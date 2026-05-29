@@ -20,14 +20,13 @@
 package org.neo4j.gds.ml.models.logisticregression;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
@@ -40,13 +39,12 @@ import static org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData.
 import static org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData.withReducedClassCount;
 
 public final class LogisticRegressionTrainer implements ClassifierTrainer {
+    private final Log log;
 
     private final LogisticRegressionTrainConfig trainConfig;
     private final int numberOfClasses;
-    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final boolean reduceClassCount;
-    private final LogLevel messageLogLevel;
     private final Concurrency concurrency;
 
     public static MemoryEstimation memoryEstimation(
@@ -83,21 +81,19 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
 
 
     public LogisticRegressionTrainer(
+        Log log,
         Concurrency concurrency,
         LogisticRegressionTrainConfig trainConfig,
         int numberOfClasses,
         boolean reduceClassCount,
-        TerminationFlag terminationFlag,
-        ProgressTracker progressTracker,
-        LogLevel messageLogLevel
+        TerminationFlag terminationFlag
     ) {
+        this.log = log;
         this.concurrency = concurrency;
         this.trainConfig = trainConfig;
         this.numberOfClasses = numberOfClasses;
-        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.reduceClassCount = reduceClassCount;
-        this.messageLogLevel = messageLogLevel;
     }
 
     @Override
@@ -108,7 +104,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
         var classifier = LogisticRegressionClassifier.from(data);
 
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels, trainConfig.focusWeight(), trainConfig.initializeClassWeights(numberOfClasses));
-        var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
+        var training = new Training(log, trainConfig, trainSet.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());
 
         training.train(objective, queueSupplier, concurrency);

@@ -27,7 +27,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -224,7 +223,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
                 trainSet,
                 config,
                 features,
-                messageLogLevel,
                 metricsHandler
             ),
             (evaluationSet, classifier, scoreConsumer) -> registerMetricScores(
@@ -287,7 +285,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             outerSplit.trainSet(),
             bestCandidate.trainerConfig(),
             features,
-            LogLevel.INFO,
             ModelSpecificMetricsHandler.of(metrics, trainingStatistics::addTestScore)
         );
         progressTracker.endSubTask("Train best model");
@@ -313,7 +310,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             trainSet,
             bestParameters,
             features,
-            LogLevel.INFO,
             ModelSpecificMetricsHandler.NOOP
         );
         progressTracker.endSubTask("Retrain best model");
@@ -325,15 +321,13 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
         Features features,
-        LogLevel messageLogLevel,
         ModelSpecificMetricsHandler metricsHandler
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
+            log,
             trainerConfig,
             classIdMap.size(),
             terminationFlag,
-            progressTracker,
-            messageLogLevel,
             trainConfig.concurrency(),
             trainConfig.randomSeed(),
             false,

@@ -23,14 +23,13 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeRegressorTrainer;
@@ -53,28 +52,24 @@ import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RandomForestRegressorTrainer implements RegressorTrainer {
-
+    private final Log log;
     private final RandomForestRegressorTrainerConfig config;
     private final Concurrency concurrency;
     private final SplittableRandom random;
     private final TerminationFlag terminationFlag;
-    private final ProgressTracker progressTracker;
-    private final LogLevel messageLogLevel;
 
     public RandomForestRegressorTrainer(
+        Log log,
         Concurrency concurrency,
         RandomForestRegressorTrainerConfig config,
         Optional<Long> randomSeed,
-        TerminationFlag terminationFlag,
-        ProgressTracker progressTracker,
-        LogLevel messageLogLevel
+        TerminationFlag terminationFlag
     ) {
+        this.log = log;
         this.config = config;
         this.concurrency = concurrency;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
         this.terminationFlag = terminationFlag;
-        this.progressTracker = progressTracker;
-        this.messageLogLevel = messageLogLevel;
     }
 
     public static MemoryEstimation memoryEstimation(
@@ -128,6 +123,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
 
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
             new TrainDecisionTreeTask(
+                log,
                 decisionTreeTrainConfig,
                 config,
                 random.split(),
@@ -135,8 +131,6 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                 targets,
                 impurityCriterion,
                 trainSet,
-                progressTracker,
-                messageLogLevel,
                 numberOfTreesTrained
             )
         ).collect(Collectors.toList());
@@ -152,8 +146,8 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
     }
 
     static class TrainDecisionTreeTask implements Runnable {
+        private final Log log;
 
-        private DecisionTreePredictor<Double> trainedTree;
         private final DecisionTreeTrainerConfig decisionTreeTrainConfig;
         private final RandomForestTrainerConfig randomForestTrainConfig;
         private final SplittableRandom random;
@@ -161,11 +155,12 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
         private final HugeDoubleArray targets;
         private final ImpurityCriterion impurityCriterion;
         private final ReadOnlyHugeLongArray trainSet;
-        private final ProgressTracker progressTracker;
-        private final LogLevel messageLogLevel;
         private final AtomicInteger numberOfTreesTrained;
 
+        private DecisionTreePredictor<Double> trainedTree;
+
         TrainDecisionTreeTask(
+            Log log,
             DecisionTreeTrainerConfig decisionTreeTrainConfig,
             RandomForestTrainerConfig randomForestTrainConfig,
             SplittableRandom random,
@@ -173,10 +168,9 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             HugeDoubleArray targets,
             ImpurityCriterion impurityCriterion,
             ReadOnlyHugeLongArray trainSet,
-            ProgressTracker progressTracker,
-            LogLevel messageLogLevel,
             AtomicInteger numberOfTreesTrained
         ) {
+            this.log = log;
             this.decisionTreeTrainConfig = decisionTreeTrainConfig;
             this.randomForestTrainConfig = randomForestTrainConfig;
             this.random = random;
@@ -184,8 +178,6 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             this.targets = targets;
             this.impurityCriterion = impurityCriterion;
             this.trainSet = trainSet;
-            this.progressTracker = progressTracker;
-            this.messageLogLevel = messageLogLevel;
             this.numberOfTreesTrained = numberOfTreesTrained;
         }
 
@@ -210,7 +202,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                 .add(bootstrappedDatasetEstimation);
         }
 
-        public DecisionTreePredictor<Double> trainedTree() {
+        DecisionTreePredictor<Double> trainedTree() {
             return trainedTree;
         }
 
@@ -232,14 +224,12 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
 
             trainedTree = decisionTree.train(bootstrappedDataset());
 
-            progressTracker.logMessage(
-                messageLogLevel,
-                formatWithLocale(
-                    "trained decision tree %d out of %d",
-                    numberOfTreesTrained.incrementAndGet(),
-                    randomForestTrainConfig.numberOfDecisionTrees()
-                )
+            var message = formatWithLocale(
+                "trained decision tree %d out of %d",
+                numberOfTreesTrained.incrementAndGet(),
+                randomForestTrainConfig.numberOfDecisionTrees()
             );
+            log.debug(message);
         }
 
         private ReadOnlyHugeLongArray bootstrappedDataset() {

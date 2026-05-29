@@ -24,12 +24,11 @@ import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.models.Features;
@@ -43,11 +42,10 @@ class LinearRegressionTrainerTest {
     @Test
     void train(SoftAssertions softly) {
         LinearRegressionTrainer trainer = new LinearRegressionTrainer(
+            Log.noOpLog(),
             new Concurrency(4),
             LinearRegressionTrainConfig.DEFAULT,
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
 
         Features features = FeaturesFactory.wrap(List.of(

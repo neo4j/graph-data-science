@@ -20,12 +20,11 @@
 package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
@@ -42,11 +41,10 @@ public final class ClassifierTrainerFactory {
     private ClassifierTrainerFactory() {}
 
     public static ClassifierTrainer create(
+        Log log,
         TrainerConfig config,
         int numberOfClasses,
         TerminationFlag terminationFlag,
-        ProgressTracker progressTracker,
-        LogLevel messageLogLevel,
         Concurrency concurrency,
         Optional<Long> randomSeed,
         boolean reduceClassCount,
@@ -55,34 +53,31 @@ public final class ClassifierTrainerFactory {
         switch (config.method()) {
             case LogisticRegression: {
                 return new LogisticRegressionTrainer(
+                    log,
                     concurrency,
                     (LogisticRegressionTrainConfig) config,
                     numberOfClasses,
                     reduceClassCount,
-                    terminationFlag,
-                    progressTracker,
-                    messageLogLevel
+                    terminationFlag
                 );
             }
             case RandomForestClassification: {
                 return new RandomForestClassifierTrainer(
+                    log,
                     concurrency,
                     numberOfClasses,
                     (RandomForestClassifierTrainerConfig) config,
                     randomSeed,
-                    progressTracker,
-                    messageLogLevel,
                     terminationFlag,
                     metricsHandler
                 );
             }
             case MLPClassification: {
                 return new MLPClassifierTrainer(
+                    log,
                     numberOfClasses,
                     (MLPClassifierTrainConfig) config,
                     randomSeed,
-                    progressTracker,
-                    messageLogLevel,
                     terminationFlag,
                     concurrency
                 );

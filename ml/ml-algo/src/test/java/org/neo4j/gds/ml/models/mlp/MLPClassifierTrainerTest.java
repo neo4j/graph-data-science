@@ -27,8 +27,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,11 +40,10 @@ class MLPClassifierTrainerTest {
     @Test
     void shouldTrainMLPClassifier() {
         var trainer = new MLPClassifierTrainer(
+            Log.noOpLog(),
             3,
             MLPClassifierTrainConfig.of(Map.of("hiddenLayerSizes", List.of(6,3))),
             Optional.of(42L),
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             new Concurrency(1)
         );

@@ -26,14 +26,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -106,6 +105,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
+            Log.noOpLog(),
             new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl.builder()
@@ -115,8 +115,6 @@ class RandomForestClassifierTest {
                 .numberOfDecisionTrees(1)
                 .build(),
             Optional.of(42L),
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.NOOP
         );
@@ -137,6 +135,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
+            Log.noOpLog(),
             new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl.builder()
@@ -147,8 +146,6 @@ class RandomForestClassifierTest {
                 .numberOfDecisionTrees(20)
                 .build(),
             Optional.of(1337L),
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.NOOP
         );
@@ -169,6 +166,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void usingTwentyTreesAndEntropyLoss(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
+            Log.noOpLog(),
             new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl.builder()
@@ -180,8 +178,6 @@ class RandomForestClassifierTest {
                 .numberOfDecisionTrees(20)
                 .build(),
             Optional.of(1337L),
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.NOOP
         );
@@ -202,6 +198,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void shouldMakeSaneErrorEstimation(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
+            Log.noOpLog(),
             new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl
@@ -212,8 +209,6 @@ class RandomForestClassifierTest {
                 .numberOfDecisionTrees(20)
                 .build(),
             Optional.of(1337L),
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.ignoringResult(List.of(OUT_OF_BAG_ERROR))
         );
@@ -227,6 +222,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void considerTrainSet(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
+            Log.noOpLog(),
             new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl
@@ -238,8 +234,6 @@ class RandomForestClassifierTest {
                 .numberOfDecisionTrees(5)
                 .build(),
             Optional.of(1337L),
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.NOOP
         );

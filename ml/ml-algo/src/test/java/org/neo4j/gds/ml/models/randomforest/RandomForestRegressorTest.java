@@ -27,14 +27,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
@@ -87,6 +86,7 @@ class RandomForestRegressorTest {
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
+            Log.noOpLog(),
             new Concurrency(concurrency),
             RandomForestRegressorTrainerConfigImpl
                 .builder()
@@ -97,9 +97,7 @@ class RandomForestRegressorTest {
                 .numberOfSamplesRatio(0.0)
                 .build(),
             Optional.of(42L),
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
 
         var randomForestRegressor = randomForestTrainer.train(allFeatureVectors, targets, trainSet);
@@ -113,6 +111,7 @@ class RandomForestRegressorTest {
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
+            Log.noOpLog(),
             new Concurrency(concurrency),
             RandomForestRegressorTrainerConfigImpl
                 .builder()
@@ -123,9 +122,7 @@ class RandomForestRegressorTest {
                 .numberOfDecisionTrees(20)
                 .build(),
             Optional.of(1337L),
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
 
         var randomForestRegressor = randomForestTrainer.train(allFeatureVectors, targets, trainSet);
@@ -139,6 +136,7 @@ class RandomForestRegressorTest {
     @ValueSource(ints = {1, 4})
     void considerTrainSet(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
+            Log.noOpLog(),
             new Concurrency(concurrency),
             RandomForestRegressorTrainerConfigImpl
                 .builder()
@@ -149,9 +147,7 @@ class RandomForestRegressorTest {
                 .numberOfDecisionTrees(10)
                 .build(),
             Optional.of(1337L),
-            TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER,
-            LogLevel.INFO
+            TerminationFlag.RUNNING_TRUE
         );
 
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES / 2);
