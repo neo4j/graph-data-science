@@ -24,10 +24,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.compat.VirtualRelationshipImpl;
-import org.neo4j.graphalgo.impl.util.PathImpl;
+import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +37,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class UserInputWritePropertiesTest {
 
@@ -88,6 +91,20 @@ class UserInputWritePropertiesTest {
 
 
     static Stream<Arguments> typesInput() {
+
+        var path = mock(Path.class);
+        when(path.iterator()).thenReturn(new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public NodeEntity next() {
+                return new NodeEntity(null, 1);
+            }
+        });
+
         return Stream.of(
             arguments(1, "number"),
             arguments(Boolean.TRUE, "boolean"),
@@ -98,7 +115,7 @@ class UserInputWritePropertiesTest {
                 new NodeEntity(null, 2),
                 RelationshipType.withName("FOO")
             ), "relationship"),
-            arguments(PathImpl.singular(new NodeEntity(null, 1)), "path")
+            arguments(path, "path")
         );
     }
 
