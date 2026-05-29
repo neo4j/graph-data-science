@@ -320,6 +320,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         LogLevel messageLogLevel
     ) {
         var trainer = RegressionTrainerFactory.create(
+            log,
             trainerConfig,
             terminationFlag,
             progressTracker,
