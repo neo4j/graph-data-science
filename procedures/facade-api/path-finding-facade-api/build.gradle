@@ -14,7 +14,8 @@ dependencies {
 
     compileOnly(neo4j.graphdb.api) { transitive = false }
     // TODO: we only need `neo4j.graph.algo` because of `PathImpl` maybe copy it around 🤔
-    compileOnly(neo4j.graph.algo) { transitive = false }
+    implementation(neo4j.graph.algo) { transitive = false }
+
 
     implementation project(':algorithms-facade-common')
 
