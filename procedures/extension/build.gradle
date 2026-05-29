@@ -37,6 +37,7 @@ dependencies {
     implementation project(':open-model-catalog')
     implementation project(':operations-applications')
     implementation project(':procedure-integration')
+    implementation project(':procedures-facade-api')
 
     runtimeOnly project(':proc-catalog')
     runtimeOnly project(':proc-community')

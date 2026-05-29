@@ -35,7 +35,7 @@ import org.neo4j.logging.internal.LogService;
 
 /**
  * The OpenGDS extension for Neo4j.
- * We register a single component, org.neo4j.gds.procedures.GraphDataScienceProcedures,
+ * We register a single component, @{@link org.neo4j.gds.procedures.GraphDataScienceProcedures},
  * that all OpenGDS procedures can inject and use.
  */
 @SuppressWarnings("unused")
