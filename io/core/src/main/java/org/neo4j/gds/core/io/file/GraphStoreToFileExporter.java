@@ -42,7 +42,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -70,7 +69,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     private final RequestCorrelationId requestCorrelationId;
     private final JobId jobId;
     private final TaskRegistryFactory taskRegistryFactory;
-    private final UserLogRegistry userLogRegistry;
     private final LoggerForProgressTracking log;
     private final String rootTaskName;
     private final ExecutorService executorService;
@@ -93,7 +91,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         RequestCorrelationId requestCorrelationId,
         JobId jobId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
         LoggerForProgressTracking log,
         String rootTaskName,
         ExecutorService executorService
@@ -120,7 +117,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         this.requestCorrelationId = requestCorrelationId;
         this.jobId = jobId;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.userLogRegistry = userLogRegistry;
         this.log = log;
         this.rootTaskName = rootTaskName;
         this.executorService = executorService;

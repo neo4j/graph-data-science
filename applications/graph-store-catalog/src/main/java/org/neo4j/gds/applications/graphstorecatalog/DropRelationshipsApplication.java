@@ -42,8 +42,7 @@ public class DropRelationshipsApplication {
         var progressTrackerFactory = new ProgressTrackerFactory(
             log,
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistry()
+            requestScopedDependencies.taskRegistryFactory()
         );
         var task = Tasks.leaf("Graph :: Relationships :: Drop", 1);
         var progressTracker = progressTrackerFactory.create(task);

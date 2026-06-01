@@ -43,8 +43,7 @@ public class DropNodePropertiesApplication {
         var progressTrackerFactory = new ProgressTrackerFactory(
             log,
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistry()
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         return computeWithProgressTracking(

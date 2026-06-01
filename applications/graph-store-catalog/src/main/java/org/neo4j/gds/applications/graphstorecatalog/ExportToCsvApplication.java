@@ -89,7 +89,6 @@ class ExportToCsvApplication {
             requestScopedDependencies.correlationId(),
             jobId,
             requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistry(),
             loggers,
             DefaultPool.INSTANCE
         );

@@ -99,7 +99,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            UserLogRegistry.EMPTY,
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
@@ -135,7 +134,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            UserLogRegistry.EMPTY,
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
@@ -170,7 +168,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            UserLogRegistry.EMPTY,
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
@@ -210,7 +207,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            UserLogRegistry.EMPTY,
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
@@ -252,7 +248,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            UserLogRegistry.EMPTY,
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
@@ -288,7 +283,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            UserLogRegistry.EMPTY,
             LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();

@@ -27,36 +27,30 @@ import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
-/**
- * A little local trickery: I want to inject a progress tracker in a neat way, like microsurgery.
- * Kinda proof of concept, that we can control things at a high level of granularity
- */
 class ProgressTrackerFactory {
     private final LoggerForProgressTracking log;
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
-    private final UserLogRegistry userLogRegistry;
 
     ProgressTrackerFactory(
         LoggerForProgressTracking log,
         RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry
+        TaskRegistryFactory taskRegistryFactory
     ) {
         this.log = log;
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.userLogRegistry = userLogRegistry;
     }
 
     ProgressTracker create(Task task) {
         var jobId = new JobId();
+        var concurrency = new Concurrency(1);
+
         return TaskProgressTracker.create(
             log,
             task,
-            new Concurrency(1),
+            concurrency,
             jobId,
             requestCorrelationId,
             taskRegistryFactory

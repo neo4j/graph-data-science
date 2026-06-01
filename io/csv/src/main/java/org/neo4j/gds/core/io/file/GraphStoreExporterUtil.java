@@ -29,7 +29,6 @@ import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.settings.GdsSettings;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,7 +52,6 @@ public final class GraphStoreExporterUtil {
         RequestCorrelationId requestCorrelationId,
         JobId jobId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
         GdsLoggers loggers,
         ExecutorService executorService
     ) {
@@ -66,7 +64,6 @@ public final class GraphStoreExporterUtil {
                 requestCorrelationId,
                 jobId,
                 taskRegistryFactory,
-                userLogRegistry,
                 loggers.loggerForProgressTracking(),
                 executorService
             );
