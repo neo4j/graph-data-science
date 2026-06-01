@@ -370,7 +370,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
     }
 
     private void registerUserLogRegistryComponent() {
-        var userLogRegistryProvider = new UserLogRegistryProvider(userAccessor, userLogServices);
+        var userLogRegistryProvider = new UserLogRegistryProvider();
 
         componentRegistration.registerComponent(
             "User Log Registry",

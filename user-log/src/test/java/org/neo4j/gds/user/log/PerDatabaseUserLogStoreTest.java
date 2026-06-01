@@ -19,11 +19,8 @@
  */
 package org.neo4j.gds.user.log;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.User;
-
-import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,75 +30,5 @@ class PerDatabaseUserLogStoreTest {
         var userLogStore = new PerDatabaseUserLogStore();
 
         assertThat(userLogStore.query(new User("user 1", false))).isEmpty();
-    }
-
-    @Test
-    void shouldStoreAndRetrieveUserLogEntry() {
-        var userLogStore = new PerDatabaseUserLogStore();
-
-        userLogStore.addUserLogMessage(new User("user 1", false), new TestGroupingKey("task description 1"), "log message 1");
-
-        assertThat(userLogStore.query(new User("user 1", false))).map(mapToSomethingUseful()).containsExactly(
-            Pair.of("log message 1", "task description 1")
-        );
-    }
-
-    @Test
-    void shouldStoreAndRetrieveUserLogEntries() {
-        var userLogStore = new PerDatabaseUserLogStore();
-
-        userLogStore.addUserLogMessage(new User("user 1", false), new TestGroupingKey("task description 1"), "log message 01");
-        userLogStore.addUserLogMessage(new User("user 1", false), new TestGroupingKey("task description 2"), "log message 02");
-        userLogStore.addUserLogMessage(new User("user 1", false), new TestGroupingKey("task description 2"), "log message 03");
-        userLogStore.addUserLogMessage(new User("user 2", false), new TestGroupingKey("task description 1"), "log message 04");
-        userLogStore.addUserLogMessage(new User("user 3", false), new TestGroupingKey("task description 1"), "log message 05");
-        userLogStore.addUserLogMessage(new User("user 3", false), new TestGroupingKey("task description 1"), "log message 06");
-
-        assertThat(userLogStore.query(new User("user 1", false))).map(mapToSomethingUseful()).containsExactly(
-            Pair.of("log message 01", "task description 1"),
-            Pair.of("log message 02", "task description 2"),
-            Pair.of("log message 03", "task description 2")
-        );
-
-        assertThat(userLogStore.query(new User("user 2", false))).map(mapToSomethingUseful()).containsExactly(
-            Pair.of("log message 04", "task description 1")
-        );
-
-        assertThat(userLogStore.query(new User("user 3", false))).map(mapToSomethingUseful()).containsExactly(
-            Pair.of("log message 05", "task description 1"),
-            Pair.of("log message 06", "task description 1")
-        );
-
-        userLogStore.addUserLogMessage(new User("user 1", false), new TestGroupingKey("task description 1"), "log message 07");
-        userLogStore.addUserLogMessage(new User("user 1", false), new TestGroupingKey("task description 2"), "log message 08");
-        userLogStore.addUserLogMessage(new User("user 2", false), new TestGroupingKey("task description 3"), "log message 09");
-        userLogStore.addUserLogMessage(new User("user 3", false), new TestGroupingKey("task description 1"), "log message 10");
-        userLogStore.addUserLogMessage(new User("user 3", false), new TestGroupingKey("task description 3"), "log message 11");
-        userLogStore.addUserLogMessage(new User("user 3", false), new TestGroupingKey("task description 3"), "log message 12");
-
-        assertThat(userLogStore.query(new User("user 1", false))).map(mapToSomethingUseful()).containsExactly(
-            Pair.of("log message 01", "task description 1"),
-            Pair.of("log message 07", "task description 1"),
-            Pair.of("log message 02", "task description 2"),
-            Pair.of("log message 03", "task description 2"),
-            Pair.of("log message 08", "task description 2")
-        );
-
-        assertThat(userLogStore.query(new User("user 2", false))).map(mapToSomethingUseful()).containsExactly(
-            Pair.of("log message 04", "task description 1"),
-            Pair.of("log message 09", "task description 3")
-        );
-
-        assertThat(userLogStore.query(new User("user 3", false))).map(mapToSomethingUseful()).containsExactly(
-            Pair.of("log message 05", "task description 1"),
-            Pair.of("log message 06", "task description 1"),
-            Pair.of("log message 10", "task description 1"),
-            Pair.of("log message 11", "task description 3"),
-            Pair.of("log message 12", "task description 3")
-        );
-    }
-
-    private static Function<UserLogEntry, Pair<String, String>> mapToSomethingUseful() {
-        return ule -> Pair.of(ule.message, ule.taskName);
     }
 }

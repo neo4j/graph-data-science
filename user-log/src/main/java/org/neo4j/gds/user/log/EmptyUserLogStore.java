@@ -27,9 +27,6 @@ public enum EmptyUserLogStore implements UserLogStore {
     INSTANCE;
 
     @Override
-    public void addUserLogMessage(User user, GroupingKey key, String message) { /* no op */ }
-
-    @Override
     public Stream<UserLogEntry> query(User user) {
         return Stream.empty();
     }

@@ -28,7 +28,5 @@ import java.util.stream.Stream;
  * That is handled up stream.
  */
 public interface UserLogStore {
-    void addUserLogMessage(User user, GroupingKey taskId, String message);
-
     Stream<UserLogEntry> query(User user);
 }

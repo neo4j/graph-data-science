@@ -19,16 +19,9 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.user.log.PerDatabaseUserLogStore;
 import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.user.log.UserLogStore;
-
-import java.util.Comparator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * We have a user log store per database, and registries per database and user.
@@ -36,37 +29,11 @@ import java.util.concurrent.ConcurrentSkipListMap;
  * or all log entries pertaining to a database.
  */
 public class UserLogServices {
-    private final Map<DatabaseId, UserLogStore> stores = new ConcurrentHashMap<>();
-    private final Map<DatabaseId, Map<User, UserLogRegistry>> registries = new ConcurrentHashMap<>();
-
-    public UserLogStore getUserLogStore(DatabaseId databaseId) {
-        return stores.computeIfAbsent(databaseId, __ -> new PerDatabaseUserLogStore());
+    public UserLogStore getUserLogStore() {
+        return new PerDatabaseUserLogStore();
     }
 
-    public UserLogRegistry getUserLogRegistry(DatabaseId databaseId, User user) {
-        var registryForDatabase = getRegistryForDatabase(databaseId);
-
-        return getRegistryForUser(databaseId, user, registryForDatabase);
-    }
-
-    private UserLogRegistry getRegistryForUser(
-        DatabaseId databaseId,
-        User user,
-        Map<User, UserLogRegistry> registryByUser
-    ) {
-        return registryByUser.computeIfAbsent(
-            user, u -> {
-                var userLogStoreForDatabase = getUserLogStore(databaseId);
-
-                return new UserLogRegistry();
-            }
-        );
-    }
-
-    private Map<User, UserLogRegistry> getRegistryForDatabase(DatabaseId databaseId) {
-        return registries.computeIfAbsent(
-            databaseId,
-            __ -> new ConcurrentSkipListMap<>(Comparator.comparing(User::getUsername))
-        );
+    public UserLogRegistry getUserLogRegistry() {
+        return new UserLogRegistry();
     }
 }

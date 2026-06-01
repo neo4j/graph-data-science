@@ -21,8 +21,6 @@ package org.neo4j.gds.user.log;
 
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.stream.Stream;
 
 /**
@@ -30,45 +28,7 @@ import java.util.stream.Stream;
  * We cap the number of tasks tracked per user. Tasks are ordered by start time, and with the cap we do FIFO semantics.
  */
 class PerUserLogStore {
-    /**
-     * We track 100 tasks per user by default.
-     * Note that each task can have an unbounded number of messages, there is no cap there yet.
-     */
-    private static final int DEFAULT_CAPACITY = 100;
-
-    private final ConcurrentSkipListMap<GroupingKey, Queue<String>> messages = new ConcurrentSkipListMap<>();
-
-    private final int capacity;
-
-    PerUserLogStore(int capacity) {
-        this.capacity = capacity;
-    }
-
-    public PerUserLogStore() {
-        this(DEFAULT_CAPACITY);
-    }
-
-    void addLogMessage(GroupingKey task, String message) {
-        getMessageList(task).add(message);
-
-        if (messages.size() > capacity) {
-            synchronized (messages) {
-                if (messages.size() > capacity) messages.pollFirstEntry();
-            }
-        }
-    }
-
     Stream<Map.Entry<GroupingKey, Queue<String>>> stream() {
-        return messages.entrySet().stream();
-    }
-
-    /**
-     * Can we get away with anything less than {@link java.util.concurrent.ConcurrentLinkedQueue}?
-     * You could have multiple things adding entries while multiple things iterate over it.
-     * Won't ever happen in real life but in _principle_.
-     * And I'm not even really concerned with the results, more the broken pointers one would encounter.
-     */
-    private Queue<String> getMessageList(GroupingKey task) {
-        return messages.computeIfAbsent(task, __ -> new ConcurrentLinkedQueue<>());
+        return Stream.empty();
     }
 }

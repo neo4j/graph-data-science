@@ -147,8 +147,8 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         var taskStore = taskStoreService.getOrCreateTaskStore(databaseId);
         taskStore.addListener(memoryTracker);
 
-        var userLogRegistry = userLogServices.getUserLogRegistry(databaseId, user);
-        var userLogStore = userLogServices.getUserLogStore(databaseId);
+        var userLogRegistry = userLogServices.getUserLogRegistry();
+        var userLogStore = userLogServices.getUserLogStore();
 
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,

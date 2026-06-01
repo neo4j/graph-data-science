@@ -17,19 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.integration;
+package org.neo4j.gds.user.log;
 
-import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.user.log.UserLogRegistry;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.procedure.Context;
+import org.junit.jupiter.api.Test;
 
-/**
- * This exists to support injectable user log registries in Pregel
- */
-class UserLogRegistryProvider implements ThrowingFunction<Context, UserLogRegistry, ProcedureException> {
-    @Override
-    public UserLogRegistry apply(Context context) throws ProcedureException {
-        return new UserLogRegistry();
+import static org.assertj.core.api.Assertions.assertThat;
+
+class PerUserLogStoreTest {
+    @Test
+    void shouldDealWithNewTasks() {
+        var logStore = new PerUserLogStore();
+
+        assertThat(logStore.stream()).isEmpty();
     }
 }
