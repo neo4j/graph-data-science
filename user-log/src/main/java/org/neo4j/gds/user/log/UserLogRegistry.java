@@ -36,8 +36,4 @@ public class UserLogRegistry {
         this.user = user;
         this.userLogStore = userLogStore;
     }
-
-    public void addWarningToLog(GroupingKey groupingKey, String message) {
-        userLogStore.addUserLogMessage(user, groupingKey, message);
-    }
 }

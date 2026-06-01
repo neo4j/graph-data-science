@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -39,7 +38,6 @@ final class GraphLoaderContextProvider {
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        UserLogRegistry userLogRegistry,
         Log log
     ) throws ProcedureException {
         return ImmutableGraphLoaderContext
@@ -47,7 +45,6 @@ final class GraphLoaderContextProvider {
             .databaseId(databaseId)
             .log(log)
             .taskRegistryFactory(taskRegistryFactory)
-            .userLogRegistry(userLogRegistry)
             .terminationFlag(terminationFlag)
             .transactionContext(DatabaseTransactionContext.of(
                 context.graphDatabaseAPI(),

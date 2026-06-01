@@ -599,7 +599,6 @@ class WccMutateProcTest extends BaseProcTest {
             .databaseId(DatabaseId.of(db.databaseName()))
             .transactionContext(TestSupport.fullAccessTransaction(db))
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .userLogRegistry(UserLogRegistry.EMPTY)
             .log(Log.noOpLog())
             .build();
 

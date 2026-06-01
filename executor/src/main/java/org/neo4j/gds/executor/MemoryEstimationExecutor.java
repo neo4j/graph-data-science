@@ -100,7 +100,6 @@ public class MemoryEstimationExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_
                     .databaseId(executionContext.databaseId())
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
-                    .userLogRegistry(executionContext.userLogRegistry())
                     .terminationFlag(TerminationFlag.wrap(TerminationMonitor.EMPTY))
                     .transactionContext(transactionContext).build();
 

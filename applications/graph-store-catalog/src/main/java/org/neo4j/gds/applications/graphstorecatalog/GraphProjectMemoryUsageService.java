@@ -119,7 +119,6 @@ public class GraphProjectMemoryUsageService {
             .taskRegistryFactory(requestScopedDependencies.taskRegistryFactory())
             .terminationFlag(requestScopedDependencies.terminationFlag())
             .transactionContext(transactionContext)
-            .userLogRegistry(requestScopedDependencies.userLogRegistry())
             .build();
     }
 

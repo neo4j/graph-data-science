@@ -155,7 +155,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             databaseId,
             taskRegistryFactory,
             terminationFlag,
-            userLogRegistry,
             loggers.log()
         );
 

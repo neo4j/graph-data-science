@@ -169,7 +169,6 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
             .taskRegistryFactory(requestScopedDependencies.taskRegistryFactory())
             .terminationFlag(requestScopedDependencies.terminationFlag())
             .transactionContext(transactionContext)
-            .userLogRegistry(requestScopedDependencies.userLogRegistry())
             .build();
     }
 }

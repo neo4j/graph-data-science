@@ -41,7 +41,6 @@ import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.AdjacencyTestUtils;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -152,7 +151,6 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .transactionContext(DatabaseTransactionContext.of(db, db.beginTx()))
             .taskRegistryFactory(TaskRegistryFactory.empty())
-            .userLogRegistry(UserLogRegistry.EMPTY)
             .databaseId(DatabaseId.of(db.databaseName()))
             .build();
     }
