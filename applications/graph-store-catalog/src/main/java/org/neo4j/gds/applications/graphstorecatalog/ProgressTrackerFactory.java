@@ -59,8 +59,7 @@ class ProgressTrackerFactory {
             new Concurrency(1),
             jobId,
             requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            taskRegistryFactory
         );
     }
 }

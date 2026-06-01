@@ -219,7 +219,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             metrics,
             pipeline.splitConfig().validationFolds(),
             trainConfig.randomSeed(),
-            (trainSet, config, metricsHandler, messageLogLevel) -> trainModel(
+            (trainSet, config, metricsHandler) -> trainModel(
                 trainSet,
                 config,
                 features,

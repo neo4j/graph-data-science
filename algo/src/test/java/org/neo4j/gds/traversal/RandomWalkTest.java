@@ -49,7 +49,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -630,8 +629,7 @@ class RandomWalkTest {
                 new Concurrency(4),
                 new JobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                TaskRegistryFactory.local("rw", taskStore),
-                UserLogRegistry.EMPTY
+                TaskRegistryFactory.local("rw", taskStore)
             );
 
             // run the algorithm and consume the result stream

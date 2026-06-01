@@ -190,7 +190,7 @@ public final class LinkPredictionTrain {
             config.metrics(),
             pipeline.splitConfig().validationFolds(),
             config.randomSeed(),
-            (trainSet, modelParameters, metricsHandler, messageLogLevel) -> trainModel(
+            (trainSet, modelParameters, metricsHandler) -> trainModel(
                 trainData,
                 trainSet,
                 modelParameters,

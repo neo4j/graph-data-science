@@ -68,8 +68,7 @@ class ExportToDatabaseApplication {
             configuration.typedWriteConcurrency(),
             configuration.jobId(),
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistry()
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         @SuppressWarnings("removal") var parameters = new GraphStoreToDatabaseExporterParameters(

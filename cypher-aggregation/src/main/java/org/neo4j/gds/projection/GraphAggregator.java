@@ -48,7 +48,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
 import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
@@ -222,8 +221,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             config.readConcurrency(),
             config.jobId(),
             requestCorrelationId,
-            TaskRegistryFactory.local(username, taskStore),
-            UserLogRegistry.EMPTY
+            TaskRegistryFactory.local(username, taskStore)
         );
         this.progressTracker = new BatchingTaskProgressTrackerFactory().create(internalProgressTracker, taskVolume, config.readConcurrency());
 

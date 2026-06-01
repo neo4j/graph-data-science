@@ -46,7 +46,6 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.StaticAccessMode;
 import org.neo4j.values.storable.Value;
@@ -271,8 +270,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY
+            EmptyTaskRegistryFactory.INSTANCE
         );
 
         var relationshipStream = IntStream

@@ -23,7 +23,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.function.Function;
@@ -39,8 +38,7 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
         Concurrency concurrency,
         JobId jobId,
         RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry
+        TaskRegistryFactory taskRegistryFactory
     ) {
         var taskVisitor = new PassThroughTaskVisitor();
         var taskProgressLogger = TaskProgressLogger.create(log, requestCorrelationId, baseTask, concurrency, taskVisitor);
@@ -49,8 +47,7 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
             baseTask,
             jobId,
             taskProgressLogger,
-            taskRegistryFactory,
-            userLogRegistry
+            taskRegistryFactory
         );
 
         return new TaskTreeProgressTracker(delegate);
@@ -129,11 +126,6 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
     @Override
     public void setVolume(long volume) {
         delegate.setVolume(volume);
-    }
-
-    @Override
-    public void logMessage(LogLevel level, String message) {
-        delegate.logMessage(level, message);
     }
 
     @Override

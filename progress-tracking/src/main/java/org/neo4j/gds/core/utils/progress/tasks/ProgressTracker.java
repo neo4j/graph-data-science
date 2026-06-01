@@ -92,10 +92,6 @@ public interface ProgressTracker {
         }
 
         @Override
-        public void logMessage(LogLevel level, String message) {
-        }
-
-        @Override
         public void release() {
         }
 
@@ -143,8 +139,6 @@ public interface ProgressTracker {
     // prefer setting volume via factory method for leaves
     // to make root progress available from the start
     void setVolume(long volume);
-
-    void logMessage(LogLevel level, String message);
 
     void release();
 

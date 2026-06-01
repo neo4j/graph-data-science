@@ -51,7 +51,6 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.logging.LogAdapter;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import java.util.List;
@@ -524,8 +523,7 @@ class GraphImporterTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            new LocalTaskRegistryFactory("", taskStore),
-            UserLogRegistry.EMPTY
+            new LocalTaskRegistryFactory("", taskStore)
         );
         var gdsLog = new GdsTestLog();
         var importer = new GraphImporter(

@@ -33,7 +33,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -219,8 +218,7 @@ class KdTreeBuilderTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY
+            EmptyTaskRegistryFactory.INSTANCE
         );
 
         var points = graph.nodeProperties("point");

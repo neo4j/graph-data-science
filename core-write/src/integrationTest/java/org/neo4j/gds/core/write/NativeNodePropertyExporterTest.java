@@ -46,7 +46,6 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -185,8 +184,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
             writeConcurrency,
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY
+            EmptyTaskRegistryFactory.INSTANCE
         );
 
         var exporterBuilder = NativeNodePropertyExporter

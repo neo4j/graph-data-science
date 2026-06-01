@@ -51,8 +51,7 @@ public class ProgressTrackerFactory {
                 concurrency,
                 jobId,
                 requestScopedDependencies.correlationId(),
-                requestScopedDependencies.taskRegistryFactory(),
-                requestScopedDependencies.userLogRegistry()
+                requestScopedDependencies.taskRegistryFactory()
             );
         } else {
             progressTracker = TaskTreeProgressTracker.create(
@@ -61,8 +60,7 @@ public class ProgressTrackerFactory {
                 concurrency,
                 jobId,
                 requestScopedDependencies.correlationId(),
-                requestScopedDependencies.taskRegistryFactory(),
-                requestScopedDependencies.userLogRegistry()
+                requestScopedDependencies.taskRegistryFactory()
             );
         }
 

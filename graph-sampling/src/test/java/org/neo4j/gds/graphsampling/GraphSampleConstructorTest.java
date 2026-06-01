@@ -46,7 +46,6 @@ import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.util.List;
 import java.util.Set;
@@ -318,8 +317,7 @@ class GraphSampleConstructorTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY
+            EmptyTaskRegistryFactory.INSTANCE
         );
 
         var rwrGraphConstructor = new GraphSampleConstructor(

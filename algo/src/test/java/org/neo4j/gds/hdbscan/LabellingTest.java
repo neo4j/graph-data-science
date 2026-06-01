@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -246,8 +245,7 @@ class LabellingTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY
+            EmptyTaskRegistryFactory.INSTANCE
         );
 
         new LabellingStep(condensedTree, nodeCount, progressTracker).labels();

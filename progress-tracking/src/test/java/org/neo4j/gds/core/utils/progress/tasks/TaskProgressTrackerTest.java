@@ -32,7 +32,6 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.UserTask;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 
@@ -93,8 +92,7 @@ class TaskProgressTrackerTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY
+            EmptyTaskRegistryFactory.INSTANCE
         );
         progressTracker.beginSubTask();
         progressTracker.endSubTask();
@@ -182,8 +180,7 @@ class TaskProgressTrackerTest {
                 new Concurrency(1),
                 new JobId(),
                 new RequestCorrelationIdForTesting("our request correlation id"),
-                EmptyTaskRegistryFactory.INSTANCE,
-                UserLogRegistry.EMPTY
+                EmptyTaskRegistryFactory.INSTANCE
             );
             progressTracker.beginSubTask();
             progressTracker.onProgress();
@@ -213,8 +210,7 @@ class TaskProgressTrackerTest {
                 new Concurrency(1),
                 new JobId(),
                 new RequestCorrelationIdForTesting("what request correlation id?"),
-                EmptyTaskRegistryFactory.INSTANCE,
-                UserLogRegistry.EMPTY
+                EmptyTaskRegistryFactory.INSTANCE
             );
 
             progressTracker.beginSubTask("root");
@@ -247,8 +243,7 @@ class TaskProgressTrackerTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            jobId -> taskRegistry,
-            UserLogRegistry.EMPTY
+            jobId -> taskRegistry
         );
 
         assertThat(taskStore.query("")).isEmpty();
@@ -276,24 +271,6 @@ class TaskProgressTrackerTest {
         assertThat(leafTask.getProgress().progress()).isEqualTo(3 + 1 + (long) (100.0 * 5.0 / 13));
     }
 
-    @Test
-    void shouldLogRightLevel() {
-        var log = new GdsTestLog();
-        var leafTask = Tasks.leaf("leaf", 100);
-        var progressTracker = progressTracker(leafTask, log);
-
-        progressTracker.logMessage(LogLevel.WARNING, "WARNING MESSAGE 0");
-        progressTracker.logMessage(LogLevel.INFO, "INFO MESSAGE 0");
-        progressTracker.logMessage(LogLevel.DEBUG, "DEBUG MESSAGE 0");
-
-        assertThat(log.getMessages(TestLog.WARN).size()).isEqualTo(1);
-        assertThat(log.getMessages(TestLog.WARN).get(0)).contains("WARNING MESSAGE 0");
-        assertThat(log.getMessages(TestLog.INFO).size()).isEqualTo(1);
-        assertThat(log.getMessages(TestLog.INFO).get(0)).contains("INFO MESSAGE 0");
-        assertThat(log.getMessages(TestLog.DEBUG).size()).isEqualTo(1);
-        assertThat(log.getMessages(TestLog.DEBUG).get(0)).contains("DEBUG MESSAGE 0");
-    }
-
     private TaskProgressTracker progressTracker(Task task, Log log) {
         return TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
@@ -301,8 +278,7 @@ class TaskProgressTrackerTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY
+            EmptyTaskRegistryFactory.INSTANCE
         );
     }
 

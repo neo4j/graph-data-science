@@ -24,7 +24,6 @@ import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.Locale;
@@ -45,7 +44,6 @@ public final class TaskProgressTracker implements ProgressTracker {
     private final Consumer<RuntimeException> onError;
     private final TaskProgressLogger taskProgressLogger;
     private final TaskRegistry taskRegistry;
-    private final UserLogRegistry userLogRegistry;
 
     public Optional<Task> currentTask = Optional.empty();
     public long currentTotalSteps = UNKNOWN_STEPS;
@@ -57,20 +55,18 @@ public final class TaskProgressTracker implements ProgressTracker {
         Concurrency concurrency,
         JobId jobId,
         RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry
+        TaskRegistryFactory taskRegistryFactory
     ) {
         var taskProgressLogger = TaskProgressLogger.create(log, requestCorrelationId, baseTask, concurrency);
 
-        return create(baseTask, jobId, taskProgressLogger, taskRegistryFactory, userLogRegistry);
+        return create(baseTask, jobId, taskProgressLogger, taskRegistryFactory);
     }
 
     public static TaskProgressTracker create(
         Task baseTask,
         JobId jobId,
         TaskProgressLogger taskProgressLogger,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry
+        TaskRegistryFactory taskRegistryFactory
     ) {
         var didLog = new AtomicBoolean(false);
 
@@ -87,8 +83,7 @@ public final class TaskProgressTracker implements ProgressTracker {
             baseTask,
             onError,
             taskProgressLogger,
-            taskRegistry,
-            userLogRegistry
+            taskRegistry
         );
     }
 
@@ -96,14 +91,12 @@ public final class TaskProgressTracker implements ProgressTracker {
         Task baseTask,
         Consumer<RuntimeException> onError,
         TaskProgressLogger taskProgressLogger,
-        TaskRegistry taskRegistry,
-        UserLogRegistry userLogRegistry
+        TaskRegistry taskRegistry
     ) {
         this.baseTask = baseTask;
         this.onError = onError;
         this.taskProgressLogger = taskProgressLogger;
         this.taskRegistry = taskRegistry;
-        this.userLogRegistry = userLogRegistry;
     }
 
     @Override
@@ -235,24 +228,6 @@ public final class TaskProgressTracker implements ProgressTracker {
             task.setVolume(volume);
             taskProgressLogger.reset(volume);
         });
-    }
-
-    @Override
-    public void logMessage(LogLevel level, String message) {
-        switch (level) {
-            case WARNING:
-                userLogRegistry.addWarningToLog(TaskGroupingKey.create(baseTask), message);
-                taskProgressLogger.logWarning(":: " + message);
-                break;
-            case INFO:
-                taskProgressLogger.logMessage(":: " + message);
-                break;
-            case DEBUG:
-                taskProgressLogger.logDebug(":: " + message);
-                break;
-            default:
-                throw new IllegalStateException("Unknown log level " + level);
-        }
     }
 
     @Override

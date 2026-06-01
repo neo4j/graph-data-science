@@ -161,8 +161,7 @@ public abstract class FileToGraphStoreImporter {
             concurrency,
             jobId,
             requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            taskRegistryFactory
         );
     }
 

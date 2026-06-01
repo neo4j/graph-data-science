@@ -172,8 +172,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
             concurrency,
             jobId,
             requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry);
+            taskRegistryFactory
+        );
     }
 
     private void exportNodes(

@@ -70,8 +70,7 @@ public final class GraphSamplingApplication {
                 samplerConfig.concurrency(),
                 samplerConfig.jobId(),
                 requestScopedDependencies.correlationId(),
-                requestScopedDependencies.taskRegistryFactory(),
-                requestScopedDependencies.userLogRegistry()
+                requestScopedDependencies.taskRegistryFactory()
             );
             var graphSampleConstructor = new GraphSampleConstructor(
                 log,

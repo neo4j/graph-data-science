@@ -28,7 +28,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -40,27 +39,10 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         Log log,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        return this.build(
-            graphOrGraphStore,
-            configuration,
-            log,
-            taskRegistryFactory,
-            UserLogRegistry.EMPTY
-        );
-    }
-
-    default ALGO build(
-        G graphOrGraphStore,
-        CONFIG configuration,
-        Log log,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry
-    ) {
         var progressTracker = createProgressTracker(
             configuration,
             log,
             taskRegistryFactory,
-            userLogRegistry,
             progressTask(graphOrGraphStore, configuration)
         );
         return build(graphOrGraphStore, configuration, progressTracker);
@@ -70,7 +52,6 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         CONFIG configuration,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
         Task progressTask
     ) {
         /*
@@ -88,8 +69,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
                 configuration.concurrency(),
                 configuration.jobId(),
                 requestCorrelationId,
-                taskRegistryFactory,
-                userLogRegistry
+                taskRegistryFactory
             );
         }
 
@@ -99,8 +79,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             configuration.concurrency(),
             configuration.jobId(),
             requestCorrelationId,
-            taskRegistryFactory,
-            userLogRegistry
+            taskRegistryFactory
         );
     }
 

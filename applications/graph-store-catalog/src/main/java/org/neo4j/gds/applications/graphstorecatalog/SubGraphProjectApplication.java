@@ -128,8 +128,7 @@ class SubGraphProjectApplication {
             configuration.typedConcurrency(),
             configuration.jobId(),
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistry()
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         return projectAndStore(configuration, originGraphStore, progressTracker);

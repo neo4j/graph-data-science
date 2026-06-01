@@ -59,8 +59,7 @@ final class Neo4jDatabaseRelationshipWriter {
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
             jobId,
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistry()
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         var exporter = relationshipExporterBuilder
@@ -118,8 +117,7 @@ final class Neo4jDatabaseRelationshipWriter {
             new Concurrency(1),
             alternativeJobId,
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistry()
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         // When we are writing to the result store, the result stream might not be consumed

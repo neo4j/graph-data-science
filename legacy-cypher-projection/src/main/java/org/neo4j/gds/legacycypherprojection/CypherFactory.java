@@ -42,7 +42,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -262,8 +261,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
                 graphProjectConfig.readConcurrency(),
                 graphProjectConfig.jobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                loadingContext.taskRegistryFactory(),
-                UserLogRegistry.EMPTY
+                loadingContext.taskRegistryFactory()
             );
         }
 
@@ -273,8 +271,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
             graphProjectConfig.readConcurrency(),
             graphProjectConfig.jobId(),
             PlainSimpleRequestCorrelationId.create(),
-            loadingContext.taskRegistryFactory(),
-            UserLogRegistry.EMPTY
+            loadingContext.taskRegistryFactory()
         );
     }
 

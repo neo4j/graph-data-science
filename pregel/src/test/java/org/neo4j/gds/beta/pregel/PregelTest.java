@@ -62,7 +62,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -226,8 +225,7 @@ class PregelTest {
             config.concurrency(),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            jobId -> new TaskRegistry("", taskStore, jobId),
-            UserLogRegistry.EMPTY
+            jobId -> new TaskRegistry("", taskStore, jobId)
         );
 
         var pregelAlgo = Pregel.create(

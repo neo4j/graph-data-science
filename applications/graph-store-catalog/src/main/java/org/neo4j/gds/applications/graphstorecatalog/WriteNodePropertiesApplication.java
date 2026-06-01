@@ -77,8 +77,7 @@ public class WriteNodePropertiesApplication {
             configuration.writeConcurrency(),
             jobId,
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory(),
-            requestScopedDependencies.userLogRegistry()
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         var allNodeProperties = configuration

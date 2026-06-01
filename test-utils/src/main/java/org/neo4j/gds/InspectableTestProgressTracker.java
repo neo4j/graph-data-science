@@ -24,13 +24,11 @@ import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.ArrayList;
@@ -74,8 +72,7 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
             new Concurrency(1),
             jobId,
             PlainSimpleRequestCorrelationId.create(),
-            TaskRegistryFactory.local(userName, taskStore),
-            UserLogRegistry.EMPTY
+            TaskRegistryFactory.local(userName, taskStore)
         );
 
         return new InspectableTestProgressTracker(delegate, taskStore, jobId, userName);
@@ -151,11 +148,6 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     @Override
     public void setVolume(long volume) {
         delegate.setVolume(volume);
-    }
-
-    @Override
-    public void logMessage(LogLevel level, String message) {
-        delegate.logMessage(level, message);
     }
 
     @Override

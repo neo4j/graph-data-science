@@ -42,7 +42,6 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -220,8 +219,7 @@ class PageRankTest {
                 config.concurrency(),
                 config.jobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                EmptyTaskRegistryFactory.INSTANCE,
-                UserLogRegistry.EMPTY
+                EmptyTaskRegistryFactory.INSTANCE
             );
 
             pageRank(graph, config, progressTracker, TerminationFlag.RUNNING_TRUE)

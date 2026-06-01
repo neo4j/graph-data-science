@@ -23,7 +23,6 @@ import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -128,7 +127,7 @@ public class CrossValidation<MODEL_TYPE> {
                 var validationSet = split.testSet();
 
                 log.debug("Starting fold " + fold + " training");
-                var trainedModel = modelTrainer.train(trainSet, modelParams, metricsHandler, LogLevel.DEBUG);
+                var trainedModel = modelTrainer.train(trainSet, modelParams, metricsHandler);
                 log.debug("Finished fold " + fold + " training");
 
                 modelEvaluator.evaluate(validationSet, trainedModel, validationStatsBuilder::update);
@@ -179,8 +178,7 @@ public class CrossValidation<MODEL_TYPE> {
         MODEL_TYPE train(
             ReadOnlyHugeLongArray trainSet,
             TrainerConfig modelParameters,
-            ModelSpecificMetricsHandler metricsHandler,
-            LogLevel messageLogLevel
+            ModelSpecificMetricsHandler metricsHandler
         );
     }
 

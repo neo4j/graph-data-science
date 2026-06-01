@@ -36,7 +36,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.util.HashMap;
 import java.util.List;
@@ -115,8 +114,7 @@ class HitsTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY
+            EmptyTaskRegistryFactory.INSTANCE
         );
 
         var hitsp =new Hits(graph,config,DefaultPool.INSTANCE,progressTracker,TerminationFlag.RUNNING_TRUE);

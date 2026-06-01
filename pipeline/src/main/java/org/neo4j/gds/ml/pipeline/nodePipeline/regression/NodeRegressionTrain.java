@@ -216,7 +216,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
             metrics,
             pipeline.splitConfig().validationFolds(),
             trainConfig.randomSeed(),
-            (trainSet, config, metricsHandler, messageLogLevel) -> trainModel(
+            (trainSet, config, metricsHandler) -> trainModel(
                 trainSet,
                 config,
                 features

@@ -191,8 +191,7 @@ public class ProcedureExecutor<
                         graph,
                         config,
                         executionContext.log(),
-                        executionContext.taskRegistryFactory(),
-                        executionContext.userLogRegistry()
+                        executionContext.taskRegistryFactory()
                     );
                 }
 
@@ -202,8 +201,7 @@ public class ProcedureExecutor<
                         graphStore,
                         config,
                         executionContext.log(),
-                        executionContext.taskRegistryFactory(),
-                        executionContext.userLogRegistry()
+                        executionContext.taskRegistryFactory()
                     );
                 }
             });

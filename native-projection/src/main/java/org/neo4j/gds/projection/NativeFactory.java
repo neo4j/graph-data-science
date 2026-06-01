@@ -38,7 +38,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
@@ -134,8 +133,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
                 graphProjectConfig.readConcurrency(),
                 graphProjectConfig.jobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                loadingContext.taskRegistryFactory(),
-                UserLogRegistry.EMPTY
+                loadingContext.taskRegistryFactory()
             );
         }
 
@@ -145,8 +143,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             graphProjectConfig.readConcurrency(),
             graphProjectConfig.jobId(),
             PlainSimpleRequestCorrelationId.create(),
-            loadingContext.taskRegistryFactory(),
-            UserLogRegistry.EMPTY
+            loadingContext.taskRegistryFactory()
         );
     }
 

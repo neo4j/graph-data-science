@@ -28,7 +28,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -47,8 +46,7 @@ class TaskProgressTrackerFailMethodTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            TaskRegistryFactory.local("", taskStore),
-            UserLogRegistry.EMPTY
+            TaskRegistryFactory.local("", taskStore)
         );
 
         tracker.beginSubTask();
@@ -81,8 +79,7 @@ class TaskProgressTrackerFailMethodTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            TaskRegistryFactory.local("", taskStore),
-            UserLogRegistry.EMPTY
+            TaskRegistryFactory.local("", taskStore)
         );
 
         tracker.beginSubTask("rootTask");

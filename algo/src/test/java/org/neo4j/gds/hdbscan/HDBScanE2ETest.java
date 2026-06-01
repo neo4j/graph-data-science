@@ -36,7 +36,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -107,8 +106,7 @@ class HDBScanE2ETest {
                 new Concurrency(1),
                 new JobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                EmptyTaskRegistryFactory.INSTANCE,
-                UserLogRegistry.EMPTY
+                EmptyTaskRegistryFactory.INSTANCE
             );
 
             new HDBScan(
