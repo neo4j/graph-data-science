@@ -30,7 +30,6 @@ import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
@@ -65,7 +64,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final TerminationMonitor terminationMonitor;
-    private final UserLogRegistry userLogRegistry;
     private final ProgressTrackerCreator progressTrackerCreator;
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final NodeClassificationPipelineTrainConfig configuration;
@@ -85,7 +83,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
-        UserLogRegistry userLogRegistry,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         NodeClassificationPipelineTrainConfig configuration
@@ -103,7 +100,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationMonitor = terminationMonitor;
-        this.userLogRegistry = userLogRegistry;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.configuration = configuration;
@@ -125,7 +121,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
-        UserLogRegistry userLogRegistry,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         NodeClassificationPipelineTrainConfig configuration
@@ -145,7 +140,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
             taskRegistryFactory,
             terminationFlag,
             terminationMonitor,
-            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration
@@ -173,7 +167,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
             requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
-            userLogRegistry,
             user,
             algorithmsProcedureFacade,
             globallyScopedDependencies.modelCatalog(),

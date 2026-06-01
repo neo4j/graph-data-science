@@ -45,7 +45,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,7 +66,6 @@ public abstract class FileToGraphStoreImporter {
     private final Log log;
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
-    private final UserLogRegistry userLogRegistry;
     private final JobId jobId;
 
     private ProgressTracker progressTracker;
@@ -78,11 +76,9 @@ public abstract class FileToGraphStoreImporter {
         Log log,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
         JobId jobId
     ) {
         this.requestCorrelationId = requestCorrelationId;
-        this.userLogRegistry = userLogRegistry;
         this.nodeVisitorBuilder = new GraphStoreNodeVisitor.Builder();
         this.relationshipVisitorBuilder = new GraphStoreRelationshipVisitor.Builder();
         this.concurrency = concurrency;

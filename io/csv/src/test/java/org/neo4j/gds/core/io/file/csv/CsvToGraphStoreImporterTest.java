@@ -30,7 +30,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -52,7 +51,6 @@ class CsvToGraphStoreImporterTest {
             Log.noOpLog(),
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY,
             new JobId()
         );
         var userGraphStore = importer.run();
@@ -88,7 +86,6 @@ class CsvToGraphStoreImporterTest {
             log,
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
-            UserLogRegistry.EMPTY,
             new JobId()
         );
         exporter.run();

@@ -58,7 +58,7 @@ public class UserLogServices {
             user, u -> {
                 var userLogStoreForDatabase = getUserLogStore(databaseId);
 
-                return new UserLogRegistry(u, userLogStoreForDatabase);
+                return new UserLogRegistry();
             }
         );
     }

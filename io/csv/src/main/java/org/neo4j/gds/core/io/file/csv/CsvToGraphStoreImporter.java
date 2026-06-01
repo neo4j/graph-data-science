@@ -26,7 +26,6 @@ import org.neo4j.gds.core.io.file.FileInput;
 import org.neo4j.gds.core.io.file.FileToGraphStoreImporter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.nio.file.Path;
 
@@ -37,10 +36,9 @@ public class CsvToGraphStoreImporter extends FileToGraphStoreImporter {
         Log log,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
         JobId jobId
     ) {
-        super(concurrency, importPath, log, requestCorrelationId, taskRegistryFactory, userLogRegistry, jobId);
+        super(concurrency, importPath, log, requestCorrelationId, taskRegistryFactory, jobId);
     }
 
     @Override

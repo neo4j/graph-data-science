@@ -98,7 +98,6 @@ public abstract class BaseProc {
                 PlainSimpleRequestCorrelationId.create(),
                 taskRegistryFactory,
                 new TransactionTerminationMonitor(transaction),
-                userLogRegistry,
                 new User(username(), transactionContext().isGdsAdmin()),
                 graphDataScienceProcedures.algorithms(),
                 GraphDatabaseApiProxy.dependencyResolver(databaseService),

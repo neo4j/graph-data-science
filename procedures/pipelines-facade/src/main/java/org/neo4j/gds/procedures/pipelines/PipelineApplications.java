@@ -68,7 +68,6 @@ import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.util.Map;
 import java.util.Optional;
@@ -97,7 +96,6 @@ public class PipelineApplications {
     private final TerminationMonitor terminationMonitor;
     private final TerminationFlag terminationFlag;
     private final User user;
-    private final UserLogRegistry userLogRegistry;
 
     private final PipelineConfigurationParser pipelineConfigurationParser;
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -134,7 +132,6 @@ public class PipelineApplications {
         TerminationMonitor terminationMonitor,
         TerminationFlag terminationFlag,
         User user,
-        UserLogRegistry userLogRegistry,
         PipelineConfigurationParser pipelineConfigurationParser,
         ProgressTrackerCreator progressTrackerCreator,
         ModelPersister modelPersister,
@@ -164,7 +161,6 @@ public class PipelineApplications {
         this.terminationMonitor = terminationMonitor;
         this.terminationFlag = terminationFlag;
         this.user = user;
-        this.userLogRegistry = userLogRegistry;
         this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.progressTrackerCreator = progressTrackerCreator;
         this.modelPersister = modelPersister;
@@ -235,7 +231,6 @@ public class PipelineApplications {
             requestScopedDependencies.taskRegistryFactory(),
             requestScopedDependencies.terminationFlag(),
             terminationMonitor,
-            requestScopedDependencies.userLogRegistry(),
             progressTrackerCreator,
             algorithmsProcedureFacade
         );
@@ -258,7 +253,6 @@ public class PipelineApplications {
             terminationMonitor,
             requestScopedDependencies.terminationFlag(),
             requestScopedDependencies.user(),
-            requestScopedDependencies.userLogRegistry(),
             pipelineConfigurationParser,
             progressTrackerCreator,
             modelPersister,
@@ -782,7 +776,6 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,
@@ -809,7 +802,6 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,
@@ -835,7 +827,6 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,
@@ -861,7 +852,6 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationFlag,
             terminationMonitor,
-            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration
@@ -886,7 +876,6 @@ public class PipelineApplications {
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,

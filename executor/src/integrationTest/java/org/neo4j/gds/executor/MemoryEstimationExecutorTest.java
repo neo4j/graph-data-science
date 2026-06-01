@@ -48,7 +48,6 @@ import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.List;
@@ -81,7 +80,6 @@ class MemoryEstimationExecutorTest extends BaseTest {
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationMonitor.EMPTY,
-            UserLogRegistry.EMPTY,
             new User("", false),
             null,
             GraphDatabaseApiProxy.dependencyResolver(db),

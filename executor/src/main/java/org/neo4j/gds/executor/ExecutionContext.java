@@ -30,7 +30,6 @@ import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
@@ -54,7 +53,6 @@ public record ExecutionContext(
     RequestCorrelationId requestCorrelationId,
     TaskRegistryFactory taskRegistryFactory,
     TerminationMonitor terminationMonitor,
-    UserLogRegistry userLogRegistry,
     User user,
     @Nullable AlgorithmsProcedureFacade algorithmsProcedureFacade,
     @Nullable DependencyResolver dependencyResolver,
@@ -73,14 +71,13 @@ public record ExecutionContext(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
-        UserLogRegistry userLogRegistry,
         User user,
         @Nullable AlgorithmsProcedureFacade algorithmsProcedureFacade,
         @Nullable ModelCatalog modelCatalog,
         @Nullable NodePropertyExporterBuilder nodePropertyExporterBuilder,
         @Nullable RelationshipExporterBuilder relationshipExporterBuilder
     ) {
-        this(closeableResourceRegistry, databaseId, log, memoryEstimationContext, metrics, returnColumns, requestCorrelationId, taskRegistryFactory, terminationMonitor, userLogRegistry, user, algorithmsProcedureFacade, EMPTY_DEPENDENCY_RESOLVER, modelCatalog, nodePropertyExporterBuilder, relationshipExporterBuilder);
+        this(closeableResourceRegistry, databaseId, log, memoryEstimationContext, metrics, returnColumns, requestCorrelationId, taskRegistryFactory, terminationMonitor, user, algorithmsProcedureFacade, EMPTY_DEPENDENCY_RESOLVER, modelCatalog, nodePropertyExporterBuilder, relationshipExporterBuilder);
     }
 
     public ExecutionContext(
@@ -93,13 +90,12 @@ public record ExecutionContext(
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
-        UserLogRegistry userLogRegistry,
         User user,
         @Nullable AlgorithmsProcedureFacade algorithmsProcedureFacade,
         @Nullable DependencyResolver dependencyResolver,
         @Nullable ModelCatalog modelCatalog
     ) {
-        this(closeableResourceRegistry, databaseId, log, memoryEstimationContext, metrics, returnColumns, requestCorrelationId, taskRegistryFactory, terminationMonitor, userLogRegistry, user, algorithmsProcedureFacade, dependencyResolver, modelCatalog, null, null);
+        this(closeableResourceRegistry, databaseId, log, memoryEstimationContext, metrics, returnColumns, requestCorrelationId, taskRegistryFactory, terminationMonitor, user, algorithmsProcedureFacade, dependencyResolver, modelCatalog, null, null);
     }
     public ExecutionContext withNodePropertyExporterBuilder(NodePropertyExporterBuilder nodePropertyExporterBuilder) {
         return new ExecutionContext(
@@ -112,7 +108,6 @@ public record ExecutionContext(
             requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
-            userLogRegistry,
             user,
             algorithmsProcedureFacade,
             dependencyResolver,
@@ -133,7 +128,6 @@ public record ExecutionContext(
             requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
-            userLogRegistry,
             user,
             algorithmsProcedureFacade,
             dependencyResolver,
@@ -172,7 +166,6 @@ public record ExecutionContext(
         PlainSimpleRequestCorrelationId.create(),
         EmptyTaskRegistryFactory.INSTANCE,
         TerminationMonitor.EMPTY,
-        UserLogRegistry.EMPTY,
         new User("", false),
         null,
         EMPTY_DEPENDENCY_RESOLVER,

@@ -133,7 +133,6 @@ class NodeClassificationTrainComputationTest {
             requestScopedDependencies.taskRegistryFactory(),
             TerminationFlag.RUNNING_TRUE,
             TerminationMonitor.EMPTY,
-            requestScopedDependencies.userLogRegistry(),
             progressTrackerCreator,
             null,
             configuration

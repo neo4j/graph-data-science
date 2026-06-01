@@ -19,21 +19,11 @@
  */
 package org.neo4j.gds.user.log;
 
-import org.neo4j.gds.api.User;
-
 /**
  * This a great and Neo4j-agnostic class.
  * It listens to log events and stores them.
  * Scope is one of these per ~~database~~ data source.
  */
 public class UserLogRegistry {
-    public static final UserLogRegistry EMPTY = new UserLogRegistry(User.DEFAULT, EmptyUserLogStore.INSTANCE);
-
-    private final User user;
-    private final UserLogStore userLogStore;
-
-    public UserLogRegistry(User user, UserLogStore userLogStore) {
-        this.user = user;
-        this.userLogStore = userLogStore;
-    }
+    public static final UserLogRegistry EMPTY = new UserLogRegistry();
 }

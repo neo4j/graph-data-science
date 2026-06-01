@@ -36,7 +36,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.logging.Log;
@@ -192,7 +191,6 @@ class LinkPredictionTrainingPipelineTest {
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationMonitor.EMPTY,
-            UserLogRegistry.EMPTY,
             new User("", false),
             null,
             ExecutionContext.EMPTY_DEPENDENCY_RESOLVER,
@@ -236,7 +234,6 @@ class LinkPredictionTrainingPipelineTest {
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationMonitor.EMPTY,
-            UserLogRegistry.EMPTY,
             new User("", false),
             null,
             ExecutionContext.EMPTY_DEPENDENCY_RESOLVER,
@@ -280,7 +277,6 @@ class LinkPredictionTrainingPipelineTest {
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationMonitor.EMPTY,
-            UserLogRegistry.EMPTY,
             new User("", false),
             null,
             ExecutionContext.EMPTY_DEPENDENCY_RESOLVER,

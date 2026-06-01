@@ -30,7 +30,6 @@ import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
@@ -60,7 +59,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationMonitor terminationMonitor;
     private final User user;
-    private final UserLogRegistry userLogRegistry;
 
     private final ProgressTrackerCreator progressTrackerCreator;
 
@@ -84,7 +82,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
         User user,
-        UserLogRegistry userLogRegistry,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         LinkPredictionTrainConfig configuration,
@@ -104,7 +101,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationMonitor = terminationMonitor;
         this.user = user;
-        this.userLogRegistry = userLogRegistry;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.configuration = configuration;
@@ -126,7 +122,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
         User user,
-        UserLogRegistry userLogRegistry,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         LinkPredictionTrainConfig configuration,
@@ -147,7 +142,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,
@@ -199,7 +193,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
             requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
-            userLogRegistry,
             this.user,
             algorithmsProcedureFacade,
             globallyScopedDependencies.modelCatalog(),

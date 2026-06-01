@@ -31,7 +31,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
@@ -62,7 +61,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationMonitor terminationMonitor;
     private final User user;
-    private final UserLogRegistry userLogRegistry;
 
     private final ProgressTrackerCreator progressTrackerCreator;
 
@@ -86,7 +84,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
         User user,
-        UserLogRegistry userLogRegistry,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         NodeRegressionPredictPipelineBaseConfig configuration,
@@ -106,7 +103,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationMonitor = terminationMonitor;
         this.user = user;
-        this.userLogRegistry = userLogRegistry;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.trainedNRPipelineModel = trainedNRPipelineModel;
@@ -128,7 +124,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
         User user,
-        UserLogRegistry userLogRegistry,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         NodeRegressionPredictPipelineBaseConfig configuration,
@@ -150,7 +145,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             taskRegistryFactory,
             terminationMonitor,
             user,
-            userLogRegistry,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration,
@@ -190,7 +184,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             requestCorrelationId,
             taskRegistryFactory,
             terminationMonitor,
-            userLogRegistry,
             user,
             algorithmsProcedureFacade,
             globallyScopedDependencies.modelCatalog(),
