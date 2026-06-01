@@ -87,7 +87,6 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -537,7 +536,6 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .taskRegistryFactory(TaskRegistryFactory.empty())
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .user(new User(getUsername(), false))
-            .userLogRegistry(UserLogRegistry.EMPTY)
             .build();
 
         var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(

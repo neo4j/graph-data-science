@@ -88,7 +88,6 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -632,7 +631,6 @@ class WccMutateProcTest extends BaseProcTest {
             .taskRegistryFactory(TaskRegistryFactory.empty())
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .user(new User(getUsername(), false))
-            .userLogRegistry(UserLogRegistry.EMPTY)
             .build();
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             logMock,

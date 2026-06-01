@@ -32,7 +32,6 @@ import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -45,8 +44,6 @@ class ProgressTrackerFactoryTest {
     private RequestCorrelationId requestCorrelationId;
     @Mock
     private TaskRegistryFactory taskRegistryFactory;
-    @Mock
-    private UserLogRegistry userLogRegistry;
     @Mock
     private Task task;
     @Mock
@@ -63,7 +60,6 @@ class ProgressTrackerFactoryTest {
             RequestScopedDependencies.builder()
                 .correlationId(requestCorrelationId)
                 .taskRegistryFactory(taskRegistryFactory)
-                .userLogRegistry(userLogRegistry)
                 .build()
         );
 
@@ -83,7 +79,6 @@ class ProgressTrackerFactoryTest {
             RequestScopedDependencies.builder()
                 .correlationId(requestCorrelationId)
                 .taskRegistryFactory(taskRegistryFactory)
-                .userLogRegistry(userLogRegistry)
                 .build()
         );
 

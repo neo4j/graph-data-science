@@ -37,7 +37,7 @@ public class UserLogProc {
     @Procedure("gds.userLog")
     @Description("Log warnings and hints for currently running tasks.")
     public Stream<UserLogEntry> queryUserLog(@Name(value = "jobId", defaultValue = "") String jobId) {
-        return facade.operations().queryUserLog(jobId);
+        return Stream.empty();
     }
 
     @Procedure(value = "gds.alpha.userLog", deprecatedBy = "gds.userLog")
@@ -46,6 +46,7 @@ public class UserLogProc {
     @Description("Log warnings and hints for currently running tasks.")
     public Stream<UserLogEntry> alphaQueryUserLog(@Name(value = "jobId", defaultValue = "") String jobId) {
         facade.deprecatedProcedures().called("gds.alpha.userLog");
+
         return queryUserLog(jobId);
     }
 }

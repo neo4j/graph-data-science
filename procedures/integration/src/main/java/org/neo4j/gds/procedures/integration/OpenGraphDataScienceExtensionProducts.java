@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.UserLogServices;
 
 /**
  * There are some singleton products that are created in the builder,
@@ -31,18 +30,15 @@ public class OpenGraphDataScienceExtensionProducts {
     private final OpenGraphDataScienceExtensionBuilder graphDataScienceExtensionBuilder;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TaskStoreService taskStoreService;
-    private final UserLogServices userLogServices;
 
     OpenGraphDataScienceExtensionProducts(
         OpenGraphDataScienceExtensionBuilder graphDataScienceExtensionBuilder,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        TaskStoreService taskStoreService,
-        UserLogServices userLogServices
+        TaskStoreService taskStoreService
     ) {
         this.graphDataScienceExtensionBuilder = graphDataScienceExtensionBuilder;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreService = taskStoreService;
-        this.userLogServices = userLogServices;
     }
 
     public OpenGraphDataScienceExtensionBuilder graphDataScienceExtensionBuilder() {
@@ -55,9 +51,5 @@ public class OpenGraphDataScienceExtensionProducts {
 
     public TaskStoreService taskStoreService() {
         return taskStoreService;
-    }
-
-    public UserLogServices userLogServices() {
-        return userLogServices;
     }
 }

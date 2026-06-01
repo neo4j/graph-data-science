@@ -42,7 +42,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.extension.GdlExtension;
@@ -126,7 +125,6 @@ class WriteNodePropertiesApplicationTest {
                 .correlationId(PlainSimpleRequestCorrelationId.create())
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build(),
             graphStore,
             ResultStore.EMPTY,
@@ -175,7 +173,6 @@ class WriteNodePropertiesApplicationTest {
                 .correlationId(PlainSimpleRequestCorrelationId.create())
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build(),
             propertiesSubsetGraphStore,
             ResultStore.EMPTY,
@@ -217,7 +214,6 @@ class WriteNodePropertiesApplicationTest {
                 .correlationId(PlainSimpleRequestCorrelationId.create())
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build(),
             graphStore,
             ResultStore.EMPTY,
@@ -258,7 +254,6 @@ class WriteNodePropertiesApplicationTest {
                 .correlationId(PlainSimpleRequestCorrelationId.create())
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build(),
             graphStore,
             ResultStore.EMPTY,
@@ -296,7 +291,6 @@ class WriteNodePropertiesApplicationTest {
                 .correlationId(PlainSimpleRequestCorrelationId.create())
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .terminationFlag(TerminationFlag.RUNNING_TRUE)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build(),
             graphStore,
             ResultStore.EMPTY,

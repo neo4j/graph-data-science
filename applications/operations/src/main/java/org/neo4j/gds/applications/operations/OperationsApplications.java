@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.operations;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.UserTask;
-import org.neo4j.gds.user.log.UserLogEntry;
 
 import java.util.stream.Stream;
 
@@ -85,16 +84,6 @@ public final class OperationsApplications {
         var results = taskStore.query(user.getUsername(), jobId);
 
         return resultRenderer.render(results);
-    }
-
-    /**
-     * Huh, we never did jobId filtering...
-     */
-    public Stream<UserLogEntry> queryUserLog(String jobId) {
-        var user = requestScopedDependencies.user();
-        var userLogStore = requestScopedDependencies.userLogStore();
-
-        return userLogStore.query(user);
     }
 
     public String resetAdjacencyPackingStrategy() {

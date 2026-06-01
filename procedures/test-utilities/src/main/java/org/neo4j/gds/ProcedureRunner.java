@@ -45,8 +45,6 @@ import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
-import org.neo4j.gds.user.log.EmptyUserLogStore;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -66,7 +64,6 @@ public final class ProcedureRunner {
         ProcedureCallContext procedureCallContext,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistry userLogRegistry,
         Transaction tx,
         KernelTransaction kernelTransaction,
         Username username,
@@ -86,7 +83,6 @@ public final class ProcedureRunner {
         proc.callContext = procedureCallContext;
         proc.log = log;
         proc.taskRegistryFactory = taskRegistryFactory;
-        proc.userLogRegistry = userLogRegistry;
         proc.username = username;
 
         proc.metrics = metrics;
@@ -123,7 +119,6 @@ public final class ProcedureRunner {
             procedureCallContext,
             log,
             taskRegistryFactory,
-            UserLogRegistry.EMPTY,
             tx,
             kernelTransaction,
             username,
@@ -164,8 +159,6 @@ public final class ProcedureRunner {
             .taskRegistryFactory(taskRegistryFactory)
             .taskStore(EmptyTaskStore.INSTANCE)
             .user(new User(username.username(), false))
-            .userLogRegistry(UserLogRegistry.EMPTY)
-            .userLogStore(EmptyUserLogStore.INSTANCE)
             .build();
         var graphStoreCatalogService = new LocalGraphStoreCatalogService();
 

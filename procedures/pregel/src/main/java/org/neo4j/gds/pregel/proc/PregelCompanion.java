@@ -38,7 +38,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -109,7 +108,6 @@ public final class PregelCompanion {
             RequestScopedDependencies.builder()
                 .correlationId(PlainSimpleRequestCorrelationId.create())
                 .taskRegistryFactory(taskRegistryFactory)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build()
         );
 

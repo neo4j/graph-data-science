@@ -47,7 +47,6 @@ import org.neo4j.gds.procedures.DefaultUserAccessor;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
-import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.procedures.memory.MemoryFacade;
 import org.neo4j.gds.projection.AlphaCypherAggregation;
 import org.neo4j.gds.projection.CypherAggregation;
@@ -55,7 +54,6 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.settings.GdsSettings;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -94,7 +92,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TaskStoreObserver taskStoreObserver;
     private final boolean useMaxMemoryEstimation;
-    private final UserLogServices userLogServices;
     private final Lifecycle gcListener;
     private final UserAccessor userAccessor;
 
@@ -111,7 +108,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreObserver taskStoreObserver,
         boolean useMaxMemoryEstimation,
-        UserLogServices userLogServices,
         Lifecycle gcListener
     ) {
         this.userAccessor = userAccessor;
@@ -126,7 +122,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreObserver = taskStoreObserver;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
-        this.userLogServices = userLogServices;
         this.gcListener = gcListener;
     }
 
@@ -166,8 +161,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var taskStoreService = new DefaultTaskStoreService(taskStoreFactory, taskStoreRepository);
         var taskStoreObserver = new DefaultTaskStoreObserver(taskStoreRepository, taskStoreService);
         var taskRegistryFactoryService = new TaskRegistryFactoryService(progressTrackingEnabled, taskStoreService);
-
-        var userLogServices = new UserLogServices();
 
         // Memory gauge integrates with the JVM
         // First, it is state held in an AtomicLong
@@ -256,15 +249,13 @@ public final class OpenGraphDataScienceExtensionBuilder {
             taskRegistryFactoryService,
             taskStoreObserver,
             useMaxMemoryEstimation,
-            userLogServices,
             gcListener
         );
 
         return new OpenGraphDataScienceExtensionProducts(
             graphDataScienceExtensionBuilder,
             taskRegistryFactoryService,
-            taskStoreService,
-            userLogServices
+            taskStoreService
         );
     }
 
@@ -317,8 +308,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             userAccessor,
             taskRegistryFactoryService,
             taskStoreService,
-            useMaxMemoryEstimation,
-            userLogServices
+            useMaxMemoryEstimation
         );
 
         componentRegistration.registerComponent(
@@ -338,7 +328,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
         registerTaskRegistryFactoryComponent();
         registerTaskStoreComponent();
         registerTaskStoreObserverComponent();
-        registerUserLogRegistryComponent();
         registerUsernameComponent();
     }
 
@@ -366,16 +355,6 @@ public final class OpenGraphDataScienceExtensionBuilder {
             "Task Registry Factory",
             TaskRegistryFactory.class,
             taskRegistryFactoryProvider
-        );
-    }
-
-    private void registerUserLogRegistryComponent() {
-        var userLogRegistryProvider = new UserLogRegistryProvider();
-
-        componentRegistration.registerComponent(
-            "User Log Registry",
-            UserLogRegistry.class,
-            userLogRegistryProvider
         );
     }
 

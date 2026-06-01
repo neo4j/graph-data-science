@@ -41,7 +41,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.user.log.UserLogRegistry;
 
 import java.util.List;
 import java.util.Map;
@@ -123,7 +122,6 @@ class GraphSamplingApplicationTest {
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .terminationFlag(TerminationFlag.RUNNING_TRUE)
                 .user(user)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build(),
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
@@ -167,7 +165,6 @@ class GraphSamplingApplicationTest {
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .terminationFlag(TerminationFlag.RUNNING_TRUE)
                 .user(user)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build(),
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
@@ -211,7 +208,6 @@ class GraphSamplingApplicationTest {
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .terminationFlag(TerminationFlag.RUNNING_TRUE)
                 .user(user)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build(),
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
@@ -259,7 +255,6 @@ class GraphSamplingApplicationTest {
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .terminationFlag(TerminationFlag.RUNNING_TRUE)
                 .user(user)
-                .userLogRegistry(UserLogRegistry.EMPTY)
                 .build(),
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),

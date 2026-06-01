@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.procedures.operations;
 
-import org.neo4j.gds.user.log.UserLogEntry;
-
 import java.util.stream.Stream;
 
 public interface OperationsProcedureFacade {
@@ -31,8 +29,6 @@ public interface OperationsProcedureFacade {
     LicenseStateResult licenceStateResult();
 
     Stream<ProgressResult> listProgress(String jobIdAsString, boolean showCompleted);
-
-    Stream<UserLogEntry> queryUserLog(String jobId);
 
     Stream<FeatureStringValue> resetAdjacencyPackingStrategy();
 

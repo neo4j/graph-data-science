@@ -26,7 +26,6 @@ import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.LogAdapter;
@@ -66,9 +65,6 @@ public abstract class BaseProc {
 
     @Context
     public TaskRegistryFactory taskRegistryFactory;
-
-    @Context
-    public UserLogRegistry userLogRegistry;
 
     @Context
     public Username username = Username.EMPTY_USERNAME;

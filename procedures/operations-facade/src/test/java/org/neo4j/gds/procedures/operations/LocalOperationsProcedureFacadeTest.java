@@ -28,8 +28,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
-import org.neo4j.gds.user.log.UserLogEntry;
-import org.neo4j.gds.user.log.UserLogStore;
 
 import java.util.stream.Stream;
 
@@ -138,31 +136,5 @@ class LocalOperationsProcedureFacadeTest {
             failed.description(),
             finished.description()
         );
-    }
-
-    @Test
-    void shouldQueryUserLog() {
-        var userLogStore = mock(UserLogStore.class);
-        var operationsApplications = OperationsApplications.create(
-            null,
-            RequestScopedDependencies.builder()
-                .user(new User("current user", false))
-                .userLogStore(userLogStore)
-                .build()
-        );
-        var applicationsFacade = mock(ApplicationsFacade.class);
-        when(applicationsFacade.operations()).thenReturn(operationsApplications);
-
-        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade, null);
-
-        var expectedWarnings = Stream.of(
-            UserLogEntry.create("lt", "going once", 1),
-            UserLogEntry.create("lt", "going twice...", 2),
-            UserLogEntry.create("lt", "gone!", 3)
-        );
-        when(userLogStore.query(new User("current user", false))).thenReturn(expectedWarnings);
-        var actualWarnings = operationsProcedureFacade.queryUserLog(null);
-
-        assertThat(actualWarnings).isSameAs(expectedWarnings);
     }
 }

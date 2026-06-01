@@ -32,7 +32,6 @@ import org.neo4j.gds.memory.tracking.MemoryTracker;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
-import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.graphdb.config.Configuration;
@@ -86,8 +85,7 @@ final class GraphDataScienceProceduresProviderFactory {
         UserAccessor userAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
-        boolean useMaxMemoryEstimation,
-        UserLogServices userLogServices
+        boolean useMaxMemoryEstimation
     ) {
         var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(
             loggers.log(),
@@ -113,7 +111,6 @@ final class GraphDataScienceProceduresProviderFactory {
             pipelineRepository,
             taskRegistryFactoryService,
             taskStoreService,
-            userLogServices,
             memoryTracker
         );
     }

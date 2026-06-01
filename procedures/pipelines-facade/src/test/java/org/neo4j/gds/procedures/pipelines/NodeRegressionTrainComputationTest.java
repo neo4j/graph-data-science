@@ -32,7 +32,6 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.user.log.UserLogRegistry;
 import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.logging.Log;
@@ -115,7 +114,6 @@ class NodeRegressionTrainComputationTest {
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .correlationId(PlainSimpleRequestCorrelationId.create())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .userLogRegistry(UserLogRegistry.EMPTY)
             .build();
         var progressTrackerCreator = new ProgressTrackerCreator(null, requestScopedDependencies);
 

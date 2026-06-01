@@ -45,7 +45,6 @@ import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
 import org.neo4j.gds.procedures.RequestCorrelationIdAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserAccessor;
-import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.settings.GdsSettings;
@@ -80,7 +79,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final PipelineRepository pipelineRepository;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TaskStoreService taskStoreService;
-    private final UserLogServices userLogServices;
 
     private final MemoryTracker memoryTracker;
 
@@ -101,7 +99,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         PipelineRepository pipelineRepository,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
-        UserLogServices userLogServices,
         MemoryTracker memoryTracker
     ) {
         this.userAccessor = userAccessor;
@@ -122,7 +119,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.pipelineRepository = pipelineRepository;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreService = taskStoreService;
-        this.userLogServices = userLogServices;
         this.memoryTracker = memoryTracker;
     }
 
@@ -147,9 +143,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         var taskStore = taskStoreService.getOrCreateTaskStore(databaseId);
         taskStore.addListener(memoryTracker);
 
-        var userLogRegistry = userLogServices.getUserLogRegistry();
-        var userLogStore = userLogServices.getUserLogStore();
-
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,
             databaseId,
@@ -166,8 +159,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             .taskStore(taskStore)
             .terminationFlag(terminationFlag)
             .user(user)
-            .userLogRegistry(userLogRegistry)
-            .userLogStore(userLogStore)
             .build();
 
         var telemetryLogger = neo4jConfiguration.get(GdsSettings.telemetryLoggingEnabled()) ?
