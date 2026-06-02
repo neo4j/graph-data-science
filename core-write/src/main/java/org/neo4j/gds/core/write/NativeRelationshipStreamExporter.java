@@ -24,6 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utility.StatementApi;
@@ -36,10 +37,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
-public final class NativeRelationshipStreamExporter extends StatementApi implements RelationshipStreamExporter {
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+public final class NativeRelationshipStreamExporter extends StatementApi implements RelationshipStreamExporter {
     private static final int QUEUE_CAPACITY = 2;
 
+    private final Log log;
     private final LongUnaryOperator toOriginalId;
     private final Stream<ExportedRelationship> relationships;
     private final int batchSize;
@@ -47,18 +50,20 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     private final ProgressTracker progressTracker;
 
     public static RelationshipStreamExporterBuilder builder(
+        Log log,
         TransactionContext transactionContext,
         IdMap idMap,
         Stream<ExportedRelationship> relationships,
         TerminationFlag terminationFlag
     ) {
-        return new NativeRelationshipStreamExporterBuilder(transactionContext)
+        return new NativeRelationshipStreamExporterBuilder(log, transactionContext)
             .withRelationships(relationships)
             .withIdMappingOperator(idMap::toOriginalNodeId)
             .withTerminationFlag(terminationFlag);
     }
 
     NativeRelationshipStreamExporter(
+        Log log,
         TransactionContext tx,
         LongUnaryOperator toOriginalId,
         Stream<ExportedRelationship> relationships,
@@ -67,6 +72,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
         ProgressTracker progressTracker
     ) {
         super(tx);
+        this.log = log;
         this.toOriginalId = toOriginalId;
         this.relationships = relationships.sequential();
         this.batchSize = batchSize;
@@ -89,6 +95,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
             }
 
             var writer = new Writer(
+                log,
                 tx,
                 progressTracker,
                 toOriginalId,
@@ -137,6 +144,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     }
 
     static class Writer extends StatementApi implements Runnable {
+        private final Log log;
 
         private final TerminationFlag terminationFlag;
         private final ProgressTracker progressTracker;
@@ -147,9 +155,11 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
 
         private final int relationshipToken;
         private final int[] propertyTokens;
+
         private long written;
 
         Writer(
+            Log log,
             TransactionContext tx,
             ProgressTracker progressTracker,
             LongUnaryOperator toOriginalId,
@@ -160,6 +170,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
             TerminationFlag terminationFlag
         ) {
             super(tx);
+            this.log = log;
             this.progressTracker = progressTracker;
             this.toOriginalId = toOriginalId;
             this.writeQueue = writeQueue;
@@ -180,7 +191,8 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
                     }
                     written += write(buffer, relationshipToken, propertyTokens);
 
-                    progressTracker.onProgress(written, "has written %d relationships");
+                    log.info(formatWithLocale("wrote %d relationships", written));
+                    progressTracker.onProgress(written);
 
                     buffer.reset();
                     bufferPool.put(buffer);

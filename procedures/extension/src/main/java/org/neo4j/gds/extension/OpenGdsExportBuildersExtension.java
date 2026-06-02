@@ -22,12 +22,14 @@ package org.neo4j.gds.extension;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.procedures.integration.ExporterBuildersComponentRegistration;
+import org.neo4j.gds.procedures.integration.LogAccessor;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
+import org.neo4j.logging.internal.LogService;
 
 /**
  * Life in OpenGDS is very simple, we just register native exporter builders as components.
@@ -45,10 +47,12 @@ public class OpenGdsExportBuildersExtension extends ExtensionFactory<OpenGdsExpo
 
     @Override
     public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
+        var log = new LogAccessor().getLog(dependencies.logService(), getClass());
+
         var globalProcedures = dependencies.globalProcedures();
         var exporterBuildersComponentRegistration = new ExporterBuildersComponentRegistration(globalProcedures);
 
-        var exportBuildersProvider = new NativeExportBuildersProvider();
+        var exportBuildersProvider = new NativeExportBuildersProvider(log);
         exporterBuildersComponentRegistration.registerExporterBuilders(exportBuildersProvider);
 
         return new LifecycleAdapter(); // do nothing
@@ -56,5 +60,7 @@ public class OpenGdsExportBuildersExtension extends ExtensionFactory<OpenGdsExpo
 
     public interface Dependencies {
         GlobalProcedures globalProcedures();
+
+        LogService logService();
     }
 }

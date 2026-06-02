@@ -19,18 +19,22 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.transaction.TransactionContext;
 
-public final class NativeRelationshipStreamExporterBuilder extends RelationshipStreamExporterBuilder {
+final class NativeRelationshipStreamExporterBuilder extends RelationshipStreamExporterBuilder {
+    private final Log log;
     private final TransactionContext transactionContext;
 
-    public NativeRelationshipStreamExporterBuilder(TransactionContext transactionContext) {
+    NativeRelationshipStreamExporterBuilder(Log log, TransactionContext transactionContext) {
+        this.log = log;
         this.transactionContext = transactionContext;
     }
 
     @Override
     public NativeRelationshipStreamExporter build() {
         return new NativeRelationshipStreamExporter(
+            log,
             transactionContext,
             toOriginalId,
             relationships,

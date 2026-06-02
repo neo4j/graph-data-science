@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
 
 public final class NativeExportBuildersProvider implements ExportBuildersProvider {
+    private final Log log;
+
+    public NativeExportBuildersProvider(Log log) {this.log = log;}
 
     @Override
     public NodePropertyExporterBuilder nodePropertyExporterBuilder(ExporterContext ctx) {
@@ -31,7 +35,7 @@ public final class NativeExportBuildersProvider implements ExportBuildersProvide
 
     @Override
     public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder(ExporterContext ctx) {
-        return new NativeRelationshipStreamExporterBuilder(transactionContext(ctx));
+        return new NativeRelationshipStreamExporterBuilder(log, transactionContext(ctx));
     }
 
     @Override

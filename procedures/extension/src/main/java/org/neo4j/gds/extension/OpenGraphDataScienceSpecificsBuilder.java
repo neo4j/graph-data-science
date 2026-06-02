@@ -51,7 +51,7 @@ class OpenGraphDataScienceSpecificsBuilder {
 
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
 
-        ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
+        ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(log); // we always just offer native writes in OpenGDS
 
         var idMapBehavior = new OpenGdsIdMapBehavior();
 
