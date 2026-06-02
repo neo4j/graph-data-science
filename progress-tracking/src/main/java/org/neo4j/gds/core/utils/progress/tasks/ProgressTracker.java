@@ -24,91 +24,14 @@ import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.function.Function;
 
+/**
+ * Progress tracking has to do with _events_. Updates to progress are events that happen.
+ * _Logging_ that progress is a separate concern, which is not offered here.
+ * This interface deals with navigating up and down the task tree, and issuing update events.
+ * And then it deals with some legacy breakages of encapsulation, plus some conceptual breakages that are not great.
+ */
 public interface ProgressTracker {
-    ProgressTracker NULL_TRACKER = new ProgressTracker() {
-        @Override
-        public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes) {
-        }
-
-        @Override
-        public void requestedConcurrency(Concurrency concurrency) {
-
-        }
-
-        @Override
-        public void beginSubTask() {
-        }
-
-        @Override
-        public void beginSubTask(long taskVolume) {
-
-        }
-
-        @Override
-        public void endSubTask() {
-        }
-
-        @Override
-        public void beginSubTask(String expectedTaskDescription) {
-
-        }
-
-        @Override
-        public void beginSubTask(String expectedTaskDescription, long taskVolume) {
-
-        }
-
-        @Override
-        public void endSubTask(String expectedTaskDescription) {
-
-        }
-
-        @Override
-        public void onProgress(long value) {
-        }
-
-        @Override
-        public void onProgress(Function<Long, Long> valueCalculator) {
-
-        }
-
-        @Override
-        public void onProgress(long value, String messageTemplate) {
-
-        }
-
-        @Override
-        public void setVolume(long volume) {
-        }
-
-        @Override
-        public void setSteps(long steps) {
-
-        }
-
-        @Override
-        public void logSteps(long steps) {
-
-        }
-
-        @Override
-        public void release() {
-        }
-
-        @Override
-        public void endSubTaskWithFailure() {
-
-        }
-
-        @Override
-        public void endSubTaskWithFailure(String expectedTaskDescription) {
-
-        }
-    };
-
-    void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes);
-
-    void requestedConcurrency(Concurrency concurrency);
+    ProgressTracker NULL_TRACKER = new NullProgressTracker();
 
     void beginSubTask();
 
@@ -117,14 +40,6 @@ public interface ProgressTracker {
     void beginSubTask(String expectedTaskDescription);
 
     void beginSubTask(String expectedTaskDescription, long taskVolume);
-
-    void endSubTask();
-
-    void endSubTask(String expectedTaskDescription);
-
-    void endSubTaskWithFailure();
-
-    void endSubTaskWithFailure(String expectedTaskDescription);
 
     void onProgress(long value);
 
@@ -136,13 +51,44 @@ public interface ProgressTracker {
 
     void onProgress(long value, String messageTemplate);
 
-    // prefer setting volume via factory method for leaves
-    // to make root progress available from the start
-    void setVolume(long volume);
+    void endSubTask();
+
+    void endSubTask(String expectedTaskDescription);
+
+    void endSubTaskWithFailure();
+
+    void endSubTaskWithFailure(String expectedTaskDescription);
 
     void release();
 
     void setSteps(long steps);
 
     void logSteps(long steps);
+
+    /*
+     * Conceptual breakages - where we make our code less cohesive by coupling unrelated things.
+     */
+
+    /**
+     * This method exists so that the old framework that powers Pregel,
+     * can set a memory related piece of metadata on the root task in the task tree.
+     * That metadata in turn is used for display in some UI.
+     * And it exists here because for some reason,
+     * the root task in the task tree could not just be injected into that code.
+     * So this method call passes through dumbly to the root task which just happens to sit on the progress tracker.
+     * Incidental coupling, and a pain to change.
+     */
+    void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes);
+
+    /**
+     * This method exists so that the old framework that powers Pregel,
+     * can set a related piece of metadata on the root task in the task tree.
+     * That metadata in turn is used for display in some UI.
+     * And it exists here because for some reason,
+     * the root task in the task tree could not just be injected into that code.
+     * So this method call passes through dumbly to the root task which just happens to sit on the progress tracker.
+     * Incidental coupling, and a pain to change.
+     */
+    @Deprecated
+    void requestedConcurrency(Concurrency concurrency);
 }

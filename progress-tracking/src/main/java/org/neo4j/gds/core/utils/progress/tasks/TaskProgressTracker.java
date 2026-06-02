@@ -68,12 +68,11 @@ public final class TaskProgressTracker implements ProgressTracker {
         TaskProgressLogger taskProgressLogger,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        var didLog = new AtomicBoolean(false);
-
+        var alreadyLoggedOnce = new AtomicBoolean(false);
         Consumer<RuntimeException> onError = error -> {
-            if (!didLog.get()) {
+            if (!alreadyLoggedOnce.get()) {
                 taskProgressLogger.logWarning(String.format(Locale.US, ":: %s", error.getMessage()));
-                didLog.set(true);
+                alreadyLoggedOnce.set(true);
             }
         };
 
@@ -221,7 +220,9 @@ public final class TaskProgressTracker implements ProgressTracker {
         });
     }
 
-    @Override
+    /**
+     * @deprecated do not use this, it is a hole in our abstraction
+     */
     public void setVolume(long volume) {
         requireCurrentTask();
         currentTask.ifPresent(task -> {

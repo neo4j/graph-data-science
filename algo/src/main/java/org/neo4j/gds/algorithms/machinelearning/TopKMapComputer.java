@@ -53,6 +53,8 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
     private final boolean higherIsBetter;
 
+    private final TerminationFlag terminationFlag;
+
     public TopKMapComputer(
         Graph graph,
         BitSet sourceNodes,

@@ -98,11 +98,6 @@ public abstract class ProgressTrackerAdapter implements ProgressTracker {
     }
 
     @Override
-    public void setVolume(long volume) {
-        delegate.setVolume(volume);
-    }
-
-    @Override
     public void release() {
         delegate.release();
     }

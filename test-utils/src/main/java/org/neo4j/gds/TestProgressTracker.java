@@ -138,10 +138,11 @@ public final class TestProgressTracker implements ProgressTracker {
         delegate.endSubTaskWithFailure(expectedTaskDescription);
     }
 
-    @Override
-    public void setVolume(long volume) {
-        delegate.setVolume(volume);
-        progresses.add(new AtomicLong());
+    private void setVolume(long volume) {
+        // this is some dirty, dirty business that I can't unravel - apologies
+        if (delegate instanceof TaskProgressTracker tpt) tpt.setVolume(volume);
+
+        progresses.add(new AtomicLong(volume));
     }
 
     @Override

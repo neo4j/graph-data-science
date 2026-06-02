@@ -138,8 +138,7 @@ public class Node2VecModel {
         AtomicInteger taskIndex = new AtomicInteger(0);
 
         for (int iteration = 0; iteration < iterations; iteration++) {
-            progressTracker.beginSubTask();
-            progressTracker.setVolume(walks.size());
+            progressTracker.beginSubTask(walks.size());
 
             var iterationLearningRate = learningRate(iteration);
 

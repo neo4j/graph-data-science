@@ -55,8 +55,7 @@ public final class ProgressTrackerExecutionMonitor implements Monitor {
 
     @Override
     public void started() {
-        this.progressTracker.beginSubTask();
-        this.progressTracker.setVolume(this.total);
+        progressTracker.beginSubTask(total);
     }
 
     @Override
