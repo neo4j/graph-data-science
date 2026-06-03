@@ -51,7 +51,9 @@ RETURN gds.graph.project('g',
 
 === Native projections
 
-  Aura Graph Analytics supports xref:management-ops/graph-creation/graph-project.adoc[native projections] with a limited feature set.
+Aura Graph Analytics supports xref:management-ops/graph-creation/graph-project.adoc[native projections] with a limited feature set that accepts node labels and relationship types only as a `String` or `List`, omitting the map-based projection format. 
+Use this method for maximum performance and memory efficiency on large datasets, as you can still load properties and configure relationship orientations via the global `configuration` parameter.
+For advanced map-defined per-label configurations or complex filtering, you must use Cypher projections instead.
 
 --
 [source, cypher, role=noplay]
@@ -140,6 +142,30 @@ CALL gds.graph.project(
   }
 ) YIELD nodeCount, relationshipCount, projectMillis
 ----
+
+==== Syntax comparison
+
+[cols="1s,2,2", options="header"]
+|===
+| | Standard GDS native projection | Aura Graph Analytics (AGA) native projection
+
+| Node selection
+| `nodeProjection`: String, List, or Map
+| `nodeLabels`: String or List
+
+| Relationship selection
+| `relationshipProjection`: String, List, or Map
+| `relationshipTypes`: String or List
+
+| Advanced filtering
+| Supported inline via Maps
+| *Not supported* (Requires Cypher projection)
+|===
+
+[WARNING]
+====
+Because AGA replaces the Map-based `nodeProjection` and `relationshipProjection` parameters with simplified `nodeLabels` and `relationshipTypes`, any use case requiring property projection, orientation configuration, or parallel relationship aggregation must use Cypher projections instead.
+====
 
 == Running algorithms
 
