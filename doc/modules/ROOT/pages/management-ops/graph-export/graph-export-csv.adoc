@@ -1,11 +1,9 @@
 [[catalog-graph-export-csv]]
-[.beta]
 = Export to CSV
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 include::partial$/product-limitations/not-in-serverless.adoc[]
-include::partial$/operations-reference/beta-note.adoc[]
 
 
 We can export graphs stored in the graph catalog to a set of CSV files.
