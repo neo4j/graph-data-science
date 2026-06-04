@@ -24,9 +24,9 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
 import org.neo4j.gds.api.schema.PropertySchema;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,63 +35,40 @@ class NodeSchemaBuilderVisitorTest {
 
     @Test
     void shouldBuildNodeSchema() {
-        var nodeSchemaBuilderVisitor = new NodeSchemaBuilderVisitor();
-        NodeLabel labelA = NodeLabel.of("A");
-        nodeSchemaBuilderVisitor.nodeLabel(labelA);
-        nodeSchemaBuilderVisitor.key("prop1");
-        nodeSchemaBuilderVisitor.valueType(ValueType.LONG);
-        nodeSchemaBuilderVisitor.defaultValue(DefaultValue.of(42L));
-        nodeSchemaBuilderVisitor.state(PropertyState.PERSISTENT);
-        nodeSchemaBuilderVisitor.endOfEntity();
+        try (var nodeSchemaBuilderVisitor = new NodeSchemaBuilderVisitor()) {
+            NodeLabel labelA = NodeLabel.of("A");
+            nodeSchemaBuilderVisitor.nodeLabel(labelA);
+            nodeSchemaBuilderVisitor.key("prop1");
+            nodeSchemaBuilderVisitor.valueType(ValueType.LONG);
+            nodeSchemaBuilderVisitor.defaultValue(DefaultValue.of(42L));
+            nodeSchemaBuilderVisitor.state(PropertyState.PERSISTENT);
+            nodeSchemaBuilderVisitor.endOfEntity();
 
-        NodeLabel labelB = NodeLabel.of("B");
-        nodeSchemaBuilderVisitor.nodeLabel(labelB);
-        nodeSchemaBuilderVisitor.key("prop2");
-        nodeSchemaBuilderVisitor.valueType(ValueType.DOUBLE);
-        nodeSchemaBuilderVisitor.defaultValue(DefaultValue.of(13.37D));
-        nodeSchemaBuilderVisitor.state(PropertyState.TRANSIENT);
-        nodeSchemaBuilderVisitor.endOfEntity();
+            NodeLabel labelB = NodeLabel.of("B");
+            nodeSchemaBuilderVisitor.nodeLabel(labelB);
+            nodeSchemaBuilderVisitor.key("prop2");
+            nodeSchemaBuilderVisitor.valueType(ValueType.DOUBLE);
+            nodeSchemaBuilderVisitor.defaultValue(DefaultValue.of(13.37D));
+            nodeSchemaBuilderVisitor.state(PropertyState.TRANSIENT);
+            nodeSchemaBuilderVisitor.endOfEntity();
 
-        nodeSchemaBuilderVisitor.close();
+            var result = nodeSchemaBuilderVisitor.schema();
 
-        var builtSchema = nodeSchemaBuilderVisitor.schema();
-
-        assertThat(builtSchema).isNotNull();
-        assertThat(builtSchema.availableLabels()).containsExactlyInAnyOrder(labelA, labelB);
-
-        var labelAEntry = builtSchema.get(NodeLabel.of("A"));
-        assertThat(labelAEntry)
-            .isEqualTo(
-                MutableNodeSchemaEntry.of(
-                    NodeLabel.of("A"),
-                    Map.of(
-                        "prop1",
-                        PropertySchema.of(
-                            "prop1",
-                            ValueType.LONG,
-                            DefaultValue.of(42L),
-                            PropertyState.PERSISTENT
-                        )
-                    )
-                )
-            );
-
-        var labelBEntry = builtSchema.get(NodeLabel.of("B"));
-        assertThat(labelBEntry)
-            .isEqualTo(
-                MutableNodeSchemaEntry.of(
-                    NodeLabel.of("B"),
-                    Map.of(
-                        "prop2",
-                        PropertySchema.of(
-                            "prop2",
-                            ValueType.DOUBLE,
-                            DefaultValue.of(13.37D),
-                            PropertyState.TRANSIENT
-                        )
-                    )
-                )
-            );
+            assertThat(result).isNotNull();
+            assertThat(result.entries()).isEqualTo(Map.of(
+                labelA, List.of(PropertySchema.of(
+                    "prop1",
+                    ValueType.LONG,
+                    DefaultValue.of(42L),
+                    PropertyState.PERSISTENT
+                )),
+                labelB, List.of(PropertySchema.of(
+                    "prop2",
+                    ValueType.DOUBLE,
+                    DefaultValue.of(13.37D),
+                    PropertyState.TRANSIENT
+                ))
+            ));
+        }
     }
-
 }

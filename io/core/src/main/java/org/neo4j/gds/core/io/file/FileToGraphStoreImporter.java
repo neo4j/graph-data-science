@@ -163,7 +163,7 @@ public abstract class FileToGraphStoreImporter {
 
     private Nodes importNodes(FileInput fileInput) {
         progressTracker.beginSubTask();
-        var nodeSchema = NodeSchemaUtils.toRecordType(fileInput.nodeSchema());
+        var nodeSchema = fileInput.nodeSchema();
         nodeSchema.entries().keySet()
             .forEach(nodeLabel -> log.info("Imported node label schema: %s", nodeLabel.name()));
         graphSchemaBuilder.nodeSchema(NodeSchemaUtils.fromRecordType(nodeSchema));

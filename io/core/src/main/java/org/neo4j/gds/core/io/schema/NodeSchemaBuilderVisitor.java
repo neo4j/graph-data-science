@@ -19,30 +19,27 @@
  */
 package org.neo4j.gds.core.io.schema;
 
-import org.neo4j.gds.api.schema.MutableNodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
 
 public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
 
-    private final MutableNodeSchema nodeSchema;
+    private final NodeSchemaRecord.NodeSchemaBuilder builder;
 
     public NodeSchemaBuilderVisitor() {
-        nodeSchema = MutableNodeSchema.empty();
+        builder = NodeSchemaRecord.builder();
     }
 
     @Override
     protected void export() {
-        var entry = nodeSchema.getOrCreateLabel(nodeLabel());
-
-        if (key() != null) {
-            entry.addProperty(
-                key(),
-                PropertySchema.of(key(), valueType(), defaultValue(), state())
-            );
+        var hasProperty = key() != null;
+        if (!hasProperty) {
+            builder.addLabel(nodeLabel().name());
+        } else {
+            builder.addProperty(nodeLabel().name(), key(), valueType(), defaultValue(), state());
         }
     }
 
-    public MutableNodeSchema schema() {
-        return nodeSchema;
+    public NodeSchemaRecord schema() {
+        return builder.build();
     }
 }

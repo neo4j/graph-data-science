@@ -28,7 +28,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
 import org.neo4j.gds.core.io.schema.NodeSchemaBuilderVisitor;
 
 import java.io.BufferedReader;
@@ -50,10 +50,10 @@ public class NodeSchemaLoader {
         objectReader = csvMapper.readerFor(SchemaLine.class).with(schema);
     }
 
-    public MutableNodeSchema load() {
-        NodeSchemaBuilderVisitor schemaBuilder = new NodeSchemaBuilderVisitor();
-
-        try(var reader = new BufferedReader(new FileReader(nodeSchemaPath.toFile(), StandardCharsets.UTF_8))) {
+    public NodeSchemaRecord load() {
+        try (var schemaBuilder = new NodeSchemaBuilderVisitor();
+             var reader = new BufferedReader(new FileReader(nodeSchemaPath.toFile(), StandardCharsets.UTF_8))
+        ) {
             var linesIterator = objectReader.<SchemaLine>readValues(reader);
             while(linesIterator.hasNext()) {
                 var schemaLine = linesIterator.next();
@@ -66,12 +66,11 @@ public class NodeSchemaLoader {
                 }
                 schemaBuilder.endOfEntity();
             }
+
+            return schemaBuilder.schema();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        schemaBuilder.close();
-        return schemaBuilder.schema();
     }
 
     public static class SchemaLine {
