@@ -119,11 +119,6 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void onProgress(long value, String messageTemplate) {
-        // NOOP
-    }
-
-    @Override
     public void release() {
         delegate.release();
     }

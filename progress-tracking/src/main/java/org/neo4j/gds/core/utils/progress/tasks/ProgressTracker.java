@@ -49,8 +49,6 @@ public interface ProgressTracker {
         onProgress(1);
     }
 
-    void onProgress(long value, String messageTemplate);
-
     void endSubTask();
 
     void endSubTask(String expectedTaskDescription);

@@ -72,11 +72,6 @@ class NullProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void onProgress(long value, String messageTemplate) {
-
-    }
-
-    @Override
     public void setSteps(long steps) {
 
     }

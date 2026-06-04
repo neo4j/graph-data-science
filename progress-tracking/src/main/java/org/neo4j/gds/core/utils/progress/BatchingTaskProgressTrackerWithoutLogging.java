@@ -37,8 +37,4 @@ class BatchingTaskProgressTrackerWithoutLogging extends ProgressTrackerAdapter i
         // disabled
     }
 
-    @Override
-    public void onProgress(long value, String messageTemplate) {
-        // disabled
-    }
 }
