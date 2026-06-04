@@ -89,11 +89,6 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void onProgress(long value, String messageTemplate) {
-        delegate.onProgress(value, messageTemplate);
-    }
-
-    @Override
     public void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes) {
         delegate.setEstimatedResourceFootprint(memoryEstimationInBytes);
     }

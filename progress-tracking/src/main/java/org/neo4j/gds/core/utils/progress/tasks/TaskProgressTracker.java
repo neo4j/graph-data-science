@@ -211,15 +211,6 @@ public final class TaskProgressTracker implements ProgressTracker {
         onProgress(valueCalculator.apply(currentVolume));
     }
 
-    @Override
-    public void onProgress(long value, String messageTemplate) {
-        requireCurrentTask();
-        currentTask.ifPresent(task -> {
-            task.logProgress(value);
-            taskProgressLogger.logMessage(formatWithLocale(messageTemplate, value));
-        });
-    }
-
     /**
      * @deprecated do not use this, it is a hole in our abstraction
      */
