@@ -37,6 +37,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -150,7 +151,7 @@ class GraphStoreMetadataFactoryTest {
             Arguments.of(
                 GdlFactory.builder()
                     .gdlGraph(
-                        "(:A { prop1: 42, prop2: 4.2 })-->(:B { prop3: [1.0, 3.0, 3.0, 7.0], prop4: [1L, 3L, 3L, 7L] })")
+                        "(:A { prop1: 42, prop2: 4.2 })-->(:B { prop3: [1.0, 3.0, 3.0, 7.0], prop4: [1L, 3L, 3L, 7L] })-->(:C)")
                     .build()
                     .build(),
                 new GraphStoreMetadata(
@@ -158,11 +159,11 @@ class GraphStoreMetadataFactoryTest {
                     WriteMode.LOCAL,
                     new IdMapInfo(
                         ArrayIdMapBuilder.ID,
+                        3,
                         2,
-                        1,
-                        Map.of("A", 1L, "B", 1L)
+                        Map.of("A", 1L, "B", 1L, "C", 1L)
                     ),
-                    Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
+                    Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(2, false, 0)),
                     Map.of(
                         "A", new NodeSchema(Map.of(
                             "prop1",
@@ -191,7 +192,8 @@ class GraphStoreMetadataFactoryTest {
                                 new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
                                 PropertyState.TRANSIENT
                             )
-                        ))
+                        )),
+                        "C", new NodeSchema(Collections.emptyMap())
                     ),
                     Map.of(
                         RelationshipType.ALL_RELATIONSHIPS.name(),

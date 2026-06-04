@@ -20,14 +20,16 @@
 package org.neo4j.gds.core.io.json;
 
 import org.neo4j.gds.ElementIdentifier;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.loading.Capabilities;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -107,28 +109,30 @@ public final class GraphStoreMetadataFactory {
     }
 
     static Map<String, NodeSchema> toNodeSchema(org.neo4j.gds.api.schema.NodeSchema nodeSchema) {
-        return nodeSchema.availableLabels().stream().collect(Collectors.toMap(
-            NodeLabel::name,
-            nodeLabel -> {
-                var propertySchemas = nodeSchema.propertySchemasFor(nodeLabel).stream().collect(Collectors.toMap(
+        var result = new HashMap<String, NodeSchema>();
+
+        for (var entry : NodeSchemaUtils.toRecordType(nodeSchema).entries().entrySet()) {
+            var labelName = entry.getKey().name();
+            var propertySchemas = entry.getValue();
+
+            if (propertySchemas.isEmpty()) {
+                result.put(labelName, new NodeSchema(Collections.emptyMap()));
+
+            } else {
+                var properties = propertySchemas.stream().collect(Collectors.toMap(
                     PropertySchema::key,
-                    propertySchema -> {
-                        var valueType = toValueType(propertySchema.valueType());
-                        var defaultValue = toDefaultValue(propertySchema.defaultValue());
-                        var propertyState = toPropertyState(propertySchema.state());
-
-                        return new NodePropertySchema(
-                            valueType,
-                            defaultValue,
-                            propertyState
-                        );
-
-                    }
+                    (propertySchema ->
+                        new NodePropertySchema(
+                            toValueType(propertySchema.valueType()),
+                            toDefaultValue(propertySchema.defaultValue()),
+                            toPropertyState(propertySchema.state())
+                        )
+                    )
                 ));
-
-                return new NodeSchema(propertySchemas);
+                result.put(labelName, new NodeSchema(properties));
             }
-        ));
+        }
+        return result;
     }
 
     static Map<String, RelationshipSchema> toRelationshipSchema(org.neo4j.gds.api.schema.RelationshipSchema relationshipSchema) {
