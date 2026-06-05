@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.api.schema;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public final class NodeSchemaUtils {
     private NodeSchemaUtils() {}
 
@@ -66,5 +71,43 @@ public final class NodeSchemaUtils {
         }
 
         return result;
+    }
+
+    public static Map<String, Object> toMap(NodeSchema nodeSchema) {
+        return toMap(toRecordType(nodeSchema));
+    }
+
+    /**
+     * Private for now, will become public once we fully transition to NodeSchemaRecord
+     */
+    private static Map<String, Object> toMap(NodeSchemaRecord nodeSchema) {
+        var result = new HashMap<String, Object>();
+
+        nodeSchema.entries().forEach((nodeLabel, propertySchemas) -> {
+            if (propertySchemas.isEmpty()) {
+                result.put(nodeLabel.name(), Map.of());
+
+            } else {
+                var properties = propertySchemas.stream()
+                    .collect(Collectors.toMap(
+                            PropertySchema::key,
+                            NodeSchemaUtils::toStringRepresentation
+                        )
+                    );
+                result.put(nodeLabel.name(), properties);
+            }
+        });
+
+        return result;
+    }
+
+    private static String toStringRepresentation(PropertySchema propertySchema) {
+        return String.format(
+            Locale.ENGLISH,
+            "%s (%s, %s)",
+            propertySchema.valueType().cypherName(),
+            propertySchema.defaultValue(),
+            propertySchema.state()
+        );
     }
 }
