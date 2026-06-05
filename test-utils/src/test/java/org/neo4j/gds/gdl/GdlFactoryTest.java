@@ -32,8 +32,9 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.loading.CollectingConsumer;
 
 import java.util.ArrayList;
@@ -261,20 +262,16 @@ class GdlFactoryTest {
                             ", (a1)-[:C]->(c)"
         );
 
-        var nodeSchema = graph.schema().nodeSchema();
-        var expectedNodeSchema = MutableNodeSchema.empty();
-
-        expectedNodeSchema.getOrCreateLabel(NodeLabel.of("A"))
-            .addProperty("double", ValueType.DOUBLE)
-            .addProperty("long", ValueType.LONG)
-            .addProperty("doubleArray", ValueType.DOUBLE_ARRAY)
-            .addProperty("longArray", ValueType.LONG_ARRAY);
-
-        expectedNodeSchema.getOrCreateLabel(NodeLabel.of("B"))
-            .addProperty("double", ValueType.DOUBLE)
-            .addProperty("long", ValueType.LONG);
-
-        expectedNodeSchema.getOrCreateLabel(NodeLabel.of("C"));
+        var nodeSchema = NodeSchemaUtils.toRecordType(graph.schema().nodeSchema());
+        var expectedNodeSchema = NodeSchemaRecord.builder()
+            .addProperty("A", "double", ValueType.DOUBLE)
+            .addProperty("A", "long", ValueType.LONG)
+            .addProperty("A", "doubleArray", ValueType.DOUBLE_ARRAY)
+            .addProperty("A", "longArray", ValueType.LONG_ARRAY)
+            .addProperty("B", "double", ValueType.DOUBLE)
+            .addProperty("B", "long", ValueType.LONG)
+            .addLabel("C")
+            .build();
         assertThat(nodeSchema).isEqualTo(expectedNodeSchema);
 
         var relationshipSchema = graph.schema().relationshipSchema();

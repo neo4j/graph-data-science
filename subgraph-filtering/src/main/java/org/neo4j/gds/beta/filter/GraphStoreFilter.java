@@ -26,8 +26,8 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
 import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.beta.filter.expression.ExpressionParser;
@@ -198,11 +198,11 @@ public final class GraphStoreFilter {
         NodesFilter.FilteredNodes filteredNodes,
         Set<RelationshipType> filteredRelationshipTypes
     ) {
-        var nodeSchema = MutableNodeSchema
-            .from(inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels()));
-        if (nodeSchema.availableLabels().isEmpty()) {
-            nodeSchema.addLabel(NodeLabel.ALL_NODES);
+        var nodeSchemaRecord = NodeSchemaUtils.toRecordType(inputGraphSchema.nodeSchema()).filter(filteredNodes.idMap().availableNodeLabels());
+        if (nodeSchemaRecord.availableLabels().isEmpty()) {
+            nodeSchemaRecord = NodeSchemaRecord.builder().addLabel(NodeLabel.ALL_LABEL).build();
         }
+        var nodeSchema = NodeSchemaUtils.fromRecordType(nodeSchemaRecord);
 
         var relationshipSchema = MutableRelationshipSchema.from(
             inputGraphSchema

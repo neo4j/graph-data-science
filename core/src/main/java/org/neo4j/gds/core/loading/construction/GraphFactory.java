@@ -23,6 +23,7 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.ImmutableRelationshipProjection;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -35,9 +36,9 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -331,8 +332,13 @@ public final class GraphFactory {
      * will be used.
      */
     public static HugeGraph create(IdMap idMap, SingleTypeRelationships relationships) {
-        var nodeSchema = MutableNodeSchema.empty();
-        idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
+        var nodeSchema = idMap.availableNodeLabels().stream()
+            .map(NodeLabel::name)
+            .collect(
+                NodeSchemaRecord::builder,
+                NodeSchemaRecord.NodeSchemaBuilder::addLabel,
+                NodeSchemaRecord.NodeSchemaBuilder::addBuilder
+            ).build();
 
         relationships.properties().ifPresent(relationshipPropertyStore -> {
             assert relationshipPropertyStore.values()
@@ -343,7 +349,7 @@ public final class GraphFactory {
         relationshipSchema.set(relationships.relationshipSchemaEntry());
 
         return create(
-            MutableGraphSchema.of(nodeSchema, relationshipSchema),
+            MutableGraphSchema.of(NodeSchemaUtils.fromRecordType(nodeSchema), relationshipSchema),
             idMap,
             Map.of(),
             relationships

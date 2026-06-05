@@ -27,8 +27,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.extension.GdlExtension;
@@ -435,7 +435,7 @@ class GraphStoreMetadataFactoryTest {
 
     @Test
     void toNodeSchema() {
-        var result = GraphStoreMetadataFactory.toNodeSchema(graphStore.schema().nodeSchema());
+        var result = GraphStoreMetadataFactory.toNodeSchema(NodeSchemaUtils.toRecordType(graphStore.schema().nodeSchema()));
 
         assertThat(result).isEqualTo(Map.of(
             "Label1", new NodeSchema(Map.of(
@@ -493,21 +493,19 @@ class GraphStoreMetadataFactoryTest {
         return Stream.of(
             Arguments.of(
                 // empty
-                MutableNodeSchema.empty(),
+                NodeSchemaRecord.empty(),
                 Map.of()
             ),
             Arguments.of(
                 // all nodes label, no properties
-                MutableNodeSchema.empty().addLabel(NodeLabel.ALL_NODES),
+                NodeSchemaRecord.builder().addLabel(NodeLabel.ALL_LABEL).build(),
                 Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of()))
             ),
             Arguments.of(
                 // no label, with properties
-                MutableNodeSchema.empty()
-                    .addLabel(
-                        NodeLabel.ALL_NODES,
-                        Map.of("foo", PropertySchema.of("foo", org.neo4j.gds.api.nodeproperties.ValueType.LONG))
-                    ),
+                NodeSchemaRecord.builder()
+                    .addProperty(NodeLabel.ALL_LABEL, "foo", org.neo4j.gds.api.nodeproperties.ValueType.LONG)
+                    .build(),
                 Map.of(
                     NodeLabel.ALL_NODES.name(),
                     new NodeSchema(Map.of(
@@ -522,22 +520,16 @@ class GraphStoreMetadataFactoryTest {
             ),
             Arguments.of(
                 // label and properties
-                MutableNodeSchema.empty()
-                    .addLabel(
-                        NodeLabel.of("A"),
-                        Map.of("foo", PropertySchema.of("foo", org.neo4j.gds.api.nodeproperties.ValueType.LONG))
+                NodeSchemaRecord.builder()
+                    .addProperty("A", "foo", org.neo4j.gds.api.nodeproperties.ValueType.LONG)
+                    .addProperty(
+                        "B",
+                        "bar",
+                        org.neo4j.gds.api.nodeproperties.ValueType.LONG,
+                        org.neo4j.gds.api.DefaultValue.of(42L),
+                        org.neo4j.gds.api.PropertyState.REMOTE
                     )
-                    .addLabel(
-                        NodeLabel.of("B"),
-                        Map.of(
-                            "bar", PropertySchema.of(
-                                "bar",
-                                org.neo4j.gds.api.nodeproperties.ValueType.LONG,
-                                org.neo4j.gds.api.DefaultValue.of(42L),
-                                org.neo4j.gds.api.PropertyState.REMOTE
-                            )
-                        )
-                    ),
+                    .build(),
                 Map.of(
                     "A",
                     new NodeSchema(Map.of(
@@ -564,7 +556,7 @@ class GraphStoreMetadataFactoryTest {
 
     @ParameterizedTest
     @MethodSource("nodeSchemas")
-    void toNodeSchema(org.neo4j.gds.api.schema.NodeSchema input, Map<String, NodeSchema> expected) {
+    void toNodeSchema(org.neo4j.gds.api.schema.NodeSchemaRecord input, Map<String, NodeSchema> expected) {
         assertThat(GraphStoreMetadataFactory.toNodeSchema(input)).isEqualTo(expected);
     }
 

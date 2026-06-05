@@ -41,7 +41,7 @@ public final class GraphStoreMetadataFactory {
         var writeMode = toWriteMode(graphStore.capabilities().writeMode());
         var idMapInfo = toIdMapInfo(graphStore.nodes());
         var relationshipInfo = toRelationshipInfo(graphStore);
-        var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema());
+        var nodeSchema = toNodeSchema(NodeSchemaUtils.toRecordType(graphStore.schema().nodeSchema()));
         var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema());
 
         return new GraphStoreMetadata(
@@ -108,10 +108,10 @@ public final class GraphStoreMetadataFactory {
             ));
     }
 
-    static Map<String, NodeSchema> toNodeSchema(org.neo4j.gds.api.schema.NodeSchema nodeSchema) {
+    static Map<String, NodeSchema> toNodeSchema(org.neo4j.gds.api.schema.NodeSchemaRecord nodeSchema) {
         var result = new HashMap<String, NodeSchema>();
 
-        for (var entry : NodeSchemaUtils.toRecordType(nodeSchema).entries().entrySet()) {
+        for (var entry : nodeSchema.entries().entrySet()) {
             var labelName = entry.getKey().name();
             var propertySchemas = entry.getValue();
 

@@ -235,20 +235,20 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     private void exportNodeSchema(GraphStoreInput graphStoreInput) {
         var nodeSchema = graphStoreInput.metaDataStore().nodeSchema();
         try (var nodeSchemaVisitor = nodeSchemaVisitorSupplier.get()) {
-            nodeSchema.entries().forEach(nodeEntry -> {
-                if (nodeEntry.properties().isEmpty()) {
-                    nodeSchemaVisitor.nodeLabel(nodeEntry.identifier());
-                    nodeSchemaVisitor.endOfEntity();
-                } else {
-                    nodeEntry.properties().forEach((propertyKey, propertySchema) -> {
-                        nodeSchemaVisitor.nodeLabel(nodeEntry.identifier());
-                        nodeSchemaVisitor.key(propertyKey);
-                        nodeSchemaVisitor.defaultValue(propertySchema.defaultValue());
-                        nodeSchemaVisitor.valueType(propertySchema.valueType());
-                        nodeSchemaVisitor.state(propertySchema.state());
-                        nodeSchemaVisitor.endOfEntity();
-                    });
-                }
+            nodeSchema.entries().forEach((nodeLabel, propertySchemas) -> {
+               if (propertySchemas.isEmpty()) {
+                   nodeSchemaVisitor.nodeLabel(nodeLabel);
+                   nodeSchemaVisitor.endOfEntity();
+               } else {
+                   for (var propertySchema : propertySchemas) {
+                       nodeSchemaVisitor.nodeLabel(nodeLabel);
+                       nodeSchemaVisitor.key(propertySchema.key());
+                       nodeSchemaVisitor.defaultValue(propertySchema.defaultValue());
+                       nodeSchemaVisitor.valueType(propertySchema.valueType());
+                       nodeSchemaVisitor.state(propertySchema.state());
+                       nodeSchemaVisitor.endOfEntity();
+                   }
+               }
             });
         }
     }
