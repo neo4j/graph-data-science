@@ -23,7 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
 import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
@@ -59,14 +59,15 @@ public final class GraphStoreToCsvExporter {
         var nodeSchema = graphStore.schema().nodeSchema();
         var relationshipSchema = graphStore.schema().relationshipSchema();
 
-        var neoNodeSchema = MutableNodeSchema.empty();
+        var neoNodeSchemaBuilder = NodeSchemaRecord.builder()
+            .addSchema(NodeSchemaUtils.toRecordType(nodeSchema));
 
         // Add additional properties to each label present in the graph store.
         neoNodeProperties.ifPresent(additionalProps -> additionalProps
             .neoNodeProperties()
             .forEach((key, ignore) -> nodeSchema
                 .availableLabels()
-                .forEach(label -> neoNodeSchema.getOrCreateLabel(label).addProperty(key, ValueType.STRING))
+                .forEach(label -> neoNodeSchemaBuilder.addProperty(label.name(), key, ValueType.STRING))
             ));
 
         var labelMapperBuilder = IdentifierMapper.<NodeLabel>builder("label");
@@ -99,7 +100,7 @@ public final class GraphStoreToCsvExporter {
             () -> new CsvGraphCapabilitiesWriter(exportPath),
             (index) -> new CsvNodeVisitor(
                 exportPath,
-                NodeSchemaUtils.toRecordType(nodeSchema.union(neoNodeSchema)),
+                neoNodeSchemaBuilder.build(),
                 headerFiles,
                 index,
                 labelMapper

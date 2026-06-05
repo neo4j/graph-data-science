@@ -30,9 +30,8 @@ import org.neo4j.batchimport.api.InputIterable;
 import org.neo4j.batchimport.api.InputIterator;
 import org.neo4j.batchimport.api.input.InputChunk;
 import org.neo4j.batchimport.api.input.InputEntityVisitor;
-import org.neo4j.gds.ElementIdentifier;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.io.GraphStoreInput;
@@ -52,7 +51,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class CsvFileInput implements FileInput {
 
@@ -77,7 +75,7 @@ public final class CsvFileInput implements FileInput {
     private final Path importPath;
     private final String userName;
     private final GraphInfo graphInfo;
-    private final MutableNodeSchema nodeSchema;
+    private final NodeSchemaRecord nodeSchema;
     // TODO: type that has the mapping
     private final Optional<HashMap<String, String>> labelMapping;
     private final MutableRelationshipSchema relationshipSchema;
@@ -113,12 +111,6 @@ public final class CsvFileInput implements FileInput {
         return () -> new NodeImporter(headerToDataFilesMapping, nodeSchema);
     }
 
-    private Stream<String> nodeLabels() {
-        return this.labelMapping.map(lm -> lm.keySet().stream()).orElseGet(() -> this.nodeSchema.availableLabels()
-            .stream()
-            .map(ElementIdentifier::name));
-    }
-
     @Override
     public InputIterable relationships() {
         Map<Path, List<Path>> pathMapping = CsvImportFileUtil.relationshipHeaderToFileMapping(importPath);
@@ -145,7 +137,7 @@ public final class CsvFileInput implements FileInput {
     }
 
     @Override
-    public MutableNodeSchema nodeSchema() {
+    public NodeSchemaRecord nodeSchema() {
         return nodeSchema;
     }
 
@@ -198,11 +190,11 @@ public final class CsvFileInput implements FileInput {
         }
     }
 
-    static class NodeImporter extends FileImporter<NodeFileHeader, MutableNodeSchema, PropertySchema> {
+    static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchemaRecord, PropertySchema> {
 
         NodeImporter(
             Map<NodeFileHeader, List<Path>> headerToDataFilesMapping,
-            MutableNodeSchema nodeSchema
+            NodeSchemaRecord nodeSchema
         ) {
             super(headerToDataFilesMapping, nodeSchema);
         }
@@ -277,9 +269,9 @@ public final class CsvFileInput implements FileInput {
         }
     }
 
-    static class NodeLineChunk extends LineChunk<NodeFileHeader, MutableNodeSchema, PropertySchema> {
+    static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchemaRecord, PropertySchema> {
 
-        NodeLineChunk(MutableNodeSchema nodeSchema) {
+        NodeLineChunk(NodeSchemaRecord nodeSchema) {
             super(nodeSchema);
         }
 

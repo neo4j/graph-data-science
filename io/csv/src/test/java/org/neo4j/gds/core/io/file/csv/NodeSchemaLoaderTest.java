@@ -27,7 +27,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
+import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.io.IOException;
@@ -66,38 +66,20 @@ class NodeSchemaLoaderTest {
         var nodeSchema = schemaLoader.load();
 
         assertThat(nodeSchema).isNotNull();
-
-        assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
-
-        var labelAProperties = nodeSchema.get(NodeLabel.of("A"));
-        assertThat(labelAProperties)
-            .isEqualTo(MutableNodeSchemaEntry.of(
-                NodeLabel.of("A"),
-                Map.of(
-                    "prop1",
-                    PropertySchema.of(
-                        "prop1",
-                        ValueType.LONG,
-                        DefaultValue.of(42L),
-                        PropertyState.PERSISTENT
-                    )
-                )
-            ));
-
-        var labelBProperties = nodeSchema.get(NodeLabel.of("B"));
-        assertThat(labelBProperties)
-            .isEqualTo(MutableNodeSchemaEntry.of(
-                NodeLabel.of("B"),
-                Map.of(
-                    "prop2",
-                    PropertySchema.of(
-                        "prop2",
-                        ValueType.DOUBLE,
-                        DefaultValue.of(13.37D),
-                        PropertyState.TRANSIENT
-                    )
-                )
-            ));
+        assertThat(nodeSchema.entries()).isEqualTo(Map.of(
+            NodeLabel.of("A"), List.of(PropertySchema.of(
+                "prop1",
+                ValueType.LONG,
+                DefaultValue.of(42L),
+                PropertyState.PERSISTENT
+            )),
+            NodeLabel.of("B"), List.of(PropertySchema.of(
+                "prop2",
+                ValueType.DOUBLE,
+                DefaultValue.of(13.37D),
+                PropertyState.TRANSIENT
+            ))
+        ));
     }
 
     static Stream<List<String>> linesWithoutProperties() {
@@ -117,7 +99,7 @@ class NodeSchemaLoaderTest {
         FileUtils.writeLines(nodeSchemaFile, lines);
 
         var schemaLoader = new NodeSchemaLoader(exportDir);
-        var nodeSchema = schemaLoader.load();
+        var nodeSchema = NodeSchemaUtils.fromRecordType(schemaLoader.load());
 
         assertThat(nodeSchema).isNotNull();
         assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
@@ -143,27 +125,15 @@ class NodeSchemaLoaderTest {
         var nodeSchema = schemaLoader.load();
 
         assertThat(nodeSchema).isNotNull();
-
-        assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
-
-        var labelAProperties = nodeSchema.get(NodeLabel.of("A"));
-        assertThat(labelAProperties)
-            .isEqualTo(MutableNodeSchemaEntry.of(
-                NodeLabel.of("A"),
-                Map.of(
-                    "prop1",
-                    PropertySchema.of(
-                        "prop1",
-                        ValueType.LONG,
-                        DefaultValue.of(42L),
-                        PropertyState.PERSISTENT
-                    )
-                )
-            ));
-
-        var labelBProperties = nodeSchema.get(NodeLabel.of("B"));
-        assertThat(labelBProperties)
-            .isEqualTo(MutableNodeSchemaEntry.of(NodeLabel.of("B"), Map.of()));
+        assertThat(nodeSchema.entries()).isEqualTo(Map.of(
+            NodeLabel.of("A"), List.of(PropertySchema.of(
+                "prop1",
+                ValueType.LONG,
+                DefaultValue.of(42L),
+                PropertyState.PERSISTENT
+            )),
+            NodeLabel.of("B"), List.of()
+        ));
     }
 
     static Stream<List<String>> arrayLines() {
@@ -185,9 +155,8 @@ class NodeSchemaLoaderTest {
         var nodeSchema = schemaLoader.load();
 
         assertThat(nodeSchema).isNotNull();
-
         assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"));
-        assertThat(nodeSchema.get(NodeLabel.of("A")).properties().get("prop1").defaultValue().doubleArrayValue())
-            .containsExactly(42.0, 13.37);
+        assertThat(nodeSchema.getDefaultValueFor("A", "prop1").isPresent()).isTrue();
+        assertThat(nodeSchema.getDefaultValueFor("A", "prop1").get().doubleArrayValue()).containsExactly(42.0, 13.37);
     }
 }
