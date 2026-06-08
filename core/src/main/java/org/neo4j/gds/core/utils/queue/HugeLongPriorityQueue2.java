@@ -219,39 +219,49 @@ public abstract class HugeLongPriorityQueue2 implements PrimitiveLongIterable {
      }
 
     private boolean upHeap(long origPos) {
-        long i = origPos;
+        long newPos = origPos;
         // save bottom node
-        long node = heap.get(i);
+        long node = heap.get(newPos);
         // find parent of current node in a 4-ary heap: (i + 2) / 4
-        long j = (i + 2) >>> 2;
-        while (j > 0 && lessThan(node, heap.get(j))) {
-            // shift parents down
-            placeElement(i, heap.get(j));
-            i = j;
+        long parentPos = (newPos + 2) >>> 2;
+        while (parentPos > 0) {
+            long parent = heap.get(parentPos);
+            if (!lessThan(node, parent)) {
+                break;
+            }
+            // shift parent down
+            placeElement(newPos, parent);
+            newPos = parentPos;
             // find new parent of swapped node
-            j = (j + 2) >>> 2;
+            parentPos = (parentPos + 2) >>> 2;
         }
         // install saved node
-        placeElement(i, node);
-        return i != origPos;
+        placeElement(newPos, node);
+        return newPos != origPos;
     }
 
-    private void downHeap(long i) {
+    private void downHeap(long pos) {
+        // hoist field read across the abstract lessThan call sites below
+        long size = this.size;
         // save top node
-        long node = heap.get(i);
+        long node = heap.get(pos);
         // find first of up to four children: 4i - 2
-        long firstChild = (i << 2) - 2;
-        long smallest = smallestChild(firstChild);
-        while (smallest <= size && lessThan(heap.get(smallest), node)) {
+        long firstChildPos = (pos << 2) - 2;
+        long smallestChildPos = smallestChildPosition(firstChildPos, size);
+        while (smallestChildPos <= size) {
+            long smallestChild = heap.get(smallestChildPos);
+            if (!lessThan(smallestChild, node)) {
+                break;
+            }
             // shift up smallest child
-            placeElement(i, heap.get(smallest));
-            i = smallest;
+            placeElement(pos, smallestChild);
+            pos = smallestChildPos;
             // find smallest child of swapped node
-            firstChild = (i << 2) - 2;
-            smallest = smallestChild(firstChild);
+            firstChildPos = (pos << 2) - 2;
+            smallestChildPos = smallestChildPosition(firstChildPos, size);
         }
         // install saved node
-        placeElement(i, node);
+        placeElement(pos, node);
     }
 
     /**
@@ -259,15 +269,21 @@ public abstract class HugeLongPriorityQueue2 implements PrimitiveLongIterable {
      * starting at {@code firstChild}. If no children exist, the returned
      * index is greater than {@code size}.
      */
-    private long smallestChild(long firstChild) {
+    private long smallestChildPosition(long firstChild, long size) {
+        if (firstChild > size) {
+            return firstChild;
+        }
         long smallest = firstChild;
+        long smallestVal = heap.get(firstChild);
         long last = firstChild + 3;
         if (last > size) {
             last = size;
         }
         for (long k = firstChild + 1; k <= last; k++) {
-            if (lessThan(heap.get(k), heap.get(smallest))) {
+            long candidate = heap.get(k);
+            if (lessThan(candidate, smallestVal)) {
                 smallest = k;
+                smallestVal = candidate;
             }
         }
         return smallest;
