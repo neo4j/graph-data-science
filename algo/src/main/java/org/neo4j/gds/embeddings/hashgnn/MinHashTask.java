@@ -84,9 +84,7 @@ class MinHashTask implements Runnable {
         TerminationFlag terminationFlag,
         MutableLong totalFeatureCountOutput
     ) {
-        progressTracker.beginSubTask("Perform min-hashing");
-
-        progressTracker.setSteps(embeddingDensity * graphs.get(0).nodeCount());
+        progressTracker.beginSubTaskWithSteps(/*Perform min-hashing*/ embeddingDensity * graphs.get(0).nodeCount());
 
         var tasks = IntStream.range(0, embeddingDensity)
             .mapToObj(k -> degreePartition.stream().map(p ->
@@ -111,7 +109,7 @@ class MinHashTask implements Runnable {
 
         totalFeatureCountOutput.add(tasks.stream().mapToLong(MinHashTask::totalFeatureCount).sum());
 
-        progressTracker.endSubTask("Perform min-hashing");
+        progressTracker.endSubTask(/*Perform min-hashing*/);
     }
 
     @Override

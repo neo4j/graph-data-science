@@ -71,9 +71,7 @@ final class HashTask implements Runnable {
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask("Precompute hashes");
-
-        progressTracker.setSteps(embeddingDensity);
+        progressTracker.beginSubTaskWithSteps(/*Precompute hashes*/embeddingDensity);
 
         var hashTasks = IntStream.range(0, embeddingDensity).mapToObj(seedOffset ->
             new HashTask(
@@ -89,7 +87,7 @@ final class HashTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        progressTracker.endSubTask("Precompute hashes");
+        progressTracker.endSubTask(/*Precompute hashes*/);
 
         return hashTasks.stream().map(HashTask::hashes).collect(Collectors.toList());
     }

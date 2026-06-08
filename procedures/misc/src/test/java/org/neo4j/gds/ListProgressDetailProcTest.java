@@ -164,13 +164,13 @@ class ListProgressDetailProcTest extends BaseProgressTest {
                 executionContext().taskRegistryFactory()
             );
 
-            taskProgressTracker.beginSubTask("root");
-            taskProgressTracker.beginSubTask("iterative");
-            taskProgressTracker.beginSubTask("leafIterative"); // 1
+            taskProgressTracker.beginSubTask(/*root*/);
+            taskProgressTracker.beginSubTask(/*iterative*/);
+            taskProgressTracker.beginSubTask(/*leafIterative*/); // 1
             taskProgressTracker.onProgress(2); // log 2/2
             ((FakeClock) ClockService.clock()).forward(42, TimeUnit.SECONDS);
-            taskProgressTracker.endSubTask("leafIterative");
-            taskProgressTracker.beginSubTask("leafIterative"); // 2
+            taskProgressTracker.endSubTask(/*leafIterative*/);
+            taskProgressTracker.beginSubTask(/*leafIterative*/); // 2
             taskProgressTracker.onProgress(1); // log 1/2
 
             return Stream.empty();

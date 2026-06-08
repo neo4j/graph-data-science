@@ -277,15 +277,15 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         Features features,
         TrainingStatistics trainingStatistics
     ) {
-        progressTracker.beginSubTask("Train best model");
+        progressTracker.beginSubTask(/*Train best model*/);
         var bestRegressor = trainModel(
             outerSplit.trainSet(),
             trainingStatistics.bestParameters(),
             features
         );
-        progressTracker.endSubTask("Train best model");
+        progressTracker.endSubTask(/*Train best model*/);
 
-        progressTracker.beginSubTask("Evaluate on test data");
+        progressTracker.beginSubTask(/*Evaluate on test data*/);
 
         registerMetricScores(outerSplit.trainSet(), bestRegressor, features, trainingStatistics::addOuterTrainScore);
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
@@ -295,7 +295,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         var testMetrics = trainingStatistics.winningModelTestMetrics();
         log.info(formatWithLocale("Final model metrics on test set: %s", testMetrics));
 
-        progressTracker.endSubTask("Evaluate on test data");
+        progressTracker.endSubTask(/*Evaluate on test data*/);
     }
 
     private Regressor retrainBestModel(
@@ -303,9 +303,9 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         Features features,
         TrainerConfig bestParameters
     ) {
-        progressTracker.beginSubTask("Retrain best model");
+        progressTracker.beginSubTask(/*Retrain best model*/);
         var retrainedRegressor = trainModel(trainSet, bestParameters, features);
-        progressTracker.endSubTask("Retrain best model");
+        progressTracker.endSubTask(/*Retrain best model*/);
 
         return retrainedRegressor;
     }

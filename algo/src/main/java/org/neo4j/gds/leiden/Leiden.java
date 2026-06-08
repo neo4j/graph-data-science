@@ -121,7 +121,7 @@ public class Leiden extends Algorithm<LeidenResult> {
 
     @Override
     public LeidenResult compute() {
-        progressTracker.beginSubTask("Leiden");
+        progressTracker.beginSubTask(/*Leiden*/);
         var workingGraph = rootGraph;
         var nodeCount = workingGraph.nodeCount();
         var localMoveCommunities = LeidenUtils.createStartingCommunities(nodeCount, seedValues.orElse(null));
@@ -151,11 +151,11 @@ public class Leiden extends Algorithm<LeidenResult> {
 
         boolean didConverge = false;
         int iteration;
-        progressTracker.beginSubTask("Iteration");
+        progressTracker.beginSubTask(/*Iteration*/);
 
         for (iteration = 0; iteration < maxIterations; iteration++) {
             // 1. LOCAL MOVE PHASE - over the singleton localMoveCommunities
-            progressTracker.beginSubTask("Local Move");
+            progressTracker.beginSubTask(/*Local Move*/);
             var localMovePhase = LocalMovePhase.create(
                 workingGraph,
                 localMoveCommunities,
@@ -168,9 +168,9 @@ public class Leiden extends Algorithm<LeidenResult> {
             localMovePhase.run();
             //if you do swaps,  no convergence
             boolean localPhaseConverged = localMovePhase.swaps == 0;
-            progressTracker.endSubTask("Local Move");
+            progressTracker.endSubTask(/*Local Move*/);
 
-            progressTracker.beginSubTask("Modularity Computation");
+            progressTracker.beginSubTask(/*Modularity Computation*/);
             updateModularity(
                 workingGraph,
                 localMoveCommunities,
@@ -181,7 +181,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 iteration
             );
 
-            progressTracker.endSubTask("Modularity Computation");
+            progressTracker.endSubTask(/*Modularity Computation*/);
 
             if (localPhaseConverged) {
                 didConverge = true;
@@ -210,7 +210,7 @@ public class Leiden extends Algorithm<LeidenResult> {
 
             if (iteration < maxIterations - 1) { //if there's no next iteration, skip refinement/graph aggregation
                 // 2 REFINE
-                progressTracker.beginSubTask("Refinement");
+                progressTracker.beginSubTask(/*Refinement*/);
                 var refinementPhase = RefinementPhase.create(
                     workingGraph,
                     localMoveCommunities,
@@ -228,9 +228,9 @@ public class Leiden extends Algorithm<LeidenResult> {
                 var refinedCommunityVolumes = refinementPhaseResult.communityVolumes();
                 var maximumRefinedCommunityId = refinementPhaseResult.maximumRefinedCommunityId();
 
-                progressTracker.endSubTask("Refinement");
+                progressTracker.endSubTask(/*Refinement*/);
 
-                progressTracker.beginSubTask("Aggregation");
+                progressTracker.beginSubTask(/*Aggregation*/);
                 dendrogramManager.updateAlgorithmDendrogram(
                     workingGraph,
                     currentActualCommunities,
@@ -262,14 +262,14 @@ public class Leiden extends Algorithm<LeidenResult> {
                 localMoveCommunities = communityData.seededCommunitiesForNextIteration;
                 localMoveCommunityVolumes = communityData.communityVolumes;
                 localMoveNodeVolumes = communityData.aggregatedNodeSeedVolume;
-                progressTracker.endSubTask("Aggregation");
+                progressTracker.endSubTask(/*Aggregation*/);
             }
             modularity = modularities[iteration];
 
         }
-        progressTracker.endSubTask("Iteration");
+        progressTracker.endSubTask(/*Iteration*/);
 
-        progressTracker.endSubTask("Leiden");
+        progressTracker.endSubTask(/*Leiden*/);
 
         return getLeidenResult(didConverge, iteration);
     }
@@ -331,7 +331,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeDoubleArray communityVolumes,
         HugeLongArray initialCommunities
     ) {
-        progressTracker.beginSubTask("Initialization");
+        progressTracker.beginSubTask(/*Initialization*/);
         double totalVolume;
         var volumeAdder = new DoubleAdder();
         if (rootGraph.hasRelationshipProperty()) {
@@ -362,7 +362,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             communityVolumes.addTo(communityId, nodeVolumes.get(nodeId));
             return true;
         });
-        progressTracker.endSubTask("Initialization");
+        progressTracker.endSubTask(/*Initialization*/);
 
         return 1 / totalVolume;
     }

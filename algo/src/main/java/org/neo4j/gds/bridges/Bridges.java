@@ -87,7 +87,7 @@ public class Bridges extends Algorithm<BridgeResult> {
         visited.clear();
         tin.setAll(__ -> -1);
         low.setAll(__ -> -1);
-        progressTracker.beginSubTask("Bridges");
+        progressTracker.beginSubTask(/*Bridges*/);
         //each edge may have at most one event to the stack at the same time
         var stack = HugeObjectArray.newArray(StackEvent.class, graph.relationshipCount());
 
@@ -111,7 +111,7 @@ public class Bridges extends Algorithm<BridgeResult> {
                 }
             }
         }
-        progressTracker.endSubTask("Bridges");
+        progressTracker.endSubTask(/*Bridges*/);
         return new BridgeResult(result);
 
     }

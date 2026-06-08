@@ -167,23 +167,23 @@ class ListProgressProcTest extends BaseProgressTest {
                 Neo4jPoweredRequestCorrelationId.create(transaction.getTransactionSequenceNumber()),
                 taskRegistryFactory
             );
-            taskProgressTracker.beginSubTask(taskName);
+            taskProgressTracker.beginSubTask(/*taskName*/);
 
-            taskProgressTracker.beginSubTask("bar");
-            taskProgressTracker.onProgress(1);
-            taskProgressTracker.onProgress(1);
-            taskProgressTracker.onProgress(1);
-
-            taskProgressTracker.endSubTask("bar");
-
-            taskProgressTracker.beginSubTask("foo");
+            taskProgressTracker.beginSubTask(/*bar*/);
             taskProgressTracker.onProgress(1);
             taskProgressTracker.onProgress(1);
             taskProgressTracker.onProgress(1);
 
-            taskProgressTracker.endSubTask("foo");
+            taskProgressTracker.endSubTask(/*bar*/);
 
-            taskProgressTracker.endSubTask(taskName);
+            taskProgressTracker.beginSubTask(/*foo*/);
+            taskProgressTracker.onProgress(1);
+            taskProgressTracker.onProgress(1);
+            taskProgressTracker.onProgress(1);
+
+            taskProgressTracker.endSubTask(/*foo*/);
+
+            taskProgressTracker.endSubTask(/*taskName*/);
 
 
             return Stream.empty();

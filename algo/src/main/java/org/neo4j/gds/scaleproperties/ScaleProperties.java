@@ -76,16 +76,16 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
 
     @Override
     public ScalePropertiesResult compute() {
-        progressTracker.beginSubTask("ScaleProperties");
+        progressTracker.beginSubTask(/*ScaleProperties*/);
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount());
 
         // Create a Scaler for each input property
         // Array properties are unrolled into multiple scalers
-        progressTracker.beginSubTask("Prepare scalers");
+        progressTracker.beginSubTask(/*Prepare scalers*/);
         var scalers = params.nodeProperties().stream()
             .map(this::prepareScalers)
             .toList();
-        progressTracker.endSubTask("Prepare scalers");
+        progressTracker.endSubTask(/*Prepare scalers*/);
 
         var scalerStatistics = IntStream
             .range(0, scalers.size())
@@ -96,15 +96,15 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         initializeArrays(scaledProperties, outputArrayLength);
 
         // Apply scalers to all properties
-        progressTracker.beginSubTask("Scale properties");
+        progressTracker.beginSubTask(/*Scale properties*/);
         var resultIndex = 0;
         for (var scaler : scalers) {
             scaleProperty(scaledProperties, scaler, resultIndex);
             resultIndex += scaler.dimension();
         }
-        progressTracker.endSubTask("Scale properties");
+        progressTracker.endSubTask(/*Scale properties*/);
 
-        progressTracker.endSubTask("ScaleProperties");
+        progressTracker.endSubTask(/*ScaleProperties*/);
         return new ScalePropertiesResult(scaledProperties, scalerStatistics);
     }
 

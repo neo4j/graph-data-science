@@ -45,8 +45,7 @@ public final class NodeLabelHistogram {
     public static Result compute(Graph inputGraph, Concurrency concurrency, ProgressTracker progressTracker,
         TerminationFlag terminationFlag
         ) {
-        progressTracker.beginSubTask("Count node labels");
-        progressTracker.setSteps(inputGraph.nodeCount());
+        progressTracker.beginSubTaskWithSteps(/*Count node labels*/inputGraph.nodeCount());
 
         var availableNodeLabels = inputGraph.availableNodeLabels()
             .stream()
@@ -84,7 +83,7 @@ public final class NodeLabelHistogram {
                 totalCounts.getOrDefault(labelCombination, 0) + count
             )));
 
-        progressTracker.endSubTask("Count node labels");
+        progressTracker.endSubTask(/*Count node labels*/);
 
         return new Result(availableNodeLabels, totalCounts);
     }

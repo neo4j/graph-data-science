@@ -72,7 +72,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
 
     @Override
     public HashGNNResult compute() {
-        progressTracker.beginSubTask("HashGNN");
+        progressTracker.beginSubTask(/*HashGNN*/);
 
         // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
         int decreasedConcurrency = Math.toIntExact(Math.min(concurrency.value() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount()));
@@ -119,7 +119,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
                 avgDegree
             ));
 
-        progressTracker.beginSubTask("Propagate embeddings");
+        progressTracker.beginSubTask(/*Propagate embeddings*/);
 
         for (int iteration = 0; iteration < parameters.iterations(); iteration++) {
             terminationFlag.assertRunning();
@@ -166,7 +166,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             ));
         }
 
-        progressTracker.endSubTask("Propagate embeddings");
+        progressTracker.endSubTask(/*Propagate embeddings*/);
 
         var binaryOutputVectors = (parameters.iterations() - 1) % 2 == 0 ? embeddingsA : embeddingsB;
 
@@ -184,7 +184,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             return (NodePropertyValues) EmbeddingsToNodePropertyValues.fromDense(denseVectors);
         }).orElseGet(() -> EmbeddingsToNodePropertyValues.fromBinary(binaryOutputVectors, embeddingDimension));
 
-        progressTracker.endSubTask("HashGNN");
+        progressTracker.endSubTask(/*HashGNN*/);
 
         return new HashGNNResult(outputVectors);
     }

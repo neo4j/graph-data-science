@@ -44,6 +44,7 @@ import java.util.stream.LongStream;
 public class ExhaustiveLinkPrediction extends LinkPrediction {
     private final int topN;
     private final double threshold;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
     public ExhaustiveLinkPrediction(
@@ -64,11 +65,11 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             graph,
             sourceNodeFilter,
             targetNodeFilter,
-            concurrency,
-            progressTracker
+            concurrency
         );
         this.topN = topN;
         this.threshold = threshold;
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
     }
 
@@ -83,7 +84,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
     @Override
     ExhaustiveLinkPredictionResult predictLinks(LinkPredictionSimilarityComputer linkPredictionSimilarityComputer) {
-        progressTracker.setSteps(graph.nodeCount());
+        progressTracker.beginSubTaskWithSteps(graph.nodeCount());
 
         var predictionQueue = BoundedLongLongPriorityQueue.max(topN);
 
@@ -112,6 +113,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             );
         }
 
+        progressTracker.endSubTask();
 
         return new ExhaustiveLinkPredictionResult(predictionQueue, linksConsidered.longValue());
     }

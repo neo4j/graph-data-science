@@ -82,8 +82,8 @@ class TaskProgressTrackerFailMethodTest {
             TaskRegistryFactory.local("", taskStore)
         );
 
-        tracker.beginSubTask("rootTask");
-        tracker.beginSubTask("failingSubTask");
+        tracker.beginSubTask(/*rootTask*/);
+        tracker.beginSubTask(/*failingSubTask*/);
         tracker.endSubTaskWithFailure("failingSubTask");
 
         assertThat(log.getMessages(TestLog.INFO))

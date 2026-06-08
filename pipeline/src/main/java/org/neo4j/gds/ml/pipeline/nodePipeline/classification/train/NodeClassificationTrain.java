@@ -279,7 +279,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         Features features,
         TrainingStatistics trainingStatistics
     ) {
-        progressTracker.beginSubTask("Train best model");
+        progressTracker.beginSubTask(/*Train best model*/);
         ModelCandidateStats bestCandidate = trainingStatistics.bestCandidate();
         var bestClassifier = trainModel(
             outerSplit.trainSet(),
@@ -287,32 +287,30 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             features,
             ModelSpecificMetricsHandler.of(metrics, trainingStatistics::addTestScore)
         );
-        progressTracker.endSubTask("Train best model");
+        progressTracker.endSubTask(/*Train best model*/);
 
-        progressTracker.beginSubTask("Evaluate on train data");
-        progressTracker.setSteps(outerSplit.trainSet().size());
+        progressTracker.beginSubTaskWithSteps(/*Evaluate on train data*/outerSplit.trainSet().size());
         registerMetricScores(outerSplit.trainSet(), bestClassifier, features, trainingStatistics::addOuterTrainScore, progressTracker);
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
         log.info(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
-        progressTracker.endSubTask("Evaluate on train data");
+        progressTracker.endSubTask(/*Evaluate on train data*/);
 
-        progressTracker.beginSubTask("Evaluate on test data");
-        progressTracker.setSteps(outerSplit.testSet().size());
+        progressTracker.beginSubTaskWithSteps(/*Evaluate on test data*/outerSplit.testSet().size());
         registerMetricScores(outerSplit.testSet(), bestClassifier, features, trainingStatistics::addTestScore, progressTracker);
         var testMetrics = trainingStatistics.winningModelTestMetrics();
         log.info(formatWithLocale("Final model metrics on test set: %s", testMetrics));
-        progressTracker.endSubTask("Evaluate on test data");
+        progressTracker.endSubTask(/*Evaluate on test data*/);
     }
 
     private Classifier retrainBestModel(ReadOnlyHugeLongArray trainSet, Features features, TrainerConfig bestParameters) {
-        progressTracker.beginSubTask("Retrain best model");
+        progressTracker.beginSubTask(/*Retrain best model*/);
         var retrainedClassifier = trainModel(
             trainSet,
             bestParameters,
             features,
             ModelSpecificMetricsHandler.NOOP
         );
-        progressTracker.endSubTask("Retrain best model");
+        progressTracker.endSubTask(/*Retrain best model*/);
 
         return retrainedClassifier;
     }

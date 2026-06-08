@@ -123,7 +123,8 @@ public final class LinkPredictionTrain {
     }
 
     public LinkPredictionTrainResult compute() {
-        progressTracker.beginSubTask("Extract train features");
+        progressTracker.beginSubTaskWithSteps(/*Extract train features*/trainGraph.relationshipCount() * 2);
+
         var trainData = extractFeaturesAndLabels(
             trainGraph,
             pipeline.featureSteps(),
@@ -132,24 +133,24 @@ public final class LinkPredictionTrain {
             terminationFlag
         );
         var trainRelationshipIds = new ReadOnlyHugeLongIdentityArray(trainData.size());
-        progressTracker.endSubTask("Extract train features");
+        progressTracker.endSubTask(/*Extract train features*/);
 
         var trainingStatistics = new TrainingStatistics(config.metrics());
 
         findBestModelCandidate(trainData, trainRelationshipIds, trainingStatistics);
 
         // train best model on the entire training graph
-        progressTracker.beginSubTask("Train best model");
+        progressTracker.beginSubTask(/*Train best model*/);
         var classifier = trainModel(
             trainData,
             trainRelationshipIds,
             trainingStatistics.bestParameters(),
             ModelSpecificMetricsHandler.of(config.metrics(), trainingStatistics::addTestScore)
         );
-        progressTracker.endSubTask("Train best model");
+        progressTracker.endSubTask(/*Train best model*/);
 
         // evaluate the best model on the training and test graphs
-        progressTracker.beginSubTask("Compute train metrics");
+        progressTracker.beginSubTaskWithSteps(/*Compute train metrics*/trainData.features().size());
         computeTrainMetric(
             trainData,
             classifier,
@@ -157,14 +158,14 @@ public final class LinkPredictionTrain {
             trainingStatistics::addOuterTrainScore,
             progressTracker
         );
-        progressTracker.endSubTask("Compute train metrics");
+        progressTracker.endSubTask(/*Compute train metrics*/);
 
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
         log.info(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
 
-        progressTracker.beginSubTask("Evaluate on test data");
+        progressTracker.beginSubTask(/*Evaluate on test data*/);
         computeTestMetric(classifier, trainingStatistics);
-        progressTracker.endSubTask("Evaluate on test data");
+        progressTracker.endSubTask(/*Evaluate on test data*/);
 
         var testMetrics = trainingStatistics.winningModelTestMetrics();
         log.info(formatWithLocale("Final model metrics on test set: %s", testMetrics));
@@ -235,7 +236,8 @@ public final class LinkPredictionTrain {
     }
 
     private void computeTestMetric(Classifier classifier, TrainingStatistics trainingStatistics) {
-        progressTracker.beginSubTask("Extract test features");
+        progressTracker.beginSubTaskWithSteps(/*Extract test features*/validationGraph.relationshipCount() * 2);
+
         var testData = extractFeaturesAndLabels(
             validationGraph,
             pipeline.featureSteps(),
@@ -243,9 +245,9 @@ public final class LinkPredictionTrain {
             progressTracker,
             terminationFlag
         );
-        progressTracker.endSubTask("Extract test features");
+        progressTracker.endSubTask(/*Extract test features*/);
 
-        progressTracker.beginSubTask("Compute test metrics");
+        progressTracker.beginSubTaskWithSteps(/*Compute test metrics*/testData.features().size());
         var signedProbabilities = SignedProbabilities.computeFromLabeledData(
             testData.features(),
             testData.labels(),
@@ -261,7 +263,7 @@ public final class LinkPredictionTrain {
                 double score = metric.compute(signedProbabilities, config.negativeClassWeight());
                 trainingStatistics.addTestScore(metric, score);
             });
-        progressTracker.endSubTask("Compute test metrics");
+        progressTracker.endSubTask(/*Compute test metrics*/);
     }
 
     private void computeTrainMetric(

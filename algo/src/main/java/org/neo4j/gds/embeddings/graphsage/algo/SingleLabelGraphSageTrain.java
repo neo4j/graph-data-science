@@ -62,7 +62,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
     @Override
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
-        progressTracker.beginSubTask("GraphSageTrain");
+        progressTracker.beginSubTask(/*GraphSageTrain*/);
 
         var featureDimension = FeatureExtraction.featureCount(graph, parameters.featureProperties());
         var graphSageModel = new GraphSageModelTrainer(
@@ -79,7 +79,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
             initializeSingleLabelFeatures(graph, parameters.featureProperties())
         );
 
-        progressTracker.endSubTask("GraphSageTrain");
+        progressTracker.endSubTask(/*GraphSageTrain*/);
 
         return Model.of(
             gdsVersion,

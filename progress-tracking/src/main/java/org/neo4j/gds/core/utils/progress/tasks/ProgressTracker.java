@@ -37,7 +37,7 @@ public interface ProgressTracker {
 
     void beginSubTask(long taskVolume);
 
-    void beginSubTask(String expectedTaskDescription);
+    void beginSubTaskWithSteps(long numberOfSteps);
 
     void beginSubTask(String expectedTaskDescription, long taskVolume);
 
@@ -51,15 +51,11 @@ public interface ProgressTracker {
 
     void endSubTask();
 
-    void endSubTask(String expectedTaskDescription);
-
     void endSubTaskWithFailure();
 
     void endSubTaskWithFailure(String expectedTaskDescription);
 
     void release();
-
-    void setSteps(long steps);
 
     void logSteps(long steps);
 

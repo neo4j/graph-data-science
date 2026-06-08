@@ -83,7 +83,7 @@ class BinarizeTask implements Runnable {
         TerminationFlag terminationFlag,
         MutableLong totalFeatureCountOutput
     ) {
-        progressTracker.beginSubTask("Binarize node property features");
+        progressTracker.beginSubTask(/*Binarize node property features*/);
 
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
 
@@ -124,7 +124,7 @@ class BinarizeTask implements Runnable {
             std
         ));
 
-        progressTracker.endSubTask("Binarize node property features");
+        progressTracker.endSubTask(/*Binarize node property features*/);
 
         return truncatedFeatures;
     }

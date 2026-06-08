@@ -40,8 +40,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.WARN;
 
@@ -136,40 +134,6 @@ class TaskProgressTrackerTest {
     }
 
     @Test
-    void shouldAssertFailureOnExpectedSubTaskSubString() {
-        var task = Tasks.task("Foo", Tasks.leaf("Leaf1"));
-        var progressTracker = progressTracker(task);
-
-        assertThatThrownBy(() -> progressTracker.beginSubTask("Bar"))
-            .isInstanceOf(AssertionError.class)
-            .hasMessageContaining("Expected task name to contain `Bar`, but was `Foo`");
-
-        assertThatThrownBy(() -> progressTracker.beginSubTask("Leaf2"))
-            .isInstanceOf(AssertionError.class)
-            .hasMessageContaining("Expected task name to contain `Leaf2`, but was `Leaf1`");
-
-        assertThatThrownBy(() -> progressTracker.endSubTask("Leaf2"))
-            .isInstanceOf(AssertionError.class)
-            .hasMessageContaining("Expected task name to contain `Leaf2`, but was `Leaf1`");
-
-        progressTracker.endSubTask(); // call once manually as the call before didn't execute due to the assertion error
-        assertThatThrownBy(() -> progressTracker.endSubTask("Bar"))
-            .isInstanceOf(AssertionError.class)
-            .hasMessageContaining("Expected task name to contain `Bar`, but was `Foo`");
-    }
-
-    @Test
-    void shouldAssertSuccessOnExpectedSuBTaskSubString() {
-        var task = Tasks.task("Foo", Tasks.leaf("Leaf"));
-        var progressTracker = progressTracker(task);
-
-        assertDoesNotThrow(() -> progressTracker.beginSubTask("Foo"));
-        assertDoesNotThrow(() -> progressTracker.beginSubTask("Leaf"));
-        assertDoesNotThrow(() -> progressTracker.endSubTask("Leaf"));
-        assertDoesNotThrow(() -> progressTracker.endSubTask("Foo"));
-    }
-
-    @Test
     void shouldLog100WhenTaskFinishedEarly() {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.leaf("leaf", 4);
@@ -213,11 +177,11 @@ class TaskProgressTrackerTest {
                 EmptyTaskRegistryFactory.INSTANCE
             );
 
-            progressTracker.beginSubTask("root");
-            progressTracker.beginSubTask("leaf");
+            progressTracker.beginSubTask(/*root*/);
+            progressTracker.beginSubTask(/*leaf*/);
             progressTracker.onProgress();
-            progressTracker.endSubTask("leaf");
-            progressTracker.endSubTask("root");
+            progressTracker.endSubTask(/*leaf*/);
+            progressTracker.endSubTask(/*root*/);
 
             assertThat(log.getMessages(TestLog.INFO)).contains(
                 "[what request correlation id?] [test] root :: Start",
@@ -258,8 +222,7 @@ class TaskProgressTrackerTest {
         var leafTask = Tasks.leaf("leaf", 100);
         var progressTracker = progressTracker(leafTask);
 
-        progressTracker.beginSubTask();
-        progressTracker.setSteps(13);
+        progressTracker.beginSubTaskWithSteps(13);
         progressTracker.onProgress(3);
         progressTracker.logSteps(1);
         double expectedDoubleProgressFromFirstStep = 100.0 / 13.0;

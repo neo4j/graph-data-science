@@ -68,7 +68,7 @@ class CrossValidationTest {
             (evaluationSet, model, scoreConsumer) -> scoreConsumer.consume(metrics.getFirst(), 0)
         );
 
-        progressTracker.beginSubTask("test");
+        progressTracker.beginSubTask(/*test*/);
         crossValidation.selectModel(
             ReadOnlyHugeLongArray.of(0, 1, 3, 7),
             (LongToLongFunction) longParameter -> 0,
@@ -76,7 +76,7 @@ class CrossValidationTest {
             trainingStatistics,
             List.<TrainerConfig>of(new TestTrainerConfig("a"), new TestTrainerConfig("b")).iterator()
         );
-        progressTracker.endSubTask("test");
+        progressTracker.endSubTask(/*test*/);
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())

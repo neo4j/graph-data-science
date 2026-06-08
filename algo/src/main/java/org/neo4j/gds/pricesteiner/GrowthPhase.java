@@ -63,15 +63,15 @@ class GrowthPhase {
 
     GrowthResult grow() {
         //initialization
-        progressTracker.beginSubTask("Growth Phase");
+        progressTracker.beginSubTask(/*Growth Phase*/);
 
-        progressTracker.beginSubTask("Initialization");
+        progressTracker.beginSubTask(/*Initialization*/);
         initializeClusterPrizes();
         initializeEdgeParts();
         setUpCusterQueue(clusterStructure().active(), clusterStructure.maxActiveCluster());
-        progressTracker.endSubTask("Initialization");
+        progressTracker.endSubTask(/*Initialization*/);
 
-        progressTracker.beginSubTask("Growing");
+        progressTracker.beginSubTask(/*Growing*/);
         double moat;
 
 
@@ -135,8 +135,8 @@ class GrowthPhase {
 
         }
 
-        progressTracker.endSubTask("Growing");
-       progressTracker.endSubTask("Growth Phase");
+        progressTracker.endSubTask(/*Growing*/);
+       progressTracker.endSubTask(/*Growth Phase*/);
         return new GrowthResult(
             treeEdges,
             numberOfTreeEdges,

@@ -135,7 +135,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
     }
 
     public void executeNodePropertySteps(List<ExecutableNodePropertyStep> steps) {
-        progressTracker.beginSubTask("Execute node property steps");
+        progressTracker.beginSubTask(/*Execute node property steps*/);
         for (ExecutableNodePropertyStep step : steps) {
             progressTracker.beginSubTask();
             var featureInputNodeLabels = step.featureInputNodeLabels(graphStore, nodeLabels);
@@ -159,7 +159,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
             );
             progressTracker.endSubTask();
         }
-        progressTracker.endSubTask("Execute node property steps");
+        progressTracker.endSubTask(/*Execute node property steps*/);
     }
 
     public void cleanupIntermediateProperties(List<ExecutableNodePropertyStep> steps) {

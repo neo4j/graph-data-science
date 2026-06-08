@@ -73,7 +73,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
     @Override
     public KCoreDecompositionResult compute() {
-        progressTracker.beginSubTask("KCoreDecomposition");
+        progressTracker.beginSubTask(/*KCoreDecomposition*/);
 
         HugeAtomicIntArray currentDegrees = HugeAtomicIntArray.of(
             graph.nodeCount(),
@@ -165,7 +165,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
             }
 
         }
-        progressTracker.endSubTask("KCoreDecomposition");
+        progressTracker.endSubTask(/*KCoreDecomposition*/);
 
         return new KCoreDecompositionResult(core, degeneracy);
     }

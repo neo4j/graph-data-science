@@ -122,8 +122,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
     @Override
     public SteinerTreeResult compute() {
-        progressTracker.beginSubTask("SteinerTree");
-        progressTracker.beginSubTask("Traverse");
+        progressTracker.beginSubTask(/*SteinerTree*/);
+        progressTracker.beginSubTask(/*Traverse*/);
         HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
         HugeDoubleArray parentCost = HugeDoubleArray.newArray(graph.nodeCount());
         ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, terminationFlag, v -> {
@@ -143,7 +143,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             processPath(path, parent, parentCost, totalCost, effectiveNodeCount);
             terminalsReached.increment();
         });
-        progressTracker.endSubTask("Traverse");
+        progressTracker.endSubTask(/*Traverse*/);
 
         if (applyRerouting) {
             var rerouter = ReroutingSupplier.createRerouter(
@@ -160,7 +160,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
             rerouter.reroute(parent, parentCost, totalCost, effectiveNodeCount);
         }
 
-        progressTracker.endSubTask("SteinerTree");
+        progressTracker.endSubTask(/*SteinerTree*/);
         return new SteinerTreeResult(
             parent,
             parentCost,

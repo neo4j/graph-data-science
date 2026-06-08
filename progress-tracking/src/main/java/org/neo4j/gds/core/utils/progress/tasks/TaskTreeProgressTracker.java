@@ -79,11 +79,6 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription) {
-        delegate.beginSubTask(expectedTaskDescription);
-    }
-
-    @Override
     public void beginSubTask(String expectedTaskDescription, long taskVolume) {
         delegate.beginSubTask(expectedTaskDescription, taskVolume);
     }
@@ -91,11 +86,6 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
     @Override
     public void endSubTask() {
         delegate.endSubTask();
-    }
-
-    @Override
-    public void endSubTask(String expectedTaskDescription) {
-        delegate.endSubTask(expectedTaskDescription);
     }
 
     @Override
@@ -121,11 +111,6 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
     @Override
     public void release() {
         delegate.release();
-    }
-
-    @Override
-    public void setSteps(long steps) {
-        delegate.setSteps(steps);
     }
 
     private static class PassThroughTaskVisitor implements TaskVisitor {

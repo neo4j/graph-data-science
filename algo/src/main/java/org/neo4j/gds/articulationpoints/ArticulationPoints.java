@@ -90,7 +90,7 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
         visited.clear();
         tin.setAll(__ -> -1);
         low.setAll(__ -> -1);
-        progressTracker.beginSubTask("ArticulationPoints");
+        progressTracker.beginSubTask(/*ArticulationPoints*/);
         //each edge may have at most one event to the stack at the same time
         var stack = HugeObjectArray.newArray(StackEvent.class, Math.max(5,graph.relationshipCount()));
 
@@ -101,7 +101,7 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
                 dfs(i, stack);
             }
         }
-        progressTracker.endSubTask("ArticulationPoints");
+        progressTracker.endSubTask(/*ArticulationPoints*/);
         return new ArticulationPointsResult(this.articulationPoints, this.subtreeTracker);
     }
 

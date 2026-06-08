@@ -101,12 +101,6 @@ public final class TestProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription) {
-        beginSubTask();
-        delegate.assertSubTask(expectedTaskDescription);
-    }
-
-    @Override
     public void beginSubTask(String expectedTaskDescription, long taskVolume) {
         beginSubTask();
         delegate.assertSubTask(expectedTaskDescription);
@@ -116,11 +110,6 @@ public final class TestProgressTracker implements ProgressTracker {
     @Override
     public void endSubTask() {
         delegate.endSubTask();
-    }
-
-    @Override
-    public void endSubTask(String expectedTaskDescription) {
-        delegate.endSubTask(expectedTaskDescription);
     }
 
     @Override
@@ -143,11 +132,6 @@ public final class TestProgressTracker implements ProgressTracker {
     @Override
     public void release() {
         delegate.release();
-    }
-
-    @Override
-    public void setSteps(long steps) {
-        delegate.setSteps(steps);
     }
 
     @Override

@@ -128,19 +128,18 @@ public final class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription) {
-        beginSubTask();
-        assertSubTask(expectedTaskDescription);
-    }
-
-    @Override
     public void beginSubTask(long taskVolume) {
         beginSubTask();
         setVolume(taskVolume);
     }
 
     @Override
-    public void setSteps(long steps) {
+    public void beginSubTaskWithSteps(long numberOfSteps) {
+        beginSubTask();
+        setSteps(numberOfSteps);
+    }
+
+    private void setSteps(long steps) {
         if (steps <= 0) {
             throw new IllegalStateException(formatWithLocale(
                 "Total steps for task must be at least 1 but was %d",
@@ -185,12 +184,6 @@ public final class TaskProgressTracker implements ProgressTracker {
             }
         );
 
-    }
-
-    @Override
-    public void endSubTask(String expectedTaskDescription) {
-        assertSubTask(expectedTaskDescription);
-        endSubTask();
     }
 
     @Override

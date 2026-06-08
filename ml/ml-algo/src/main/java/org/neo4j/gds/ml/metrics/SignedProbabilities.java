@@ -110,8 +110,6 @@ public abstract class SignedProbabilities {
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
-        progressTracker.setSteps(features.size());
-
         var signedProbabilities = SignedProbabilities.create(evaluationQueue.totalSize());
 
         var positiveClassIndex = (int) EdgeSplitter.POSITIVE;

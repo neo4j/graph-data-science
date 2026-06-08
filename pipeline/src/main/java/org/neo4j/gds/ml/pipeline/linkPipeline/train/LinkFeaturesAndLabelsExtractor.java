@@ -79,7 +79,6 @@ final class LinkFeaturesAndLabelsExtractor {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        progressTracker.setSteps(graph.relationshipCount() * 2);
         var features = LinkFeatureExtractor.extractFeatures(
             graph,
             featureSteps,

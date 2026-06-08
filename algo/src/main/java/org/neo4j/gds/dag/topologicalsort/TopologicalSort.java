@@ -84,17 +84,17 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
 
     @Override
     public TopologicalSortResult compute() {
-        this.progressTracker.beginSubTask("TopologicalSort");
+        this.progressTracker.beginSubTask(/*TopologicalSort*/);
 
         initializeInDegrees();
         traverse();
 
-        this.progressTracker.endSubTask("TopologicalSort");
+        this.progressTracker.endSubTask(/*TopologicalSort*/);
         return result;
     }
 
     private void initializeInDegrees() {
-        this.progressTracker.beginSubTask("Initialization");
+        this.progressTracker.beginSubTask(/*Initialization*/);
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
             concurrency,
@@ -110,11 +110,11 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                 progressTracker.onProgress();
             }
         );
-        this.progressTracker.endSubTask("Initialization");
+        this.progressTracker.endSubTask(/*Initialization*/);
     }
 
     private void traverse() {
-        this.progressTracker.beginSubTask("Traversal");
+        this.progressTracker.beginSubTask(/*Traversal*/);
 
         try(var forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency)) {
             var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
@@ -152,7 +152,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
 
             // calling join makes sure the pool waits for all the tasks to complete before shutting down
             tasks.forEach(ForkJoinTask::join);
-            this.progressTracker.endSubTask("Traversal");
+            this.progressTracker.endSubTask(/*Traversal*/);
         }
 
     }

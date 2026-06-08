@@ -68,7 +68,7 @@ class DensifyTask implements Runnable {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        progressTracker.beginSubTask("Densify output embeddings");
+        progressTracker.beginSubTask(/*Densify output embeddings*/);
 
         var denseFeatures = HugeObjectArray.newArray(double[].class, graph.nodeCount());
 
@@ -94,7 +94,7 @@ class DensifyTask implements Runnable {
             .terminationFlag(terminationFlag)
             .run();
 
-        progressTracker.endSubTask("Densify output embeddings");
+        progressTracker.endSubTask(/*Densify output embeddings*/);
 
         return denseFeatures;
     }
