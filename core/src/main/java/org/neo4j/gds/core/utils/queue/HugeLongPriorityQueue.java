@@ -19,26 +19,14 @@
  */
 package org.neo4j.gds.core.utils.queue;
 
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.PrimitiveIterator;
 
-/**
- * A PriorityQueue specialized for longs that maintains a partial ordering of
- * its elements such that the smallest value can always be found in constant time.
- * The definition of what <i>small</i> means is up to the implementing subclass.
- * <p>
- * Put()'s and pop()'s require log(size) time but the remove() cost implemented here is linear.
- * <p>
- * <b>NOTE</b>: Iteration order is not specified.
- *
- * Implementation has been copied from https://issues.apache.org/jira/browse/SOLR-2092
- * and slightly adapted to our needs.
- */
 public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
 
@@ -52,11 +40,11 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
     private final long capacity;
 
-    private HugeLongArray heap;
-    private HugeLongArray mapIndexTo;
-    private long size = 0;
+    private final HugeLongArray heap;
+    private final HugeLongArray mapIndexTo;
+    protected final HugeDoubleArray costValues;
 
-    protected HugeDoubleArray costValues;
+    private long size = 0;
 
     /**
      * Creates a new priority queue with the given capacity.
@@ -166,17 +154,6 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     /**
-     * Removes all entries from the queue, releases all buffers.
-     * The queue can no longer be used afterwards.
-     */
-    public void release() {
-        size = 0;
-        heap = null;
-        mapIndexTo = null;
-        costValues.release();
-    }
-
-    /**
      * Defines the ordering of the queue.
      * Returns true iff {@code a} is strictly less than {@code b}.
      * <p>
@@ -219,45 +196,74 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      }
 
     private boolean upHeap(long origPos) {
-        long i = origPos;
+        long newPos = origPos;
         // save bottom node
-        long node = heap.get(i);
-        // find parent of current node
-        long j = i >>> 1;
-        while (j > 0 && lessThan(node, heap.get(j))) {
-            // shift parents down
-            placeElement(i, heap.get(j));
-            i = j;
+        long node = heap.get(newPos);
+        // find parent of current node in a 4-ary heap: (i + 2) / 4
+        long parentPos = (newPos + 2) >>> 2;
+        while (parentPos > 0) {
+            long parent = heap.get(parentPos);
+            if (!lessThan(node, parent)) {
+                break;
+            }
+            // shift parent down
+            placeElement(newPos, parent);
+            newPos = parentPos;
             // find new parent of swapped node
-            j = j >>> 1;
+            parentPos = (parentPos + 2) >>> 2;
         }
         // install saved node
-        placeElement(i, node);
-        return i != origPos;
+        placeElement(newPos, node);
+        return newPos != origPos;
     }
 
-    private void downHeap(long i) {
+    private void downHeap(long pos) {
+        // hoist field read across the abstract lessThan call sites below
+        long size = this.size;
         // save top node
-        long node = heap.get(i);
-        // find smallest child of top node
-        long j = i << 1;
-        long k = j + 1;
-        if (k <= size && lessThan(heap.get(k), heap.get(j))) {
-            j = k;
-        }
-        while (j <= size && lessThan(heap.get(j), node)) {
-            // shift up child
-            placeElement(i, heap.get(j));
-            i = j;
-            // find smallest child of swapped node
-            j = i << 1;
-            k = j + 1;
-            if (k <= size && lessThan(heap.get(k), heap.get(j))) {
-                j = k;
+        long node = heap.get(pos);
+        // find first of up to four children: 4i - 2
+        long firstChildPos = (pos << 2) - 2;
+        long smallestChildPos = smallestChildPosition(firstChildPos, size);
+        while (smallestChildPos <= size) {
+            long smallestChild = heap.get(smallestChildPos);
+            if (!lessThan(smallestChild, node)) {
+                break;
             }
+            // shift up smallest child
+            placeElement(pos, smallestChild);
+            pos = smallestChildPos;
+            // find smallest child of swapped node
+            firstChildPos = (pos << 2) - 2;
+            smallestChildPos = smallestChildPosition(firstChildPos, size);
         }
         // install saved node
-        placeElement(i, node);
+        placeElement(pos, node);
+    }
+
+    /**
+     * Returns the index of the smallest among the up to four children
+     * starting at {@code firstChild}. If no children exist, the returned
+     * index is greater than {@code size}.
+     */
+    private long smallestChildPosition(long firstChild, long size) {
+        if (firstChild > size) {
+            return firstChild;
+        }
+        long smallest = firstChild;
+        long smallestVal = heap.get(firstChild);
+        long last = firstChild + 3;
+        if (last > size) {
+            last = size;
+        }
+        for (long k = firstChild + 1; k <= last; k++) {
+            long candidate = heap.get(k);
+            if (lessThan(candidate, smallestVal)) {
+                smallest = k;
+                smallestVal = candidate;
+            }
+        }
+        return smallest;
     }
 
     private void update(long element) {
