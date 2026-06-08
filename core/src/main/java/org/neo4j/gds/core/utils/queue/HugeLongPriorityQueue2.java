@@ -27,18 +27,6 @@ import org.neo4j.gds.mem.MemoryEstimations;
 
 import java.util.PrimitiveIterator;
 
-/**
- * A PriorityQueue specialized for longs that maintains a partial ordering of
- * its elements such that the smallest value can always be found in constant time.
- * The definition of what <i>small</i> means is up to the implementing subclass.
- * <p>
- * Put()'s and pop()'s require log(size) time but the remove() cost implemented here is linear.
- * <p>
- * <b>NOTE</b>: Iteration order is not specified.
- *
- * Implementation has been copied from https://issues.apache.org/jira/browse/SOLR-2092
- * and slightly adapted to our needs.
- */
 public abstract class HugeLongPriorityQueue2 implements PrimitiveLongIterable {
 
 
@@ -52,11 +40,11 @@ public abstract class HugeLongPriorityQueue2 implements PrimitiveLongIterable {
 
     private final long capacity;
 
-    private HugeLongArray heap;
-    private HugeLongArray mapIndexTo;
-    private long size = 0;
+    private final HugeLongArray heap;
+    private final HugeLongArray mapIndexTo;
+    protected final HugeDoubleArray costValues;
 
-    protected HugeDoubleArray costValues;
+    private long size = 0;
 
     /**
      * Creates a new priority queue with the given capacity.
@@ -163,17 +151,6 @@ public abstract class HugeLongPriorityQueue2 implements PrimitiveLongIterable {
      */
     public long size() {
         return size;
-    }
-
-    /**
-     * Removes all entries from the queue, releases all buffers.
-     * The queue can no longer be used afterwards.
-     */
-    public void release() {
-        size = 0;
-        heap = null;
-        mapIndexTo = null;
-        costValues.release();
     }
 
     /**
