@@ -79,6 +79,11 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public void beginSubTaskWithSteps(long numberOfSteps) {
+        delegate.beginSubTaskWithSteps(numberOfSteps);
+    }
+
+    @Override
     public void endSubTask() {
         delegate.endSubTask();
     }

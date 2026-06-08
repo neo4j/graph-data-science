@@ -101,6 +101,12 @@ public final class TestProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public void beginSubTaskWithSteps(long numberOfSteps) {
+        beginSubTask();
+        setSteps(numberOfSteps);
+    }
+
+    @Override
     public void endSubTask() {
         delegate.endSubTask();
     }
@@ -120,6 +126,11 @@ public final class TestProgressTracker implements ProgressTracker {
     @Override
     public void release() {
         delegate.release();
+    }
+
+    private void setSteps(long steps) {
+        // this is some dirty, dirty business that I can't unravel - apologies
+        if (delegate instanceof TaskProgressTracker tpt) tpt.setSteps(steps);
     }
 
     @Override

@@ -53,6 +53,11 @@ public abstract class ProgressTrackerAdapter implements ProgressTracker {
     }
 
     @Override
+    public void beginSubTaskWithSteps(long numberOfSteps) {
+        delegate.beginSubTaskWithSteps(numberOfSteps);
+    }
+
+    @Override
     public void endSubTask() {
         delegate.endSubTask();
     }

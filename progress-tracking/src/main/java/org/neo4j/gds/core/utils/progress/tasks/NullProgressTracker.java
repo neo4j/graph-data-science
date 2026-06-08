@@ -44,6 +44,11 @@ class NullProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public void beginSubTaskWithSteps(long numberOfSteps) {
+
+    }
+
+    @Override
     public void endSubTask() {
     }
 

@@ -139,7 +139,11 @@ public final class TaskProgressTracker implements ProgressTracker {
         setSteps(numberOfSteps);
     }
 
-    private void setSteps(long steps) {
+    /**
+     * @deprecated do not use this, it is a hole in our abstraction
+     */
+    @Deprecated
+    public void setSteps(long steps) {
         if (steps <= 0) {
             throw new IllegalStateException(formatWithLocale(
                 "Total steps for task must be at least 1 but was %d",
@@ -200,6 +204,7 @@ public final class TaskProgressTracker implements ProgressTracker {
     /**
      * @deprecated do not use this, it is a hole in our abstraction
      */
+    @Deprecated
     public void setVolume(long volume) {
         requireCurrentTask();
         currentTask.ifPresent(task -> {
@@ -262,17 +267,6 @@ public final class TaskProgressTracker implements ProgressTracker {
 
             taskProgressLogger.logWarning(message);
         }
-    }
-
-    public void assertSubTask(String subTaskSubString) {
-        currentTask.ifPresent(task -> {
-            var currentTaskDescription = task.description();
-            assert currentTaskDescription.contains(subTaskSubString) : formatWithLocale(
-                "Expected task name to contain `%s`, but was `%s`",
-                subTaskSubString,
-                currentTaskDescription
-            );
-        });
     }
 
     public Optional<Task> getCurrentTask() {
