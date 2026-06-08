@@ -162,13 +162,6 @@ public final class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription, long taskVolume) { // x
-        beginSubTask();
-        assertSubTask(expectedTaskDescription);
-        setVolume(taskVolume);
-    }
-
-    @Override
     public void endSubTask() {
         requireCurrentTask();
         currentTask.ifPresent(
@@ -236,12 +229,6 @@ public final class TaskProgressTracker implements ProgressTracker {
         }
 
         release();
-    }
-
-    @Override
-    public void endSubTaskWithFailure(String expectedTaskDescription) {
-        assertSubTask(expectedTaskDescription);
-        endSubTaskWithFailure();
     }
 
     Task currentSubTask() {

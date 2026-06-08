@@ -48,11 +48,6 @@ class NullProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription, long taskVolume) {
-
-    }
-
-    @Override
     public void onProgress(long value) {
     }
 
@@ -75,8 +70,4 @@ class NullProgressTracker implements ProgressTracker {
 
     }
 
-    @Override
-    public void endSubTaskWithFailure(String expectedTaskDescription) {
-
-    }
 }

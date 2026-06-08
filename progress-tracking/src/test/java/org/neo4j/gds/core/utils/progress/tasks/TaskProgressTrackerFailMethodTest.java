@@ -84,7 +84,7 @@ class TaskProgressTrackerFailMethodTest {
 
         tracker.beginSubTask(/*rootTask*/);
         tracker.beginSubTask(/*failingSubTask*/);
-        tracker.endSubTaskWithFailure("failingSubTask");
+        tracker.endSubTaskWithFailure();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())

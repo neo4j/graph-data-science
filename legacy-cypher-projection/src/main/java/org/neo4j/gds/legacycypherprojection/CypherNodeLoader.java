@@ -54,7 +54,7 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
 
     @Override
     BatchLoadResult loadSingleBatch(InternalTransaction tx, int bufferSize) {
-        progressTracker.beginSubTask("Nodes", nodeCount);
+        progressTracker.beginSubTask(/*Nodes*/nodeCount);
 
         var nodeSubscriber = new NodeSubscriber(progressTracker);
         var subscription = runLoadingQuery(tx, nodeSubscriber);

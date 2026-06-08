@@ -101,13 +101,6 @@ public final class TestProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription, long taskVolume) {
-        beginSubTask();
-        delegate.assertSubTask(expectedTaskDescription);
-        setVolume(taskVolume);
-    }
-
-    @Override
     public void endSubTask() {
         delegate.endSubTask();
     }
@@ -115,11 +108,6 @@ public final class TestProgressTracker implements ProgressTracker {
     @Override
     public void endSubTaskWithFailure() {
         delegate.endSubTaskWithFailure();
-    }
-
-    @Override
-    public void endSubTaskWithFailure(String expectedTaskDescription) {
-        delegate.endSubTaskWithFailure(expectedTaskDescription);
     }
 
     private void setVolume(long volume) {
