@@ -90,7 +90,7 @@ public class Walker implements Runnable {
             // walk a step
             double degree = computeDegree(currentNode);
             if (degree == 0.0 || rng.nextDouble() < restartProbability) {
-                progressTracker.logSteps(addedNodes);
+                progressTracker.onSteps(addedNodes);
 
                 double walkQuality = ((double) addedNodes) / nodesConsidered;
                 walkQualities.updateNodeQuality(currentStartNodePosition, walkQuality);

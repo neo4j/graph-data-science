@@ -49,6 +49,8 @@ public interface ProgressTracker {
         onProgress(1);
     }
 
+    void onSteps(long steps);
+
     void endSubTask();
 
     void endSubTaskWithFailure();

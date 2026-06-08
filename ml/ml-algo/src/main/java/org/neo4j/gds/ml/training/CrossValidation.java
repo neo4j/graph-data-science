@@ -132,7 +132,7 @@ public class CrossValidation<MODEL_TYPE> {
                 modelEvaluator.evaluate(validationSet, trainedModel, validationStatsBuilder::update);
                 modelEvaluator.evaluate(trainSet, trainedModel, trainStatsBuilder::update);
 
-                progressTracker.logSteps(1);
+                progressTracker.onSteps(1);
 
                 fold++;
             }

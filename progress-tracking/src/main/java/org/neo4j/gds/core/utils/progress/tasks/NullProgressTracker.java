@@ -62,7 +62,7 @@ class NullProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void logSteps(long steps) {
+    public void onSteps(long steps) {
 
     }
 

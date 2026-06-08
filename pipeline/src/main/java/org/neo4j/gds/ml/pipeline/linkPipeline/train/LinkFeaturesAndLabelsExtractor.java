@@ -126,7 +126,7 @@ final class LinkFeaturesAndLabelsExtractor {
                     }
                     return true;
                 }));
-                    progressTracker.logSteps(partition.relationshipCount());
+                    progressTracker.onSteps(partition.relationshipCount());
                 }
             );
             relationshipOffset.add(partition.relationshipCount());

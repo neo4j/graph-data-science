@@ -235,7 +235,7 @@ public class GraphSampleConstructor {
                 }
             }
 
-            progressTracker.logSteps(partition.nodeCount());
+            progressTracker.onSteps(partition.nodeCount());
         }
     }
 

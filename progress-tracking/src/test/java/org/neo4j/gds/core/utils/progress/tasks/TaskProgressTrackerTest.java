@@ -224,13 +224,13 @@ class TaskProgressTrackerTest {
 
         progressTracker.beginSubTaskWithSteps(13);
         progressTracker.onProgress(3);
-        progressTracker.logSteps(1);
+        progressTracker.onSteps(1);
         double expectedDoubleProgressFromFirstStep = 100.0 / 13.0;
         long progressAfterFirstStep = leafTask.getProgress().progress();
         assertThat(progressAfterFirstStep).isEqualTo((long) expectedDoubleProgressFromFirstStep + 3);
 
         progressTracker.onProgress();
-        progressTracker.logSteps(4);
+        progressTracker.onSteps(4);
         assertThat(leafTask.getProgress().progress()).isEqualTo(3 + 1 + (long) (100.0 * 5.0 / 13));
     }
 

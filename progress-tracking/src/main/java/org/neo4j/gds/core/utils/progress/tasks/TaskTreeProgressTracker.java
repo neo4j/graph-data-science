@@ -54,7 +54,7 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void logSteps(long steps) {
+    public void onSteps(long steps) {
         // NOOP
     }
 

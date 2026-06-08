@@ -125,7 +125,7 @@ public abstract class SignedProbabilities {
 
                     signedProbabilities.add(probabilityOfPositiveEdge, isEdge);
                 }
-                progressTracker.logSteps(batch.size());
+                progressTracker.onSteps(batch.size());
             },
             terminationFlag
         );

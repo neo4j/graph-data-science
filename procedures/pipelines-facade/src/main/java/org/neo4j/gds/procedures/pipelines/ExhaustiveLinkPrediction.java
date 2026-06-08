@@ -156,7 +156,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                 predictLinksFromNode(sourceId, sourceNodeFilter);
             }
 
-            progressTracker.logSteps(1);
+            progressTracker.onSteps(1);
         }
 
         private LongHashSet largerValidNeighbors(long sourceId, LongPredicate targetNodeFilter) {

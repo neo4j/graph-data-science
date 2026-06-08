@@ -140,7 +140,7 @@ final class HashTask implements Runnable {
             .mapToObj(unused -> computeHashesFromTriple(embeddingDimension, HashGNNCompanion.HashTriple.generate(rng)))
             .collect(Collectors.toList());
 
-        progressTracker.logSteps(1);
+        progressTracker.onSteps(1);
     }
 
     private Hashes hashes() {

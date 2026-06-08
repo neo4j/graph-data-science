@@ -150,7 +150,7 @@ public final class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void logSteps(long steps) { // x
+    public void onSteps(long steps) { // x
         requireCurrentTask();
         currentTask.ifPresent(task -> {
             long volume = task.getProgress().volume();

@@ -162,7 +162,7 @@ class MinHashTask implements Runnable {
             }
         });
 
-        progressTracker.logSteps(partition.nodeCount());
+        progressTracker.onSteps(partition.nodeCount());
     }
 
     public long totalFeatureCount() {

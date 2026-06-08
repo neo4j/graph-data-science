@@ -88,7 +88,7 @@ public abstract class ProgressTrackerAdapter implements ProgressTracker {
     }
 
     @Override
-    public void logSteps(long steps) {
-        delegate.logSteps(steps);
+    public void onSteps(long steps) {
+        delegate.onSteps(steps);
     }
 }

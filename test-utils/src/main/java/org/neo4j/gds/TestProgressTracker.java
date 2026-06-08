@@ -135,7 +135,7 @@ public final class TestProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void logSteps(long steps) {
+    public void onSteps(long steps) {
         delegate.requireCurrentTask();
         delegate.currentTask.ifPresent(task -> {
             long volume = task.getProgress().volume();
