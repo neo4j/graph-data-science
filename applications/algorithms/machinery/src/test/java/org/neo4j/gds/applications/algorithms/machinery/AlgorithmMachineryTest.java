@@ -25,7 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.Supplier;
@@ -41,8 +40,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AlgorithmMachineryTest {
-
-    private static final Concurrency CONCURRENCY = new Concurrency(4);
     @Mock
     private Algorithm<String> algo;
 
@@ -57,13 +54,11 @@ class AlgorithmMachineryTest {
         var result = algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algo,
             progressTracker,
-            false,
-            CONCURRENCY
+            false
         );
 
         assertThat(result).isEqualTo("Hello, world!");
 
-        verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
         verifyNoMoreInteractions(progressTracker);
     }
 
@@ -78,13 +73,11 @@ class AlgorithmMachineryTest {
         var result = algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algo,
             progressTracker,
-            true,
-            CONCURRENCY
+            true
         );
 
         assertThat(result).isEqualTo("Dodgers win world series!");
 
-        verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
         verify(progressTracker, times(1)).release();
         verifyNoMoreInteractions(progressTracker);
     }
@@ -102,15 +95,13 @@ class AlgorithmMachineryTest {
             algorithmMachinery.runAlgorithmsAndManageProgressTracker(
                 algo,
                 progressTracker,
-                false,
-                CONCURRENCY
+                false
             );
             fail();
         } catch (Exception e) {
             assertThat(e).hasMessage("Whoops!");
         }
 
-        verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
         verify(progressTracker, times(1)).endSubTaskWithFailure();
         verifyNoMoreInteractions(progressTracker);
     }
@@ -128,15 +119,13 @@ class AlgorithmMachineryTest {
             algorithmMachinery.runAlgorithmsAndManageProgressTracker(
                 algo,
                 progressTracker,
-                true,
-                CONCURRENCY
+                true
             );
             fail();
         } catch (Exception e) {
             assertThat(e).hasMessage("Yeah, no...");
         }
 
-        verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
         verify(progressTracker, times(1)).endSubTaskWithFailure();
         verify(progressTracker, times(1)).release();
         verifyNoMoreInteractions(progressTracker);
@@ -144,8 +133,6 @@ class AlgorithmMachineryTest {
 
     @Nested
     class SupplierMethodsTest {
-        private static final Concurrency CONCURRENCY = new Concurrency(4);
-
         @Mock
         private Supplier<String> resultSupplier;
 
@@ -157,15 +144,10 @@ class AlgorithmMachineryTest {
 
             when(resultSupplier.get()).thenReturn("Hello, world!");
 
-            var result = algorithmMachinery.getResultWithoutReleasingProgressTracker(
-                resultSupplier,
-                progressTracker,
-                CONCURRENCY
-            );
+            var result = algorithmMachinery.getResultAndManageProgressTracker(resultSupplier, progressTracker, false);
 
             assertThat(result).isEqualTo("Hello, world!");
 
-            verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
             verifyNoMoreInteractions(progressTracker);
         }
 
@@ -177,15 +159,10 @@ class AlgorithmMachineryTest {
 
             when(resultSupplier.get()).thenReturn("Dodgers win world series!");
 
-            var result = algorithmMachinery.getResult(
-                resultSupplier,
-                progressTracker,
-                CONCURRENCY
-            );
+            var result = algorithmMachinery.getResultAndManageProgressTracker(resultSupplier, progressTracker, true);
 
             assertThat(result).isEqualTo("Dodgers win world series!");
 
-            verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
             verify(progressTracker, times(1)).release();
             verifyNoMoreInteractions(progressTracker);
         }
@@ -200,14 +177,9 @@ class AlgorithmMachineryTest {
             when(resultSupplier.get()).thenThrow(exception);
 
             assertThatException().isThrownBy(
-                () -> algorithmMachinery.getResultWithoutReleasingProgressTracker(
-                    resultSupplier,
-                    progressTracker,
-                    CONCURRENCY
-                )
+                () -> algorithmMachinery.getResultAndManageProgressTracker(resultSupplier, progressTracker, false)
             ).withMessage("Whoops!");
 
-            verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
             verify(progressTracker, times(1)).endSubTaskWithFailure();
             verifyNoMoreInteractions(progressTracker);
         }
@@ -222,14 +194,9 @@ class AlgorithmMachineryTest {
             when(resultSupplier.get()).thenThrow(exception);
 
             assertThatException().isThrownBy(
-                () -> algorithmMachinery.getResult(
-                    resultSupplier,
-                    progressTracker,
-                    CONCURRENCY
-                )
+                () -> algorithmMachinery.getResultAndManageProgressTracker(resultSupplier, progressTracker, true)
             ).withMessage("Yeah, no...");
 
-            verify(progressTracker, times(1)).requestedConcurrency(CONCURRENCY);
             verify(progressTracker, times(1)).endSubTaskWithFailure();
             verify(progressTracker, times(1)).release();
             verifyNoMoreInteractions(progressTracker);

@@ -94,11 +94,6 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void requestedConcurrency(Concurrency concurrency) {
-        delegate.requestedConcurrency(concurrency);
-    }
-
-    @Override
     public void beginSubTask() {
         delegate.beginSubTask();
         progressHistory.add(taskStore.query(userName, jobId).map(userTask -> userTask.task().getProgress()));

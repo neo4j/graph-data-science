@@ -67,10 +67,7 @@ public class ProcedureExecutor<
         this(algoSpec, algoSpec.createDefaultExecutorSpec(), executionContext);
     }
 
-    public RESULT compute(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
+    public RESULT compute(String graphName, Map<String, Object> configuration) {
         // This is needed in the case of `pipelines` where they either pick stuff from the user input,
         // or if there is a `modelName` they read stuff from the model stored in the catalog.
         algoSpec.preProcessConfig(configuration, executionContext);
@@ -86,7 +83,7 @@ public class ProcedureExecutor<
 
         ComputationResultBuilder<ALGO, ALGO_RESULT, CONFIG> builder = ComputationResult.builder();
 
-        try (ProgressTimer timer = ProgressTimer.start(builder::preProcessingMillis)) {
+        try (var ignored = ProgressTimer.start(builder::preProcessingMillis)) {
             var graphProjectConfig = graphCreation.graphProjectConfig();
             var validator = executorSpec.validator(algoSpec.validationConfig(executionContext));
             validator.validateConfigsBeforeLoad(graphProjectConfig, config);
@@ -111,10 +108,8 @@ public class ProcedureExecutor<
 
         ALGO algo = newAlgorithm(graph, graphStore, config);
 
+        // this is problematic
         algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes);
-        algo.getProgressTracker().requestedConcurrency(config.concurrency()); // this should be the only place using it
-        // and even then no not really, because it is always known at the time we create progress tracker
-        // it is right there in configuration
 
         ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metrics().algorithmMetrics(), graphStore, config);
 

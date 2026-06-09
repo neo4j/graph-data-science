@@ -65,7 +65,6 @@ class ProgressTrackerFactoryTest {
 
         var tracker = factory.create(task, new JobId("jid-test"), concurrency, true);
         assertThat(tracker).isNotNull();
-        tracker.requestedConcurrency(concurrency);
     }
 
     @Test
@@ -84,7 +83,6 @@ class ProgressTrackerFactoryTest {
 
         var tracker = factory.create(task, new JobId("jid-test"), concurrency, false);
         assertThat(tracker).isNotNull();
-        tracker.requestedConcurrency(concurrency);
     }
 
     @Test

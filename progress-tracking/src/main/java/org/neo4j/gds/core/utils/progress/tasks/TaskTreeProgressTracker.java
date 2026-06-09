@@ -64,11 +64,6 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void requestedConcurrency(Concurrency concurrency) {
-        delegate.requestedConcurrency(concurrency);
-    }
-
-    @Override
     public void beginSubTask() {
         delegate.beginSubTask();
     }

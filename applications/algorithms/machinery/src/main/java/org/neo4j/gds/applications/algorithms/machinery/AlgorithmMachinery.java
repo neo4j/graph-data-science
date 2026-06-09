@@ -20,18 +20,10 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.Supplier;
 
-/**
- * I wish this did not exist quite like this; it is where we encapsulate running an algorithm,
- * managing termination, and handling (progress tracker) resources.
- * Somehow I wish that was encapsulated more naturally, but as you can hear from this use of language,
- * the design has not crystallized yet.
- * At least nothing here is tied to termination flag.
- */
 public class AlgorithmMachinery {
     /**
      * Runs algorithm.
@@ -43,11 +35,9 @@ public class AlgorithmMachinery {
     public <RESULT> RESULT runAlgorithmsAndManageProgressTracker(
         Algorithm<RESULT> algorithm,
         ProgressTracker progressTracker,
-        boolean shouldReleaseProgressTracker,
-        Concurrency concurrency
+        boolean shouldReleaseProgressTracker
     ) {
         try {
-            progressTracker.requestedConcurrency(concurrency);
             return algorithm.compute();
         } catch (Exception e) {
             progressTracker.endSubTaskWithFailure();
@@ -57,33 +47,18 @@ public class AlgorithmMachinery {
         }
     }
 
-    public <RESULT> RESULT getResultWithoutReleasingProgressTracker(
+    public <RESULT> RESULT getResultAndManageProgressTracker(
         Supplier<RESULT> resultSupplier,
         ProgressTracker progressTracker,
-        Concurrency concurrency
+        boolean shouldReleaseProgressTracker
     ) {
         try {
-            progressTracker.requestedConcurrency(concurrency);
-            return resultSupplier.get();
-        } catch (Exception e) {
-            progressTracker.endSubTaskWithFailure();
-            throw e;
-        }
-    }
-
-    public <RESULT> RESULT getResult(
-        Supplier<RESULT> resultSupplier,
-        ProgressTracker progressTracker,
-        Concurrency concurrency
-    ) {
-        try {
-            progressTracker.requestedConcurrency(concurrency);
             return resultSupplier.get();
         } catch (Exception e) {
             progressTracker.endSubTaskWithFailure();
             throw e;
         } finally {
-            progressTracker.release();
+            if (shouldReleaseProgressTracker) progressTracker.release();
         }
     }
 }

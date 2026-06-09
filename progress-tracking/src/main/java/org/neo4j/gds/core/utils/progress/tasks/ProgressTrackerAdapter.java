@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.function.Function;
@@ -35,11 +34,6 @@ public abstract class ProgressTrackerAdapter implements ProgressTracker {
     @Override
     public void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes) {
         delegate.setEstimatedResourceFootprint(memoryEstimationInBytes);
-    }
-
-    @Override
-    public void requestedConcurrency(Concurrency concurrency) {
-        delegate.requestedConcurrency(concurrency);
     }
 
     @Override

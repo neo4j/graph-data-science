@@ -64,7 +64,6 @@ public class ProgressTrackerFactory {
             );
         }
 
-        progressTracker.requestedConcurrency(concurrency);
         return progressTracker;
     }
 }

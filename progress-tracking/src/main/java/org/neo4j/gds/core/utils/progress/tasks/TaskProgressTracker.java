@@ -104,11 +104,6 @@ public final class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void requestedConcurrency(Concurrency concurrency) {
-        this.baseTask.setMaxConcurrency(concurrency);
-    }
-
-    @Override
     public void beginSubTask() {
         registerBaseTask();
         var nextTask = currentTask.map(task -> {

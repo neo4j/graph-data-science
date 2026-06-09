@@ -93,8 +93,7 @@ public class MachineLearningAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
-            true,
-            configuration.concurrency()
+            true
         );
     }
 

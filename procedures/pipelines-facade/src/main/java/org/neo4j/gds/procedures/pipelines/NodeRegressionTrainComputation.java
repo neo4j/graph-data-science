@@ -212,8 +212,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
-            true,
-            configuration.concurrency()
+            true
         );
     }
 }

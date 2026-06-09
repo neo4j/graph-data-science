@@ -84,11 +84,6 @@ public final class TestProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void requestedConcurrency(Concurrency concurrency) {
-        delegate.requestedConcurrency(concurrency);
-    }
-
-    @Override
     public void beginSubTask() {
         delegate.beginSubTask();
         delegate.getCurrentTask().ifPresent(__ -> progresses.add(new AtomicLong()));

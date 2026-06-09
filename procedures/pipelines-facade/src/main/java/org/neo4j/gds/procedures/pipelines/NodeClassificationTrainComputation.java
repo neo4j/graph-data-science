@@ -212,8 +212,7 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
             algorithm,
             progressTracker,
-            true,
-            configuration.concurrency()
+            true
         );
     }
 }

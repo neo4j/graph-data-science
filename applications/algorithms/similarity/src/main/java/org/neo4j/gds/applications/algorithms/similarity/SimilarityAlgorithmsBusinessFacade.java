@@ -32,8 +32,8 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 public class SimilarityAlgorithmsBusinessFacade {
-
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+
     private final SimilarityAlgorithms similarityAlgorithms;
     private final ProgressTrackerCreator progressTrackerCreator;
 
@@ -50,11 +50,9 @@ public class SimilarityAlgorithmsBusinessFacade {
         var task = SimilarityAlgorithmTasks.filteredKnn(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResult(
+        return algorithmMachinery.getResultAndManageProgressTracker(
             () -> similarityAlgorithms.filteredKnn(graph, parameters, progressTracker),
-            progressTracker,
-            parameters.concurrency()
-        );
+            progressTracker, true);
     }
 
     public NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
@@ -62,25 +60,19 @@ public class SimilarityAlgorithmsBusinessFacade {
         var task = SimilarityAlgorithmTasks.filteredNodeSimilarity(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResult(
+        return algorithmMachinery.getResultAndManageProgressTracker(
             () -> similarityAlgorithms.filteredNodeSimilarity(graph, parameters, progressTracker),
-            progressTracker,
-            parameters.concurrency()
-        );
+            progressTracker, true);
     }
-
 
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {
         var parameters = configuration.toParameters().finalize(graph.nodeCount());
         var task = SimilarityAlgorithmTasks.knn(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResult(
+        return algorithmMachinery.getResultAndManageProgressTracker(
             () -> similarityAlgorithms.knn(graph, parameters, progressTracker),
-            progressTracker,
-            parameters.concurrency()
-        );
-
+            progressTracker, true);
     }
 
     public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
@@ -88,12 +80,8 @@ public class SimilarityAlgorithmsBusinessFacade {
         var task = SimilarityAlgorithmTasks.nodeSimilarity(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResult(
+        return algorithmMachinery.getResultAndManageProgressTracker(
             () -> similarityAlgorithms.nodeSimilarity(graph, parameters, progressTracker),
-            progressTracker,
-            parameters.concurrency()
-        );
+            progressTracker, true);
     }
-
-
 }

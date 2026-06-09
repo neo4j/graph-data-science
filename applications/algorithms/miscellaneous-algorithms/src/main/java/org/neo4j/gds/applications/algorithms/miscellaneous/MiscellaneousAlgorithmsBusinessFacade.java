@@ -38,8 +38,8 @@ import org.neo4j.gds.walking.CollapsePathParamsTransformer;
 import java.util.Map;
 
 public class MiscellaneousAlgorithmsBusinessFacade {
-
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+
     private final ProgressTrackerCreator progressTrackerCreator;
     private final MiscellaneousAlgorithms miscellaneousAlgorithms;
 
@@ -66,11 +66,9 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         var task = MiscellaneousAlgorithmsTasks.inverseIndex(idMap.nodeCount(), params);
 
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        return algorithmMachinery.getResult(
+        return algorithmMachinery.getResultAndManageProgressTracker(
             () -> miscellaneousAlgorithms.indexInverse(graphStore, params, progressTracker),
-            progressTracker,
-            params.concurrency()
-        );
+            progressTracker, true);
     }
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
@@ -78,11 +76,9 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         var task = MiscellaneousAlgorithmsTasks.scaleProperties(graph, params);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResult(
+        return algorithmMachinery.getResultAndManageProgressTracker(
             () -> miscellaneousAlgorithms.scaleProperties(graph, params, progressTracker),
-            progressTracker,
-            params.concurrency()
-        );
+            progressTracker, true);
 
     }
 
@@ -91,10 +87,8 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         var task = MiscellaneousAlgorithmsTasks.toUndirected(graphStore, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResult(
+        return algorithmMachinery.getResultAndManageProgressTracker(
             () -> miscellaneousAlgorithms.toUndirected(graphStore, params, progressTracker),
-            progressTracker,
-            params.concurrency()
-        );
+            progressTracker, true);
     }
 }
