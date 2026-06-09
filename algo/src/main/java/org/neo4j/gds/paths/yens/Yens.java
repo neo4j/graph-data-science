@@ -95,7 +95,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
 
     @Override
     public PathFindingResult compute() {
-        progressTracker.beginSubTask("Yens");
+        progressTracker.beginSubTask(/*Yens*/);
         var kShortestPaths = new ArrayList<MutablePathResult>();
         // compute top 1 shortest path
 
@@ -103,7 +103,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
 
         // no shortest path has been found
         if (shortestPath.isEmpty()) {
-            progressTracker.endSubTask("Yens");
+            progressTracker.endSubTask(/*Yens*/);
             return new PathFindingResult(Stream.empty());
         }
 
@@ -115,7 +115,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
 
         var tasks = createTasks(kShortestPaths, candidatePathsQueue, currentSpurIndexId);
 
-        progressTracker.beginSubTask("Path growing");
+        progressTracker.beginSubTask(/*Path growing*/);
 
         for (int i = 1; i < k; i++) {
             var prevPath = kShortestPaths.get(i - 1);
@@ -135,9 +135,9 @@ public final class Yens extends Algorithm<PathFindingResult> {
             }
             addPathToSolution(i, kShortestPaths, candidatePathsQueue, currentSpurIndexId);
         }
-        progressTracker.endSubTask("Path growing");
+        progressTracker.endSubTask(/*Path growing*/);
 
-        progressTracker.endSubTask("Yens");
+        progressTracker.endSubTask(/*Yens*/);
 
         return new PathFindingResult(kShortestPaths.stream().map(MutablePathResult::toPathResult));
     }

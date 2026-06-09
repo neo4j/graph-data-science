@@ -82,7 +82,7 @@ public class InverseRerouter extends ReroutingAlgorithm {
         DoubleAdder totalCost,
         LongAdder effectiveNodeCount
     ) {
-        progressTracker.beginSubTask("Reroute");
+        progressTracker.beginSubTask(/*Reroute*/);
 
         LinkCutTree linkCutTree = createLinkCutTree(parent);
         ReroutingChildrenManager childrenManager = new ReroutingChildrenManager(
@@ -135,7 +135,7 @@ public class InverseRerouter extends ReroutingAlgorithm {
             }
 
         }
-        progressTracker.endSubTask("Reroute");
+        progressTracker.endSubTask(/*Reroute*/);
     }
     private void initializeChildrenManager(ReroutingChildrenManager childrenManager, HugeLongArray parent) {
         graph.forEachNode(nodeId -> {

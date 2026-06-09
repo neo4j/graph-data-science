@@ -61,7 +61,7 @@ public class StrongPruning {
 
     void performPruning(){
 
-        progressTracker.beginSubTask("Pruning Phase");
+        progressTracker.beginSubTask(/*Pruning Phase*/);
         if (activeOriginalNodes.cardinality() == 1){
             var singleActiveNode = activeOriginalNodes.nextSetBit(0);
             parentArray.set(singleActiveNode, PrizeSteinerTreeResult.ROOT);
@@ -134,7 +134,7 @@ public class StrongPruning {
 
         }
 
-        progressTracker.endSubTask("Pruning Phase");
+        progressTracker.endSubTask(/*Pruning Phase*/);
 
 
     }

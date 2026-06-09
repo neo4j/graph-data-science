@@ -120,7 +120,7 @@ public final class RandomWalkCountingNodeVisits extends Algorithm<HugeAtomicLong
 
     @Override
     public HugeAtomicLongArray compute() {
-        progressTracker.beginSubTask("RandomWalk");
+        progressTracker.beginSubTask(/*RandomWalk*/);
 
         var result = HugeAtomicLongArray.of(
             graph.nodeCount(),
@@ -141,7 +141,7 @@ public final class RandomWalkCountingNodeVisits extends Algorithm<HugeAtomicLong
             .mayInterruptIfRunning(true)
             .run();
 
-        progressTracker.endSubTask("RandomWalk");
+        progressTracker.endSubTask(/*RandomWalk*/);
 
         return result;
     }

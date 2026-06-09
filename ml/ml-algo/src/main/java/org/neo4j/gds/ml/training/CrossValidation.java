@@ -92,7 +92,7 @@ public class CrossValidation<MODEL_TYPE> {
         TrainingStatistics trainingStatistics,
         Iterator<TrainerConfig> modelCandidates
     ) {
-        progressTracker.beginSubTask("Create validation folds");
+        progressTracker.beginSubTask(/*Create validation folds*/);
         List<TrainingExamplesSplit> validationSplits = new StratifiedKFoldSplitter(
             validationFolds,
             outerTrainSet,
@@ -100,13 +100,12 @@ public class CrossValidation<MODEL_TYPE> {
             randomSeed,
             distinctInternalTargets
         ).splits();
-        progressTracker.endSubTask("Create validation folds");
+        progressTracker.endSubTask(/*Create validation folds*/);
 
-        progressTracker.beginSubTask("Select best model");
+        progressTracker.beginSubTask(/*Select best model*/);
         int trial = 0;
         while (modelCandidates.hasNext()) {
-            progressTracker.beginSubTask("Trial");
-            progressTracker.setSteps(validationSplits.size());
+            progressTracker.beginSubTaskWithSteps(/*Trial*/validationSplits.size());
 
             terminationFlag.assertRunning();
 
@@ -133,7 +132,7 @@ public class CrossValidation<MODEL_TYPE> {
                 modelEvaluator.evaluate(validationSet, trainedModel, validationStatsBuilder::update);
                 modelEvaluator.evaluate(trainSet, trainedModel, trainStatsBuilder::update);
 
-                progressTracker.logSteps(1);
+                progressTracker.onSteps(1);
 
                 fold++;
             }
@@ -159,7 +158,7 @@ public class CrossValidation<MODEL_TYPE> {
 
             trial++;
 
-            progressTracker.endSubTask("Trial");
+            progressTracker.endSubTask(/*Trial*/);
         }
 
         int bestTrial = trainingStatistics.getBestTrialIdx() + 1;
@@ -170,7 +169,7 @@ public class CrossValidation<MODEL_TYPE> {
             bestTrialScore
         ));
 
-        progressTracker.endSubTask("Select best model");
+        progressTracker.endSubTask(/*Select best model*/);
     }
 
     @FunctionalInterface

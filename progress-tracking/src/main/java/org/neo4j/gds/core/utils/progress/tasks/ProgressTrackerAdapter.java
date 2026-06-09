@@ -53,13 +53,8 @@ public abstract class ProgressTrackerAdapter implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription) {
-        delegate.beginSubTask(expectedTaskDescription);
-    }
-
-    @Override
-    public void beginSubTask(String expectedTaskDescription, long taskVolume) {
-        delegate.beginSubTask(expectedTaskDescription, taskVolume);
+    public void beginSubTaskWithSteps(long numberOfSteps) {
+        delegate.beginSubTaskWithSteps(numberOfSteps);
     }
 
     @Override
@@ -68,18 +63,8 @@ public abstract class ProgressTrackerAdapter implements ProgressTracker {
     }
 
     @Override
-    public void endSubTask(String expectedTaskDescription) {
-        delegate.endSubTask(expectedTaskDescription);
-    }
-
-    @Override
     public void endSubTaskWithFailure() {
         delegate.endSubTaskWithFailure();
-    }
-
-    @Override
-    public void endSubTaskWithFailure(String expectedTaskDescription) {
-        delegate.endSubTaskWithFailure(expectedTaskDescription);
     }
 
     @Override
@@ -98,12 +83,7 @@ public abstract class ProgressTrackerAdapter implements ProgressTracker {
     }
 
     @Override
-    public void setSteps(long steps) {
-        delegate.setSteps(steps);
-    }
-
-    @Override
-    public void logSteps(long steps) {
-        delegate.logSteps(steps);
+    public void onSteps(long steps) {
+        delegate.onSteps(steps);
     }
 }

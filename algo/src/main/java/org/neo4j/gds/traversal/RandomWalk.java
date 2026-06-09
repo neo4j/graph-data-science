@@ -142,7 +142,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     @Override
     public Stream<long[]> compute() {
-        progressTracker.beginSubTask("RandomWalk");
+        progressTracker.beginSubTask(/*RandomWalk*/);
         var taskSupplier = createRandomWalkTaskSupplier();
 
         startWalkers(
@@ -196,7 +196,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     }
 
     private void runTasks(Iterable<? extends Runnable> tasks) {
-        progressTracker.beginSubTask("create walks");
+        progressTracker.beginSubTask(/*create walks*/);
 
         RunWithConcurrency.builder()
             .executor(this.executorService)
@@ -206,7 +206,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             .mayInterruptIfRunning(true)
             .run();
 
-        progressTracker.endSubTask("create walks");
+        progressTracker.endSubTask(/*create walks*/);
 
         try {
             boolean finished = false;

@@ -128,18 +128,21 @@ public final class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription) {
-        beginSubTask();
-        assertSubTask(expectedTaskDescription);
-    }
-
-    @Override
     public void beginSubTask(long taskVolume) {
         beginSubTask();
         setVolume(taskVolume);
     }
 
     @Override
+    public void beginSubTaskWithSteps(long numberOfSteps) {
+        beginSubTask();
+        setSteps(numberOfSteps);
+    }
+
+    /**
+     * @deprecated do not use this, it is a hole in our abstraction
+     */
+    @Deprecated
     public void setSteps(long steps) {
         if (steps <= 0) {
             throw new IllegalStateException(formatWithLocale(
@@ -151,7 +154,7 @@ public final class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void logSteps(long steps) { // x
+    public void onSteps(long steps) { // x
         requireCurrentTask();
         currentTask.ifPresent(task -> {
             long volume = task.getProgress().volume();
@@ -160,13 +163,6 @@ public final class TaskProgressTracker implements ProgressTracker {
             progressLeftOvers = progress - longProgress;
             onProgress(longProgress);
         });
-    }
-
-    @Override
-    public void beginSubTask(String expectedTaskDescription, long taskVolume) { // x
-        beginSubTask();
-        assertSubTask(expectedTaskDescription);
-        setVolume(taskVolume);
     }
 
     @Override
@@ -185,12 +181,6 @@ public final class TaskProgressTracker implements ProgressTracker {
             }
         );
 
-    }
-
-    @Override
-    public void endSubTask(String expectedTaskDescription) {
-        assertSubTask(expectedTaskDescription);
-        endSubTask();
     }
 
     @Override
@@ -214,6 +204,7 @@ public final class TaskProgressTracker implements ProgressTracker {
     /**
      * @deprecated do not use this, it is a hole in our abstraction
      */
+    @Deprecated
     public void setVolume(long volume) {
         requireCurrentTask();
         currentTask.ifPresent(task -> {
@@ -243,12 +234,6 @@ public final class TaskProgressTracker implements ProgressTracker {
         }
 
         release();
-    }
-
-    @Override
-    public void endSubTaskWithFailure(String expectedTaskDescription) {
-        assertSubTask(expectedTaskDescription);
-        endSubTaskWithFailure();
     }
 
     Task currentSubTask() {
@@ -282,17 +267,6 @@ public final class TaskProgressTracker implements ProgressTracker {
 
             taskProgressLogger.logWarning(message);
         }
-    }
-
-    public void assertSubTask(String subTaskSubString) {
-        currentTask.ifPresent(task -> {
-            var currentTaskDescription = task.description();
-            assert currentTaskDescription.contains(subTaskSubString) : formatWithLocale(
-                "Expected task name to contain `%s`, but was `%s`",
-                subTaskSubString,
-                currentTaskDescription
-            );
-        });
     }
 
     public Optional<Task> getCurrentTask() {

@@ -54,7 +54,7 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
 
     @Override
     BatchLoadResult loadSingleBatch(InternalTransaction tx, int bufferSize) {
-        progressTracker.beginSubTask("Nodes", nodeCount);
+        progressTracker.beginSubTask(/*Nodes*/nodeCount);
 
         var nodeSubscriber = new NodeSubscriber(progressTracker);
         var subscription = runLoadingQuery(tx, nodeSubscriber);
@@ -81,7 +81,7 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
         if (rows == 0) {
             nodesBuilder.close(new IllegalArgumentException("Node-Query returned no nodes"));
         }
-        progressTracker.endSubTask("Nodes");
+        progressTracker.endSubTask(/*Nodes*/);
         return new BatchLoadResult(rows, nodeSubscriber.maxId());
     }
 

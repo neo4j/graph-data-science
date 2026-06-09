@@ -87,7 +87,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
 
     @Override
     BatchLoadResult loadSingleBatch(InternalTransaction tx, int bufferSize) {
-        progressTracker.beginSubTask("Relationships");
+        progressTracker.beginSubTask(/*Relationships*/);
 
         var subscriber = new RelationshipSubscriber(idMap, loaderContext, cypherConfig.validateRelationships(), progressTracker);
         var subscription = runLoadingQuery(tx, subscriber);
@@ -112,7 +112,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
         subscriber.error().ifPresent(e -> {
             throw e;
         });
-        progressTracker.endSubTask("Relationships");
+        progressTracker.endSubTask(/*Relationships*/);
         return new BatchLoadResult(subscriber.rows(), -1L);
     }
 

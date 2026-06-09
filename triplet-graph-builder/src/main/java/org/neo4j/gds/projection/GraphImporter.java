@@ -112,8 +112,8 @@ public final class GraphImporter {
         this.relImporters = new ConcurrentHashMap<>();
         this.graphSchemaBuilder = MutableGraphSchema.builder();
 
-        progressTracker.beginSubTask("Graph aggregation");
-        progressTracker.beginSubTask("Update aggregation");
+        progressTracker.beginSubTask(/*Graph aggregation*/);
+        progressTracker.beginSubTask(/*Update aggregation*/);
     }
 
     public void update(
@@ -200,9 +200,9 @@ public final class GraphImporter {
         ProgressTimer timer,
         boolean hasSeenArbitraryId
     ) {
-        progressTracker.endSubTask("Update aggregation");
-        progressTracker.beginSubTask("Build graph store");
-        progressTracker.beginSubTask("Nodes");
+        progressTracker.endSubTask(/*Update aggregation*/);
+        progressTracker.beginSubTask(/*Build graph store*/);
+        progressTracker.beginSubTask(/*Nodes*/);
         var graphName = config.graphName();
 
         if (graphStoreCatalogService.graphExists(
@@ -225,14 +225,14 @@ public final class GraphImporter {
             .databaseInfo(databaseInfo);
 
         var valueMapper = buildNodesWithProperties(graphStoreBuilder);
-        progressTracker.endSubTask("Nodes");
+        progressTracker.endSubTask(/*Nodes*/);
 
-        progressTracker.beginSubTask("Relationships");
+        progressTracker.beginSubTask(/*Relationships*/);
         buildRelationshipsWithProperties(graphStoreBuilder, valueMapper);
 
         var graphStore = graphStoreBuilder.schema(this.graphSchemaBuilder.build()).build();
         validateRelTypes(graphStore.schema().relationshipSchema());
-        progressTracker.endSubTask("Relationships");
+        progressTracker.endSubTask(/*Relationships*/);
 
         log.info(StringFormatting.formatWithLocale(
             "Imported Graph: {nodes: {count: %d, propertyCount: %d, labelCount: %d}, relationships: {count: %d, typeCount: %d, propertyCount: %d}}'",
@@ -248,8 +248,8 @@ public final class GraphImporter {
 
         var projectMillis = timer.stop().getDuration();
 
-        progressTracker.endSubTask("Build graph store");
-        progressTracker.endSubTask("Graph aggregation");
+        progressTracker.endSubTask(/*Build graph store*/);
+        progressTracker.endSubTask(/*Graph aggregation*/);
 
         return ProjectionResultBuilder.builder()
             .graphName(graphName)

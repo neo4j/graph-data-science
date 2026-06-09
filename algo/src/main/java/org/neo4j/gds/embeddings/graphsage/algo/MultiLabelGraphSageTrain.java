@@ -75,7 +75,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
 
     @Override
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
-        progressTracker.beginSubTask("GraphSageTrain");
+        progressTracker.beginSubTask(/*GraphSageTrain*/);
         terminationFlag.assertRunning();
         var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(
             graph,
@@ -99,7 +99,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
             initializeMultiLabelFeatures(graph, multiLabelFeatureExtractors)
         );
 
-        progressTracker.endSubTask("GraphSageTrain");
+        progressTracker.endSubTask(/*GraphSageTrain*/);
 
         return Model.of(
             gdsVersion,

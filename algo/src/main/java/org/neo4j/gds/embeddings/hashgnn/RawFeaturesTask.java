@@ -71,7 +71,7 @@ class RawFeaturesTask implements Runnable {
         TerminationFlag terminationFlag,
         MutableLong totalFeatureCountOutput
     ) {
-        progressTracker.beginSubTask("Extract raw node property features");
+        progressTracker.beginSubTask(/*Extract raw node property features*/);
 
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         int inputDimension = FeatureExtraction.featureCount(featureExtractors);
@@ -96,7 +96,7 @@ class RawFeaturesTask implements Runnable {
 
         totalFeatureCountOutput.add(tasks.stream().mapToLong(RawFeaturesTask::totalFeatureCount).sum());
 
-        progressTracker.endSubTask("Extract raw node property features");
+        progressTracker.endSubTask(/*Extract raw node property features*/);
 
         return features;
     }

@@ -79,7 +79,6 @@ final class LinkFeaturesAndLabelsExtractor {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        progressTracker.setSteps(graph.relationshipCount() * 2);
         var features = LinkFeatureExtractor.extractFeatures(
             graph,
             featureSteps,
@@ -127,7 +126,7 @@ final class LinkFeaturesAndLabelsExtractor {
                     }
                     return true;
                 }));
-                    progressTracker.logSteps(partition.relationshipCount());
+                    progressTracker.onSteps(partition.relationshipCount());
                 }
             );
             relationshipOffset.add(partition.relationshipCount());

@@ -44,22 +44,12 @@ class NullProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public void beginSubTaskWithSteps(long numberOfSteps) {
+
+    }
+
+    @Override
     public void endSubTask() {
-    }
-
-    @Override
-    public void beginSubTask(String expectedTaskDescription) {
-
-    }
-
-    @Override
-    public void beginSubTask(String expectedTaskDescription, long taskVolume) {
-
-    }
-
-    @Override
-    public void endSubTask(String expectedTaskDescription) {
-
     }
 
     @Override
@@ -72,12 +62,7 @@ class NullProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void setSteps(long steps) {
-
-    }
-
-    @Override
-    public void logSteps(long steps) {
+    public void onSteps(long steps) {
 
     }
 
@@ -90,8 +75,4 @@ class NullProgressTracker implements ProgressTracker {
 
     }
 
-    @Override
-    public void endSubTaskWithFailure(String expectedTaskDescription) {
-
-    }
 }

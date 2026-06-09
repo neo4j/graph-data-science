@@ -81,7 +81,7 @@ public class GraphSampleConstructor {
     }
 
     public GraphStore compute() {
-        progressTracker.beginSubTask(nodesSampler.progressTaskName());
+        progressTracker.beginSubTask();
 
         var inputGraph = inputGraphStore.getGraph(
             config.nodeLabelIdentifiers(inputGraphStore),
@@ -92,7 +92,7 @@ public class GraphSampleConstructor {
 
         var sampledNodesBitSet = nodesSampler.compute(inputGraph, progressTracker);
 
-        progressTracker.beginSubTask("Construct graph");
+        progressTracker.beginSubTask(/*Construct graph*/);
 
         var idMap = computeIdMap(inputGraph, sampledNodesBitSet);
 
@@ -153,16 +153,15 @@ public class GraphSampleConstructor {
             outputGraphStore.relationshipPropertyKeys().size()
         ));
 
-        progressTracker.endSubTask("Construct graph");
+        progressTracker.endSubTask(/*Construct graph*/);
 
-        progressTracker.endSubTask(nodesSampler.progressTaskName());
+        progressTracker.endSubTask();
 
         return outputGraphStore;
     }
 
     private IdMap computeIdMap(Graph inputGraph, HugeAtomicBitSet sampledNodesBitSet) {
-        progressTracker.beginSubTask("Construct node id map");
-        progressTracker.setSteps(inputGraph.nodeCount());
+        progressTracker.beginSubTaskWithSteps(/*Construct node id map*/inputGraph.nodeCount());
 
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
@@ -190,7 +189,7 @@ public class GraphSampleConstructor {
             .tasks(tasks)
             .run();
         var idMap = nodesBuilder.build().idMap();
-        progressTracker.endSubTask("Construct node id map");
+        progressTracker.endSubTask(/*Construct node id map*/);
 
         return idMap;
     }
@@ -236,7 +235,7 @@ public class GraphSampleConstructor {
                 }
             }
 
-            progressTracker.logSteps(partition.nodeCount());
+            progressTracker.onSteps(partition.nodeCount());
         }
     }
 

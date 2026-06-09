@@ -146,22 +146,22 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     @Override
     public ModularityOptimizationResult compute() {
-        progressTracker.beginSubTask("ModularityOptimization");
+        progressTracker.beginSubTask(/*ModularityOptimization*/);
 
 
-        progressTracker.beginSubTask("initialization");
+        progressTracker.beginSubTask(/*initialization*/);
         computeColoring();
         initSeeding();
         init();
         progressTracker.endSubTask();
 
 
-        progressTracker.beginSubTask("compute modularity");
+        progressTracker.beginSubTask(/*compute modularity*/);
 
         long numberOfColors = modularityColorArray.numberOfColors();
 
         for (iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
-            progressTracker.beginSubTask("optimizeForColor");
+            progressTracker.beginSubTask(/*optimizeForColor*/);
 
             boolean hasConverged;
 

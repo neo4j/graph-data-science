@@ -80,18 +80,18 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
 
     @Override
     public PathFindingResult compute() {
-        this.progressTracker.beginSubTask("LongestPath");
+        this.progressTracker.beginSubTask(/*LongestPath*/);
 
         initializeInDegrees();
         traverse();
 
-        this.progressTracker.endSubTask("LongestPath");
+        this.progressTracker.endSubTask(/*LongestPath*/);
 
         return new PathFindingResult(pathResults(parentsAndDistances, concurrency));
     }
 
     private void initializeInDegrees() {
-        this.progressTracker.beginSubTask("Initialization");
+        this.progressTracker.beginSubTask(/*Initialization*/);
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
             concurrency,
@@ -107,11 +107,11 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
                 progressTracker.onProgress();
             }
         );
-        this.progressTracker.endSubTask("Initialization");
+        this.progressTracker.endSubTask(/*Initialization*/);
     }
 
     private void traverse() {
-        this.progressTracker.beginSubTask("Traversal");
+        this.progressTracker.beginSubTask(/*Traversal*/);
 
         try(var forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency)) {
             var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
@@ -142,7 +142,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
 
             // calling join makes sure the pool waits for all the tasks to complete before shutting down
             tasks.forEach(ForkJoinTask::join);
-            this.progressTracker.endSubTask("Traversal");
+            this.progressTracker.endSubTask(/*Traversal*/);
         }
     }
 

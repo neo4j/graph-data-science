@@ -86,7 +86,7 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
 
     @Override
     public Node2VecResult compute() {
-        progressTracker.beginSubTask("Node2Vec");
+        progressTracker.beginSubTask(/*Node2Vec*/);
 
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
@@ -122,7 +122,7 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
 
         var result = node2VecModel.train();
 
-        progressTracker.endSubTask("Node2Vec");
+        progressTracker.endSubTask(/*Node2Vec*/);
         return result;
     }
 
@@ -177,7 +177,7 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
     CompressedRandomWalks createWalks(RandomWalkProbabilitiesBuilder probabilitiesBuilder){
         var walks = new CompressedRandomWalks(graph.nodeCount() * samplingWalkParameters.walksPerNode());
 
-        progressTracker.beginSubTask("RandomWalk");
+        progressTracker.beginSubTask(/*RandomWalk*/);
 
         var tasks = walkTasks(
             walks,
@@ -193,7 +193,7 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
             terminationFlag
         );
 
-        progressTracker.beginSubTask("create walks");
+        progressTracker.beginSubTask(/*create walks*/);
         RunWithConcurrency.builder().concurrency(concurrency).tasks(tasks).run();
         walks.setMaxWalkLength(tasks.stream()
             .map(Node2VecRandomWalkTask::maxWalkLength)
@@ -205,8 +205,8 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
             .max(Long::compareTo)
             .orElse(0L));
 
-        progressTracker.endSubTask("create walks");
-        progressTracker.endSubTask("RandomWalk");
+        progressTracker.endSubTask(/*create walks*/);
+        progressTracker.endSubTask(/*RandomWalk*/);
 
         return walks;
     }

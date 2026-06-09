@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
     private final KnnParameters knnParameters;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
     public ApproximateLinkPrediction(
@@ -56,10 +57,10 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             graph,
             sourceNodeFilter,
             targetNodeFilter,
-            knnParameters.concurrency(),
-            progressTracker
+            knnParameters.concurrency()
         );
         this.knnParameters = knnParameters;
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
     }
 
@@ -69,6 +70,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
 
     @Override
     LinkPredictionResult predictLinks(LinkPredictionSimilarityComputer linkPredictionSimilarityComputer) {
+        progressTracker.beginSubTask();
         var knn = Knn.create(
             graph,
             knnParameters,
@@ -87,6 +89,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
 
         knn.setTerminationFlag(terminationFlag);
         var knnResult = knn.compute();
+
+        progressTracker.endSubTask();
 
         return new Result(knnResult);
     }

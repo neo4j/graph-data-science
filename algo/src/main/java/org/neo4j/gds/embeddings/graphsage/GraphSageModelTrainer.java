@@ -118,7 +118,7 @@ public class GraphSageModelTrainer {
             weights.addAll(layer.weights());
         }
 
-        progressTracker.beginSubTask("Prepare batches");
+        progressTracker.beginSubTask(/*Prepare batches*/);
 
         var batchSampler = new BatchSampler(graph, progressTracker, terminationFlag);
 
@@ -127,9 +127,9 @@ public class GraphSageModelTrainer {
 
         var random = new SplittableRandom(randomSeed);
 
-        progressTracker.endSubTask("Prepare batches");
+        progressTracker.endSubTask(/*Prepare batches*/);
 
-        progressTracker.beginSubTask("Train model");
+        progressTracker.beginSubTask(/*Train model*/);
 
         boolean converged = false;
         var iterationLossesPerEpoch = new ArrayList<List<Double>>();
@@ -140,7 +140,7 @@ public class GraphSageModelTrainer {
         boolean createBatchTasksEagerly = parameters.batchesPerIteration(graph.nodeCount()) * parameters.maxIterations() > extendedBatches.size();
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
-            progressTracker.beginSubTask("Epoch");
+            progressTracker.beginSubTask(/*Epoch*/);
             terminationFlag.assertRunning();
             // also tried using random.nextLong() but this somehow had a worse quality
             long epochLocalSeed = epoch + randomSeed;
@@ -181,10 +181,10 @@ public class GraphSageModelTrainer {
             iterationLossesPerEpoch.add(epochLosses);
             prevEpochLoss = epochLosses.get(epochLosses.size() - 1);
             converged = epochResult.converged();
-            progressTracker.endSubTask("Epoch");
+            progressTracker.endSubTask(/*Epoch*/);
         }
 
-        progressTracker.endSubTask("Train model");
+        progressTracker.endSubTask(/*Train model*/);
 
         return ModelTrainResult.of(iterationLossesPerEpoch, converged, layers);
     }
@@ -259,7 +259,7 @@ public class GraphSageModelTrainer {
 
         int maxIterations = parameters.maxIterations();
         for (; iteration <= maxIterations; iteration++) {
-            progressTracker.beginSubTask("Iteration");
+            progressTracker.beginSubTask(/*Iteration*/);
             terminationFlag.assertRunning();
 
             var sampledBatchTasks = sampledBatchTaskSupplier.get();
@@ -276,7 +276,7 @@ public class GraphSageModelTrainer {
 
             if (Math.abs(prevLoss - avgLossPerNode) < parameters.tolerance()) {
                 converged = true;
-                progressTracker.endSubTask("Iteration");
+                progressTracker.endSubTask(/*Iteration*/);
                 break;
             }
 
@@ -290,7 +290,7 @@ public class GraphSageModelTrainer {
             var meanGradients = averageTensors(batchedGradients);
 
             updater.update(meanGradients);
-            progressTracker.endSubTask("Iteration");
+            progressTracker.endSubTask(/*Iteration*/);
         }
 
         return new EpochResult(converged, iterationLosses);

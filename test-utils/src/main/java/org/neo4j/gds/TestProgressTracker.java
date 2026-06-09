@@ -101,16 +101,9 @@ public final class TestProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void beginSubTask(String expectedTaskDescription) {
+    public void beginSubTaskWithSteps(long numberOfSteps) {
         beginSubTask();
-        delegate.assertSubTask(expectedTaskDescription);
-    }
-
-    @Override
-    public void beginSubTask(String expectedTaskDescription, long taskVolume) {
-        beginSubTask();
-        delegate.assertSubTask(expectedTaskDescription);
-        setVolume(taskVolume);
+        setSteps(numberOfSteps);
     }
 
     @Override
@@ -119,18 +112,8 @@ public final class TestProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void endSubTask(String expectedTaskDescription) {
-        delegate.endSubTask(expectedTaskDescription);
-    }
-
-    @Override
     public void endSubTaskWithFailure() {
         delegate.endSubTaskWithFailure();
-    }
-
-    @Override
-    public void endSubTaskWithFailure(String expectedTaskDescription) {
-        delegate.endSubTaskWithFailure(expectedTaskDescription);
     }
 
     private void setVolume(long volume) {
@@ -145,13 +128,13 @@ public final class TestProgressTracker implements ProgressTracker {
         delegate.release();
     }
 
-    @Override
-    public void setSteps(long steps) {
-        delegate.setSteps(steps);
+    private void setSteps(long steps) {
+        // this is some dirty, dirty business that I can't unravel - apologies
+        if (delegate instanceof TaskProgressTracker tpt) tpt.setSteps(steps);
     }
 
     @Override
-    public void logSteps(long steps) {
+    public void onSteps(long steps) {
         delegate.requireCurrentTask();
         delegate.currentTask.ifPresent(task -> {
             long volume = task.getProgress().volume();

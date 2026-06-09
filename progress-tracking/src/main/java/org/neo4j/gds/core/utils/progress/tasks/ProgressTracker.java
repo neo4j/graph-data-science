@@ -29,6 +29,16 @@ import java.util.function.Function;
  * _Logging_ that progress is a separate concern, which is not offered here.
  * This interface deals with navigating up and down the task tree, and issuing update events.
  * And then it deals with some legacy breakages of encapsulation, plus some conceptual breakages that are not great.
+ * The pattern for using these, is this:
+ * <ol>
+ *     <li>begin*</li>
+ *     <li>on*</li>
+ *     <li>...</li>
+ *     <li>end*</li>
+ *     <li>release</li>
+ * </ol>
+ * NB: The release call only happens on the outer one
+ * Looking at that high level description: it smells a lot like try-with-resources innit - maybe one day...
  */
 public interface ProgressTracker {
     ProgressTracker NULL_TRACKER = new NullProgressTracker();
@@ -37,9 +47,7 @@ public interface ProgressTracker {
 
     void beginSubTask(long taskVolume);
 
-    void beginSubTask(String expectedTaskDescription);
-
-    void beginSubTask(String expectedTaskDescription, long taskVolume);
+    void beginSubTaskWithSteps(long numberOfSteps);
 
     void onProgress(long value);
 
@@ -49,19 +57,13 @@ public interface ProgressTracker {
         onProgress(1);
     }
 
-    void endSubTask();
+    void onSteps(long steps);
 
-    void endSubTask(String expectedTaskDescription);
+    void endSubTask();
 
     void endSubTaskWithFailure();
 
-    void endSubTaskWithFailure(String expectedTaskDescription);
-
     void release();
-
-    void setSteps(long steps);
-
-    void logSteps(long steps);
 
     /*
      * Conceptual breakages - where we make our code less cohesive by coupling unrelated things.

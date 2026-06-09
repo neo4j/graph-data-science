@@ -134,8 +134,7 @@ public class NodeClassificationPredict {
     }
 
     public NodeClassificationResult compute() {
-        progressTracker.beginSubTask();
-        progressTracker.setSteps(features.size());
+        progressTracker.beginSubTaskWithSteps(features.size());
         var predictedProbabilities = initProbabilities();
         var predictedClasses = predictor.predict(predictedProbabilities);
         progressTracker.endSubTask();

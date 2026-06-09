@@ -66,7 +66,7 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkBasedNodesSampler 
     public HugeAtomicBitSet compute(Graph inputGraph, ProgressTracker progressTracker) {
         assert inputGraph.hasRelationshipProperty() == config.hasRelationshipWeightProperty();
 
-        progressTracker.beginSubTask("Sample nodes");
+        progressTracker.beginSubTask(/*Sample nodes*/);
 
         var seenNodes = SeenNodes.create(
             inputGraph,
@@ -78,13 +78,12 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkBasedNodesSampler 
         );
 
         if (seenNodes.totalExpectedNodes() == 0) {
-            progressTracker.endSubTask("Sample nodes");
+            progressTracker.endSubTask(/*Sample nodes*/);
             return seenNodes.sampledNodes();
         }
 
 
-        progressTracker.beginSubTask("Do common neighbour aware random walks");
-        progressTracker.setSteps(seenNodes.totalExpectedNodes());
+        progressTracker.beginSubTaskWithSteps(/*Do common neighbour aware random walks*/seenNodes.totalExpectedNodes());
 
         startNodesUsed = new LongHashSet();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
@@ -112,9 +111,9 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkBasedNodesSampler 
 
         tasks.forEach(task -> startNodesUsed.addAll(((Walker) task).startNodesUsed()));
 
-        progressTracker.endSubTask("Do common neighbour aware random walks");
+        progressTracker.endSubTask(/*Do common neighbour aware random walks*/);
 
-        progressTracker.endSubTask("Sample nodes");
+        progressTracker.endSubTask(/*Sample nodes*/);
 
         return seenNodes.sampledNodes();
     }

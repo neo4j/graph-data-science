@@ -57,7 +57,7 @@ public class NodeRegressionPredict {
 
 
     public HugeDoubleArray compute() {
-        progressTracker.beginSubTask("Predict");
+        progressTracker.beginSubTask(/*Predict*/);
         var predictedTargets = HugeDoubleArray.newArray(features.size());
         ParallelUtil.parallelForEachNode(
             features.size(),
@@ -65,7 +65,7 @@ public class NodeRegressionPredict {
             terminationFlag,
             id -> predictedTargets.set(id, regressor.predict(features.get(id)))
         );
-        progressTracker.endSubTask("Predict");
+        progressTracker.endSubTask(/*Predict*/);
 
         return predictedTargets;
     }

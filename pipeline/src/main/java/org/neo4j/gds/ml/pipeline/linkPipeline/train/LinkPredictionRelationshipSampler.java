@@ -90,7 +90,7 @@ public class LinkPredictionRelationshipSampler {
     public void splitAndSampleRelationships(
         Optional<String> relationshipWeightProperty
     ) {
-        progressTracker.beginSubTask("Split relationships");
+        progressTracker.beginSubTask(/*Split relationships*/);
 
         splitConfig.validateAgainstGraphStore(graphStore, trainConfig.internalTargetRelationshipType());
 
@@ -170,7 +170,7 @@ public class LinkPredictionRelationshipSampler {
         validateTrainSplit(graphStore);
         graphStore.deleteRelationships(testComplementRelationshipType);
 
-        progressTracker.endSubTask("Split relationships");
+        progressTracker.endSubTask(/*Split relationships*/);
     }
 
     private EdgeSplitter.SplitResult split(

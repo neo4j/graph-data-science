@@ -127,7 +127,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         var progressTracker = createProgressTracker(graphStoreInput);
         var pbiInput = graphStoreInput.toInput();
         try {
-            progressTracker.beginSubTask("Csv export");
+            progressTracker.beginSubTask(/*Csv export*/);
             exportUserName();
             exportGraphInfo(graphStoreInput);
             exportNodeSchema(graphStoreInput);

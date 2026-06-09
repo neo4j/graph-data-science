@@ -72,7 +72,7 @@ abstract class ScanningRecordsImporter<Record, T> {
             StoreScanner.DEFAULT_PREFETCH_SIZE,
             transaction
         )) {
-            progressTracker.beginSubTask("Store Scan");
+            progressTracker.beginSubTask(/*Store Scan*/);
 
             log.info(formatWithLocale("Start using %s", storeScanner.getClass().getSimpleName()));
 
@@ -112,7 +112,7 @@ abstract class ScanningRecordsImporter<Record, T> {
             );
 
         } finally {
-            progressTracker.endSubTask("Store Scan");
+            progressTracker.endSubTask(/*Store Scan*/);
         }
 
         return build();

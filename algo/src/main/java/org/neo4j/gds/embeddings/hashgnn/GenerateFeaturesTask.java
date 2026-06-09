@@ -70,7 +70,7 @@ class GenerateFeaturesTask implements Runnable {
         TerminationFlag terminationFlag,
         MutableLong totalFeatureCountOutput
     ) {
-        progressTracker.beginSubTask("Generate base node property features");
+        progressTracker.beginSubTask(/*Generate base node property features*/);
 
         var output = HugeObjectArray.newArray(HugeAtomicBitSet.class, graph.nodeCount());
 
@@ -92,7 +92,7 @@ class GenerateFeaturesTask implements Runnable {
 
         totalFeatureCountOutput.add(tasks.stream().mapToLong(GenerateFeaturesTask::totalFeatureCount).sum());
 
-        progressTracker.endSubTask("Generate base node property features");
+        progressTracker.endSubTask(/*Generate base node property features*/);
 
         return output;
     }

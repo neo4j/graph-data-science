@@ -75,7 +75,7 @@ public class SimpleRerouter extends ReroutingAlgorithm {
         DoubleAdder totalCost,
         LongAdder effectiveNodeCount
     ) {
-        progressTracker.beginSubTask("Reroute");
+        progressTracker.beginSubTask(/*Reroute*/);
         //First, represent the tree as an LinkCutTree:
         // This is a dynamic tree (can answer connectivity like UnionFind)
         // but can also do some other cool stuff like answering path queries
@@ -107,7 +107,7 @@ public class SimpleRerouter extends ReroutingAlgorithm {
         if (didReroutes.isTrue()) {
             cutNodesAfterRerouting(parent, parentCost, totalCost, effectiveNodeCount);
         }
-        progressTracker.endSubTask("Reroute");
+        progressTracker.endSubTask(/*Reroute*/);
     }
 
     private void cutNodesAfterRerouting(

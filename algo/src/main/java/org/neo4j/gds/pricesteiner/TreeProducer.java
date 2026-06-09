@@ -35,7 +35,7 @@ public final class TreeProducer {
 
     static TreeStructure createTree(GrowthResult growthResult,long nodeCount, IdMap idMap, ProgressTracker progressTracker){
 
-        progressTracker.beginSubTask("Tree Creation");
+        progressTracker.beginSubTask(/*Tree Creation*/);
 
         var treeEdges = growthResult.treeEdges();
         var numberOfTreeEdges = growthResult.numberOfTreeEdges();
@@ -66,7 +66,7 @@ public final class TreeProducer {
         var singleTypeRelationships= relationshipsBuilder.build();
         var tree = GraphFactory.create(idMap, singleTypeRelationships);
 
-        progressTracker.endSubTask("Tree Creation");
+        progressTracker.endSubTask(/*Tree Creation*/);
         return new TreeStructure(tree,degree,  idMap.nodeCount());
 
     }

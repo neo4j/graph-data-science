@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
@@ -38,7 +37,6 @@ public abstract class LinkPrediction {
     protected final LPNodeFilter targetNodeFilter;
 
     protected final Concurrency concurrency;
-    final ProgressTracker progressTracker;
 
     LinkPrediction(
         Classifier classifier,
@@ -46,8 +44,7 @@ public abstract class LinkPrediction {
         Graph graph,
         LPNodeFilter sourceNodeFilter,
         LPNodeFilter targetNodeFilter,
-        Concurrency concurrency,
-        ProgressTracker progressTracker
+        Concurrency concurrency
     ) {
         this.classifier = classifier;
         this.linkFeatureExtractor = linkFeatureExtractor;
@@ -55,20 +52,9 @@ public abstract class LinkPrediction {
         this.sourceNodeFilter = sourceNodeFilter;
         this.targetNodeFilter = targetNodeFilter;
         this.concurrency = concurrency;
-        this.progressTracker = progressTracker;
     }
 
     public LinkPredictionResult compute() {
-        progressTracker.beginSubTask();
-
-        var result = predict();
-
-        progressTracker.endSubTask();
-
-        return result;
-    }
-
-    private LinkPredictionResult predict() {
         var linkPredictionSimilarityComputer = new LinkPredictionSimilarityComputer(
             linkFeatureExtractor,
             classifier
