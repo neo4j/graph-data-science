@@ -65,12 +65,20 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
 
     @Override
     public long toMappedNodeId(long originalNodeId) {
-        return rootToFilteredIdMap.toMappedNodeId(originalToRootIdMap.toMappedNodeId(originalNodeId));
+        var rootNodeId = originalToRootIdMap.toMappedNodeId(originalNodeId);
+        if (rootNodeId == IdMap.NOT_FOUND) {
+            return IdMap.NOT_FOUND;
+        }
+        return rootToFilteredIdMap.toMappedNodeId(rootNodeId);
     }
 
     @Override
     public boolean containsOriginalId(long originalNodeId) {
-        return rootToFilteredIdMap.containsOriginalId(originalToRootIdMap.toMappedNodeId(originalNodeId));
+        var rootNodeId = originalToRootIdMap.toMappedNodeId(originalNodeId);
+        if (rootNodeId == IdMap.NOT_FOUND) {
+            return false;
+        }
+        return rootToFilteredIdMap.containsOriginalId(rootNodeId);
     }
 
     @Override
