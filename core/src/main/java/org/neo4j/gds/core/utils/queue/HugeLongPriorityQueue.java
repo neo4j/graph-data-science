@@ -283,7 +283,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     public PrimitiveIterator.OfLong iterator() {
         return new PrimitiveIterator.OfLong() {
 
-            int i = 1;
+            long i = 1;
 
             @Override
             public boolean hasNext() {
@@ -330,7 +330,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     /**
      * Returns the element in the i-th position of the heap
      */
-    public long getIth(int i) {
+    public long getIth(long i) {
         return heap.get(i + 1);
     }
 
