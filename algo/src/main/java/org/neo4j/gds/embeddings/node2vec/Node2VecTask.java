@@ -28,22 +28,23 @@ import org.neo4j.gds.degree.DegreeCentralityTask;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Node2VecTask {
-
+public final class Node2VecTask {
     private Node2VecTask() {}
 
     public static Task create(Graph graph, Node2VecParameters parameters) {
         var randomWalkTasks = new ArrayList<Task>();
         if (graph.hasRelationshipProperty()) {
-            randomWalkTasks.add(DegreeCentralityTask.create(graph));
+            randomWalkTasks.add(DegreeCentralityTask.create(parameters.concurrency(), graph.nodeCount()));
         }
-        randomWalkTasks.add(Tasks.leaf("create walks", graph.nodeCount()));
+        randomWalkTasks.add(Tasks.leaf("create walks", parameters.concurrency(), graph.nodeCount()));
         return Tasks.task(
             AlgorithmLabel.Node2Vec.asString(),
-            Tasks.task("RandomWalk", randomWalkTasks),
+            parameters.concurrency(),
+            Tasks.task("RandomWalk", parameters.concurrency(), randomWalkTasks),
             Tasks.iterativeFixed(
                 "train",
-                () -> List.of(Tasks.leaf("iteration")),
+                parameters.concurrency(),
+                () -> List.of(Tasks.leaf("iteration", parameters.concurrency())),
                 parameters.trainParameters().iterations()
             )
         );

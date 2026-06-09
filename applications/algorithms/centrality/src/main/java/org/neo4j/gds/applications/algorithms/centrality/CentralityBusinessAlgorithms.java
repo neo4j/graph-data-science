@@ -62,7 +62,7 @@ public class CentralityBusinessAlgorithms {
     }
 
     PageRankResult articleRank(Graph graph, ArticleRankConfig configuration) {
-        var task = CentralityAlgorithmTasks.articleRank(graph,configuration);
+        var task = CentralityAlgorithmTasks.articleRank(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
@@ -78,7 +78,7 @@ public class CentralityBusinessAlgorithms {
         ArticulationPointsBaseConfig configuration,
         boolean shouldComputeComponents
     ) {
-        var task = CentralityAlgorithmTasks.articulationPoints(graph);
+        var task = CentralityAlgorithmTasks.articulationPoints(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         var params = ArticulationPointsToParameters.toParameters(configuration, shouldComputeComponents);
@@ -104,8 +104,7 @@ public class CentralityBusinessAlgorithms {
     }
 
     BridgeResult bridges(Graph graph, BridgesBaseConfig configuration, boolean shouldComputeComponents) {
-
-        var task = CentralityAlgorithmTasks.bridges(graph);
+        var task = CentralityAlgorithmTasks.bridges(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         var params = BridgesToParameters.toParameters(configuration, shouldComputeComponents);
@@ -138,7 +137,7 @@ public class CentralityBusinessAlgorithms {
     ) {
 
         var params = configuration.toParameters();
-        var task = CentralityAlgorithmTasks.closenessCentrality(graph);
+        var task = CentralityAlgorithmTasks.closenessCentrality(graph, configuration.concurrency());
 
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
@@ -152,7 +151,7 @@ public class CentralityBusinessAlgorithms {
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
 
         var params = configuration.toParameters();
-        var task = CentralityAlgorithmTasks.degreeCentrality(graph);
+        var task = CentralityAlgorithmTasks.degreeCentrality(graph, configuration.concurrency());
 
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
@@ -165,7 +164,7 @@ public class CentralityBusinessAlgorithms {
 
     PageRankResult eigenVector(Graph graph, EigenvectorConfig configuration) {
 
-        var task = CentralityAlgorithmTasks.eigenVector(graph,configuration);
+        var task = CentralityAlgorithmTasks.eigenVector(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
@@ -178,7 +177,7 @@ public class CentralityBusinessAlgorithms {
 
     HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
         var params = configuration.toParameters();
-        var task = CentralityAlgorithmTasks.harmonicCentrality();
+        var task = CentralityAlgorithmTasks.harmonicCentrality(configuration.concurrency());
 
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
@@ -191,7 +190,7 @@ public class CentralityBusinessAlgorithms {
 
     PregelResult hits(Graph graph, HitsConfig configuration) {
 
-        var task = CentralityAlgorithmTasks.hits(graph,configuration);
+        var task = CentralityAlgorithmTasks.hits(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
@@ -202,7 +201,7 @@ public class CentralityBusinessAlgorithms {
     }
 
     IndirectExposureResult indirectExposure(Graph graph, IndirectExposureConfig configuration) {
-        var task = CentralityAlgorithmTasks.indirectExposure(graph,configuration);
+        var task = CentralityAlgorithmTasks.indirectExposure(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
@@ -214,7 +213,7 @@ public class CentralityBusinessAlgorithms {
 
     public PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
 
-        var task = CentralityAlgorithmTasks.pageRank(graph,configuration);
+        var task = CentralityAlgorithmTasks.pageRank(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(

@@ -153,8 +153,8 @@ class ListProgressProcTest extends BaseProgressTest {
         ) {
             var task = Tasks.task(
                 taskName,
-                Tasks.leaf("bar", 3),
-                Tasks.leaf("foo", 3)
+                new Concurrency(1), Tasks.leaf("bar", new Concurrency(1), 3),
+                Tasks.leaf("foo", new Concurrency(1), 3)
             );
             var taskRegistry = taskRegistryFactory.newInstance(new JobId());
             this.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(taskRegistry);

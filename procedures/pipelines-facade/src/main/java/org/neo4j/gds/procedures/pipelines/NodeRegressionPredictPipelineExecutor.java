@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -56,14 +57,22 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
     ) {
         super(pipeline, config, executionContext, graphStore, progressTracker);
         this.regressor = regressor;
-        this.predictGraphFilter = new PipelineGraphFilter(config.nodeLabelIdentifiers(graphStore), config.internalRelationshipTypes(graphStore));
+        this.predictGraphFilter = new PipelineGraphFilter(
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        );
     }
 
-    public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
+    public static Task progressTask(
+        String taskName,
+        Concurrency concurrency,
+        NodePropertyPredictPipeline pipeline, GraphStore graphStore
+    ) {
         return Tasks.task(
             taskName,
-            NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), graphStore.nodeCount()),
-            NodeRegressionPredict.progressTask(graphStore.nodeCount())
+            concurrency,
+            NodePropertyStepExecutor.tasks(concurrency, pipeline.nodePropertySteps(), graphStore.nodeCount()),
+            NodeRegressionPredict.progressTask(concurrency, graphStore.nodeCount())
         );
     }
 

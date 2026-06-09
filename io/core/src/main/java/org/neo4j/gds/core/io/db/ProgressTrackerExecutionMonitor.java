@@ -21,6 +21,7 @@ package org.neo4j.gds.core.io.db;
 
 import org.neo4j.batchimport.api.Monitor;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -38,9 +39,10 @@ public final class ProgressTrackerExecutionMonitor implements Monitor {
         this.progressTracker = progressTracker;
     }
 
-    public static Task progressTask(GraphStore graphStore) {
+    public static Task progressTask(GraphStore graphStore, Concurrency concurrency) {
         return Tasks.leaf(
             GraphStoreToDatabaseExporter.class.getSimpleName(),
+            concurrency,
             graphStore.nodes().nodeCount() + graphStore.relationshipCount()
         );
     }

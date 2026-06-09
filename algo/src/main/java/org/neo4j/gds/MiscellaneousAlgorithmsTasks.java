@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.indexInverse.InverseRelationshipsTask;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
@@ -31,15 +32,15 @@ import org.neo4j.gds.undirected.ToUndirectedTask;
 public final class MiscellaneousAlgorithmsTasks {
     private MiscellaneousAlgorithmsTasks() {}
 
-    public static Task scaleProperties(Graph graph, ScalePropertiesParameters parameters){
+    public static Task scaleProperties(Graph graph, ScalePropertiesParameters parameters) {
         return ScalePropertiesTask.create(graph, parameters);
     }
 
-    public static Task inverseIndex(long nodecount, InverseRelationshipsParameters parameters){
-        return InverseRelationshipsTask.progressTask(nodecount, parameters);
+    public static Task inverseIndex(long nodecount, InverseRelationshipsParameters parameters) {
+        return InverseRelationshipsTask.progressTask(parameters.concurrency(), nodecount, parameters);
     }
 
-    public static Task toUndirected(GraphStore graphStore){
-        return  ToUndirectedTask.create(graphStore.nodeCount());
+    public static Task toUndirected(GraphStore graphStore, Concurrency concurrency) {
+        return ToUndirectedTask.create(concurrency, graphStore.nodeCount());
     }
 }

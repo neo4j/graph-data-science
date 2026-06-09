@@ -157,7 +157,7 @@ class ConductanceTest {
         void shouldLogProgress() {
             var concurrency = new Concurrency(1);
             var progressTrackerWithLog = TestProgressTrackerHelper.create(
-                CommunityAlgorithmTasks.conductance(graph),
+                CommunityAlgorithmTasks.conductance(graph, concurrency),
                 concurrency
             );
 

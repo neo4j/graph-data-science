@@ -26,16 +26,16 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import java.util.ArrayList;
 
 public final class SteinerTreeProgressTask {
-
     private SteinerTreeProgressTask() {}
 
     public static Task create(SteinerTreeParameters parameters, long nodeCount) {
         var subtasks = new ArrayList<Task>();
-        subtasks.add(Tasks.leaf("Traverse", parameters.targetNodes().size()));
-        if (parameters.applyRerouting()) {
-            subtasks.add(Tasks.leaf("Reroute", nodeCount));
-        }
-        return Tasks.task(AlgorithmLabel.SteinerTree.asString(), subtasks);
+        subtasks.add(Tasks.leaf("Traverse", parameters.concurrency(), parameters.targetNodes().size()));
 
+        if (parameters.applyRerouting()) {
+            subtasks.add(Tasks.leaf("Reroute", parameters.concurrency(), nodeCount));
+        }
+
+        return Tasks.task(AlgorithmLabel.SteinerTree.asString(), parameters.concurrency(), subtasks);
     }
 }

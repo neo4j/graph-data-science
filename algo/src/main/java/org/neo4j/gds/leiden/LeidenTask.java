@@ -30,19 +30,25 @@ public final class LeidenTask {
     private LeidenTask() {}
 
     public static Task create(IdMap idMap, LeidenParameters parameters) {
-        var iterations = parameters.maxLevels();
         var iterativeTasks = Tasks.iterativeDynamic(
             "Iteration",
-            () ->
+            parameters.concurrency(), () ->
                 List.of(
-                    Tasks.leaf("Local Move", 1),
-                    Tasks.leaf("Modularity Computation", idMap.nodeCount()),
-                    Tasks.leaf("Refinement", idMap.nodeCount()),
-                    Tasks.leaf("Aggregation", idMap.nodeCount())
+                    Tasks.leaf("Local Move", parameters.concurrency(), 1),
+                    Tasks.leaf("Modularity Computation", parameters.concurrency(), idMap.nodeCount()),
+                    Tasks.leaf("Refinement", parameters.concurrency(), idMap.nodeCount()),
+                    Tasks.leaf("Aggregation", parameters.concurrency(), idMap.nodeCount())
                 ),
-            iterations
+            parameters.maxLevels()
         );
-        var initializationTask = Tasks.leaf("Initialization", idMap.nodeCount());
-        return Tasks.task(AlgorithmLabel.Leiden.asString(), initializationTask, iterativeTasks);
+
+        var initializationTask = Tasks.leaf("Initialization", parameters.concurrency(), idMap.nodeCount());
+
+        return Tasks.task(
+            AlgorithmLabel.Leiden.asString(),
+            parameters.concurrency(),
+            initializationTask,
+            iterativeTasks
+        );
     }
 }

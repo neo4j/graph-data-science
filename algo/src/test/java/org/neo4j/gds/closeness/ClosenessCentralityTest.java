@@ -113,7 +113,7 @@ class ClosenessCentralityTest {
     void shouldLogProgress() {
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
-            CentralityAlgorithmTasks.closenessCentrality(graph),
+            CentralityAlgorithmTasks.closenessCentrality(graph, new Concurrency(1)),
             new Concurrency(1)
         );
 

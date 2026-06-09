@@ -291,7 +291,7 @@ class MinCostMaxFlowTest {
 
             var log = new GdsTestLog();
             var testTracker = TestProgressTracker.create(
-                MinCostMaxFlowTask.create(),
+                MinCostMaxFlowTask.create(new Concurrency(4)),
                 new LoggerForProgressTrackingAdapter(log),
                 new Concurrency(4),
                 EmptyTaskRegistryFactory.INSTANCE

@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
@@ -30,8 +31,8 @@ public class SubTaskCountingVisitorTest {
 
     @Test
     void shouldCountSimpleTask() {
-        var leaf1 = Tasks.leaf("leaf1");
-        var baseTask = Tasks.task("base", leaf1, Tasks.leaf("leaf2"));
+        var leaf1 = Tasks.leaf("leaf1", new Concurrency(1));
+        var baseTask = Tasks.task("base", new Concurrency(1), leaf1, Tasks.leaf("leaf2", new Concurrency(1)));
 
         var subTaskCountingVisitor = new SubTaskCountingVisitor();
         baseTask.visit(subTaskCountingVisitor);
@@ -52,7 +53,9 @@ public class SubTaskCountingVisitorTest {
     void shouldCountIterativeTasks() {
         var baseTask = Tasks.task(
             "base",
-            Tasks.iterativeFixed("iterative", () -> List.of(Tasks.leaf("leaf1"), Tasks.leaf("leaf2")), 2)
+            new Concurrency(1), Tasks.iterativeFixed("iterative", new Concurrency(1), () -> List.of(Tasks.leaf("leaf1",
+                new Concurrency(1)
+            ), Tasks.leaf("leaf2", new Concurrency(1))), 2)
         );
 
         var subTaskCountingVisitor = new SubTaskCountingVisitor();
@@ -80,7 +83,7 @@ public class SubTaskCountingVisitorTest {
 
     @Test
     void shouldDetectOpenIterativeTask() {
-        var baseTask = Tasks.iterativeOpen("open", () -> List.of(Tasks.leaf("leaf")));
+        var baseTask = Tasks.iterativeOpen("open", new Concurrency(1), () -> List.of(Tasks.leaf("leaf", new Concurrency(1))));
 
         var subTaskCountingVisitor = new SubTaskCountingVisitor();
         baseTask.visit(subTaskCountingVisitor);
@@ -92,7 +95,7 @@ public class SubTaskCountingVisitorTest {
 
     @Test
     void shouldDetectFinishedOpenTask() {
-        var baseTask = Tasks.iterativeOpen("open", () -> List.of(Tasks.leaf("leaf")));
+        var baseTask = Tasks.iterativeOpen("open", new Concurrency(1), () -> List.of(Tasks.leaf("leaf", new Concurrency(1))));
         baseTask.start();
         var leafTask = baseTask.nextSubtask();
         leafTask.start();

@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.bellmanford;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -29,12 +30,12 @@ public final class BellmanFordProgressTask {
 
     private BellmanFordProgressTask() {}
 
-    public static Task create() {
+    public static Task create(Concurrency concurrency) {
         return Tasks.iterativeOpen(
             AlgorithmLabel.BellmanFord.asString(),
-            () -> List.of(
-                Tasks.leaf("Relax"),
-                Tasks.leaf("Sync")
+            concurrency, () -> List.of(
+                Tasks.leaf("Relax", concurrency),
+                Tasks.leaf("Sync", concurrency)
             )
         );
     }

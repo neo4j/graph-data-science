@@ -20,6 +20,7 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
@@ -27,24 +28,28 @@ import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
 import java.util.List;
 
 public final class ModularityOptimizationProgressTrackerTaskCreator {
-
     private ModularityOptimizationProgressTrackerTaskCreator() {}
 
-    public static Task progressTask(long nodeCount, long relationshipCount, int maxIterations) {
-
+    public static Task progressTask(
+        Concurrency concurrency,
+        long nodeCount,
+        long relationshipCount,
+        int maxIterations
+    ) {
         var coloringTask = K1ColoringProgressTrackerTaskCreator.progressTask(
+            concurrency,
             nodeCount,
             ModularityOptimization.K1COLORING_MAX_ITERATIONS
         );
+
         return Tasks.task(
             AlgorithmLabel.ModularityOptimization.asString(),
-            Tasks.task(
-                "initialization",
-                coloringTask
-            ),
+            concurrency,
+            Tasks.task("initialization", concurrency, coloringTask),
             Tasks.iterativeDynamic(
                 "compute modularity",
-                () -> List.of(Tasks.leaf("optimizeForColor", relationshipCount)),
+                concurrency,
+                () -> List.of(Tasks.leaf("optimizeForColor", concurrency, relationshipCount)),
                 maxIterations
             )
         );

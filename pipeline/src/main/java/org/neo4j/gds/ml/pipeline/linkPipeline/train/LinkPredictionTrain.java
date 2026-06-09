@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.metrics.EvaluationScores;
@@ -97,6 +98,7 @@ public final class LinkPredictionTrain {
     }
 
     public static List<Task> progressTasks(
+        Concurrency concurrency,
         long relationshipCount,
         LinkPredictionSplitConfig splitConfig,
         int numberOfModelSelectionTrials
@@ -104,18 +106,18 @@ public final class LinkPredictionTrain {
         var sizes = splitConfig.expectedSetSizes(relationshipCount);
 
         var tasks = new ArrayList<Task>();
-        tasks.add(Tasks.leaf("Extract train features", sizes.trainSize() * 3));
+        tasks.add(Tasks.leaf("Extract train features", concurrency, sizes.trainSize() * 3));
         tasks.addAll(CrossValidation.progressTasks(
-            splitConfig.validationFolds(),
+            concurrency, splitConfig.validationFolds(),
             numberOfModelSelectionTrials,
             sizes.trainSize()
         ));
-        tasks.add(ClassifierTrainer.progressTask("Train best model", sizes.trainSize() * 5));
-        tasks.add(Tasks.leaf("Compute train metrics", sizes.trainSize()));
+        tasks.add(ClassifierTrainer.progressTask("Train best model", concurrency, sizes.trainSize() * 5));
+        tasks.add(Tasks.leaf("Compute train metrics", concurrency, sizes.trainSize()));
         tasks.add(Tasks.task(
                 "Evaluate on test data",
-                Tasks.leaf("Extract test features", sizes.testSize() * 3),
-                Tasks.leaf("Compute test metrics", sizes.testSize())
+            concurrency, Tasks.leaf("Extract test features", concurrency, sizes.testSize() * 3),
+                Tasks.leaf("Compute test metrics", concurrency, sizes.testSize())
             )
         );
 

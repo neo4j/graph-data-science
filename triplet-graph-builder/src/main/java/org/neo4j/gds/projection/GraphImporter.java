@@ -34,6 +34,7 @@ import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -81,11 +82,15 @@ public final class GraphImporter {
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
 
-    public static Task graphImporterTask(int taskVolume) {
+    public static Task graphImporterTask(Concurrency concurrency, int taskVolume) {
         return Tasks.task(
             "Graph aggregation",
-            Tasks.leaf("Update aggregation", taskVolume),
-            Tasks.task("Build graph store", Tasks.leaf("Nodes", 1), Tasks.leaf("Relationships", 1))
+            concurrency,
+            Tasks.leaf("Update aggregation", concurrency, taskVolume),
+            Tasks.task("Build graph store", concurrency,
+                Tasks.leaf("Nodes", concurrency, 1),
+                Tasks.leaf("Relationships", concurrency, 1)
+            )
         );
     }
 

@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -97,14 +98,16 @@ public class GraphSageModelTrainer {
             .toArray(Layer[]::new);
     }
 
-    public static List<Task> progressTasks(long numberOfBatches, int batchesPerIteration, int maxIterations, int epochs) {
+    public static List<Task> progressTasks(
+        Concurrency concurrency,
+        long numberOfBatches, int batchesPerIteration, int maxIterations, int epochs) {
         return List.of(
-            Tasks.leaf("Prepare batches", numberOfBatches),
+            Tasks.leaf("Prepare batches", concurrency, numberOfBatches),
             Tasks.iterativeDynamic(
                 "Train model",
-                () -> List.of(Tasks.iterativeDynamic(
+                concurrency, () -> List.of(Tasks.iterativeDynamic(
                     "Epoch",
-                    () -> List.of(Tasks.leaf("Iteration", batchesPerIteration)),
+                    concurrency, () -> List.of(Tasks.leaf("Iteration", concurrency, batchesPerIteration)),
                     maxIterations
                 )),
                 epochs

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -32,7 +33,7 @@ public interface RelationshipStreamExporter {
      */
     long write(String relationshipType, List<String> propertyKeys, List<ValueType> propertyTypes);
 
-    static Task baseTask(String operationName) {
-        return Tasks.leaf(operationName + " :: WriteRelationshipStream");
+    static Task baseTask(String operationName, Concurrency concurrency) {
+        return Tasks.leaf(operationName + " :: WriteRelationshipStream", concurrency);
     }
 }

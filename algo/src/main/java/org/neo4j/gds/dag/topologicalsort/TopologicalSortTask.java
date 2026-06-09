@@ -21,6 +21,7 @@ package org.neo4j.gds.dag.topologicalsort;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -29,12 +30,13 @@ import java.util.List;
 public final class TopologicalSortTask {
     private TopologicalSortTask() {}
 
-    public static Task create(IdMap idMap) {
-        var initializationTask = Tasks.leaf("Initialization", idMap.nodeCount());
-        var traversalTask = Tasks.leaf("Traversal", idMap.nodeCount());
+    public static Task create(IdMap idMap, Concurrency concurrency) {
+        var initializationTask = Tasks.leaf("Initialization", concurrency, idMap.nodeCount());
+        var traversalTask = Tasks.leaf("Traversal", concurrency, idMap.nodeCount());
 
         return Tasks.task(
             AlgorithmLabel.TopologicalSort.asString(),
+            concurrency,
             List.of(initializationTask, traversalTask)
         );
     }

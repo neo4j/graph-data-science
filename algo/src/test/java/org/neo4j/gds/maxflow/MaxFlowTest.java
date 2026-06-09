@@ -74,15 +74,15 @@ class MaxFlowTest {
         assertThat(result.totalFlow()).isCloseTo(expectedFlow, Offset.offset(TOLERANCE));
     }
 
-    void testGraph(Graph graph, long sourceNode, long targetNode, double expectedFlow, int concurrency) {
+    void testGraph(Graph graph, long sourceNode, long targetNode, double expectedFlow) {
         var sourceNodes = new ListInputNodes(List.of(sourceNode));
         var targetNodes = new ListInputNodes(List.of(targetNode));
 
-        testGraph(graph, sourceNodes, targetNodes, expectedFlow, concurrency);
+        testGraph(graph, sourceNodes, targetNodes, expectedFlow, 1);
     }
 
     void testGraph(TestGraph graph, String sourceNode, String targetNode, double expectedFlow) {
-        testGraph(graph.graph(), graph.toOriginalNodeId(sourceNode), graph.toOriginalNodeId(targetNode), expectedFlow, 1);
+        testGraph(graph.graph(), graph.toOriginalNodeId(sourceNode), graph.toOriginalNodeId(targetNode), expectedFlow);
     }
 
     @Test
@@ -374,7 +374,7 @@ class MaxFlowTest {
     @Test
     void test4() {
         var graph = generate(200L, 10, UNIFORM);
-        testGraph(graph, 50, 100, 434.3606561583014, 1);
+        testGraph(graph, 50, 100, 434.3606561583014);
 
         testGraph(graph,
             new MapInputNodes(Map.of(1L, 103.1, 23L, 129.5, 101L, 242.2)),
@@ -386,7 +386,7 @@ class MaxFlowTest {
     @Test
     void test5() {
         var graph = generate(1000L, 25, UNIFORM);
-        testGraph(graph, 100, 200, 1091.5727039914948, 1);
+        testGraph(graph, 100, 200, 1091.5727039914948);
 
 
         testGraph(graph,
@@ -401,7 +401,7 @@ class MaxFlowTest {
         var graph = generate(100L, 10, UNIFORM);
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            MaxFlowTask.create(),
+            MaxFlowTask.create(new Concurrency(4)),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE

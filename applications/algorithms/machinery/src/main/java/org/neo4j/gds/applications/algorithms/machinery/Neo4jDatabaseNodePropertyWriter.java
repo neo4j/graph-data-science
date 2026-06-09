@@ -111,15 +111,15 @@ final class Neo4jDatabaseNodePropertyWriter {
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         long taskVolume,
-        Concurrency writeConcurrency,
+        Concurrency concurrency,
         String name,
         Log log,
         JobId jobId
     ) {
         return TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            NodePropertyExporter.baseTask(name, taskVolume),
-            writeConcurrency,
+            NodePropertyExporter.baseTask(name, concurrency, taskVolume),
+            concurrency,
             jobId,
             requestCorrelationId,
             taskRegistryFactory

@@ -241,7 +241,7 @@ class LabellingTest {
 
         var progressTracker = TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            HDBScanProgressTrackerCreator.labellingTask("foo",nodeCount),
+            HDBScanProgressTrackerCreator.labellingTask("foo", new Concurrency(1), nodeCount),
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),

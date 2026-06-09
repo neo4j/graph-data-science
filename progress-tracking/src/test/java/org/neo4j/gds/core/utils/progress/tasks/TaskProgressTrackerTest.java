@@ -47,11 +47,13 @@ class TaskProgressTrackerTest {
 
     @Test
     void shouldStepThroughSubtasks() {
-        var leafTask = Tasks.leaf("leaf1");
-        var iterativeTask = Tasks.iterativeFixed("iterative", () -> List.of(Tasks.leaf("leaf2")), 2);
+        var leafTask = Tasks.leaf("leaf1", new Concurrency(1));
+        var iterativeTask = Tasks.iterativeFixed("iterative",
+            new Concurrency(1),
+            () -> List.of(Tasks.leaf("leaf2", new Concurrency(1))), 2);
         var rootTask = Tasks.task(
             "root",
-            leafTask,
+            new Concurrency(1), leafTask,
             iterativeTask
         );
 
@@ -81,7 +83,7 @@ class TaskProgressTrackerTest {
 
     @Test
     void shouldNotThrowIfEndMoreTasksThanStarted() {
-        var task = Tasks.leaf("leaf");
+        var task = Tasks.leaf("leaf", new Concurrency(1));
         var log = new GdsTestLog();
 
         var progressTracker = TaskProgressTracker.create(
@@ -106,7 +108,7 @@ class TaskProgressTrackerTest {
 
     @Test
     void shouldUpdateProgress() {
-        var task = Tasks.leaf("leaf");
+        var task = Tasks.leaf("leaf", new Concurrency(1));
         var progressTracker = progressTracker(task);
         progressTracker.beginSubTask();
         progressTracker.onProgress(42);
@@ -115,7 +117,7 @@ class TaskProgressTrackerTest {
 
     @Test
     void shouldCancelSubTasksOnDynamicIterative() {
-        var task = Tasks.iterativeDynamic("iterative", () -> List.of(Tasks.leaf("leaf")), 2);
+        var task = Tasks.iterativeDynamic("iterative", new Concurrency(1), () -> List.of(Tasks.leaf("leaf", new Concurrency(1))), 2);
         var progressTracker = progressTracker(task);
         progressTracker.beginSubTask();
         assertThat(progressTracker.currentSubTask()).isEqualTo(task);
@@ -136,7 +138,7 @@ class TaskProgressTrackerTest {
     @Test
     void shouldLog100WhenTaskFinishedEarly() {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
-            var task = Tasks.leaf("leaf", 4);
+            var task = Tasks.leaf("leaf", new Concurrency(1), 4);
             var log = new GdsTestLog();
             var progressTracker = TaskProgressTracker.create(
                 new LoggerForProgressTrackingAdapter(log),
@@ -166,7 +168,7 @@ class TaskProgressTrackerTest {
     @Test
     void shouldLog100OnlyOnLeafTasks() {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
-            var task = Tasks.task("root", Tasks.leaf("leaf", 4));
+            var task = Tasks.task("root", new Concurrency(1), Tasks.leaf("leaf", new Concurrency(1), 4));
             var log = new GdsTestLog();
             var progressTracker = TaskProgressTracker.create(
                 new LoggerForProgressTrackingAdapter(log),
@@ -196,7 +198,7 @@ class TaskProgressTrackerTest {
 
     @Test
     void shouldRegisterBaseTaskOnBaseTaskStart() {
-        var task = Tasks.leaf("root");
+        var task = Tasks.leaf("root", new Concurrency(1));
 
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var taskRegistry = new TaskRegistry("", taskStore);
@@ -219,7 +221,7 @@ class TaskProgressTrackerTest {
 
     @Test
     void stepsShouldGiveProgress() {
-        var leafTask = Tasks.leaf("leaf", 100);
+        var leafTask = Tasks.leaf("leaf", new Concurrency(1), 100);
         var progressTracker = progressTracker(leafTask);
 
         progressTracker.beginSubTaskWithSteps(13);

@@ -21,6 +21,7 @@ package org.neo4j.gds.traversal;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +35,7 @@ class RandomWalkCountingNodeVisitsProgressTaskFactoryTest {
 
         var graphMock = mock(Graph.class);
         when(graphMock.hasRelationshipProperty()).thenReturn(true);
-        var task = RandomWalkCountingNodeVisitsProgressTaskFactory.create(graphMock);
+        var task = RandomWalkCountingNodeVisitsProgressTaskFactory.create(graphMock, new Concurrency(1));
 
         assertThat(task).isNotInstanceOf(LeafTask.class);
 
@@ -50,7 +51,7 @@ class RandomWalkCountingNodeVisitsProgressTaskFactoryTest {
         var graphMock = mock(Graph.class);
         when(graphMock.hasRelationshipProperty()).thenReturn(false);
 
-        var task = RandomWalkCountingNodeVisitsProgressTaskFactory.create(graphMock);
+        var task = RandomWalkCountingNodeVisitsProgressTaskFactory.create(graphMock, new Concurrency(1));
 
         assertThat(task).isInstanceOf(LeafTask.class);
         assertThat(task.subTasks())

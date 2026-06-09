@@ -28,6 +28,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -80,9 +81,10 @@ public class LinkPredictionRelationshipSampler {
      }
 
     @NotNull
-    static LeafTask progressTask(ExpectedSetSizes sizes) {
+    static LeafTask progressTask(Concurrency concurrency, ExpectedSetSizes sizes) {
         return Tasks.leaf(
             "Split relationships",
+            concurrency,
             sizes.trainSize() + sizes.featureInputSize() + sizes.testSize() + sizes.testComplementSize()
         );
     }

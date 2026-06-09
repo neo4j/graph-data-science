@@ -20,6 +20,7 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -28,12 +29,12 @@ import java.util.List;
 public final class K1ColoringProgressTrackerTaskCreator {
     private K1ColoringProgressTrackerTaskCreator() {}
 
-    public static Task progressTask(long nodeCount, int maxIterations) {
+    public static Task progressTask(Concurrency concurrency, long nodeCount, int maxIterations) {
         return Tasks.iterativeDynamic(
             AlgorithmLabel.K1Coloring.asString(),
-            () -> List.of(
-                Tasks.leaf("color nodes", nodeCount),
-                Tasks.leaf("validate nodes", nodeCount)
+            concurrency, () -> List.of(
+                Tasks.leaf("color nodes", concurrency, nodeCount),
+                Tasks.leaf("validate nodes", concurrency, nodeCount)
             ),
             maxIterations
         );

@@ -29,10 +29,11 @@ public final class GraphSageTrainTask {
     private GraphSageTrainTask() {}
 
     public static Task create(Graph graph, GraphSageTrainParameters parameters) {
-
         return Tasks.task(
             AlgorithmLabel.GraphSageTrain.asString(),
+            parameters.concurrency(),
             GraphSageModelTrainer.progressTasks(
+                parameters.concurrency(),
                 parameters.numberOfBatches(graph.nodeCount()),
                 parameters.batchesPerIteration(graph.nodeCount()),
                 parameters.maxIterations(),

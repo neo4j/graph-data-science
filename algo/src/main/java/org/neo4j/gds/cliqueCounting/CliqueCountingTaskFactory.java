@@ -34,9 +34,10 @@ public final class CliqueCountingTaskFactory {
     }
 
     public static Task createTask(Graph graph, CliqueCountingParameters parameters) {
-        return Tasks.leaf(AlgorithmLabel.CliqueCounting.asString(), volume(graph, parameters));
+        return Tasks.leaf(
+            AlgorithmLabel.CliqueCounting.asString(),
+            parameters.concurrency(),
+            volume(graph, parameters)
+        );
     }
-
-
-
 }

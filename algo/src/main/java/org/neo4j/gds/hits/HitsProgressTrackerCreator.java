@@ -20,6 +20,7 @@
 package org.neo4j.gds.hits;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.indexInverse.InverseRelationshipsTask;
@@ -31,21 +32,25 @@ public final class HitsProgressTrackerCreator {
 
     private HitsProgressTrackerCreator() {}
 
-    public static Task progressTask(long nodeCount, int maxIterations) {
+    public static Task progressTask(Concurrency concurrency, long nodeCount, int maxIterations) {
         return Tasks.iterativeDynamic(
             AlgorithmLabel.HITS.asString(),
-            () -> List.of(
-                Tasks.leaf("Compute iteration", nodeCount),
-                Tasks.leaf("Master compute iteration", nodeCount)
+            concurrency, () -> List.of(
+                Tasks.leaf("Compute iteration", concurrency, nodeCount),
+                Tasks.leaf("Master compute iteration", concurrency, nodeCount)
             ),
             maxIterations
         );
     }
 
-    public  static Task progressTaskWithInvertedIndex(long nodeCount, int maxIterations, InverseRelationshipsParameters inverseParams){
-            var  hitsTask = progressTask(nodeCount,maxIterations);
-            var invTask = InverseRelationshipsTask.progressTask(nodeCount,inverseParams);
-            return Tasks.task(AlgorithmLabel.HITS.asString(), invTask,hitsTask);
+    public static Task progressTaskWithInvertedIndex(
+        long nodeCount,
+        int maxIterations,
+        InverseRelationshipsParameters inverseParams
+    ) {
+        var hitsTask = progressTask(inverseParams.concurrency(), nodeCount, maxIterations);
+        var invTask = InverseRelationshipsTask.progressTask(inverseParams.concurrency(), nodeCount, inverseParams);
+        return Tasks.task(AlgorithmLabel.HITS.asString(), inverseParams.concurrency(), invTask, hitsTask);
 
     }
 }

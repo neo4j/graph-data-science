@@ -20,18 +20,19 @@
 package org.neo4j.gds.kspanningtree;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public final class KSpanningTreeTask {
-
     private KSpanningTreeTask() {}
 
-    public static Task create(long relationshipCount) {
+    public static Task create(Concurrency concurrency, long relationshipCount) {
         return Tasks.task(
             AlgorithmLabel.KSpanningTree.asString(),
-            Tasks.leaf(AlgorithmLabel.SpanningTree.asString(), relationshipCount),
-            Tasks.leaf("Remove relationships")
+            concurrency,
+            Tasks.leaf(AlgorithmLabel.SpanningTree.asString(), concurrency, relationshipCount),
+            Tasks.leaf("Remove relationships", concurrency)
         );
     }
 }

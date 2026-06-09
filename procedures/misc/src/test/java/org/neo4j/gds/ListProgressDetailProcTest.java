@@ -147,12 +147,12 @@ class ListProgressDetailProcTest extends BaseProgressTest {
         public Stream<ListProgressProcTest.Bar> foo() {
             var task = Tasks.task(
                 "root",
-                Tasks.iterativeFixed(
+                new Concurrency(1), Tasks.iterativeFixed(
                     "iterative",
-                    () -> List.of(Tasks.leaf("leafIterative", 2)),
+                    new Concurrency(1), () -> List.of(Tasks.leaf("leafIterative", new Concurrency(1), 2)),
                     2
                 ),
-                Tasks.leaf("leaf", 3)
+                Tasks.leaf("leaf", new Concurrency(1), 3)
             );
 
             var taskProgressTracker = TaskProgressTracker.create(

@@ -32,6 +32,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
@@ -64,16 +65,16 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Neo4jGraph
     static String GDL = "CREATE " +
-                        "  (n0:N {a: 1.0, b: 0.8, c: 1})" +
-                        ", (n1:N {a: 2.0, b: 1.0, c: 1})" +
-                        ", (n2:N {a: 3.0, b: 1.5, c: 1})" +
-                        ", (n3:N {a: 0.0, b: 2.8, c: 1})" +
-                        ", (n4:N {a: 1.0, b: 0.9, c: 1})" +
-                        ", (m1:M {a: 1.0, b: 0.9, c: 1})" +
-                        ", (n1)-[:T]->(n2)" +
-                        ", (n3)-[:T]->(n4)" +
-                        ", (n1)-[:T]->(n3)" +
-                        ", (n2)-[:T]->(n4)";
+        "  (n0:N {a: 1.0, b: 0.8, c: 1})" +
+        ", (n1:N {a: 2.0, b: 1.0, c: 1})" +
+        ", (n2:N {a: 3.0, b: 1.5, c: 1})" +
+        ", (n3:N {a: 0.0, b: 2.8, c: 1})" +
+        ", (n4:N {a: 1.0, b: 0.9, c: 1})" +
+        ", (m1:M {a: 1.0, b: 0.9, c: 1})" +
+        ", (n1)-[:T]->(n2)" +
+        ", (n3)-[:T]->(n4)" +
+        ", (n1)-[:T]->(n3)" +
+        ", (n2)-[:T]->(n4)";
 
     private GraphStore graphStore;
 
@@ -98,37 +99,42 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void shouldPredict() {
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
-                .modelUser("")
-                .modelName("model")
-                .targetNodeLabels(List.of("N"))
-                .relationshipTypes(List.of("T"))
-                .graphName(GRAPH_NAME)
-                .build();
+        TestProcedureRunner.applyOnProcedure(
+            db, TestProc.class, caller -> {
+                var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
+                    .modelUser("")
+                    .modelName("model")
+                    .targetNodeLabels(List.of("N"))
+                    .relationshipTypes(List.of("T"))
+                    .graphName(GRAPH_NAME)
+                    .build();
 
-            var pipeline = NodePropertyPredictPipeline.from(
-                Stream.of(NodePropertyStepFactory.createNodePropertyStep("testProc", Map.of("mutateProperty", "community"))),
-                Stream.of("community", "b", "c").map(NodeFeatureStep::of)
-            );
+                var pipeline = NodePropertyPredictPipeline.from(
+                    Stream.of(NodePropertyStepFactory.createNodePropertyStep(
+                        "testProc",
+                        Map.of("mutateProperty", "community")
+                    )),
+                    Stream.of("community", "b", "c").map(NodeFeatureStep::of)
+                );
 
-            double[] weights = {2, -1, 3};
-            var bias = 0.0;
+                double[] weights = {2, -1, 3};
+                var bias = 0.0;
 
-            var expectedSchema = graphStore.schema();
+                var expectedSchema = graphStore.schema();
 
-            HugeDoubleArray predictions = new NodeRegressionPredictPipelineExecutor(
-                pipeline,
-                config,
-                caller.executionContext(),
-                graphStore,
-                ProgressTracker.NULL_TRACKER,
-                createModelData(weights, bias)
-            ).compute();
+                HugeDoubleArray predictions = new NodeRegressionPredictPipelineExecutor(
+                    pipeline,
+                    config,
+                    caller.executionContext(),
+                    graphStore,
+                    ProgressTracker.NULL_TRACKER,
+                    createModelData(weights, bias)
+                ).compute();
 
-            assertThat(graphStore.schema()).isEqualTo(expectedSchema);
-            assertThat(predictions.toArray()).containsExactly(2.2, 4.0, 5.5, 6.2, 10.1);
-        });
+                assertThat(graphStore.schema()).isEqualTo(expectedSchema);
+                assertThat(predictions.toArray()).containsExactly(2.2, 4.0, 5.5, 6.2, 10.1);
+            }
+        );
     }
 
     @Test
@@ -160,77 +166,86 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(
-            NodeRegressionPredictPipelineExecutor.progressTask("Node Regression Predict Pipeline", pipeline, graphStore),
+            NodeRegressionPredictPipelineExecutor.progressTask(
+                "Node Regression Predict Pipeline",
+                new Concurrency(1),
+                pipeline,
+                graphStore
+            ),
             getUsername(),
             config.jobId(),
             new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             new LoggerForProgressTrackingAdapter(log)
         );
 
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var pipelineExecutor = new NodeRegressionPredictPipelineExecutor(
-                pipeline,
-                config,
-                caller.executionContext(),
-                graphStore,
-                progressTracker,
-                modelData
-            );
+        TestProcedureRunner.applyOnProcedure(
+            db, TestProc.class, caller -> {
+                var pipelineExecutor = new NodeRegressionPredictPipelineExecutor(
+                    pipeline,
+                    config,
+                    caller.executionContext(),
+                    graphStore,
+                    progressTracker,
+                    modelData
+                );
 
-            pipelineExecutor.compute();
+                pipelineExecutor.compute();
 
-            var expectedMessages = new ArrayList<>(List.of(
-                "Node Regression Predict Pipeline :: Start",
-                "Node Regression Predict Pipeline :: Execute node property steps :: Start",
-                "Node Regression Predict Pipeline :: Execute node property steps :: TestAlgorithm :: Start",
-                "Node Regression Predict Pipeline :: Execute node property steps :: TestAlgorithm 100%",
-                "Node Regression Predict Pipeline :: Execute node property steps :: TestAlgorithm :: Finished",
-                "Node Regression Predict Pipeline :: Execute node property steps :: Finished",
-                "Node Regression Predict Pipeline :: Predict :: Start",
-                "Node Regression Predict Pipeline :: Predict 100%",
-                "Node Regression Predict Pipeline :: Predict :: Finished",
-                "Node Regression Predict Pipeline :: Finished"
-            ));
+                var expectedMessages = new ArrayList<>(List.of(
+                    "Node Regression Predict Pipeline :: Start",
+                    "Node Regression Predict Pipeline :: Execute node property steps :: Start",
+                    "Node Regression Predict Pipeline :: Execute node property steps :: TestAlgorithm :: Start",
+                    "Node Regression Predict Pipeline :: Execute node property steps :: TestAlgorithm 100%",
+                    "Node Regression Predict Pipeline :: Execute node property steps :: TestAlgorithm :: Finished",
+                    "Node Regression Predict Pipeline :: Execute node property steps :: Finished",
+                    "Node Regression Predict Pipeline :: Predict :: Start",
+                    "Node Regression Predict Pipeline :: Predict 100%",
+                    "Node Regression Predict Pipeline :: Predict :: Finished",
+                    "Node Regression Predict Pipeline :: Finished"
+                ));
 
-            assertThat(log.getMessages(INFO))
-                .extracting(removingThreadId())
-                .extracting(replaceTimings())
-                .containsExactly(expectedMessages.toArray(String[]::new));
-        });
+                assertThat(log.getMessages(INFO))
+                    .extracting(removingThreadId())
+                    .extracting(replaceTimings())
+                    .containsExactly(expectedMessages.toArray(String[]::new));
+            }
+        );
         progressTracker.assertValidProgressEvolution();
     }
 
     @Test
     void failOnInvalidFeatureDimensions() {
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
-                .modelUser("")
-                .modelName("model")
-                .graphName(GRAPH_NAME)
-                .targetNodeLabels(List.of("N"))
-                .relationshipTypes(List.of("T"))
-                .build();
+        TestProcedureRunner.applyOnProcedure(
+            db, TestProc.class, caller -> {
+                var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
+                    .modelUser("")
+                    .modelName("model")
+                    .graphName(GRAPH_NAME)
+                    .targetNodeLabels(List.of("N"))
+                    .relationshipTypes(List.of("T"))
+                    .build();
 
-            var pipeline = NodePropertyPredictPipeline.from(
-                Stream.of(),
-                Stream.of("a").map(NodeFeatureStep::of)
-            );
+                var pipeline = NodePropertyPredictPipeline.from(
+                    Stream.of(),
+                    Stream.of("a").map(NodeFeatureStep::of)
+                );
 
-            double[] manyWeights = {-1.5, -2, 2.5, -1};
-            var bias = 0.0;
+                double[] manyWeights = {-1.5, -2, 2.5, -1};
+                var bias = 0.0;
 
 
-            var pipelineExecutor = new NodeRegressionPredictPipelineExecutor(
-                pipeline,
-                config,
-                caller.executionContext(),
-                graphStore,
-                ProgressTracker.NULL_TRACKER,
-                createModelData(manyWeights, bias)
-            );
+                var pipelineExecutor = new NodeRegressionPredictPipelineExecutor(
+                    pipeline,
+                    config,
+                    caller.executionContext(),
+                    graphStore,
+                    ProgressTracker.NULL_TRACKER,
+                    createModelData(manyWeights, bias)
+                );
 
-            assertThatThrownBy(() -> pipelineExecutor.compute().toArray())
-                .hasMessage("Model expected features ['a'] to have a total dimension of `4`, but got `1`.");
-        });
+                assertThatThrownBy(() -> pipelineExecutor.compute().toArray())
+                    .hasMessage("Model expected features ['a'] to have a total dimension of `4`, but got `1`.");
+            }
+        );
     }
 }

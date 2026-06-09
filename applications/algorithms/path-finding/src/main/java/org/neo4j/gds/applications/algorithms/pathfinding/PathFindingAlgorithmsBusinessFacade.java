@@ -96,7 +96,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     }
 
     public BellmanFordResult bellmanFord(Graph graph, AllShortestPathsBellmanFordBaseConfig configuration) {
-        var task = PathFindingAlgorithmTasks.bellmanFord();
+        var task = PathFindingAlgorithmTasks.bellmanFord(configuration.concurrency());
         var progressTracker = createProgressTracker(task, configuration);
 
 
@@ -120,7 +120,7 @@ public class PathFindingAlgorithmsBusinessFacade {
      * But it is not great innit.
      */
     HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.bfs(), configuration);
+        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.bfs(configuration.concurrency()), configuration);
 
         return algorithmMachinery.getResult(
             () -> algorithms.breadthFirstSearch(
@@ -135,7 +135,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     }
 
     public PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
-        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.deltaStepping(), configuration);
+        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.deltaStepping(configuration.concurrency()), configuration);
 
         return algorithmMachinery.getResult(
             () -> algorithms.deltaStepping(
@@ -156,7 +156,7 @@ public class PathFindingAlgorithmsBusinessFacade {
      * @see #breadthFirstSearch(org.neo4j.gds.api.Graph, org.neo4j.gds.paths.traverse.BfsBaseConfig)
      */
     HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.dfs(), configuration);
+        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.dfs(configuration.concurrency()), configuration);
 
         return algorithmMachinery.getResult(
             () -> algorithms.depthFirstSearch(
@@ -172,7 +172,7 @@ public class PathFindingAlgorithmsBusinessFacade {
 
     public SpanningTree kSpanningTree(Graph graph, KSpanningTreeBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.kSpanningTree(graph),
+            PathFindingAlgorithmTasks.kSpanningTree(graph, configuration.concurrency()),
             configuration
         );
 
@@ -190,7 +190,7 @@ public class PathFindingAlgorithmsBusinessFacade {
 
     PathFindingResult longestPath(Graph graph, DagLongestPathBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.longestPath(graph),
+            PathFindingAlgorithmTasks.longestPath(graph, configuration.concurrency()),
             configuration
         );
 
@@ -208,7 +208,7 @@ public class PathFindingAlgorithmsBusinessFacade {
 
     FlowResult maxFlow(Graph graph, MaxFlowBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.maxFlow(),
+            PathFindingAlgorithmTasks.maxFlow(configuration.concurrency()),
             configuration
         );
 
@@ -226,7 +226,7 @@ public class PathFindingAlgorithmsBusinessFacade {
 
     CostFlowResult mcmf(GraphStore graphStore, MCMFBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.minCostMaxFlow(),
+            PathFindingAlgorithmTasks.minCostMaxFlow(configuration.concurrency()),
             configuration
         );
 
@@ -247,7 +247,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     }
 
     Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration) {
-        var task = PathFindingAlgorithmTasks.randomWalk(graph);
+        var task = PathFindingAlgorithmTasks.randomWalk(graph, configuration.concurrency());
         var progressTracker = createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResultWithoutReleasingProgressTracker(
@@ -265,7 +265,7 @@ public class PathFindingAlgorithmsBusinessFacade {
 
     HugeAtomicLongArray randomWalkCountingNodeVisits(Graph graph, RandomWalkBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.randomWalkCountingVisits(graph),
+            PathFindingAlgorithmTasks.randomWalkCountingVisits(graph, configuration.concurrency()),
             configuration
         );
 
@@ -285,7 +285,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     PrizeSteinerTreeResult pcst(Graph graph, PCSTBaseConfig configuration) {
 
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.pcst(graph),
+            PathFindingAlgorithmTasks.pcst(graph, configuration.concurrency()),
             configuration
         );
 
@@ -303,7 +303,7 @@ public class PathFindingAlgorithmsBusinessFacade {
 
     public PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.aStar(graph),
+            PathFindingAlgorithmTasks.aStar(graph, configuration.concurrency()),
             configuration
         );
 
@@ -321,7 +321,7 @@ public class PathFindingAlgorithmsBusinessFacade {
 
     PathFindingResult singlePairShortestPathDijkstra(Graph graph, DijkstraSourceTargetsBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.dijkstra(graph),
+            PathFindingAlgorithmTasks.dijkstra(graph, configuration.concurrency()),
             configuration
         );
 
@@ -341,7 +341,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     public PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
 
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.yens(graph,configuration.k()),
+            PathFindingAlgorithmTasks.yens(graph, configuration.concurrency(), configuration.k()),
             configuration
         );
 
@@ -358,7 +358,7 @@ public class PathFindingAlgorithmsBusinessFacade {
 
     PathFindingResult singleSourceShortestPathDijkstra(Graph graph, DijkstraBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.singleSourceDijkstra(graph),
+            PathFindingAlgorithmTasks.singleSourceDijkstra(graph, configuration.concurrency()),
             configuration
         );
 
@@ -376,7 +376,7 @@ public class PathFindingAlgorithmsBusinessFacade {
 
     public SpanningTree spanningTree(Graph graph, SpanningTreeBaseConfig configuration) {
         var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.spanningTree(graph),
+            PathFindingAlgorithmTasks.spanningTree(graph, configuration.concurrency()),
             configuration
         );
         return algorithmMachinery.getResult(
@@ -413,7 +413,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     }
 
     public TopologicalSortResult topologicalSort(Graph graph, TopologicalSortBaseConfig configuration) {
-        var task = PathFindingAlgorithmTasks.topologicalSort(graph);
+        var task = PathFindingAlgorithmTasks.topologicalSort(graph, configuration.concurrency());
         var progressTracker = createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(

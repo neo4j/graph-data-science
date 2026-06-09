@@ -180,7 +180,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
         var progressTracker = TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            NodePropertyExporter.baseTask("AlgoNameGoesHere", graph.nodeCount()),
+            NodePropertyExporter.baseTask("AlgoNameGoesHere", writeConcurrency, graph.nodeCount()),
             writeConcurrency,
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),

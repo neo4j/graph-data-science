@@ -33,8 +33,8 @@ public final class BetweennessCentralityProgressTask {
 
         return Tasks.leaf(
             AlgorithmLabel.BetweennessCentrality.asString(),
+            parameters.concurrency(),
             actualSamplingSize
         );
     }
-
 }

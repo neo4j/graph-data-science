@@ -194,7 +194,7 @@ class BFSTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldLogProgress(int concurrency) {
-        var progressTask = Tasks.leaf("BFS", naturalGraph.relationshipCount());
+        var progressTask = Tasks.leaf("BFS", new Concurrency(concurrency), naturalGraph.relationshipCount());
         var testLog = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(testLog), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
         BFS.create(

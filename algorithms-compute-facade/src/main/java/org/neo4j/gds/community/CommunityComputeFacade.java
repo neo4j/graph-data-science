@@ -116,7 +116,7 @@ public class CommunityComputeFacade {
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
     }
-    
+
     public CompletableFuture<TimedAlgorithmResult<ApproxMaxKCutResult>> approxMaxKCut(
         Graph graph,
         ApproxMaxKCutParameters parameters,
@@ -192,7 +192,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.conductance(graph),
+            CommunityAlgorithmTasks.conductance(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -226,7 +226,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.hdbscan(graph),
+            CommunityAlgorithmTasks.hdbscan(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -290,7 +290,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.kCore(graph),
+            CommunityAlgorithmTasks.kCore(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -321,7 +321,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.kMeans(graph,parameters),
+            CommunityAlgorithmTasks.kMeans(graph, parameters),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -353,7 +353,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.labelPropagation(graph,parameters),
+            CommunityAlgorithmTasks.labelPropagation(graph, parameters),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -385,7 +385,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.lcc(graph,parameters),
+            CommunityAlgorithmTasks.lcc(graph, parameters),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -418,7 +418,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.leiden(graph,parameters),
+            CommunityAlgorithmTasks.leiden(graph, parameters),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -454,7 +454,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.louvain(graph,parameters),
+            CommunityAlgorithmTasks.louvain(graph, parameters),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -508,7 +508,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.modularityOptimization(graph,parameters),
+            CommunityAlgorithmTasks.modularityOptimization(graph, parameters),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -548,7 +548,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.scc(graph),
+            CommunityAlgorithmTasks.scc(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -574,12 +574,12 @@ public class CommunityComputeFacade {
     ) {
 
         if (graph.isEmpty()) {
-            var empty = NodeValue.of(PregelSchema.empty(),0,configuration.concurrency());
+            var empty = NodeValue.of(PregelSchema.empty(), 0, configuration.concurrency());
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(new PregelResult(empty, 0, false)));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.speakerListenerLPA(graph,configuration),
+            CommunityAlgorithmTasks.speakerListenerLPA(graph, configuration),
             jobId,
             configuration.concurrency(),
             logProgress
@@ -612,7 +612,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.triangleCount(graph),
+            CommunityAlgorithmTasks.triangleCount(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -637,7 +637,8 @@ public class CommunityComputeFacade {
     CompletableFuture<TimedAlgorithmResult<Stream<TriangleResult>>> triangles(
         Graph graph,
         TriangleCountParameters parameters,
-        JobId jobId) {
+        JobId jobId
+    ) {
 
         if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Stream.empty()));
@@ -665,11 +666,14 @@ public class CommunityComputeFacade {
     ) {
 
         if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(new HugeAtomicDisjointSetStruct(0, new Concurrency(1))));
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(new HugeAtomicDisjointSetStruct(
+                0,
+                new Concurrency(1)
+            )));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.wcc(graph),
+            CommunityAlgorithmTasks.wcc(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress

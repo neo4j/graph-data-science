@@ -322,7 +322,7 @@ class ToUndirectedTest {
         );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
-            MiscellaneousAlgorithmsTasks.toUndirected(directedGraphStore),
+            MiscellaneousAlgorithmsTasks.toUndirected(directedGraphStore, params.concurrency()),
             new Concurrency(4)
         );
 

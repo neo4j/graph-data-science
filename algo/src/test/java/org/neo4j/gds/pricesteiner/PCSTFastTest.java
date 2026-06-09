@@ -92,7 +92,7 @@ class PCSTFastTest {
 
             var progressTracker = TaskProgressTracker.create(
                 new LoggerForProgressTrackingAdapter(log),
-                PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(),graph.relationshipCount()),
+                PCSTProgressTrackerTaskCreator.progressTask(new Concurrency(1), graph.nodeCount(),graph.relationshipCount()),
                 new Concurrency(1),
                 new JobId(),
                 PlainSimpleRequestCorrelationId.create(),

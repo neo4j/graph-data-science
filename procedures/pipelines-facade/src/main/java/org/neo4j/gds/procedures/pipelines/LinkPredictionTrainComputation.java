@@ -171,6 +171,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
 
         var task = LinkPredictionTrainPipelineExecutor.progressTask(
             label.asString(),
+            configuration.concurrency(),
             pipeline,
             relationshipCount
         );

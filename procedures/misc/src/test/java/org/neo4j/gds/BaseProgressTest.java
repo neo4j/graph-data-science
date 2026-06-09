@@ -67,21 +67,19 @@ public abstract class BaseProgressTest extends BaseTest {
             @Name(value = "withMemoryEstimation", defaultValue = "false") boolean withMemoryEstimation,
             @Name(value = "withConcurrency", defaultValue = "false") boolean withConcurrency
         ) {
-            var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
+            var concurrency = withConcurrency ? new Concurrency(REQUESTED_CPU_CORES) : new Concurrency(1);
+
+            var task = Tasks.task(taskName, concurrency, Tasks.leaf("leaf", concurrency, 3));
             if (withMemoryEstimation) {
                 task.setEstimatedMemoryRangeInBytes(MEMORY_ESTIMATION_RANGE);
 
                 memoryFacade.track(task.description(),new JobId(),task.estimatedMemoryRangeInBytes().max);
             }
 
-            if (withConcurrency) {
-                task.setMaxConcurrency(new Concurrency(REQUESTED_CPU_CORES));
-            }
-
             var taskProgressTracker = TaskProgressTracker.create(
                 LoggerForProgressTracking.noOpLog(),
                 task,
-                new Concurrency(1),
+                concurrency,
                 new JobId(),
                 PlainSimpleRequestCorrelationId.create(),
                 taskRegistryFactory

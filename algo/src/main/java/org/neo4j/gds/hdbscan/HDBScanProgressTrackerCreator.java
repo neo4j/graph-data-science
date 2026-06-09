@@ -19,53 +19,55 @@
  */
 package org.neo4j.gds.hdbscan;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-public class HDBScanProgressTrackerCreator {
+public final class HDBScanProgressTrackerCreator {
+    private HDBScanProgressTrackerCreator() {}
 
-    static Task kdBuildingTask(String name, long nodeCount){
-        return Tasks.leaf(name, nodeCount);
+    static Task kdBuildingTask(String name, Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf(name, concurrency, nodeCount);
     }
 
-    static Task hierarchyTask(String name, long nodeCount){
-        return Tasks.leaf(name,nodeCount - 1);
+    static Task hierarchyTask(String name, Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf(name, concurrency, nodeCount - 1);
     }
 
-    static Task condenseTask(String name, long nodeCount){
-        return Tasks.leaf(name,nodeCount - 1);
+    static Task condenseTask(String name, Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf(name, concurrency, nodeCount - 1);
     }
 
-    static Task labellingTask(String name, long nodeCount){
-        return Tasks.task(
-                name,
-                List.of(
-                    Tasks.leaf("Stability calculation", nodeCount-1),
-                    Tasks.leaf("cluster selection", nodeCount-1),
-                    Tasks.leaf("labelling", nodeCount + nodeCount-1)
-                )
-        );
-    }
-
-    static Task boruvkaTask(String name, long nodeCount){
-        return Tasks.leaf(name,nodeCount - 1);
-    }
-
-    public static Task hdbscanTask(String name, long nodeCount){
+    static Task labellingTask(String name, Concurrency concurrency, long nodeCount) {
         return Tasks.task(
             name,
+            concurrency,
             List.of(
-                kdBuildingTask("KD-Tree Construction",nodeCount),
-                Tasks.leaf("Nearest Neighbors Search", nodeCount),
-                boruvkaTask("MST Computation", nodeCount),
-                hierarchyTask("Dendrogram Creation", nodeCount),
-                condenseTask("Condensed Tree Creation ", nodeCount),
-                labellingTask("Node Labelling", nodeCount)
+                Tasks.leaf("Stability calculation", concurrency, nodeCount - 1),
+                Tasks.leaf("cluster selection", concurrency, nodeCount - 1),
+                Tasks.leaf("labelling", concurrency, nodeCount + nodeCount - 1)
             )
         );
-
     }
 
+    static Task boruvkaTask(String name, Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf(name, concurrency, nodeCount - 1);
+    }
+
+    public static Task hdbscanTask(String name, Concurrency concurrency, long nodeCount) {
+        return Tasks.task(
+            name,
+            concurrency,
+            List.of(
+                kdBuildingTask("KD-Tree Construction", concurrency, nodeCount),
+                Tasks.leaf("Nearest Neighbors Search", concurrency, nodeCount),
+                boruvkaTask("MST Computation", concurrency, nodeCount),
+                hierarchyTask("Dendrogram Creation", concurrency, nodeCount),
+                condenseTask("Condensed Tree Creation ", concurrency, nodeCount),
+                labellingTask("Node Labelling", concurrency, nodeCount)
+            )
+        );
+    }
 }

@@ -144,16 +144,16 @@ public abstract class FileToGraphStoreImporter {
         var nodeCount = graphInfo.nodeCount();
 
         var importTasks = new ArrayList<Task>();
-        importTasks.add(Tasks.leaf("Import nodes", nodeCount));
+        importTasks.add(Tasks.leaf("Import nodes", concurrency, nodeCount));
 
         var relationshipTaskVolume = graphInfo.relationshipTypeCounts().isEmpty()
             ? Task.UNKNOWN_VOLUME
             : graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum();
-        importTasks.add(Tasks.leaf("Import relationships", relationshipTaskVolume));
+        importTasks.add(Tasks.leaf("Import relationships", concurrency, relationshipTaskVolume));
 
         return TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            Tasks.task(rootTaskName() + " import", importTasks),
+            Tasks.task(rootTaskName() + " import", concurrency, importTasks),
             concurrency,
             jobId,
             requestCorrelationId,

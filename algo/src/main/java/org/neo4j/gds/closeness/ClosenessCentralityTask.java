@@ -20,17 +20,19 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public final class ClosenessCentralityTask {
     private ClosenessCentralityTask() {}
 
-    public static Task create(long nodeCount) {
+    public static Task create(Concurrency concurrency, long nodeCount) {
         return Tasks.task(
             AlgorithmLabel.ClosenessCentrality.asString(),
-            Tasks.leaf("Farness computation", nodeCount * nodeCount),
-            Tasks.leaf("Closeness computation", nodeCount)
+            concurrency,
+            Tasks.leaf("Farness computation", concurrency, nodeCount * nodeCount),
+            Tasks.leaf("Closeness computation", concurrency, nodeCount)
         );
     }
 }

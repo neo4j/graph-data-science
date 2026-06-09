@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -44,13 +45,13 @@ class LocalTaskRegistryFactoryTest {
 
     @Test
     void shouldPutAndMarkCompletedDistinctTasks() {
-        var task1 = Tasks.leaf("root1");
+        var task1 = Tasks.leaf("root1", new Concurrency(1));
         var taskRegistry1 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry1.registerTask(task1);
 
         assertThat(taskStore.query("")).size().isEqualTo(1);
 
-        var task2 = Tasks.leaf("root2");
+        var task2 = Tasks.leaf("root2", new Concurrency(1));
         var taskRegistry2 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry2.registerTask(task2);
 
@@ -65,7 +66,7 @@ class LocalTaskRegistryFactoryTest {
     void shouldThrowOnDuplicateJobId() {
         var jobId = new JobId();
 
-        var task1 = Tasks.leaf("root1");
+        var task1 = Tasks.leaf("root1", new Concurrency(1));
         var taskRegistry1 = taskRegistryFactory.newInstance(jobId);
         taskRegistry1.registerTask(task1);
 
@@ -76,7 +77,7 @@ class LocalTaskRegistryFactoryTest {
     void shouldAllowReplacingCompletedTasks() {
         var jobId = new JobId();
 
-        var task1 = Tasks.leaf("root1");
+        var task1 = Tasks.leaf("root1", new Concurrency(1));
         var taskRegistry1 = taskRegistryFactory.newInstance(jobId);
         taskRegistry1.registerTask(task1);
 
@@ -88,14 +89,14 @@ class LocalTaskRegistryFactoryTest {
         task1.finish();
 
         var registry2 = taskRegistryFactory.newInstance(jobId);
-        LeafTask task2 = Tasks.leaf("root2");
+        LeafTask task2 = Tasks.leaf("root2", new Concurrency(1));
         registry2.registerTask(task2);
 
         task2.start();
         task2.fail();
 
         var registry3 = taskRegistryFactory.newInstance(jobId);
-        LeafTask task3 = Tasks.leaf("root3");
+        LeafTask task3 = Tasks.leaf("root3", new Concurrency(1));
         registry3.registerTask(task2);
 
         task3.start();

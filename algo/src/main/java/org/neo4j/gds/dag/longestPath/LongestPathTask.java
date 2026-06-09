@@ -20,6 +20,7 @@
 package org.neo4j.gds.dag.longestPath;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -28,10 +29,14 @@ import java.util.List;
 public final class LongestPathTask {
     private LongestPathTask() {}
 
-    public static Task create(long nodeCount) {
-        var initializationTask = Tasks.leaf("Initialization", nodeCount);
-        var traversalTask = Tasks.leaf("Traversal", nodeCount);
+    public static Task create(Concurrency concurrency, long nodeCount) {
+        var initializationTask = Tasks.leaf("Initialization", concurrency, nodeCount);
+        var traversalTask = Tasks.leaf("Traversal", concurrency, nodeCount);
 
-        return Tasks.task(AlgorithmLabel.LongestPath.asString(), List.of(initializationTask, traversalTask));
+        return Tasks.task(
+            AlgorithmLabel.LongestPath.asString(),
+            concurrency,
+            List.of(initializationTask, traversalTask)
+        );
     }
 }

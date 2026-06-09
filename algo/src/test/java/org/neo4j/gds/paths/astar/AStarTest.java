@@ -127,7 +127,7 @@ class AStarTest {
     void shouldLogProgress() {
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.AStar, graph.relationshipCount()),
+            RelationshipCountProgressTaskFactory.create(AlgorithmLabel.AStar, new Concurrency(4), graph.relationshipCount()),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE

@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -35,7 +36,7 @@ class PerDatabaseTaskStoreTest {
     void shouldBeIdempotentOnRemove() {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var jobId = new JobId();
-        taskStore.store("", jobId, Tasks.leaf("leaf"));
+        taskStore.store("", jobId, Tasks.leaf("leaf", new Concurrency(1)));
         taskStore.remove("", jobId);
         assertDoesNotThrow(() -> taskStore.remove("", jobId));
     }
@@ -51,27 +52,27 @@ class PerDatabaseTaskStoreTest {
     void shouldCountOngoingAcrossUsers() {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
 
-        taskStore.store("a", new JobId(), Tasks.leaf("v"));
+        taskStore.store("a", new JobId(), Tasks.leaf("v", new Concurrency(1)));
         assertThat(taskStore.ongoingTaskCount()).isEqualTo(1);
 
-        taskStore.store("b", new JobId(), Tasks.leaf("x"));
+        taskStore.store("b", new JobId(), Tasks.leaf("x", new Concurrency(1)));
         assertThat(taskStore.ongoingTaskCount()).isEqualTo(2);
 
-        taskStore.store("b", new JobId(), Tasks.leaf("y"));
+        taskStore.store("b", new JobId(), Tasks.leaf("y", new Concurrency(1)));
         assertThat(taskStore.ongoingTaskCount()).isEqualTo(3);
 
-        LeafTask failedTask = Tasks.leaf("y");
+        LeafTask failedTask = Tasks.leaf("y", new Concurrency(1));
         failedTask.fail();
         taskStore.store("b", new JobId(), failedTask);
         assertThat(taskStore.ongoingTaskCount()).isEqualTo(3);
 
-        LeafTask completedTask = Tasks.leaf("z");
+        LeafTask completedTask = Tasks.leaf("z", new Concurrency(1));
         completedTask.start();
         completedTask.finish();
         taskStore.store("b", new JobId(), completedTask);
         assertThat(taskStore.ongoingTaskCount()).isEqualTo(3);
 
-        LeafTask cancelledTask = Tasks.leaf("alpha");
+        LeafTask cancelledTask = Tasks.leaf("alpha", new Concurrency(1));
         cancelledTask.cancel();
         taskStore.store("b", new JobId(), cancelledTask);
         assertThat(taskStore.ongoingTaskCount()).isEqualTo(3);
@@ -80,22 +81,22 @@ class PerDatabaseTaskStoreTest {
     @Test
     void shouldCountAcrossUsers() {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-        taskStore.store("a", new JobId(), Tasks.leaf("v"));
+        taskStore.store("a", new JobId(), Tasks.leaf("v", new Concurrency(1)));
         assertThat(taskStore.ongoingTaskCount()).isEqualTo(1);
 
-        taskStore.store("b", new JobId(), Tasks.leaf("x"));
+        taskStore.store("b", new JobId(), Tasks.leaf("x", new Concurrency(1)));
         assertThat(taskStore.ongoingTaskCount()).isEqualTo(2);
 
-        taskStore.store("b", new JobId(), Tasks.leaf("y"));
+        taskStore.store("b", new JobId(), Tasks.leaf("y", new Concurrency(1)));
         assertThat(taskStore.ongoingTaskCount()).isEqualTo(3);
     }
 
     @Test
     void shouldQueryByUser() {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-        taskStore.store("alice", new JobId("42"), Tasks.leaf("leaf"));
-        taskStore.store("alice", new JobId("666"), Tasks.leaf("leaf"));
-        taskStore.store("bob", new JobId("1337"), Tasks.leaf("other"));
+        taskStore.store("alice", new JobId("42"), Tasks.leaf("leaf", new Concurrency(1)));
+        taskStore.store("alice", new JobId("666"), Tasks.leaf("leaf", new Concurrency(1)));
+        taskStore.store("bob", new JobId("1337"), Tasks.leaf("other", new Concurrency(1)));
 
         assertThat(taskStore.query("alice")).hasSize(2)
             .allMatch(task -> task.username().equals("alice"));
@@ -109,8 +110,8 @@ class PerDatabaseTaskStoreTest {
     @Test
     void shouldQueryMultipleUsers() {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-        taskStore.store("alice", new JobId("42"), Tasks.leaf("leaf"));
-        taskStore.store("bob", new JobId("1337"), Tasks.leaf("other"));
+        taskStore.store("alice", new JobId("42"), Tasks.leaf("leaf", new Concurrency(1)));
+        taskStore.store("bob", new JobId("1337"), Tasks.leaf("other", new Concurrency(1)));
 
         assertThat(taskStore.query()).hasSize(2);
         assertThat(taskStore.query(new JobId("42"))).hasSize(1);
@@ -129,10 +130,10 @@ class PerDatabaseTaskStoreTest {
     @Test
     void shouldReturnNonEmptyOptionalForExistingUser() {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-        var aliceLeafTask = Tasks.leaf("leaf");
+        var aliceLeafTask = Tasks.leaf("leaf", new Concurrency(1));
         taskStore.store("alice", new JobId("42"), aliceLeafTask);
-        taskStore.store("alice", new JobId("43"), Tasks.leaf("leaf_2"));
-        taskStore.store("bob", new JobId("1337"), Tasks.leaf("other"));
+        taskStore.store("alice", new JobId("43"), Tasks.leaf("leaf_2", new Concurrency(1)));
+        taskStore.store("bob", new JobId("1337"), Tasks.leaf("other", new Concurrency(1)));
 
         var alice = taskStore.query("alice", new JobId("42"));
         assertThat(alice)
@@ -144,7 +145,7 @@ class PerDatabaseTaskStoreTest {
     void shouldCleanupOnReachingLimit() throws InterruptedException {
         var taskStore = new PerDatabaseTaskStore(Duration.ofMillis(100));
 
-        var aliceLeafTask = Tasks.leaf("leaf");
+        var aliceLeafTask = Tasks.leaf("leaf", new Concurrency(1));
         JobId jobId = new JobId("42");
         taskStore.store("alice", jobId, aliceLeafTask);
         taskStore.markCompleted("alice", jobId);

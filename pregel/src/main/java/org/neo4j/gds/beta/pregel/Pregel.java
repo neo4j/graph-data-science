@@ -139,9 +139,9 @@ public final class Pregel<CONFIG extends PregelConfig> {
     public static <CONFIG extends PregelConfig> Task progressTask(Graph graph, CONFIG config, String taskName) {
         return Tasks.iterativeDynamic(
             taskName,
-            () -> List.of(
-                Tasks.leaf("Compute iteration", graph.nodeCount()),
-                Tasks.leaf("Master compute iteration", graph.nodeCount())
+            config.concurrency(), () -> List.of(
+                Tasks.leaf("Compute iteration", config.concurrency(), graph.nodeCount()),
+                Tasks.leaf("Master compute iteration", config.concurrency(), graph.nodeCount())
             ),
             config.maxIterations()
         );

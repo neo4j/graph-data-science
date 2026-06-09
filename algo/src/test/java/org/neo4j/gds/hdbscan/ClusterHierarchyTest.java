@@ -157,7 +157,7 @@ class ClusterHierarchyTest {
 
         var progressTracker = TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            HDBScanProgressTrackerCreator.hierarchyTask("foo",3),
+            HDBScanProgressTrackerCreator.hierarchyTask("foo", new Concurrency(1), 3),
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),

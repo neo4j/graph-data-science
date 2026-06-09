@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.dag.longestPath.LongestPathTask;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortTask;
@@ -42,84 +43,89 @@ import org.neo4j.gds.traversal.RandomWalkProgressTask;
 public final class PathFindingAlgorithmTasks {
     private PathFindingAlgorithmTasks() {}
 
-    public static Task bellmanFord(){
-        return BellmanFordProgressTask.create();
+    public static Task bellmanFord(Concurrency concurrency) {
+        return BellmanFordProgressTask.create(concurrency);
     }
 
-    public static Task bfs(){
-        return BFSProgressTask.create();
+    public static Task bfs(Concurrency concurrency) {
+        return BFSProgressTask.create(concurrency);
     }
 
-    public static Task deltaStepping(){
-        return DeltaSteppingProgressTask.create();
+    public static Task deltaStepping(Concurrency concurrency) {
+        return DeltaSteppingProgressTask.create(concurrency);
     }
 
-    public static Task dfs(){
-        return DFSProgressTask.create();
+    public static Task dfs(Concurrency concurrency) {
+        return DFSProgressTask.create(concurrency);
     }
 
-    public static Task kSpanningTree(Graph graph){
-        return KSpanningTreeTask.create(graph.relationshipCount());
+    public static Task kSpanningTree(Graph graph, Concurrency concurrency) {
+        return KSpanningTreeTask.create(concurrency, graph.relationshipCount());
     }
 
-    public static Task longestPath(Graph graph){
-        return LongestPathTask.create(graph.nodeCount());
+    public static Task longestPath(Graph graph, Concurrency concurrency) {
+        return LongestPathTask.create(concurrency, graph.nodeCount());
     }
 
-    public static Task maxFlow(){
-        return MaxFlowTask.create();
+    public static Task maxFlow(Concurrency concurrency) {
+        return MaxFlowTask.create(concurrency);
     }
 
-    public static Task minCostMaxFlow(){
-        return MinCostMaxFlowTask.create();
+    public static Task minCostMaxFlow(Concurrency concurrency) {
+        return MinCostMaxFlowTask.create(concurrency);
     }
 
-    public static Task randomWalk(Graph graph){
-        return RandomWalkProgressTask.create(graph);
+    public static Task randomWalk(Graph graph, Concurrency concurrency) {
+        return RandomWalkProgressTask.create(graph, concurrency);
     }
 
-    public static Task randomWalkCountingVisits(Graph graph){
-        return RandomWalkCountingNodeVisitsProgressTaskFactory.create(graph);
+    public static Task randomWalkCountingVisits(Graph graph, Concurrency concurrency) {
+        return RandomWalkCountingNodeVisitsProgressTaskFactory.create(graph, concurrency);
     }
 
-    public static Task pcst(Graph graph){
-        return PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(), graph.relationshipCount());
+    public static Task pcst(Graph graph, Concurrency concurrency) {
+        return PCSTProgressTrackerTaskCreator.progressTask(concurrency, graph.nodeCount(), graph.relationshipCount());
     }
 
-    private static Task dijkstraVariant(AlgorithmLabel algorithmLabel,Graph graph){
-        return RelationshipCountProgressTaskFactory.create(algorithmLabel, graph.relationshipCount());
+    private static Task dijkstraVariant(Graph graph, Concurrency concurrency, AlgorithmLabel algorithmLabel) {
+        return RelationshipCountProgressTaskFactory.create(algorithmLabel, concurrency, graph.relationshipCount());
 
     }
-    public static Task aStar(Graph graph){
-        return dijkstraVariant(AlgorithmLabel.AStar,graph);
+
+    public static Task aStar(Graph graph, Concurrency concurrency) {
+        return dijkstraVariant(graph, concurrency, AlgorithmLabel.AStar);
     }
 
-    public static Task dijkstra(Graph graph){
-        return dijkstraVariant(AlgorithmLabel.Dijkstra, graph);
+    public static Task dijkstra(Graph graph, Concurrency concurrency) {
+        return dijkstraVariant(graph, concurrency, AlgorithmLabel.Dijkstra);
     }
 
-    public static Task singleSourceDijkstra(Graph graph){
-        return dijkstraVariant(AlgorithmLabel.SingleSourceDijkstra, graph);
+    public static Task singleSourceDijkstra(Graph graph, Concurrency concurrency) {
+        return dijkstraVariant(graph, concurrency, AlgorithmLabel.SingleSourceDijkstra);
     }
 
-    public static Task spanningTree(Graph graph){
-        return RelationshipCountProgressTaskFactory.create(AlgorithmLabel.SpanningTree, graph.relationshipCount());
+    public static Task spanningTree(Graph graph, Concurrency concurrency) {
+        return RelationshipCountProgressTaskFactory.create(
+            AlgorithmLabel.SpanningTree,
+            concurrency,
+            graph.relationshipCount()
+        );
     }
 
-    public static Task yens(Graph graph,int k){
-       return YensProgressTask.create(
-            graph.characteristics(),
+    public static Task yens(Graph graph, Concurrency concurrency, int k) {
+        return YensProgressTask.create(
+            concurrency, graph.characteristics(),
             graph.nodeCount(),
             graph.relationshipCount(),
             k
         );
     }
 
-    public static Task steinerTree(SteinerTreeParameters parameters, Graph graph){
-       return SteinerTreeProgressTask.create(parameters, graph.nodeCount());
+    public static Task steinerTree(SteinerTreeParameters parameters, Graph graph) {
+        return SteinerTreeProgressTask.create(parameters, graph.nodeCount());
     }
 
-    public static Task topologicalSort(Graph graph){
-        return TopologicalSortTask.create(graph);
+    public static Task topologicalSort(Graph graph, Concurrency concurrency) {
+        return TopologicalSortTask.create(graph, concurrency);
     }
 }

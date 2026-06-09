@@ -30,15 +30,18 @@ public class FastRPTask {
 
     public static Task create(long nodeCount, long relationshipCount, FastRPParameters parameters) {
         var tasks = new ArrayList<Task>();
-        tasks.add(Tasks.leaf("Initialize random vectors", nodeCount));
+        tasks.add(Tasks.leaf("Initialize random vectors", parameters.concurrency(), nodeCount));
         if (Float.compare(parameters.nodeSelfInfluence().floatValue(), 0.0f) != 0) {
-            tasks.add(Tasks.leaf("Apply node self-influence", nodeCount));
+            tasks.add(Tasks.leaf("Apply node self-influence", parameters.concurrency(), nodeCount));
         }
         tasks.add(Tasks.iterativeFixed(
             "Propagate embeddings",
-            () -> List.of(Tasks.leaf("Propagate embeddings task", relationshipCount)),
+            parameters.concurrency(), () -> List.of(Tasks.leaf(
+                "Propagate embeddings task",
+                parameters.concurrency(), relationshipCount
+            )),
             parameters.iterationWeights().size()
         ));
-        return Tasks.task(AlgorithmLabel.FastRP.asString(), tasks);
+        return Tasks.task(AlgorithmLabel.FastRP.asString(), parameters.concurrency(), tasks);
     }
 }

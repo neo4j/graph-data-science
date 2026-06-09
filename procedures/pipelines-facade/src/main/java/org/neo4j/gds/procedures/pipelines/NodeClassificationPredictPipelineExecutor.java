@@ -21,13 +21,14 @@ package org.neo4j.gds.procedures.pipelines;
 
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
@@ -65,14 +66,22 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
         super(pipeline, config, executionContext, graphStore, progressTracker);
         this.modelData = modelData;
         this.classIdMap = classIdMap;
-        this.predictGraphFilter = new PipelineGraphFilter(config.nodeLabelIdentifiers(graphStore), config.internalRelationshipTypes(graphStore));
+        this.predictGraphFilter = new PipelineGraphFilter(
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        );
     }
 
-    public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
+    public static Task progressTask(
+        String taskName,
+        Concurrency concurrency,
+        NodePropertyPredictPipeline pipeline, GraphStore graphStore
+    ) {
         return Tasks.task(
             taskName,
-            NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), graphStore.nodeCount()),
-            NodeClassificationPredict.progressTask(graphStore.nodeCount())
+            concurrency,
+            NodePropertyStepExecutor.tasks(concurrency, pipeline.nodePropertySteps(), graphStore.nodeCount()),
+            NodeClassificationPredict.progressTask(concurrency, graphStore.nodeCount())
         );
     }
 
@@ -106,7 +115,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
             ));
         }
 
-        var nodeClassificationResult =  new NodeClassificationPredict(
+        var nodeClassificationResult = new NodeClassificationPredict(
             ClassifierFactory.create(modelData),
             features,
             NodeClassificationPredictPipelineConstants.MIN_BATCH_SIZE,

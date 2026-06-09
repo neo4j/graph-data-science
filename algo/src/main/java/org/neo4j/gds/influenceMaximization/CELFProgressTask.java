@@ -27,11 +27,12 @@ public final class CELFProgressTask {
 
     private CELFProgressTask() {}
 
-    public static Task create(long nodeCount, CELFParameters parameters){
-       return Tasks.task(
+    public static Task create(long nodeCount, CELFParameters parameters) {
+        return Tasks.task(
             AlgorithmLabel.CELF.asString(),
-            Tasks.leaf("Greedy", nodeCount),
-            Tasks.leaf("LazyForwarding", parameters.seedSetSize() - 1)
+            parameters.concurrency(),
+            Tasks.leaf("Greedy", parameters.concurrency(), nodeCount),
+            Tasks.leaf("LazyForwarding", parameters.concurrency(), parameters.seedSetSize() - 1)
         );
     }
 

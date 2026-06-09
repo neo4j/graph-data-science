@@ -154,7 +154,7 @@ class PrimTest {
     void shouldLogProgress() {
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            SpanningTreeProgressTask.create(graph.relationshipCount()),
+            SpanningTreeProgressTask.create(new Concurrency(4), graph.relationshipCount()),
             new LoggerForProgressTrackingAdapter(log),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE

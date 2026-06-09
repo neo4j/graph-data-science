@@ -25,6 +25,7 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproximateKCutTaskFactory;
 import org.neo4j.gds.cliqueCounting.CliqueCountingTaskFactory;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.hdbscan.HDBScanProgressTrackerCreator;
@@ -58,28 +59,34 @@ public final class CommunityAlgorithmTasks {
         return CliqueCountingTaskFactory.createTask(graph, parameters);
     }
 
-    public static Task conductance(Graph graph) {
+    public static Task conductance(Graph graph, Concurrency concurrency) {
         return Tasks.task(
             AlgorithmLabel.Conductance.asString(),
-            Tasks.leaf("count relationships", graph.nodeCount()),
-            Tasks.leaf("accumulate counts"),
-            Tasks.leaf("perform conductance computations")
+            concurrency,
+            Tasks.leaf("count relationships", concurrency, graph.nodeCount()),
+            Tasks.leaf("accumulate counts", concurrency),
+            Tasks.leaf("perform conductance computations", concurrency)
         );
     }
 
-    public static Task hdbscan(Graph graph) {
-        return HDBScanProgressTrackerCreator.hdbscanTask(AlgorithmLabel.HDBScan.asString(), graph.nodeCount());
+    public static Task hdbscan(Graph graph, Concurrency concurrency) {
+        return HDBScanProgressTrackerCreator.hdbscanTask(
+            AlgorithmLabel.HDBScan.asString(),
+            concurrency,
+            graph.nodeCount()
+        );
     }
 
     public static Task k1Coloring(Graph graph, K1ColoringParameters parameters) {
         return K1ColoringProgressTrackerTaskCreator.progressTask(
+            parameters.concurrency(),
             graph.nodeCount(),
             parameters.maxIterations()
         );
     }
 
-    public static Task kCore(Graph graph) {
-        return Tasks.leaf(AlgorithmLabel.KCore.asString(), graph.nodeCount());
+    public static Task kCore(Graph graph, Concurrency concurrency) {
+        return Tasks.leaf(AlgorithmLabel.KCore.asString(), concurrency, graph.nodeCount());
     }
 
     public static Task kMeans(Graph graph, KmeansParameters parameters) {
@@ -89,10 +96,12 @@ public final class CommunityAlgorithmTasks {
     public static Task labelPropagation(Graph graph, LabelPropagationParameters parameters) {
         return Tasks.task(
             AlgorithmLabel.LabelPropagation.asString(),
-            Tasks.leaf("Initialization", graph.relationshipCount()),
+            parameters.concurrency(),
+            Tasks.leaf("Initialization", parameters.concurrency(), graph.relationshipCount()),
             Tasks.iterativeDynamic(
                 "Assign labels",
-                () -> List.of(Tasks.leaf("Iteration", graph.relationshipCount())),
+                parameters.concurrency(),
+                () -> List.of(Tasks.leaf("Iteration", parameters.concurrency(), graph.relationshipCount())),
                 parameters.maxIterations()
             )
         );
@@ -101,10 +110,10 @@ public final class CommunityAlgorithmTasks {
     public static Task lcc(Graph graph, LocalClusteringCoefficientParameters parameters) {
         var tasks = new ArrayList<Task>();
         if (parameters.seedProperty() == null) {
-            tasks.add(TriangleCountTask.create(graph.nodeCount()));
+            tasks.add(TriangleCountTask.create(parameters.concurrency(), graph.nodeCount()));
         }
-        tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", graph.nodeCount()));
-        return Tasks.task(AlgorithmLabel.LCC.asString(), tasks);
+        tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", parameters.concurrency(), graph.nodeCount()));
+        return Tasks.task(AlgorithmLabel.LCC.asString(), parameters.concurrency(), tasks);
     }
 
     public static Task leiden(Graph graph, LeidenParameters parameters) {
@@ -113,6 +122,7 @@ public final class CommunityAlgorithmTasks {
 
     public static Task louvain(Graph graph, LouvainParameters parameters) {
         return LouvainProgressTrackerTaskCreator.createTask(
+            parameters.concurrency(),
             graph.nodeCount(),
             graph.relationshipCount(),
             parameters.maxLevels(),
@@ -122,29 +132,31 @@ public final class CommunityAlgorithmTasks {
 
     public static Task modularityOptimization(Graph graph, ModularityOptimizationParameters parameters) {
         return ModularityOptimizationProgressTrackerTaskCreator.progressTask(
+            parameters.concurrency(),
             graph.nodeCount(),
             graph.relationshipCount(),
             parameters.maxIterations()
         );
     }
 
-    public static Task scc(Graph graph) {
-        return Tasks.leaf(AlgorithmLabel.SCC.asString(), graph.nodeCount());
+    public static Task scc(Graph graph, Concurrency concurrency) {
+        return Tasks.leaf(AlgorithmLabel.SCC.asString(), concurrency, graph.nodeCount());
     }
 
-    public static Task triangleCount(Graph graph) {
-        return Tasks.leaf(AlgorithmLabel.TriangleCount.asString(), graph.nodeCount());
+    public static Task triangleCount(Graph graph, Concurrency concurrency) {
+        return Tasks.leaf(AlgorithmLabel.TriangleCount.asString(), concurrency, graph.nodeCount());
     }
 
-    public static Task wcc(Graph graph) {
-        return Tasks.leaf(AlgorithmLabel.WCC.asString(), graph.relationshipCount());
+    public static Task wcc(Graph graph, Concurrency concurrency) {
+        return Tasks.leaf(AlgorithmLabel.WCC.asString(), concurrency, graph.relationshipCount());
     }
 
     public static Task speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
         return SpeakerListenerLPAProgressTrackerCreator.progressTask(
+            AlgorithmLabel.SLLPA.asString(),
+            configuration.concurrency(),
             graph.nodeCount(),
-            configuration.maxIterations(),
-            AlgorithmLabel.SLLPA.asString()
+            configuration.maxIterations()
         );
     }
 }

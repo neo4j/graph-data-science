@@ -19,13 +19,14 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public final class TriangleCountTask {
     private TriangleCountTask() {}
 
-    public static Task create(long nodeCount) {
-        return Tasks.leaf(IntersectingTriangleCount.class.getSimpleName(), nodeCount);
+    public static Task create(Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf(IntersectingTriangleCount.class.getSimpleName(), concurrency, nodeCount);
     }
 }

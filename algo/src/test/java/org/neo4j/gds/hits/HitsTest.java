@@ -110,7 +110,7 @@ class HitsTest {
 
         var progressTracker = TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            HitsProgressTrackerCreator.progressTask(graph.nodeCount(),config.maxIterations()),
+            HitsProgressTrackerCreator.progressTask(new Concurrency(1), graph.nodeCount(),config.maxIterations()),
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),

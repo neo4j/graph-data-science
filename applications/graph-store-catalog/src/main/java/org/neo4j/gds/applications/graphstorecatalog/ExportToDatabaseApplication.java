@@ -64,7 +64,7 @@ class ExportToDatabaseApplication {
     ) {
         var progressTracker = TaskProgressTracker.create(
             loggers.loggerForProgressTracking(),
-            ProgressTrackerExecutionMonitor.progressTask(graphStore),
+            ProgressTrackerExecutionMonitor.progressTask(graphStore, configuration.typedWriteConcurrency()),
             configuration.typedWriteConcurrency(),
             configuration.jobId(),
             requestScopedDependencies.correlationId(),

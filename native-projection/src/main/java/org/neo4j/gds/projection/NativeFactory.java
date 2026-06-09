@@ -120,17 +120,19 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
                     : relCount;
             }).mapToLong(Long::longValue).sum();
 
+        var concurrency = graphProjectConfig.readConcurrency();
+
         var task = Tasks.task(
             "Loading",
-            Tasks.task("Nodes", Tasks.leaf("Store Scan", dimensions.nodeCount())),
-            Tasks.task("Relationships", Tasks.leaf("Store Scan", relationshipCount))
+            concurrency, Tasks.task("Nodes", concurrency, Tasks.leaf("Store Scan", concurrency, dimensions.nodeCount())),
+            Tasks.task("Relationships", concurrency, Tasks.leaf("Store Scan", concurrency, relationshipCount))
         );
 
         if (graphProjectConfig.logProgress()) {
             return TaskProgressTracker.create(
                 new LoggerForProgressTrackingAdapter(loadingContext.log()),
                 task,
-                graphProjectConfig.readConcurrency(),
+                concurrency,
                 graphProjectConfig.jobId(),
                 PlainSimpleRequestCorrelationId.create(),
                 loadingContext.taskRegistryFactory()
@@ -140,7 +142,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         return TaskTreeProgressTracker.create(
             task,
             new LoggerForProgressTrackingAdapter(loadingContext.log()),
-            graphProjectConfig.readConcurrency(),
+            concurrency,
             graphProjectConfig.jobId(),
             PlainSimpleRequestCorrelationId.create(),
             loadingContext.taskRegistryFactory()

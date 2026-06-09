@@ -111,7 +111,7 @@ public final class PregelCompanion {
                 .build()
         );
 
-        var task = InverseRelationshipsTask.progressTask(graphStore.nodeCount(), params);
+        var task = InverseRelationshipsTask.progressTask(concurrency, graphStore.nodeCount(), params);
 
         var progressTracker = progressTrackerCreator.createProgressTracker(task,
             new JobId(),

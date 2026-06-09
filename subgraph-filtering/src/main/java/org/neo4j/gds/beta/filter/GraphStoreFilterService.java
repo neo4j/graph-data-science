@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.filter;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.logging.Log;
@@ -34,8 +35,8 @@ public class GraphStoreFilterService {
 
     public GraphStoreFilterService(Log log) {this.log = log;}
 
-    public Task progressTask(GraphStore graphStore) {
-        return GraphStoreFilter.progressTask(graphStore);
+    public Task progressTask(GraphStore graphStore, Concurrency concurrency) {
+        return GraphStoreFilter.progressTask(graphStore, concurrency);
     }
 
     /**

@@ -28,6 +28,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetweennessCentralityProgressTask;
 import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
 import org.neo4j.gds.closeness.ClosenessCentralityTask;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityProgressTask;
@@ -49,52 +50,59 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 public final class CentralityAlgorithmTasks {
     private CentralityAlgorithmTasks() {}
 
-    public static Task articulationPoints(Graph graph) {
-        return ArticulationPointsProgressTaskCreator.progressTask(graph.nodeCount());
+    public static Task articulationPoints(Graph graph, Concurrency concurrency) {
+        return ArticulationPointsProgressTaskCreator.progressTask(concurrency, graph.nodeCount());
     }
 
-    public static Task betweennessCentrality(Graph graph, BetweennessCentralityParameters parameters){
-        return BetweennessCentralityProgressTask.create(graph.nodeCount(),parameters);
+    public static Task betweennessCentrality(Graph graph, BetweennessCentralityParameters parameters) {
+        return BetweennessCentralityProgressTask.create(graph.nodeCount(), parameters);
     }
 
-    public static Task CELF(Graph graph, CELFParameters parameters){
+    public static Task CELF(Graph graph, CELFParameters parameters) {
         return CELFProgressTask.create(graph.nodeCount(), parameters);
     }
 
-    public static Task bridges(Graph graph){
-        return BridgeProgressTaskCreator.progressTask(graph.nodeCount());
+    public static Task bridges(Graph graph, Concurrency concurrency) {
+        return BridgeProgressTaskCreator.progressTask(concurrency, graph.nodeCount());
     }
 
-    public static Task closenessCentrality(Graph graph){
-        return ClosenessCentralityTask.create(graph.nodeCount());
+    public static Task closenessCentrality(Graph graph, Concurrency concurrency) {
+        return ClosenessCentralityTask.create(concurrency, graph.nodeCount());
     }
 
-    public static Task degreeCentrality(Graph graph){
-        return DegreeCentralityProgressTask.create(graph.nodeCount());
+    public static Task degreeCentrality(Graph graph, Concurrency concurrency) {
+        return DegreeCentralityProgressTask.create(concurrency, graph.nodeCount());
     }
 
-    public static Task harmonicCentrality(){ return HarmonicCentralityProgressTask.create(); }
+    public static Task harmonicCentrality(Concurrency concurrency) {
+        return HarmonicCentralityProgressTask.create(concurrency);
+    }
 
-    public static Task articleRank(Graph graph, ArticleRankConfig configuration){
+    public static Task articleRank(Graph graph, ArticleRankConfig configuration) {
         return Pregel.progressTask(graph, configuration, ArticleRank.asString());
     }
 
-    public static Task eigenVector(Graph graph, EigenvectorConfig configuration){
+    public static Task eigenVector(Graph graph, EigenvectorConfig configuration) {
         return Pregel.progressTask(graph, configuration, EigenVector.asString());
     }
 
-    public static Task pageRank(Graph graph, PageRankConfig configuration){
-       return Pregel.progressTask(graph, configuration, PageRank.asString());
+    public static Task pageRank(Graph graph, PageRankConfig configuration) {
+        return Pregel.progressTask(graph, configuration, PageRank.asString());
     }
 
-    public static Task hits(Graph graph, HitsConfig configuration){
+    public static Task hits(Graph graph, HitsConfig configuration) {
         return HitsProgressTrackerCreator.progressTask(
+            configuration.concurrency(),
             graph.nodeCount(),
             configuration.maxIterations()
         );
     }
 
-    public static Task hits(GraphStore graphStore, HitsConfig configuration, InverseRelationshipsParameters inverseRelationshipsParameters){
+    public static Task hits(
+        GraphStore graphStore,
+        HitsConfig configuration,
+        InverseRelationshipsParameters inverseRelationshipsParameters
+    ) {
         return HitsProgressTrackerCreator.progressTaskWithInvertedIndex(
             graphStore.nodeCount(),
             configuration.maxIterations(),
@@ -102,10 +110,10 @@ public final class CentralityAlgorithmTasks {
         );
     }
 
-    public static Task indirectExposure(Graph graph, IndirectExposureConfig configuration){
-       return Tasks.task(
+    public static Task indirectExposure(Graph graph, IndirectExposureConfig configuration) {
+        return Tasks.task(
             AlgorithmLabel.IndirectExposure.asString(),
-            Tasks.leaf("TotalTransfers", graph.nodeCount()),
+            configuration.concurrency(), Tasks.leaf("TotalTransfers", configuration.concurrency(), graph.nodeCount()),
             Pregel.progressTask(graph, configuration, "ExposurePropagation")
         );
     }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.mcmf;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.maxflow.MaxFlowTask;
@@ -27,13 +28,16 @@ import org.neo4j.gds.maxflow.MaxFlowTask;
 import java.util.List;
 
 public final class MinCostMaxFlowTask {
-
     private MinCostMaxFlowTask() {}
 
-    public static Task create() {
-            var  maxFlowTask = MaxFlowTask.create();
-            var flowTask =Tasks.iterativeOpen("Cost refinement",()->List.of(Tasks.leaf("Refine",1)));
-            return Tasks.task(AlgorithmLabel.MCMF.asString(), List.of(maxFlowTask, flowTask));
-        }
-
+    public static Task create(Concurrency concurrency) {
+        return Tasks.task(
+            AlgorithmLabel.MCMF.asString(),
+            concurrency,
+            List.of(
+                MaxFlowTask.create(concurrency),
+                Tasks.iterativeOpen("Cost refinement", concurrency, () -> List.of(Tasks.leaf("Refine", concurrency, 1)))
+            )
+        );
+    }
 }

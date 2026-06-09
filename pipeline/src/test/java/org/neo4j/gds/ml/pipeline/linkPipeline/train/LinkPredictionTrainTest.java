@@ -480,8 +480,7 @@ class LinkPredictionTrainTest {
         var log = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(
             progressTask(
-                trainGraph.relationshipCount(),
-                pipeline.splitConfig(),
+                new Concurrency(1), pipeline.splitConfig(), trainGraph.relationshipCount(),
                 pipeline.numberOfModelSelectionTrials()
             ),
             new LoggerForProgressTrackingAdapter(log),
@@ -574,8 +573,7 @@ class LinkPredictionTrainTest {
         var log = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(
             progressTask(
-                trainGraph.relationshipCount(),
-                pipeline.splitConfig(),
+                new Concurrency(1), pipeline.splitConfig(), trainGraph.relationshipCount(),
                 pipeline.numberOfModelSelectionTrials()
             ),
             new LoggerForProgressTrackingAdapter(log),
@@ -658,8 +656,7 @@ class LinkPredictionTrainTest {
         var log = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(
             progressTask(
-                2 * trainGraph.relationshipCount(),
-                pipeline.splitConfig(),
+                new Concurrency(1), pipeline.splitConfig(), 2 * trainGraph.relationshipCount(),
                 pipeline.numberOfModelSelectionTrials()
             ),
             new LoggerForProgressTrackingAdapter(log),
@@ -835,10 +832,11 @@ class LinkPredictionTrainTest {
             );
     }
 
-    static Task progressTask(long relationshipCount, LinkPredictionSplitConfig splitConfig, int numberOfModelSelectionTrials) {
+    static Task progressTask(Concurrency concurrency, LinkPredictionSplitConfig splitConfig, long relationshipCount, int numberOfModelSelectionTrials) {
         return Tasks.task(
             "MY TEST TASK",
-            LinkPredictionTrain.progressTasks(relationshipCount, splitConfig, numberOfModelSelectionTrials)
+            concurrency,
+            LinkPredictionTrain.progressTasks(concurrency, relationshipCount, splitConfig, numberOfModelSelectionTrials)
         );
     }
 

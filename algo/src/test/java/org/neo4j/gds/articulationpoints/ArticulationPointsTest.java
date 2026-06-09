@@ -93,7 +93,7 @@ class ArticulationPointsTest {
     void shouldLogProgress(){
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
-            CentralityAlgorithmTasks.articulationPoints(graph),
+            CentralityAlgorithmTasks.articulationPoints(graph, new Concurrency(1)),
             new Concurrency(1)
         );
 

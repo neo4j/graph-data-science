@@ -19,21 +19,23 @@
  */
 package org.neo4j.gds.sllpa;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-public class SpeakerListenerLPAProgressTrackerCreator {
+public final class SpeakerListenerLPAProgressTrackerCreator {
+    private SpeakerListenerLPAProgressTrackerCreator() {}
 
-    public static Task progressTask(long nodeCount, int maxIterations,String taskName) {
+    public static Task progressTask(String taskName, Concurrency concurrency, long nodeCount, int maxIterations) {
         return Tasks.iterativeDynamic(
             taskName,
-            () -> List.of(
-                Tasks.leaf("Compute iteration", nodeCount),
-                Tasks.leaf("Master compute iteration", nodeCount)
+            concurrency, () -> List.of(
+                Tasks.leaf("Compute iteration", concurrency, nodeCount),
+                Tasks.leaf("Master compute iteration", concurrency, nodeCount)
             ),
             maxIterations
         );
-}
+    }
 }

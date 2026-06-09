@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -27,7 +28,7 @@ public interface RelationshipExporter {
 
     void write(String relationshipType, String propertyKey);
 
-    static Task baseTask(String operationName, long taskVolume) {
-        return Tasks.leaf(operationName + " :: Relationships :: Write", taskVolume);
+    static Task baseTask(String operationName, Concurrency concurrency, long taskVolume) {
+        return Tasks.leaf(operationName + " :: Relationships :: Write", concurrency, taskVolume);
     }
 }

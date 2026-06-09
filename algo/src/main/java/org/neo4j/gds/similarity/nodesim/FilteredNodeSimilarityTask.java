@@ -20,32 +20,34 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.wcc.WccTask;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
 
-public class FilteredNodeSimilarityTask {
-
+public final class FilteredNodeSimilarityTask {
     private FilteredNodeSimilarityTask() {}
 
     public static Task create(Graph graph, NodeSimilarityParameters parameters) {
-        return  Tasks.task(
+        return Tasks.task(
             FilteredNodeSimilarity.asString(),
-            filteredNodeSimilarityProgressTask(graph, parameters.runWCC()),
-            Tasks.leaf("compare node pairs")
+            parameters.concurrency(),
+            filteredNodeSimilarityProgressTask(graph, parameters.concurrency(), parameters.runWCC()),
+            Tasks.leaf("compare node pairs", parameters.concurrency())
         );
     }
 
-    private static Task filteredNodeSimilarityProgressTask(Graph graph, boolean runWcc) {
+    private static Task filteredNodeSimilarityProgressTask(Graph graph, Concurrency concurrency, boolean runWcc) {
         if (runWcc) {
             return Tasks.task(
                 "prepare",
-                WccTask.create(graph),
-                Tasks.leaf("initialize", graph.relationshipCount())
+                concurrency,
+                WccTask.create(graph, concurrency),
+                Tasks.leaf("initialize", concurrency, graph.relationshipCount())
             );
         }
-        return Tasks.leaf("prepare", graph.relationshipCount());
+        return Tasks.leaf("prepare", concurrency, graph.relationshipCount());
     }
 }

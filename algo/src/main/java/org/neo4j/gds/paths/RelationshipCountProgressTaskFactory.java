@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.paths;
 
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.applications.algorithms.machinery.Label;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public final class RelationshipCountProgressTaskFactory {
-
     private RelationshipCountProgressTaskFactory() {}
 
-    public static Task create(AlgorithmLabel algorithmLabel, long relationshipCount) {
-        return Tasks.leaf(algorithmLabel.asString(), relationshipCount);
+    public static Task create(Label label, Concurrency concurrency, long relationshipCount) {
+        return Tasks.leaf(label.asString(), concurrency, relationshipCount);
     }
 }

@@ -34,6 +34,7 @@ import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.beta.filter.expression.ValidationContext;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
@@ -50,35 +51,37 @@ import java.util.concurrent.ExecutorService;
 
 public final class GraphStoreFilter {
 
-    public static Task progressTask(GraphStore graphStore) {
+    public static Task progressTask(GraphStore graphStore, Concurrency concurrency) {
         var nodePropertyCount = graphStore.nodePropertyKeys().size();
+
         return progressTask(
+            concurrency,
             graphStore.nodeCount(),
             nodePropertyCount,
             graphStore.relationshipTypes().size()
         );
     }
 
-    public static Task progressTask(long nodeCount, long nodePropertyCount, int relationshipTypes) {
-        var nodesTask = Tasks.leaf("Nodes", nodeCount);
+    public static Task progressTask(Concurrency concurrency, long nodeCount, long nodePropertyCount, int relationshipTypes) {
+        var nodesTask = Tasks.leaf("Nodes", concurrency, nodeCount);
         var nodePropertiesTask = Tasks.iterativeOpen(
             "Node properties",
-            () -> List.of(
-                Tasks.leaf("Label", nodeCount * nodePropertyCount)
+            concurrency, () -> List.of(
+                Tasks.leaf("Label", concurrency, nodeCount * nodePropertyCount)
             )
         );
 
         var relationshipsTask = Tasks.iterativeFixed(
             "Relationships",
-            () -> List.of(
-                Tasks.leaf("Relationship type")
+            concurrency, () -> List.of(
+                Tasks.leaf("Relationship type", concurrency)
             ),
             relationshipTypes
         );
 
         return Tasks.task(
             "GraphStore Filter",
-            nodesTask,
+            concurrency, nodesTask,
             nodePropertiesTask,
             relationshipsTask
         );

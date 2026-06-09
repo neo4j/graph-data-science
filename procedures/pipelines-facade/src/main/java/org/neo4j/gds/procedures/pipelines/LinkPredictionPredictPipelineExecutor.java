@@ -72,10 +72,6 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
         this.graphStoreFilter = graphStoreFilter;
     }
 
-    public LPGraphStoreFilter labelFilter() {
-        return graphStoreFilter;
-    }
-
     @Override
     protected LinkPredictionResult execute() {
         var graph = graphStore.getGraph(
@@ -91,7 +87,10 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
 
     @Override
     protected PipelineGraphFilter nodePropertyStepFilter() {
-        return new PipelineGraphFilter(graphStoreFilter.nodePropertyStepsBaseLabels(), graphStoreFilter.predictRelationshipTypes());
+        return new PipelineGraphFilter(
+            graphStoreFilter.nodePropertyStepsBaseLabels(),
+            graphStoreFilter.predictRelationshipTypes()
+        );
     }
 
     public static Task progressTask(
@@ -103,13 +102,18 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
         var nodeCount = graphStore.nodeCount();
         return Tasks.task(
             taskName,
-            NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), graphStore.relationshipCount()),
+            config.concurrency(),
+            NodePropertyStepExecutor.tasks(
+                config.concurrency(),
+                pipeline.nodePropertySteps(),
+                graphStore.relationshipCount()
+            ),
             config.isApproximateStrategy()
                 ? Tasks.task(
                 "Approximate link prediction",
-                KnnTask.create(nodeCount, config.approximateParameters().finalize(nodeCount))
+                config.concurrency(), KnnTask.create(nodeCount, config.approximateParameters().finalize(nodeCount))
             )
-                : Tasks.leaf("Exhaustive link prediction", nodeCount * nodeCount / 2)
+                : Tasks.leaf("Exhaustive link prediction", config.concurrency(), nodeCount * nodeCount / 2)
         );
     }
 
@@ -170,7 +174,7 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
 
             throw new IllegalArgumentException(formatWithLocale(
                 "Model expected link features to have a total dimension of `%d`, but got `%d`." +
-                " This indicates the dimension of the node-properties %s differ between the input and the original train graph.",
+                    " This indicates the dimension of the node-properties %s differ between the input and the original train graph.",
                 classifier.data().featureDimension(),
                 linkFeatureExtractor.featureDimension(),
                 StringJoining.join(inputNodeProperties)

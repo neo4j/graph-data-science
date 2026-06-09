@@ -561,7 +561,7 @@ class NodeClassificationTrainTest {
         var metrics = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
         var config = createConfig("bananasModel", GRAPH_NAME, metrics, 42L);
 
-        var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount());
+        var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount(), config.concurrency());
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(progressTask, config.username(), config.jobId(), new PerDatabaseTaskStore(
             Duration.ofMinutes(1)), new LoggerForProgressTrackingAdapter(log));
@@ -600,7 +600,7 @@ class NodeClassificationTrainTest {
         var metrics = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
         var config = createConfig("bananasModel", GRAPH_NAME, metrics, 42L);
 
-        var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount());
+        var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount(), config.concurrency());
         var testLog = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(testLog), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 

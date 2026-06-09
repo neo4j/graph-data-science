@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.articulationpoints;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -26,7 +27,7 @@ public final class ArticulationPointsProgressTaskCreator {
 
     private ArticulationPointsProgressTaskCreator() {}
 
-    public static Task progressTask(long nodeCount) {
-        return Tasks.leaf("ArticulationPoints", nodeCount);
+    public static Task progressTask(Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf("ArticulationPoints", concurrency, nodeCount);
     }
 }

@@ -275,7 +275,7 @@ class ModularityOptimizationWithoutOrientationTest {
         Log log
     ) {
         var progressTask = ModularityOptimizationProgressTrackerTaskCreator.progressTask(
-            graph.nodeCount(),
+            concurrency, graph.nodeCount(),
             graph.relationshipCount(),
             maxIterations
         );

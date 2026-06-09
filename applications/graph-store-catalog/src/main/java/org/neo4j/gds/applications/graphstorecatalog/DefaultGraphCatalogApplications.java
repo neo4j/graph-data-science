@@ -526,6 +526,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
         var numberOfPropertiesRemoved = dropNodePropertiesApplication.compute(
             requestScopedDependencies,
+            configuration.concurrency(),
             droppedProperties,
             graphStore
         );
@@ -565,12 +566,16 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var result = dropRelationshipsApplication.compute(
             requestScopedDependencies,
             graphStore,
+            graphStoreWithConfig.config().readConcurrency(),
             relationshipType
         );
 
         return new GraphDropRelationshipResult(
             graphName.value(),
-            relationshipType, result.deletedRelationships(), result.deletedProperties());
+            relationshipType,
+            result.deletedRelationships(),
+            result.deletedProperties()
+        );
     }
 
     @Override

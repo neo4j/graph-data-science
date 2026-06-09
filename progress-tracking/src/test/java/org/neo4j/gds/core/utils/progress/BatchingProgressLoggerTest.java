@@ -161,7 +161,7 @@ class BatchingProgressLoggerTest {
         var logger = BatchingProgressLogger.create(
             new LoggerForProgressTrackingAdapter(log),
             PlainSimpleRequestCorrelationId.create(),
-            Tasks.leaf("Test", taskVolume),
+            Tasks.leaf("Test", concurrency, taskVolume),
             concurrency); // batchSize is 13
         logger.reset(taskVolume);
         logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
@@ -179,7 +179,9 @@ class BatchingProgressLoggerTest {
     void log100Percent() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = BatchingProgressLogger.create(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create(), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = BatchingProgressLogger.create(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create(), Tasks.leaf("Test",
+            concurrency
+        ), concurrency);
         testProgressLogger.reset(1337);
         testProgressLogger.logFinishPercentage();
         assertThat(log.getMessages(TestLog.INFO))
@@ -191,7 +193,9 @@ class BatchingProgressLoggerTest {
     void shouldLog100OnlyOnce() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = BatchingProgressLogger.create(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create(), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = BatchingProgressLogger.create(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create(), Tasks.leaf("Test",
+            concurrency
+        ), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1);
         testProgressLogger.logFinishPercentage();
@@ -204,7 +208,9 @@ class BatchingProgressLoggerTest {
     void shouldNotExceed100Percent() {
         var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = BatchingProgressLogger.create(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create(), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = BatchingProgressLogger.create(new LoggerForProgressTrackingAdapter(log), PlainSimpleRequestCorrelationId.create(), Tasks.leaf("Test",
+            concurrency
+        ), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1); // reaches 100 %
         testProgressLogger.logProgress(1); // exceeds 100 %
@@ -218,7 +224,7 @@ class BatchingProgressLoggerTest {
         var logger = BatchingProgressLogger.create(
             LoggerForProgressTracking.noOpLog(),
             PlainSimpleRequestCorrelationId.create(),
-            Tasks.leaf("foo", 42),
+            Tasks.leaf("foo", new Concurrency(1), 42),
             new Concurrency(1)
         );
 
@@ -242,7 +248,7 @@ class BatchingProgressLoggerTest {
         var logger = BatchingProgressLogger.create(
             new LoggerForProgressTrackingAdapter(log),
             PlainSimpleRequestCorrelationId.create(),
-            Tasks.leaf("Test", taskVolume),
+            Tasks.leaf("Test", concurrency, taskVolume),
             concurrency
         );
         logger.reset(taskVolume);
@@ -277,7 +283,7 @@ class BatchingProgressLoggerTest {
         var batchingProgressLogger = BatchingProgressLogger.create(
             new LoggerForProgressTrackingAdapter(log),
             new RequestCorrelationIdForTesting("my request correlation id"),
-            new LeafTask("Monsieur Alfonse", 42),
+            new LeafTask("Monsieur Alfonse", new Concurrency(1), 42),
             new Concurrency(87)
         );
 
@@ -292,7 +298,7 @@ class BatchingProgressLoggerTest {
         var batchingProgressLogger = BatchingProgressLogger.create(
             new LoggerForProgressTrackingAdapter(log),
             new RequestCorrelationIdForTesting("my request correlation id"),
-            new LeafTask("Monsieur Alfonse", 42),
+            new LeafTask("Monsieur Alfonse", new Concurrency(1), 42),
             new Concurrency(87)
         );
 
@@ -308,7 +314,7 @@ class BatchingProgressLoggerTest {
         var batchingProgressLogger = BatchingProgressLogger.create(
             new LoggerForProgressTrackingAdapter(log),
             new RequestCorrelationIdForTesting("my request correlation id"),
-            new LeafTask("Monsieur Alfonse", 42),
+            new LeafTask("Monsieur Alfonse", new Concurrency(1), 42),
             new Concurrency(87)
         );
 
@@ -323,7 +329,7 @@ class BatchingProgressLoggerTest {
         var batchingProgressLogger = BatchingProgressLogger.create(
             new LoggerForProgressTrackingAdapter(log),
             new RequestCorrelationIdForTesting("my request correlation id"),
-            new LeafTask("Monsieur Alfonse", 42),
+            new LeafTask("Monsieur Alfonse", new Concurrency(1), 42),
             new Concurrency(87)
         );
 

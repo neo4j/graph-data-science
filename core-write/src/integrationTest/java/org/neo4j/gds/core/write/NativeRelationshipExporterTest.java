@@ -182,7 +182,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
         var progressTracker = TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            Tasks.leaf("WriteRelationships", graph.relationshipCount()),
+            Tasks.leaf("WriteRelationships", RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY, graph.relationshipCount()),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),

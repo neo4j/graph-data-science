@@ -31,14 +31,14 @@ class TaskTest {
 
     @Test
     void startShouldSetStatusToRunning() {
-        var task = Tasks.leaf("test");
+        var task = Tasks.leaf("test", new Concurrency(1));
         task.start();
         assertThat(task.status()).isEqualTo(Status.RUNNING);
     }
 
     @Test
     void startShouldOnlyTransitionFromOpen() {
-        var task = Tasks.leaf("test");
+        var task = Tasks.leaf("test", new Concurrency(1));
         task.cancel();
         assertThatThrownBy(task::start)
             .hasMessageContaining("Task `test` with state CANCELED cannot be started");
@@ -46,7 +46,7 @@ class TaskTest {
 
     @Test
     void finishShouldSetStatusToFinished() {
-        var task = Tasks.leaf("test");
+        var task = Tasks.leaf("test", new Concurrency(1));
         task.start();
         task.finish();
         assertThat(task.status()).isEqualTo(Status.FINISHED);
@@ -54,14 +54,14 @@ class TaskTest {
 
     @Test
     void finishShouldOnlyTransitionFromRunning() {
-        var task = Tasks.leaf("test");
+        var task = Tasks.leaf("test", new Concurrency(1));
         assertThatThrownBy(task::finish)
             .hasMessageContaining("Task `test` with state PENDING cannot be finished");
     }
 
     @Test
     void cancelShouldSetStatusToFinished() {
-        var task = Tasks.leaf("test");
+        var task = Tasks.leaf("test", new Concurrency(1));
         task.start();
         task.cancel();
         assertThat(task.status()).isEqualTo(Status.CANCELED);
@@ -69,7 +69,7 @@ class TaskTest {
 
     @Test
     void cancelShouldNotBeCallableFromFinished() {
-        var task = Tasks.leaf("test");
+        var task = Tasks.leaf("test", new Concurrency(1));
         task.start();
         task.finish();
         assertThatThrownBy(task::cancel)
@@ -78,13 +78,13 @@ class TaskTest {
 
     @Test
     void nextSubtaskShouldReturnNextPendingTask() {
-        var a = Tasks.leaf("A");
-        var b = Tasks.leaf("B");
-        var c = Tasks.leaf("C");
+        var a = Tasks.leaf("A", new Concurrency(1));
+        var b = Tasks.leaf("B", new Concurrency(1));
+        var c = Tasks.leaf("C", new Concurrency(1));
 
         var root = Tasks.task(
             "Root",
-            a, b, c
+            new Concurrency(1), a, b, c
         );
         root.start();
 
@@ -103,13 +103,13 @@ class TaskTest {
 
     @Test
     void nextSubtaskShouldThrowIfPreviousTaskIsRunning() {
-        var a = Tasks.leaf("A");
-        var b = Tasks.leaf("B");
-        var c = Tasks.leaf("C");
+        var a = Tasks.leaf("A", new Concurrency(1));
+        var b = Tasks.leaf("B", new Concurrency(1));
+        var c = Tasks.leaf("C", new Concurrency(1));
 
         var root = Tasks.task(
             "Root",
-            a, b, c
+            new Concurrency(1), a, b, c
         );
         root.start();
 
@@ -123,11 +123,11 @@ class TaskTest {
 
     @Test
     void nextSubtaskShouldThrowIfThereAreNoMoreOpenTasks() {
-        var a = Tasks.leaf("A");
+        var a = Tasks.leaf("A", new Concurrency(1));
 
         var root = Tasks.task(
             "Root",
-            a
+            new Concurrency(1), a
         );
         root.start();
 
@@ -141,31 +141,13 @@ class TaskTest {
     }
 
     @Test
-    void shouldSetConcurrencyWhenApplicable() {
-        int concurrency = 42;
-
-        var a = Tasks.leaf("A");
-        var b = Tasks.task("B", a);
-        var c = Tasks.leaf("C");
-        var d = Tasks.task("C", b, c);
-
-        c.setMaxConcurrency(new Concurrency(concurrency + 1));
-        d.setMaxConcurrency(new Concurrency(concurrency));
-
-        assertThat(a.maxConcurrency()).isEqualTo(concurrency);
-        assertThat(b.maxConcurrency()).isEqualTo(concurrency);
-        assertThat(c.maxConcurrency()).isEqualTo(concurrency + 1);
-        assertThat(d.maxConcurrency()).isEqualTo(concurrency);
-    }
-
-    @Test
     void shouldGetCumulativeProgress() {
-        var a = Tasks.leaf("A", 100);
-        var b = Tasks.leaf("B", 100);
+        var a = Tasks.leaf("A", new Concurrency(1), 100);
+        var b = Tasks.leaf("B", new Concurrency(1), 100);
 
         var root = Tasks.task(
             "Root",
-            a, b
+            new Concurrency(1), a, b
         );
 
         assertThat(root.getProgress()).isEqualTo(new Progress(0, 200));
@@ -182,12 +164,12 @@ class TaskTest {
 
     @Test
     void shouldGetUnknownVolume() {
-        var a = Tasks.leaf("A", 100);
-        var b = Tasks.leaf("B");
+        var a = Tasks.leaf("A", new Concurrency(1), 100);
+        var b = Tasks.leaf("B", new Concurrency(1));
 
         var root = Tasks.task(
             "Root",
-            a, b
+            new Concurrency(1), a, b
         );
 
         assertThat(root.getProgress()).isEqualTo(new Progress(0, -1L));
@@ -199,7 +181,7 @@ class TaskTest {
 
     @Test
     void shouldSetVolumeLate() {
-        var task = Tasks.task("root", Tasks.leaf("leaf"));
+        var task = Tasks.task("root", new Concurrency(1), Tasks.leaf("leaf", new Concurrency(1)));
         assertThat(task.getProgress().volume()).isEqualTo(Task.UNKNOWN_VOLUME);
         task.start();
         task.nextSubtask().setVolume(100);
@@ -208,7 +190,7 @@ class TaskTest {
 
     @Test
     void shouldSetProgressWhenFinishingTask() {
-        var task = Tasks.iterativeOpen("root", () -> List.of(Tasks.leaf("leaf")));
+        var task = Tasks.iterativeOpen("root", new Concurrency(1), () -> List.of(Tasks.leaf("leaf", new Concurrency(1))));
         task.start();
         var leaf1 = task.nextSubtask();
         leaf1.start();
@@ -235,7 +217,7 @@ class TaskTest {
 
     @Test
     void shouldNotProgressWhenNotStarted() {
-        var task = Tasks.task("root", Tasks.leaf("leaf"));
+        var task = Tasks.task("root", new Concurrency(1), Tasks.leaf("leaf", new Concurrency(1)));
         assertThatThrownBy(task::nextSubtask)
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("`root` is not running");
@@ -243,9 +225,11 @@ class TaskTest {
 
     @Test
     void shouldVisitTasks() {
-        Task leafTask = Tasks.leaf("leaf");
-        Task intermediateTask = Tasks.task("root", leafTask);
-        Task iterativeTask = Tasks.iterativeFixed("iterative", () -> List.of(Tasks.leaf("iterationLeaf")), 2);
+        Task leafTask = Tasks.leaf("leaf", new Concurrency(1));
+        Task intermediateTask = Tasks.task("root", new Concurrency(1), leafTask);
+        Task iterativeTask = Tasks.iterativeFixed("iterative",
+            new Concurrency(1),
+            () -> List.of(Tasks.leaf("iterationLeaf", new Concurrency(1))), 2);
 
         var taskVisitor = new CountingTaskVisitor();
 

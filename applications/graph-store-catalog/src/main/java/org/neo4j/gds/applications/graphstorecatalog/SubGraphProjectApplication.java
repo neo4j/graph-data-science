@@ -120,7 +120,7 @@ class SubGraphProjectApplication {
         GraphProjectFromGraphConfig configuration,
         GraphStore originGraphStore
     ) {
-        var task = graphStoreFilterService.progressTask(originGraphStore);
+        var task = graphStoreFilterService.progressTask(originGraphStore, configuration.typedConcurrency());
 
         var progressTracker = TaskProgressTracker.create(
             loggers.loggerForProgressTracking(),

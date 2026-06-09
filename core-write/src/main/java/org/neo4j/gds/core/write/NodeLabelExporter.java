@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -31,11 +32,7 @@ public interface NodeLabelExporter {
 
     long nodeLabelsWritten();
 
-    static Task baseTask(String operationName, long taskVolume) {
-        return Tasks.leaf(operationName + " :: WriteNodeLabel", taskVolume);
-    }
-
-    static Task innerTask(String innerName, long taskVolume) {
-        return Tasks.leaf(innerName, taskVolume);
+    static Task baseTask(String operationName, Concurrency concurrency, long taskVolume) {
+        return Tasks.leaf(operationName + " :: WriteNodeLabel", concurrency, taskVolume);
     }
 }

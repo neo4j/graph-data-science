@@ -30,9 +30,9 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 class TaskProgressLoggerTest {
     @Test
     void shouldNotEliminateParentTaskIfCommonPrefix() {
-        var taskA = Tasks.leaf("A");
-        var taskAB = Tasks.task("A B", List.of(taskA));
-        var task = Tasks.task("T", List.of(taskA));
+        var taskA = Tasks.leaf("A", new Concurrency(1));
+        var taskAB = Tasks.task("A B", new Concurrency(1), List.of(taskA));
+        var task = Tasks.task("T", new Concurrency(1), List.of(taskA));
 
         var logger = TaskProgressLogger.create(
             LoggerForProgressTracking.noOpLog(),

@@ -36,7 +36,7 @@ class TaskProgressTrackerFailMethodTest {
 
     @Test
     void failingTask() {
-        var failingTask = Tasks.leaf("failingTask");
+        var failingTask = Tasks.leaf("failingTask", new Concurrency(1));
         var log = new GdsTestLog();
         var taskStore = new TestTaskStore();
 
@@ -67,9 +67,9 @@ class TaskProgressTrackerFailMethodTest {
     @Test
     void failingIntermediateTask() {
 
-        var failingSubTask = Tasks.leaf("failingSubTask");
+        var failingSubTask = Tasks.leaf("failingSubTask", new Concurrency(1));
 
-        var rootTask = Tasks.task("rootTask", failingSubTask);
+        var rootTask = Tasks.task("rootTask", new Concurrency(1), failingSubTask);
         var log = new GdsTestLog();
         var taskStore = new TestTaskStore();
 

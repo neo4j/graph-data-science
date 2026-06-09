@@ -154,13 +154,13 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         var graphInfo = graphStoreInput.metaDataStore().graphInfo();
 
         var importTasks = new ArrayList<Task>();
-        importTasks.add(Tasks.leaf("Export nodes", graphInfo.nodeCount()));
+        importTasks.add(Tasks.leaf("Export nodes", concurrency, graphInfo.nodeCount()));
         importTasks.add(Tasks.leaf(
             "Export relationships",
-            graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum()
+            concurrency, graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum()
         ));
 
-        var task = Tasks.task(rootTaskName + " export", importTasks);
+        var task = Tasks.task(rootTaskName + " export", concurrency, importTasks);
 
         return TaskProgressTracker.create(
             log,

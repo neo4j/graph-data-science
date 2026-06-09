@@ -21,6 +21,7 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -30,39 +31,40 @@ public final class ApproximateKCutTaskFactory {
 
     private ApproximateKCutTaskFactory() {}
 
-   public static Task createTask(Graph graph, ApproxMaxKCutParameters parameters) {
+    public static Task createTask(Graph graph, ApproxMaxKCutParameters parameters) {
         return Tasks.iterativeFixed(
             AlgorithmLabel.ApproximateMaximumKCut.asString(),
+            parameters.concurrency(),
             () -> List.of(
-                Tasks.leaf("place nodes randomly", graph.nodeCount()),
-                searchTask(graph.nodeCount(), parameters.vnsMaxNeighborhoodOrder())
+                Tasks.leaf("place nodes randomly", parameters.concurrency(), graph.nodeCount()),
+                searchTask(parameters.concurrency(), graph.nodeCount(), parameters.vnsMaxNeighborhoodOrder())
             ),
             parameters.iterations()
         );
     }
 
-    private static Task searchTask(long nodeCount, int vnsMaxNeighborhoodOrder) {
+    private static Task searchTask(Concurrency concurrency, long nodeCount, int vnsMaxNeighborhoodOrder) {
         if (vnsMaxNeighborhoodOrder > 0) {
             return Tasks.iterativeOpen(
                 "variable neighborhood search",
-                () -> List.of(localSearchTask(nodeCount))
+                concurrency,
+                () -> List.of(localSearchTask(concurrency, nodeCount))
             );
         }
 
-        return localSearchTask(nodeCount);
+        return localSearchTask(concurrency, nodeCount);
     }
 
-    private static Task localSearchTask(long nodeCount) {
+    private static Task localSearchTask(Concurrency concurrency, long nodeCount) {
         return Tasks.task(
-            "local search",
-            Tasks.iterativeOpen(
+            "local search", concurrency, Tasks.iterativeOpen(
                 "improvement loop",
+                concurrency,
                 () -> List.of(
-                    Tasks.leaf("compute node to community weights", nodeCount),
-                    Tasks.leaf("swap for local improvements", nodeCount)
+                    Tasks.leaf("compute node to community weights", concurrency, nodeCount),
+                    Tasks.leaf("swap for local improvements", concurrency, nodeCount)
                 )
-            ),
-            Tasks.leaf("compute current solution cost", nodeCount)
+            ), Tasks.leaf("compute current solution cost", concurrency, nodeCount)
         );
     }
 

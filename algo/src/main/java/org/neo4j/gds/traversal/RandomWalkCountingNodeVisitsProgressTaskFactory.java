@@ -21,6 +21,7 @@ package org.neo4j.gds.traversal;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityTask;
@@ -28,18 +29,18 @@ import org.neo4j.gds.degree.DegreeCentralityTask;
 import java.util.List;
 
 public final class RandomWalkCountingNodeVisitsProgressTaskFactory {
-
     private RandomWalkCountingNodeVisitsProgressTaskFactory() {}
 
-    public static Task create(Graph graph) {
+    public static Task create(Graph graph, Concurrency concurrency) {
         if (graph.hasRelationshipProperty()) {
             return Tasks.task(
                 AlgorithmLabel.RandomWalk.asString(),
-                List.of(DegreeCentralityTask.create(graph))
+                concurrency,
+                List.of(DegreeCentralityTask.create(concurrency, graph.nodeCount()))
             );
         }
 
-        return Tasks.leaf(AlgorithmLabel.RandomWalk.asString(), graph.nodeCount());
+        return Tasks.leaf(AlgorithmLabel.RandomWalk.asString(), concurrency, graph.nodeCount());
     }
 
 }

@@ -109,7 +109,7 @@ class SmallBridgesTest {
         void shouldLogProgress(){
 
             var progressTrackerWithLog = TestProgressTrackerHelper.create(
-                CentralityAlgorithmTasks.bridges(graph),
+                CentralityAlgorithmTasks.bridges(graph, new Concurrency(1)),
                 new Concurrency(1)
             );
 

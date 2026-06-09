@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.bridges;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -26,7 +27,7 @@ public final class BridgeProgressTaskCreator {
 
     private BridgeProgressTaskCreator() {}
 
-    public static Task progressTask(long nodeCount) {
-        return Tasks.leaf("Bridges", nodeCount);
+    public static Task progressTask(Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf("Bridges", concurrency, nodeCount);
     }
 }

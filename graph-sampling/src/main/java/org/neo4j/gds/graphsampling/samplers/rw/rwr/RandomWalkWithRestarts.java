@@ -124,13 +124,13 @@ public class RandomWalkWithRestarts extends RandomWalkBasedNodesSampler {
         if (config.nodeLabelStratification()) {
             return Tasks.task(
                 "Sample nodes",
-                Tasks.leaf("Count node labels", graphStore.nodeCount()),
-                Tasks.leaf("Do random walks", sampledNodes)
+                concurrency, Tasks.leaf("Count node labels", concurrency, graphStore.nodeCount()),
+                Tasks.leaf("Do random walks", concurrency, sampledNodes)
             );
         } else {
             return Tasks.task(
                 "Sample nodes",
-                Tasks.leaf("Do random walks", sampledNodes)
+                concurrency, Tasks.leaf("Do random walks", concurrency, sampledNodes)
             );
         }
     }

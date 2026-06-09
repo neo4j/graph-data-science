@@ -112,7 +112,9 @@ public class ProcedureExecutor<
         ALGO algo = newAlgorithm(graph, graphStore, config);
 
         algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes);
-        algo.getProgressTracker().requestedConcurrency(config.concurrency());
+        algo.getProgressTracker().requestedConcurrency(config.concurrency()); // this should be the only place using it
+        // and even then no not really, because it is always known at the time we create progress tracker
+        // it is right there in configuration
 
         ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metrics().algorithmMetrics(), graphStore, config);
 

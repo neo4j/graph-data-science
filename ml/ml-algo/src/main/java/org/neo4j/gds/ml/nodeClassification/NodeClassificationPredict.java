@@ -73,8 +73,8 @@ public class NodeClassificationPredict {
         );
     }
 
-    public static Task progressTask(long nodeCount) {
-        return Tasks.leaf("Node classification predict", nodeCount);
+    public static Task progressTask(Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf("Node classification predict", concurrency, nodeCount);
     }
 
     public static MemoryEstimation memoryEstimation(

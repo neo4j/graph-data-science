@@ -164,6 +164,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
 
         var task = NodeRegressionPredictPipelineExecutor.progressTask(
             label.asString(),
+            configuration.concurrency(),
             predictPipeline,
             graphStore
         );
@@ -189,7 +190,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             globallyScopedDependencies.modelCatalog(),
             nodePropertyExporterBuilder,
             relationshipExporterBuilder
-            );
+        );
 
         return new NodeRegressionPredictPipelineExecutor(
             predictPipeline,

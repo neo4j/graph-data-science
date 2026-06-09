@@ -40,6 +40,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
@@ -336,6 +337,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         var progressTracker = InspectableTestProgressTracker.create(
             NodeClassificationPredictPipelineExecutor.progressTask(
                 "Node Classification Predict Pipeline",
+                new Concurrency(1),
                 pipeline,
                 graphStore
             ),

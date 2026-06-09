@@ -21,6 +21,7 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -30,7 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 public final class WccTask {
     private WccTask() {}
 
-    public static Task create(Graph graph) {
-        return Tasks.leaf(AlgorithmLabel.WCC.asString(), graph.relationshipCount());
+    public static Task create(Graph graph, Concurrency concurrency) {
+        return Tasks.leaf(AlgorithmLabel.WCC.asString(), concurrency, graph.relationshipCount());
     }
 }

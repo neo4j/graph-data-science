@@ -71,6 +71,7 @@ public class StreamRelationshipPropertiesApplication {
 
         var task = Tasks.leaf(
             "Graph :: RelationshipProperties :: Stream",
+            configuration.concurrency(),
             graphStore.nodeCount() * relationshipPropertyKeysAndValues.size()
         );
 

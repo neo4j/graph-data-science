@@ -36,8 +36,9 @@ public final class ScalePropertiesTask {
             .sum();
         return Tasks.task(
             AlgorithmLabel.ScaleProperties.asString(),
-            Tasks.leaf("Prepare scalers", graph.nodeCount() * totalPropertyDimension),
-            Tasks.leaf("Scale properties", graph.nodeCount() * totalPropertyDimension)
+            parameters.concurrency(),
+            Tasks.leaf("Prepare scalers", parameters.concurrency(), graph.nodeCount() * totalPropertyDimension),
+            Tasks.leaf("Scale properties", parameters.concurrency(), graph.nodeCount() * totalPropertyDimension)
         );
     }
 }

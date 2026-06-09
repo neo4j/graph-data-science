@@ -20,6 +20,7 @@
 package org.neo4j.gds.degree;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -27,7 +28,7 @@ public final class DegreeCentralityProgressTask {
 
     private DegreeCentralityProgressTask() {}
 
-    public static Task create(long nodeCount){
-        return Tasks.leaf(AlgorithmLabel.DegreeCentrality.asString(), nodeCount);
+    public static Task create(Concurrency concurrency, long nodeCount){
+        return Tasks.leaf(AlgorithmLabel.DegreeCentrality.asString(), concurrency, nodeCount);
     }
 }

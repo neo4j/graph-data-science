@@ -273,7 +273,7 @@ class KSpanningTreeTest {
     void shouldLogProgress() {
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            KSpanningTreeTask.create(graph.relationshipCount()),
+            KSpanningTreeTask.create(DEFAULT_CONCURRENCY, graph.relationshipCount()),
             new LoggerForProgressTrackingAdapter(log),
             DEFAULT_CONCURRENCY,
             EmptyTaskRegistryFactory.INSTANCE

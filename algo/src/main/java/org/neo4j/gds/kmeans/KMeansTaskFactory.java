@@ -28,7 +28,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import java.util.List;
 
 public final class KMeansTaskFactory {
-
     private KMeansTaskFactory() {}
 
     public static Task createTask(Graph graph, KmeansParameters parameters) {
@@ -41,6 +40,7 @@ public final class KMeansTaskFactory {
 
         return Tasks.iterativeFixed(
             label,
+            parameters.concurrency(),
             () -> List.of(kMeansTask(graph, "KMeans Iteration", parameters)),
             iterations
         );
@@ -49,24 +49,37 @@ public final class KMeansTaskFactory {
     private static Task kMeansTask(IdMap idMap, String description, KmeansParameters parameters) {
         if (parameters.computeSilhouette()) {
             return Tasks.task(
-                description, List.of(
-                    Tasks.leaf("Initialization", parameters.k()),
+                description,
+                parameters.concurrency(),
+                List.of(
+                    Tasks.leaf(
+                        "Initialization",
+                        parameters.concurrency(),
+                        parameters.k()
+                    ),
                     Tasks.iterativeDynamic(
                         "Main",
-                        () -> List.of(Tasks.leaf("Iteration")),
+                        parameters.concurrency(),
+                        () -> List.of(Tasks.leaf("Iteration", parameters.concurrency())),
                         parameters.maxIterations()
                     ),
-                    Tasks.leaf("Silhouette", idMap.nodeCount())
-
+                    Tasks.leaf("Silhouette", parameters.concurrency(), idMap.nodeCount())
                 )
             );
         } else {
             return Tasks.task(
-                description, List.of(
-                    Tasks.leaf("Initialization", parameters.k()),
+                description,
+                parameters.concurrency(),
+                List.of(
+                    Tasks.leaf(
+                        "Initialization",
+                        parameters.concurrency(),
+                        parameters.k()
+                    ),
                     Tasks.iterativeDynamic(
                         "Main",
-                        () -> List.of(Tasks.leaf("Iteration")),
+                        parameters.concurrency(),
+                        () -> List.of(Tasks.leaf("Iteration", parameters.concurrency())),
                         parameters.maxIterations()
                     )
                 )

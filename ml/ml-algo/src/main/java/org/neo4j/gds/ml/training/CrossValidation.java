@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.training;
 
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -54,12 +55,17 @@ public class CrossValidation<MODEL_TYPE> {
     private final ModelTrainer<MODEL_TYPE> modelTrainer;
     private final ModelEvaluator<MODEL_TYPE> modelEvaluator;
 
-    public static List<Task> progressTasks(int validationFolds, int numberOfModelSelectionTrials, long trainSetSize) {
+    public static List<Task> progressTasks(
+        Concurrency concurrency,
+        int validationFolds,
+        int numberOfModelSelectionTrials,
+        long trainSetSize
+    ) {
         return List.of(
-            Tasks.leaf("Create validation folds", Math.max((long) (0.5 * trainSetSize), 1)),
+            Tasks.leaf("Create validation folds", concurrency, Math.max((long) (0.5 * trainSetSize), 1)),
             Tasks.iterativeFixed(
                 "Select best model",
-                () -> List.of(Tasks.leaf("Trial", 5L * validationFolds * trainSetSize)),
+                concurrency, () -> List.of(Tasks.leaf("Trial", concurrency, 5L * validationFolds * trainSetSize)),
                 numberOfModelSelectionTrials
             )
         );

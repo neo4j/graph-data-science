@@ -160,6 +160,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
 
         var task = NodeClassificationPredictPipelineExecutor.progressTask(
             label.asString(),
+            configuration.concurrency(),
             nodeClassificationPipeline,
             graphStore
         );

@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphNameConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -109,14 +110,16 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         return MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
     }
 
-    public static Task tasks(List<ExecutableNodePropertyStep> nodePropertySteps, long featureInputSize) {
+    public static Task tasks(Concurrency concurrency, List<ExecutableNodePropertyStep> nodePropertySteps, long featureInputSize) {
         long volumeEstimation = 10 * featureInputSize;
         return Tasks.task(
             "Execute node property steps",
+            concurrency,
             nodePropertySteps.stream()
                 .map(ExecutableNodePropertyStep::rootTaskName)
-                .map(taskName -> Tasks.leaf(taskName, volumeEstimation))
-                .collect(Collectors.toList())
+                .map(taskName -> Tasks.leaf(taskName, concurrency, volumeEstimation))
+                .collect(Collectors.toList()
+                )
         );
     }
 

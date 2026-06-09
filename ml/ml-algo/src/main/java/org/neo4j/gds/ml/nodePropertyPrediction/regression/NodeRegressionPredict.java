@@ -51,8 +51,8 @@ public class NodeRegressionPredict {
         this.terminationFlag = terminationFlag;
     }
 
-    public static Task progressTask(long nodeCount) {
-        return Tasks.leaf("Predict", nodeCount);
+    public static Task progressTask(Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf("Predict", concurrency, nodeCount);
     }
 
 

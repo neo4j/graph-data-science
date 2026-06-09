@@ -70,6 +70,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
 
     public static Task progressTask(
         NodePropertyTrainingPipeline pipeline,
+        Concurrency concurrency,
         long nodeCount
     ) {
         var splitConfig = pipeline.splitConfig();
@@ -78,17 +79,17 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         int validationFolds = splitConfig.validationFolds();
 
         var tasks = new ArrayList<Task>();
-        tasks.add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), nodeCount));
+        tasks.add(NodePropertyStepExecutor.tasks(concurrency, pipeline.nodePropertySteps(), nodeCount));
         tasks.addAll(CrossValidation.progressTasks(
-            validationFolds,
+            concurrency, validationFolds,
             pipeline.numberOfModelSelectionTrials(),
             trainSetSize
         ));
-        tasks.add(ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize));
-        tasks.add(Tasks.leaf("Evaluate on test data", testSetSize));
-        tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
+        tasks.add(ClassifierTrainer.progressTask("Train best model", concurrency, 5 * trainSetSize));
+        tasks.add(Tasks.leaf("Evaluate on test data", concurrency, testSetSize));
+        tasks.add(ClassifierTrainer.progressTask("Retrain best model", concurrency, 5 * nodeCount));
 
-        return Tasks.task("Node Regression Train Pipeline", tasks);
+        return Tasks.task("Node Regression Train Pipeline", concurrency, tasks);
     }
 
     private static HugeDoubleArray createTargets(Graph graph, String targetProperty) {

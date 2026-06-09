@@ -225,8 +225,9 @@ class NodePropertyStepExecutorTest {
         );
 
         var log = new GdsTestLog();
+        var configuration = new NodePropertyStepExecutorTestConfig();
         var progressTracker = InspectableTestProgressTracker.create(
-            NodePropertyStepExecutor.tasks(steps, graphStore.nodeCount()),
+            NodePropertyStepExecutor.tasks(configuration.concurrency(), steps, graphStore.nodeCount()),
             "user",
             new JobId("42"),
             new PerDatabaseTaskStore(
@@ -236,7 +237,7 @@ class NodePropertyStepExecutorTest {
 
         new NodePropertyStepExecutor<>(
             ExecutionContext.EMPTY,
-            new NodePropertyStepExecutorTestConfig(),
+            configuration,
             graphStore,
             graphStore.nodeLabels(),
             graphStore.relationshipTypes(),

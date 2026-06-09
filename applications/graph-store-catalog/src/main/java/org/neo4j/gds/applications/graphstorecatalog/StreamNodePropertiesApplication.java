@@ -86,7 +86,7 @@ public class StreamNodePropertiesApplication {
     ) {
         var task = Tasks.leaf(
             "Graph :: NodeProperties :: Stream",
-            idMap.nodeCount() * nodePropertyKeysAndValues.size()
+            configuration.concurrency(), idMap.nodeCount() * nodePropertyKeysAndValues.size()
         );
 
         var jobId = new JobId();

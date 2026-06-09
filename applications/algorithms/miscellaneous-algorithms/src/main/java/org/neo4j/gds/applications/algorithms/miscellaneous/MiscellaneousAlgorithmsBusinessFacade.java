@@ -43,13 +43,16 @@ public class MiscellaneousAlgorithmsBusinessFacade {
     private final ProgressTrackerCreator progressTrackerCreator;
     private final MiscellaneousAlgorithms miscellaneousAlgorithms;
 
-    public MiscellaneousAlgorithmsBusinessFacade(MiscellaneousAlgorithms miscellaneousAlgorithms,ProgressTrackerCreator progressTrackerCreator) {
+    MiscellaneousAlgorithmsBusinessFacade(
+        MiscellaneousAlgorithms miscellaneousAlgorithms,
+        ProgressTrackerCreator progressTrackerCreator
+    ) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.miscellaneousAlgorithms = miscellaneousAlgorithms;
     }
 
     public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathConfig configuration) {
-        var params  = CollapsePathParamsTransformer.create(configuration,graphStore);
+        var params = CollapsePathParamsTransformer.create(configuration, graphStore);
         return miscellaneousAlgorithms.collapsePath(graphStore, params);
     }
 
@@ -59,10 +62,10 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         InverseRelationshipsConfig configuration
     ) {
 
-        var params = InverseRelationshipsParamsTransformer.toParameters(graphStore,configuration);
-        var task = MiscellaneousAlgorithmsTasks.inverseIndex(idMap.nodeCount(),params);
+        var params = InverseRelationshipsParamsTransformer.toParameters(graphStore, configuration);
+        var task = MiscellaneousAlgorithmsTasks.inverseIndex(idMap.nodeCount(), params);
 
-        var progressTracker =  progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         return algorithmMachinery.getResult(
             () -> miscellaneousAlgorithms.indexInverse(graphStore, params, progressTracker),
             progressTracker,
@@ -72,8 +75,8 @@ public class MiscellaneousAlgorithmsBusinessFacade {
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
         var params = configuration.toParameters();
-        var task = MiscellaneousAlgorithmsTasks.scaleProperties(graph,params);
-        var progressTracker =  progressTrackerCreator.createProgressTracker(task, configuration);
+        var task = MiscellaneousAlgorithmsTasks.scaleProperties(graph, params);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
             () -> miscellaneousAlgorithms.scaleProperties(graph, params, progressTracker),
@@ -85,8 +88,8 @@ public class MiscellaneousAlgorithmsBusinessFacade {
 
     public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
         var params = configuration.toParameters();
-        var task  = MiscellaneousAlgorithmsTasks.toUndirected(graphStore);
-        var progressTracker =  progressTrackerCreator.createProgressTracker(task, configuration);
+        var task = MiscellaneousAlgorithmsTasks.toUndirected(graphStore, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
             () -> miscellaneousAlgorithms.toUndirected(graphStore, params, progressTracker),

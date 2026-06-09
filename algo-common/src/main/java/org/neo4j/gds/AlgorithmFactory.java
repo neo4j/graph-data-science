@@ -90,7 +90,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
     );
 
     default Task progressTask(G graphOrGraphStore, CONFIG config) {
-        return Tasks.leaf(taskName());
+        return Tasks.leaf(taskName(), config.concurrency());
     }
 
     /**

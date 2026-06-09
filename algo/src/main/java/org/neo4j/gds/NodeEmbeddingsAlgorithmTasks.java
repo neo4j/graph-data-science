@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPTask;
@@ -52,7 +53,7 @@ public final class NodeEmbeddingsAlgorithmTasks {
         return GraphSageTrainTask.create(graph, parameters);
     }
 
-    public static Task graphSage(Graph graph){
-        return GraphSageTask.create(graph);
+    public static Task graphSage(Graph graph, Concurrency concurrency){
+        return GraphSageTask.create(graph, concurrency);
     }
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,15 @@ class TaskTraversalTest {
 
     @Test
     void shouldTraverseWithDepthInformation() {
-        var task = Tasks.task("root", Tasks.task("node", Tasks.leaf("leaf2")), Tasks.leaf("leaf1"));
+        var task = Tasks.task(
+            "root",
+            new Concurrency(1),
+            Tasks.task("node", new Concurrency(1), Tasks.leaf("leaf2", new Concurrency(1))),
+            Tasks.leaf(
+                "leaf1",
+                new Concurrency(1)
+            )
+        );
         var depthCollectingVisitor = new DepthCollectingVisitorVisitor();
         TaskTraversal.visitPreOrderWithDepth(task, depthCollectingVisitor);
 

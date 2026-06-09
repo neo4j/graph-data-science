@@ -104,16 +104,16 @@ public class CentralityComputeFacade {
         ArticleRankConfig configuration,
         JobId jobId,
         boolean logProgress
-        ) {
+    ) {
 
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PageRankResult.EMPTY));
         }
 
         var articleRankComputation = articleRankComputation(graph, configuration);
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.articleRank(graph,configuration),
+            CentralityAlgorithmTasks.articleRank(graph, configuration),
             jobId,
             configuration.concurrency(),
             logProgress
@@ -168,17 +168,17 @@ public class CentralityComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ArticulationPointsResult.EMPTY));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.articulationPoints(graph),
+            CentralityAlgorithmTasks.articulationPoints(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
         );
-        var articulationPoints = ArticulationPoints.create(graph, parameters, progressTracker,terminationFlag);
+        var articulationPoints = ArticulationPoints.create(graph, parameters, progressTracker, terminationFlag);
 
         return algorithmCaller.run(
             articulationPoints::compute,
@@ -192,18 +192,18 @@ public class CentralityComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(BetwennessCentralityResult.EMPTY));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.betweennessCentrality(graph,parameters),
+            CentralityAlgorithmTasks.betweennessCentrality(graph, parameters),
             jobId,
             parameters.concurrency(),
             logProgress
         );
 
-        var betweennessCentrality =  BetweennessCentrality
+        var betweennessCentrality = BetweennessCentrality
             .create(graph, parameters, progressTracker, terminationFlag);
 
         return algorithmCaller.run(
@@ -218,19 +218,19 @@ public class CentralityComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(BridgeResult.EMPTY));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.bridges(graph),
+            CentralityAlgorithmTasks.bridges(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
         );
 
-        var bridges =  Bridges
-            .create(graph, progressTracker, parameters.computeComponents(),terminationFlag);
+        var bridges = Bridges
+            .create(graph, progressTracker, parameters.computeComponents(), terminationFlag);
 
         return algorithmCaller.run(
             bridges::compute,
@@ -244,18 +244,18 @@ public class CentralityComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(CELFResult.EMPTY));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.CELF(graph,parameters),
+            CentralityAlgorithmTasks.CELF(graph, parameters),
             jobId,
             parameters.concurrency(),
             logProgress
         );
 
-        var celf =  new CELF(
+        var celf = new CELF(
             graph,
             parameters,
             DefaultPool.INSTANCE,
@@ -275,12 +275,12 @@ public class CentralityComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ClosenessCentralityResult.EMPTY));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.closenessCentrality(graph),
+            CentralityAlgorithmTasks.closenessCentrality(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -306,18 +306,18 @@ public class CentralityComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(DegreeCentralityResult.EMPTY));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.degreeCentrality(graph),
+            CentralityAlgorithmTasks.degreeCentrality(graph, parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
         );
 
-        var degree  = new DegreeCentrality(
+        var degree = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
             parameters.concurrency(),
@@ -341,14 +341,14 @@ public class CentralityComputeFacade {
         boolean logProgress
     ) {
 
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PageRankResult.EMPTY));
         }
 
         var eigenvectorComputation = eigenvectorComputation(graph, configuration);
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.eigenVector(graph,configuration),
+            CentralityAlgorithmTasks.eigenVector(graph, configuration),
             jobId,
             configuration.concurrency(),
             logProgress
@@ -402,12 +402,12 @@ public class CentralityComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(HarmonicResult.EMPTY));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.harmonicCentrality(),
+            CentralityAlgorithmTasks.harmonicCentrality(parameters.concurrency()),
             jobId,
             parameters.concurrency(),
             logProgress
@@ -441,7 +441,7 @@ public class CentralityComputeFacade {
         );
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.hits(graphStore,configuration,inverseRelationshipsParameters),
+            CentralityAlgorithmTasks.hits(graphStore, configuration, inverseRelationshipsParameters),
             jobId,
             configuration.concurrency(),
             logProgress
@@ -474,12 +474,12 @@ public class CentralityComputeFacade {
         JobId jobId,
         boolean logProgress
     ) {
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(IndirectExposureResult.EMPTY));
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.indirectExposure(graph,configuration),
+            CentralityAlgorithmTasks.indirectExposure(graph, configuration),
             jobId,
             configuration.concurrency(),
             logProgress
@@ -506,14 +506,14 @@ public class CentralityComputeFacade {
         boolean logProgress
     ) {
 
-        if (graph.isEmpty()){
+        if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PageRankResult.EMPTY));
         }
 
         var pageRankComputation = pagerankComputation(graph, configuration);
 
         var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.pageRank(graph,configuration),
+            CentralityAlgorithmTasks.pageRank(graph, configuration),
             jobId,
             configuration.concurrency(),
             logProgress

@@ -20,14 +20,14 @@
 package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public final class SpanningTreeProgressTask {
-
     private SpanningTreeProgressTask() {}
 
-    public static Task create(long relationshipCount) {
-        return Tasks.leaf(AlgorithmLabel.SpanningTree.asString(), relationshipCount);
+    public static Task create(Concurrency concurrency, long relationshipCount) {
+        return Tasks.leaf(AlgorithmLabel.SpanningTree.asString(), concurrency, relationshipCount);
     }
 }

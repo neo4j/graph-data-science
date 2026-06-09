@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -28,7 +29,7 @@ public interface RegressorTrainer {
 
     Regressor train(Features features, HugeDoubleArray targets, ReadOnlyHugeLongArray trainSet);
 
-    static Task progressTask(String taskName) {
-        return Tasks.leaf(taskName);
+    static Task progressTask(String taskName, Concurrency concurrency) {
+        return Tasks.leaf(taskName, concurrency);
     }
 }

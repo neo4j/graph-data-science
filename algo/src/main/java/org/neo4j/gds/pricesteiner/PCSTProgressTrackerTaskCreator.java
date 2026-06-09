@@ -20,6 +20,7 @@
 package org.neo4j.gds.pricesteiner;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -29,15 +30,15 @@ public class PCSTProgressTrackerTaskCreator {
 
     private PCSTProgressTrackerTaskCreator() {}
 
-    public static Task progressTask(long nodeCount, long relationshipCount) {
-        var initTask = Tasks.leaf("Initialization",relationshipCount);
-        var growthExecutionTask = Tasks.leaf("Growing",nodeCount);
+    public static Task progressTask(Concurrency concurrency, long nodeCount, long relationshipCount) {
+        var initTask = Tasks.leaf("Initialization", concurrency, relationshipCount);
+        var growthExecutionTask = Tasks.leaf("Growing", concurrency, nodeCount);
 
-        var growthTask = Tasks.task("Growth Phase", List.of(initTask, growthExecutionTask));
+        var growthTask = Tasks.task("Growth Phase", concurrency, List.of(initTask, growthExecutionTask));
 
-        var treeTask = Tasks.leaf("Tree Creation", nodeCount);
-        var pruningTasks= Tasks.leaf("Pruning Phase", nodeCount);
-        return Tasks.task(AlgorithmLabel.PCST.asString(), List.of(growthTask,treeTask,pruningTasks));
+        var treeTask = Tasks.leaf("Tree Creation", concurrency, nodeCount);
+        var pruningTasks= Tasks.leaf("Pruning Phase", concurrency, nodeCount);
+        return Tasks.task(AlgorithmLabel.PCST.asString(), concurrency, List.of(growthTask,treeTask,pruningTasks));
     }
 
 }

@@ -248,17 +248,20 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     }
 
     private ProgressTracker initProgressTracker() {
+        var concurrency = graphProjectConfig.readConcurrency();
+
         var task = Tasks.task(
             "Loading",
-            Tasks.leaf("Nodes", dimensions.highestPossibleNodeCount()),
-            Tasks.leaf("Relationships", dimensions.relCountUpperBound())
+            concurrency,
+            Tasks.leaf("Nodes", concurrency, dimensions.highestPossibleNodeCount()),
+            Tasks.leaf("Relationships", concurrency, dimensions.relCountUpperBound())
         );
 
         if (graphProjectConfig.logProgress()) {
             return TaskProgressTracker.create(
                 new LoggerForProgressTrackingAdapter(loadingContext.log()),
                 task,
-                graphProjectConfig.readConcurrency(),
+                concurrency,
                 graphProjectConfig.jobId(),
                 PlainSimpleRequestCorrelationId.create(),
                 loadingContext.taskRegistryFactory()
@@ -268,7 +271,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         return TaskTreeProgressTracker.create(
             task,
             new LoggerForProgressTrackingAdapter(loadingContext.log()),
-            graphProjectConfig.readConcurrency(),
+            concurrency,
             graphProjectConfig.jobId(),
             PlainSimpleRequestCorrelationId.create(),
             loadingContext.taskRegistryFactory()

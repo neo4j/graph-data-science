@@ -40,18 +40,18 @@ class LeidenAlgorithmFactoryTest {
         var graph = GdlFactory.of(" CREATE (a:NODE), (b:NODE) ").build().getUnion();
 
         var task = LeidenTask.create(graph, config.toParameters());
-        var initialization = Tasks.leaf("Initialization", 2);
+        var initialization = Tasks.leaf("Initialization", config.concurrency(), 2);
 
-        var iteration = Tasks.iterativeDynamic("Iteration", () ->
+        var iteration = Tasks.iterativeDynamic("Iteration", config.concurrency(), () ->
                 List.of(
-                    Tasks.leaf("Local Move", 1),
-                    Tasks.leaf("Modularity Computation", 2),
-                    Tasks.leaf("Refinement", 2),
-                    Tasks.leaf("Aggregation", 2)
+                    Tasks.leaf("Local Move", config.concurrency(), 1),
+                    Tasks.leaf("Modularity Computation", config.concurrency(), 2),
+                    Tasks.leaf("Refinement", config.concurrency(), 2),
+                    Tasks.leaf("Aggregation", config.concurrency(), 2)
                 ),
             3
         );
-        var expectedTask = Tasks.task("Leiden", initialization, iteration);
+        var expectedTask = Tasks.task("Leiden", config.concurrency(), initialization, iteration);
 
         assertThat(task.render()).isEqualTo(expectedTask.render());
     }

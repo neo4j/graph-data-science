@@ -20,6 +20,7 @@
 package org.neo4j.gds.indexInverse;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
@@ -31,16 +32,21 @@ import java.util.stream.Stream;
 
 public class InverseRelationshipsTask {
 
-    public static Task progressTask(long nodeCount, InverseRelationshipsParameters parameters) {
+    public static Task progressTask(
+        Concurrency concurrency,
+        long nodeCount,
+        InverseRelationshipsParameters parameters
+    ) {
         var relationshipTypes = parameters.relationshipTypes();
         List<Task> tasks = relationshipTypes.stream().flatMap(type -> Stream.of(
             Tasks.leaf(
                 String.format(Locale.US, "Create inverse relationships of type '%s'", type.name),
+                concurrency,
                 nodeCount
             ),
-            Tasks.leaf("Build Adjacency list")
+            Tasks.leaf("Build Adjacency list", concurrency)
         )).collect(Collectors.toList());
-        return Tasks.task(AlgorithmLabel.IndexInverse.asString(), tasks);
+        return Tasks.task(AlgorithmLabel.IndexInverse.asString(), concurrency, tasks);
 
     }
 }

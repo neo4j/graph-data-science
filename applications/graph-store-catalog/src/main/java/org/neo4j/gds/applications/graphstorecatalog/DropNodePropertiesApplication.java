@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -37,6 +38,7 @@ public class DropNodePropertiesApplication {
 
     public long compute(
         RequestScopedDependencies requestScopedDependencies,
+        Concurrency concurrency,
         List<String> nodeProperties,
         GraphStore graphStore
     ) {
@@ -49,6 +51,7 @@ public class DropNodePropertiesApplication {
         return computeWithProgressTracking(
             graphStore,
             progressTrackerFactory,
+            concurrency,
             nodeProperties
         );
     }
@@ -56,9 +59,10 @@ public class DropNodePropertiesApplication {
     private long computeWithProgressTracking(
         GraphStore graphStore,
         ProgressTrackerFactory progressTrackerFactory,
+        Concurrency concurrency,
         List<String> nodeProperties
     ) {
-        var task = Tasks.leaf("Graph :: NodeProperties :: Drop", nodeProperties.size());
+        var task = Tasks.leaf("Graph :: NodeProperties :: Drop", concurrency, nodeProperties.size());
 
         var progressTracker = progressTrackerFactory.create(task);
 

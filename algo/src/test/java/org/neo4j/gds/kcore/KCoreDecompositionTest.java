@@ -287,7 +287,7 @@ class KCoreDecompositionTest {
             var concurrency = new Concurrency(4);
 
             var progressTrackerWithLog = TestProgressTrackerHelper.create(
-                CommunityAlgorithmTasks.kCore(graph),
+                CommunityAlgorithmTasks.kCore(graph, concurrency),
                 concurrency
             );
 

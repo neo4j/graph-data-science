@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.traverse.bfs;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -27,7 +28,7 @@ public final class BFSProgressTask {
 
     private BFSProgressTask() {}
 
-    public static Task create() {
-        return Tasks.leaf(AlgorithmLabel.BFS.asString());
+    public static Task create(Concurrency concurrency) {
+        return Tasks.leaf(AlgorithmLabel.BFS.asString(), concurrency);
     }
 }

@@ -181,7 +181,7 @@ class K1ColoringTest {
 
             var progressTrackerWithLog = TestProgressTrackerHelper.create(
                 K1ColoringProgressTrackerTaskCreator.progressTask(
-                    graph.nodeCount(),
+                    concurrency, graph.nodeCount(),
                     10
                 ), concurrency
             );

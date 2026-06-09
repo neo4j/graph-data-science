@@ -59,23 +59,26 @@ class HitsETLHook implements PostLoadETLHook {
             return;
         }
 
-        var inverseRelationships = createInverseRelationshipsAlgorithm(graphStore,relationshipTypesWithoutIndex);
+        var inverseRelationships = createInverseRelationshipsAlgorithm(graphStore, relationshipTypesWithoutIndex);
 
         inverseRelationships
             .compute()
-            .forEach((relationshipType, inverseIndex) -> addInverseIndex(relationshipType,inverseIndex,graphStore));
+            .forEach((relationshipType, inverseIndex) -> addInverseIndex(relationshipType, inverseIndex, graphStore));
 
     }
 
-    List<String> relationshipsWithoutIndices(GraphStore graphStore, Collection<RelationshipType> relTypes){
-        return  relTypes
+    List<String> relationshipsWithoutIndices(GraphStore graphStore, Collection<RelationshipType> relTypes) {
+        return relTypes
             .stream()
             .filter(relType -> !graphStore.inverseIndexedRelationshipTypes().contains(relType))
             .map(RelationshipType::name)
             .toList();
     }
 
-    InverseRelationships createInverseRelationshipsAlgorithm(GraphStore graphStore, List<String> relationshipTypesWithoutIndex){
+    private InverseRelationships createInverseRelationshipsAlgorithm(
+        GraphStore graphStore,
+        List<String> relationshipTypesWithoutIndex
+    ) {
         var inverseConfig = InverseRelationshipsConfigImpl
             .builder()
             .concurrency(configuration.concurrency().value())
@@ -84,8 +87,12 @@ class HitsETLHook implements PostLoadETLHook {
 
         var parameters = InverseRelationshipsParamsTransformer.toParameters(graphStore, inverseConfig);
 
-        var task = InverseRelationshipsTask.progressTask(graphStore.nodeCount(),parameters);
-        var progressTracker =  progressTrackerCreator.createProgressTracker(
+        var task = InverseRelationshipsTask.progressTask(
+            inverseConfig.concurrency(),
+            graphStore.nodeCount(),
+            parameters
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(
             task,
             inverseConfig.jobId(),
             inverseConfig.concurrency(),
@@ -101,7 +108,11 @@ class HitsETLHook implements PostLoadETLHook {
         );
     }
 
-    void addInverseIndex(RelationshipType relationshipType, SingleTypeRelationships inverseIndex, GraphStore graphStore){
+    private void addInverseIndex(
+        RelationshipType relationshipType,
+        SingleTypeRelationships inverseIndex,
+        GraphStore graphStore
+    ) {
         graphStore.addInverseIndex(
             relationshipType,
             inverseIndex.topology(),

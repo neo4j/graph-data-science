@@ -20,16 +20,19 @@
 package org.neo4j.gds.undirected;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class ToUndirectedTask {
+public final class ToUndirectedTask {
+    private ToUndirectedTask() {}
 
-    public static Task create(long nodeCount) {
+    public static Task create(Concurrency concurrency, long nodeCount) {
         return Tasks.task(
             AlgorithmLabel.ToUndirected.asString(),
-            Tasks.leaf("Create Undirected Relationships", nodeCount),
-            Tasks.leaf("Build undirected Adjacency list")
+            concurrency,
+            Tasks.leaf("Create Undirected Relationships", concurrency, nodeCount),
+            Tasks.leaf("Build undirected Adjacency list", concurrency)
         );
     }
 }

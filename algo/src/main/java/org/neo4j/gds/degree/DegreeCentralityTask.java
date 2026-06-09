@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.degree;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public final class DegreeCentralityTask {
     private DegreeCentralityTask() {}
 
-    public static Task create(IdMap idMap) {
-        return Tasks.leaf("DegreeCentrality", idMap.nodeCount());
+    public static Task create(Concurrency concurrency, long nodeCount) {
+        return Tasks.leaf("DegreeCentrality", concurrency, nodeCount);
     }
 }

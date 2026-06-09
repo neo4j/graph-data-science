@@ -62,19 +62,19 @@ public class WriteNodePropertiesApplication {
             Optional.empty()
         );
 
+        var concurrency = configuration.writeConcurrency();
 
         var task = Tasks.iterativeFixed(
             "Graph :: NodeProperties :: Write",
-            () -> List.of(
-                NodePropertyExporter.innerTask("Label", subGraph.nodeCount())
-            ),
+            concurrency,
+            () -> List.of(NodePropertyExporter.innerTask("Label", concurrency, subGraph.nodeCount())),
             validNodeLabels.size()
         );
         var jobId = new JobId();
         var progressTracker = TaskProgressTracker.create(
             loggers.loggerForProgressTracking(),
             task,
-            configuration.writeConcurrency(),
+            concurrency,
             jobId,
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory()

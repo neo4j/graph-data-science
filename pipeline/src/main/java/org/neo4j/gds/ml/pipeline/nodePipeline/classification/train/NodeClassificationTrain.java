@@ -23,6 +23,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -92,25 +93,28 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         ).memoryEstimation();
     }
 
-    public static Task progressTask(NodeClassificationTrainingPipeline pipeline, long nodeCount) {
+    public static Task progressTask(NodeClassificationTrainingPipeline pipeline, long nodeCount,
+        Concurrency concurrency
+    ) {
         var splitConfig = pipeline.splitConfig();
         long trainSetSize = splitConfig.trainSetSize(nodeCount);
         long testSetSize = splitConfig.testSetSize(nodeCount);
         int validationFolds = splitConfig.validationFolds();
 
         var tasks = new ArrayList<Task>();
-        tasks.add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), nodeCount));
+        tasks.add(NodePropertyStepExecutor.tasks(concurrency, pipeline.nodePropertySteps(), nodeCount));
         tasks.addAll(CrossValidation.progressTasks(
+            concurrency,
             validationFolds,
             pipeline.numberOfModelSelectionTrials(),
             trainSetSize
         ));
-        tasks.add(ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize));
-        tasks.add(Tasks.leaf("Evaluate on train data", trainSetSize));
-        tasks.add(Tasks.leaf("Evaluate on test data", testSetSize));
-        tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
+        tasks.add(ClassifierTrainer.progressTask("Train best model", concurrency, 5 * trainSetSize));
+        tasks.add(Tasks.leaf("Evaluate on train data", concurrency, trainSetSize));
+        tasks.add(Tasks.leaf("Evaluate on test data", concurrency, testSetSize));
+        tasks.add(ClassifierTrainer.progressTask("Retrain best model", concurrency, 5 * nodeCount));
 
-        return Tasks.task("Node Classification Train Pipeline", tasks);
+        return Tasks.task("Node Classification Train Pipeline", concurrency, tasks);
     }
 
     public static NodeClassificationTrain create(

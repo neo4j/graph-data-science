@@ -392,7 +392,7 @@ class LinkPredictionTrainPipelineExecutorTest {
             var progressTracker = InspectableTestProgressTracker.create(
                 LinkPredictionTrainPipelineExecutor.progressTask(
                     "Link Prediction Train Pipeline",
-                    pipeline,
+                    config.concurrency(), pipeline,
                     relationshipCount
                 ),
                 getUsername(),

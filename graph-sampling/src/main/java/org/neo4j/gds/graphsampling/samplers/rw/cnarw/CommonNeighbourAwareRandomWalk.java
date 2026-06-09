@@ -150,18 +150,18 @@ public class CommonNeighbourAwareRandomWalk extends RandomWalkBasedNodesSampler 
         if (config.nodeLabelStratification()) {
             return Tasks.task(
                 "Sample nodes",
-                Tasks.leaf("Count node labels", graphStore.nodeCount()),
+                concurrency, Tasks.leaf("Count node labels", concurrency, graphStore.nodeCount()),
                 Tasks.leaf(
                     "Do common neighbour aware random walks",
-                    10 * Math.round(graphStore.nodeCount() * config.samplingRatio())
+                    concurrency, 10 * Math.round(graphStore.nodeCount() * config.samplingRatio())
                 )
             );
         } else {
             return Tasks.task(
                 "Sample nodes",
-                Tasks.leaf(
+                concurrency, Tasks.leaf(
                     "Do common neighbour aware random walks",
-                    10 * Math.round(graphStore.nodeCount() * config.samplingRatio())
+                    concurrency, 10 * Math.round(graphStore.nodeCount() * config.samplingRatio())
                 )
             );
         }

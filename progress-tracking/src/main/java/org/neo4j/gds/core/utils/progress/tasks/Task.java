@@ -37,6 +37,7 @@ public class Task {
     public static final long NOT_FINISHED = -1L;
 
     private final String description;
+    private final Concurrency concurrency;
     protected final List<Task> subTasks;
 
     private Status status = Status.PENDING;
@@ -46,8 +47,9 @@ public class Task {
     private int maxConcurrency = UNKNOWN_CONCURRENCY;
 
 
-    public Task(String description, List<Task> subTasks) {
+    public Task(String description, Concurrency concurrency, List<Task> subTasks) {
         this.description = description;
+        this.concurrency = concurrency;
         this.subTasks = subTasks;
     }
 

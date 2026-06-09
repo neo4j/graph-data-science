@@ -30,28 +30,29 @@ import java.util.List;
 public final class HashGNNTask {
     private HashGNNTask() {}
 
-    public static Task create(Graph graph, HashGNNParameters parameters,List<String> relationshipTypes ) {
+    public static Task create(Graph graph, HashGNNParameters parameters, List<String> relationshipTypes) {
         var tasks = new ArrayList<Task>();
 
         if (parameters.generateFeatures().isPresent()) {
-            tasks.add(Tasks.leaf("Generate base node property features", graph.nodeCount()));
+            tasks.add(Tasks.leaf("Generate base node property features", parameters.concurrency(), graph.nodeCount()));
         } else if (parameters.binarizeFeatures().isPresent()) {
-            tasks.add(Tasks.leaf("Binarize node property features", graph.nodeCount()));
+            tasks.add(Tasks.leaf("Binarize node property features", parameters.concurrency(), graph.nodeCount()));
         } else {
-            tasks.add(Tasks.leaf("Extract raw node property features", graph.nodeCount()));
+            tasks.add(Tasks.leaf("Extract raw node property features", parameters.concurrency(), graph.nodeCount()));
         }
 
         int numRelTypes = parameters.heterogeneous() ? relationshipTypes.size() : 1;
 
         tasks.add(Tasks.iterativeFixed(
             "Propagate embeddings",
-            () -> List.of(
+            parameters.concurrency(), () -> List.of(
                 Tasks.leaf(
                     "Precompute hashes",
-                    parameters.embeddingDensity() * (1 + 1 + numRelTypes)
+                    parameters.concurrency(), parameters.embeddingDensity() * (1 + 1 + numRelTypes)
                 ),
                 Tasks.leaf(
                     "Perform min-hashing",
+                    parameters.concurrency(),
                     (2 * graph.nodeCount() + graph.relationshipCount()) * parameters.embeddingDensity()
                 )
             ),
@@ -59,12 +60,9 @@ public final class HashGNNTask {
         ));
 
         if (parameters.outputDimension().isPresent()) {
-            tasks.add(Tasks.leaf("Densify output embeddings", graph.nodeCount()));
+            tasks.add(Tasks.leaf("Densify output embeddings", parameters.concurrency(), graph.nodeCount()));
         }
 
-        return Tasks.task(
-            AlgorithmLabel.HashGNN.asString(),
-            tasks
-        );
+        return Tasks.task(AlgorithmLabel.HashGNN.asString(), parameters.concurrency(), tasks);
     }
 }

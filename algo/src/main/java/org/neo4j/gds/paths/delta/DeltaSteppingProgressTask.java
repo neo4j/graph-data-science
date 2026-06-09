@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.delta;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -29,17 +30,16 @@ public final class DeltaSteppingProgressTask {
 
     private DeltaSteppingProgressTask() {}
 
-    public static Task create(String name) {
+    public static Task create(String name, Concurrency concurrency) {
         return Tasks.iterativeOpen(
-            name,
-            () -> List.of(
-                Tasks.leaf(DeltaStepping.Phase.RELAX.name()),
-                Tasks.leaf(DeltaStepping.Phase.SYNC.name())
+            name, concurrency, () -> List.of(
+                Tasks.leaf(DeltaStepping.Phase.RELAX.name(), concurrency),
+                Tasks.leaf(DeltaStepping.Phase.SYNC.name(), concurrency)
             )
         );
     }
 
-    public static Task create() {
-        return create(AlgorithmLabel.DeltaStepping.asString());
+    public static Task create(Concurrency concurrency) {
+        return create(AlgorithmLabel.DeltaStepping.asString(), concurrency);
     }
 }

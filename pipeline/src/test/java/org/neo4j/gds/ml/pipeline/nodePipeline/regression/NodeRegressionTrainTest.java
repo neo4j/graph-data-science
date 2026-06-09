@@ -266,7 +266,8 @@ class NodeRegressionTrainTest {
             .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR.name()))
             .build();
 
-        var progressTask = NodeRegressionTrain.progressTask(pipeline, graphStore.nodeCount());
+        var progressTask = NodeRegressionTrain.progressTask(pipeline, config.concurrency(), graphStore.nodeCount()
+        );
 
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(

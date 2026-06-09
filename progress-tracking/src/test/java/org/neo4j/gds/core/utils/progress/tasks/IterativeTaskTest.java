@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -31,10 +32,15 @@ class IterativeTaskTest {
 
     @Test
     void shouldCreateSubtasks() {
-        Supplier<List<Task>> taskSupplier = () -> List.of(Tasks.leaf("leaf1"), Tasks.leaf("leaf2"));
+        Supplier<List<Task>> taskSupplier = () -> List.of(
+            Tasks.leaf("leaf1", new Concurrency(1)), Tasks.leaf(
+                "leaf2",
+                new Concurrency(1)
+            )
+        );
         var iterativeFixedTask = Tasks.iterativeFixed(
             "root",
-            taskSupplier,
+            new Concurrency(1), taskSupplier,
             3
         );
 
@@ -42,7 +48,7 @@ class IterativeTaskTest {
 
         var iterativeDynamicTask = Tasks.iterativeDynamic(
             "root",
-            taskSupplier,
+            new Concurrency(1), taskSupplier,
             3
         );
 
@@ -50,7 +56,7 @@ class IterativeTaskTest {
 
         var iterativeOpenTask = Tasks.iterativeOpen(
             "root",
-            taskSupplier
+            new Concurrency(1), taskSupplier
         );
 
         assertThat(iterativeOpenTask.subTasks()).hasSize(0);
@@ -58,29 +64,33 @@ class IterativeTaskTest {
 
     @Test
     void shouldCreateSubTasksOnDemandForOpen() {
-        var leafTask = Tasks.leaf("leaf");
-        var openTask = Tasks.iterativeOpen("root", () -> List.of(leafTask));
+        var leafTask = Tasks.leaf("leaf", new Concurrency(1));
+        var openTask = Tasks.iterativeOpen("root", new Concurrency(1), () -> List.of(leafTask));
         openTask.start();
         assertThat(openTask.nextSubtask()).isEqualTo(leafTask);
     }
 
     @Test
     void nextSubtaskShouldThrowIfPreviousTaskIsRunning() {
-        Supplier<List<Task>> taskSupplier = () -> List.of(Tasks.leaf("A"));
+        Supplier<List<Task>> taskSupplier = () -> List.of(Tasks.leaf("A", new Concurrency(1)));
 
-        var root = Tasks.iterativeFixed("root", taskSupplier, 3);
+        var root = Tasks.iterativeFixed("root", new Concurrency(1), taskSupplier, 3);
 
         root.start();
         root.nextSubtask().start();
 
-        assertThatThrownBy(root::nextSubtask).hasMessageContaining("Cannot move to next subtask, because subtask `A` is still running");
+        assertThatThrownBy(root::nextSubtask).hasMessageContaining(
+            "Cannot move to next subtask, because subtask `A` is still running");
     }
 
     @Test
     void shouldReturnTheCorrectIteration() {
-        Supplier<List<Task>> taskSupplier = () -> List.of(Tasks.leaf("A"), Tasks.leaf("B"));
+        Supplier<List<Task>> taskSupplier = () -> List.of(
+            Tasks.leaf("A", new Concurrency(1)),
+            Tasks.leaf("B", new Concurrency(1))
+        );
 
-        var root = Tasks.iterativeFixed("root", taskSupplier, 3);
+        var root = Tasks.iterativeFixed("root", new Concurrency(1), taskSupplier, 3);
         root.start();
 
         assertThat(root.currentIteration()).isEqualTo(0);
@@ -100,10 +110,14 @@ class IterativeTaskTest {
     @Test
     void shouldNotStartSubtasksImplicitly() {
         Supplier<List<Task>> taskSupplier = () -> List.of(
-            Tasks.iterativeFixed("A", () -> List.of(Tasks.leaf("leaf1"), Tasks.leaf("leaf2")), 1)
+            Tasks.iterativeFixed(
+                "A",
+                new Concurrency(1),
+                () -> List.of(Tasks.leaf("leaf1", new Concurrency(1)), Tasks.leaf("leaf2", new Concurrency(1))), 1
+            )
         );
 
-        var root = Tasks.iterativeFixed("root", taskSupplier, 3);
+        var root = Tasks.iterativeFixed("root", new Concurrency(1), taskSupplier, 3);
         root.start();
 
         assertThat(root.currentIteration()).isEqualTo(0);

@@ -174,7 +174,7 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
             relationshipExporterBuilder
         );
 
-        var task = NodeRegressionTrain.progressTask(pipeline, graphStore.nodeCount());
+        var task = NodeRegressionTrain.progressTask(pipeline, configuration.concurrency(), graphStore.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(
             task,
             configuration.jobId(),

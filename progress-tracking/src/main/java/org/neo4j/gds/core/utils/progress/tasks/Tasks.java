@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,30 +31,32 @@ import java.util.stream.Stream;
 
 public final class Tasks {
 
-    private static final Task EMPTY_TASK = new Task("", List.of());
+    private static final Task EMPTY_TASK = new Task("", new Concurrency(1), List.of());
 
     public static Task empty() {
         return EMPTY_TASK;
     }
 
-    public static Task task(String description, List<Task> children) {
-        return new Task(description, children);
+    public static Task task(String description, Concurrency concurrency, List<Task> children) {
+        return new Task(description, concurrency, children);
     }
 
-    public static Task task(String description, Task firstChild, Task... children) {
+    public static Task task(String description, Concurrency concurrency, Task firstChild, Task... children) {
         var childrenList = new ArrayList<Task>();
         childrenList.add(firstChild);
         childrenList.addAll(Arrays.asList(children));
-        return new Task(description, childrenList);
+        return new Task(description, concurrency, childrenList);
     }
 
     public static IterativeTask iterativeFixed(
         String description,
+        Concurrency concurrency,
         Supplier<List<Task>> subTasksSupplier,
         int iterations
     ) {
         return new IterativeTask(
             description,
+            concurrency,
             unrollTasks(subTasksSupplier, iterations),
             subTasksSupplier,
             IterativeTask.Mode.FIXED
@@ -61,11 +65,13 @@ public final class Tasks {
 
     public static IterativeTask iterativeDynamic(
         String description,
+        Concurrency concurrency,
         Supplier<List<Task>> subTasksSupplier,
         int iterations
     ) {
         return new IterativeTask(
             description,
+            concurrency,
             unrollTasks(subTasksSupplier, iterations),
             subTasksSupplier,
             IterativeTask.Mode.DYNAMIC
@@ -74,22 +80,24 @@ public final class Tasks {
 
     public static IterativeTask iterativeOpen(
         String description,
+        Concurrency concurrency,
         Supplier<List<Task>> subTasksSupplier
     ) {
         return new IterativeTask(
             description,
+            concurrency,
             new ArrayList<>(),
             subTasksSupplier,
             IterativeTask.Mode.OPEN
         );
     }
 
-    public static LeafTask leaf(String description) {
-        return leaf(description, Task.UNKNOWN_VOLUME);
+    public static LeafTask leaf(String description, Concurrency concurrency) {
+        return leaf(description, concurrency, Task.UNKNOWN_VOLUME);
     }
 
-    public static LeafTask leaf(String description, long volume) {
-        return new LeafTask(description, volume);
+    public static LeafTask leaf(String description, Concurrency concurrency, long volume) {
+        return new LeafTask(description, concurrency, volume);
     }
 
     private static List<Task> unrollTasks(Supplier<List<Task>> subTasksSupplier, int iterations) {

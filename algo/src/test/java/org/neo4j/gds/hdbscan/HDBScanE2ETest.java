@@ -102,7 +102,7 @@ class HDBScanE2ETest {
 
             var progressTracker = TaskProgressTracker.create(
                 new LoggerForProgressTrackingAdapter(log),
-                HDBScanProgressTrackerCreator.hdbscanTask("foo", graph.nodeCount()),
+                HDBScanProgressTrackerCreator.hdbscanTask("foo", new Concurrency(1), graph.nodeCount()),
                 new Concurrency(1),
                 new JobId(),
                 PlainSimpleRequestCorrelationId.create(),

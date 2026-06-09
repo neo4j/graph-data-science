@@ -313,7 +313,7 @@ class GraphSampleConstructorTest {
 
         var progressTracker = TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            GraphSampleConstructor.progressTask(naturalGraphStore, rwr),
+            GraphSampleConstructor.progressTask(naturalGraphStore, rwr, new Concurrency(1)),
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),

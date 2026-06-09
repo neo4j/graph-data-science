@@ -56,7 +56,7 @@ public class NodeEmbeddingBusinessAlgorithms {
 
     public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
         var params = FastRPConfigTransformer.toParameters(configuration);
-        var task = NodeEmbeddingsAlgorithmTasks.fastRP(graph,params);
+        var task = NodeEmbeddingsAlgorithmTasks.fastRP(graph, params);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
@@ -69,7 +69,7 @@ public class NodeEmbeddingBusinessAlgorithms {
 
     Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
         var params = Node2VecConfigTransformer.toParameters(configuration);
-        var task = NodeEmbeddingsAlgorithmTasks.node2Vec(graph,params);
+        var task = NodeEmbeddingsAlgorithmTasks.node2Vec(graph, params);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
@@ -97,7 +97,7 @@ public class NodeEmbeddingBusinessAlgorithms {
     ) {
         var params = TrainConfigTransformer.toParameters(configuration);
         var task = NodeEmbeddingsAlgorithmTasks.graphSageTrain(graph, params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
             () -> algorithms.graphSageTrain(graph, params, configuration, progressTracker),
@@ -109,8 +109,8 @@ public class NodeEmbeddingBusinessAlgorithms {
     public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
 
         var params = configuration.toParameters();
-        var task = NodeEmbeddingsAlgorithmTasks.graphSage(graph);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task,configuration);
+        var task = NodeEmbeddingsAlgorithmTasks.graphSage(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResult(
             () -> algorithms.graphSage(graph, params, progressTracker),

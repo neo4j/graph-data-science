@@ -31,15 +31,14 @@ public final class FilteredKNNTask {
     public static Task create(long nodeCount, FilteredKnnParameters parameters) {
         return Tasks.task(
             FilteredKNN.asString(),
-            Tasks.leaf("Initialize random neighbors", nodeCount),
+            parameters.concurrency(),
+            Tasks.leaf("Initialize random neighbors", parameters.concurrency(), nodeCount),
             Tasks.iterativeDynamic(
-                "Iteration",
-                () -> List.of(
-                    Tasks.leaf("Split old and new neighbors", nodeCount),
-                    Tasks.leaf("Reverse old and new neighbors", nodeCount),
-                    Tasks.leaf("Join neighbors", nodeCount)
-                ),
-                parameters.knnParameters().maxIterations()
+                "Iteration", parameters.concurrency(), () -> List.of(
+                    Tasks.leaf("Split old and new neighbors", parameters.concurrency(), nodeCount),
+                    Tasks.leaf("Reverse old and new neighbors", parameters.concurrency(), nodeCount),
+                    Tasks.leaf("Join neighbors", parameters.concurrency(), nodeCount)
+                ), parameters.knnParameters().maxIterations()
             )
         );
     }

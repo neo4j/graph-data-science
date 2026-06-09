@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
@@ -53,19 +54,19 @@ class LocalOperationsProcedureFacadeTest {
 
         var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade, null);
 
-        var finished = new LeafTask("t1", 1);
+        var finished = new LeafTask("t1", new Concurrency(1), 1);
         finished.start();
         finished.finish();
 
-        var cancelled = new LeafTask("t2", 1);
+        var cancelled = new LeafTask("t2", new Concurrency(1), 1);
         cancelled.cancel();
 
-        var running = new LeafTask("t3", 1);
+        var running = new LeafTask("t3", new Concurrency(1), 1);
         running.start();
 
-        var pending = new LeafTask("t4", 1);
+        var pending = new LeafTask("t4", new Concurrency(1), 1);
 
-        var failed = new LeafTask("t5", 1);
+        var failed = new LeafTask("t5", new Concurrency(1), 1);
         failed.fail();
 
 
@@ -102,21 +103,20 @@ class LocalOperationsProcedureFacadeTest {
 
         var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade, null);
 
-        var finished = new LeafTask("t1", 1);
+        var finished = new LeafTask("t1", new Concurrency(1), 1);
         finished.start();
         finished.finish();
 
-        var cancelled = new LeafTask("t2", 1);
+        var cancelled = new LeafTask("t2", new Concurrency(1), 1);
         cancelled.cancel();
 
-        var running = new LeafTask("t3", 1);
+        var running = new LeafTask("t3", new Concurrency(1), 1);
         running.start();
 
-        var pending = new LeafTask("t4", 1);
+        var pending = new LeafTask("t4", new Concurrency(1), 1);
 
-        var failed = new LeafTask("t5", 1);
+        var failed = new LeafTask("t5", new Concurrency(1), 1);
         failed.fail();
-
 
         var jobId = new JobId("another job id");
         var mockedTasks = Stream.of(

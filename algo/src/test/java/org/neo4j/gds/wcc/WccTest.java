@@ -323,7 +323,7 @@ class WccTest {
         var parameters = new WccParameters(WccParameters.DEFAULT_THRESHOLD, new Concurrency(2));
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
-            CommunityAlgorithmTasks.wcc(graph),
+            CommunityAlgorithmTasks.wcc(graph, new Concurrency(2)),
             new Concurrency(2)
         );
 

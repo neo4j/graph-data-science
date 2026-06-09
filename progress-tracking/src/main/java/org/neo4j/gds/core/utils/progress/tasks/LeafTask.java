@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
+
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -27,12 +29,8 @@ public class LeafTask extends Task {
 
     private long volume;
 
-    /**
-     * @deprecated get rid
-     */
-    @Deprecated
-    public LeafTask(String description, long volume) {
-        super(description, List.of());
+    public LeafTask(String description, Concurrency concurrency, long volume) {
+        super(description, concurrency, List.of());
         this.volume = volume;
     }
 

@@ -268,7 +268,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         var progressTracker = TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            RelationshipStreamExporter.baseTask("OpName"),
+            RelationshipStreamExporter.baseTask("OpName", new Concurrency(1)),
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),

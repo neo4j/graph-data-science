@@ -214,7 +214,7 @@ class NodeClassificationPredictTest {
         var concurrency = new Concurrency(1);
         var progressTracker = TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(log),
-            NodeClassificationPredict.progressTask(graph.nodeCount()),
+            NodeClassificationPredict.progressTask(concurrency, graph.nodeCount()),
             concurrency,
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),

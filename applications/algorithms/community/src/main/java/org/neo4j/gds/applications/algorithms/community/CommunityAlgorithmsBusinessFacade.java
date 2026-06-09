@@ -104,7 +104,7 @@ public class CommunityAlgorithmsBusinessFacade {
     }
 
     ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.conductance(graph);
+        var task = CommunityAlgorithmTasks.conductance(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = ConductanceConfigTransformer.toParameters(configuration);
         return algorithmMachinery.getResult(
@@ -115,7 +115,7 @@ public class CommunityAlgorithmsBusinessFacade {
     }
 
     public Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.hdbscan(graph);
+        var task = CommunityAlgorithmTasks.hdbscan(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
 
@@ -140,7 +140,7 @@ public class CommunityAlgorithmsBusinessFacade {
     }
 
     KCoreDecompositionResult kCore(Graph graph, KCoreDecompositionBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.kCore(graph);
+        var task = CommunityAlgorithmTasks.kCore(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
         return algorithmMachinery.getResult(
@@ -227,7 +227,7 @@ public class CommunityAlgorithmsBusinessFacade {
     }
 
     HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.scc(graph);
+        var task = CommunityAlgorithmTasks.scc(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
         return algorithmMachinery.getResult(
@@ -238,12 +238,12 @@ public class CommunityAlgorithmsBusinessFacade {
     }
 
     TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.triangleCount(graph);
+        var task = CommunityAlgorithmTasks.triangleCount(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
 
         return algorithmMachinery.getResult(
-            () -> algorithms.triangleCount(graph,params, progressTracker),
+            () -> algorithms.triangleCount(graph, params, progressTracker),
             progressTracker,
             params.concurrency()
         );
@@ -254,7 +254,7 @@ public class CommunityAlgorithmsBusinessFacade {
     }
 
     public DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.wcc(graph);
+        var task = CommunityAlgorithmTasks.wcc(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
@@ -262,7 +262,7 @@ public class CommunityAlgorithmsBusinessFacade {
         }
         var params = configuration.toParameters();
         return algorithmMachinery.getResult(
-            () -> algorithms.wcc(graph,params, progressTracker),
+            () -> algorithms.wcc(graph, params, progressTracker),
             progressTracker,
             params.concurrency()
         );

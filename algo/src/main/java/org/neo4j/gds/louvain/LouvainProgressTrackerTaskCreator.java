@@ -20,6 +20,7 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationProgressTrackerTaskCreator;
@@ -31,13 +32,19 @@ public final class LouvainProgressTrackerTaskCreator {
 
     private LouvainProgressTrackerTaskCreator() {}
 
-    public static Task createTask(long nodeCount, long relationshipCount, int maxLevels, int maxIterations) {
-        Supplier<List<Task>> modOptTask = ()->List.of(ModularityOptimizationProgressTrackerTaskCreator.progressTask(nodeCount,relationshipCount,maxIterations));
+    public static Task createTask(
+        Concurrency concurrency,
+        long nodeCount,
+        long relationshipCount,
+        int maxLevels,
+        int maxIterations
+    ) {
+        Supplier<List<Task>> modOptTask = () -> List.of(ModularityOptimizationProgressTrackerTaskCreator.progressTask(concurrency,
+            nodeCount,
+            relationshipCount,
+            maxIterations
+        ));
 
-        return Tasks.iterativeDynamic(
-            AlgorithmLabel.Louvain.asString(),
-            modOptTask,
-            maxLevels
-        );
+        return Tasks.iterativeDynamic(AlgorithmLabel.Louvain.asString(), concurrency, modOptTask, maxLevels);
     }
 }

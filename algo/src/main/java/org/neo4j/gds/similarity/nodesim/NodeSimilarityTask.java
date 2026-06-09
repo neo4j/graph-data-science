@@ -26,21 +26,18 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.wcc.WccTask;
 
 public final class NodeSimilarityTask {
-
     private NodeSimilarityTask() {}
 
-    public static Task create(Graph graph,  NodeSimilarityParameters parameters) {
+    public static Task create(Graph graph, NodeSimilarityParameters parameters) {
         return Tasks.task(
             AlgorithmLabel.NodeSimilarity.asString(),
-            parameters.runWCC()
-                ? Tasks.task(
-                "prepare",
-                WccTask.create(graph),
-                Tasks.leaf("initialize", graph.relationshipCount())
-            )
-                : Tasks.leaf("prepare", graph.relationshipCount()),
-            Tasks.leaf("compare node pairs")
+            parameters.concurrency(),
+            parameters.runWCC() ? Tasks.task("prepare",
+                parameters.concurrency(),
+                WccTask.create(graph, parameters.concurrency()),
+                Tasks.leaf("initialize", parameters.concurrency(), graph.relationshipCount())
+            ) : Tasks.leaf("prepare", parameters.concurrency(), graph.relationshipCount()),
+            Tasks.leaf("compare node pairs", parameters.concurrency())
         );
     }
-
 }

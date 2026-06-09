@@ -239,17 +239,20 @@ public class GraphSampleConstructor {
         }
     }
 
-    public static Task progressTask(GraphStore graphStore, NodesSampler nodesSampler) {
+    public static Task progressTask(GraphStore graphStore, NodesSampler nodesSampler, Concurrency concurrency) {
         return Tasks.task(
             nodesSampler.progressTaskName(),
+            concurrency,
             nodesSampler.progressTask(graphStore),
             Tasks.task(
                 "Construct graph",
-                Tasks.leaf("Construct node id map", graphStore.nodeCount()),
-                Tasks.leaf("Filter node properties", graphStore.nodeCount()),
+                concurrency,
+                Tasks.leaf("Construct node id map", concurrency, graphStore.nodeCount()),
+                Tasks.leaf("Filter node properties", concurrency, graphStore.nodeCount()),
                 Tasks.iterativeFixed(
                     "Filter relationship properties",
-                    () -> List.of(Tasks.leaf("Relationship type", graphStore.relationshipCount())),
+                    concurrency,
+                    () -> List.of(Tasks.leaf("Relationship type", concurrency, graphStore.relationshipCount())),
                     graphStore.relationshipTypes().size()
                 )
             )

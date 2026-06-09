@@ -21,6 +21,7 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -39,11 +40,11 @@ public interface NodePropertyExporter {
 
     long propertiesWritten();
 
-    static Task baseTask(String operationName, long taskVolume) {
-        return Tasks.leaf(operationName + " :: WriteNodeProperties", taskVolume);
+    static Task baseTask(String operationName, Concurrency concurrency, long taskVolume) {
+        return Tasks.leaf(operationName + " :: WriteNodeProperties", concurrency, taskVolume);
     }
 
-    static Task innerTask(String innerName, long taskVolume) {
-        return Tasks.leaf(innerName, taskVolume);
+    static Task innerTask(String innerName, Concurrency concurrency, long taskVolume) {
+        return Tasks.leaf(innerName, concurrency, taskVolume);
     }
 }

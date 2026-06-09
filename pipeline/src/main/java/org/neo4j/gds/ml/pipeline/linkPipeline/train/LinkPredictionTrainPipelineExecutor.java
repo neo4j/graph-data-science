@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.CatalogModelContainer;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -94,18 +95,26 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         );
     }
 
-    public static Task progressTask(String taskName, LinkPredictionTrainingPipeline pipeline, long relationshipCount) {
+    public static Task progressTask(
+        String taskName,
+        Concurrency concurrency,
+        LinkPredictionTrainingPipeline pipeline, long relationshipCount
+    ) {
         var sizes = pipeline.splitConfig().expectedSetSizes(relationshipCount);
         List<Task> childTasks = new ArrayList<>();
-        childTasks.add(LinkPredictionRelationshipSampler.progressTask(sizes));
-        childTasks.add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), sizes.featureInputSize()));
+        childTasks.add(LinkPredictionRelationshipSampler.progressTask(concurrency, sizes));
+        childTasks.add(NodePropertyStepExecutor.tasks(
+            concurrency,
+            pipeline.nodePropertySteps(),
+            sizes.featureInputSize()
+        ));
         childTasks.addAll(LinkPredictionTrain.progressTasks(
-            relationshipCount,
+            concurrency, relationshipCount,
             pipeline.splitConfig(),
             pipeline.numberOfModelSelectionTrials()
         ));
 
-        return Tasks.task(taskName, childTasks);
+        return Tasks.task(taskName, concurrency, childTasks);
     }
 
     public static MemoryEstimation estimate(

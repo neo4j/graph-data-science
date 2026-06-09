@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.time.Duration;
@@ -35,13 +36,13 @@ class TaskRegistryTest {
 
         assertThat(taskStore.query()).isEmpty();
 
-        var task1 = Tasks.leaf("task1");
+        var task1 = Tasks.leaf("task1", new Concurrency(1));
         taskRegistry1.registerTask(task1);
 
         assertThat(taskStore.query("").map(UserTask::task)).contains(task1);
 
         var taskRegistry2 = new TaskRegistry("", taskStore);
-        var task2 = Tasks.leaf("task2");
+        var task2 = Tasks.leaf("task2", new Concurrency(1));
         taskRegistry2.registerTask(task2);
 
         assertThat(taskStore.query("").map(UserTask::task)).contains(task1, task2);
@@ -52,7 +53,7 @@ class TaskRegistryTest {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var taskRegistry = new TaskRegistry("", taskStore);
 
-        var task = Tasks.leaf("task");
+        var task = Tasks.leaf("task", new Concurrency(1));
         taskRegistry.registerTask(task);
 
         assertThat(taskStore.query()).hasSize(1);
@@ -68,7 +69,7 @@ class TaskRegistryTest {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
         var taskRegistry = new TaskRegistry("", taskStore);
 
-        var task = Tasks.leaf("task");
+        var task = Tasks.leaf("task", new Concurrency(1));
 
         assertThat(taskRegistry.containsTask(task)).isFalse();
 

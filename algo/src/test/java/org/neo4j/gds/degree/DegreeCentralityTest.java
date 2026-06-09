@@ -157,7 +157,7 @@ final class DegreeCentralityTest {
         var concurrency = new Concurrency(4);
         var orientation = Orientation.NATURAL;
 
-        var task = CentralityAlgorithmTasks.harmonicCentrality();
+        var task = CentralityAlgorithmTasks.harmonicCentrality(concurrency);
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
             task,
