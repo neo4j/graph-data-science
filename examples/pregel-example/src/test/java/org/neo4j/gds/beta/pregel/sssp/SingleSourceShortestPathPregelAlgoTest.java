@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
@@ -84,7 +85,8 @@ class SingleSourceShortestPathPregelAlgoTest {
             config,
             new SingleSourceShortestPathPregel(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         HugeLongArray nodeValues = pregelJob.run().nodeValues().longProperties(DISTANCE);

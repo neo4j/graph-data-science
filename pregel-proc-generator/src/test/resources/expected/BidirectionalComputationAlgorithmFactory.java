@@ -27,13 +27,14 @@ import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.termination.TerminationFlag;
 
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class BidirectionalComputationAlgorithmFactory extends GraphAlgorithmFactory<BidirectionalComputationAlgorithm, PregelProcedureConfig> {
     @Override
     public BidirectionalComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
-            ProgressTracker progressTracker) {
-        return new BidirectionalComputationAlgorithm(graph, configuration, progressTracker);
+            ProgressTracker progressTracker, TerminationFlag terminationFlag) {
+        return new BidirectionalComputationAlgorithm(graph, configuration, progressTracker, terminationFlag);
     }
 
     @Override

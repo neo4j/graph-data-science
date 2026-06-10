@@ -40,14 +40,6 @@ public abstract class Algorithm<RESULT> implements Callable<RESULT> {
         return compute();
     }
 
-    /**
-     * @deprecated get rid, breaks abstraction and encapsulation. now only used by Pregel
-     */
-    @Deprecated
-    public void setTerminationFlag(TerminationFlag terminationFlag) {
-        this.terminationFlag = terminationFlag;
-    }
-
     public ProgressTracker getProgressTracker() {
         return this.progressTracker;
     }

@@ -27,13 +27,14 @@ import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.termination.TerminationFlag;
 
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
 public final class ComputationAlgorithmFactory extends GraphAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> {
     @Override
     public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
-            ProgressTracker progressTracker) {
-        return new ComputationAlgorithm(graph, configuration, progressTracker);
+            ProgressTracker progressTracker, TerminationFlag terminationFlag) {
+        return new ComputationAlgorithm(graph, configuration, progressTracker, terminationFlag);
     }
 
     @Override

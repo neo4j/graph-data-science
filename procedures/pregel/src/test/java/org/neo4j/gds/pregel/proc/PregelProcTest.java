@@ -308,6 +308,7 @@ public class PregelProcTest extends BaseProcTest {
                 graph,
                 configuration,
                 progressTracker,
+                terminationFlag,
                 configuration.throwInCompute()
             );
         }
@@ -461,6 +462,7 @@ public class PregelProcTest extends BaseProcTest {
             Graph graph,
             PregelProcedureConfig configuration,
             ProgressTracker progressTracker,
+            TerminationFlag terminationFlag,
             boolean throwInCompute
         ) {
             super(progressTracker);
@@ -492,7 +494,7 @@ public class PregelProcTest extends BaseProcTest {
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});
                     context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4});
                 }
-            }, DefaultPool.INSTANCE, progressTracker);
+            }, DefaultPool.INSTANCE, progressTracker, terminationFlag);
         }
 
         @Override

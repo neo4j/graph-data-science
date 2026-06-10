@@ -58,24 +58,11 @@ class AlgorithmGeneratorTest {
         var spec = generator.constructor();
         assertThat(spec.toString()).isEqualTo("" +
             "Constructor(org.neo4j.gds.api.Graph graph, d.e.F configuration," + NL +
-            "    org.neo4j.gds.core.utils.progress.tasks.ProgressTracker progressTracker) {" + NL +
+            "    org.neo4j.gds.core.utils.progress.tasks.ProgressTracker progressTracker," + NL +
+            "    org.neo4j.gds.termination.TerminationFlag terminationFlag) {" + NL +
             "  super(progressTracker);" + NL +
             "  var computation = new a.b.C();" + NL +
-            "  this.pregelJob = org.neo4j.gds.beta.pregel.Pregel.create(graph, configuration, computation, org.neo4j.gds.core.concurrency.DefaultPool.INSTANCE, progressTracker);" + NL +
-            "}" + NL
-        );
-    }
-
-    @Test
-    void shouldGenerateSetTerminationFlagMethod() {
-        var typeNames = new TypeNames("a.b", "C", ClassName.get("d.e", "F"));
-        var generator = new AlgorithmGenerator(typeNames);
-        var spec = generator.setTerminatonFlag();
-        assertThat(spec.toString()).isEqualTo("" +
-            "@java.lang.Override" + NL +
-            "public void setTerminationFlag(org.neo4j.gds.termination.TerminationFlag terminationFlag) {" + NL +
-            "  super.setTerminationFlag(terminationFlag);" + NL +
-            "  pregelJob.setTerminationFlag(terminationFlag);" + NL +
+            "  this.pregelJob = org.neo4j.gds.beta.pregel.Pregel.create(graph, configuration, computation, org.neo4j.gds.core.concurrency.DefaultPool.INSTANCE, progressTracker, terminationFlag);" + NL +
             "}" + NL
         );
     }

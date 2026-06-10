@@ -56,20 +56,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final ExecutorService executor;
 
-    /**
-     * @deprecated Use the variant that does proper injection of termination flag instead
-     */
-    @Deprecated
-    public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
-        Graph graph,
-        CONFIG config,
-        BasePregelComputation<CONFIG> computation,
-        ExecutorService executor,
-        ProgressTracker progressTracker
-    ) {
-        return create(graph, config, computation, executor, progressTracker, TerminationFlag.RUNNING_TRUE);
-    }
-
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
         Graph graph,
         CONFIG config,
@@ -163,7 +149,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         final NodeValue initialNodeValue,
         final ExecutorService executor,
         final ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        final TerminationFlag terminationFlag
     ) {
         this.graph = graph;
         this.config = config;

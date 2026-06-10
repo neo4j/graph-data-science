@@ -28,6 +28,7 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -333,7 +334,8 @@ class TriangleCountPregelTest {
             config,
             new TriangleCountPregel(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         return pregelJob.run().nodeValues().longProperties(TriangleCountPregel.TRIANGLE_COUNT);

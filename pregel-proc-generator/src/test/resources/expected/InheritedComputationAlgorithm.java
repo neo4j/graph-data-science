@@ -34,16 +34,10 @@ public final class InheritedComputationAlgorithm extends Algorithm<PregelResult>
     private final Pregel<PregelProcedureConfig> pregelJob;
 
     InheritedComputationAlgorithm(Graph graph, PregelProcedureConfig configuration,
-                         ProgressTracker progressTracker) {
+                         ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         super(progressTracker);
         var computation = new InheritedComputation();
-        this.pregelJob = Pregel.create(graph, configuration, computation, DefaultPool.INSTANCE, progressTracker);
-    }
-
-    @Override
-    public void setTerminationFlag(TerminationFlag terminationFlag) {
-        super.setTerminationFlag(terminationFlag);
-        pregelJob.setTerminationFlag(terminationFlag);
+        this.pregelJob = Pregel.create(graph, configuration, computation, DefaultPool.INSTANCE, progressTracker, terminationFlag);
     }
 
     @Override
