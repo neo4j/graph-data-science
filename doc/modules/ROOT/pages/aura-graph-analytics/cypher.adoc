@@ -164,7 +164,7 @@ CALL gds.graph.project(
 
 [WARNING]
 ====
-Because AGA replaces the Map-based `nodeProjection` and `relationshipProjection` parameters with simplified `nodeLabels` and `relationshipTypes`, any use case requiring property projection, orientation configuration, or parallel relationship aggregation must use Cypher projections instead.
+Because AGA replaces the Map-based `nodeProjection` and `relationshipProjection` parameters with simplified `nodeLabels` and `relationshipTypes`, per-label or per-type  configurations are not supported. While you can still project properties and configure orientations globally using the `configuration` parameter, use cases requiring advanced per-type aggregation or complex label-specific overrides must use Cypher projections instead.
 ====
 
 == Running algorithms
