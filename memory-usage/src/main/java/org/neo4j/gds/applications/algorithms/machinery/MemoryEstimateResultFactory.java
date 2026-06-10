@@ -37,35 +37,29 @@ public final class MemoryEstimateResultFactory {
     }
 
     public static MemoryEstimateResult from(MemoryTree memory, GraphDimensions dimensions) {
-        return create(memory.render(), memory.renderMap(), memory.memoryUsage(), dimensions);
+        return from(memory.render(), memory.renderMap(), memory.memoryUsage(), dimensions.nodeCount(), dimensions.relCountUpperBound());
     }
 
-    private static MemoryEstimateResult create(
+    public static MemoryEstimateResult from(
         String treeView,
         Map<String, Object> mapView,
         MemoryRange estimateMemoryUsage,
-        GraphDimensions dimensions
+        long nodeCount,
+        long relationshipCount
     ) {
         // FIXME: pass the heap size from the outside?
-        var requiredMemory = estimateMemoryUsage.toString();
         var heapSize = Runtime.getRuntime().maxMemory();
-        var bytesMin = estimateMemoryUsage.min;
-        var bytesMax = estimateMemoryUsage.max;
-        var heapPercentageMin = getPercentage(bytesMin, heapSize);
-        var heapPercentageMax = getPercentage(bytesMax, heapSize);
-        var nodeCount = dimensions.nodeCount();
-        var relationshipCount = dimensions.relCountUpperBound();
 
         return new MemoryEstimateResult(
-            requiredMemory,
+            estimateMemoryUsage.toString(),
             treeView,
             mapView,
-            bytesMin,
-            bytesMax,
+            estimateMemoryUsage.min,
+            estimateMemoryUsage.max,
             nodeCount,
             relationshipCount,
-            heapPercentageMin,
-            heapPercentageMax
+            getPercentage(estimateMemoryUsage.min, heapSize),
+            getPercentage(estimateMemoryUsage.max, heapSize)
         );
     }
 
