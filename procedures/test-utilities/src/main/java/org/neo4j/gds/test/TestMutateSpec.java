@@ -37,6 +37,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -67,7 +68,8 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
             public TestAlgorithm build(
                 Graph graph,
                 TestMutateConfig configuration,
-                ProgressTracker progressTracker
+                ProgressTracker progressTracker,
+                TerminationFlag terminationFlag
             ) {
                 return new TestAlgorithm(
                     graph,

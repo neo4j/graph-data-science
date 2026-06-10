@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
@@ -72,7 +73,7 @@ public class PregelWriteComputationResultConsumer<
                         var requestScopedDependencies = RequestScopedDependencies
                             .builder()
                             .correlationId(PlainSimpleRequestCorrelationId.create())
-                            .terminationFlag(computationResult.algorithm().getTerminationFlag())
+                            .terminationFlag(TerminationFlag.wrap(executionContext.terminationMonitor()))
                             .taskRegistryFactory(executionContext.taskRegistryFactory())
                             .build();
 

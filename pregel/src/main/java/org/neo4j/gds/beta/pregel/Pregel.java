@@ -52,7 +52,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     private final PregelComputer<CONFIG> computer;
 
     private final ProgressTracker progressTracker;
-    private TerminationFlag terminationFlag;
+    private final TerminationFlag terminationFlag;
 
     private final ExecutorService executor;
 
@@ -195,10 +195,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .build();
     }
 
-    public void setTerminationFlag(TerminationFlag terminationFlag) {
-        this.terminationFlag = terminationFlag;
-    }
-
     public PregelResult run() {
         boolean didConverge = false;
 
@@ -245,7 +241,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private boolean runMasterComputeStep(int iteration) {
         var context = new MasterComputeContext<>(config, graph, iteration, nodeValues, executor, progressTracker);
-        var didConverge = computation.masterCompute(context);
-        return didConverge;
+
+        return computation.masterCompute(context);
     }
 }

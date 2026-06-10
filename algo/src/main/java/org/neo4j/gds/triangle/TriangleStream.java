@@ -60,6 +60,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     private final AtomicInteger runningThreads;
     private final BlockingQueue<TriangleResult> resultQueue;
     private final LabelFilterChecker labelFilterChecker;
+    private final TerminationFlag terminationFlag;
 
     public static TriangleStream create(
         Graph graph,
@@ -91,7 +92,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         List<String> labelFilter,
         TerminationFlag terminationFlag
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(ProgressTracker.NULL_TRACKER); // because this is hard coded, we can drop any usages of it below
         this.graph = graph;
         this.intersectFactory = intersectFactory;
         this.executorService = executorService;
@@ -106,15 +107,13 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
 
     @Override
     public Stream<TriangleResult> compute() {
-        progressTracker.beginSubTask(graph.nodeCount());
         submitTasks();
-        final TerminationFlag flag = getTerminationFlag();
         final Iterator<TriangleResult> it = new AbstractIterator<>() {
 
             @Override
             protected TriangleResult fetch() {
                 TriangleResult result = null;
-                while (result == null && flag.running() && (runningThreads.get() > 0 || !resultQueue.isEmpty())) {
+                while (result == null && terminationFlag.running() && (runningThreads.get() > 0 || !resultQueue.isEmpty())) {
                     result = resultQueue.poll();
                 }
                 return result != null ? result : done();
@@ -123,8 +122,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
 
         return StreamSupport
             .stream(Spliterators.spliteratorUnknownSize(it, 0), false)
-            .filter(Objects::nonNull)
-            .onClose(progressTracker::endSubTask);
+            .filter(Objects::nonNull);
     }
 
     private void submitTasks() {
@@ -139,7 +137,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     }
 
     private abstract class BaseTask implements Runnable {
-
         BaseTask() {
             runningThreads.incrementAndGet();
         }
@@ -152,7 +149,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
                     if (labelFilterChecker.check(node)) {
                         evaluateNode(node);
                     }
-                    progressTracker.onProgress();
                 }
             } finally {
                 runningThreads.decrementAndGet();
@@ -189,5 +185,4 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
             emit(nodeA, nodeB, nodeC);
         }
     }
-
 }

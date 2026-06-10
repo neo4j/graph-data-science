@@ -24,4 +24,5 @@ dependencies {
     implementation project(':graph-projection-api')
     implementation project(':memory-usage')
     implementation project(':progress-tracking')
+    implementation project(':termination')
 }

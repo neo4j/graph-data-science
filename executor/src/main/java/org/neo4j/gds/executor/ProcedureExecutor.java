@@ -20,9 +20,6 @@
 package org.neo4j.gds.executor;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
@@ -106,9 +103,11 @@ public class ProcedureExecutor<
             return algoSpec.computationResultConsumer().consume(emptyComputationResult, executionContext);
         }
 
-        ALGO algo = newAlgorithm(graph, graphStore, config);
+        ALGO algo = newAlgorithm(graph, config);
 
-        // this is problematic
+        // the memory estimate is only ever set over here in the executor
+        // that means it is only Pregel things that get it set
+        // but the estimate comes from the Pregel algorithms themselves
         algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes);
 
         ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metrics().algorithmMetrics(), graphStore, config);
@@ -133,7 +132,6 @@ public class ProcedureExecutor<
         CONFIG config
     ) {
         return runWithExceptionLogging(
-            "Computation failed",
             () -> {
                 var telemetryLogger = new TelemetryLoggerImpl(executionContext.log());
                 var algorithmMetric = algorithmMetricsService.create(
@@ -173,7 +171,6 @@ public class ProcedureExecutor<
 
     private ALGO newAlgorithm(
         Graph graph,
-        GraphStore graphStore,
         CONFIG config
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(
@@ -181,37 +178,23 @@ public class ProcedureExecutor<
             () -> TransactionTerminatedHelper.transactionTerminated(Status.Transaction.Terminated)
         );
         ALGO algorithm = algoSpec.algorithmFactory(executionContext)
-            .accept(new AlgorithmFactory.Visitor<>() {
-                @Override
-                public ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory) {
-                    return graphAlgorithmFactory.build(
-                        graph,
-                        config,
-                        executionContext.log(),
-                        executionContext.taskRegistryFactory()
-                    );
-                }
-
-                @Override
-                public ALGO graphStore(GraphStoreAlgorithmFactory<ALGO, CONFIG> graphStoreAlgorithmFactory) {
-                    return graphStoreAlgorithmFactory.build(
-                        graphStore,
-                        config,
-                        executionContext.log(),
-                        executionContext.taskRegistryFactory()
-                    );
-                }
-            });
-        algorithm.setTerminationFlag(terminationFlag);
+            .accept(graphAlgorithmFactory -> graphAlgorithmFactory.build(
+                    graph,
+                    config,
+                    executionContext.log(),
+                    executionContext.taskRegistryFactory(),
+                    terminationFlag
+                )
+            );
 
         return algorithm;
     }
 
-    private <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {
+    private <R> R runWithExceptionLogging(Supplier<R> supplier) {
         try {
             return supplier.get();
         } catch (Exception e) {
-            executionContext.log().warn(message, e);
+            executionContext.log().warn("Computation failed", e);
             throw e;
         }
     }

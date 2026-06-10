@@ -137,7 +137,6 @@ class LouvainTest {
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
-        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         var result = algorithm.compute();
 
@@ -185,7 +184,6 @@ class LouvainTest {
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
-        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         var result = algorithm.compute();
 
@@ -233,7 +231,6 @@ class LouvainTest {
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
-        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         var result = algorithm.compute();
 
@@ -273,10 +270,8 @@ class LouvainTest {
             null,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE,
-
             TerminationFlag.RUNNING_TRUE
         );
-        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         var result = algorithm.compute();
 
@@ -303,7 +298,6 @@ class LouvainTest {
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
-        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         var result = algorithm.compute();
         assertEquals(1, result.ranLevels());
@@ -333,7 +327,7 @@ class LouvainTest {
                     DefaultPool.INSTANCE,
                     TerminationFlag.RUNNING_TRUE
                 );
-                louvain.setTerminationFlag(terminationFlag);
+
                 louvain.compute();
             }, 500, 1000
         );
@@ -361,7 +355,6 @@ class LouvainTest {
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
-        algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         assertThatThrownBy(algorithm::compute).hasMessageContaining("non-negative");
 

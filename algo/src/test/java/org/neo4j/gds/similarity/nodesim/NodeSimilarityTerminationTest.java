@@ -25,7 +25,6 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -61,9 +60,9 @@ class NodeSimilarityTerminationTest {
                     ProgressTracker.NULL_TRACKER,
                     NodeFilter.ALLOW_EVERYTHING,
                     NodeFilter.ALLOW_EVERYTHING,
-                    TerminationFlag.RUNNING_TRUE
+                    terminationFlag
                 );
-                nodeSimilarity.setTerminationFlag(terminationFlag);
+
                 nodeSimilarity.compute();
             }, 500, 1000
         );

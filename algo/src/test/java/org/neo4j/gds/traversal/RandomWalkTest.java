@@ -439,6 +439,18 @@ class RandomWalkTest {
     void testSetTerminationFlagAndMultipleRuns() {
         for (int i = 0; i < 3; i++) {
 
+            var terminationFlagThatAllowsTenChecks = new TerminationFlag() {
+                int numberOfChecks;
+
+                @Override
+                public boolean running() {
+                    if (numberOfChecks < 10) return true;
+
+                    numberOfChecks++;
+
+                    return false;
+                }
+            };
             var randomWalk = RandomWalk.create(
                 Log.noOpLog(),
                 graph,
@@ -449,13 +461,11 @@ class RandomWalkTest {
                 Optional.empty(),
                 ProgressTracker.NULL_TRACKER,
                 DefaultPool.INSTANCE,
-                TerminationFlag.RUNNING_TRUE
+                terminationFlagThatAllowsTenChecks
             );
 
             var stream = randomWalk.compute();
-            long count = stream.limit(10).count();
-
-            randomWalk.setTerminationFlag(() -> false);
+            var count = stream.count();
 
             assertEquals(10, count);
         }

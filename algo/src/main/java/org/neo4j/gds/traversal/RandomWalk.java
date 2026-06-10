@@ -132,7 +132,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.walks = new ArrayBlockingQueue<>(walkBufferSize);
-        this.externalTerminationFlag = new ExternalTerminationFlag(this);
+        this.externalTerminationFlag = new ExternalTerminationFlag(terminationFlag);
         this.graph = graph;
         this.walkParameters = walkParameters;
         this.sourceNodes = sourceNodes;
@@ -226,21 +226,21 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     }
 
     private static final class ExternalTerminationFlag implements TerminationFlag {
-        private volatile boolean running = true;
-        private final Algorithm<?> algo;
+        private final TerminationFlag terminationFlag;
 
-        ExternalTerminationFlag(Algorithm<?> algo) {
-            this.algo = algo;
+        private volatile boolean running = true;
+
+        ExternalTerminationFlag(TerminationFlag terminationFlag) {
+            this.terminationFlag = terminationFlag;
         }
 
         @Override
         public boolean running() {
-            return this.running && this.algo.getTerminationFlag().running();
+            return this.running && terminationFlag.running();
         }
 
         void stop() {
             this.running = false;
         }
     }
-
 }
