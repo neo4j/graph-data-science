@@ -63,6 +63,12 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
         return originalToRootIdMap.toOriginalNodeId(rootToFilteredIdMap.toOriginalNodeId(filteredNodeId));
     }
 
+    /**
+     * If the original node id is not present in the root id map, the lookup
+     * must short-circuit to {@link IdMap#NOT_FOUND}. {@code NOT_FOUND} is not
+     * a valid input for the root-to-filtered lookup; see {@link HighLimitIdMap}
+     * for the same pattern.
+     */
     @Override
     public long toMappedNodeId(long originalNodeId) {
         var rootNodeId = originalToRootIdMap.toMappedNodeId(originalNodeId);
@@ -72,6 +78,10 @@ public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap 
         return rootToFilteredIdMap.toMappedNodeId(rootNodeId);
     }
 
+    /**
+     * If the original node id is not present in the root id map, the lookup
+     * must short-circuit; see {@link #toMappedNodeId(long)}.
+     */
     @Override
     public boolean containsOriginalId(long originalNodeId) {
         var rootNodeId = originalToRootIdMap.toMappedNodeId(originalNodeId);
