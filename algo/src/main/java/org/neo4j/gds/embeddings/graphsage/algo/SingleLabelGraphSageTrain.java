@@ -37,9 +37,10 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
     private final Log log;
     private final Graph graph;
     private final ExecutorService executor;
+    private final TerminationFlag terminationFlag;
     private final String gdsVersion;
     private final GraphSageTrainParameters parameters;
-    @Deprecated  private final GraphSageTrainConfig config;
+    private final GraphSageTrainConfig config;
 
     public SingleLabelGraphSageTrain(
         Log log,
@@ -49,13 +50,14 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         String gdsVersion,
-        GraphSageTrainConfig config // TODO: Last trace of UI config in here--Once we attach Parameters to Models we can lose this too
+        GraphSageTrainConfig config
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
         this.log = log;
         this.graph = graph;
         this.parameters = parameters;
         this.executor = executor;
+        this.terminationFlag = terminationFlag;
         this.gdsVersion = gdsVersion;
         this.config = config;
     }

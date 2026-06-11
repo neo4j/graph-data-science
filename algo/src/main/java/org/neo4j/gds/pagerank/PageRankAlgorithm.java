@@ -62,12 +62,6 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
     }
 
     @Override
-    public void setTerminationFlag(TerminationFlag terminationFlag) {
-        super.setTerminationFlag(terminationFlag);
-        pregelJob.setTerminationFlag(terminationFlag);
-    }
-
-    @Override
     public PageRankResult compute() {
         var pregelResult = pregelJob.run();
 

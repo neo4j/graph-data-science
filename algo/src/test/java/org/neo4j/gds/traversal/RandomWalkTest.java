@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -436,8 +437,16 @@ class RandomWalkTest {
      * Ensure that when termination flag is set externally, we terminate the walk
      */
     @Test
-    void testSetTerminationFlagAndMultipleRuns() {
+    void testSetTerminationFlagAndMultipleRuns() { // what is this supposed to test?
         for (int i = 0; i < 3; i++) {
+
+            var terminationStatus = new AtomicBoolean(true);
+            var terminationFlagWeCanControl = new TerminationFlag() {
+                @Override
+                public boolean running() {
+                    return terminationStatus.get();
+                }
+            };
 
             var randomWalk = RandomWalk.create(
                 Log.noOpLog(),
@@ -449,15 +458,15 @@ class RandomWalkTest {
                 Optional.empty(),
                 ProgressTracker.NULL_TRACKER,
                 DefaultPool.INSTANCE,
-                TerminationFlag.RUNNING_TRUE
+                terminationFlagWeCanControl
             );
 
             var stream = randomWalk.compute();
-            long count = stream.limit(10).count();
+            var count = stream.limit(10).count(); // if you stream ten...
 
-            randomWalk.setTerminationFlag(() -> false);
+            terminationStatus.set(false); // this ends the algorithm, it will inexplicably hang otherwise
 
-            assertEquals(10, count);
+            assertEquals(10, count); // ... then you get ten :facepalm: this assertion is meaningless
         }
     }
 

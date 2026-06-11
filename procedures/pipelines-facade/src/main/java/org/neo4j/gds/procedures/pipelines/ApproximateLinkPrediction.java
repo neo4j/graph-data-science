@@ -84,10 +84,9 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             new KnnContext(
                 progressTracker
             ),
-            TerminationFlag.RUNNING_TRUE
+            terminationFlag
         );
 
-        knn.setTerminationFlag(terminationFlag);
         var knnResult = knn.compute();
 
         progressTracker.endSubTask();

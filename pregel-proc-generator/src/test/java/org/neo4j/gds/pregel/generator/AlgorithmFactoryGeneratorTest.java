@@ -50,8 +50,9 @@ class AlgorithmFactoryGeneratorTest {
             "@java.lang.Override" + NL +
             "public gds.test.BazAlgorithm build(org.neo4j.gds.api.Graph graph," + NL +
             "    gds.testconfig.TheConfig configuration," + NL +
-            "    org.neo4j.gds.core.utils.progress.tasks.ProgressTracker progressTracker) {" + NL +
-            "  return new gds.test.BazAlgorithm(graph, configuration, progressTracker);" + NL +
+            "    org.neo4j.gds.core.utils.progress.tasks.ProgressTracker progressTracker," + NL +
+            "    org.neo4j.gds.termination.TerminationFlag terminationFlag) {" + NL +
+            "  return new gds.test.BazAlgorithm(graph, configuration, progressTracker, terminationFlag);" + NL +
             "}" + NL
         );
     }

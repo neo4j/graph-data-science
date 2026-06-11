@@ -40,14 +40,6 @@ public abstract class Algorithm<RESULT> implements Callable<RESULT> {
         return compute();
     }
 
-    public void setTerminationFlag(TerminationFlag terminationFlag) {
-        this.terminationFlag = terminationFlag;
-    }
-
-    public TerminationFlag getTerminationFlag() {
-        return terminationFlag;
-    }
-
     public ProgressTracker getProgressTracker() {
         return this.progressTracker;
     }

@@ -60,6 +60,7 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Context;
@@ -300,12 +301,14 @@ public class PregelProcTest extends BaseProcTest {
         public CompositeTestAlgorithm build(
             Graph graph,
             TestPregelConfig configuration,
-            ProgressTracker progressTracker
+            ProgressTracker progressTracker,
+            TerminationFlag terminationFlag
         ) {
             return new CompositeTestAlgorithm(
                 graph,
                 configuration,
                 progressTracker,
+                terminationFlag,
                 configuration.throwInCompute()
             );
         }
@@ -459,6 +462,7 @@ public class PregelProcTest extends BaseProcTest {
             Graph graph,
             PregelProcedureConfig configuration,
             ProgressTracker progressTracker,
+            TerminationFlag terminationFlag,
             boolean throwInCompute
         ) {
             super(progressTracker);
@@ -490,7 +494,7 @@ public class PregelProcTest extends BaseProcTest {
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});
                     context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4});
                 }
-            }, DefaultPool.INSTANCE, progressTracker);
+            }, DefaultPool.INSTANCE, progressTracker, terminationFlag);
         }
 
         @Override

@@ -47,7 +47,6 @@ public class AlgorithmGenerator {
         return typeSpec(generatedAnnotationSpec).toBuilder()
             .addField(pregelJobField())
             .addMethod(constructor())
-            .addMethod(setTerminatonFlag())
             .addMethod(computeMethod())
             .build();
     }
@@ -85,10 +84,11 @@ public class AlgorithmGenerator {
             .addParameter(Graph.class, "graph")
             .addParameter(typeNames.config(), "configuration")
             .addParameter(ProgressTracker.class, "progressTracker")
+            .addParameter(TerminationFlag.class, "terminationFlag")
             .addStatement("super(progressTracker)")
             .addStatement("var computation = new $T()", typeNames.computation())
             .addStatement(
-                "this.pregelJob = $T.create(graph, configuration, computation, $T.INSTANCE, progressTracker)",
+                "this.pregelJob = $T.create(graph, configuration, computation, $T.INSTANCE, progressTracker, terminationFlag)",
                 Pregel.class,
                 DefaultPool.class
             ).build();
@@ -100,16 +100,6 @@ public class AlgorithmGenerator {
             .addModifiers(Modifier.PUBLIC)
             .returns(PregelResult.class)
             .addStatement("return pregelJob.run()")
-            .build();
-    }
-
-    MethodSpec setTerminatonFlag() {
-        return MethodSpec.methodBuilder("setTerminationFlag")
-            .addAnnotation(Override.class)
-            .addModifiers(Modifier.PUBLIC)
-            .addParameter(TerminationFlag.class, "terminationFlag")
-            .addStatement("super.setTerminationFlag(terminationFlag)")
-            .addStatement("pregelJob.setTerminationFlag(terminationFlag)")
             .build();
     }
 }

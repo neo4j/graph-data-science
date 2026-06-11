@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.config.DummyConfig;
 import org.neo4j.gds.test.config.DummyConfigImpl;
 
@@ -50,7 +51,8 @@ public class SpecForProcedureThatFailsDuringTask implements
             public FailingAlgorithm build(
                 Graph graph,
                 DummyConfig configuration,
-                ProgressTracker progressTracker
+                ProgressTracker progressTracker,
+                TerminationFlag terminationFlag
             ) {
                 return new FailingAlgorithm(progressTracker);
             }

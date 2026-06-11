@@ -30,6 +30,7 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
@@ -75,8 +76,9 @@ public class AlgorithmFactoryGenerator {
             .addParameter(Graph.class, "graph")
             .addParameter(typeNames.config(), "configuration")
             .addParameter(ProgressTracker.class, "progressTracker")
+            .addParameter(TerminationFlag.class, "terminationFlag")
             .returns(typeNames.algorithm())
-            .addStatement("return new $T(graph, configuration, progressTracker)", typeNames.algorithm())
+            .addStatement("return new $T(graph, configuration, progressTracker, terminationFlag)", typeNames.algorithm())
             .build();
     }
 

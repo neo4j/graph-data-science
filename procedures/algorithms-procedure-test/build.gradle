@@ -21,6 +21,6 @@ dependencies {
     integrationTestImplementation project(':proc-catalog')
     integrationTestImplementation project(':proc-test-utilities')
     integrationTestImplementation project(':progress-tracking')
+    integrationTestImplementation project(':termination')
     integrationTestImplementation project(':test-utils')
-
 }

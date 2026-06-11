@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
@@ -74,7 +75,8 @@ class LabelPropagationPregelAlgoTest {
             config,
             new LabelPropagationPregel(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var nodeValues = pregelJob.run()
@@ -112,7 +114,8 @@ class LabelPropagationPregelAlgoTest {
             config,
             weightedLabelPropagation,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var nodeValues = pregelJob.run()

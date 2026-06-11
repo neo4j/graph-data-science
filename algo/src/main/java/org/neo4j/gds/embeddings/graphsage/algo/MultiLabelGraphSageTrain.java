@@ -49,8 +49,9 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     private final GraphSageTrainParameters parameters;
     private final int featureDimension;
     private final ExecutorService executor;
+    private final TerminationFlag terminationFlag;
     private final String gdsVersion;
-    @Deprecated private final GraphSageTrainConfig config;
+    private final GraphSageTrainConfig config;
 
     public MultiLabelGraphSageTrain(
         Log log,
@@ -61,14 +62,15 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         String gdsVersion,
-        GraphSageTrainConfig config // TODO: Last trace of UI config in here--Once we attach Parameters to Models we can lose this too
+        GraphSageTrainConfig config
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
         this.log = log;
         this.graph = graph;
         this.featureDimension = projectedFeatureDimension;
         this.parameters = parameters;
         this.executor = executor;
+        this.terminationFlag = terminationFlag;
         this.gdsVersion = gdsVersion;
         this.config = config;
     }

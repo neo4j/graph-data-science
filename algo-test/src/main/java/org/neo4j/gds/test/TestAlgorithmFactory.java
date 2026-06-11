@@ -25,6 +25,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class TestAlgorithmFactory<CONFIG extends TestConfig> extends GraphAlgorithmFactory<TestAlgorithm, CONFIG> {
 
@@ -37,7 +38,8 @@ public class TestAlgorithmFactory<CONFIG extends TestConfig> extends GraphAlgori
     public TestAlgorithm build(
         Graph graph,
         TestConfig configuration,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         return new TestAlgorithm(
             graph,

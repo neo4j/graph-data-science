@@ -116,7 +116,8 @@ class PregelTest {
             config,
             computation,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -125,8 +126,6 @@ class PregelTest {
 
     @Test
     void stopsEarlyWhenTransactionHasBeenTerminated() {
-        TerminationFlag terminationFlag = () -> false;
-
         var config = PregelConfigImpl.builder().maxIterations(10).build();
 
         Pregel<PregelConfig> pregelJob = Pregel.create(
@@ -134,9 +133,9 @@ class PregelTest {
             config,
             new TestPregelComputation(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            () -> false
         );
-        pregelJob.setTerminationFlag(terminationFlag);
 
         assertTransactionTermination(pregelJob::run);
     }
@@ -170,7 +169,8 @@ class PregelTest {
             config,
             computation,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).run();
 
         assertThat(progressTracker.getProgresses())
@@ -233,7 +233,8 @@ class PregelTest {
             config,
             computation,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         pregelAlgo.run();
@@ -290,7 +291,8 @@ class PregelTest {
             config,
             computation,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         return pregelJob.run().nodeValues().doubleProperties(KEY);
@@ -310,7 +312,8 @@ class PregelTest {
             config,
             new TestSendTo(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -335,7 +338,8 @@ class PregelTest {
             config,
             new CompositeTestComputation(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = pregelJob.run().nodeValues();
@@ -373,7 +377,8 @@ class PregelTest {
             PregelConfigImpl.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -388,7 +393,8 @@ class PregelTest {
             PregelConfigImpl.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(2),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = pregelJob.run();
@@ -578,7 +584,8 @@ class PregelTest {
                 }
             },
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).run();
 
         assertThat(ranInit.get()).isTrue();
@@ -668,7 +675,8 @@ class PregelTest {
             config,
             new TestSendTo(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ));
     }
 
@@ -691,7 +699,8 @@ class PregelTest {
             config,
             new TestEmptyMessageInInitialSuperstep(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         // assertion is happening in the computation
@@ -911,7 +920,8 @@ class PregelTest {
             PregelConfigImpl.builder().maxIterations(4).build(),
             new Bidirectional(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertThatThrownBy(pregelCreate)

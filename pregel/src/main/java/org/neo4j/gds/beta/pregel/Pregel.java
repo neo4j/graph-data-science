@@ -52,23 +52,9 @@ public final class Pregel<CONFIG extends PregelConfig> {
     private final PregelComputer<CONFIG> computer;
 
     private final ProgressTracker progressTracker;
-    private TerminationFlag terminationFlag;
+    private final TerminationFlag terminationFlag;
 
     private final ExecutorService executor;
-
-    /**
-     * @deprecated Use the variant that does proper injection of termination flag instead
-     */
-    @Deprecated
-    public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
-        Graph graph,
-        CONFIG config,
-        BasePregelComputation<CONFIG> computation,
-        ExecutorService executor,
-        ProgressTracker progressTracker
-    ) {
-        return create(graph, config, computation, executor, progressTracker, TerminationFlag.RUNNING_TRUE);
-    }
 
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
         Graph graph,
@@ -163,7 +149,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         final NodeValue initialNodeValue,
         final ExecutorService executor,
         final ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        final TerminationFlag terminationFlag
     ) {
         this.graph = graph;
         this.config = config;
@@ -193,10 +179,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 : executor)
             .progressTracker(progressTracker)
             .build();
-    }
-
-    public void setTerminationFlag(TerminationFlag terminationFlag) {
-        this.terminationFlag = terminationFlag;
     }
 
     public PregelResult run() {
@@ -245,7 +227,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private boolean runMasterComputeStep(int iteration) {
         var context = new MasterComputeContext<>(config, graph, iteration, nodeValues, executor, progressTracker);
-        var didConverge = computation.masterCompute(context);
-        return didConverge;
+
+        return computation.masterCompute(context);
     }
 }

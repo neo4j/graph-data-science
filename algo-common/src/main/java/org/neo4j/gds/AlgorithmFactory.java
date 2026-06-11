@@ -31,13 +31,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
     default ALGO build(
         G graphOrGraphStore,
         CONFIG configuration,
         Log log,
-        TaskRegistryFactory taskRegistryFactory
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag
     ) {
         var progressTracker = createProgressTracker(
             configuration,
@@ -45,7 +47,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             taskRegistryFactory,
             progressTask(graphOrGraphStore, configuration)
         );
-        return build(graphOrGraphStore, configuration, progressTracker);
+        return build(graphOrGraphStore, configuration, progressTracker, terminationFlag);
     }
 
     private ProgressTracker createProgressTracker(
@@ -86,7 +88,8 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
     ALGO build(
         G graphOrGraphStore,
         CONFIG configuration,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     );
 
     default Task progressTask(G graphOrGraphStore, CONFIG config) {
@@ -117,6 +120,5 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
 
     interface Visitor<ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
         ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory);
-        ALGO graphStore(GraphStoreAlgorithmFactory<ALGO, CONFIG> graphStoreAlgorithmFactory);
     }
 }
