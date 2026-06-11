@@ -21,6 +21,8 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.LabeledIdMap;
 
 import java.util.ArrayList;
 import java.util.OptionalLong;
@@ -68,6 +70,28 @@ class FilteredLabeledIdMapTest {
         assertThat(idMap.toMappedNodeId(42)).isEqualTo(0);
         assertThat(idMap.toMappedNodeId(1337)).isEqualTo(1);
         assertThat(idMap.toMappedNodeId(1338)).isEqualTo(NOT_FOUND);
+    }
+
+    @Test
+    void toMappedNodeIdMustNotPropagateNotFoundToTheFilteredIdMap() {
+        var idMap = new FilteredLabeledIdMap(
+            idMap(42, 0, 43, 1, 1337, 2),
+            new StrictIdMap(idMap(0, 0, 2, 1))
+        );
+        // 1338 is not in the root id map; the lookup must short-circuit
+        // instead of passing NOT_FOUND to the root-to-filtered id map
+        assertThat(idMap.toMappedNodeId(1338)).isEqualTo(NOT_FOUND);
+    }
+
+    @Test
+    void containsOriginalIdMustNotPropagateNotFoundToTheFilteredIdMap() {
+        var idMap = new FilteredLabeledIdMap(
+            idMap(42, 0, 43, 1, 1337, 2),
+            new StrictIdMap(idMap(0, 0, 2, 1))
+        );
+        // 1338 is not in the root id map; the lookup must short-circuit
+        // instead of passing NOT_FOUND to the root-to-filtered id map
+        assertThat(idMap.containsOriginalId(1338)).isFalse();
     }
 
     @Test
@@ -218,5 +242,66 @@ class FilteredLabeledIdMapTest {
 
     private static TestIdMap idMap(long... mappings) {
         return TestIdMap.builder().addAll(mappings).build();
+    }
+
+    /**
+     * Delegating id map that rejects negative original ids on lookup.
+     * Real id map implementations are not required to handle {@link org.neo4j.gds.api.IdMap#NOT_FOUND}
+     * as lookup input, so composing id maps must never pass it along.
+     */
+    private static final class StrictIdMap extends LabeledIdMap {
+
+        private final TestIdMap delegate;
+
+        StrictIdMap(TestIdMap delegate) {
+            super(delegate.labelInformation(), delegate.nodeCount());
+            this.delegate = delegate;
+        }
+
+        @Override
+        public long toMappedNodeId(long originalNodeId) {
+            assertThat(originalNodeId)
+                .as("toMappedNodeId must not be called with a negative original id")
+                .isNotNegative();
+            return delegate.toMappedNodeId(originalNodeId);
+        }
+
+        @Override
+        public boolean containsOriginalId(long originalNodeId) {
+            assertThat(originalNodeId)
+                .as("containsOriginalId must not be called with a negative original id")
+                .isNotNegative();
+            return delegate.containsOriginalId(originalNodeId);
+        }
+
+        @Override
+        public String typeId() {
+            return delegate.typeId();
+        }
+
+        @Override
+        public long toOriginalNodeId(long mappedNodeId) {
+            return delegate.toOriginalNodeId(mappedNodeId);
+        }
+
+        @Override
+        public long toRootNodeId(long mappedNodeId) {
+            return delegate.toRootNodeId(mappedNodeId);
+        }
+
+        @Override
+        public long highestOriginalId() {
+            return delegate.highestOriginalId();
+        }
+
+        @Override
+        public IdMap rootIdMap() {
+            return delegate.rootIdMap();
+        }
+
+        @Override
+        public OptionalLong rootNodeCount() {
+            return delegate.rootNodeCount();
+        }
     }
 }
