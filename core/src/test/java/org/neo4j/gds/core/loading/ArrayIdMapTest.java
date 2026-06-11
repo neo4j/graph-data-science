@@ -35,6 +35,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.GdlSupport.fromGdl;
 
 class ArrayIdMapTest {
 
@@ -97,6 +98,30 @@ class ArrayIdMapTest {
             .tokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
         memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, concurrency);
         assertEquals(MemoryRange.of(48L + 840L + 32832L + 112L), memRec.memoryUsage());
+    }
+
+    @Test
+    void withFilteredLabelsShouldReturnEmptyIfAllLabelsAreRequested() {
+        var graph = fromGdl("(a:A),(b:B)");
+
+        // filtering by all available labels is a no-op; callers fall back to
+        // the root id map and avoid the cost of a filtered id map copy
+        var filteredIdMap = graph.withFilteredLabels(
+            List.of(NodeLabel.of("A"), NodeLabel.of("B")),
+            new Concurrency(1)
+        );
+
+        assertThat(filteredIdMap).isEmpty();
+    }
+
+    @Test
+    void withFilteredLabelsShouldFilterIfSubsetOfLabelsIsRequested() {
+        var graph = fromGdl("(a:A),(b:B)");
+
+        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.of("B")), new Concurrency(1));
+
+        assertThat(filteredIdMap).isPresent();
+        assertThat(filteredIdMap.get().nodeCount()).isEqualTo(1);
     }
 
     @Test
