@@ -133,6 +133,13 @@ public class ArrayIdMap extends LabeledIdMap {
             return Optional.empty();
         }
 
+        // Filtering by all available labels is a no-op. Callers fall back to
+        // this id map and avoid the indirection in id lookups and the memory
+        // overhead of a filtered id map copy.
+        if (nodeLabels.containsAll(labelInformation.availableNodeLabels())) {
+            return Optional.empty();
+        }
+
         BitSet unionBitSet = labelInformation.unionBitSet(nodeLabels, nodeCount());
 
         long nodeId = -1L;

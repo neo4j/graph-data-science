@@ -136,6 +136,16 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
      */
     IdMap rootIdMap();
 
+    /**
+     * Returns an id map that maps between this id map's id space (the root
+     * id space) and a compact id space containing only the nodes that have
+     * at least one of the given node labels.
+     *
+     * Returns an empty Optional if no filtered id map is necessary, i.e.,
+     * if there is no label information or the given labels cover all nodes
+     * of this id map. Callers are expected to fall back to this id map in
+     * that case.
+     */
     default Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, Concurrency concurrency) {
         throw new UnsupportedOperationException("This node mapping does not support label filtering");
     }
