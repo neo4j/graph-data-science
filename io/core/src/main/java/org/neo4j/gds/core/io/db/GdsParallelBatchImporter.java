@@ -272,7 +272,8 @@ public final class GdsParallelBatchImporter {
             1,
             EmptyDependencyResolver.EMPTY_RESOLVER,
             // Not sure the empty is actually correct here but it's on par with the rest.
-            DatabaseCreationOptions.EMPTY_CREATION_OPTIONS
+            DatabaseCreationOptions.EMPTY_CREATION_OPTIONS,
+            BatchImporter.HardwareValidation.NONE
         );
     }
 
