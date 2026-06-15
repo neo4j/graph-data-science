@@ -29,6 +29,8 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.indexInverse.InverseRelationshipsParamsTransformer;
+import org.neo4j.gds.nodecount.NodeCountBaseConfig;
+import org.neo4j.gds.nodecount.NodeCountResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
@@ -46,6 +48,18 @@ public class MiscellaneousAlgorithmsBusinessFacade {
     public MiscellaneousAlgorithmsBusinessFacade(MiscellaneousAlgorithms miscellaneousAlgorithms,ProgressTrackerCreator progressTrackerCreator) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.miscellaneousAlgorithms = miscellaneousAlgorithms;
+    }
+
+    NodeCountResult nodeCount(Graph graph, NodeCountBaseConfig configuration) {
+        var params = configuration.toParameters();
+        var task = MiscellaneousAlgorithmsTasks.nodeCount(graph);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return algorithmMachinery.getResult(
+            () -> miscellaneousAlgorithms.nodeCount(graph, progressTracker),
+            progressTracker,
+            params.concurrency()
+        );
     }
 
     public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathConfig configuration) {

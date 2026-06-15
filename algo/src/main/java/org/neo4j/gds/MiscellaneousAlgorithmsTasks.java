@@ -24,12 +24,17 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.indexInverse.InverseRelationshipsTask;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
+import org.neo4j.gds.nodecount.NodeCountTask;
 import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesTask;
 import org.neo4j.gds.undirected.ToUndirectedTask;
 
 public final class MiscellaneousAlgorithmsTasks {
     private MiscellaneousAlgorithmsTasks() {}
+
+    public static Task nodeCount(Graph graph){
+        return NodeCountTask.create(graph);
+    }
 
     public static Task scaleProperties(Graph graph, ScalePropertiesParameters parameters){
         return ScalePropertiesTask.create(graph, parameters);

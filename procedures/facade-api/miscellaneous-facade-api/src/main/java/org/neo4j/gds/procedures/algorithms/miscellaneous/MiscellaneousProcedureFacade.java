@@ -29,6 +29,16 @@ public interface MiscellaneousProcedureFacade {
 
     MiscellaneousStubs miscellaneousStubs();
 
+    Stream<NodeCountStreamResult> nodeCountStream(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> nodeCountStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
     Stream<CollapsePathMutateResult> collapsePathMutate(
         String graphName,
         Map<String, Object> configuration

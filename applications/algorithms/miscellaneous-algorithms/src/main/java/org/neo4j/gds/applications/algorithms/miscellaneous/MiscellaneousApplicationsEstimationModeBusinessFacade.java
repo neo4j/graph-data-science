@@ -25,6 +25,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.indexInverse.InverseRelationshipsMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.nodecount.NodeCountBaseConfig;
+import org.neo4j.gds.nodecount.NodeCountMemoryEstimateDefinition;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMemoryEstimateDefinition;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
@@ -40,6 +42,21 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
 
     public MemoryEstimation collapsePath() {
         throw new MemoryEstimationNotImplementedException();
+    }
+
+    public MemoryEstimation nodeCount() {
+        return new NodeCountMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult nodeCount(
+        NodeCountBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            nodeCount()
+        );
     }
 
     public MemoryEstimation indexInverse(AlgoBaseConfig configuration) {

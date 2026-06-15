@@ -150,6 +150,9 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.hits.write",
         "gds.hits.write.estimate",
 
+        "gds.nodeCount.stream",
+        "gds.nodeCount.stream.estimate",
+
         "gds.nodeSimilarity.filtered.mutate",
         "gds.nodeSimilarity.filtered.mutate.estimate",
         "gds.nodeSimilarity.filtered.stats",
@@ -643,7 +646,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 482;
+        int expectedCount = 484;
         assertEquals(
             expectedCount,
             returnedRows,
