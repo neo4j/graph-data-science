@@ -68,6 +68,7 @@ public enum AlgorithmLabel implements Label {
     MCMF("MinCostMaxFlow"),
     Modularity("Modularity"),
     ModularityOptimization("ModularityOptimization"),
+    NodeCount("NodeCount"),
     NodeSimilarity("Node Similarity"),
     Node2Vec("Node2Vec"),
     PageRank("PageRank"),

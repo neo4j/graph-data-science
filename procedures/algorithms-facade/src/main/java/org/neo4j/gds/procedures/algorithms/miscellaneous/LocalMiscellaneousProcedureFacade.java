@@ -34,6 +34,7 @@ import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.LocalScalePropert
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.LocalToUndirectedMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.MiscellaneousStubs;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.nodecount.NodeCountStreamConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
@@ -127,6 +128,33 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
     @Override
     public MiscellaneousStubs miscellaneousStubs() {
         return stubs;
+    }
+
+    @Override
+    public Stream<NodeCountStreamResult> nodeCountStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new NodeCountResultBuilderForStreamMode();
+
+        return streamModeBusinessFacade.nodeCount(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, NodeCountStreamConfig::of),
+            resultBuilder
+        );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> nodeCountStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeBusinessFacade.nodeCount(
+            configurationParser.parseConfiguration(algorithmConfiguration, NodeCountStreamConfig::of),
+            graphNameOrConfiguration
+        );
+
+        return Stream.of(result);
     }
 
     @Override

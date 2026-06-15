@@ -22,11 +22,14 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
+import org.neo4j.gds.nodecount.NodeCountResult;
+import org.neo4j.gds.nodecount.NodeCountStreamConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.NodeCount;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ScaleProperties;
 
 public class MiscellaneousApplicationsStreamModeBusinessFacade {
@@ -42,6 +45,21 @@ public class MiscellaneousApplicationsStreamModeBusinessFacade {
         this.estimationFacade = estimationFacade;
         this.miscellaneousAlgorithms = miscellaneousAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
+    }
+
+    public <RESULT> Stream<RESULT> nodeCount(
+        GraphName graphName,
+        NodeCountStreamConfig configuration,
+        StreamResultBuilder<NodeCountResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            NodeCount,
+            estimationFacade::nodeCount,
+            (graph, __) -> miscellaneousAlgorithms.nodeCount(graph, configuration),
+            resultBuilder
+        );
     }
 
     public <RESULT> Stream<RESULT> scaleProperties(

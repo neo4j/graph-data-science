@@ -28,6 +28,8 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.indexInverse.InverseRelationships;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
+import org.neo4j.gds.nodecount.NodeCount;
+import org.neo4j.gds.nodecount.NodeCountResult;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
@@ -44,6 +46,12 @@ public class MiscellaneousAlgorithms {
 
     public MiscellaneousAlgorithms( TerminationFlag terminationFlag) {
         this.terminationFlag = terminationFlag;
+    }
+
+    public NodeCountResult nodeCount(Graph graph, ProgressTracker progressTracker) {
+        var algorithm = new NodeCount(graph, progressTracker, terminationFlag);
+
+        return algorithm.compute();
     }
 
     public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathParameters parameters) {
