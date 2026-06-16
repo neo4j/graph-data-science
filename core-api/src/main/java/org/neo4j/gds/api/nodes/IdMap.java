@@ -30,50 +30,21 @@ import java.util.Collection;
 import java.util.Optional;
 
 /**
- * Bidirectional mapping between two id spaces.
  * Usually the IdMap is used to map between neo4j
  * node ids and consecutive mapped node ids.
  */
-public interface IdMap extends NodeLabels, PartialIdMap, NodeIterator, BatchNodeIterable {
+public interface IdMap extends NodeTranslator, NodeLabels, PartialIdMap, NodeIterator, BatchNodeIterable {
 
     /**
      * Defines the lower bound of mapped ids
      */
     long START_NODE_ID = 0;
 
-    /**
-     * Defines the value for unmapped ids
-     */
-    long NOT_FOUND = -1;
 
     /**
      * Used for IdMap implementations that do not require a type definition.
      */
     String NO_TYPE = "unsupported";
-
-    /**
-     * A unique identifier for this type of IdMap.
-     */
-    String typeId();
-
-    /**
-     * Map original nodeId to mapped nodeId
-     *
-     * Returns org.neo4j.gds.api.nodes.IdMap#NOT_FOUND if the nodeId is not mapped.
-     */
-    default long safeToMappedNodeId(long originalNodeId) {
-        return highestOriginalId() < originalNodeId ? NOT_FOUND : toMappedNodeId(originalNodeId);
-    }
-
-    /**
-     * Returns the original node id for the given mapped node id.
-     * The original node id is typically the Neo4j node id.
-     *
-     * This method is guaranteed to always return the Neo4j id,
-     * regardless of the given mapped node id refers to a filtered
-     * node id space or a regular / unfiltered node id space.
-     */
-    long toOriginalNodeId(long mappedNodeId);
 
     /**
      * Maps a filtered mapped node id to its root mapped node id.
@@ -85,23 +56,6 @@ public interface IdMap extends NodeLabels, PartialIdMap, NodeIterator, BatchNode
      * node id.
      */
     long toRootNodeId(long mappedNodeId);
-
-    /**
-     * Returns true iff the Neo4j id is mapped, otherwise false.
-     */
-    boolean containsOriginalId(long originalNodeId);
-
-    /**
-     * Number of mapped nodeIds.
-     */
-    long nodeCount();
-
-    /**
-     * The highest id that is mapped in this id mapping.
-     * <p>
-     * The value is the upper bound of the original node id space.
-     */
-    long highestOriginalId();
 
     /**
      * Returns the original node mapping if the current node mapping is filtered, otherwise
