@@ -78,8 +78,8 @@ class AlgorithmFactoryGeneratorTest {
         assertThat(type.toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
             "public org.neo4j.gds.core.utils.progress.tasks.Task progressTask(org.neo4j.gds.api.Graph graph," + NL +
-            "    gds.testconfig.TheConfig configuration) {" + NL +
-            "  return org.neo4j.gds.beta.pregel.Pregel.progressTask(graph, configuration);" + NL +
+            "    gds.testconfig.TheConfig configuration, org.neo4j.gds.mem.MemoryRange memoryEstimationInBytes) {" + NL +
+            "  return org.neo4j.gds.beta.pregel.Pregel.progressTask(graph, configuration, memoryEstimationInBytes);" + NL +
             "}" + NL
         );
     }

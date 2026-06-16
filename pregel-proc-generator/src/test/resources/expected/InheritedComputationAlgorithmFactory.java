@@ -27,6 +27,7 @@ import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminationFlag;
 
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
@@ -43,8 +44,8 @@ public final class InheritedComputationAlgorithmFactory extends GraphAlgorithmFa
     }
 
     @Override
-    public Task progressTask(Graph graph, PregelProcedureConfig configuration) {
-        return Pregel.progressTask(graph, configuration);
+    public Task progressTask(Graph graph, PregelProcedureConfig configuration, MemoryRange memoryEstimationInBytes) {
+        return Pregel.progressTask(graph, configuration, memoryEstimationInBytes);
     }
 
     @Override
