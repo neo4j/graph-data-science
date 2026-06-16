@@ -22,7 +22,7 @@ package org.neo4j.gds.graphsampling;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.beta.filter.GraphStoreFilter;
 import org.neo4j.gds.beta.filter.NodesFilter;

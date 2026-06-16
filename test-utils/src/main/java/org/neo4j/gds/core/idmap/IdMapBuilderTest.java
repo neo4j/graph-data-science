@@ -26,7 +26,7 @@ import net.jqwik.api.Property;
 import net.jqwik.api.Provide;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.api.IdMap.NOT_FOUND;
+import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
 
 public abstract class IdMapBuilderTest {
 

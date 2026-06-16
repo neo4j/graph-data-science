@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;

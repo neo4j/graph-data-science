@@ -31,7 +31,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.function.LongConsumer;
 
-import static org.neo4j.gds.api.IdMap.NOT_FOUND;
+import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
 
 public class RelationshipsBuilder {
 

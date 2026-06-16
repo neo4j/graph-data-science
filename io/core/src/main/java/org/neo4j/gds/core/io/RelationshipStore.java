@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;

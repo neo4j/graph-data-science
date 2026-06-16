@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;

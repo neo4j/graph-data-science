@@ -21,14 +21,14 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.LabeledIdMap;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.DefaultIdMap;
 
 import java.util.ArrayList;
 import java.util.OptionalLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.api.IdMap.NOT_FOUND;
+import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
 
 class FilteredLabeledIdMapTest {
 
@@ -246,10 +246,10 @@ class FilteredLabeledIdMapTest {
 
     /**
      * Delegating id map that rejects negative original ids on lookup.
-     * Real id map implementations are not required to handle {@link org.neo4j.gds.api.IdMap#NOT_FOUND}
+     * Real id map implementations are not required to handle {@link org.neo4j.gds.api.nodes.IdMap#NOT_FOUND}
      * as lookup input, so composing id maps must never pass it along.
      */
-    private static final class StrictIdMap extends LabeledIdMap {
+    private static final class StrictIdMap extends DefaultIdMap {
 
         private final TestIdMap delegate;
 

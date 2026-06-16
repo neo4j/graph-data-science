@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.algorithms.community.stream;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.k1coloring.K1ColoringResult;

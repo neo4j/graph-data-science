@@ -27,7 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
+import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 
@@ -283,7 +284,7 @@ class MultiLabelInformationTest {
 
         var labelInformation = builder.build(3, LongUnaryOperator.identity());
 
-        var nodeLabelConsumerMock = mock(IdMap.NodeLabelConsumer.class);
+        var nodeLabelConsumerMock = mock(NodeLabelConsumer.class);
         when(nodeLabelConsumerMock.accept(any())).thenReturn(true);
 
         labelInformation.forEachNodeLabel(1L, nodeLabelConsumerMock);

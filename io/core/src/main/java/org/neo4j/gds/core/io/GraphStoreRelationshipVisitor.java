@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.io;
 
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.file.RelationshipBuilderFromVisitor;

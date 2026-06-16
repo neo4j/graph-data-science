@@ -32,9 +32,11 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.Topology;
+import org.neo4j.gds.api.nodes.LabelInformation;
+import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.ImmutableProperties;
 import org.neo4j.gds.api.properties.relationships.Properties;
@@ -598,6 +600,11 @@ public class HugeGraph implements CSRGraph {
     @Override
     public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
         idMap.forEachNodeLabel(mappedNodeId, consumer);
+    }
+
+    @Override
+    public LabelInformation labelInformation() {
+        return idMap.labelInformation();
     }
 
     @Override

@@ -23,7 +23,7 @@ import org.neo4j.common.Validator;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.io.IOException;

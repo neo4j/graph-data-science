@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.eclipse.collections.api.block.function.primitive.LongToBooleanFunction;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.ValueTransformers;
 import org.neo4j.gds.core.concurrency.Concurrency;

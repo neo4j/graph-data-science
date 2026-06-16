@@ -21,18 +21,19 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.LabeledIdMap;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.DefaultIdMap;
+import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 
 import java.util.List;
 import java.util.OptionalLong;
 
-public class FilteredLabeledIdMap extends LabeledIdMap implements FilteredIdMap {
+public class FilteredLabeledIdMap extends DefaultIdMap implements FilteredIdMap {
 
     private final IdMap originalToRootIdMap;
     private final IdMap rootToFilteredIdMap;
 
-    public FilteredLabeledIdMap(IdMap originalToRootIdMap, LabeledIdMap rootToFilteredIdMap) {
+    public FilteredLabeledIdMap(IdMap originalToRootIdMap, DefaultIdMap rootToFilteredIdMap) {
         super(rootToFilteredIdMap.labelInformation(), rootToFilteredIdMap.nodeCount());
         this.originalToRootIdMap = originalToRootIdMap;
         this.rootToFilteredIdMap = rootToFilteredIdMap;

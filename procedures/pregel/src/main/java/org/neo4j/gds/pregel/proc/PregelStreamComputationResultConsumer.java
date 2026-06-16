@@ -20,7 +20,7 @@
 package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.beta.pregel.Element;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;

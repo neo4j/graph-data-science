@@ -24,7 +24,7 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.RequestCorrelationId;

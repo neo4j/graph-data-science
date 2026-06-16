@@ -25,7 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 
 import java.util.List;
 import java.util.Random;
@@ -121,7 +121,7 @@ class SingleLabelInformationTest {
     void forEachNodeLabelShouldAcceptNodeLabelConsumer() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
             .build(1, LongUnaryOperator.identity());
-        var nodeLabelConsumerMock = mock(IdMap.NodeLabelConsumer.class);
+        var nodeLabelConsumerMock = mock(NodeLabelConsumer.class);
 
         labelInformation.forEachNodeLabel(19, nodeLabelConsumerMock);
         labelInformation.forEachNodeLabel(3, nodeLabelConsumerMock);

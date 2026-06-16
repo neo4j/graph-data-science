@@ -22,7 +22,7 @@ package org.neo4j.gds.api;
 import java.util.OptionalLong;
 
 /**
- * This interface exposes the relevant parts of {@link org.neo4j.gds.api.IdMap} used
+ * This interface exposes the relevant parts of {@link org.neo4j.gds.api.nodes.IdMap} used
  * for relationship loading. It helps implementations that are only used for relationship
  * loading to avoid implementing unnecessary methods.
  */
@@ -33,7 +33,7 @@ public interface PartialIdMap {
      * In case of nested id maps, the mapped node id
      * is always in the space of the innermost mapping.
      *
-     * @param originalNodeId must be smaller or equal to the id returned by {@link IdMap#highestOriginalId}
+     * @param originalNodeId must be smaller or equal to the id returned by {@link org.neo4j.gds.api.nodes.IdMap#highestOriginalId}
      */
     long toMappedNodeId(long originalNodeId);
 

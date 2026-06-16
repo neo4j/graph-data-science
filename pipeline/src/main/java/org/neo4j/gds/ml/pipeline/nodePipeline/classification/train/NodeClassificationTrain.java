@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.concurrency.Concurrency;

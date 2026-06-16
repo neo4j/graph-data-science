@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.filtering;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.similarity.NodeFilterSpec;
 
 import java.util.Collection;

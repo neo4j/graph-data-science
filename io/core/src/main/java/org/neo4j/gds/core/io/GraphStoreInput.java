@@ -28,7 +28,7 @@ import org.neo4j.batchimport.api.input.ReadableGroups;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter.IdMapFunction;

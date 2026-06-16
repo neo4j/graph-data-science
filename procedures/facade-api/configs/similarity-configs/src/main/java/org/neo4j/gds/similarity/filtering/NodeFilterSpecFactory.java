@@ -39,7 +39,7 @@ public final class NodeFilterSpecFactory {
      * User input can be a label represented as a {@link String}, or scalar or list of {@link Long} or {@link org.neo4j.graphdb.Node}.
      *
      * @param input One of {@link String}, {@link Long}, {@link org.neo4j.graphdb.Node}, {@link List} of {@link Long}, {@link List} of {@link Node}
-     * @return A {@link NodeFilterSpec} that can be used to create a {@link NodeFilter} over an {@link org.neo4j.gds.api.IdMap}
+     * @return A {@link NodeFilterSpec} that can be used to create a {@link NodeFilter} over an {@link org.neo4j.gds.api.nodes.IdMap}
      */
     public static NodeFilterSpec create(Object input) {
         if (input instanceof NodeFilterSpec) {

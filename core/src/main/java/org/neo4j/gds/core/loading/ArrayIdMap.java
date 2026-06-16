@@ -22,8 +22,9 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.LabeledIdMap;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.DefaultIdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
@@ -41,7 +42,7 @@ import java.util.OptionalLong;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class ArrayIdMap extends LabeledIdMap {
+public class ArrayIdMap extends DefaultIdMap {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
         .builder(ArrayIdMap.class)

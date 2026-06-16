@@ -22,7 +22,7 @@ package org.neo4j.gds.procedures.algorithms.embeddings;
 import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 

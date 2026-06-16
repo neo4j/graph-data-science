@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.ml.negativeSampling.NegativeSampler;
 import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;

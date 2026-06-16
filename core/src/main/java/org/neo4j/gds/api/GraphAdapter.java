@@ -21,6 +21,9 @@ package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
+import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
@@ -169,6 +172,11 @@ public abstract class GraphAdapter implements Graph {
     @Override
     public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
         graph.forEachNodeLabel(mappedNodeId, consumer);
+    }
+
+    @Override
+    public LabelInformation labelInformation() {
+        return graph.labelInformation();
     }
 
     @Override

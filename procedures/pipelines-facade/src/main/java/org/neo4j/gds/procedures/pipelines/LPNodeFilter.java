@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 
 import java.util.function.LongPredicate;
 

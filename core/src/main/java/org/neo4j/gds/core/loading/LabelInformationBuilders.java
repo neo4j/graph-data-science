@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.nodes.LabelInformation;
 
 import java.util.Collection;
 

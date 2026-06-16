@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;

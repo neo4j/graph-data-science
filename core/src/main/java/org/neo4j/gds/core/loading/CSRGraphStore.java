@@ -31,7 +31,7 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStoreWithTopology;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodeproperties.ValueType;

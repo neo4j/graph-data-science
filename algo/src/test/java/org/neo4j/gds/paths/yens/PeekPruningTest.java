@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.yens;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;

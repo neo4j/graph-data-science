@@ -22,7 +22,7 @@ package org.neo4j.gds.core.io.file;
 import org.neo4j.common.Validator;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.JobId;

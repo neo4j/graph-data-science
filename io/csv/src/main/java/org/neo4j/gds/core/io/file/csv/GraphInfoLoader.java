@@ -34,7 +34,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.io.file.GraphInfo;
 
 import java.io.IOException;

@@ -23,7 +23,8 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
+import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 
 import java.util.ArrayList;
@@ -136,7 +137,7 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
-    public void forEachNodeLabel(long nodeId, IdMap.NodeLabelConsumer consumer) {
+    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
         forEach((nodeLabel, bitSet) -> {
             if (bitSet.get(nodeId)) {
                 return consumer.accept(nodeLabel);

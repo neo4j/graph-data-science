@@ -20,9 +20,12 @@
 package org.neo4j.gds.core.huge;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
+import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.collections.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 
 import java.util.Collection;
@@ -30,6 +33,7 @@ import java.util.List;
 import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.LongPredicate;
 
 public class DirectIdMap implements IdMap {
@@ -101,6 +105,11 @@ public class DirectIdMap implements IdMap {
     @Override
     public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
 
+    }
+
+    @Override
+    public LabelInformation labelInformation() {
+        return LabelInformationBuilders.allNodes().build(nodeCount, operand -> operand);
     }
 
     @Override

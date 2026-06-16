@@ -20,6 +20,9 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
+import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
@@ -49,6 +52,11 @@ public abstract class IdMapAdapter implements IdMap {
         long batchSize
     ) {
         return idMap.batchIterables(batchSize);
+    }
+
+    @Override
+    public LabelInformation labelInformation() {
+        return idMap.labelInformation();
     }
 
     @Override

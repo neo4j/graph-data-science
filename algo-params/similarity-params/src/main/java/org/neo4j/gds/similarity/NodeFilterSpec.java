@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 
 import java.util.Collection;
@@ -36,7 +36,7 @@ import java.util.Collection;
  *
  * The spec is created using {@code org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory.create(Object);}
  * and the {@link org.neo4j.gds.similarity.filtering.NodeFilter} is then created
- * using {@link NodeFilterSpec#toNodeFilter(org.neo4j.gds.api.IdMap)}.
+ * using {@link NodeFilterSpec#toNodeFilter(org.neo4j.gds.api.nodes.IdMap)}.
  */
 public interface NodeFilterSpec {
     NodeFilter toNodeFilter(IdMap idMap);

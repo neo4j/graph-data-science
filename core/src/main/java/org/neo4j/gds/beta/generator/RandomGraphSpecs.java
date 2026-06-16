@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.generator;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;

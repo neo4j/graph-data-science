@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.io;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.NodeSchemaRecord;
 import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.api.schema.RelationshipSchema;

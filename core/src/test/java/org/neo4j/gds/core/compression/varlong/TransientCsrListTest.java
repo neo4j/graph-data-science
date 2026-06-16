@@ -28,7 +28,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.compression.packed.PackedAdjacencyList;
 import org.neo4j.gds.core.concurrency.Concurrency;

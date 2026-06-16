@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.api.nodes;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.IdMap;
 
 import java.util.Collection;
 import java.util.List;
@@ -49,7 +48,7 @@ public interface LabelInformation {
 
     List<NodeLabel> nodeLabelsForNodeId(long nodeId);
 
-    void forEachNodeLabel(long nodeId, IdMap.NodeLabelConsumer consumer);
+    void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer);
 
     void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels);
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.dag.topologicalsort;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.progress.tasks.Task;

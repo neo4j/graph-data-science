@@ -20,7 +20,7 @@
 package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.ExportedRelationship;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.values.storable.Value;

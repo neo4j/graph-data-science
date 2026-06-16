@@ -26,7 +26,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 
 import java.io.IOException;

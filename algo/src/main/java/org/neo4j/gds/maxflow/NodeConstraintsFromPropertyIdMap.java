@@ -20,7 +20,7 @@
 package org.neo4j.gds.maxflow;
 
 import org.neo4j.gds.InputNodes;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 

@@ -31,7 +31,7 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.Topology;

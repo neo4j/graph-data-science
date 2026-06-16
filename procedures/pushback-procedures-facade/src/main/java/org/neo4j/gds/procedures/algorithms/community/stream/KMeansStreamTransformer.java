@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.community.stream;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.procedures.algorithms.community.KMeansStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;

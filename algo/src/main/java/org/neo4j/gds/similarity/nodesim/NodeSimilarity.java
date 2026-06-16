@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.collections.ha.HugeLongArray;

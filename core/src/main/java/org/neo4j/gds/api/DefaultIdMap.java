@@ -20,8 +20,10 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
+import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 
 import java.util.Collection;
@@ -30,16 +32,17 @@ import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
-public abstract class LabeledIdMap implements IdMap {
+public abstract class DefaultIdMap implements IdMap {
 
     protected LabelInformation labelInformation;
     private final long nodeCount;
 
-    public LabeledIdMap(LabelInformation labelInformation, long nodeCount) {
+    public DefaultIdMap(LabelInformation labelInformation, long nodeCount) {
         this.labelInformation = labelInformation;
         this.nodeCount = nodeCount;
     }
 
+    @Override
     public LabelInformation labelInformation() {
         return this.labelInformation;
     }
@@ -47,11 +50,6 @@ public abstract class LabeledIdMap implements IdMap {
     @Override
     public long nodeCount() {
         return nodeCount;
-    }
-
-    @Override
-    public long nodeCount(NodeLabel nodeLabel) {
-        return labelInformation.nodeCountForLabel(nodeLabel);
     }
 
     @Override
@@ -81,26 +79,6 @@ public abstract class LabeledIdMap implements IdMap {
             batchSize,
             IdIterable::new
         );
-    }
-
-    @Override
-    public Set<NodeLabel> availableNodeLabels() {
-        return labelInformation.availableNodeLabels();
-    }
-
-    @Override
-    public List<NodeLabel> nodeLabels(long mappedNodeId) {
-        return labelInformation.nodeLabelsForNodeId(mappedNodeId);
-    }
-
-    @Override
-    public void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
-        labelInformation.forEachNodeLabel(mappedNodeId, consumer);
-    }
-
-    @Override
-    public boolean hasLabel(long mappedNodeId, NodeLabel label) {
-        return labelInformation.hasLabel(mappedNodeId, label);
     }
 
     @Override

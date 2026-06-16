@@ -21,7 +21,7 @@ package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.compression.common.LongArrayBuffer;
 import org.neo4j.gds.functions.similarity.OverlapSimilarity;
 import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;

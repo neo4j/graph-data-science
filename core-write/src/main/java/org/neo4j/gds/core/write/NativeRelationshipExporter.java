@@ -22,7 +22,7 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.DefaultPool;

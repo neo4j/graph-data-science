@@ -21,14 +21,15 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.LabeledIdMap;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.DefaultIdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
 
 import java.util.OptionalLong;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class TestIdMap extends LabeledIdMap {
+public final class TestIdMap extends DefaultIdMap {
 
     private final LongLongHashMap forwardMap;
     private final LongLongHashMap reverseMap;

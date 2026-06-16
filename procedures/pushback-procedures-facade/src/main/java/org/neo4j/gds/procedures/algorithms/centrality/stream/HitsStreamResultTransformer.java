@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stream;
 
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.hits.HitsResultWithGraph;
 import org.neo4j.gds.procedures.algorithms.centrality.HitsStreamResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;

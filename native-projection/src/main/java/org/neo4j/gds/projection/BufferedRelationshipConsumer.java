@@ -27,7 +27,7 @@ import org.neo4j.storageengine.api.Reference;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.api.IdMap.NOT_FOUND;
+import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateSourceNodeIsLoaded;
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateTargetNodeIsLoaded;
 import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;

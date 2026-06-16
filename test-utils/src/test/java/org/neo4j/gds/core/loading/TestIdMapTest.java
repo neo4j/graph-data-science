@@ -26,7 +26,7 @@ import java.util.OptionalLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.api.IdMap.NOT_FOUND;
+import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
 
 class TestIdMapTest {
 

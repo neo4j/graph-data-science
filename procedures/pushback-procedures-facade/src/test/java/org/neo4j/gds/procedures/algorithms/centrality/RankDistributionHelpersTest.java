@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.scaling.ScalerFactory;
 import org.neo4j.gds.scaling.ScalerType;

@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stream;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;

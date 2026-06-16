@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stream;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.maxflow.FlowRelationship;
 import org.neo4j.gds.maxflow.FlowResult;

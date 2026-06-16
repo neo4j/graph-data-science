@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import com.carrotsearch.hppc.procedures.ObjectLongProcedure;
 import org.eclipse.collections.impl.collection.mutable.AbstractMultiReaderMutableCollection;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.BitUtil;

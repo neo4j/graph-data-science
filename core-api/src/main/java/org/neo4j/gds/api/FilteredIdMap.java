@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.api;
 
+import org.neo4j.gds.api.nodes.IdMap;
+
 /**
  * Extends the IdMap to support an additional
  * filtered id mapping layer.

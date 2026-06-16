@@ -17,22 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.nodes;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.BatchNodeIterable;
+import org.neo4j.gds.api.FilteredIdMap;
+import org.neo4j.gds.api.NodeIterator;
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Bidirectional mapping between two id spaces.
  * Usually the IdMap is used to map between neo4j
  * node ids and consecutive mapped node ids.
  */
-public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
+public interface IdMap extends NodeLabels, PartialIdMap, NodeIterator, BatchNodeIterable {
 
     /**
      * Defines the lower bound of mapped ids
@@ -57,7 +59,7 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     /**
      * Map original nodeId to mapped nodeId
      *
-     * Returns org.neo4j.gds.api.IdMap#NOT_FOUND if the nodeId is not mapped.
+     * Returns org.neo4j.gds.api.nodes.IdMap#NOT_FOUND if the nodeId is not mapped.
      */
     default long safeToMappedNodeId(long originalNodeId) {
         return highestOriginalId() < originalNodeId ? NOT_FOUND : toMappedNodeId(originalNodeId);
@@ -95,40 +97,11 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
     long nodeCount();
 
     /**
-     * Number of mapped nodeIds for a specific node label.
-     */
-    long nodeCount(NodeLabel nodeLabel);
-
-    /**
      * The highest id that is mapped in this id mapping.
      * <p>
      * The value is the upper bound of the original node id space.
      */
     long highestOriginalId();
-
-    List<NodeLabel> nodeLabels(long mappedNodeId);
-
-    void forEachNodeLabel(long mappedNodeId, IdMap.NodeLabelConsumer consumer);
-
-    Set<NodeLabel> availableNodeLabels();
-
-    boolean hasLabel(long mappedNodeId, NodeLabel label);
-
-    /**
-     * Adds new node label to the available node labels.
-     * The labels is not assigned to any nodes at this point.
-     *
-     * @param nodeLabel the node label to add
-     */
-    void addNodeLabel(NodeLabel nodeLabel);
-
-    /**
-     * Assigns a node to the given node label.
-     *
-     * @param nodeId the node id to assign
-     * @param nodeLabel the node label to which the node will be assigned to
-     */
-    void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel);
 
     /**
      * Returns the original node mapping if the current node mapping is filtered, otherwise
@@ -150,10 +123,4 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
         throw new UnsupportedOperationException("This node mapping does not support label filtering");
     }
 
-    @FunctionalInterface
-    interface NodeLabelConsumer {
-
-        boolean accept(NodeLabel nodeLabel);
-
-    }
 }

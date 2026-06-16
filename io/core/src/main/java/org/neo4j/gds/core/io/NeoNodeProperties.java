@@ -22,7 +22,7 @@ package org.neo4j.gds.core.io;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.graphdb.NotFoundException;

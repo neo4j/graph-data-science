@@ -23,7 +23,7 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.loading.Capabilities;

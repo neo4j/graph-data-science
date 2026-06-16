@@ -22,7 +22,7 @@ package org.neo4j.gds.projection;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.RecordScannerTask;
