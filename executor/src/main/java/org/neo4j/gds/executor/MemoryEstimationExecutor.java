@@ -80,7 +80,6 @@ public class MemoryEstimationExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        algoSpec.preProcessConfig(algoConfiguration, executionContext);
         var configParser = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext);
         CONFIG algoConfig = configParser.processInput(algoConfiguration);
 
