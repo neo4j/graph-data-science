@@ -23,7 +23,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.function.Function;
 
@@ -56,11 +55,6 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
     @Override
     public void onSteps(long steps) {
         // NOOP
-    }
-
-    @Override
-    public void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes) {
-        delegate.setEstimatedResourceFootprint(memoryEstimationInBytes);
     }
 
     @Override

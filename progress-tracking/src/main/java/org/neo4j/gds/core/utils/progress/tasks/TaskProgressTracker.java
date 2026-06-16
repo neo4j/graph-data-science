@@ -24,7 +24,6 @@ import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -96,11 +95,6 @@ public final class TaskProgressTracker implements ProgressTracker {
         this.onError = onError;
         this.taskProgressLogger = taskProgressLogger;
         this.taskRegistry = taskRegistry;
-    }
-
-    @Override
-    public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes) {
-        this.baseTask.setEstimatedMemoryRangeInBytes(memoryRangeInBytes);
     }
 
     @Override

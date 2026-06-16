@@ -39,6 +39,7 @@ import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFProgressTask;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
@@ -79,15 +80,15 @@ public final class CentralityAlgorithmTasks {
     }
 
     public static Task articleRank(Graph graph, ArticleRankConfig configuration) {
-        return Pregel.progressTask(graph, configuration, ArticleRank.asString());
+        return Pregel.progressTask(graph, configuration, MemoryRange.empty(), ArticleRank.asString());
     }
 
     public static Task eigenVector(Graph graph, EigenvectorConfig configuration) {
-        return Pregel.progressTask(graph, configuration, EigenVector.asString());
+        return Pregel.progressTask(graph, configuration, MemoryRange.empty(), EigenVector.asString());
     }
 
     public static Task pageRank(Graph graph, PageRankConfig configuration) {
-        return Pregel.progressTask(graph, configuration, PageRank.asString());
+        return Pregel.progressTask(graph, configuration, MemoryRange.empty(), PageRank.asString());
     }
 
     public static Task hits(Graph graph, HitsConfig configuration) {
@@ -114,7 +115,7 @@ public final class CentralityAlgorithmTasks {
         return Tasks.task(
             AlgorithmLabel.IndirectExposure.asString(),
             configuration.concurrency(), Tasks.leaf("TotalTransfers", configuration.concurrency(), graph.nodeCount()),
-            Pregel.progressTask(graph, configuration, "ExposurePropagation")
+            Pregel.progressTask(graph, configuration, MemoryRange.empty(), "ExposurePropagation")
         );
     }
 

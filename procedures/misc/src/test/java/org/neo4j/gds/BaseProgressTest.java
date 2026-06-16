@@ -24,6 +24,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extensions.shared.TaskStoreExtension;
@@ -69,12 +70,7 @@ public abstract class BaseProgressTest extends BaseTest {
         ) {
             var concurrency = withConcurrency ? new Concurrency(REQUESTED_CPU_CORES) : new Concurrency(1);
 
-            var task = Tasks.task(taskName, concurrency, Tasks.leaf("leaf", concurrency, 3));
-            if (withMemoryEstimation) {
-                task.setEstimatedMemoryRangeInBytes(MEMORY_ESTIMATION_RANGE);
-
-                memoryFacade.track(task.description(),new JobId(),task.estimatedMemoryRangeInBytes().max);
-            }
+            var task = createTask(taskName, withMemoryEstimation, concurrency);
 
             var taskProgressTracker = TaskProgressTracker.create(
                 LoggerForProgressTracking.noOpLog(),
@@ -88,6 +84,16 @@ public abstract class BaseProgressTest extends BaseTest {
             taskProgressTracker.beginSubTask();
             taskProgressTracker.onProgress();
             return Stream.empty();
+        }
+
+        private Task createTask(String taskName, boolean withMemoryEstimation, Concurrency concurrency) {
+            if (withMemoryEstimation) {
+                memoryFacade.track(taskName, new JobId(), MEMORY_ESTIMATION_RANGE.max);
+
+                return Tasks.task(taskName, concurrency, MEMORY_ESTIMATION_RANGE, Tasks.leaf("leaf", concurrency, 3));
+            } else {
+                return Tasks.task(taskName, concurrency, Tasks.leaf("leaf", concurrency, 3));
+            }
         }
 
     }

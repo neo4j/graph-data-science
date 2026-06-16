@@ -33,21 +33,26 @@ public class Task {
 
     public static final long UNKNOWN_VOLUME = -1;
     public static final long NOT_STARTED = -1L;
-    public static final long NOT_FINISHED = -1L;
+    private static final long NOT_FINISHED = -1L;
 
     private final String description;
     private final Concurrency concurrency;
     protected final List<Task> subTasks;
+    private final MemoryRange estimatedMemoryRangeInBytes;
 
     private Status status = Status.PENDING;
     private long startTime = NOT_STARTED;
     private long finishTime = NOT_FINISHED;
-    private MemoryRange estimatedMemoryRangeInBytes = MemoryRange.empty();
 
     public Task(String description, Concurrency concurrency, List<Task> subTasks) {
+        this(description, concurrency, subTasks, MemoryRange.empty());
+    }
+
+    public Task(String description, Concurrency concurrency, List<Task> subTasks, MemoryRange memoryEstimationInBytes) {
         this.description = description;
         this.concurrency = concurrency;
         this.subTasks = subTasks;
+        this.estimatedMemoryRangeInBytes = memoryEstimationInBytes;
     }
 
     public String description() {
@@ -159,10 +164,6 @@ public class Task {
 
     public Concurrency getConcurrency() {
         return concurrency;
-    }
-
-    public void setEstimatedMemoryRangeInBytes(MemoryRange memoryRangeInBytes) {
-        this.estimatedMemoryRangeInBytes = memoryRangeInBytes;
     }
 
     public void fail() {

@@ -34,6 +34,7 @@ dependencies {
     implementation project(':core-utils')
     implementation project(':graph-projection-api')
     implementation project(':logging')
+    implementation project(':memory-usage')
     implementation project(':neo4j-utility')
     implementation project(':neo4j-values')
     implementation project(':progress-tracking')

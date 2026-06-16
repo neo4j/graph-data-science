@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,7 +60,14 @@ class ProgressTrackingTest {
         var testConfig = TestConfigImpl.builder().logProgress(true).build();
         var log = new GdsTestLog();
 
-        factory.build(graph, testConfig, log, TaskRegistryFactory.empty(), TerminationFlag.RUNNING_TRUE).compute();
+        factory.build(
+            graph,
+            testConfig,
+            log,
+            TaskRegistryFactory.empty(),
+            TerminationFlag.RUNNING_TRUE,
+            MemoryRange.empty()
+        ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -83,7 +91,14 @@ class ProgressTrackingTest {
         TaskRegistry taskRegistryMock = mock(TaskRegistry.class);
         doReturn(taskRegistryMock).when(taskRegistryFactoryMock).newInstance(any(JobId.class));
 
-        factory.build(graph, testConfig, log, taskRegistryFactoryMock, TerminationFlag.RUNNING_TRUE).compute();
+        factory.build(
+            graph,
+            testConfig,
+            log,
+            taskRegistryFactoryMock,
+            TerminationFlag.RUNNING_TRUE,
+            MemoryRange.empty()
+        ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .as("When `logProgress` is set to `false` there should only be `start` and `finished` log messages")

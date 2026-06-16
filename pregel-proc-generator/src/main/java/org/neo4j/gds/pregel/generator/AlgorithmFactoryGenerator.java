@@ -30,6 +30,7 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import javax.lang.model.element.Modifier;
@@ -97,8 +98,9 @@ public class AlgorithmFactoryGenerator {
             .addModifiers(Modifier.PUBLIC)
             .addParameter(Graph.class, "graph")
             .addParameter(typeNames.config(), "configuration")
+            .addParameter(MemoryRange.class, "memoryEstimationInBytes")
             .returns(Task.class)
-            .addStatement("return $T.progressTask(graph, configuration)", Pregel.class)
+            .addStatement("return $T.progressTask(graph, configuration, memoryEstimationInBytes)", Pregel.class)
             .build();
     }
 

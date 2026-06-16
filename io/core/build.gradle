@@ -35,6 +35,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':gds-values')
     implementation project(':logging')
+    implementation project(':memory-usage')
     implementation project(':neo4j-kernel-adapter-api')
     implementation project(':neo4j-settings')
     implementation project(':progress-tracking')

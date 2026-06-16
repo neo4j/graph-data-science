@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -35,13 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class ProcedureExecutor<
-    ALGO extends Algorithm<ALGO_RESULT>,
-    ALGO_RESULT,
-    CONFIG extends AlgoBaseConfig,
-    RESULT
-> {
-
+public class ProcedureExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends AlgoBaseConfig, RESULT> {
     private final AlgorithmSpec<ALGO, ALGO_RESULT, CONFIG, RESULT, ?> algoSpec;
     private final ExecutorSpec<ALGO, ALGO_RESULT, CONFIG> executorSpec;
     private final ExecutionContext executionContext;
@@ -53,7 +48,6 @@ public class ProcedureExecutor<
     ) {
         this.algoSpec = algoSpec;
         this.executorSpec = executorSpec;
-
         this.executionContext = executionContext;
     }
 
@@ -68,6 +62,7 @@ public class ProcedureExecutor<
         // This is needed in the case of `pipelines` where they either pick stuff from the user input,
         // or if there is a `modelName` they read stuff from the model stored in the catalog.
         algoSpec.preProcessConfig(configuration, executionContext);
+
         CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
         var graphCreation = executorSpec.graphCreationFactory(executionContext).create(config, graphName);
@@ -103,12 +98,7 @@ public class ProcedureExecutor<
             return algoSpec.computationResultConsumer().consume(emptyComputationResult, executionContext);
         }
 
-        ALGO algo = newAlgorithm(graph, config);
-
-        // the memory estimate is only ever set over here in the executor
-        // that means it is only Pregel things that get it set
-        // but the estimate comes from the Pregel algorithms themselves
-        algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes);
+        ALGO algo = newAlgorithm(graph, config, memoryEstimationInBytes);
 
         ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metrics().algorithmMetrics(), graphStore, config);
 
@@ -141,17 +131,14 @@ public class ProcedureExecutor<
                 );
 
                 var timer = ProgressTimer.start(builder::computeMillis);
-                try (
-                    timer;
-                    algorithmMetric
-                ) {
+                try (timer; algorithmMetric) {
                     algorithmMetric.start();
 
                     var result = algo.compute();
 
                     timer.stop();
 
-                    int graphIdentifier = System.identityHashCode(graphStore);
+                    var graphIdentifier = System.identityHashCode(graphStore);
                     telemetryLogger.logAlgorithm(graphIdentifier, algoSpec.name(), config, timer.getDuration());
 
                     return result;
@@ -171,19 +158,22 @@ public class ProcedureExecutor<
 
     private ALGO newAlgorithm(
         Graph graph,
-        CONFIG config
+        CONFIG config,
+        MemoryRange memoryEstimationInBytes
     ) {
-        TerminationFlag terminationFlag = TerminationFlag.wrap(
+        var terminationFlag = TerminationFlag.wrap(
             executionContext.terminationMonitor(),
             () -> TransactionTerminatedHelper.transactionTerminated(Status.Transaction.Terminated)
         );
+
         ALGO algorithm = algoSpec.algorithmFactory(executionContext)
             .accept(graphAlgorithmFactory -> graphAlgorithmFactory.build(
                     graph,
                     config,
                     executionContext.log(),
                     executionContext.taskRegistryFactory(),
-                    terminationFlag
+                    terminationFlag,
+                    memoryEstimationInBytes
                 )
             );
 

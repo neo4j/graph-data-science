@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
@@ -39,14 +40,18 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         CONFIG configuration,
         Log log,
         TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        MemoryRange memoryEstimationInBytes
     ) {
+        var progressTask = progressTask(graphOrGraphStore, configuration, memoryEstimationInBytes);
+
         var progressTracker = createProgressTracker(
             configuration,
             log,
             taskRegistryFactory,
-            progressTask(graphOrGraphStore, configuration)
+            progressTask
         );
+
         return build(graphOrGraphStore, configuration, progressTracker, terminationFlag);
     }
 
@@ -92,8 +97,8 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         TerminationFlag terminationFlag
     );
 
-    default Task progressTask(G graphOrGraphStore, CONFIG config) {
-        return Tasks.leaf(taskName(), config.concurrency());
+    default Task progressTask(G graphOrGraphStore, CONFIG config, MemoryRange memoryEstimationInBytes) {
+        return Tasks.leaf(taskName(), config.concurrency(), memoryEstimationInBytes);
     }
 
     /**

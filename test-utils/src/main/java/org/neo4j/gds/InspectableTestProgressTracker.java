@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,11 +85,6 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     @Override
     public void onProgress(Function<Long, Long> valueCalculator) {
         delegate.onProgress(valueCalculator);
-    }
-
-    @Override
-    public void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes) {
-        delegate.setEstimatedResourceFootprint(memoryEstimationInBytes);
     }
 
     @Override

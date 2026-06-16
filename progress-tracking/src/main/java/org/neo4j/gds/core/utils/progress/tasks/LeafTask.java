@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
@@ -30,7 +31,11 @@ public class LeafTask extends Task {
     private long volume;
 
     public LeafTask(String description, Concurrency concurrency, long volume) {
-        super(description, concurrency, List.of());
+        this(description, concurrency, volume, MemoryRange.empty());
+    }
+
+    public LeafTask(String description, Concurrency concurrency, long volume, MemoryRange memoryEstimationInBytes) {
+        super(description, concurrency, List.of(), memoryEstimationInBytes);
         this.volume = volume;
     }
 

@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
-import org.neo4j.gds.mem.MemoryRange;
-
 import java.util.function.Function;
 
 /**
@@ -63,19 +61,4 @@ public interface ProgressTracker {
     void endSubTaskWithFailure();
 
     void release();
-
-    /*
-     * Conceptual breakages - where we make our code less cohesive by coupling unrelated things.
-     */
-
-    /**
-     * This method exists so that the old framework that powers Pregel,
-     * can set a memory related piece of metadata on the root task in the task tree.
-     * That metadata in turn is used for display in some UI.
-     * And it exists here because for some reason,
-     * the root task in the task tree could not just be injected into that code.
-     * So this method call passes through dumbly to the root task which just happens to sit on the progress tracker.
-     * Incidental coupling, and a pain to change.
-     */
-    void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes);
 }

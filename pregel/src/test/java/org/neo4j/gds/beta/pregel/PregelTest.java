@@ -160,7 +160,7 @@ class PregelTest {
 
         var computation = new TestPregelComputation();
 
-        var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
+        var task = Pregel.progressTask(graph, config, MemoryRange.empty(), computation.getClass().getSimpleName());
         var log = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(task, new LoggerForProgressTrackingAdapter(log), config.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
 
@@ -221,7 +221,7 @@ class PregelTest {
 
         var progressTracker = TaskProgressTracker.create(
             new LoggerForProgressTrackingAdapter(Log.noOpLog()),
-            Pregel.progressTask(graph, config, computation.getClass().getSimpleName()),
+            Pregel.progressTask(graph, config, MemoryRange.empty(), computation.getClass().getSimpleName()),
             config.concurrency(),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),

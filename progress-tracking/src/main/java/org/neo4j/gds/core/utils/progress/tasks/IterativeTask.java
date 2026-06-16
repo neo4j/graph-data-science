@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -41,6 +42,16 @@ public class IterativeTask extends Task {
     private final Mode mode;
     private final int maxIterations;
 
+    IterativeTask(
+        String description,
+        Concurrency concurrency,
+        List<Task> subTasks,
+        Supplier<List<Task>> subTasksSupplier,
+        Mode mode
+    ) {
+        this(description, concurrency, subTasks, MemoryRange.empty(), subTasksSupplier, mode);
+    }
+
     /**
      * @param concurrency
      * @param subTasks    Requires an unrolled list of subtasks for modes DYNAMIC and FIXED.
@@ -49,10 +60,11 @@ public class IterativeTask extends Task {
         String description,
         Concurrency concurrency,
         List<Task> subTasks,
+        MemoryRange memoryEstimationInBytes,
         Supplier<List<Task>> subTasksSupplier,
         Mode mode
     ) {
-        super(description, concurrency, subTasks);
+        super(description, concurrency, subTasks, memoryEstimationInBytes);
         this.subTasksSupplier = subTasksSupplier;
         this.mode = mode;
         this.maxIterations = Math.toIntExact(subTasks().count() / subTasksSupplier.get().size());

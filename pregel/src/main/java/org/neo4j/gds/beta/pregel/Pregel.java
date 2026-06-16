@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -122,24 +123,25 @@ public final class Pregel<CONFIG extends PregelConfig> {
         return estimationBuilder.build();
     }
 
-    public static <CONFIG extends PregelConfig> Task progressTask(Graph graph, CONFIG config, String taskName) {
+    public static <CONFIG extends PregelConfig> Task progressTask(Graph graph, CONFIG config, MemoryRange memoryEstimationInBytes, String taskName) {
         return Tasks.iterativeDynamic(
             taskName,
             config.concurrency(), () -> List.of(
                 Tasks.leaf("Compute iteration", config.concurrency(), graph.nodeCount()),
                 Tasks.leaf("Master compute iteration", config.concurrency(), graph.nodeCount())
             ),
+            memoryEstimationInBytes,
             config.maxIterations()
         );
     }
 
-    public static <CONFIG extends PregelConfig> Task progressTask(Graph graph, CONFIG config) {
+    public static <CONFIG extends PregelConfig> Task progressTask(Graph graph, CONFIG config, MemoryRange memoryEstimationInBytes) {
         var configName = config.getClass().getSimpleName();
         var taskName = configName.replaceAll(
             "(Mutate|Stream|Write|Stats)*Config",
             ""
         );
-        return progressTask(graph, config, taskName);
+        return progressTask(graph, config, memoryEstimationInBytes, taskName);
     }
 
     private Pregel(

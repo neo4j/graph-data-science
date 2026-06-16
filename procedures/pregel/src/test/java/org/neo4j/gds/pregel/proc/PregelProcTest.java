@@ -57,6 +57,7 @@ import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
@@ -319,8 +320,8 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        public Task progressTask(Graph graph, TestPregelConfig config) {
-            return Pregel.progressTask(graph, config);
+        public Task progressTask(Graph graph, TestPregelConfig config, MemoryRange memoryEstimationInBytes) {
+            return Pregel.progressTask(graph, config, memoryEstimationInBytes);
         }
     }
 
