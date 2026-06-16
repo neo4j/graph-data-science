@@ -25,8 +25,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.Map;
-
 public interface AlgorithmSpec<
     ALGO extends Algorithm<ALGO_RESULT>,
     ALGO_RESULT,
@@ -37,18 +35,6 @@ public interface AlgorithmSpec<
     String name();
 
     ALGO_FACTORY algorithmFactory(ExecutionContext executionContext);
-
-    /**
-     * This is used to enhance the user input, mainly when running ML pipelines and the user has provided pre-trained model.
-     * There you would use this method to collect "missing" parameters, i.e. parameters that were given to steps in the pipeline.
-     * This method has effects on the passed in user input directly.
-     *
-     * @param userInput        - user provided configuration to enhance
-     * @param executionContext - the execution context provided during a procedure execution
-     */
-    default void preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
-        // do nothing
-    }
 
     NewConfigFunction<CONFIG> newConfigFunction();
 

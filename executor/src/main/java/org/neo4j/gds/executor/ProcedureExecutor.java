@@ -59,10 +59,6 @@ public class ProcedureExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT,
     }
 
     public RESULT compute(String graphName, Map<String, Object> configuration) {
-        // This is needed in the case of `pipelines` where they either pick stuff from the user input,
-        // or if there is a `modelName` they read stuff from the model stored in the catalog.
-        algoSpec.preProcessConfig(configuration, executionContext);
-
         CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
         var graphCreation = executorSpec.graphCreationFactory(executionContext).create(config, graphName);
