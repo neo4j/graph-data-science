@@ -22,12 +22,10 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
-import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
