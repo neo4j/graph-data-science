@@ -4,7 +4,7 @@
 
 
 Node embedding algorithms compute low-dimensional vector representations of nodes in a graph.
-These vectors, also called embeddings, can be used for machine learning.
+These vectors, also called embeddings, can be used for machine learning and vector search.
 The Neo4j Graph Data Science library contains the following node embedding algorithms:
 
 * Production-quality
@@ -16,13 +16,22 @@ The Neo4j Graph Data Science library contains the following node embedding algor
 ** xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
 
 
+[[node-embeddings-using]]
+== Using node embeddings
+
+Node embeddings support two common workflows:
+
+* Machine learning: Use embeddings as input features for downstream tasks such as node classification, link prediction, and kNN similarity graph construction.
+* Structural similarity search: Write the embeddings to node properties, create a link:https://neo4j.com/docs/cypher-manual/current/indexes/semantic-indexes/vector-indexes/[vector index] in the Neo4j database over that property, and retrieve nodes that are similar by graph topology.
+  This structural vector search can be useful on its own or combined with lexical and semantic results in hybrid search.
+
+See the link:https://neo4j.com/developer/genai-ecosystem/hybrid-search/[Developer Guides] for more examples of hybrid search.
+
 
 [[node-embeddings-generalization]]
 == Generalization across graphs
 
-Node embeddings are typically used as input to downstream machine learning tasks such as node classification, link prediction and kNN similarity graph construction.
-
-Often the graph used for constructing the embeddings and training the downstream model differs from the graph on which predictions are made.
+In machine learning tasks, often the graph used for constructing the embeddings and training the downstream model differs from the graph on which predictions are made.
 Compared to normal machine learning where we just have a stream of independent examples from some distribution, we now have graphs that are used to generate a set of labeled examples.
 Therefore, we must ensure that the set of training examples is representative of the set of labeled examples derived from the prediction graph.
 For this to work, certain things are required of the embedding algorithm, and we denote such algorithms as _inductive_ footnote:definition[This practical definition of induction may not agree completely with definitions elsewhere].
