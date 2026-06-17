@@ -61,6 +61,10 @@ public final class FilteredIdMaps {
             return Optional.empty();
         }
 
+        if (nodeLabels.containsAll(labelInformation.availableNodeLabels())) {
+            return Optional.empty();
+        }
+
         var unionBitSet = labelInformation.unionBitSet(nodeLabels, rootIdMap.nodeCount());
         var filteredTranslator = filterable.filteredNodeTranslator(unionBitSet, concurrency);
         var filteredLabelInformation = labelInformation.filter(nodeLabels);
