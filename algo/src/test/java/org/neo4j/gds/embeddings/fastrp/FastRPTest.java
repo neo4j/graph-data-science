@@ -29,6 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
@@ -1115,12 +1116,13 @@ class FastRPTest {
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             firstOriginalToMappedBuilder.set(nodeId, nodeId);
         }
-        var firstIdMap = new ArrayIdMap(
-            firstMappedToOriginal,
-            firstOriginalToMappedBuilder.build(),
-            LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, firstMappedToOriginal::get),
-            nodeCount,
-            nodeCount - 1
+        ComposedIdMap firstIdMap = ComposedIdMap.of(
+            new ArrayIdMap(
+                firstMappedToOriginal,
+                firstOriginalToMappedBuilder.build(),
+                nodeCount,
+                nodeCount - 1
+            ), LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, firstMappedToOriginal::get)
         );
         RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(firstIdMap)
@@ -1139,12 +1141,14 @@ class FastRPTest {
             secondOriginalToMappedBuilder.set(secondMappedToOriginal.get(nodeId), nodeId);
         }
 
-        var secondIdMap = new ArrayIdMap(
-            secondMappedToOriginal,
-            secondOriginalToMappedBuilder.build(),
-            LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, secondMappedToOriginal::get),
-            nodeCount,
-            nodeCount - 1
+        ComposedIdMap secondIdMap = ComposedIdMap.of(
+            new ArrayIdMap(
+                secondMappedToOriginal,
+                secondOriginalToMappedBuilder.build(),
+                nodeCount,
+                nodeCount - 1
+            ),
+            LabelInformationBuilders.singleLabel(NodeLabel.of("hello")).build(nodeCount, secondMappedToOriginal::get)
         );
         RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(secondIdMap)

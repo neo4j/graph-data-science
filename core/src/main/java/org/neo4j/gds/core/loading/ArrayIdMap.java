@@ -20,11 +20,9 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.nodes.IdMap;
-import org.neo4j.gds.api.DefaultIdMap;
-import org.neo4j.gds.api.nodes.LabelInformation;
+import com.carrotsearch.hppc.BitSetIterator;
+import org.neo4j.gds.api.nodes.FilterableNodeTranslator;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
@@ -34,15 +32,11 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.OptionalLong;
-
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class ArrayIdMap extends DefaultIdMap {
+public class ArrayIdMap implements FilterableNodeTranslator {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
         .builder(ArrayIdMap.class)
@@ -61,6 +55,7 @@ public class ArrayIdMap extends DefaultIdMap {
         )
         .build();
 
+    private final long nodeCount;
     private final long highestNeoId;
 
     private final HugeLongArray internalToOriginalIds;
@@ -76,13 +71,12 @@ public class ArrayIdMap extends DefaultIdMap {
     public ArrayIdMap(
         HugeLongArray internalToOriginalIds,
         HugeSparseLongArray originalToInternalIds,
-        LabelInformation labelInformation,
         long nodeCount,
         long highestNeoId
     ) {
-        super(labelInformation, nodeCount);
         this.internalToOriginalIds = internalToOriginalIds;
         this.originalToInternalIds = originalToInternalIds;
+        this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
     }
 
@@ -102,74 +96,46 @@ public class ArrayIdMap extends DefaultIdMap {
     }
 
     @Override
-    public long toRootNodeId(long mappedNodeId) {
-        return mappedNodeId;
-    }
-
-    @Override
-    public IdMap rootIdMap() {
-        return this;
-    }
-
-    @Override
     public boolean containsOriginalId(final long originalNodeId) {
         return originalToInternalIds.contains(originalNodeId);
     }
 
     @Override
-    public OptionalLong rootNodeCount() {
-        return OptionalLong.of(nodeCount());
+    public long nodeCount() {
+        return this.nodeCount;
     }
 
     @Override
     public long highestOriginalId() {
-        return highestNeoId;
+        return this.highestNeoId;
     }
 
     @Override
-    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, Concurrency concurrency) {
-        labelInformation.validateNodeLabelFilter(nodeLabels);
+    public NodeTranslator filteredNodeTranslator(BitSet unionBitSet, Concurrency concurrency) {
+        long filteredNodeCount = unionBitSet.cardinality();
+        HugeLongArray filteredToRoot = HugeLongArray.newArray(filteredNodeCount);
 
-        if (labelInformation.isEmpty()) {
-            return Optional.empty();
-        }
-
-        // Filtering by all available labels is a no-op. Callers fall back to
-        // this id map and avoid the indirection in id lookups and the memory
-        // overhead of a filtered id map copy.
-        if (nodeLabels.containsAll(labelInformation.availableNodeLabels())) {
-            return Optional.empty();
-        }
-
-        BitSet unionBitSet = labelInformation.unionBitSet(nodeLabels, nodeCount());
-
-        long nodeId = -1L;
+        BitSetIterator iterator = unionBitSet.iterator();
+        long rootMappedId;
         long cursor = 0L;
-        long newNodeCount = unionBitSet.cardinality();
-        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount);
-
-        while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
-            newGraphIds.set(cursor, nodeId);
-            cursor++;
+        while ((rootMappedId = iterator.nextSetBit()) != BitSetIterator.NO_MORE) {
+            filteredToRoot.set(cursor++, rootMappedId);
         }
 
-        HugeSparseLongArray newNodeToGraphIds = ArrayIdMapBuilderOps.buildSparseIdMap(
-            newNodeCount,
-            originalToInternalIds.capacity(),
+        long highestRootMappedId = nodeCount - 1;
+
+        HugeSparseLongArray rootToFiltered = ArrayIdMapBuilderOps.buildSparseIdMap(
+            filteredNodeCount,
+            highestRootMappedId,
             concurrency,
-            newGraphIds
+            filteredToRoot
         );
 
-        LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
-
-        var rootToFilteredIdMap = new ArrayIdMap(
-            newGraphIds,
-            newNodeToGraphIds,
-            newLabelInformation,
-            newNodeCount,
+        return new ArrayIdMap(
+            filteredToRoot,
+            rootToFiltered,
+            filteredNodeCount,
             highestNeoId
         );
-
-        return Optional.of(new FilteredLabeledIdMap(this, rootToFilteredIdMap));
     }
 }

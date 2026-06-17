@@ -20,22 +20,23 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
-import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.collections.cursor.HugeCursor;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.OptionalLong;
 import java.util.stream.LongStream;
 
 final class ArrayIdMapBuilderOps {
 
-    static ArrayIdMap build(
+    static ComposedIdMap build(
         HugeLongArray internalToOriginalIds,
         long nodeCount,
         LabelInformation.Builder labelInformationBuilder,
@@ -53,15 +54,15 @@ final class ArrayIdMapBuilderOps {
             internalToOriginalIds
         );
 
-        var labelInformation = labelInformationBuilder.build(nodeCount, originalToInternalIds::get);
-
-        return new ArrayIdMap(
+        var nodeTranslator = new ArrayIdMap(
             internalToOriginalIds,
             originalToInternalIds,
-            labelInformation,
             nodeCount,
             highestNodeId
         );
+        var labelInformation = labelInformationBuilder.build(nodeCount, originalToInternalIds::get);
+
+        return ComposedIdMap.of(nodeTranslator, labelInformation);
     }
 
     private static OptionalLong findMaxNodeId(HugeLongArray nodeIds) {
