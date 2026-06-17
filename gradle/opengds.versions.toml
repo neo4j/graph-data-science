@@ -30,7 +30,7 @@ jjwt = "0.13.0"
 jol = "0.17"
 jqwik = "1.9.3"
 junit-pioneer = "2.3.0"
-junit5bom = "6.0.3"
+junit6bom = "6.1.0"
 log4j = "2.25.4"
 memoryfilesystem = "2.8.2"
 mockito = "5.23.0"
@@ -86,7 +86,7 @@ jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
 jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
 jol-core = { module = "org.openjdk.jol:jol-core", version.ref = "jol" }
 jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
-junit-bom = { module = "org.junit:junit-bom", version.ref = "junit5bom" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit6bom" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
