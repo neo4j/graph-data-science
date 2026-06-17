@@ -67,7 +67,7 @@ class ProgressTrackingTest {
             TaskRegistryFactory.empty(),
             TerminationFlag.RUNNING_TRUE,
             MemoryRange.empty()
-        ).compute();
+        ).getLeft().compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -98,7 +98,7 @@ class ProgressTrackingTest {
             taskRegistryFactoryMock,
             TerminationFlag.RUNNING_TRUE,
             MemoryRange.empty()
-        ).compute();
+        ).getLeft().compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .as("When `logProgress` is set to `false` there should only be `start` and `finished` log messages")

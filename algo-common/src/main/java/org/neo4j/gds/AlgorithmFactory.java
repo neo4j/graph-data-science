@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -35,7 +36,7 @@ import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
-    default ALGO build(
+    default Pair<ALGO, ProgressTracker> build(
         G graphOrGraphStore,
         CONFIG configuration,
         Log log,
@@ -52,7 +53,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             progressTask
         );
 
-        return build(graphOrGraphStore, configuration, progressTracker, terminationFlag);
+        return Pair.of(build(graphOrGraphStore, configuration, progressTracker, terminationFlag), progressTracker);
     }
 
     private ProgressTracker createProgressTracker(
@@ -121,9 +122,9 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         throw new MemoryEstimationNotImplementedException();
     }
 
-    ALGO accept(Visitor<ALGO, CONFIG> visitor);
+    Pair<ALGO, ProgressTracker> accept(Visitor<ALGO, CONFIG> visitor);
 
     interface Visitor<ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig> {
-        ALGO graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory);
+        Pair<ALGO, ProgressTracker> graph(GraphAlgorithmFactory<ALGO, CONFIG> graphAlgorithmFactory);
     }
 }

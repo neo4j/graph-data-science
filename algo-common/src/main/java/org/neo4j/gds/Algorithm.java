@@ -39,8 +39,4 @@ public abstract class Algorithm<RESULT> implements Callable<RESULT> {
     public RESULT call() throws Exception {
         return compute();
     }
-
-    public ProgressTracker getProgressTracker() {
-        return this.progressTracker;
-    }
 }

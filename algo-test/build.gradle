@@ -17,6 +17,8 @@ dependencies {
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
 
+    implementation openGds.commons.lang3
+
     implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':concurrency')

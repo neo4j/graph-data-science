@@ -19,14 +19,16 @@
  */
 package org.neo4j.gds;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public abstract class GraphAlgorithmFactory<ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig>
     implements AlgorithmFactory<Graph, ALGO, CONFIG> {
 
     @Override
-    public ALGO accept(Visitor<ALGO, CONFIG> visitor) {
+    public Pair<ALGO, ProgressTracker> accept(Visitor<ALGO, CONFIG> visitor) {
         return visitor.graph(this);
     }
 }

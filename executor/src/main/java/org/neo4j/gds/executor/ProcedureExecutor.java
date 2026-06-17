@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.executor;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
@@ -94,15 +96,22 @@ public class ProcedureExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT,
             return algoSpec.computationResultConsumer().consume(emptyComputationResult, executionContext);
         }
 
-        ALGO algo = newAlgorithm(graph, config, memoryEstimationInBytes);
+        Pair<ALGO, ProgressTracker> algorithmAndProgressTracker = newAlgorithm(graph, config, memoryEstimationInBytes);
 
-        ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metrics().algorithmMetrics(), graphStore, config);
+        ALGO_RESULT result = executeAlgorithm(
+            builder,
+            algorithmAndProgressTracker.getLeft(),
+            executionContext.metrics().algorithmMetrics(),
+            graphStore,
+            config,
+            algorithmAndProgressTracker.getRight()
+        );
 
         var computationResult = builder
             .graph(graph)
             .graphStore(graphStore)
             .resultStore(resultStore)
-            .algorithm(algo)
+            .algorithm(algorithmAndProgressTracker.getLeft())
             .result(result)
             .config(config)
             .build();
@@ -115,7 +124,8 @@ public class ProcedureExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT,
         ALGO algo,
         AlgorithmMetricsService algorithmMetricsService,
         GraphStore graphStore,
-        CONFIG config
+        CONFIG config,
+        ProgressTracker progressTracker
     ) {
         return runWithExceptionLogging(
             () -> {
@@ -126,8 +136,7 @@ public class ProcedureExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT,
                     algoSpec.algorithmFactory(executionContext).taskName()
                 );
 
-                var timer = ProgressTimer.start(builder::computeMillis);
-                try (timer; algorithmMetric) {
+                try (var timer = ProgressTimer.start(builder::computeMillis); algorithmMetric) {
                     algorithmMetric.start();
 
                     var result = algo.compute();
@@ -139,20 +148,20 @@ public class ProcedureExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT,
 
                     return result;
                 } catch (Exception e) {
-                    algo.getProgressTracker().endSubTaskWithFailure();
+                    progressTracker.endSubTaskWithFailure();
                     algorithmMetric.failed(e);
 
                     throw e;
                 } finally {
                     if (algoSpec.releaseProgressTask()) {
-                        algo.getProgressTracker().release();
+                        progressTracker.release();
                     }
                 }
             }
         );
     }
 
-    private ALGO newAlgorithm(
+    private Pair<ALGO, ProgressTracker> newAlgorithm(
         Graph graph,
         CONFIG config,
         MemoryRange memoryEstimationInBytes
@@ -162,18 +171,15 @@ public class ProcedureExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT,
             () -> TransactionTerminatedHelper.transactionTerminated(Status.Transaction.Terminated)
         );
 
-        ALGO algorithm = algoSpec.algorithmFactory(executionContext)
+        return algoSpec.algorithmFactory(executionContext)
             .accept(graphAlgorithmFactory -> graphAlgorithmFactory.build(
-                    graph,
-                    config,
-                    executionContext.log(),
-                    executionContext.taskRegistryFactory(),
-                    terminationFlag,
-                    memoryEstimationInBytes
-                )
-            );
-
-        return algorithm;
+                graph,
+                config,
+                executionContext.log(),
+                executionContext.taskRegistryFactory(),
+                terminationFlag,
+                memoryEstimationInBytes
+            ));
     }
 
     private <R> R runWithExceptionLogging(Supplier<R> supplier) {
