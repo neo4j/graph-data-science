@@ -27,6 +27,7 @@ import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.negativeSampling.NegativeSampler;
 import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -44,6 +45,8 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
     private final SplitRelationshipsParameters parameters;
 
     private SplitRelationships(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         Graph masterGraph,
         IdMap rootNodes,
@@ -51,7 +54,8 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         IdMap targetNodes,
         SplitRelationshipsParameters parameters
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.masterGraph = masterGraph;
         this.rootNodes = rootNodes;
@@ -60,7 +64,12 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         this.parameters = parameters;
     }
 
-    public static SplitRelationships of(GraphStore graphStore, SplitRelationshipsBaseConfig config) {
+    public static SplitRelationships of(
+        GraphStore graphStore,
+        SplitRelationshipsBaseConfig config,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
         var sourceLabels = ElementTypeValidator.resolve(graphStore, config.sourceNodeLabels());
         var targetLabels = ElementTypeValidator.resolve(graphStore, config.targetNodeLabels());
@@ -73,7 +82,10 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         IdMap sourceNodes = graphStore.getGraph(sourceLabels);
         IdMap targetNodes = graphStore.getGraph(targetLabels);
 
-        return new SplitRelationships(graph,
+        return new SplitRelationships(
+            progressTracker,
+            terminationFlag,
+            graph,
             masterGraph,
             graphStore.nodes(),
             sourceNodes,

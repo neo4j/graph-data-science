@@ -29,11 +29,13 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -62,9 +64,14 @@ class SplitRelationshipsTest {
             .randomSeed(1337L)
             .build();
 
-        SplitRelationships splitter = SplitRelationships.of(graphStore, config);
+        var splitter = SplitRelationships.of(
+            graphStore,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
 
-        EdgeSplitter.SplitResult result = splitter.compute();
+        var result = splitter.compute();
 
         assertThat(result.selectedRels().build().topology().elementCount()).isEqualTo(6);
         assertThat(result.remainingRels().build().topology().elementCount()).isEqualTo(24);
