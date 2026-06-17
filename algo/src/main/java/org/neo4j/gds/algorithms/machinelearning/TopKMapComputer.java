@@ -39,6 +39,7 @@ import java.util.stream.LongStream;
 
 public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final ProgressTracker progressTracker;
     private final BitSet sourceNodes;
@@ -53,9 +54,9 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
     private final boolean higherIsBetter;
 
-    private final TerminationFlag terminationFlag;
-
     public TopKMapComputer(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         BitSet sourceNodes,
         BitSet targetNodes,
@@ -63,11 +64,10 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         List<Double> relationshipTypeEmbedding,
         ScoreFunction scoreFunction,
         int topK,
-        Concurrency concurrency,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        Concurrency concurrency
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.progressTracker = progressTracker;
         this.sourceNodes = sourceNodes;
@@ -80,8 +80,6 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.topK = topK;
         this.scoreFunction = scoreFunction;
         this.higherIsBetter = scoreFunction == ScoreFunction.DISTMULT;
-
-        this.terminationFlag = terminationFlag;
     }
 
     public KGEPredictResult compute() {

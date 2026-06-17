@@ -70,6 +70,8 @@ class TopKMapComputerTest {
         var concurrency = 4;
 
         var computer = new TopKMapComputer(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             sourceNodes,
             targetNodes,
@@ -77,9 +79,7 @@ class TopKMapComputerTest {
             List.of(3.0, -0.5),
             TRANSE,
             topK,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            new Concurrency(concurrency)
         );
 
         KGEPredictResult result = computer.compute();
@@ -104,6 +104,8 @@ class TopKMapComputerTest {
         var concurrency = 4;
 
         var computer = new TopKMapComputer(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             sourceNodes,
             targetNodes,
@@ -111,9 +113,7 @@ class TopKMapComputerTest {
             List.of(0.5, -0.5),
             DISTMULT,
             topK,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            new Concurrency(concurrency)
         );
 
         KGEPredictResult result = computer.compute();
@@ -140,6 +140,8 @@ class TopKMapComputerTest {
         var concurrency = 4;
 
         var computer = new TopKMapComputer(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             sourceNodes,
             targetNodes,
@@ -147,9 +149,7 @@ class TopKMapComputerTest {
             List.of(0.5, -0.5),
             TRANSE,
             topK,
-            new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            new Concurrency(concurrency)
         );
 
         KGEPredictResult result = computer.compute();

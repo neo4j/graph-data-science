@@ -40,6 +40,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingl
 public class GraphSage extends Algorithm<GraphSageResult> {
 
     public static final String MODEL_TYPE = "graphSage";
+    private final TerminationFlag terminationFlag;
 
     private final Graph graph;
     private final Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model;
@@ -56,7 +57,8 @@ public class GraphSage extends Algorithm<GraphSageResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.concurrency = concurrency;
         this.batchSize = batchSize;

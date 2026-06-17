@@ -39,6 +39,7 @@ import static org.neo4j.gds.mcmf.MinCostFunctions.isAdmissible;
 import static org.neo4j.gds.mcmf.MinCostFunctions.isResidualEdge;
 
 public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
+    private final TerminationFlag terminationFlag;
     private final Graph graphOfFlows;
     private final Graph graphOfCosts;
     private final MCMFParameters parameters;
@@ -95,7 +96,8 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         NodeConstraintsIdMap nodeConstraintsIdMap,
         Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graphOfFlows = graphOfFlows;
         this.graphOfCosts = graphOfCosts;
         this.parameters = parameters;

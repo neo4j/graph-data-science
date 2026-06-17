@@ -58,6 +58,7 @@ public class FastRP extends Algorithm<FastRPResult> {
     private static final double ENTRY_PROBABILITY = 1.0 / (2 * SPARSITY);
     private static final float EPSILON = 10f / Float.MAX_VALUE;
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final Concurrency concurrency;
     private final float normalizationStrength;
@@ -88,7 +89,8 @@ public class FastRP extends Algorithm<FastRPResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.featureExtractors = featureExtractors;
         this.relationshipWeightProperty = parameters.relationshipWeightProperty();

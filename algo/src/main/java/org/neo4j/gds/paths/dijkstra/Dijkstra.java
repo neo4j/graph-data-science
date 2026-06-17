@@ -42,6 +42,7 @@ import static org.neo4j.gds.paths.dijkstra.TraversalState.EMIT_AND_STOP;
 
 public final class Dijkstra extends Algorithm<PathFindingResult> {
     private static final long NO_RELATIONSHIP = -1;
+    private final TerminationFlag terminationFlag;
 
     private final Graph graph;
     // Takes a visited node as input and decides if a path should be emitted.
@@ -77,7 +78,8 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
          ProgressTracker progressTracker,
          TerminationFlag terminationFlag
      ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.sourceNode = sourceNode;
         this.targets = targets;

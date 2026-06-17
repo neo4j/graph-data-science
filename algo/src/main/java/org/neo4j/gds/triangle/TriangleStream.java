@@ -51,6 +51,7 @@ import java.util.stream.StreamSupport;
  */
 public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final RelationshipIntersectFactory intersectFactory;
     private final ExecutorService executorService;
@@ -60,7 +61,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     private final AtomicInteger runningThreads;
     private final BlockingQueue<TriangleResult> resultQueue;
     private final LabelFilterChecker labelFilterChecker;
-    private final TerminationFlag terminationFlag;
 
     public static TriangleStream create(
         ProgressTracker progressTracker,
@@ -96,7 +96,8 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         Concurrency concurrency,
         List<String> labelFilter
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.intersectFactory = intersectFactory;
         this.executorService = executorService;
@@ -106,7 +107,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         this.runningThreads = new AtomicInteger();
         this.queue = new AtomicInteger();
         this.labelFilterChecker = new LabelFilterChecker(labelFilter, graph::hasLabel);
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

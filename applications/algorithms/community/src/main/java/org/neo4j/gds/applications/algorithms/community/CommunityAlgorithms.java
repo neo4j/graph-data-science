@@ -118,7 +118,6 @@ public class CommunityAlgorithms {
     ConductanceResult conductance(Graph graph, ConductanceParameters parameters, ProgressTracker progressTracker) {
         return new Conductance(
             progressTracker,
-            terminationFlag,
             graph,
             parameters.concurrency(),
             parameters.minBatchSize(),

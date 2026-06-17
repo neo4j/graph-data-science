@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 public final class Yens extends Algorithm<PathFindingResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final boolean trackRelationships;
 
@@ -83,7 +84,8 @@ public final class Yens extends Algorithm<PathFindingResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.trackRelationships = trackRelationships;
         this.sourceNode = sourceNode;

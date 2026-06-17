@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 
 public class CELF extends Algorithm<CELFResult> {
 
+    private final TerminationFlag terminationFlag;
     private final int seedSetCount;
     private final Graph graph;
     private final CELFParameters parameters;
@@ -59,8 +60,8 @@ public class CELF extends Algorithm<CELFResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
-
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.parameters = parameters;
         this.concurrency = parameters.concurrency();

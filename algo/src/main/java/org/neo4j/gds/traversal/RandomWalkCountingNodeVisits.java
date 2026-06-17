@@ -39,6 +39,7 @@ import java.util.stream.IntStream;
 
 public final class RandomWalkCountingNodeVisits extends Algorithm<HugeAtomicLongArray> {
 
+    private final TerminationFlag terminationFlag;
     private final Concurrency concurrency;
     private final ExecutorService executorService;
     private final Graph graph;
@@ -107,7 +108,8 @@ public final class RandomWalkCountingNodeVisits extends Algorithm<HugeAtomicLong
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.graph = graph;

@@ -35,7 +35,6 @@ import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -67,8 +66,7 @@ class SplitRelationshipsTest {
         var splitter = SplitRelationships.of(
             graphStore,
             config,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            ProgressTracker.NULL_TRACKER
         );
 
         var result = splitter.compute();

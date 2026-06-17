@@ -27,7 +27,6 @@ import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.negativeSampling.NegativeSampler;
 import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -46,7 +45,6 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
     private SplitRelationships(
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag,
         Graph graph,
         Graph masterGraph,
         IdMap rootNodes,
@@ -54,7 +52,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         IdMap targetNodes,
         SplitRelationshipsParameters parameters
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
         this.graph = graph;
         this.masterGraph = masterGraph;
         this.rootNodes = rootNodes;
@@ -66,8 +64,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
     public static SplitRelationships of(
         GraphStore graphStore,
         SplitRelationshipsBaseConfig config,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        ProgressTracker progressTracker
     ) {
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
         var sourceLabels = ElementTypeValidator.resolve(graphStore, config.sourceNodeLabels());
@@ -83,7 +80,6 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
         return new SplitRelationships(
             progressTracker,
-            terminationFlag,
             graph,
             masterGraph,
             graphStore.nodes(),

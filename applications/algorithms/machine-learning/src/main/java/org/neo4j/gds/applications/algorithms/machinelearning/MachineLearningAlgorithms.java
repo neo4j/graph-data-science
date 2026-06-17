@@ -78,6 +78,8 @@ public class MachineLearningAlgorithms {
             return true;
         });
         var algorithm = new TopKMapComputer(
+            progressTracker,
+            terminationFlag,
             graph,
             sourceNodes,
             targetNodes,
@@ -85,9 +87,7 @@ public class MachineLearningAlgorithms {
             parameters.relationshipTypeEmbedding(),
             parameters.scoringFunction(),
             parameters.topK(),
-            parameters.concurrency(),
-            progressTracker,
-            terminationFlag
+            parameters.concurrency()
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -98,7 +98,7 @@ public class MachineLearningAlgorithms {
     }
 
     EdgeSplitter.SplitResult splitRelationships(GraphStore graphStore, SplitRelationshipsBaseConfig configuration) {
-        var algorithm = SplitRelationships.of(graphStore, configuration, ProgressTracker.NULL_TRACKER, terminationFlag);
+        var algorithm = SplitRelationships.of(graphStore, configuration, ProgressTracker.NULL_TRACKER);
 
         return algorithm.compute();
     }

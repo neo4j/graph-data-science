@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final Concurrency concurrency;
     private static final int CHUNK_SIZE = 64;
@@ -64,7 +65,8 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         int chunkSize,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.concurrency = concurrency;
         this.chunkSize = chunkSize;

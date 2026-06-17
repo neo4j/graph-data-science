@@ -52,6 +52,7 @@ import java.util.function.LongFunction;
  * This algorithm is also capable of calculating the longest path for each node (unless it is ignored during sorting).
  */
 public class TopologicalSort extends Algorithm<TopologicalSortResult> {
+    private final TerminationFlag terminationFlag;
     // Contains the sorted nodes, which is the array we iterate on during the run
     private final TopologicalSortResult result;
     // The in degree for each node in the graph. Being updated (down) as we cross out visited nodes
@@ -70,7 +71,8 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         boolean computeMaxDistanceFromSource,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;

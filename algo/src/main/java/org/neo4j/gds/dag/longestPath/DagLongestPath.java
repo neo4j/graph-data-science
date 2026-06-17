@@ -55,6 +55,7 @@ import static org.neo4j.gds.paths.delta.DistanceAndPredecessors.NO_PREDECESSOR;
  */
 public class DagLongestPath extends Algorithm<PathFindingResult> {
     private static final long[] EMPTY_ARRAY = new long[0];
+    private final TerminationFlag terminationFlag;
 
     // The in degree for each node in the graph. Being updated (down) as we cross out visited nodes
     private final HugeAtomicLongArray inDegrees;
@@ -69,7 +70,8 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         Concurrency concurrency,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;

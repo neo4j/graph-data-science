@@ -201,7 +201,6 @@ public class CommunityComputeFacade {
 
         var algorithm = new Conductance(
             progressTracker,
-            terminationFlag,
             graph,
             parameters.concurrency(),
             parameters.minBatchSize(),

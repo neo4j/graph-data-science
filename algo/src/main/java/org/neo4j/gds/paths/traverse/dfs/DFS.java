@@ -33,6 +33,7 @@ import org.neo4j.gds.traversal.TraversalParameters;
 
 public class DFS extends Algorithm<HugeLongArray> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final long startNodeId;
     private final ExitPredicate exitPredicate;
@@ -51,7 +52,8 @@ public class DFS extends Algorithm<HugeLongArray> {
         TerminationFlag terminationFlag
     ) {
 
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.startNodeId = startNodeId;

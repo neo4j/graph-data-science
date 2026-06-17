@@ -39,6 +39,7 @@ import java.util.function.LongUnaryOperator;
 
 public final class ModularityCalculator extends Algorithm<ModularityResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final LongUnaryOperator communityIdProvider;
     private final HugeLongLongMap communityMapper;
@@ -75,7 +76,8 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
         HugeLongLongMap communityMapper,
         Concurrency concurrency
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.communityIdProvider = communityIdProvider;
         this.communityMapper = communityMapper;

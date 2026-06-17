@@ -61,6 +61,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
     private final ExecutorService executorService;
     private final Graph graph;
     private final AtomicInteger counter; // nodeId counter (init with nodeCount, counts down for each node)
+    private final TerminationFlag terminationFlag;
 
     private volatile boolean outputStreamOpen;
 
@@ -68,10 +69,11 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
         Graph graph,
         ExecutorService executorService,
         Concurrency concurrency,
-        ProgressTracker progressTracker, TerminationFlag terminationFlag
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
-
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.executorService = executorService;

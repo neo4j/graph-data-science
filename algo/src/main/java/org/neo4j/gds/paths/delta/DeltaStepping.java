@@ -40,6 +40,7 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
     private static final int NO_BIN = Integer.MAX_VALUE;
     private static final int BIN_SIZE_THRESHOLD = 1000;
     private static final int BATCH_SIZE = 64;
+    private final TerminationFlag terminationFlag;
 
 
     private final Graph graph;
@@ -80,7 +81,8 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.startNode = startNode;
         this.delta = delta;

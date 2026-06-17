@@ -20,18 +20,14 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.Callable;
 
 public abstract class Algorithm<RESULT> implements Callable<RESULT> {
     protected final ProgressTracker progressTracker;
 
-    protected final TerminationFlag terminationFlag;
-
-    protected Algorithm(ProgressTracker progressTracker, TerminationFlag terminationFlag) {
+    protected Algorithm(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
-        this.terminationFlag = terminationFlag;
     }
 
     public abstract RESULT compute();

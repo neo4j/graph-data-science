@@ -91,7 +91,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         int binSizeThreshold,
         ExecutorService executorService
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
         this.graph = graph;
         this.startNode = startNode;
         this.delta = delta;

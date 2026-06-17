@@ -31,13 +31,13 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 public class HDBScan extends Algorithm<Labels> {
 
+    private final TerminationFlag terminationFlag;
     private final IdMap nodes;
     private final NodePropertyValues nodePropertyValues;
     private final Concurrency concurrency;
     private final int samples;
     private final long minClusterSize;
     private final long leafSize;
-    private final TerminationFlag terminationFlag;
 
     public HDBScan(
         IdMap nodes,
@@ -68,14 +68,14 @@ public class HDBScan extends Algorithm<Labels> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.nodes = nodes;
         this.nodePropertyValues = nodePropertyValues;
         this.concurrency = concurrency;
         this.leafSize = leafSize;
         this.samples = samples;
         this.minClusterSize = minClusterSize;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

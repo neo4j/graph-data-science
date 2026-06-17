@@ -45,6 +45,7 @@ import java.util.function.DoubleUnaryOperator;
  */
 public class KSpanningTree extends Algorithm<SpanningTree> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final DoubleUnaryOperator minMax;
     private final long startNodeId;
@@ -58,7 +59,8 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.minMax = minMax;
         this.startNodeId = startNodeId;

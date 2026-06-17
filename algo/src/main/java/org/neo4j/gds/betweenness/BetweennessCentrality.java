@@ -41,6 +41,7 @@ import java.util.function.Consumer;
 
 public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final long nodeCount;
     private final double divisor;
@@ -87,7 +88,8 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;

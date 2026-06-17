@@ -32,6 +32,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Distances distances;
     private final KdTree kdTree;
     private final BitSet kdNodeSingleComponent;
@@ -56,7 +57,8 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         long nodeCount,
         Concurrency concurrency
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.distances = distances;
         this.closestDistanceTracker = closestDistanceTracker;
         this.kdTree = kdTree;

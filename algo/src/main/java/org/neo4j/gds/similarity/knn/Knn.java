@@ -36,6 +36,82 @@ import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
 public final class Knn extends Algorithm<KnnResult> {
+    private final TerminationFlag terminationFlag;
+    private final Graph graph;
+    private final Concurrency concurrency;
+    private final int maxIterations;
+    private final double similarityCutoff;
+    private final int minBatchSize;
+    private final NeighborFilterFactory neighborFilterFactory;
+    private final ExecutorService executorService;
+    private final KnnSampler.Factory samplerFactory;
+    private final JoinNeighbors.Factory joinNeighborsFactory;
+    private final GenerateRandomNeighbors.Factory generateRandomNeighborsFactory;
+    private final SplitOldAndNewNeighbors.Factory splitOldAndNewNeighborsFactory;
+    private final long updateThreshold;
+
+    private Knn(
+        Graph graph,
+        ProgressTracker progressTracker,
+        ExecutorService executorService,
+        K k,
+        Concurrency concurrency,
+        int minBatchSize,
+        int maxIterations,
+        double similarityCutoff,
+        double perturbationRate,
+        int randomJoins,
+        Optional<Long> randomSeed,
+        KnnSampler.SamplerType initialSamplerType,
+        SimilarityFunction similarityFunction,
+        NeighborFilterFactory neighborFilterFactory,
+        NeighbourConsumers neighborConsumers,
+        TerminationFlag terminationFlag
+    ) {
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
+        this.graph = graph;
+        this.concurrency = concurrency;
+        this.maxIterations = maxIterations;
+        this.similarityCutoff = similarityCutoff;
+        this.minBatchSize = minBatchSize;
+        this.neighborFilterFactory = neighborFilterFactory;
+        this.executorService = executorService;
+
+        this.updateThreshold = k.updateThreshold();
+
+        var splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
+        switch (initialSamplerType) {
+            case UNIFORM:
+                this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount(), splittableRandom);
+                break;
+            case RANDOMWALK:
+                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value(), splittableRandom);
+                break;
+            default:
+                throw new IllegalStateException("Invalid KnnSampler");
+        }
+        this.generateRandomNeighborsFactory = new GenerateRandomNeighbors.Factory(
+            similarityFunction,
+            neighborConsumers,
+            k.value(),
+            splittableRandom,
+            progressTracker
+        );
+        this.splitOldAndNewNeighborsFactory = new SplitOldAndNewNeighbors.Factory(
+            k.sampledValue(),
+            splittableRandom,
+            progressTracker
+        );
+        this.joinNeighborsFactory = new JoinNeighbors.Factory(
+            similarityFunction,
+            k.sampledValue(),
+            perturbationRate,
+            randomJoins,
+            splittableRandom,
+            progressTracker
+        );
+    }
 
     public static Knn create(
         Graph graph,
@@ -107,81 +183,6 @@ public final class Knn extends Algorithm<KnnResult> {
             neighborFilterFactory,
             neighbourConsumers.orElse(NeighbourConsumers.no_op),
             terminationFlag
-        );
-    }
-
-    private final Graph graph;
-    private final Concurrency concurrency;
-    private final int maxIterations;
-    private final double similarityCutoff;
-    private final int minBatchSize;
-    private final NeighborFilterFactory neighborFilterFactory;
-    private final ExecutorService executorService;
-    private final KnnSampler.Factory samplerFactory;
-    private final JoinNeighbors.Factory joinNeighborsFactory;
-    private final GenerateRandomNeighbors.Factory generateRandomNeighborsFactory;
-    private final SplitOldAndNewNeighbors.Factory splitOldAndNewNeighborsFactory;
-    private final long updateThreshold;
-
-    private Knn(
-        Graph graph,
-        ProgressTracker progressTracker,
-        ExecutorService executorService,
-        K k,
-        Concurrency concurrency,
-        int minBatchSize,
-        int maxIterations,
-        double similarityCutoff,
-        double perturbationRate,
-        int randomJoins,
-        Optional<Long> randomSeed,
-        KnnSampler.SamplerType initialSamplerType,
-        SimilarityFunction similarityFunction,
-        NeighborFilterFactory neighborFilterFactory,
-        NeighbourConsumers neighborConsumers,
-        TerminationFlag terminationFlag
-    ) {
-        super(progressTracker, terminationFlag);
-        this.graph = graph;
-        this.concurrency = concurrency;
-        this.maxIterations = maxIterations;
-        this.similarityCutoff = similarityCutoff;
-        this.minBatchSize = minBatchSize;
-        this.neighborFilterFactory = neighborFilterFactory;
-        this.executorService = executorService;
-
-        this.updateThreshold = k.updateThreshold();
-
-        var splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
-        switch (initialSamplerType) {
-            case UNIFORM:
-                this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount(), splittableRandom);
-                break;
-            case RANDOMWALK:
-                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value(), splittableRandom);
-                break;
-            default:
-                throw new IllegalStateException("Invalid KnnSampler");
-        }
-        this.generateRandomNeighborsFactory = new GenerateRandomNeighbors.Factory(
-            similarityFunction,
-            neighborConsumers,
-            k.value(),
-            splittableRandom,
-            progressTracker
-        );
-        this.splitOldAndNewNeighborsFactory = new SplitOldAndNewNeighbors.Factory(
-            k.sampledValue(),
-            splittableRandom,
-            progressTracker
-        );
-        this.joinNeighborsFactory = new JoinNeighbors.Factory(
-            similarityFunction,
-            k.sampledValue(),
-            perturbationRate,
-            randomJoins,
-            splittableRandom,
-            progressTracker
         );
     }
 

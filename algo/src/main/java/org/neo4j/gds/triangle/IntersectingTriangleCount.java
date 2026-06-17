@@ -54,6 +54,7 @@ import java.util.concurrent.atomic.LongAdder;
 public final class IntersectingTriangleCount extends Algorithm<TriangleCountResult> {
 
     static final int EXCLUDED_NODE_TRIANGLE_COUNT = -1;
+    private final TerminationFlag terminationFlag;
 
     private final Graph graph;
     private final RelationshipIntersectFactory intersectFactory;
@@ -105,7 +106,8 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.intersectFactory = intersectFactory;
         this.concurrency = concurrency;

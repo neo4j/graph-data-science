@@ -45,6 +45,7 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
     NodePropertyPredictPipeline,
     HugeDoubleArray
     > {
+    private final TerminationFlag terminationFlag;
     private final Regressor regressor;
     private final PipelineGraphFilter predictGraphFilter;
 
@@ -57,7 +58,8 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
         GraphStore graphStore,
         Regressor regressor
     ) {
-        super(progressTracker, terminationFlag, pipeline, config, executionContext, graphStore);
+        super(progressTracker, pipeline, config, executionContext, graphStore);
+        this.terminationFlag = terminationFlag;
         this.regressor = regressor;
         this.predictGraphFilter = new PipelineGraphFilter(
             config.nodeLabelIdentifiers(graphStore),

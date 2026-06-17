@@ -48,6 +48,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ToUndirected extends Algorithm<SingleTypeRelationships> {
+    private final TerminationFlag terminationFlag;
     private final GraphStore graphStore;
     private final ExecutorService executorService;
     private final Concurrency concurrency;
@@ -61,8 +62,8 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
-
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graphStore = graphStore;
         this.parameters = params;
         this.executorService = executorService;

@@ -50,7 +50,7 @@ public abstract class PipelineTrainAlgorithm<
         GraphStore graphStore,
         CONFIG config
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
         this.pipelineTrainer = pipelineTrainer;
         this.pipeline = pipeline;
         this.toCatalogModelConverter = toCatalogModelConverter;

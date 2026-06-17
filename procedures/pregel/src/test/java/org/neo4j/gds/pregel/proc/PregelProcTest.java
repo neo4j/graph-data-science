@@ -466,7 +466,7 @@ public class PregelProcTest extends BaseProcTest {
             TerminationFlag terminationFlag,
             boolean throwInCompute
         ) {
-            super(progressTracker, terminationFlag);
+            super(progressTracker);
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override

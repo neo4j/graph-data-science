@@ -52,7 +52,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
         this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, progressTracker, terminationFlag);
         this.mode = mode;
         this.executorService = executorService;

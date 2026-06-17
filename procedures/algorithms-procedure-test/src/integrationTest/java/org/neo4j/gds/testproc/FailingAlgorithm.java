@@ -21,11 +21,10 @@ package org.neo4j.gds.testproc;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.termination.TerminationFlag;
 
 class FailingAlgorithm extends Algorithm<OutputFromProcedureThatFailsDuringTask> {
     FailingAlgorithm(ProgressTracker progressTracker) {
-        super(progressTracker, TerminationFlag.RUNNING_TRUE);
+        super(progressTracker);
     }
 
     @Override

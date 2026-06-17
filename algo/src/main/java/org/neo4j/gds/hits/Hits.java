@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 
 public class Hits extends Algorithm<PregelResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final HitsConfig config;
     private final ExecutorService executorService;
@@ -41,7 +42,8 @@ public class Hits extends Algorithm<PregelResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ){
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.config = config;
         this.executorService = executorService;

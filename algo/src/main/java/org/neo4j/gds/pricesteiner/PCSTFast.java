@@ -28,11 +28,13 @@ import java.util.function.LongToDoubleFunction;
 
 public class PCSTFast extends Algorithm<PrizeSteinerTreeResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final LongToDoubleFunction prizes; //figure out how to expose to user
 
     public PCSTFast(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.prizes = prizes;
     }

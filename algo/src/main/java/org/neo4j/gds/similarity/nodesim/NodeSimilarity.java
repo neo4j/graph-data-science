@@ -52,6 +52,7 @@ import java.util.stream.StreamSupport;
 
 public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final NodeSimilarityParameters parameters;
     private final boolean sortVectors;
@@ -80,7 +81,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         NodeFilter targetNodeFilter,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
         this.sourceNodeFilter = sourceNodeFilter;

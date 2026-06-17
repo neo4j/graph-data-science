@@ -60,6 +60,7 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
  */
 
 public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final ExecutorService executorService;
     private final Concurrency concurrency;
@@ -83,7 +84,8 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         AtomicLong rootQueue,
         CliqueCountsHandler cliqueCountsHandler
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.concurrency = parameters.concurrency();
         this.executorService = executorService;

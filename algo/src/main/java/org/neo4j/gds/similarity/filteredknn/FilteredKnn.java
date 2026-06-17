@@ -118,17 +118,16 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             terminationFlag
         );
 
-        return new FilteredKnn(context.progressTracker(), terminationFlag, knn, targetNodeFiltering, sourceNodeFilter);
+        return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter);
     }
 
     private FilteredKnn(
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag,
         Knn delegate,
         StreamProducingTargetNodeFiltering targetNodeFiltering,
         NodeFilter sourceNodeFilter
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
         this.delegate = delegate;
         this.targetNodeFiltering = targetNodeFiltering;
         this.sourceNodeFilter = sourceNodeFilter;

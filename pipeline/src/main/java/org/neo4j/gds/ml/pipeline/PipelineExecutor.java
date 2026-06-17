@@ -27,7 +27,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Set;
@@ -53,13 +52,12 @@ public abstract class PipelineExecutor<
 
     protected PipelineExecutor(
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag,
         PIPELINE pipeline,
         PIPELINE_CONFIG config,
         ExecutionContext executionContext,
         GraphStore graphStore
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
         this.pipeline = pipeline;
         this.config = config;
         this.executionContext = executionContext;

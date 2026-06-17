@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.paths.delta.DistanceAndPredecessors.NO_PREDECESSOR;
 
 public class BellmanFord extends Algorithm<BellmanFordResult> {
+    private final TerminationFlag terminationFlag;
     private final long sourceNode;
     private final Graph graph;
     private final boolean trackNegativeCycles;
@@ -65,7 +66,8 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.sourceNode = sourceNode;
         this.trackNegativeCycles = trackNegativeCycles;

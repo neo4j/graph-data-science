@@ -63,6 +63,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     private final LinkPredictionRelationshipSampler linkPredictionRelationshipSampler;
 
     private final Set<RelationshipType> availableRelationshipTypesForNodeProperty;
+    private final TerminationFlag terminationFlag;
 
     public LinkPredictionTrainPipelineExecutor(
         Log log,
@@ -73,9 +74,9 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         ExecutionContext executionContext,
         GraphStore graphStore
     ) {
-        super(progressTracker, terminationFlag, pipeline, config, executionContext, graphStore);
+        super(progressTracker, pipeline, config, executionContext, graphStore);
         this.log = log;
-
+        this.terminationFlag = terminationFlag;
         this.availableRelationshipTypesForNodeProperty = graphStore.relationshipTypes()
             .stream()
             .filter(relType -> !relType.name.equals(config.targetRelationshipType()))

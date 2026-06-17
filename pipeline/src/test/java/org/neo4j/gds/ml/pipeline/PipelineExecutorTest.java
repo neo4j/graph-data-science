@@ -42,7 +42,6 @@ import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.settings.Neo4jSettings;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
 import java.util.List;
@@ -212,7 +211,6 @@ class PipelineExecutorTest {
         ) {
             super(
                 progressTracker,
-                TerminationFlag.RUNNING_TRUE,
                 pipelineStub,
                 config,
                 ExecutionContext.EMPTY,

@@ -48,6 +48,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     private static final long[] TOMBSTONE = new long[0];
 
     private final Log log;
+    private final TerminationFlag terminationFlag;
     private final Concurrency concurrency;
     private final ExecutorService executorService;
     private final Graph graph;
@@ -56,7 +57,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     private final List<Long> sourceNodes;
     private final ExternalTerminationFlag externalTerminationFlag;
     private final BlockingQueue<long[]> walks;
-    private final TerminationFlag terminationFlag;
 
     public static RandomWalk create(
         Log log,
@@ -160,7 +160,8 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         ExternalTerminationFlag externalTerminationFlag,
         long randomSeed
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.log = log;
         this.concurrency = concurrency;
         this.executorService = executorService;
@@ -170,7 +171,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         this.sourceNodes = sourceNodes;
         this.walks = walks;
         this.externalTerminationFlag = externalTerminationFlag;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

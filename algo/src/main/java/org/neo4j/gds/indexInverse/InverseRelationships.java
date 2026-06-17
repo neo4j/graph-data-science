@@ -50,6 +50,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class InverseRelationships extends Algorithm<Map<RelationshipType, SingleTypeRelationships>> {
+    private final TerminationFlag terminationFlag;
     private final GraphStore graphStore;
     private final InverseRelationshipsParameters parameters;
     private final Concurrency concurrency;
@@ -62,8 +63,8 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
-
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graphStore = graphStore;
         this.parameters = parameters;
         this.concurrency = parameters.concurrency();

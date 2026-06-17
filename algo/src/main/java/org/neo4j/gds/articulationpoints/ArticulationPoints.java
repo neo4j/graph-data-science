@@ -32,6 +32,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Optional;
 
 public final class ArticulationPoints extends Algorithm<ArticulationPointsResult> {
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
 
     private final BitSet visited;
@@ -49,7 +50,8 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
         Optional<SubtreeTracker> subtreeTracker,
         TerminationFlag terminationFlag
     ){
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
 
         this.graph = graph;
 

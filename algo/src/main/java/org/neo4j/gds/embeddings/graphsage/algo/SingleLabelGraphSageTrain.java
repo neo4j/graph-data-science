@@ -52,12 +52,12 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
         String gdsVersion,
         GraphSageTrainConfig config
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.log = log;
         this.graph = graph;
         this.parameters = parameters;
         this.executor = executor;
-        this.terminationFlag = terminationFlag;
         this.gdsVersion = gdsVersion;
         this.config = config;
     }

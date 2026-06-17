@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
 public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
     private static final Comparator MINIMIZING = (lhs, rhs) -> lhs < rhs;
     private static final Comparator MAXIMIZING = (lhs, rhs) -> lhs > rhs;
+    private final TerminationFlag terminationFlag;
 
     private final Graph graph;
     private final SplittableRandom random;
@@ -143,7 +144,8 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
         int iterations,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.random = random;
         this.comparator = comparator;

@@ -35,7 +35,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;
 import java.util.List;
@@ -125,7 +124,6 @@ class CollapsePathTest {
 
         var relationships = new CollapsePath(
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             false,
             RelationshipType.of("SAME_DRUG"),
@@ -143,7 +141,6 @@ class CollapsePathTest {
 
         var relationships = new CollapsePath(
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             true,
             RelationshipType.of("SAME_DRUG"),
@@ -159,7 +156,6 @@ class CollapsePathTest {
     void runWithDifferentRelationshipTypes() {
         var relationships = new CollapsePath(
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             Collections.singletonList(new Graph[]{tookGraph, takenByGraph}),
             false,
             RelationshipType.of("SAME_DRUG"),
@@ -212,7 +208,6 @@ class CollapsePathTest {
 
             var relationships = CollapsePath.create(
                 ProgressTracker.NULL_TRACKER,
-                TerminationFlag.RUNNING_TRUE,
                 graphStore,
                 parameters,
                 DefaultPool.INSTANCE
@@ -242,7 +237,6 @@ class CollapsePathTest {
 
             var relationships = CollapsePath.create(
                 ProgressTracker.NULL_TRACKER,
-                TerminationFlag.RUNNING_TRUE,
                 graphStore,
                 parameters,
                 DefaultPool.INSTANCE

@@ -43,6 +43,7 @@ import java.util.concurrent.ExecutorService;
  */
 public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
 
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final long nodeCount;
     private final Concurrency concurrency;
@@ -80,7 +81,8 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;

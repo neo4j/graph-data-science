@@ -38,7 +38,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -125,7 +124,6 @@ class ConductanceTest {
         var minBatchSize = concurrency > 1 ? 1 : 10_000;
         var conductance = new Conductance(
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             orientation == Orientation.NATURAL ? naturalGraph : undirectedGraph,
             new Concurrency(4),
             minBatchSize,
@@ -165,7 +163,6 @@ class ConductanceTest {
 
             var conductance = new Conductance(
                 progressTrackerWithLog.progressTracker(),
-                TerminationFlag.RUNNING_TRUE,
                 graph,
                 new Concurrency(1),
                 1,

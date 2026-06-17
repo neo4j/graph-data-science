@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public final class MaxFlow extends Algorithm<FlowResult> {
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final MaxFlowParameters parameters;
     private final NodeConstraintsIdMap constraints;
@@ -77,7 +78,8 @@ public final class MaxFlow extends Algorithm<FlowResult> {
         NodeConstraintsIdMap constraints,
         Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand
     ) {
-        super(progressTracker, terminationFlag);
+        super(progressTracker);
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.parameters = parameters;
         this.constraints = constraints;
