@@ -56,6 +56,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     private final List<Long> sourceNodes;
     private final ExternalTerminationFlag externalTerminationFlag;
     private final BlockingQueue<long[]> walks;
+    private final TerminationFlag terminationFlag;
 
     public static RandomWalk create(
         Log log,
@@ -79,7 +80,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             );
         }
 
-        return new RandomWalk(
+        return create(
             log,
             graph,
             concurrency,
@@ -101,7 +102,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
-        return new RandomWalk(
+        return create(
             log,
             graph,
             parameters.concurrency(),
@@ -115,7 +116,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         );
     }
 
-    private RandomWalk(
+    private static RandomWalk create(
         Log log,
         Graph graph,
         Concurrency concurrency,
@@ -127,16 +128,48 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
+        var walks = new ArrayBlockingQueue<long[]>(walkBufferSize);
+        var externalTerminationFlag = new ExternalTerminationFlag(terminationFlag);
+        var randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
+
+        return new RandomWalk(
+            log,
+            graph,
+            concurrency,
+            executorService,
+            walkParameters,
+            sourceNodes,
+            progressTracker,
+            terminationFlag,
+            walks,
+            externalTerminationFlag,
+            randomSeed
+        );
+    }
+
+    private RandomWalk(
+        Log log,
+        Graph graph,
+        Concurrency concurrency,
+        ExecutorService executorService,
+        WalkParameters walkParameters,
+        List<Long> sourceNodes,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
+        ArrayBlockingQueue<long[]> walks,
+        ExternalTerminationFlag externalTerminationFlag,
+        long randomSeed
+    ) {
         super(progressTracker);
         this.log = log;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.walks = new ArrayBlockingQueue<>(walkBufferSize);
-        this.externalTerminationFlag = new ExternalTerminationFlag(terminationFlag);
         this.graph = graph;
+        this.randomSeed = randomSeed;
         this.walkParameters = walkParameters;
         this.sourceNodes = sourceNodes;
-        this.randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
+        this.walks = walks;
+        this.externalTerminationFlag = externalTerminationFlag;
         this.terminationFlag = terminationFlag;
     }
 
