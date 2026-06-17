@@ -67,7 +67,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.progressTracker = progressTracker;
         this.sourceNodes = sourceNodes;

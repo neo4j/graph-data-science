@@ -49,7 +49,7 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
         Optional<SubtreeTracker> subtreeTracker,
         TerminationFlag terminationFlag
     ){
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
 
         this.graph = graph;
 
@@ -58,7 +58,6 @@ public final class ArticulationPoints extends Algorithm<ArticulationPointsResult
         this.low = HugeLongArray.newArray(graph.nodeCount());
         this.subtreeTracker =  subtreeTracker;
         this.articulationPoints = new BitSet(graph.nodeCount());
-        this.terminationFlag = terminationFlag;
     }
 
     public static  ArticulationPoints create(

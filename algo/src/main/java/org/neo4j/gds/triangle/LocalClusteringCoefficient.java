@@ -57,7 +57,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.concurrency = concurrency;
         this.maxDegree = maxDegree;
@@ -66,8 +66,6 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             Optional.ofNullable(seedProperty)
                 .map(graph::nodeProperties)
                 .orElse(null);
-
-        this.terminationFlag = terminationFlag;
     }
 
     public LocalClusteringCoefficient(

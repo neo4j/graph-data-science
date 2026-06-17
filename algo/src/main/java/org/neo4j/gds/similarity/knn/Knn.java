@@ -141,7 +141,7 @@ public final class Knn extends Algorithm<KnnResult> {
         NeighbourConsumers neighborConsumers,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.concurrency = concurrency;
         this.maxIterations = maxIterations;
@@ -183,8 +183,6 @@ public final class Knn extends Algorithm<KnnResult> {
             splittableRandom,
             progressTracker
         );
-
-        this.terminationFlag = terminationFlag;
     }
 
     public ExecutorService executorService() {

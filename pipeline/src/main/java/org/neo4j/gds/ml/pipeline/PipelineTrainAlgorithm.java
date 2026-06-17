@@ -25,6 +25,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.model.CatalogModelContainer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Set;
 
@@ -41,14 +42,15 @@ public abstract class PipelineTrainAlgorithm<
     private final ResultToModelConverter<MODEL_RESULT, RESULT> toCatalogModelConverter;
 
     public PipelineTrainAlgorithm(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         PipelineTrainer<RESULT> pipelineTrainer,
         TrainingPipeline<FEATURE_STEP> pipeline,
         ResultToModelConverter<MODEL_RESULT, RESULT> toCatalogModelConverter,
         GraphStore graphStore,
-        CONFIG config,
-        ProgressTracker progressTracker
+        CONFIG config
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.pipelineTrainer = pipelineTrainer;
         this.pipeline = pipeline;
         this.toCatalogModelConverter = toCatalogModelConverter;

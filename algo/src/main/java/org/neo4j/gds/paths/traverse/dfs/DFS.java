@@ -51,15 +51,13 @@ public class DFS extends Algorithm<HugeLongArray> {
         TerminationFlag terminationFlag
     ) {
 
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.startNodeId = startNodeId;
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
         this.maxDepth = maxDepth;
-
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

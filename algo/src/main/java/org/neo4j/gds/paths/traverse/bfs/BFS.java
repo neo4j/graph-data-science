@@ -64,7 +64,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class BFS extends Algorithm<HugeLongArray> {
 
     private static final int DEFAULT_DELTA = 64;
-    public static final int ALL_DEPTHS_ALLOWED = -1;
 
     private final long sourceNodeId;
     private final ExitPredicate exitPredicate;
@@ -166,7 +165,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.sourceNodeId = sourceNodeId;
         this.exitPredicate = exitPredicate;
@@ -178,7 +177,6 @@ public final class BFS extends Algorithm<HugeLongArray> {
         this.traversedNodes = traversedNodes;
         this.weights = weights;
         this.visited = visited;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

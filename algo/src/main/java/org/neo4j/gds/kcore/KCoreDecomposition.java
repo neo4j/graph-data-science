@@ -64,11 +64,10 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         int chunkSize,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.concurrency = concurrency;
         this.chunkSize = chunkSize;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

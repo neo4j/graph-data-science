@@ -37,8 +37,8 @@ public final class AStar extends Algorithm<PathFindingResult> {
 
     private final Dijkstra dijkstra;
 
-    private AStar(Dijkstra dijkstra, ProgressTracker progressTracker) {
-        super(progressTracker);
+    private AStar(ProgressTracker progressTracker, TerminationFlag terminationFlag, Dijkstra dijkstra) {
+        super(progressTracker, terminationFlag);
         this.dijkstra = dijkstra;
     }
 
@@ -82,7 +82,8 @@ public final class AStar extends Algorithm<PathFindingResult> {
             progressTracker,
             terminationFlag
         );
-        return new AStar(dijkstra, progressTracker);
+
+        return new AStar(progressTracker, terminationFlag, dijkstra);
     }
 
     

@@ -22,6 +22,7 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class TestAlgorithm extends Algorithm<TestAlgorithmResult> {
 
@@ -33,7 +34,7 @@ public class TestAlgorithm extends Algorithm<TestAlgorithmResult> {
         ProgressTracker progressTracker,
         boolean throwInCompute
     ) {
-        super(progressTracker);
+        super(progressTracker, TerminationFlag.RUNNING_TRUE);
         this.graph = graph;
         this.throwInCompute = throwInCompute;
     }

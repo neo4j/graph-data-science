@@ -55,11 +55,10 @@ public class Prim extends Algorithm<SpanningTree> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.minMax = minMax;
         this.startNodeId = startNodeId;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

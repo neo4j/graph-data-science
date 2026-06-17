@@ -202,11 +202,12 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         );
 
         var algorithm = new NodeClassificationTrainAlgorithm(
+            progressTracker,
+            terminationFlag,
             pipelineTrainer,
             pipeline,
             graphStore,
-            configuration,
-            progressTracker
+            configuration
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(

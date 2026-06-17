@@ -70,14 +70,13 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
         Concurrency concurrency,
         ProgressTracker progressTracker, TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
 
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.counter = new AtomicInteger();
-        this.terminationFlag = terminationFlag;
     }
 
     /**

@@ -59,7 +59,7 @@ public class CELF extends Algorithm<CELFResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
 
         this.graph = graph;
         this.parameters = parameters;
@@ -77,7 +77,6 @@ public class CELF extends Algorithm<CELFResult> {
                     : costValues.get(a) > costValues.get(b);                       // otherwise compare the costs
             }
         };
-        this.terminationFlag = terminationFlag;
 
     }
 

@@ -88,7 +88,7 @@ public class FastRP extends Algorithm<FastRPResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.featureExtractors = featureExtractors;
         this.relationshipWeightProperty = parameters.relationshipWeightProperty();
@@ -112,8 +112,6 @@ public class FastRP extends Algorithm<FastRPResult> {
             ? this::addArrayValuesWeighted
             : (lhs, rhs, ignoreWeight) -> addInPlace(lhs, rhs);
         this.embeddings.setAll((i) -> new float[embeddingDimension]);
-
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

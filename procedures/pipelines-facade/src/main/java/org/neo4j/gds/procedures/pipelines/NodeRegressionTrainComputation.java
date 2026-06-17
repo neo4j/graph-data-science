@@ -202,11 +202,12 @@ final class NodeRegressionTrainComputation implements Computation<NodeRegression
         );
 
         var algorithm = new NodeRegressionTrainAlgorithm(
+            progressTracker,
+            terminationFlag,
             pipelineTrainer,
             pipeline,
             graphStore,
-            configuration,
-            progressTracker
+            configuration
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(

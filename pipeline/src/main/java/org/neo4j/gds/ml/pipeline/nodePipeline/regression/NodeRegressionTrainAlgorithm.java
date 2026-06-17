@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult.NodeRegressionTrainPipelineResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class NodeRegressionTrainAlgorithm extends PipelineTrainAlgorithm<
     NodeRegressionTrainResult,
@@ -33,13 +34,22 @@ public class NodeRegressionTrainAlgorithm extends PipelineTrainAlgorithm<
     NodeFeatureStep> {
 
     public NodeRegressionTrainAlgorithm(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         PipelineTrainer<NodeRegressionTrainResult> pipelineTrainer,
         NodeRegressionTrainingPipeline pipeline,
         GraphStore graphStore,
-        NodeRegressionPipelineTrainConfig config,
-        ProgressTracker progressTracker
+        NodeRegressionPipelineTrainConfig config
     ) {
-        super(pipelineTrainer, pipeline, new NodeRegressionToModelConverter(pipeline, config), graphStore, config, progressTracker);
+        super(
+            progressTracker,
+            terminationFlag,
+            pipelineTrainer,
+            pipeline,
+            new NodeRegressionToModelConverter(pipeline, config),
+            graphStore,
+            config
+        );
     }
 
 }

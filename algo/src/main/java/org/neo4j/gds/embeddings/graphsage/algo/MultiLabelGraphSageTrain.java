@@ -64,7 +64,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         String gdsVersion,
         GraphSageTrainConfig config
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.log = log;
         this.graph = graph;
         this.featureDimension = projectedFeatureDimension;

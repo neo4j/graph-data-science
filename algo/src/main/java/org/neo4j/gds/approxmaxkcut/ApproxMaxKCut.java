@@ -143,7 +143,7 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
         int iterations,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.random = random;
         this.comparator = comparator;
@@ -156,7 +156,6 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
         this.minCommunitySizes = minCommunitySizes;
         this.k = k;
         this.iterations = iterations;
-        this.terminationFlag = terminationFlag;
     }
 
     @FunctionalInterface

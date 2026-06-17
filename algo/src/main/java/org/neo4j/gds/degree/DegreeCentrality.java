@@ -62,14 +62,13 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.executor = executor;
         this.concurrency = concurrency;
         this.orientation = orientation;
         this.hasRelationshipWeightProperty = hasRelationshipWeightProperty;
         this.minBatchSize = minBatchSize;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

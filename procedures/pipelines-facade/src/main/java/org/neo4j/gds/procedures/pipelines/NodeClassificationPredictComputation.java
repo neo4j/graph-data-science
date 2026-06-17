@@ -39,6 +39,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
 final class NodeClassificationPredictComputation implements Computation<NodeClassificationPipelineResult> {
@@ -54,6 +55,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
+    private final TerminationFlag terminationFlag;
     private final TerminationMonitor terminationMonitor;
     private final User user;
 
@@ -77,6 +79,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
         RelationshipExporterBuilder relationshipExporterBuilder,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
@@ -96,6 +99,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
+        this.terminationFlag = terminationFlag;
         this.terminationMonitor = terminationMonitor;
         this.user = user;
         this.progressTrackerCreator = progressTrackerCreator;
@@ -117,6 +121,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
         RelationshipExporterBuilder relationshipExporterBuilder,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
@@ -138,6 +143,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
             relationshipExporterBuilder,
             requestCorrelationId,
             taskRegistryFactory,
+            terminationFlag,
             terminationMonitor,
             user,
             progressTrackerCreator,
@@ -191,11 +197,12 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
         );
 
         var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
+            progressTracker,
+            terminationFlag,
             nodeClassificationPipeline,
             configuration,
             executionContext,
             graphStore,
-            progressTracker,
             data,
             classIdMap
         );

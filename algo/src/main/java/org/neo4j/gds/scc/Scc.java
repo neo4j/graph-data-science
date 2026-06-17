@@ -49,7 +49,7 @@ public class Scc extends Algorithm<HugeLongArray> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
 
         this.graph = graph;
         var nodeCount = this.graph.nodeCount();
@@ -60,8 +60,6 @@ public class Scc extends Algorithm<HugeLongArray> {
         this.stack = HugeLongArrayStack.newStack(nodeCount);
         this.todo = new PagedLongStack(nodeCount); //can be as high as `graph.relationshipsCount()` if we are unlucky...
         this.visited = new BitSet(nodeCount);
-
-        this.terminationFlag = terminationFlag;
     }
 
     /**

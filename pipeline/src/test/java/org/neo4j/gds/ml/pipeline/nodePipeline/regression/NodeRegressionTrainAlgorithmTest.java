@@ -146,11 +146,12 @@ class NodeRegressionTrainAlgorithmTest {
         );
 
         return new NodeRegressionTrainAlgorithm(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             pipelineTrainer,
             pipeline,
             graphStore,
-            config,
-            ProgressTracker.NULL_TRACKER
+            config
         );
     }
 }

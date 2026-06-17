@@ -61,13 +61,12 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
 
         this.graphStore = graphStore;
         this.parameters = params;
         this.executorService = executorService;
         this.concurrency = params.concurrency();
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

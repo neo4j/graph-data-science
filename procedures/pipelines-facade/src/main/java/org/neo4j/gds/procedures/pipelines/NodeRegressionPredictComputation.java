@@ -44,6 +44,7 @@ import org.neo4j.gds.ml.models.linearregression.LinearRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorData;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
 final class NodeRegressionPredictComputation implements Computation<HugeDoubleArray> {
@@ -59,6 +60,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
+    private final TerminationFlag terminationFlag;
     private final TerminationMonitor terminationMonitor;
     private final User user;
 
@@ -82,6 +84,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         RelationshipExporterBuilder relationshipExporterBuilder,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
@@ -101,6 +104,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
+        this.terminationFlag = terminationFlag;
         this.terminationMonitor = terminationMonitor;
         this.user = user;
         this.progressTrackerCreator = progressTrackerCreator;
@@ -122,6 +126,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         RelationshipExporterBuilder relationshipExporterBuilder,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
@@ -143,6 +148,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             relationshipExporterBuilder,
             requestCorrelationId,
             taskRegistryFactory,
+            terminationFlag,
             terminationMonitor,
             user,
             progressTrackerCreator,
@@ -193,11 +199,12 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         );
 
         return new NodeRegressionPredictPipelineExecutor(
+            progressTracker,
+            terminationFlag,
             predictPipeline,
             configuration,
             executionContext,
             graphStore,
-            progressTracker,
             regressorFrom(model.data())
         ).compute();
     }

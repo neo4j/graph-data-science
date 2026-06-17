@@ -25,6 +25,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -104,11 +105,12 @@ class TriangleStreamTest {
         AtomicInteger allAppearances = new AtomicInteger();
 
         TriangleStream.create(
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 graph,
                 DefaultPool.INSTANCE,
                 new Concurrency(concurrency),
-                Collections.emptyList(),
-                TerminationFlag.RUNNING_TRUE
+                Collections.emptyList()
             )
             .compute()
             .forEach(r -> {

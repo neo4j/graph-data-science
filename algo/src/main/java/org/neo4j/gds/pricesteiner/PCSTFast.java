@@ -32,10 +32,9 @@ public class PCSTFast extends Algorithm<PrizeSteinerTreeResult> {
     private final LongToDoubleFunction prizes; //figure out how to expose to user
 
     public PCSTFast(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.prizes = prizes;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

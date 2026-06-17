@@ -72,7 +72,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.rootGraph = graph;
         this.direction = rootGraph.schema().direction();
         this.maxIterations = maxIterations;
@@ -93,8 +93,6 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.modularities = new double[maxIterations];
         this.modularity = 0d;
         this.tolerance = tolerance;
-
-        this.terminationFlag = terminationFlag;
     }
 
     public Leiden(

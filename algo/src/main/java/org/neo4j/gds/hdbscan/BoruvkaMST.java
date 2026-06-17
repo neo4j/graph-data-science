@@ -28,6 +28,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
 
@@ -46,15 +47,16 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
     private double totalEdgeSum = 0d;
 
     private BoruvkaMST(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Distances distances,
         KdTree kdTree,
         ClosestDistanceTracker closestDistanceTracker,
         HugeDoubleArray coreValues,
         long nodeCount,
-        Concurrency concurrency,
-        ProgressTracker progressTracker
+        Concurrency concurrency
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.distances = distances;
         this.closestDistanceTracker = closestDistanceTracker;
         this.kdTree = kdTree;
@@ -69,46 +71,49 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
         this.concurrency = concurrency;
     }
 
-
     public static BoruvkaMST createWithZeroCores(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Distances distances,
         KdTree kdTree,
         long nodeCount,
-        Concurrency concurrency,
-        ProgressTracker progressTracker
+        Concurrency concurrency
     ) {
         var zeroCores = HugeDoubleArray.newArray(nodeCount);
 
         return new BoruvkaMST(
+            progressTracker,
+            terminationFlag,
             distances,
             kdTree,
             ClosestDistanceTracker.create(nodeCount),
             zeroCores,
             nodeCount,
-            concurrency,
-            progressTracker
+            concurrency
         );
     }
 
     public static BoruvkaMST create(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Distances distances,
         KdTree kdTree,
         CoreResult coreResult,
         long nodeCount,
-        Concurrency concurrency,
-        ProgressTracker progressTracker
+        Concurrency concurrency
     ) {
         var cores = coreResult.createCoreArray();
         var closestTracker = ClosestDistanceTracker.create(nodeCount, cores, coreResult);
 
         return new BoruvkaMST(
+            progressTracker,
+            terminationFlag,
             distances,
             kdTree,
             closestTracker,
             cores,
             nodeCount,
-            concurrency,
-            progressTracker
+            concurrency
         );
     }
 
@@ -226,7 +231,7 @@ public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
 
     }
 
-    void mergeComponents() {
+    private void mergeComponents() {
         for (var componentId = 0; componentId < nodeCount; componentId++) {
             var u = closestDistanceTracker.componentInsideBestNode(componentId);
             var v = closestDistanceTracker.componentOutsideBestNode(componentId);

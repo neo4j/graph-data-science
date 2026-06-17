@@ -74,14 +74,13 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.log = log;
         this.graph = graph;
         this.concurrency = concurrency;
         this.samplingWalkParameters = samplingWalkParameters;
         this.maybeRandomSeed = maybeRandomSeed;
         this.trainParameters = trainParameters;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

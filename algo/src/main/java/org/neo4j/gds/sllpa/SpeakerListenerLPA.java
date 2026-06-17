@@ -46,13 +46,11 @@ public class SpeakerListenerLPA extends Algorithm<PregelResult> {
         Optional<Long> seed,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.config = config;
         this.executorService = executorService;
         this.seed = seed;
-        this.terminationFlag = terminationFlag;
-
     }
 
     @Override

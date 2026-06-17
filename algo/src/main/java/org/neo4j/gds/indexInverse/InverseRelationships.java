@@ -62,14 +62,12 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
 
         this.graphStore = graphStore;
         this.parameters = parameters;
         this.concurrency = parameters.concurrency();
         this.executorService = executorService;
-
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

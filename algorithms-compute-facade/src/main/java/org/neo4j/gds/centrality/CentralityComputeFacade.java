@@ -449,6 +449,7 @@ public class CentralityComputeFacade {
 
         var hits = new HitsWithInvertedIndexValidation(
             progressTracker,
+            terminationFlag,
             inverseRelationshipsParameters,
             graphStore,
             configuration.nodeLabelsFilter(),

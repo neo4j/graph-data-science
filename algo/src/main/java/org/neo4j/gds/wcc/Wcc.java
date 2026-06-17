@@ -67,9 +67,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
-
-        this.terminationFlag = terminationFlag;
+        super(progressTracker, terminationFlag);
 
         this.graph = graph;
         this.parameters = parameters;

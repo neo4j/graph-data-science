@@ -41,11 +41,10 @@ public class Hits extends Algorithm<PregelResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ){
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.config = config;
         this.executorService = executorService;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

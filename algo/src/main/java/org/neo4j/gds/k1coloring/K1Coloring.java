@@ -88,7 +88,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.minBatchSize = minBatchSize;
         this.concurrency = concurrency;
@@ -103,8 +103,6 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         if (maxIterations <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
-
-        this.terminationFlag = terminationFlag;
     }
 
     public K1Coloring(Graph graph, K1ColoringParameters parameters, ExecutorService executorService, ProgressTracker progressTracker, TerminationFlag terminationFlag) {

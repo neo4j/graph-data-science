@@ -80,7 +80,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.rootGraph = graph;
         this.maxIterations = maxIterations;
         this.concurrency = concurrency;
@@ -97,8 +97,6 @@ public final class Louvain extends Algorithm<LouvainResult> {
         this.modularities = new double[maxLevels];
         this.maxLevels = maxLevels;
         this.trackIntermediateCommunities = trackIntermediateCommunities;
-
-        this.terminationFlag = terminationFlag;
     }
 
     public Louvain(Graph graph, LouvainParameters parameters, ProgressTracker progressTracker, TerminationFlag terminationFlag) {

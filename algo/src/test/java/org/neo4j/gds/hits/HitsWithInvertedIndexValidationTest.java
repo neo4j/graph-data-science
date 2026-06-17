@@ -81,6 +81,7 @@ class HitsWithInvertedIndexValidationTest {
             );
             var hitsWithInvertedIndex = new HitsWithInvertedIndexValidation(
                 ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 invertedParameters,
                 graphStore,
                 Set.of(NodeLabel.of("Node")),
@@ -152,6 +153,7 @@ class HitsWithInvertedIndexValidationTest {
 
             new HitsWithInvertedIndexValidation(
                 progressTracker,
+                TerminationFlag.RUNNING_TRUE,
                 invertedParameters,
                 graphStore,
                 Set.of(NodeLabel.of("Node")),
@@ -233,6 +235,7 @@ class HitsWithInvertedIndexValidationTest {
                 );
                 var hitsWithInvertedIndex = new HitsWithInvertedIndexValidation(
                     ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE,
                     invertedParameters,
                     graphStore,
                     Set.of(NodeLabel.of("Node")),
@@ -304,6 +307,7 @@ class HitsWithInvertedIndexValidationTest {
 
                 new HitsWithInvertedIndexValidation(
                     progressTracker,
+                    TerminationFlag.RUNNING_TRUE,
                     invertedParameters,
                     graphStore,
                     Set.of(NodeLabel.of("Node")),

@@ -35,6 +35,7 @@ import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.StringJoining;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -48,14 +49,15 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
     private final PipelineGraphFilter predictGraphFilter;
 
     public NodeRegressionPredictPipelineExecutor(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         NodePropertyPredictPipeline pipeline,
         NodeRegressionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-        ProgressTracker progressTracker,
         Regressor regressor
     ) {
-        super(pipeline, config, executionContext, graphStore, progressTracker);
+        super(progressTracker, terminationFlag, pipeline, config, executionContext, graphStore);
         this.regressor = regressor;
         this.predictGraphFilter = new PipelineGraphFilter(
             config.nodeLabelIdentifiers(graphStore),

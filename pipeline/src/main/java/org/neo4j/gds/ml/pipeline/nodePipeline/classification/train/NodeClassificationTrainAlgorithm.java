@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
     NodeClassificationTrainResult,
@@ -33,12 +34,21 @@ public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
     NodeFeatureStep> {
 
     public NodeClassificationTrainAlgorithm(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         PipelineTrainer<NodeClassificationTrainResult> pipelineTrainer,
         NodeClassificationTrainingPipeline pipeline,
         GraphStore graphStore,
-        NodeClassificationPipelineTrainConfig config,
-        ProgressTracker progressTracker
+        NodeClassificationPipelineTrainConfig config
     ) {
-        super(pipelineTrainer, pipeline, new NodeClassificationToModelConverter(pipeline, config), graphStore, config, progressTracker);
+        super(
+            progressTracker,
+            terminationFlag,
+            pipelineTrainer,
+            pipeline,
+            new NodeClassificationToModelConverter(pipeline, config),
+            graphStore,
+            config
+        );
     }
 }

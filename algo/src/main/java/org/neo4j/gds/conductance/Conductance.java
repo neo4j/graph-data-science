@@ -31,6 +31,7 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,15 +49,16 @@ public class Conductance extends Algorithm<ConductanceResult> {
     private final NodePropertyValues communityProperties;
 
     public Conductance(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         Concurrency concurrency,
         int minBatchSize,
         boolean hasRelationshipWeightProperty,
         String communityProperty,
-        ExecutorService executor,
-        ProgressTracker progressTracker
+        ExecutorService executor
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.concurrency = concurrency;
         this.executor = executor;

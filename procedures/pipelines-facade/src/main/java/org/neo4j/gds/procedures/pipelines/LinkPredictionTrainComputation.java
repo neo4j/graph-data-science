@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
 final class LinkPredictionTrainComputation implements Computation<LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult> {
@@ -57,6 +58,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
+    private final TerminationFlag terminationFlag;
     private final TerminationMonitor terminationMonitor;
     private final User user;
 
@@ -80,6 +82,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         RelationshipExporterBuilder relationshipExporterBuilder,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
@@ -99,6 +102,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
+        this.terminationFlag = terminationFlag;
         this.terminationMonitor = terminationMonitor;
         this.user = user;
         this.progressTrackerCreator = progressTrackerCreator;
@@ -120,6 +124,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         RelationshipExporterBuilder relationshipExporterBuilder,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
@@ -140,6 +145,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
             relationshipExporterBuilder,
             requestCorrelationId,
             taskRegistryFactory,
+            terminationFlag,
             terminationMonitor,
             user,
             progressTrackerCreator,
@@ -203,11 +209,12 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
 
         var pipelineExecutor = new LinkPredictionTrainPipelineExecutor(
             log,
+            progressTracker,
+            terminationFlag,
             pipeline,
             configuration,
             executionContext,
-            graphStore,
-            progressTracker
+            graphStore
         );
 
         try {

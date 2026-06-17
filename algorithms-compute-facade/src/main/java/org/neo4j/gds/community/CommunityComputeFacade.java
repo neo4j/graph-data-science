@@ -43,6 +43,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
@@ -199,13 +200,14 @@ public class CommunityComputeFacade {
         );
 
         var algorithm = new Conductance(
+            progressTracker,
+            terminationFlag,
             graph,
             parameters.concurrency(),
             parameters.minBatchSize(),
             parameters.hasRelationshipWeightProperty(),
             parameters.communityProperty(),
-            DefaultPool.INSTANCE,
-            progressTracker
+            DefaultPool.INSTANCE
         );
 
         return algorithmCaller.run(
@@ -484,10 +486,11 @@ public class CommunityComputeFacade {
         }
 
         var algorithm = ModularityCalculator.create(
+            ProgressTracker.NULL_TRACKER, // future work
+            terminationFlag,
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
-            parameters.concurrency(),
-            terminationFlag
+            parameters.concurrency()
         );
 
         return algorithmCaller.run(
@@ -645,11 +648,11 @@ public class CommunityComputeFacade {
         }
 
         var algorithm = TriangleStream.create(
-            graph,
+            ProgressTracker.NULL_TRACKER, // future work
+            terminationFlag, graph,
             DefaultPool.INSTANCE,
             parameters.concurrency(),
-            parameters.labelFilter(),
-            terminationFlag
+            parameters.labelFilter()
         );
 
         return algorithmCaller.run(

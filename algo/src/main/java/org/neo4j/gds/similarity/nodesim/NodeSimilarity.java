@@ -80,7 +80,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         NodeFilter targetNodeFilter,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
         this.sourceNodeFilter = sourceNodeFilter;
@@ -91,7 +91,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.sourceNodes = new BitSet(graph.nodeCount());
         this.targetNodes = new BitSet(graph.nodeCount());
         this.weighted = this.parameters.hasRelationshipWeightProperty();
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

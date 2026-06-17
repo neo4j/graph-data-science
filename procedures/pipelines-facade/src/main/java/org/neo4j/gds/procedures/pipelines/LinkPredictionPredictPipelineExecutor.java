@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.similarity.knn.KnnTask;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
@@ -59,15 +60,16 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
     private final LPGraphStoreFilter graphStoreFilter;
 
     public LinkPredictionPredictPipelineExecutor(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         LinkPredictionPredictPipeline pipeline,
         Classifier classifier,
         LPGraphStoreFilter graphStoreFilter,
         LinkPredictionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
-        GraphStore graphStore,
-        ProgressTracker progressTracker
+        GraphStore graphStore
     ) {
-        super(pipeline, config, executionContext, graphStore, progressTracker);
+        super(progressTracker, terminationFlag, pipeline, config, executionContext, graphStore);
         this.classifier = classifier;
         this.graphStoreFilter = graphStoreFilter;
     }

@@ -39,6 +39,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -86,11 +87,12 @@ class BoruvkaMSTTest {
             ).build();
 
             var boruvka =  BoruvkaMST.createWithZeroCores(
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 distances,
                 kdTree,
                 graph.nodeCount(),
-                new Concurrency(concurrency),
-                ProgressTracker.NULL_TRACKER
+                new Concurrency(concurrency)
             );
 
             var result = boruvka.compute();
@@ -153,11 +155,12 @@ class BoruvkaMSTTest {
             ).build();
 
             var dualTree =  BoruvkaMST.createWithZeroCores(
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 distances,
                 kdTree,
                 graph.nodeCount(),
-                new Concurrency(concurrency),
-                ProgressTracker.NULL_TRACKER
+                new Concurrency(concurrency)
             );
 
             var result = dualTree.compute();
@@ -220,11 +223,12 @@ class BoruvkaMSTTest {
             ).build();
 
             var boruvka =  BoruvkaMST.createWithZeroCores(
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 distances,
                 kdTree,
                 graph.nodeCount(),
-                new Concurrency(concurrency),
-                ProgressTracker.NULL_TRACKER
+                new Concurrency(concurrency)
             );
 
             var result = boruvka.compute();
@@ -277,11 +281,12 @@ class BoruvkaMSTTest {
             ).build();
 
             BoruvkaMST.createWithZeroCores(
+                progressTracker,
+                TerminationFlag.RUNNING_TRUE,
                 distances,
                 kdTree,
                 graph.nodeCount(),
-                new Concurrency(1),
-                progressTracker
+                new Concurrency(1)
             ).compute();
 
             Assertions.assertThat(log.getMessages(TestLog.INFO))

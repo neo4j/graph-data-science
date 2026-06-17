@@ -42,6 +42,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,19 +66,14 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     public LinkPredictionTrainPipelineExecutor(
         Log log,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig config,
         ExecutionContext executionContext,
-        GraphStore graphStore,
-        ProgressTracker progressTracker
+        GraphStore graphStore
     ) {
-        super(
-            pipeline,
-            config,
-            executionContext,
-            graphStore,
-            progressTracker
-        );
+        super(progressTracker, terminationFlag, pipeline, config, executionContext, graphStore);
         this.log = log;
 
         this.availableRelationshipTypesForNodeProperty = graphStore.relationshipTypes()

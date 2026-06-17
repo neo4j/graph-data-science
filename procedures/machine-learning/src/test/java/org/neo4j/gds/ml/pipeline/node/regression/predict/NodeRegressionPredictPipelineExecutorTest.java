@@ -44,6 +44,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineBaseConfigImpl;
 import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineExecutor;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.TestProc;
 
 import java.time.Duration;
@@ -123,11 +124,12 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 var expectedSchema = graphStore.schema();
 
                 HugeDoubleArray predictions = new NodeRegressionPredictPipelineExecutor(
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE,
                     pipeline,
                     config,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER,
                     createModelData(weights, bias)
                 ).compute();
 
@@ -181,11 +183,12 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(
             db, TestProc.class, caller -> {
                 var pipelineExecutor = new NodeRegressionPredictPipelineExecutor(
+                    progressTracker,
+                    TerminationFlag.RUNNING_TRUE,
                     pipeline,
                     config,
                     caller.executionContext(),
                     graphStore,
-                    progressTracker,
                     modelData
                 );
 
@@ -235,11 +238,12 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
 
                 var pipelineExecutor = new NodeRegressionPredictPipelineExecutor(
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE,
                     pipeline,
                     config,
                     caller.executionContext(),
                     graphStore,
-                    ProgressTracker.NULL_TRACKER,
                     createModelData(manyWeights, bias)
                 );
 

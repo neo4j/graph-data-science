@@ -96,7 +96,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.maxIterations = maxIterations;
@@ -113,8 +113,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         }
 
         this.modularityManager = ModularityManager.create(graph, concurrency);
-
-        this.terminationFlag = terminationFlag;
     }
 
     public ModularityOptimization(

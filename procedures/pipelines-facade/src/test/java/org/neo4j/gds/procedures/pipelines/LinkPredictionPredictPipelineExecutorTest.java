@@ -62,6 +62,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -159,6 +160,8 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE,
             pipeline,
             LogisticRegressionClassifier.from(modelData),
             new LPGraphStoreFilter(
@@ -169,8 +172,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ),
             config,
             ExecutionContext.EMPTY,
-            graphStore,
-            progressTracker
+            graphStore
         );
 
         var predictionResult = pipelineExecutor.compute();
@@ -206,6 +208,8 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             pipeline,
             new RandomForestClassifier(modelData),
             new LPGraphStoreFilter(
@@ -216,8 +220,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ),
             config,
             ExecutionContext.EMPTY,
-            graphStore,
-            ProgressTracker.NULL_TRACKER
+            graphStore
         );
 
         var predictionResult = pipelineExecutor.compute();
@@ -256,6 +259,8 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             pipeline,
             LogisticRegressionClassifier.from(modelData),
             new LPGraphStoreFilter(
@@ -266,8 +271,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ),
             config,
             ExecutionContext.EMPTY,
-            graphStore,
-            ProgressTracker.NULL_TRACKER
+            graphStore
         );
 
         var predictionResult = pipelineExecutor.compute();
@@ -314,13 +318,14 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             pipeline,
             LogisticRegressionClassifier.from(modelData),
             graphStoreFilter,
             config,
             ExecutionContext.EMPTY,
-            multiLabelGraphStore,
-            ProgressTracker.NULL_TRACKER
+            multiLabelGraphStore
         );
 
         var predictionResult = pipelineExecutor.compute();
@@ -396,6 +401,8 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE,
             pipeline,
             LogisticRegressionClassifier.from(modelData),
             new LPGraphStoreFilter(
@@ -406,8 +413,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             ),
             config,
             ExecutionContext.EMPTY,
-            graphStore,
-            progressTracker
+            graphStore
         );
 
         pipelineExecutor.compute();
@@ -508,6 +514,8 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             LinkPredictionPredictPipeline.from(
                 Stream.of(),
                 Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
@@ -526,8 +534,7 @@ class LinkPredictionPredictPipelineExecutorTest {
                 .graphName("DUMMY")
                 .build(),
             ExecutionContext.EMPTY,
-            graphStore,
-            ProgressTracker.NULL_TRACKER
+            graphStore
         );
 
         assertThatThrownBy(pipelineExecutor::compute)

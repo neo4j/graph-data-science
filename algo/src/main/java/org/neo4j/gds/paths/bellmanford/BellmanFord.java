@@ -65,14 +65,13 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.sourceNode = sourceNode;
         this.trackNegativeCycles = trackNegativeCycles;
         this.trackPaths = trackPaths;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.terminationFlag = terminationFlag;
     }
 
     BellmanFord(

@@ -68,7 +68,7 @@ public class HDBScan extends Algorithm<Labels> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.nodes = nodes;
         this.nodePropertyValues = nodePropertyValues;
         this.concurrency = concurrency;
@@ -119,12 +119,13 @@ public class HDBScan extends Algorithm<Labels> {
 
     GeometricMSTResult boruvka(KdTree kdTree, CoreResult coreResult, Distances distances) {
         var boruvkaMST = BoruvkaMST.create(
+            progressTracker,
+            terminationFlag,
             distances,
             kdTree,
             coreResult,
             nodes.nodeCount(),
-            concurrency,
-            progressTracker
+            concurrency
         );
         return boruvkaMST.compute();
     }

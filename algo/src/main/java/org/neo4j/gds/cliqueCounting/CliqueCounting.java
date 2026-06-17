@@ -83,11 +83,10 @@ public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
         AtomicLong rootQueue,
         CliqueCountsHandler cliqueCountsHandler
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.concurrency = parameters.concurrency();
         this.executorService = executorService;
-        this.terminationFlag = terminationFlag;
         this.rootQueue = rootQueue;
         this.countingMode = parameters.countingMode();
         this.subcliques = subcliques;

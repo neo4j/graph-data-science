@@ -390,7 +390,13 @@ class LouvainTest {
         var result = louvain.compute();
         assertThat(result.ranLevels()).isGreaterThan(1);
         LongUnaryOperator vToCommunity = result::community;
-        var modularityCalculator = ModularityCalculator.create(myGraph, vToCommunity, new Concurrency(4),TerminationFlag.RUNNING_TRUE);
+        var modularityCalculator = ModularityCalculator.create(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
+            myGraph,
+            vToCommunity,
+            new Concurrency(4)
+        );
         double calculatedModularity = modularityCalculator.compute().totalModularity();
         assertThat(result.modularity()).isCloseTo(calculatedModularity, Offset.offset(1e-5));
     }

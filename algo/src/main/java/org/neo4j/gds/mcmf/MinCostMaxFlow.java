@@ -95,12 +95,11 @@ public final class MinCostMaxFlow extends Algorithm<CostFlowResult> {
         NodeConstraintsIdMap nodeConstraintsIdMap,
         Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graphOfFlows = graphOfFlows;
         this.graphOfCosts = graphOfCosts;
         this.parameters = parameters;
         this.constraints = nodeConstraintsIdMap;
-        this.terminationFlag = terminationFlag;
         this.supplyAndDemand = supplyAndDemand;
     }
 

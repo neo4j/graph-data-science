@@ -80,7 +80,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
@@ -88,8 +88,6 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         this.centralityComputer = centralityComputer;
         this.farness = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
         this.component = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
-
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

@@ -87,7 +87,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
@@ -97,7 +97,6 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         this.selectionStrategy.init(graph, executorService, concurrency);
         this.divisor = graph.schema().isUndirected() ? 2.0 : 1.0;
         this.traverserFactory = traverserFactory;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

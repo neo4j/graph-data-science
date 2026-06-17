@@ -77,7 +77,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
          ProgressTracker progressTracker,
          TerminationFlag terminationFlag
      ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.sourceNode = sourceNode;
         this.targets = targets;
@@ -90,7 +90,6 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
         this.relationships = trackRelationships ? new HugeLongLongMap() : null;
         this.visited = new BitSet();
         this.pathIndex = 0L;
-        this.terminationFlag = terminationFlag;
     }
 
     public Dijkstra withSourceNode(long sourceNode) {

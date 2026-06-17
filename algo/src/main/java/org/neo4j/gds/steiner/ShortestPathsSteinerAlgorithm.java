@@ -63,7 +63,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.sourceId = sourceId;
         this.terminals = terminals;
@@ -75,11 +75,12 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.binSizeThreshold = SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD;
         this.examinationQueue = createExaminationQueue(graph, applyRerouting, terminals.size());
         this.indexQueue = new LongAdder();
-        this.terminationFlag = terminationFlag;
     }
 
     @TestOnly
     ShortestPathsSteinerAlgorithm(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         long sourceId,
         List<Long> terminals,
@@ -87,10 +88,9 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         Concurrency concurrency,
         boolean applyRerouting,
         int binSizeThreshold,
-        ExecutorService executorService,
-        ProgressTracker progressTracker
+        ExecutorService executorService
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.sourceId = sourceId;
         this.terminals = terminals;
@@ -209,14 +209,15 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
     private PathFindingResult runShortestPaths() {
         var steinerBasedDelta = new SteinerBasedDeltaStepping(
+            progressTracker,
+            terminationFlag,
             graph,
             sourceId,
             delta,
             isTerminal,
             concurrency,
             binSizeThreshold,
-            executorService,
-            progressTracker
+            executorService
         );
 
         return steinerBasedDelta.compute();

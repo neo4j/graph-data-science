@@ -25,8 +25,9 @@ package org.neo4j.gds.ml.pipeline;
  import org.neo4j.gds.config.GraphNameConfig;
  import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
  import org.neo4j.gds.executor.ExecutionContext;
+ import org.neo4j.gds.termination.TerminationFlag;
 
-public abstract class PredictPipelineExecutor<
+ public abstract class PredictPipelineExecutor<
     PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig,
     PIPELINE extends Pipeline<?>,
     RESULT
@@ -38,13 +39,14 @@ public abstract class PredictPipelineExecutor<
     protected final GraphStore graphStore;
 
     protected PredictPipelineExecutor(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         PIPELINE pipeline,
         PIPELINE_CONFIG config,
         ExecutionContext executionContext,
-        GraphStore graphStore,
-        ProgressTracker progressTracker
+        GraphStore graphStore
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.pipeline = pipeline;
         this.config = config;
         this.executionContext = executionContext;

@@ -168,11 +168,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var modelData = createClassifierData(weights, bias);
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 pipeline,
                 config,
                 caller.executionContext(),
                 graphStore,
-                ProgressTracker.NULL_TRACKER,
                 modelData,
                 LocalIdMap.of(42, 1337)
             );
@@ -222,11 +223,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 pipeline,
                 config,
                 caller.executionContext(),
                 graphStore,
-                ProgressTracker.NULL_TRACKER,
                 modelData,
                 LocalIdMap.of(0, 1)
             );
@@ -279,11 +281,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var modelData = createClassifierData(weights, bias);
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 pipeline,
                 config,
                 caller.executionContext(),
                 graphStore,
-                ProgressTracker.NULL_TRACKER,
                 modelData,
                 LocalIdMap.of(0, 1)
             );
@@ -349,11 +352,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
+                progressTracker,
+                TerminationFlag.RUNNING_TRUE,
                 pipeline,
                 config,
                 caller.executionContext(),
                 graphStore,
-                progressTracker,
                 modelData,
                 LocalIdMap.of(0, 1)
             );
@@ -395,11 +399,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .build();
 
             var algo = new NodeClassificationPredictPipelineExecutor(
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 model.customInfo().pipeline(),
                 streamConfig,
                 caller.executionContext(),
                 graphStore,
-                ProgressTracker.NULL_TRACKER,
                 model.data(),
                 LocalIdMap.of(0, 1)
             );
@@ -546,11 +551,12 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 pipeline,
                 config,
                 caller.executionContext(),
                 graphStore,
-                ProgressTracker.NULL_TRACKER,
                 NodeClassificationPipelinePredictProcTestUtil.createClassifierData(manyWeights, bias),
                 LocalIdMap.of(0, 1)
             );

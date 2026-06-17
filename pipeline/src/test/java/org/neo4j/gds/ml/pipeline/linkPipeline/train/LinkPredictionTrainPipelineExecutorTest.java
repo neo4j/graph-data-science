@@ -72,6 +72,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 
@@ -217,11 +218,12 @@ class LinkPredictionTrainPipelineExecutorTest {
             TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
                 var result = new LinkPredictionTrainPipelineExecutor(
                     Log.noOpLog(),
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE,
                     pipeline,
                     config,
                     caller.executionContext(),
-                    graphStore,
-                    ProgressTracker.NULL_TRACKER
+                    graphStore
                 ).compute();
 
                 var actualModel = result.model();
@@ -263,11 +265,12 @@ class LinkPredictionTrainPipelineExecutorTest {
             TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
                 var executor = new LinkPredictionTrainPipelineExecutor(
                     Log.noOpLog(),
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE,
                     pipeline,
                     trainConfig,
                     caller.executionContext(),
-                    graphStore,
-                    ProgressTracker.NULL_TRACKER
+                    graphStore
                 );
 
                 assertThatThrownBy(executor::compute)
@@ -297,11 +300,12 @@ class LinkPredictionTrainPipelineExecutorTest {
             TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {
                 var executor = new LinkPredictionTrainPipelineExecutor(
                     Log.noOpLog(),
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE,
                     pipeline,
                     linkPredictionTrainConfig,
                     caller.executionContext(),
-                    graphStore,
-                    ProgressTracker.NULL_TRACKER
+                    graphStore
                 );
 
                 assertThatThrownBy(executor::compute)
@@ -341,11 +345,12 @@ class LinkPredictionTrainPipelineExecutorTest {
             TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {
                 var executor = new LinkPredictionTrainPipelineExecutor(
                     Log.noOpLog(),
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE,
                     pipeline,
                     linkPredictionTrainConfig,
                     caller.executionContext(),
-                    invalidGraphStore,
-                    ProgressTracker.NULL_TRACKER
+                    invalidGraphStore
                 );
 
                 assertThatThrownBy(executor::compute)
@@ -404,11 +409,12 @@ class LinkPredictionTrainPipelineExecutorTest {
             TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
                 new LinkPredictionTrainPipelineExecutor(
                     log,
+                    progressTracker,
+                    TerminationFlag.RUNNING_TRUE,
                     pipeline,
                     config,
                     caller.executionContext(),
-                    graphStore,
-                    progressTracker
+                    graphStore
                 ).compute();
 
                 assertThat(log.getMessages(TestLog.WARN))
@@ -575,26 +581,28 @@ class LinkPredictionTrainPipelineExecutorTest {
                 .build();
 
             assertThatThrownBy(() -> TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> new LinkPredictionTrainPipelineExecutor(
-                Log.noOpLog(),
-                pipeline,
-                config,
-                caller.executionContext(),
-                graphStore,
-                ProgressTracker.NULL_TRACKER
-            ).compute()
+                    Log.noOpLog(),
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE,
+                    pipeline,
+                    config,
+                    caller.executionContext(),
+                    graphStore
+                ).compute()
             ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Could not find the specified contextNodeLabels for step `assert step filter` of ['INVALID']. Available labels are ['N'].");
 
 
             assertThatThrownBy(() -> TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> new LinkPredictionTrainPipelineExecutor(
-                Log.noOpLog(),
-                pipeline2,
-                config,
-                caller.executionContext(),
-                graphStore,
-                ProgressTracker.NULL_TRACKER
-            ).compute()
+                    Log.noOpLog(),
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE,
+                    pipeline2,
+                    config,
+                    caller.executionContext(),
+                    graphStore
+                ).compute()
             ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Could not find the specified contextRelationshipTypes for step `assert step filter` of ['INVALID']. Available relationship types are ['REL'].");
@@ -702,11 +710,12 @@ class LinkPredictionTrainPipelineExecutorTest {
 
             var result = new LinkPredictionTrainPipelineExecutor(
                 Log.noOpLog(),
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 pipeline,
                 config,
                 ExecutionContext.EMPTY,
-                graphStore,
-                ProgressTracker.NULL_TRACKER
+                graphStore
             ).compute();
 
             // mainly a smoke test
@@ -744,11 +753,12 @@ class LinkPredictionTrainPipelineExecutorTest {
 
             var splits = new LinkPredictionTrainPipelineExecutor(
                 Log.noOpLog(),
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 pipeline,
                 config,
                 ExecutionContext.EMPTY,
-                graphStore,
-                ProgressTracker.NULL_TRACKER
+                graphStore
             ).generateDatasetSplitGraphFilters();
 
             assertThat(splits.get(FEATURE_INPUT).nodeLabels()).containsExactlyInAnyOrder(
@@ -798,11 +808,12 @@ class LinkPredictionTrainPipelineExecutorTest {
 
             var executor = new LinkPredictionTrainPipelineExecutor(
                 Log.noOpLog(),
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE,
                 pipeline,
                 trainConfig,
                 ExecutionContext.EMPTY,
-                graphStore,
-                ProgressTracker.NULL_TRACKER
+                graphStore
             );
 
             assertThatThrownBy(executor::compute)

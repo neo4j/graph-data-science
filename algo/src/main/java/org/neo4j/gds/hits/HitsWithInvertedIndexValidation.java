@@ -29,6 +29,7 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.indexInverse.InverseRelationships;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -43,13 +44,14 @@ public class HitsWithInvertedIndexValidation extends Algorithm<HitsResultWithGra
 
     public HitsWithInvertedIndexValidation(
         ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         InverseRelationshipsParameters inverseRelationshipsParameters,
         GraphStore graphStore,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypesFilter,
         Function<Graph, Hits> hitsFunction
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.inverseRelationshipsParameters = inverseRelationshipsParameters;
         this.graphStore = graphStore;
         this.nodeLabels = nodeLabels;

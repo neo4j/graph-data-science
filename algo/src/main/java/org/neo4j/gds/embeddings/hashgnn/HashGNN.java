@@ -57,7 +57,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
     private final MutableLong currentTotalFeatureCount = new MutableLong();
 
     public HashGNN(Log log, Graph graph, HashGNNParameters parameters, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.log = log;
         this.graph = graph;
         this.parameters = parameters;
@@ -66,8 +66,6 @@ public class HashGNN extends Algorithm<HashGNNResult> {
         long tempRandomSeed = this.parameters.randomSeed().orElse((new SplittableRandom().nextLong()));
         this.randomSeed = new SplittableRandom(tempRandomSeed).nextLong();
         this.rng = new SplittableRandom(randomSeed);
-
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

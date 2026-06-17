@@ -28,10 +28,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Set;
@@ -109,6 +111,8 @@ class CollapseMultiPathsTest {
         );
 
         var path = new CollapsePath(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             pathTemplates,
             false,
             RelationshipType.of("REL"),
@@ -167,6 +171,8 @@ class CollapseMultiPathsTest {
         var train = graphStore.getGraph(RelationshipType.of("TRAIN"));
 
         var path = new CollapsePath(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             List.of(
                 new Graph[]{car, car, car},
                 new Graph[]{train, train, train},

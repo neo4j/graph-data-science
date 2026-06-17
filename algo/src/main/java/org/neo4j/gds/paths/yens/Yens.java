@@ -83,9 +83,8 @@ public final class Yens extends Algorithm<PathFindingResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
-        this.terminationFlag = terminationFlag;
         this.trackRelationships = trackRelationships;
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;

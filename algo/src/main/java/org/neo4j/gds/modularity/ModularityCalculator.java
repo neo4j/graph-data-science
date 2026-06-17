@@ -45,32 +45,41 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
     private final Concurrency concurrency;
 
     public static ModularityCalculator create(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         LongUnaryOperator seedCommunityIdProvider,
-        Concurrency concurrency,
-        TerminationFlag terminationFlag
+        Concurrency concurrency
     ) {
         var communityMapper = createMapping(graph.nodeCount(), seedCommunityIdProvider);
         LongUnaryOperator communityIdProvider = nodeId -> communityMapper.getOrDefault(
             seedCommunityIdProvider.applyAsLong(nodeId),
             -1
         );
-        return new ModularityCalculator(graph, communityIdProvider, communityMapper, concurrency,terminationFlag);
+
+        return new ModularityCalculator(
+            progressTracker,
+            terminationFlag,
+            graph,
+            communityIdProvider,
+            communityMapper,
+            concurrency
+        );
     }
 
     private ModularityCalculator(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         LongUnaryOperator communityIdProvider,
         HugeLongLongMap communityMapper,
-        Concurrency concurrency,
-        TerminationFlag terminationFlag
+        Concurrency concurrency
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.communityIdProvider = communityIdProvider;
         this.communityMapper = communityMapper;
         this.concurrency = concurrency;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

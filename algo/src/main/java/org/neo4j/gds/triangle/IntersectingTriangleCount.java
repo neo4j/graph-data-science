@@ -105,7 +105,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.intersectFactory = intersectFactory;
         this.concurrency = concurrency;
@@ -119,8 +119,6 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         this.queue = new AtomicLong();
 
         this.labelFilterChecker = new LabelFilterChecker(labelFilter, graph::hasLabel);
-
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

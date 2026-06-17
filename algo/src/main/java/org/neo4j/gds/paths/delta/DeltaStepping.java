@@ -80,13 +80,12 @@ public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.startNode = startNode;
         this.delta = delta;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.terminationFlag = terminationFlag;
         this.frontier = HugeLongArray.newArray(graph.relationshipCount());
         this.distances = new DistanceAndPredecessors(
             graph.nodeCount(),

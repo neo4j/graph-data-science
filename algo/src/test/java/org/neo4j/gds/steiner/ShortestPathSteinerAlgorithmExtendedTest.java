@@ -149,6 +149,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
 
         var a = SteinerTestUtils.getNodes(idFunction, 6);
         var steinerTreeResult = new ShortestPathsSteinerAlgorithm(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             a[0],
             List.of(a[2], a[5]),
@@ -157,8 +159,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             false,
             binSizeThreshold,
             //setting custom threshold for such a small graph allows to not examine everything in a single iteration
-            DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            DefaultPool.INSTANCE
         ).compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOT_NODE, a[0], a[1], a[2], a[3], a[4]};
@@ -200,14 +201,15 @@ class ShortestPathSteinerAlgorithmExtendedTest {
         isTerminal.set(a[2]);
         isTerminal.set(a[5]);
         var deltaSteiner = new SteinerBasedDeltaStepping(
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             0,
             2.0,
             isTerminal,
             new Concurrency(1),
             SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD,
-            DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            DefaultPool.INSTANCE
         );
         var result = deltaSteiner.compute().pathSet();
         assertThat(result.size()).isEqualTo(2);

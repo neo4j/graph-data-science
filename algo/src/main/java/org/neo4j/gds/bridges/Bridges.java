@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 public class Bridges extends Algorithm<BridgeResult> {
+    private final List<Bridge> result = new ArrayList<>();
 
     private final Graph graph;
     private final BitSet visited;
@@ -41,7 +42,6 @@ public class Bridges extends Algorithm<BridgeResult> {
     private final HugeLongArray low;
     private long timer;
     private long stackIndex = -1;
-    private List<Bridge> result = new ArrayList<>();
     private final Optional<TreeSizeTracker> treeSizeTracker;
 
     public static  Bridges create(
@@ -71,14 +71,13 @@ public class Bridges extends Algorithm<BridgeResult> {
     private Bridges(Graph graph, ProgressTracker progressTracker, Optional<TreeSizeTracker> treeSizeTracker,
         TerminationFlag terminationFlag
     ){
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
 
         this.graph = graph;
         this.visited = new BitSet(graph.nodeCount());
         this.tin = HugeLongArray.newArray(graph.nodeCount());
         this.low = HugeLongArray.newArray(graph.nodeCount());
         this.treeSizeTracker = treeSizeTracker;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

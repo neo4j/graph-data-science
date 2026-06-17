@@ -66,12 +66,11 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         ExecutorService executor,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.params = params;
         this.executor = executor;
         this.concurrency = params.concurrency();
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

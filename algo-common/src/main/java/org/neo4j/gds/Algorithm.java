@@ -27,10 +27,11 @@ import java.util.concurrent.Callable;
 public abstract class Algorithm<RESULT> implements Callable<RESULT> {
     protected final ProgressTracker progressTracker;
 
-    protected TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
+    protected final TerminationFlag terminationFlag;
 
-    protected Algorithm(ProgressTracker progressTracker) {
+    protected Algorithm(ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     public abstract RESULT compute();

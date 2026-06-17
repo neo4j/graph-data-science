@@ -54,8 +54,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         IdMap targetNodes,
         SplitRelationshipsParameters parameters
     ) {
-        super(progressTracker);
-        this.terminationFlag = terminationFlag;
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.masterGraph = masterGraph;
         this.rootNodes = rootNodes;

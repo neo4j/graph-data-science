@@ -63,36 +63,40 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     private final TerminationFlag terminationFlag;
 
     public static TriangleStream create(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         ExecutorService executorService,
         Concurrency concurrency,
-        List<String> labelFilter,
-        TerminationFlag terminationFlag
+        List<String> labelFilter
     ) {
         var factory = RelationshipIntersectFactoryLocator
             .lookup(graph)
             .orElseThrow(
                 () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
             );
+
         return new TriangleStream(
+            progressTracker,
+            terminationFlag,
             graph,
             factory,
             executorService,
             concurrency,
-            labelFilter,
-            terminationFlag
+            labelFilter
         );
     }
 
     private TriangleStream(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         RelationshipIntersectFactory intersectFactory,
         ExecutorService executorService,
         Concurrency concurrency,
-        List<String> labelFilter,
-        TerminationFlag terminationFlag
+        List<String> labelFilter
     ) {
-        super(ProgressTracker.NULL_TRACKER); // because this is hard coded, we can drop any usages of it below
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.intersectFactory = intersectFactory;
         this.executorService = executorService;

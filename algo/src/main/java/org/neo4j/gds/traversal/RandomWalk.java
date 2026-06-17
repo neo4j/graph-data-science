@@ -160,7 +160,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         ExternalTerminationFlag externalTerminationFlag,
         long randomSeed
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.log = log;
         this.concurrency = concurrency;
         this.executorService = executorService;

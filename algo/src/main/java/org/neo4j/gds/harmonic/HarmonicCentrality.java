@@ -50,14 +50,12 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.inverseFarness = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         this.nodeCount = graph.nodeCount();
-
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

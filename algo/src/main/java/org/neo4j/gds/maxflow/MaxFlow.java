@@ -77,12 +77,11 @@ public final class MaxFlow extends Algorithm<FlowResult> {
         NodeConstraintsIdMap constraints,
         Pair<NodeWithValue[],NodeWithValue[]> supplyAndDemand
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.parameters = parameters;
         this.constraints = constraints;
         this.supplyAndDemand = supplyAndDemand;
-        this.terminationFlag = terminationFlag;
     }
 
     public FlowResult compute() {

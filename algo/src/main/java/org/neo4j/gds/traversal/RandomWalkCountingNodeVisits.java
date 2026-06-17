@@ -107,15 +107,13 @@ public final class RandomWalkCountingNodeVisits extends Algorithm<HugeAtomicLong
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.graph = graph;
         this.walkParameters = walkParameters;
         this.sourceNodes = sourceNodes;
         this.randomSeed = randomSeed;
-        this.terminationFlag = terminationFlag;
-
     }
 
     @Override

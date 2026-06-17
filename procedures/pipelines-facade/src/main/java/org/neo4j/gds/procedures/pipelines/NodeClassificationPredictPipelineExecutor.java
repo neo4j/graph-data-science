@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.StringJoining;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -55,15 +56,16 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
     private final PipelineGraphFilter predictGraphFilter;
 
     public NodeClassificationPredictPipelineExecutor(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         NodePropertyPredictPipeline pipeline,
         NodeClassificationPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-        ProgressTracker progressTracker,
         Classifier.ClassifierData modelData,
         LocalIdMap classIdMap
     ) {
-        super(pipeline, config, executionContext, graphStore, progressTracker);
+        super(progressTracker, terminationFlag, pipeline, config, executionContext, graphStore);
         this.modelData = modelData;
         this.classIdMap = classIdMap;
         this.predictGraphFilter = new PipelineGraphFilter(

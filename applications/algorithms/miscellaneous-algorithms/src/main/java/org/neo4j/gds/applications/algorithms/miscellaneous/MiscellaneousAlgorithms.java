@@ -47,11 +47,12 @@ public class MiscellaneousAlgorithms {
     }
 
     public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathParameters parameters) {
-
         var algorithm = CollapsePath.create(
-                graphStore,
-                parameters,
-                DefaultPool.INSTANCE
+            ProgressTracker.NULL_TRACKER, // future work
+            terminationFlag,
+            graphStore,
+            parameters,
+            DefaultPool.INSTANCE
         );
 
         return algorithm.compute();

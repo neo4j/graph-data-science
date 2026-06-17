@@ -39,6 +39,7 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.PathResultBuilder;
 import org.neo4j.gds.paths.delta.DistanceAndPredecessors;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,16 +81,17 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
     private final int binSizeThreshold;
 
     SteinerBasedDeltaStepping(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         long startNode,
         double delta,
         BitSet isTerminal,
         Concurrency concurrency,
         int binSizeThreshold,
-        ExecutorService executorService,
-        ProgressTracker progressTracker
+        ExecutorService executorService
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.startNode = startNode;
         this.delta = delta;

@@ -46,11 +46,10 @@ public class IndirectExposure extends Algorithm<IndirectExposureResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.config = config;
         this.executorService = executorService;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

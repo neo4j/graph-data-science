@@ -46,8 +46,6 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
 
     private static final int NO_SUCH_LABEL = -1;
 
-    static final String LABEL_PROPAGATION_DESCRIPTION =
-        "The Label Propagation algorithm is a fast algorithm for finding communities in a graph.";
     private final long nodeCount;
     private final NodePropertyValues nodePropertyValues;
     private final NodePropertyValues nodeWeights;
@@ -66,7 +64,7 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.parameters = parameters;
@@ -92,8 +90,6 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
         this.nodeWeights = nodeWeightProperty;
 
         maxLabelId = seedProperty.getMaxLongPropertyValue().orElse(NO_SUCH_LABEL);
-
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

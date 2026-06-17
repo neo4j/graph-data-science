@@ -56,13 +56,12 @@ public class GraphSage extends Algorithm<GraphSageResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.model = model;
         this.executor = executor;
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

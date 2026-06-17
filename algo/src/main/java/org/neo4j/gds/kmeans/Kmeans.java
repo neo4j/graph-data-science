@@ -96,7 +96,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         NodePropertyValues nodePropertyValues,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.log = log;
         this.executorService = executorService;
         this.graph = graph;
@@ -114,7 +114,6 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         this.parameters = parameters;
         this.concurrency = parameters.concurrency();
         this.nodesInCluster = new long[parameters.k()];
-        this.terminationFlag = terminationFlag;
     }
 
     @Override

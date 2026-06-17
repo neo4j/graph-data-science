@@ -117,13 +117,14 @@ public class CommunityAlgorithms {
 
     ConductanceResult conductance(Graph graph, ConductanceParameters parameters, ProgressTracker progressTracker) {
         return new Conductance(
+            progressTracker,
+            terminationFlag,
             graph,
             parameters.concurrency(),
             parameters.minBatchSize(),
             parameters.hasRelationshipWeightProperty(),
             parameters.communityProperty(),
-            DefaultPool.INSTANCE,
-            progressTracker
+            DefaultPool.INSTANCE
         ).compute();
     }
 
@@ -224,10 +225,11 @@ public class CommunityAlgorithms {
 
     ModularityResult modularity(Graph graph, ModularityParameters parameters) {
         return ModularityCalculator.create(
+            ProgressTracker.NULL_TRACKER, // future work
+            terminationFlag,
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
-            parameters.concurrency(),
-            terminationFlag
+            parameters.concurrency()
         ).compute();
     }
 
@@ -279,11 +281,12 @@ public class CommunityAlgorithms {
 
     Stream<TriangleResult> triangles(Graph graph, TriangleCountParameters parameters) {
         return TriangleStream.create(
+            ProgressTracker.NULL_TRACKER, // future work
+            terminationFlag,
             graph,
             DefaultPool.INSTANCE,
             parameters.concurrency(),
-            parameters.labelFilter(),
-            terminationFlag
+            parameters.labelFilter()
         ).compute();
     }
 

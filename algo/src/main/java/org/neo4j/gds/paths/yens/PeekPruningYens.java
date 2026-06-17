@@ -66,9 +66,8 @@ public final class PeekPruningYens extends Algorithm<PathFindingResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
-        this.terminationFlag = terminationFlag;
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;
         this.k = k;
