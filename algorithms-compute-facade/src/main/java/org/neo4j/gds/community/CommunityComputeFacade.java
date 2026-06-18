@@ -20,7 +20,6 @@
 package org.neo4j.gds.community;
 
 import org.neo4j.gds.CommunityAlgorithmTasks;
-import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
@@ -43,6 +42,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
+import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;

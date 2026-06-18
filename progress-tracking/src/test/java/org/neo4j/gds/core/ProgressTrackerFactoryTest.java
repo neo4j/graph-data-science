@@ -17,15 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Progress;

@@ -17,13 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -35,16 +33,7 @@ public class ProgressTrackerFactory {
     private final RequestCorrelationId correlationId;
     private final TaskRegistryFactory taskRegistryFactory;
 
-    public static ProgressTrackerFactory create(
-        LoggerForProgressTracking log,
-        RequestScopedDependencies requestScopedDependencies
-    ){
-        return new ProgressTrackerFactory(
-            log,
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
-        );
-    }
+
     public ProgressTrackerFactory(LoggerForProgressTracking log,
         RequestCorrelationId correlationId,
         TaskRegistryFactory taskRegistryFactory
@@ -82,5 +71,9 @@ public class ProgressTrackerFactory {
         }
 
         return progressTracker;
+    }
+
+    public ProgressTracker create(Task task, Concurrency concurrency, boolean logProgress) {
+        return create(task, new JobId(), concurrency, logProgress);
     }
 }
