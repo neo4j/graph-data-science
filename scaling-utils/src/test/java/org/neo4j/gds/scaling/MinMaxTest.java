@@ -29,8 +29,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
-import org.neo4j.gds.scaling.compute.MinMaxComputer;
-import org.neo4j.gds.scaling.scale.MinMax;
+import org.neo4j.gds.scaling.compute.MinMaxAverageComputer;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,7 @@ class MinMaxTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double min, double max) {
-        var scaler = (MinMax) MinMaxComputer.create(
+        var computed = MinMaxAverageComputer.compute(
             properties,
             10,
             new Concurrency(1),
@@ -58,8 +57,10 @@ class MinMaxTest {
             DefaultPool.INSTANCE
         );
 
-        assertThat(scaler.min).isEqualTo(min);
-        assertThat(scaler.maxMinDiff).isEqualTo(max - min);
+        var scaler = ScalerFactory.minMaxScaler(properties, computed);
+
+        assertThat(computed.min()).isEqualTo(min);
+        assertThat(computed.max() - computed.min()).isEqualTo(max - min);
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
             "max", List.of(max),
             "min", List.of(min)
@@ -74,7 +75,7 @@ class MinMaxTest {
     void avoidsDivByZero() {
         double propValue = 4D;
         var properties = new DoubleTestPropertyValues(nodeId -> propValue);
-        var scaler = MinMaxComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.MinMax).create(
             properties,
             10,
             new Concurrency(1),
@@ -95,7 +96,7 @@ class MinMaxTest {
     @Test
     void handlesMissingValue() {
         var properties = new DoubleTestPropertyValues(value -> value == 5 ? Double.NaN : value);
-        var scaler = MinMaxComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.MinMax).create(
             properties,
             10,
             new Concurrency(1),

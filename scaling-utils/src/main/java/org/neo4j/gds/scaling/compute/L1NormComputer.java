@@ -25,17 +25,15 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.scaling.scale.L1Norm;
-import org.neo4j.gds.scaling.scale.ScalarScaler;
-import org.neo4j.gds.scaling.scale.Zero;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public final class L1NormComputer {
+    public record Result(double sum) {}
     private L1NormComputer() {}
 
-    public static ScalarScaler create(
+    public static Result compute(
         NodePropertyValues properties,
         long nodeCount,
         Concurrency concurrency,
@@ -54,13 +52,7 @@ public final class L1NormComputer {
             .executor(executor)
             .run();
 
-        var absoluteSum = tasks.stream().mapToDouble(ComputeAbsoluteSum::sum).sum();
-
-        if (absoluteSum < AggregatesComputer.CLOSE_TO_ZERO) {
-            return Zero.of();
-        } else {
-            return new L1Norm(properties, absoluteSum);
-        }
+        return new Result(tasks.stream().mapToDouble(ComputeAbsoluteSum::sum).sum());
     }
 
     static class ComputeAbsoluteSum extends AggregatesComputer {

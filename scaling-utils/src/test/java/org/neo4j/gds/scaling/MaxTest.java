@@ -29,8 +29,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
-import org.neo4j.gds.scaling.compute.MaxComputer;
-import org.neo4j.gds.scaling.scale.Max;
+import org.neo4j.gds.scaling.compute.MinMaxAverageComputer;
 
 import java.util.List;
 import java.util.Map;
@@ -67,7 +66,7 @@ class MaxTest {
     @ParameterizedTest
     @MethodSource("properties")
     void scale(int nodeCount, NodePropertyValues properties, double absMax, double[] expected) {
-        var scaler = (Max) MaxComputer.create(
+        var computed = MinMaxAverageComputer.compute(
             properties,
             nodeCount,
             new Concurrency(1),
@@ -75,7 +74,9 @@ class MaxTest {
             DefaultPool.INSTANCE
         );
 
-        assertThat(scaler.maxAbs).isEqualTo(absMax);
+        var scaler = ScalerFactory.maxScaler(properties, computed);
+
+        assertThat(Math.max(Math.abs(computed.min()), Math.abs(computed.max()))).isEqualTo(absMax);
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of("absMax", List.of(absMax)));
 
         double[] actual = IntStream.range(0, nodeCount).mapToDouble(scaler::scaleProperty).toArray();
@@ -85,7 +86,7 @@ class MaxTest {
     @Test
     void avoidsDivByZero() {
         var properties = new DoubleTestPropertyValues(nodeId -> 0D);
-        var scaler = MaxComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.Max).create(
             properties,
             10,
             new Concurrency(1),
@@ -103,7 +104,7 @@ class MaxTest {
     @Test
     void handlesMissingValue() {
         var properties = new DoubleTestPropertyValues(value -> value == 5 ? Double.NaN : value);
-        var scaler = MaxComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.Max).create(
             properties,
             10,
             new Concurrency(1),

@@ -24,8 +24,6 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public abstract class AggregatesComputer implements Runnable {
-
-    static final double CLOSE_TO_ZERO = 1e-15;
     private final Partition partition;
     private final NodePropertyValues properties;
     private final ProgressTracker progressTracker;

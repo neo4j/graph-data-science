@@ -30,7 +30,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
-import org.neo4j.gds.scaling.scale.LogScaler;
 
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -50,7 +49,7 @@ class LogScalerTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double[] expected) {
-        var scaler = LogScaler.of(properties, 0);
+        var scaler = ScalerFactory.logScaler(properties, 0);
 
         double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);
@@ -59,7 +58,7 @@ class LogScalerTest {
     @Test
     void normalizesWithOffset() {
         var properties = new LongTestPropertyValues(nodeId -> nodeId - 7);
-        var scaler = LogScaler.of(properties, 7);
+        var scaler = ScalerFactory.logScaler(properties, 7);
 
         double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(new double[]{0.0, 0.69, 1.09, 1.38}, Offset.offset(1e-2));

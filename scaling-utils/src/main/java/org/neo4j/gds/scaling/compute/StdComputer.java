@@ -25,19 +25,15 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.scaling.scale.ScalarScaler;
-import org.neo4j.gds.scaling.scale.StdScore;
-import org.neo4j.gds.scaling.scale.Zero;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public final class StdComputer {
+    public record Result(double average, double std) {}
     private StdComputer() {}
 
-    public static ScalarScaler create(
+    public static Result compute(
         NodePropertyValues properties,
         long nodeCount,
         Concurrency concurrency,
@@ -67,17 +63,7 @@ public final class StdComputer {
         // (Σ(pᵢ²) + avg(Navg - 2Σ(pᵢ)) / N
         var variance = (squaredSum - avg * sum) / nodeCountOmittingMissingProperties;
         var std = Math.sqrt(variance);
-
-        var statistics = Map.of(
-            "avg", List.of(avg),
-            "std", List.of(std)
-        );
-
-        if (std < AggregatesComputer.CLOSE_TO_ZERO) {
-            return Zero.of(statistics);
-        } else {
-            return new StdScore(properties, statistics, avg, std);
-        }
+        return new Result(avg, std);
     }
 
     static class ComputeSumAndSquaredSum extends AggregatesComputer {

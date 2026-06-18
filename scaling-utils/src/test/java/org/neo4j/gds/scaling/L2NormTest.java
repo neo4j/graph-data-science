@@ -30,7 +30,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.scaling.compute.L2NormComputer;
-import org.neo4j.gds.scaling.scale.L2Norm;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -50,7 +49,7 @@ class L2NormTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double euclideanLength, double[] expected) {
-        var scaler = (L2Norm) L2NormComputer.create(
+        var computed = L2NormComputer.compute(
             properties,
             10,
             new Concurrency(1),
@@ -58,7 +57,9 @@ class L2NormTest {
             DefaultPool.INSTANCE
         );
 
-        assertThat(scaler.euclideanLength).isEqualTo(euclideanLength);
+        var scaler = ScalerFactory.L2NormScaler(properties, computed);
+
+        assertThat(computed.length()).isEqualTo(euclideanLength);
 
         double[] actual = IntStream.range(0, 10).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);
@@ -67,7 +68,7 @@ class L2NormTest {
     @Test
     void avoidsDivByZero() {
         var properties = new DoubleTestPropertyValues(nodeId -> 0D);
-        var scaler = L2NormComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.L2Norm).create(
             properties,
             10,
             new Concurrency(1),
@@ -83,7 +84,7 @@ class L2NormTest {
     @Test
     void handlesMissingValue() {
         var properties = new DoubleTestPropertyValues(value -> value == 5 ? Double.NaN : value);
-        var scaler = L2NormComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.L2Norm).create(
             properties,
             10,
             new Concurrency(1),

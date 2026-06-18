@@ -24,7 +24,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
-import org.neo4j.gds.scaling.scale.NoneScaler;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -43,7 +42,7 @@ class NoneScalerTest {
     @ParameterizedTest
     @MethodSource("properties")
     void scale(NodePropertyValues properties, double[] expected) {
-        var scaler = NoneScaler.of(properties);
+        var scaler = ScalerFactory.noneScaler(properties);
 
         double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);

@@ -30,7 +30,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.scaling.compute.StdComputer;
-import org.neo4j.gds.scaling.scale.StdScore;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +52,7 @@ class StdScoreTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodePropertyValues properties, double avg, double std, double[] expected) {
-        var scaler = (StdScore) StdComputer.create(
+        var computed = StdComputer.compute(
             properties,
             10,
             new Concurrency(1),
@@ -61,8 +60,10 @@ class StdScoreTest {
             DefaultPool.INSTANCE
         );
 
-        assertThat(scaler.avg).isEqualTo(avg);
-        assertThat(scaler.std).isEqualTo(std);
+        var scaler = ScalerFactory.StdScaler(properties, computed);
+
+        assertThat(computed.average()).isEqualTo(avg);
+        assertThat(computed.std()).isEqualTo(std);
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
             "avg", List.of(avg),
             "std", List.of(std)
@@ -75,7 +76,7 @@ class StdScoreTest {
     @Test
     void handlesMissingValue() {
         var properties = new DoubleTestPropertyValues(value -> value == 5 ? Double.NaN : value);
-        var scaler = StdComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.Std).create(
             properties,
             10,
             new Concurrency(1),
@@ -97,7 +98,7 @@ class StdScoreTest {
     @Test
     void avoidsDivByZero() {
         var properties = new DoubleTestPropertyValues(nodeId -> 4D);
-        var scaler = StdComputer.create(
+        var scaler = ScalerFactory.of(ScalerType.Std).create(
             properties,
             10,
             new Concurrency(1),

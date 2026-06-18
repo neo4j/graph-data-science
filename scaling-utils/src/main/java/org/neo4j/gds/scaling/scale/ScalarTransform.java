@@ -23,21 +23,30 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
-public final class Mean extends ScalarScaler {
+public final class ScalarTransform extends ScalarScaler {
+    private final NodePropertyValues properties;
+    private final Map<String, List<Double>> statistics;
+    private final Function<Double, Double> transform;
 
-    public final double avg;
-    public final double maxMinDiff;
+    private ScalarTransform(NodePropertyValues properties, Map<String, List<Double>> statistics, Function<Double, Double> transform) {
+        this.properties = properties;
+        this.statistics = statistics;
+        this.transform = transform;
+    }
 
-    public Mean(NodePropertyValues properties, Map<String, List<Double>> statistics, double avg, double minMaxDiff) {
-        super(properties, statistics);
-        this.avg = avg;
-        this.maxMinDiff = minMaxDiff;
+    public static ScalarTransform of(NodePropertyValues properties, Map<String, List<Double>> statistics, Function<Double, Double> transform) {
+        return new ScalarTransform(properties, statistics, transform);
+    }
+
+    @Override
+    public Map<String, List<Double>> statistics() {
+        return statistics;
     }
 
     @Override
     public double scaleProperty(long nodeId) {
-        return (properties.doubleValue(nodeId) - avg) / maxMinDiff;
+        return transform.apply(properties.doubleValue(nodeId));
     }
-
 }

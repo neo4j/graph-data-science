@@ -25,17 +25,15 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.scaling.scale.L2Norm;
-import org.neo4j.gds.scaling.scale.ScalarScaler;
-import org.neo4j.gds.scaling.scale.Zero;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public final class L2NormComputer {
+    public record Result(double length) {}
     private L2NormComputer() {}
 
-    public static ScalarScaler create(
+    public static Result compute(
         NodePropertyValues properties,
         long nodeCount,
         Concurrency concurrency,
@@ -55,13 +53,7 @@ public final class L2NormComputer {
             .run();
 
         var squaredSum = tasks.stream().mapToDouble(ComputeSquaredSum::squaredSum).sum();
-        var euclideanLength = Math.sqrt(squaredSum);
-
-        if (euclideanLength < AggregatesComputer.CLOSE_TO_ZERO) {
-            return Zero.of();
-        } else {
-            return new L2Norm(properties, euclideanLength);
-        }
+        return new Result(Math.sqrt(squaredSum));
     }
 
     static class ComputeSquaredSum extends AggregatesComputer {
