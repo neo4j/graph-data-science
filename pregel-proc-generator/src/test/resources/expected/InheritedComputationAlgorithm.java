@@ -35,7 +35,6 @@ public final class InheritedComputationAlgorithm extends Algorithm<PregelResult>
 
     InheritedComputationAlgorithm(Graph graph, PregelProcedureConfig configuration,
                          ProgressTracker progressTracker, TerminationFlag terminationFlag) {
-        this.progressTracker = progressTracker;
         var computation = new InheritedComputation();
         this.pregelJob = Pregel.create(graph, configuration, computation, DefaultPool.INSTANCE, progressTracker, terminationFlag);
     }

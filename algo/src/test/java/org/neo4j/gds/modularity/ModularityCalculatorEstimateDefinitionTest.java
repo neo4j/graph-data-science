@@ -41,8 +41,8 @@ class ModularityCalculatorEstimateDefinitionTest {
 
     static Stream<Arguments> memoryEstimationSetup() {
         return Stream.of(
-            Arguments.of(1, 1120),
-            Arguments.of(4, 1240)
+            Arguments.of(1, 1112),
+            Arguments.of(4, 1232)
         );
     }
 
