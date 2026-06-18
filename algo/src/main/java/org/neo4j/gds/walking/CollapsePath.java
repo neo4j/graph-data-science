@@ -41,7 +41,7 @@ import java.util.function.Supplier;
  * A path template is a list of relationship types.
  * In this implementation, the list of relationship types is encoded as a list of graphs with each one having only a single relationship type.
  */
-public class CollapsePath extends Algorithm<SingleTypeRelationships> {
+public class CollapsePath implements Algorithm<SingleTypeRelationships> {
     private final List<Graph[]> pathTemplates;
     private final long nodeCount;
     private final boolean allowSelfLoops;

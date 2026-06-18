@@ -26,7 +26,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
-public final class MaxFlow extends Algorithm<FlowResult> {
+public final class MaxFlow implements Algorithm<FlowResult> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;

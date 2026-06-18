@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class RandomWalk extends Algorithm<Stream<long[]>> {
+public final class RandomWalk implements Algorithm<Stream<long[]>> {
     private static final long[] TOMBSTONE = new long[0];
     private final ProgressTracker progressTracker;
 

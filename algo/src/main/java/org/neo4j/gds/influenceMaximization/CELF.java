@@ -34,7 +34,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-public class CELF extends Algorithm<CELFResult> {
+public class CELF implements Algorithm<CELFResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

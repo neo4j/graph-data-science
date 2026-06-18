@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.executor;
 
-import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
@@ -41,6 +41,10 @@ public interface GraphCreation<
 
     GraphProjectConfig graphProjectConfig();
 
+    /**
+     * @deprecated unused?
+     */
+    @Deprecated
     MemoryRange validateMemoryEstimation(AlgorithmFactory<?, ALGO, CONFIG> algorithmFactory);
 
 }

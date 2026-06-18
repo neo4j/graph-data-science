@@ -27,5 +27,5 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 /**
  * Just a marker interface
  */
-public abstract class GraphSageTrain extends Algorithm<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> {
+public abstract class GraphSageTrain implements Algorithm<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> {
 }

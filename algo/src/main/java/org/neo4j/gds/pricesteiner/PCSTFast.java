@@ -26,7 +26,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 
-public class PCSTFast extends Algorithm<PrizeSteinerTreeResult> {
+public class PCSTFast implements Algorithm<PrizeSteinerTreeResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

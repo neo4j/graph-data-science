@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public final class Yens extends Algorithm<PathFindingResult> {
+public final class Yens implements Algorithm<PathFindingResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

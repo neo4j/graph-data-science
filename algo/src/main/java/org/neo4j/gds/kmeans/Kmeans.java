@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
-public final class Kmeans extends Algorithm<KmeansResult> {
+public final class Kmeans implements Algorithm<KmeansResult> {
     private static final int UNASSIGNED = -1;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

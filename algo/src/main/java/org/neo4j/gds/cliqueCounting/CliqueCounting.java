@@ -59,7 +59,7 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
  * <a href="https://dl.acm.org/doi/10.1145/3336191.3371839">...</a>
  */
 
-public final class CliqueCounting extends Algorithm<CliqueCountingResult> {
+public final class CliqueCounting implements Algorithm<CliqueCountingResult> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;

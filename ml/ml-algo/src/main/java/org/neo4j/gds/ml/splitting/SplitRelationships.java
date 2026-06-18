@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;
 
 import java.util.Optional;
 
-public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
+public final class SplitRelationships implements Algorithm<EdgeSplitter.SplitResult> {
 
     private final Graph graph;
     private final Graph masterGraph;

@@ -31,7 +31,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
-public final class ArticulationPoints extends Algorithm<ArticulationPointsResult> {
+public final class ArticulationPoints implements Algorithm<ArticulationPointsResult> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;

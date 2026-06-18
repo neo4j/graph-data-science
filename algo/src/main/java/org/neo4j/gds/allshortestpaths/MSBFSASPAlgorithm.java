@@ -26,5 +26,5 @@ import java.util.stream.Stream;
 /**
  * Just a marker interface
  */
-public abstract class MSBFSASPAlgorithm extends Algorithm<Stream<AllShortestPathsStreamResult>> {
+public abstract class MSBFSASPAlgorithm implements Algorithm<Stream<AllShortestPathsStreamResult>> {
 }

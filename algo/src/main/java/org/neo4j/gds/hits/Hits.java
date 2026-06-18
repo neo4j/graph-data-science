@@ -28,7 +28,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.ExecutorService;
 
-public class Hits extends Algorithm<PregelResult> {
+public class Hits implements Algorithm<PregelResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

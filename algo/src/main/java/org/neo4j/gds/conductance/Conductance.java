@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Conductance extends Algorithm<ConductanceResult> {
+public class Conductance implements Algorithm<ConductanceResult> {
     private static final double DEFAULT_WEIGHT = 0.0D;
     private final ProgressTracker progressTracker;
 

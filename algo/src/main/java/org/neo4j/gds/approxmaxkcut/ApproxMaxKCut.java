@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
  * [1]: Festa et al. Randomized Heuristics for the Max-Cut Problem, 2002.
  * [2]: Dunning et al. What Works Best When? A Systematic Evaluation of Heuristics for Max-Cut and QUBO, 2018.
  */
-public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
+public final class ApproxMaxKCut implements Algorithm<ApproxMaxKCutResult> {
     private static final Comparator MINIMIZING = (lhs, rhs) -> lhs < rhs;
     private static final Comparator MAXIMIZING = (lhs, rhs) -> lhs > rhs;
     private final ProgressTracker progressTracker;

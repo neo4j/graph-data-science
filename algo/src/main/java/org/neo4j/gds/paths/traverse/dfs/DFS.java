@@ -31,7 +31,7 @@ import org.neo4j.gds.paths.traverse.ExitPredicate;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.TraversalParameters;
 
-public class DFS extends Algorithm<HugeLongArray> {
+public class DFS implements Algorithm<HugeLongArray> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

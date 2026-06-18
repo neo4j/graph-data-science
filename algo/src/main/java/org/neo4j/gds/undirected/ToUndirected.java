@@ -47,7 +47,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ToUndirected extends Algorithm<SingleTypeRelationships> {
+public class ToUndirected implements Algorithm<SingleTypeRelationships> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final GraphStore graphStore;

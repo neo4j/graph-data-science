@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class DeltaStepping extends Algorithm<DeltaSteppingResult> {
+public final class DeltaStepping implements Algorithm<DeltaSteppingResult> {
     private static final int NO_BIN = Integer.MAX_VALUE;
     private static final int BIN_SIZE_THRESHOLD = 1000;
     private static final int BATCH_SIZE = 64;

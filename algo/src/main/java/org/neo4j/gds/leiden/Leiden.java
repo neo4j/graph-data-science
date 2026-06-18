@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 
 //TODO: take care of potential issues w. self-loops
 
-public class Leiden extends Algorithm<LeidenResult> {
+public class Leiden implements Algorithm<LeidenResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

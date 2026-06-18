@@ -52,7 +52,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * The output node property values are lists of the same size as the input lists, and contain the scaled values
  * of the input node properties.
  */
-public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
+public class ScaleProperties implements Algorithm<ScalePropertiesResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

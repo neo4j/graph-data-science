@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.executor;
 
-import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;

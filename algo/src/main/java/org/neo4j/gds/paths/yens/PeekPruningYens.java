@@ -29,7 +29,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
-public final class PeekPruningYens extends Algorithm<PathFindingResult> {
+public final class PeekPruningYens implements Algorithm<PathFindingResult> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;

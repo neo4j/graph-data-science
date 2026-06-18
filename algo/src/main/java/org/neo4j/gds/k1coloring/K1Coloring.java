@@ -62,7 +62,7 @@ import static org.neo4j.gds.mem.BitUtil.ceilDiv;
  * and contain more colors as needed.
  * </p>
  */
-public class K1Coloring extends Algorithm<K1ColoringResult> {
+public class K1Coloring implements Algorithm<K1ColoringResult> {
     private static final long FINISHED = -1;
     private final ProgressTracker progressTracker;
 

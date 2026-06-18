@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
-public final class Knn extends Algorithm<KnnResult> {
+public final class Knn implements Algorithm<KnnResult> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;

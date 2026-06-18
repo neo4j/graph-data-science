@@ -61,7 +61,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * descendants from the nodes of a chunk, appear together before those from a later
  * chunk.
  */
-public final class BFS extends Algorithm<HugeLongArray> {
+public final class BFS implements Algorithm<HugeLongArray> {
 
     private static final int DEFAULT_DELTA = 64;
     private final ProgressTracker progressTracker;

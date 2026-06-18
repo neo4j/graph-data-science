@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutorService;
  * Utilizes the MSBFS for counting the farness between nodes.
  * See MSBFS documentation.
  */
-public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
+public final class ClosenessCentrality implements Algorithm<ClosenessCentralityResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

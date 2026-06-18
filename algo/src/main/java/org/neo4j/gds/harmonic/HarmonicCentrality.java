@@ -34,7 +34,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-public class HarmonicCentrality extends Algorithm<HarmonicResult> {
+public class HarmonicCentrality implements Algorithm<HarmonicResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

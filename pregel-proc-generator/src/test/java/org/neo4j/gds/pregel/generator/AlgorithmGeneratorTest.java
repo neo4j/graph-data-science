@@ -36,7 +36,7 @@ class AlgorithmGeneratorTest {
         var generator = new AlgorithmGenerator(typeNames);
         var spec = generator.typeSpec(Optional.empty());
         assertThat(spec.toString()).isEqualTo("" +
-            "public final class CAlgorithm extends org.neo4j.gds.Algorithm<org.neo4j.gds.beta.pregel.PregelResult> {" + NL +
+            "public final class CAlgorithm implements org.neo4j.gds.Algorithm<org.neo4j.gds.beta.pregel.PregelResult> {" + NL +
             "}" + NL
         );
     }

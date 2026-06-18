@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
-public final class Bridges extends Algorithm<BridgeResult> {
+public final class Bridges implements Algorithm<BridgeResult> {
     private final ProgressTracker progressTracker;
     private final List<Bridge> result = new ArrayList<>();
 
