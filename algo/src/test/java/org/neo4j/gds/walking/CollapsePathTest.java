@@ -30,7 +30,6 @@ import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -123,7 +122,6 @@ class CollapsePathTest {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
         var relationships = new CollapsePath(
-            ProgressTracker.NULL_TRACKER,
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             false,
             RelationshipType.of("SAME_DRUG"),
@@ -140,7 +138,6 @@ class CollapsePathTest {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
         var relationships = new CollapsePath(
-            ProgressTracker.NULL_TRACKER,
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             true,
             RelationshipType.of("SAME_DRUG"),
@@ -155,7 +152,6 @@ class CollapsePathTest {
     @Test
     void runWithDifferentRelationshipTypes() {
         var relationships = new CollapsePath(
-            ProgressTracker.NULL_TRACKER,
             Collections.singletonList(new Graph[]{tookGraph, takenByGraph}),
             false,
             RelationshipType.of("SAME_DRUG"),
@@ -207,7 +203,6 @@ class CollapsePathTest {
             );
 
             var relationships = CollapsePath.create(
-                ProgressTracker.NULL_TRACKER,
                 graphStore,
                 parameters,
                 DefaultPool.INSTANCE
@@ -236,7 +231,6 @@ class CollapsePathTest {
             );
 
             var relationships = CollapsePath.create(
-                ProgressTracker.NULL_TRACKER,
                 graphStore,
                 parameters,
                 DefaultPool.INSTANCE

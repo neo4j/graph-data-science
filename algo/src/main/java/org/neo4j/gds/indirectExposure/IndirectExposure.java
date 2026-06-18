@@ -35,6 +35,7 @@ import java.util.concurrent.ExecutorService;
 
 public class IndirectExposure extends Algorithm<IndirectExposureResult> {
 
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final IndirectExposureConfig config;
@@ -47,7 +48,7 @@ public class IndirectExposure extends Algorithm<IndirectExposureResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.config = config;

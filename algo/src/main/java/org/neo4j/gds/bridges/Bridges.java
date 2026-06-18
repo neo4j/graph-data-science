@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 public final class Bridges extends Algorithm<BridgeResult> {
+    private final ProgressTracker progressTracker;
     private final List<Bridge> result = new ArrayList<>();
 
     private final TerminationFlag terminationFlag;
@@ -71,7 +72,7 @@ public final class Bridges extends Algorithm<BridgeResult> {
     }
 
     private Bridges(Graph graph, ProgressTracker progressTracker, Optional<TreeSizeTracker> treeSizeTracker, TerminationFlag terminationFlag){
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.visited = new BitSet(graph.nodeCount());

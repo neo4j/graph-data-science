@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
     private final BlockingQueue<AllShortestPathsStreamResult> resultQueue = new LinkedBlockingQueue<>();
 
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final Concurrency concurrency;
@@ -55,7 +56,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.concurrency = concurrency;

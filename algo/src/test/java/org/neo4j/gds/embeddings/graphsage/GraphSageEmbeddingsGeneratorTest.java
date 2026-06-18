@@ -127,12 +127,12 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var trainer = new MultiLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             weightedGraph,
             TrainConfigTransformer.toParameters(config),
             5,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );
@@ -187,11 +187,11 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var trainer = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             filteredGraph,
             TrainConfigTransformer.toParameters(config),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );

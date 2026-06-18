@@ -44,6 +44,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
 
     private static final double DEFAULT_WEIGHT = 0D;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
     private final Graph graph;
@@ -63,7 +64,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.executor = executor;

@@ -36,6 +36,7 @@ import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
 public final class Knn extends Algorithm<KnnResult> {
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final Concurrency concurrency;
@@ -68,7 +69,7 @@ public final class Knn extends Algorithm<KnnResult> {
         NeighbourConsumers neighborConsumers,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.concurrency = concurrency;

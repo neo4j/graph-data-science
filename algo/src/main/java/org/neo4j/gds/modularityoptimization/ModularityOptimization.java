@@ -61,6 +61,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class ModularityOptimization extends Algorithm<ModularityOptimizationResult> {
 
     public static final int K1COLORING_MAX_ITERATIONS = 5;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Concurrency concurrency;
     private final int maxIterations;
@@ -97,7 +98,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.nodeCount = graph.nodeCount();

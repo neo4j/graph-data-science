@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class HitsWithInvertedIndexValidation extends Algorithm<HitsResultWithGraph> {
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final InverseRelationshipsParameters inverseRelationshipsParameters;
     private final GraphStore graphStore;
@@ -52,7 +53,7 @@ public class HitsWithInvertedIndexValidation extends Algorithm<HitsResultWithGra
         Collection<RelationshipType> relationshipTypesFilter,
         Function<Graph, Hits> hitsFunction
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.inverseRelationshipsParameters = inverseRelationshipsParameters;
         this.graphStore = graphStore;

@@ -23,7 +23,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
@@ -36,16 +35,13 @@ abstract class ReroutingAlgorithm {
     protected final Graph graph;
     protected final long sourceId;
     protected final Concurrency concurrency;
-    protected final ProgressTracker progressTracker;
 
     ReroutingAlgorithm(
         Graph graph,
         long sourceId,
-        Concurrency concurrency,
-        ProgressTracker progressTracker
+        Concurrency concurrency
     ) {
         this.graph = graph;
-        this.progressTracker = progressTracker;
         this.concurrency = concurrency;
         this.sourceId = sourceId;
 

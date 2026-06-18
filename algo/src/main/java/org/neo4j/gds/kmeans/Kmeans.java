@@ -41,6 +41,7 @@ import java.util.concurrent.ExecutorService;
 
 public final class Kmeans extends Algorithm<KmeansResult> {
     private static final int UNASSIGNED = -1;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
     private final Log log;
@@ -97,7 +98,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         NodePropertyValues nodePropertyValues,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.log = log;
         this.executorService = executorService;

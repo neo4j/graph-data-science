@@ -46,6 +46,7 @@ import java.util.stream.StreamSupport;
 
 public final class RandomWalk extends Algorithm<Stream<long[]>> {
     private static final long[] TOMBSTONE = new long[0];
+    private final ProgressTracker progressTracker;
 
     private final Log log;
     private final TerminationFlag terminationFlag;
@@ -160,7 +161,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         ExternalTerminationFlag externalTerminationFlag,
         long randomSeed
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.log = log;
         this.concurrency = concurrency;

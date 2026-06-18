@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 
 public class HarmonicCentrality extends Algorithm<HarmonicResult> {
 
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Concurrency concurrency;
     private final long nodeCount;
@@ -51,7 +52,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.concurrency = concurrency;

@@ -35,6 +35,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingl
 
 public class SingleLabelGraphSageTrain extends GraphSageTrain {
     private final Log log;
+    private final ProgressTracker progressTracker;
     private final Graph graph;
     private final ExecutorService executor;
     private final TerminationFlag terminationFlag;
@@ -44,17 +45,17 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
     public SingleLabelGraphSageTrain(
         Log log,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         GraphSageTrainParameters parameters,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag,
         String gdsVersion,
         GraphSageTrainConfig config
     ) {
-        super(progressTracker);
-        this.terminationFlag = terminationFlag;
         this.log = log;
+        this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.parameters = parameters;
         this.executor = executor;

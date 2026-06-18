@@ -42,8 +42,9 @@ import static org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm.ROOT_NODE;
 
 public class SimpleRerouter extends ReroutingAlgorithm {
 
-    private final List<Long> terminals;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
+    private final List<Long> terminals;
 
     static MemoryEstimation estimation() {
 
@@ -63,8 +64,10 @@ public class SimpleRerouter extends ReroutingAlgorithm {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(graph, sourceId, concurrency, progressTracker);
+        super(graph, sourceId, concurrency);
+
         this.terminals = terminals;
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
     }
 

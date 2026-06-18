@@ -99,9 +99,12 @@ class WeightedAllShortestPathsTest {
 
         TriConsumer<Long, Long, Double> mock = mock(TriConsumer.class);
 
-        new WeightedAllShortestPaths(graph, DefaultPool.INSTANCE, new Concurrency(4),
+        new WeightedAllShortestPaths(
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            graph,
+            DefaultPool.INSTANCE,
+            new Concurrency(4)
         )
                 .compute()
                 .forEach(r -> {

@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 public final class PeekPruningYens extends Algorithm<PathFindingResult> {
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final long sourceNode;
@@ -67,7 +68,7 @@ public final class PeekPruningYens extends Algorithm<PathFindingResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.sourceNode = sourceNode;

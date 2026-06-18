@@ -50,6 +50,7 @@ import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 public final class Louvain extends Algorithm<LouvainResult> {
 
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph rootGraph;
     private final NodePropertyValues seedingValues;
@@ -81,7 +82,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.rootGraph = graph;
         this.maxIterations = maxIterations;

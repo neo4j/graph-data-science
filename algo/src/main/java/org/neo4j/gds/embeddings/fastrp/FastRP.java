@@ -57,6 +57,7 @@ public class FastRP extends Algorithm<FastRPResult> {
     private static final int SPARSITY = 3;
     private static final double ENTRY_PROBABILITY = 1.0 / (2 * SPARSITY);
     private static final float EPSILON = 10f / Float.MAX_VALUE;
+    private final ProgressTracker progressTracker;
 
     private final TerminationFlag terminationFlag;
     private final Graph graph;
@@ -89,7 +90,7 @@ public class FastRP extends Algorithm<FastRPResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.featureExtractors = featureExtractors;

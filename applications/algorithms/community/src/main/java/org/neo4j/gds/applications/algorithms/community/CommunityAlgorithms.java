@@ -224,7 +224,6 @@ public class CommunityAlgorithms {
 
     ModularityResult modularity(Graph graph, ModularityParameters parameters) {
         return ModularityCalculator.create(
-            ProgressTracker.NULL_TRACKER, // future work
             terminationFlag,
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
@@ -280,7 +279,6 @@ public class CommunityAlgorithms {
 
     Stream<TriangleResult> triangles(Graph graph, TriangleCountParameters parameters) {
         return TriangleStream.create(
-            ProgressTracker.NULL_TRACKER, // future work
             terminationFlag,
             graph,
             DefaultPool.INSTANCE,

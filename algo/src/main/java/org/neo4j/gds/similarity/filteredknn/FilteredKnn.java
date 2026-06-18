@@ -22,7 +22,6 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
@@ -118,16 +117,14 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             terminationFlag
         );
 
-        return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter);
+        return new FilteredKnn(knn, targetNodeFiltering, sourceNodeFilter);
     }
 
     private FilteredKnn(
-        ProgressTracker progressTracker,
         Knn delegate,
         StreamProducingTargetNodeFiltering targetNodeFiltering,
         NodeFilter sourceNodeFilter
     ) {
-        super(progressTracker);
         this.delegate = delegate;
         this.targetNodeFiltering = targetNodeFiltering;
         this.sourceNodeFilter = sourceNodeFilter;

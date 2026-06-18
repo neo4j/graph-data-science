@@ -54,6 +54,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
 
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final ScalePropertiesParameters params;
@@ -67,7 +68,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         ExecutorService executor,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.params = params;

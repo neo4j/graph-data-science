@@ -391,7 +391,6 @@ class LouvainTest {
         assertThat(result.ranLevels()).isGreaterThan(1);
         LongUnaryOperator vToCommunity = result::community;
         var modularityCalculator = ModularityCalculator.create(
-            ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE,
             myGraph,
             vToCommunity,

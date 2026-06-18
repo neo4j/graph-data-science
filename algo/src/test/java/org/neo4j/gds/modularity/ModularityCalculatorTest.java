@@ -25,7 +25,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -64,7 +63,6 @@ class ModularityCalculatorTest {
     @CsvSource({"communityId,0", "communityId2,200"})
     void compute(String communityId, int startingId) {
         var modularityCalculator = ModularityCalculator.create(
-            ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE,
             graph,
             graphStore.nodeProperty(communityId).values()::longValue,

@@ -29,7 +29,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.extension.GdlExtension;
@@ -65,8 +64,7 @@ class SplitRelationshipsTest {
 
         var splitter = SplitRelationships.of(
             graphStore,
-            config,
-            ProgressTracker.NULL_TRACKER
+            config
         );
 
         var result = splitter.compute();

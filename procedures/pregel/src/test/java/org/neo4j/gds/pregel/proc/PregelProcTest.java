@@ -456,6 +456,7 @@ public class PregelProcTest extends BaseProcTest {
         static final String LONG_ARRAY_KEY = "long_array";
         static final String DOUBLE_ARRAY_KEY = "double_array";
         static final String PRIVATE_LONG_KEY = "long_private";
+        private final ProgressTracker progressTracker;
 
         private final Pregel<PregelProcedureConfig> pregelJob;
 
@@ -466,7 +467,7 @@ public class PregelProcTest extends BaseProcTest {
             TerminationFlag terminationFlag,
             boolean throwInCompute
         ) {
-            super(progressTracker);
+            this.progressTracker = progressTracker;
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override

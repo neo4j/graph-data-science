@@ -47,23 +47,23 @@ public class GraphSageTrainAlgorithmFactory {
 
         if (configuration.isMultiLabel()) return new MultiLabelGraphSageTrain(
             log,
+            progressTracker,
+            terminationFlag,
             graph,
             parameters,
             configuration.projectedFeatureDimension().orElseThrow(),
             DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag,
             gdsVersion,
             configuration
         );
 
         return new SingleLabelGraphSageTrain(
             log,
+            progressTracker,
+            terminationFlag,
             graph,
             parameters,
             DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag,
             gdsVersion,
             configuration
         );

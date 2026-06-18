@@ -98,7 +98,7 @@ public class MachineLearningAlgorithms {
     }
 
     EdgeSplitter.SplitResult splitRelationships(GraphStore graphStore, SplitRelationshipsBaseConfig configuration) {
-        var algorithm = SplitRelationships.of(graphStore, configuration, ProgressTracker.NULL_TRACKER);
+        var algorithm = SplitRelationships.of(graphStore, configuration);
 
         return algorithm.compute();
     }

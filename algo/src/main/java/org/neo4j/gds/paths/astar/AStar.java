@@ -34,11 +34,9 @@ import java.util.Optional;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class AStar extends Algorithm<PathFindingResult> {
-
     private final Dijkstra dijkstra;
 
-    private AStar(ProgressTracker progressTracker, Dijkstra dijkstra) {
-        super(progressTracker);
+    private AStar(Dijkstra dijkstra) {
         this.dijkstra = dijkstra;
     }
 
@@ -83,7 +81,7 @@ public final class AStar extends Algorithm<PathFindingResult> {
             terminationFlag
         );
 
-        return new AStar(progressTracker, dijkstra);
+        return new AStar(dijkstra);
     }
 
     

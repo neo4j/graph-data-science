@@ -45,6 +45,7 @@ import static java.util.concurrent.TimeUnit.MICROSECONDS;
 public class LabelPropagation extends Algorithm<LabelPropagationResult> {
 
     private static final int NO_SUCH_LABEL = -1;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
     private final long nodeCount;
@@ -65,7 +66,7 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.nodeCount = graph.nodeCount();

@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Conductance extends Algorithm<ConductanceResult> {
     private static final double DEFAULT_WEIGHT = 0.0D;
+    private final ProgressTracker progressTracker;
 
     private final Graph graph;
     private final Concurrency concurrency;
@@ -56,7 +57,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
         String communityProperty,
         ExecutorService executor
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.graph = graph;
         this.concurrency = concurrency;
         this.executor = executor;

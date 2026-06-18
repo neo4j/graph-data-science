@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutorService;
 
 public class SpeakerListenerLPA extends Algorithm<PregelResult> {
     public static final String LABELS_PROPERTY = "communityIds";
+    private final ProgressTracker progressTracker;
 
     private final TerminationFlag terminationFlag;
     private final Graph graph;
@@ -47,7 +48,7 @@ public class SpeakerListenerLPA extends Algorithm<PregelResult> {
         Optional<Long> seed,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.config = config;

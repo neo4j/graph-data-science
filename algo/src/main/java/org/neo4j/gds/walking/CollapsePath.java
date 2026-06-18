@@ -31,7 +31,6 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.Aggregation;
 
 import java.util.List;
@@ -51,7 +50,6 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
     private final ExecutorService executorService;
 
     public static CollapsePath create(
-        ProgressTracker progressTracker,
         GraphStore graphStore,
         CollapsePathParameters parameters,
         ExecutorService executorService
@@ -59,7 +57,6 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
         var pathTemplates = CollapsePathListOfGraphsLoader.graphs(graphStore,parameters);
 
         return new CollapsePath(
-            progressTracker,
             pathTemplates,
             parameters.allowSelfLoops(),
             RelationshipType.of(parameters.typeToCreate()),
@@ -69,14 +66,12 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
     }
 
     public CollapsePath(
-        ProgressTracker progressTracker,
         List<Graph[]> pathTemplates,
         boolean allowSelfLoops,
         RelationshipType mutateRelationshipType,
         Concurrency concurrency,
         ExecutorService executorService
     ) {
-        super(progressTracker);
         this.pathTemplates = pathTemplates;
         this.nodeCount = pathTemplates.get(0)[0].nodeCount();
         this.allowSelfLoops = allowSelfLoops;

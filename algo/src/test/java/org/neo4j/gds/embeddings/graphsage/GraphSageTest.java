@@ -152,11 +152,11 @@ class GraphSageTest {
 
         var trainAlgo = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             orphanGraph,
             TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             trainConfig
         );
@@ -200,11 +200,11 @@ class GraphSageTest {
 
         var graphSageTrain = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             trainConfig
         );
@@ -248,11 +248,11 @@ class GraphSageTest {
 
         var graphSageTrain = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             trainConfig
         );
@@ -326,11 +326,11 @@ class GraphSageTest {
 
         var resultModel = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            terminationFlag,
             graph,
             TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            terminationFlag,
             testGdsVersion,
             trainConfig
         ).compute();

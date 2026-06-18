@@ -85,7 +85,6 @@ public class AlgorithmGenerator {
             .addParameter(typeNames.config(), "configuration")
             .addParameter(ProgressTracker.class, "progressTracker")
             .addParameter(TerminationFlag.class, "terminationFlag")
-            .addStatement("super(progressTracker)")
             .addStatement("var computation = new $T()", typeNames.computation())
             .addStatement(
                 "this.pregelJob = $T.create(graph, configuration, computation, $T.INSTANCE, progressTracker, terminationFlag)",

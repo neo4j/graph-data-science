@@ -150,23 +150,23 @@ class GraphSageTrainProgressLoggingTest {
 
         if (configuration.isMultiLabel()) return new MultiLabelGraphSageTrain(
             log,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             parameters,
             configuration.projectedFeatureDimension().orElseThrow(),
             DefaultPool.INSTANCE,
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE,
             gdsVersion,
             configuration
         );
 
         return new SingleLabelGraphSageTrain(
             log,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             parameters,
             DefaultPool.INSTANCE,
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE,
             gdsVersion,
             configuration
         );

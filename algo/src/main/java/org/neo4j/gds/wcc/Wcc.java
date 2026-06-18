@@ -53,6 +53,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 public class Wcc extends Algorithm<DisjointSetStruct> {
 
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final WccParameters parameters;
     private final ExecutorService executorService;
@@ -68,7 +69,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.parameters = parameters;

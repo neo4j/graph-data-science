@@ -37,6 +37,8 @@ public abstract class PipelineExecutor<
     RESULT
     > extends Algorithm<RESULT> {
 
+    private final ProgressTracker progressTracker;
+
     public enum DatasetSplits {
         TRAIN,
         TEST,
@@ -57,7 +59,7 @@ public abstract class PipelineExecutor<
         ExecutionContext executionContext,
         GraphStore graphStore
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.pipeline = pipeline;
         this.config = config;
         this.executionContext = executionContext;

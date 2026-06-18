@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public class TestAlgorithm extends Algorithm<TestAlgorithmResult> {
 
+    private final ProgressTracker progressTracker;
     private final Graph graph;
     private final boolean throwInCompute;
 
@@ -33,7 +34,7 @@ public class TestAlgorithm extends Algorithm<TestAlgorithmResult> {
         ProgressTracker progressTracker,
         boolean throwInCompute
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.graph = graph;
         this.throwInCompute = throwInCompute;
     }

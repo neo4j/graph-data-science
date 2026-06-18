@@ -37,6 +37,7 @@ public abstract class PipelineTrainAlgorithm<
     protected final TrainingPipeline<FEATURE_STEP> pipeline;
     protected final GraphStore graphStore;
     protected final CONFIG config;
+    private final ProgressTracker progressTracker;
 
     private final PipelineTrainer<RESULT> pipelineTrainer;
     private final ResultToModelConverter<MODEL_RESULT, RESULT> toCatalogModelConverter;
@@ -50,7 +51,7 @@ public abstract class PipelineTrainAlgorithm<
         GraphStore graphStore,
         CONFIG config
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.pipelineTrainer = pipelineTrainer;
         this.pipeline = pipeline;
         this.toCatalogModelConverter = toCatalogModelConverter;

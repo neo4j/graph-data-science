@@ -35,6 +35,7 @@ import org.neo4j.gds.termination.TerminationFlag;
  */
 public class Scc extends Algorithm<HugeLongArray> {
     private static final int UNORDERED = -1;
+    private final ProgressTracker progressTracker;
 
     private final TerminationFlag terminationFlag;
     private final Graph graph;
@@ -50,7 +51,7 @@ public class Scc extends Algorithm<HugeLongArray> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         var nodeCount = this.graph.nodeCount();

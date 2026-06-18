@@ -54,6 +54,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
     private final Classifier.ClassifierData modelData;
     private final LocalIdMap classIdMap;
     private final PipelineGraphFilter predictGraphFilter;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
     public NodeClassificationPredictPipelineExecutor(
@@ -67,6 +68,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
         LocalIdMap classIdMap
     ) {
         super(progressTracker, pipeline, config, executionContext, graphStore);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.modelData = modelData;
         this.classIdMap = classIdMap;

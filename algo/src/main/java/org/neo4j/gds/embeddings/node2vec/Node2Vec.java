@@ -38,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 public final class Node2Vec extends Algorithm<Node2VecResult> {
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Log log;
     private final Graph graph;
@@ -75,7 +76,7 @@ public final class Node2Vec extends Algorithm<Node2VecResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.log = log;
         this.graph = graph;

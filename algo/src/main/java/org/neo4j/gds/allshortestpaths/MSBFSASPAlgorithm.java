@@ -20,7 +20,6 @@
 package org.neo4j.gds.allshortestpaths;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.stream.Stream;
 
@@ -28,7 +27,4 @@ import java.util.stream.Stream;
  * Just a marker interface
  */
 public abstract class MSBFSASPAlgorithm extends Algorithm<Stream<AllShortestPathsStreamResult>> {
-    MSBFSASPAlgorithm(ProgressTracker progressTracker) {
-        super(progressTracker);
-    }
 }

@@ -49,11 +49,11 @@ public final class MSBFSASPAlgorithmFactory {
             }
 
             return new WeightedAllShortestPaths(
+                progressTracker,
+                terminationFlag,
                 graph,
                 executorService,
-                parameters.concurrency(),
-                progressTracker,
-                terminationFlag
+                parameters.concurrency()
             );
         } else {
             return new MSBFSAllShortestPaths(

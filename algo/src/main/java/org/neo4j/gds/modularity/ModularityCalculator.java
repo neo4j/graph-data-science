@@ -30,7 +30,6 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
@@ -46,7 +45,6 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
     private final Concurrency concurrency;
 
     public static ModularityCalculator create(
-        ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         Graph graph,
         LongUnaryOperator seedCommunityIdProvider,
@@ -59,7 +57,6 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
         );
 
         return new ModularityCalculator(
-            progressTracker,
             terminationFlag,
             graph,
             communityIdProvider,
@@ -69,14 +66,12 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
     }
 
     private ModularityCalculator(
-        ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         Graph graph,
         LongUnaryOperator communityIdProvider,
         HugeLongLongMap communityMapper,
         Concurrency concurrency
     ) {
-        super(progressTracker);
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.communityIdProvider = communityIdProvider;

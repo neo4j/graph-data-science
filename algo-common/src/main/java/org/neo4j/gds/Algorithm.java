@@ -19,17 +19,9 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-
 import java.util.concurrent.Callable;
 
 public abstract class Algorithm<RESULT> implements Callable<RESULT> {
-    protected final ProgressTracker progressTracker;
-
-    protected Algorithm(ProgressTracker progressTracker) {
-        this.progressTracker = progressTracker;
-    }
-
     public abstract RESULT compute();
 
     @Override

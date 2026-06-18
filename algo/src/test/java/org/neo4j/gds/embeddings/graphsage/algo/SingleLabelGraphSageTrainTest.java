@@ -115,11 +115,9 @@ class SingleLabelGraphSageTrainTest {
 
         var SingleLabelGraphSageTrain = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
-            weightedGraph,
+            ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE, weightedGraph,
             TrainConfigTransformer.toParameters(config),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );
@@ -148,11 +146,9 @@ class SingleLabelGraphSageTrainTest {
 
         var graphSageTrain = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
-            weightedGraph,
+            ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE, weightedGraph,
             TrainConfigTransformer.toParameters(graphSageTrainConfig),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             graphSageTrainConfig
         );
@@ -194,11 +190,9 @@ class SingleLabelGraphSageTrainTest {
 
         var SingleLabelGraphSageTrain = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
-            unequalGraph,
+            ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE, unequalGraph,
             TrainConfigTransformer.toParameters(config),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );
@@ -221,11 +215,9 @@ class SingleLabelGraphSageTrainTest {
 
         var SingleLabelGraphSageTrain = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
-            graph,
+            ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE, graph,
             TrainConfigTransformer.toParameters(config),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );
@@ -274,11 +266,9 @@ class SingleLabelGraphSageTrainTest {
 
         var graphSageTrain = new SingleLabelGraphSageTrain(
             Log.noOpLog(),
-            weightedGraph,
+            ProgressTracker.NULL_TRACKER, TerminationFlag.STOP_RUNNING, weightedGraph,
             TrainConfigTransformer.toParameters(graphSageTrainConfig),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.STOP_RUNNING,
             testGdsVersion,
             graphSageTrainConfig
         );

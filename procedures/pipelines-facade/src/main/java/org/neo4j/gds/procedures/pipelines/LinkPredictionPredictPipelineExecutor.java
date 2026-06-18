@@ -55,6 +55,7 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
     LinkPredictionPredictPipeline,
     LinkPredictionResult
     > {
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Classifier classifier;
     private final LPGraphStoreFilter graphStoreFilter;
@@ -70,6 +71,7 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
         GraphStore graphStore
     ) {
         super(progressTracker, pipeline, config, executionContext, graphStore);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.classifier = classifier;
         this.graphStoreFilter = graphStoreFilter;

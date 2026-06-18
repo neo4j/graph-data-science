@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.LongAdder;
 public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> {
     public static final long ROOT_NODE = -1;
     public static final long PRUNED = -2;
+    private final ProgressTracker progressTracker;
 
     private final TerminationFlag terminationFlag;
     private final Graph graph;
@@ -65,7 +66,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.sourceId = sourceId;
@@ -93,7 +94,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         int binSizeThreshold,
         ExecutorService executorService
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.sourceId = sourceId;

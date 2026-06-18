@@ -23,8 +23,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 class FailingAlgorithm extends Algorithm<OutputFromProcedureThatFailsDuringTask> {
+    private final ProgressTracker progressTracker;
+
     FailingAlgorithm(ProgressTracker progressTracker) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
     }
 
     @Override

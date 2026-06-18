@@ -47,6 +47,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 public class HashGNN extends Algorithm<HashGNNResult> {
     private static final long DEGREE_PARTITIONS_PER_THREAD = 4;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
     private final Log log;
@@ -58,7 +59,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
     private final MutableLong currentTotalFeatureCount = new MutableLong();
 
     public HashGNN(Log log, Graph graph, HashGNNParameters parameters, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.log = log;
         this.graph = graph;

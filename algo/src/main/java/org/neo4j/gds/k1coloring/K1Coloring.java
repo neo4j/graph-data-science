@@ -64,6 +64,7 @@ import static org.neo4j.gds.mem.BitUtil.ceilDiv;
  */
 public class K1Coloring extends Algorithm<K1ColoringResult> {
     private static final long FINISHED = -1;
+    private final ProgressTracker progressTracker;
 
     private final TerminationFlag terminationFlag;
     private final Graph graph;
@@ -90,7 +91,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.minBatchSize = minBatchSize;

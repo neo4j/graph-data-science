@@ -45,28 +45,29 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     private static final double WEIGHT_BOUND = 1.0D;
 
     private final Log log;
+    private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
     private final Graph graph;
     private final GraphSageTrainParameters parameters;
     private final int featureDimension;
     private final ExecutorService executor;
-    private final TerminationFlag terminationFlag;
     private final String gdsVersion;
     private final GraphSageTrainConfig config;
 
     public MultiLabelGraphSageTrain(
         Log log,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         GraphSageTrainParameters parameters,
         int projectedFeatureDimension,
         ExecutorService executor,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag,
         String gdsVersion,
         GraphSageTrainConfig config
     ) {
-        super(progressTracker);
-        this.terminationFlag = terminationFlag;
         this.log = log;
+        this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.featureDimension = projectedFeatureDimension;
         this.parameters = parameters;

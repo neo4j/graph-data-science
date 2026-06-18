@@ -43,7 +43,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
@@ -485,7 +484,6 @@ public class CommunityComputeFacade {
         }
 
         var algorithm = ModularityCalculator.create(
-            ProgressTracker.NULL_TRACKER, // future work
             terminationFlag,
             graph,
             graph.nodeProperties(parameters.communityProperty())::longValue,
@@ -647,7 +645,6 @@ public class CommunityComputeFacade {
         }
 
         var algorithm = TriangleStream.create(
-            ProgressTracker.NULL_TRACKER, // future work
             terminationFlag, graph,
             DefaultPool.INSTANCE,
             parameters.concurrency(),

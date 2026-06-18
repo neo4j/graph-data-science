@@ -26,7 +26,6 @@ import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactoryLocator;
@@ -63,7 +62,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     private final LabelFilterChecker labelFilterChecker;
 
     public static TriangleStream create(
-        ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         Graph graph,
         ExecutorService executorService,
@@ -77,7 +75,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
             );
 
         return new TriangleStream(
-            progressTracker,
             terminationFlag,
             graph,
             factory,
@@ -88,7 +85,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
     }
 
     private TriangleStream(
-        ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         Graph graph,
         RelationshipIntersectFactory intersectFactory,
@@ -96,7 +92,6 @@ public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
         Concurrency concurrency,
         List<String> labelFilter
     ) {
-        super(progressTracker);
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.intersectFactory = intersectFactory;

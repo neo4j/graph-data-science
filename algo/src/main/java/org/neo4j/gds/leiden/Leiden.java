@@ -43,6 +43,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 
 public class Leiden extends Algorithm<LeidenResult> {
 
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph rootGraph;
     private final Direction direction;
@@ -73,7 +74,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.rootGraph = graph;
         this.direction = rootGraph.schema().direction();

@@ -31,6 +31,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 public class HDBScan extends Algorithm<Labels> {
 
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final IdMap nodes;
     private final NodePropertyValues nodePropertyValues;
@@ -68,7 +69,7 @@ public class HDBScan extends Algorithm<Labels> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.nodes = nodes;
         this.nodePropertyValues = nodePropertyValues;

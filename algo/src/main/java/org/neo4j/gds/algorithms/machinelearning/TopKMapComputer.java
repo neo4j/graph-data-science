@@ -39,9 +39,9 @@ import java.util.stream.LongStream;
 
 public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Graph graph;
-    private final ProgressTracker progressTracker;
     private final BitSet sourceNodes;
     private final BitSet targetNodes;
 
@@ -66,10 +66,9 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         int topK,
         Concurrency concurrency
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
-        this.progressTracker = progressTracker;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
         this.nodeEmbeddingProperty = nodeEmbeddingProperty;

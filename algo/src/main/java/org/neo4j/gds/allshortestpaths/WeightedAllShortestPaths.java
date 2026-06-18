@@ -56,23 +56,24 @@ import static org.neo4j.gds.Converters.longToIntConsumer;
 public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
     private final BlockingQueue<AllShortestPathsStreamResult> resultQueue = new LinkedBlockingQueue<>();
 
+    private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
     private final int nodeCount;
     private final Concurrency concurrency; // maximum number of workers
     private final ExecutorService executorService;
     private final Graph graph;
     private final AtomicInteger counter; // nodeId counter (init with nodeCount, counts down for each node)
-    private final TerminationFlag terminationFlag;
 
     private volatile boolean outputStreamOpen;
 
     public WeightedAllShortestPaths(
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         Graph graph,
         ExecutorService executorService,
-        Concurrency concurrency,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        Concurrency concurrency
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());

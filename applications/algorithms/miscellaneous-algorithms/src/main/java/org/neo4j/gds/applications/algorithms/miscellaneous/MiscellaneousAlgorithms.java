@@ -48,7 +48,6 @@ public class MiscellaneousAlgorithms {
 
     public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathParameters parameters) {
         var algorithm = CollapsePath.create(
-            ProgressTracker.NULL_TRACKER, // future work
             graphStore,
             parameters,
             DefaultPool.INSTANCE

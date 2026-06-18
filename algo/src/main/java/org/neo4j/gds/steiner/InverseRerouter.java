@@ -53,7 +53,7 @@ public class InverseRerouter extends ReroutingAlgorithm {
         Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
-        super(graph, sourceId, concurrency, progressTracker);
+        super(graph, sourceId, concurrency);
         this.isTerminal = isTerminal;
         this.examinationQueue = examinationQueue;
         this.indexQueue = indexQueue;

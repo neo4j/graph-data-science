@@ -100,12 +100,12 @@ class MultiLabelGraphSageTrainTest {
     void shouldRunWithDifferentProjectedFeatureSizes(String name, GraphSageTrainConfig config) {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             weightedGraph,
             TrainConfigTransformer.toParameters(config),
             config.projectedFeatureDimension().get(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );
@@ -125,12 +125,12 @@ class MultiLabelGraphSageTrainTest {
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             weightedGraph,
             TrainConfigTransformer.toParameters(config),
             PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );
@@ -159,12 +159,12 @@ class MultiLabelGraphSageTrainTest {
 
         var graphSageTrain = new MultiLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             weightedGraph,
             TrainConfigTransformer.toParameters(graphSageTrainConfig),
             featureDimension,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             graphSageTrainConfig
         );
@@ -207,12 +207,12 @@ class MultiLabelGraphSageTrainTest {
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             unequalGraph,
             TrainConfigTransformer.toParameters(config),
             featureDimension,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );
@@ -236,12 +236,12 @@ class MultiLabelGraphSageTrainTest {
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             graph,
             TrainConfigTransformer.toParameters(config),
             PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );
@@ -290,12 +290,12 @@ class MultiLabelGraphSageTrainTest {
 
         var graphSageTrain = new MultiLabelGraphSageTrain(
             Log.noOpLog(),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.STOP_RUNNING,
             weightedGraph,
             TrainConfigTransformer.toParameters(graphSageTrainConfig),
             PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.STOP_RUNNING,
             testGdsVersion,
             graphSageTrainConfig
         );

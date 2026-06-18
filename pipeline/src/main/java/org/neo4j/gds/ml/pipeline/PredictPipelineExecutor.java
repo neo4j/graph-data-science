@@ -36,15 +36,16 @@ package org.neo4j.gds.ml.pipeline;
     protected final PIPELINE_CONFIG config;
     protected final ExecutionContext executionContext;
     protected final GraphStore graphStore;
+     private final ProgressTracker progressTracker;
 
-    protected PredictPipelineExecutor(
+     protected PredictPipelineExecutor(
         ProgressTracker progressTracker,
         PIPELINE pipeline,
         PIPELINE_CONFIG config,
         ExecutionContext executionContext,
         GraphStore graphStore
     ) {
-        super(progressTracker);
+        this.progressTracker = progressTracker;
         this.pipeline = pipeline;
         this.config = config;
         this.executionContext = executionContext;
