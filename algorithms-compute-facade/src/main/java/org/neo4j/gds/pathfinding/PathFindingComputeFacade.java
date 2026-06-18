@@ -20,7 +20,6 @@
 package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.PathFindingAlgorithmTasks;
-import org.neo4j.gds.ProgressTrackerFactory;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
@@ -31,6 +30,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
+import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;

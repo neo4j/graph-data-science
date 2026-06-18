@@ -29,4 +29,7 @@ dependencies {
     testImplementation project(':core')
     testImplementation project(':neo4j-settings')
     testImplementation project(':test-utils')
+    testImplementation openGds.mockito.core
+    testImplementation openGds.mockito.junit.jupiter
+    testImplementation openGds.junit.jupiter.api
 }

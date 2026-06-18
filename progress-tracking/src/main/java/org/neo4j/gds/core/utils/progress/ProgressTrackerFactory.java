@@ -17,43 +17,63 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.graphstorecatalog;
+package org.neo4j.gds.core.utils.progress;
 
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 
-class ProgressTrackerFactory {
+public class ProgressTrackerFactory {
     private final LoggerForProgressTracking log;
-    private final RequestCorrelationId requestCorrelationId;
+    private final RequestCorrelationId correlationId;
     private final TaskRegistryFactory taskRegistryFactory;
 
-    ProgressTrackerFactory(
-        LoggerForProgressTracking log,
-        RequestCorrelationId requestCorrelationId,
+
+    public ProgressTrackerFactory(LoggerForProgressTracking log,
+        RequestCorrelationId correlationId,
         TaskRegistryFactory taskRegistryFactory
     ) {
         this.log = log;
-        this.requestCorrelationId = requestCorrelationId;
+        this.correlationId = correlationId;
         this.taskRegistryFactory = taskRegistryFactory;
     }
 
-    ProgressTracker create(Task task) {
-        var jobId = new JobId();
-        var concurrency = new Concurrency(1);
+    public ProgressTracker create(
+        Task task,
+        JobId jobId,
+        Concurrency concurrency,
+        boolean logProgress
+    ) {
+        ProgressTracker progressTracker;
+        if (logProgress) {
+            progressTracker = TaskProgressTracker.create(
+                log,
+                task,
+                concurrency,
+                jobId,
+                correlationId,
+                taskRegistryFactory
+            );
+        } else {
+            progressTracker = TaskTreeProgressTracker.create(
+                task,
+                log,
+                concurrency,
+                jobId,
+                correlationId,
+                taskRegistryFactory
+            );
+        }
 
-        return TaskProgressTracker.create(
-            log,
-            task,
-            concurrency,
-            jobId,
-            requestCorrelationId,
-            taskRegistryFactory
-        );
+        return progressTracker;
+    }
+
+    public ProgressTracker create(Task task, Concurrency concurrency, boolean logProgress) {
+        return create(task, new JobId(), concurrency, logProgress);
     }
 }
