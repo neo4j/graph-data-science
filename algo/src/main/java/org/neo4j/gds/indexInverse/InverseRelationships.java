@@ -49,7 +49,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class InverseRelationships extends Algorithm<Map<RelationshipType, SingleTypeRelationships>> {
+public class InverseRelationships implements Algorithm<Map<RelationshipType, SingleTypeRelationships>> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final GraphStore graphStore;

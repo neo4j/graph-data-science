@@ -22,7 +22,7 @@ package org.neo4j.gds.testproc;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-class FailingAlgorithm extends Algorithm<OutputFromProcedureThatFailsDuringTask> {
+class FailingAlgorithm implements Algorithm<OutputFromProcedureThatFailsDuringTask> {
     private final ProgressTracker progressTracker;
 
     FailingAlgorithm(ProgressTracker progressTracker) {

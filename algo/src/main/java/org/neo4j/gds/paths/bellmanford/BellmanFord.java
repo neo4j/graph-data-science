@@ -47,7 +47,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.delta.DistanceAndPredecessors.NO_PREDECESSOR;
 
-public class BellmanFord extends Algorithm<BellmanFordResult> {
+public class BellmanFord implements Algorithm<BellmanFordResult> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final long sourceNode;

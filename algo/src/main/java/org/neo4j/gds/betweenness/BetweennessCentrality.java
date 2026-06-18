@@ -39,7 +39,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult> {
+public class BetweennessCentrality implements Algorithm<BetwennessCentralityResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

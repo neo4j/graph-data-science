@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
+public class KCoreDecomposition implements Algorithm<KCoreDecompositionResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

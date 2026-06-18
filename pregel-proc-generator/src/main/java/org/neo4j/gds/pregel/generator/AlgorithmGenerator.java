@@ -55,7 +55,7 @@ public class AlgorithmGenerator {
         var typeSpecBuilder = TypeSpec
             .classBuilder(typeNames.algorithm())
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-            .superclass(ParameterizedTypeName.get(
+            .addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(Algorithm.class),
                 ClassName.get(PregelResult.class)
             ));

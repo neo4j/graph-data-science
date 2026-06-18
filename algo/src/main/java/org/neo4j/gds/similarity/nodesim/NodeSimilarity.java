@@ -50,7 +50,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
+public class NodeSimilarity implements Algorithm<NodeSimilarityResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

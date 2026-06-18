@@ -40,7 +40,7 @@ import java.util.function.DoubleUnaryOperator;
  * The algorithm also computes the minimum, maximum and sum of all
  * weights in the MST.
  */
-public class Prim extends Algorithm<SpanningTree> {
+public class Prim implements Algorithm<SpanningTree> {
     private static final int EMPTY = -1;
     private final ProgressTracker progressTracker;
 

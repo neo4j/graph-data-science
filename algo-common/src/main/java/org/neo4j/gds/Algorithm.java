@@ -19,6 +19,6 @@
  */
 package org.neo4j.gds;
 
-public abstract class Algorithm<RESULT> {
-    public abstract RESULT compute();
+public interface Algorithm<RESULT> {
+    RESULT compute();
 }

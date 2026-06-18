@@ -20,6 +20,7 @@
 package org.neo4j.gds.pregel.cc;
 
 import javax.annotation.processing.Generated;
+
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -30,7 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 @Generated("org.neo4j.gds.pregel.PregelProcessor")
-public final class ComputationAlgorithm extends Algorithm<PregelResult> {
+public final class ComputationAlgorithm implements Algorithm<PregelResult> {
     private final Pregel<PregelProcedureConfig> pregelJob;
 
     ComputationAlgorithm(Graph graph, PregelProcedureConfig configuration,

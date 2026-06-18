@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
-public final class BoruvkaMST extends Algorithm<GeometricMSTResult> {
+public final class BoruvkaMST implements Algorithm<GeometricMSTResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

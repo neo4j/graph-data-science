@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.paged.HugeSerialObjectMergeSort;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
-public class HDBScan extends Algorithm<Labels> {
+public class HDBScan implements Algorithm<Labels> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

@@ -51,7 +51,7 @@ import java.util.function.LongFunction;
  *
  * This algorithm is also capable of calculating the longest path for each node (unless it is ignored during sorting).
  */
-public class TopologicalSort extends Algorithm<TopologicalSortResult> {
+public class TopologicalSort implements Algorithm<TopologicalSortResult> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     // Contains the sorted nodes, which is the array we iterate on during the run

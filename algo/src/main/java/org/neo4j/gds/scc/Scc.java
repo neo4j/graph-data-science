@@ -33,7 +33,7 @@ import org.neo4j.gds.termination.TerminationFlag;
  *
  * specified in:  http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
  */
-public class Scc extends Algorithm<HugeLongArray> {
+public class Scc implements Algorithm<HugeLongArray> {
     private static final int UNORDERED = -1;
     private final ProgressTracker progressTracker;
 

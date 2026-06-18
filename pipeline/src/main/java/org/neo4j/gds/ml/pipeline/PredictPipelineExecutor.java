@@ -30,7 +30,7 @@ package org.neo4j.gds.ml.pipeline;
     PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig,
     PIPELINE extends Pipeline<?>,
     RESULT
-    > extends Algorithm<RESULT> {
+    > implements Algorithm<RESULT> {
 
     protected final PIPELINE pipeline;
     protected final PIPELINE_CONFIG config;

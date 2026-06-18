@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 
-public class PageRankAlgorithm extends Algorithm<PageRankResult> {
+public class PageRankAlgorithm implements Algorithm<PageRankResult> {
 
     private final ProgressTracker progressTracker;
     private final Pregel<PregelConfig> pregelJob;

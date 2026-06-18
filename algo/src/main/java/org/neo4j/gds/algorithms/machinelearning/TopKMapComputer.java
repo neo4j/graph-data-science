@@ -37,7 +37,7 @@ import org.neo4j.gds.utils.CloseableThreadLocal;
 import java.util.List;
 import java.util.stream.LongStream;
 
-public class TopKMapComputer extends Algorithm<KGEPredictResult> {
+public class TopKMapComputer implements Algorithm<KGEPredictResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

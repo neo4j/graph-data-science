@@ -53,7 +53,7 @@ import static org.neo4j.gds.paths.delta.DistanceAndPredecessors.NO_PREDECESSOR;
 /*
  * Longest Path algorithm implemented using topological sort
  */
-public class DagLongestPath extends Algorithm<PathFindingResult> {
+public class DagLongestPath implements Algorithm<PathFindingResult> {
     private static final long[] EMPTY_ARRAY = new long[0];
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

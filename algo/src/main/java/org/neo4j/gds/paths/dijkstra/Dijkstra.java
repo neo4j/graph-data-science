@@ -40,7 +40,7 @@ import static org.neo4j.gds.paths.dijkstra.TraversalState.CONTINUE;
 import static org.neo4j.gds.paths.dijkstra.TraversalState.EMIT_AND_CONTINUE;
 import static org.neo4j.gds.paths.dijkstra.TraversalState.EMIT_AND_STOP;
 
-public final class Dijkstra extends Algorithm<PathFindingResult> {
+public final class Dijkstra implements Algorithm<PathFindingResult> {
     private static final long NO_RELATIONSHIP = -1;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

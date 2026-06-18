@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.LongToDoubleFunction;
 
-public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficientResult> {
+public class LocalClusteringCoefficient implements Algorithm<LocalClusteringCoefficientResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

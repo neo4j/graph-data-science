@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.LongAdder;
  * http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
  */
 @SuppressWarnings("FieldCanBeLocal")
-public final class IntersectingTriangleCount extends Algorithm<TriangleCountResult> {
+public final class IntersectingTriangleCount implements Algorithm<TriangleCountResult> {
 
     static final int EXCLUDED_NODE_TRIANGLE_COUNT = -1;
     private final ProgressTracker progressTracker;

@@ -48,7 +48,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
-public final class Louvain extends Algorithm<LouvainResult> {
+public final class Louvain implements Algorithm<LouvainResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

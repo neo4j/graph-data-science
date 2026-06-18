@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 
-public class SpeakerListenerLPA extends Algorithm<PregelResult> {
+public class SpeakerListenerLPA implements Algorithm<PregelResult> {
     public static final String LABELS_PROPERTY = "communityIds";
     private final ProgressTracker progressTracker;
 

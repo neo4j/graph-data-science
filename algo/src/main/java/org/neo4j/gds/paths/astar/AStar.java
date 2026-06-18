@@ -33,7 +33,7 @@ import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class AStar extends Algorithm<PathFindingResult> {
+public final class AStar implements Algorithm<PathFindingResult> {
     private final Dijkstra dijkstra;
 
     private AStar(Dijkstra dijkstra) {

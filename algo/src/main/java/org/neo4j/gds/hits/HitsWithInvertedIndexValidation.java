@@ -35,7 +35,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class HitsWithInvertedIndexValidation extends Algorithm<HitsResultWithGraph> {
+public class HitsWithInvertedIndexValidation implements Algorithm<HitsResultWithGraph> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final InverseRelationshipsParameters inverseRelationshipsParameters;

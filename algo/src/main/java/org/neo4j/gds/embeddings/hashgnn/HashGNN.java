@@ -45,7 +45,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 /**
  * Based on the paper "Hashing-Accelerated Graph Neural Networks for Link Prediction"
  */
-public class HashGNN extends Algorithm<HashGNNResult> {
+public class HashGNN implements Algorithm<HashGNNResult> {
     private static final long DEGREE_PARTITIONS_PER_THREAD = 4;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;

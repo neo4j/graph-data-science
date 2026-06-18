@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.LongUnaryOperator;
 
-public final class ModularityCalculator extends Algorithm<ModularityResult> {
+public final class ModularityCalculator implements Algorithm<ModularityResult> {
 
     private final TerminationFlag terminationFlag;
     private final Graph graph;

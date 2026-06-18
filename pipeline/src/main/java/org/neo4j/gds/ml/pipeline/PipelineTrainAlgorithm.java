@@ -33,7 +33,7 @@ public abstract class PipelineTrainAlgorithm<
     RESULT,
     MODEL_RESULT extends CatalogModelContainer<?, CONFIG, ?>,
     CONFIG extends AlgoBaseConfig & ModelConfig,
-    FEATURE_STEP extends FeatureStep> extends Algorithm<MODEL_RESULT> {
+    FEATURE_STEP extends FeatureStep> implements Algorithm<MODEL_RESULT> {
     protected final TrainingPipeline<FEATURE_STEP> pipeline;
     protected final GraphStore graphStore;
     protected final CONFIG config;

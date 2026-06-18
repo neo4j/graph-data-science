@@ -35,7 +35,7 @@ public abstract class PipelineExecutor<
     PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig,
     PIPELINE extends Pipeline<?>,
     RESULT
-    > extends Algorithm<RESULT> {
+    > implements Algorithm<RESULT> {
 
     private final ProgressTracker progressTracker;
 

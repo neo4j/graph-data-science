@@ -61,7 +61,7 @@ import java.util.stream.IntStream;
  * Also, when a path to terminal has been found, we do not start a shortest path search from scratch.
  * We instead continue from where we left off.
  */
-public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult> {
+public final class SteinerBasedDeltaStepping implements Algorithm<PathFindingResult> {
 
     static final int NO_BIN = Integer.MAX_VALUE;
     private static final long NO_TERMINAL = -1;

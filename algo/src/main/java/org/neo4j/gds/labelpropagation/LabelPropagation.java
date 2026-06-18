@@ -42,7 +42,7 @@ import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 
-public class LabelPropagation extends Algorithm<LabelPropagationResult> {
+public class LabelPropagation implements Algorithm<LabelPropagationResult> {
 
     private static final int NO_SUCH_LABEL = -1;
     private final ProgressTracker progressTracker;

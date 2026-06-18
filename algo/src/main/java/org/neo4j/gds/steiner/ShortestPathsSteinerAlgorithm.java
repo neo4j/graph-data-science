@@ -37,7 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.concurrent.atomic.LongAdder;
 
-public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> {
+public class ShortestPathsSteinerAlgorithm implements Algorithm<SteinerTreeResult> {
     public static final long ROOT_NODE = -1;
     public static final long PRUNED = -2;
     private final ProgressTracker progressTracker;

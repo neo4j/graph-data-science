@@ -23,7 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class TestAlgorithm extends Algorithm<TestAlgorithmResult> {
+public class TestAlgorithm implements Algorithm<TestAlgorithmResult> {
 
     private final ProgressTracker progressTracker;
     private final Graph graph;

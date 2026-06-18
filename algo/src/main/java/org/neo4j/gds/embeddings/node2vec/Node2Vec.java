@@ -37,7 +37,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class Node2Vec extends Algorithm<Node2VecResult> {
+public final class Node2Vec implements Algorithm<Node2VecResult> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final Log log;

@@ -41,7 +41,7 @@ import java.util.function.LongToIntFunction;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
+public class DegreeCentrality implements Algorithm<DegreeCentralityResult> {
 
     private static final double DEFAULT_WEIGHT = 0D;
     private final ProgressTracker progressTracker;
