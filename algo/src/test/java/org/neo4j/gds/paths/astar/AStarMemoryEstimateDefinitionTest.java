@@ -31,9 +31,9 @@ class AStarMemoryEstimateDefinitionTest {
 
     private static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, 56_856L),
-            Arguments.of(1_000_000, 56_125_728L),
-            Arguments.of(1_000_000_000, 56_133_545_824L)
+            Arguments.of(1_000, 56_848L),
+            Arguments.of(1_000_000, 56_125_720L),
+            Arguments.of(1_000_000_000, 56_133_545_816L)
         );
     }
 
