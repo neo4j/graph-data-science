@@ -19,13 +19,6 @@
  */
 package org.neo4j.gds;
 
-import java.util.concurrent.Callable;
-
-public abstract class Algorithm<RESULT> implements Callable<RESULT> {
+public abstract class Algorithm<RESULT> {
     public abstract RESULT compute();
-
-    @Override
-    public RESULT call() throws Exception {
-        return compute();
-    }
 }
