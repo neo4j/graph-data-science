@@ -42,7 +42,7 @@ public final class ShardedIdMap extends LabeledIdMap {
 
     @Override
     public String typeId() {
-        return "sharded";
+        return ShardedIdMapBuilder.ID;
     }
 
     @Override
