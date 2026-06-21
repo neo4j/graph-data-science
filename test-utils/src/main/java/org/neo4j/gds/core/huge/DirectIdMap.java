@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.LongPredicate;
 
 public class DirectIdMap implements IdMap {
