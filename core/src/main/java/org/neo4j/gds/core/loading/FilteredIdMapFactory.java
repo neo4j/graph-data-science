@@ -20,60 +20,45 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
-import java.util.Collection;
-
+/**
+ * Builds the community-edition (array-backed) filtered {@link NodeTranslator} over a dense
+ * root mapped id space. Lives in {@code core.loading} so it can reach the package-private
+ * {@link ArrayIdMapBuilderOps}; the enterprise edition supplies a {@code BitIdMap}-backed
+ * translator via its {@link org.neo4j.gds.core.IdMapBehavior} instead.
+ */
 public final class FilteredIdMapFactory {
 
     private FilteredIdMapFactory() {}
 
-    /**
-     * Builds an {@link ArrayIdMap}-backed filtered id map over the dense root mapped
-     * space selected by {@code nodeLabels}. This is the community-edition representation.
-     */
-    public static FilteredIdMap arrayBased(
-        IdMap rootIdMap,
-        LabelInformation labelInformation,
-        Collection<NodeLabel> nodeLabels,
+    public static NodeTranslator arrayBasedTranslator(
+        BitSet unionBitSet,
+        long rootNodeCount,
         Concurrency concurrency
     ) {
-        BitSet unionBitSet = labelInformation.unionBitSet(nodeLabels, rootIdMap.nodeCount());
+        long filteredNodeCount = unionBitSet.cardinality();
+        HugeLongArray filteredToRoot = HugeLongArray.newArray(filteredNodeCount);
 
-        long nodeId = -1L;
+        long rootMappedId = -1L;
         long cursor = 0L;
-        long newNodeCount = unionBitSet.cardinality();
-        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount);
-        while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
-            newGraphIds.set(cursor, nodeId);
-            cursor++;
+        while ((rootMappedId = unionBitSet.nextSetBit(rootMappedId + 1)) != -1) {
+            filteredToRoot.set(cursor++, rootMappedId);
         }
 
-        // rootIdMap.nodeCount() - 1 is the correct capacity because the root mapped space is
-        // dense 0..nodeCount-1. Unlike ArrayIdMap.withFilteredLabels (which uses originalId
-        // capacity), here the root is a ShardedIdMap whose mapped ids are always sequential.
-        HugeSparseLongArray newNodeToGraphIds = ArrayIdMapBuilderOps.buildSparseIdMap(
-            newNodeCount,
-            rootIdMap.nodeCount() - 1,
+        // The root mapped space is dense 0..rootNodeCount-1.
+        long highestRootMappedId = rootNodeCount - 1;
+
+        HugeSparseLongArray rootToFiltered = ArrayIdMapBuilderOps.buildSparseIdMap(
+            filteredNodeCount,
+            highestRootMappedId,
             concurrency,
-            newGraphIds
+            filteredToRoot
         );
 
-        LabelInformation newLabelInformation = labelInformation.filter(nodeLabels);
-
-        var rootToFilteredIdMap = new ArrayIdMap(
-            newGraphIds,
-            newNodeToGraphIds,
-            newLabelInformation,
-            newNodeCount,
-            rootIdMap.nodeCount() - 1
-        );
-
-        return new FilteredLabeledIdMap(rootIdMap, rootToFilteredIdMap);
+        return new ArrayIdMap(filteredToRoot, rootToFiltered, filteredNodeCount, highestRootMappedId);
     }
 }

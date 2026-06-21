@@ -19,30 +19,39 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.LabeledIdMap;
+import com.carrotsearch.hppc.BitSet;
+import org.neo4j.gds.api.nodes.FilterableNodeTranslator;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.OptionalLong;
-
-public final class ShardedIdMap extends LabeledIdMap {
+/**
+ * A {@link NodeTranslator} backed directly by a {@link ShardedLongLongMap}. The dense
+ * mapped id space it produces is the same space its labels and properties are keyed by,
+ * so it is exposed as the node translator of a {@link org.neo4j.gds.api.nodes.ComposedIdMap}.
+ */
+public final class ShardedIdMap implements FilterableNodeTranslator {
 
     private final ShardedLongLongMap idMap;
 
-    ShardedIdMap(ShardedLongLongMap idMap, LabelInformation labelInformation) {
-        super(labelInformation, idMap.size());
+    ShardedIdMap(ShardedLongLongMap idMap) {
         this.idMap = idMap;
     }
 
     @Override
     public String typeId() {
         return ShardedIdMapBuilder.ID;
+    }
+
+    @Override
+    public long nodeCount() {
+        return idMap.size();
+    }
+
+    @Override
+    public long highestOriginalId() {
+        return idMap.maxOriginalId();
     }
 
     @Override
@@ -56,49 +65,16 @@ public final class ShardedIdMap extends LabeledIdMap {
     }
 
     @Override
-    public long toRootNodeId(long mappedNodeId) {
-        return mappedNodeId;
-    }
-
-    @Override
     public boolean containsOriginalId(long originalNodeId) {
         return idMap.contains(originalNodeId);
     }
 
     @Override
-    public long highestOriginalId() {
-        return idMap.maxOriginalId();
-    }
-
-    @Override
-    public IdMap rootIdMap() {
-        return this;
-    }
-
-    @Override
-    public OptionalLong rootNodeCount() {
-        return OptionalLong.of(nodeCount());
-    }
-
-    @Override
-    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, Concurrency concurrency) {
-        labelInformation.validateNodeLabelFilter(nodeLabels);
-
-        if (labelInformation.isEmpty()) {
-            return Optional.empty();
-        }
-
-        // Filtering by all available labels is a no-op; callers fall back to this id map.
-        if (nodeLabels.containsAll(labelInformation.availableNodeLabels())) {
-            return Optional.empty();
-        }
-
+    public NodeTranslator filteredNodeTranslator(BitSet unionBitSet, Concurrency concurrency) {
         // The filtered representation (ArrayIdMap on community, BitIdMap on enterprise) is
-        // chosen by the IdMapBehavior. ShardedIdMap is in public/core and must NOT build a
-        // BitIdMap directly, so it delegates.
-        return Optional.of(
-            IdMapBehaviorServiceProvider.idMapBehavior()
-                .filteredIdMap(this, labelInformation, nodeLabels, concurrency)
-        );
+        // chosen by the IdMapBehavior. ShardedIdMap lives in public/core and must NOT build a
+        // BitIdMap directly, so it delegates the construction to the behavior.
+        return IdMapBehaviorServiceProvider.idMapBehavior()
+            .filteredNodeTranslator(unionBitSet, nodeCount(), concurrency);
     }
 }

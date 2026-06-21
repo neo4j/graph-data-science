@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds.core;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.api.IdMap;
+import com.carrotsearch.hppc.BitSet;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.FilteredIdMapFactory;
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.mem.MemoryEstimation;
 
-import java.util.Collection;
 import java.util.Optional;
 
 public interface IdMapBehavior {
@@ -55,12 +52,12 @@ public interface IdMapBehavior {
 
     MemoryEstimation memoryEstimation();
 
-    default FilteredIdMap filteredIdMap(
-        IdMap rootIdMap,
-        LabelInformation labelInformation,
-        Collection<NodeLabel> nodeLabels,
-        Concurrency concurrency
-    ) {
-        return FilteredIdMapFactory.arrayBased(rootIdMap, labelInformation, nodeLabels, concurrency);
+    /**
+     * Builds the filtered node translator over {@code unionBitSet} (the selected subset of a
+     * root translator's dense mapped id space). The community default is array-backed;
+     * enterprise overrides this to produce a denser bit-set-backed translator.
+     */
+    default NodeTranslator filteredNodeTranslator(BitSet unionBitSet, long rootNodeCount, Concurrency concurrency) {
+        return FilteredIdMapFactory.arrayBasedTranslator(unionBitSet, rootNodeCount, concurrency);
     }
 }

@@ -20,9 +20,9 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.LabeledIdMap;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.nodes.ComposedIdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.NodeSchemaRecord;
@@ -139,8 +139,8 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             );
         }
 
-        var labelInformation = ((LabeledIdMap) nodes.idMap()).labelInformation();
-        var idMap = new ShardedIdMap(intermediateIdMap, labelInformation);
+        var labelInformation = ((ComposedIdMap) nodes.idMap()).labelInformation();
+        var idMap = ComposedIdMap.of(new ShardedIdMap(intermediateIdMap), labelInformation);
 
         // The intermediate (dense) id equals the mapped id, so this id map is the identity.
         // It is consumed by node-property finalization (arrow) and relationship value mapping.

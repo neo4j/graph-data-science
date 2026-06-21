@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -98,7 +99,7 @@ public final class NodePropertiesFromStoreBuilder {
         // ShardedIdMap: the dense intermediate id equals the mapped id, so resolution is
         // identity. Its own toMappedNodeId is an external->mapped lookup and must not be used.
         PartialIdMap actualIdMap;
-        if (idMap instanceof ShardedIdMap) {
+        if (idMap instanceof ComposedIdMap composedIdMap && composedIdMap.nodeTranslator() instanceof ShardedIdMap) {
             long nodeCount = idMap.nodeCount();
             actualIdMap = new PartialIdMap() {
                 @Override

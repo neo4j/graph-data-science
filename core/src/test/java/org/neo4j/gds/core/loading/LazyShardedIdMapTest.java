@@ -21,6 +21,8 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.nodes.ComposedIdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 
@@ -44,7 +46,8 @@ class LazyShardedIdMapTest {
         var result = builder.build();
         var idMap = result.idMap();
 
-        assertThat(idMap).isInstanceOf(ShardedIdMap.class);
+        assertThat(idMap).isInstanceOf(ComposedIdMap.class);
+        assertThat(((ComposedIdMap) idMap).nodeTranslator()).isInstanceOf(ShardedIdMap.class);
         assertThat(idMap.typeId()).isEqualTo("sharded");
         assertThat(idMap.nodeCount()).isEqualTo(3);
         assertThat(idMap.toOriginalNodeId(idMap.toMappedNodeId(2000))).isEqualTo(2000);
@@ -66,7 +69,7 @@ class LazyShardedIdMapTest {
         builder.addNode(5, NodeLabelTokens.empty());
 
         var idMap = builder.build().idMap();
-        assertThat(idMap.toMappedNodeId(1337)).isEqualTo(org.neo4j.gds.api.IdMap.NOT_FOUND);
+        assertThat(idMap.toMappedNodeId(1337)).isEqualTo(IdMap.NOT_FOUND);
         assertThat(idMap.containsOriginalId(1337)).isFalse();
     }
 }

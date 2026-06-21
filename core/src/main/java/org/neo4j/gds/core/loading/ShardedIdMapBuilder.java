@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.ComposedIdMap;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
@@ -52,10 +54,10 @@ public final class ShardedIdMapBuilder implements IdMapBuilder {
 
     @Override
     public IdMap build(LabelInformation.Builder labelInformationBuilder, long highestNodeId, Concurrency concurrency) {
-        var idMap = this.builder.build();
+        var shardedMap = this.builder.build();
         // Dense ids: the label keys (already dense intermediate ids) map to themselves.
-        var labelInformation = labelInformationBuilder.build(idMap.size(), id -> id);
-        return new ShardedIdMap(idMap, labelInformation);
+        var labelInformation = labelInformationBuilder.build(shardedMap.size(), id -> id);
+        return ComposedIdMap.of(new ShardedIdMap(shardedMap), labelInformation);
     }
 
     public static boolean isShardedIdMapType(String typeId) {

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.stream.LongStream;
@@ -38,7 +39,8 @@ class ShardedIdMapBuilderTest {
         builder.allocate(nodes.length).insert(nodes.clone());
         var idMap = builder.build(LabelInformationBuilders.allNodes(), nodes.length - 1, concurrency);
 
-        assertThat(idMap).isInstanceOf(ShardedIdMap.class);
+        assertThat(idMap).isInstanceOf(ComposedIdMap.class);
+        assertThat(((ComposedIdMap) idMap).nodeTranslator()).isInstanceOf(ShardedIdMap.class);
         assertThat(idMap.typeId()).isEqualTo("sharded");
         assertThat(idMap.nodeCount()).isEqualTo(10);
         assertThat(idMap.toMappedNodeId(offset)).isGreaterThanOrEqualTo(0);
