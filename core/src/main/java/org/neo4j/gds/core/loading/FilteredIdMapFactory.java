@@ -54,6 +54,9 @@ public final class FilteredIdMapFactory {
             cursor++;
         }
 
+        // rootIdMap.nodeCount() - 1 is the correct capacity because the root mapped space is
+        // dense 0..nodeCount-1. Unlike ArrayIdMap.withFilteredLabels (which uses originalId
+        // capacity), here the root is a ShardedIdMap whose mapped ids are always sequential.
         HugeSparseLongArray newNodeToGraphIds = ArrayIdMapBuilderOps.buildSparseIdMap(
             newNodeCount,
             rootIdMap.nodeCount() - 1,
