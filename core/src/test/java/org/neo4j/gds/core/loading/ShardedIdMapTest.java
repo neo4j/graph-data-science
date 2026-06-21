@@ -22,7 +22,9 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
 import java.util.List;
@@ -77,5 +79,28 @@ class ShardedIdMapTest {
             return true;
         });
         assertThat(idMap.rootIdMap()).isSameAs(idMap);
+    }
+
+    @Test
+    void withFilteredLabelsReturnsCommunityFilteredMap() {
+        // Build a multi-label ShardedIdMap via the lazy builder (community path: ArrayIdMap-backed filter).
+        var builder = new LazyIdMapBuilderBuilder()
+            .concurrency(new Concurrency(4))
+            .hasLabelInformation(true)
+            .hasProperties(false)
+            .propertyState(PropertyState.PERSISTENT)
+            .build();
+        builder.addNode(1000, NodeLabelTokens.ofStrings("A"));
+        builder.addNode(2000, NodeLabelTokens.ofStrings("B"));
+        builder.addNode(3000, NodeLabelTokens.ofStrings("C"));
+        var idMap = (ShardedIdMap) builder.build().idMap();
+
+        var filtered = idMap.withFilteredLabels(List.of(NodeLabel.of("A")), new Concurrency(1));
+
+        assertThat(filtered).isPresent();
+        assertThat(filtered.get().nodeCount()).isEqualTo(1);
+        // The filtered map is rooted in the ShardedIdMap's dense space; toRootNodeId(0) == mapped id of 1000.
+        assertThat(filtered.get().toRootNodeId(0)).isEqualTo(idMap.toMappedNodeId(1000));
+        assertThat(filtered.get().toOriginalNodeId(0)).isEqualTo(1000);
     }
 }
