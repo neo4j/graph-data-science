@@ -128,6 +128,17 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     public ShardedIdMapAndProperties build() {
         var nodes = this.nodesBuilder.build();
         var intermediateIdMap = this.intermediateIdMapBuilder.build();
+
+        // The label information is indexed against intermediate ids (0..size-1). ShardedIdMap
+        // uses those same ids as its mapped ids. Guard that the invariant holds before proceeding.
+        if (nodes.idMap().nodeCount() != intermediateIdMap.size()) {
+            throw new IllegalStateException(
+                "ShardedIdMap requires inner mapped ids to equal intermediate ids: " +
+                "inner node count = " + nodes.idMap().nodeCount() +
+                ", intermediate map size = " + intermediateIdMap.size()
+            );
+        }
+
         var labelInformation = ((LabeledIdMap) nodes.idMap()).labelInformation();
         var idMap = new ShardedIdMap(intermediateIdMap, labelInformation);
 
