@@ -45,8 +45,8 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
-import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.IdMapBuilder;
+import org.neo4j.gds.core.loading.ShardedIdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
@@ -111,7 +111,7 @@ public final class GraphFactory {
         boolean usePooled = usePooledBuilderProvider.orElse(false);
         long maxIntermediateId = maxOriginalNodeId;
 
-        if (HighLimitIdMap.isHighLimitIdMap(idMapType)) {
+        if (ShardedIdMapBuilder.isShardedIdMapType(idMapType)) {
             // If the requested id map is high limit, we need to make sure that
             // internal data structures are sized accordingly. Using the highest
             // original id will potentially fail due to size limitations.
