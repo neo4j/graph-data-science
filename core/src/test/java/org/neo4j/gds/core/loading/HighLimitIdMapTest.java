@@ -38,7 +38,7 @@ import static org.neo4j.gds.api.IdMap.NOT_FOUND;
 
 class HighLimitIdMapTest {
 
-    private HighLimitIdMap idMap;
+    private ShardedIdMap idMap;
 
     @BeforeEach
     void setup() {
@@ -52,7 +52,7 @@ class HighLimitIdMapTest {
         builder.addNode(2000, NodeLabelTokens.ofStrings("B"));
         builder.addNode(3000, NodeLabelTokens.ofStrings("C"));
 
-        this.idMap = builder.build().idMap();
+        this.idMap = (ShardedIdMap) builder.build().idMap();
     }
 
     @Test

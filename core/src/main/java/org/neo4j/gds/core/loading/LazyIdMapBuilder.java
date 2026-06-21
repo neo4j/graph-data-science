@@ -20,6 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.LabeledIdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
@@ -116,29 +118,25 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             : OptionalLong.of(this.nodesBuilder.importedNodes());
     }
 
-    public record HighLimitIdMapAndProperties(
-        HighLimitIdMap idMap,
+    public record ShardedIdMapAndProperties(
+        IdMap idMap,
         PartialIdMap intermediateIdMap,
         NodeSchemaRecord schema,
         NodePropertyStore propertyStore
     ) {}
 
-    public HighLimitIdMapAndProperties build() {
+    public ShardedIdMapAndProperties build() {
         var nodes = this.nodesBuilder.build();
         var intermediateIdMap = this.intermediateIdMapBuilder.build();
-        // The implementation of this map depends on either CE/EE or a feature toggle.
-        var internalIdMap = nodes.idMap();
+        var labelInformation = ((LabeledIdMap) nodes.idMap()).labelInformation();
+        var idMap = new ShardedIdMap(intermediateIdMap, labelInformation);
 
-        var idMap = new HighLimitIdMap(intermediateIdMap, internalIdMap);
-
+        // The intermediate (dense) id equals the mapped id, so this id map is the identity.
+        // It is consumed by node-property finalization (arrow) and relationship value mapping.
         var partialIdMap = new PartialIdMap() {
             @Override
             public long toMappedNodeId(long intermediateId) {
-                // This partial id map is used to construct the final node properties.
-                // During import, the node properties are indexed by the intermediate id
-                // produced by the LazyIdMap. To get the correct mapped id, we have to
-                // go through the actual high limit id map.
-                return idMap.toMappedNodeId(intermediateIdMap.toOriginalNodeId(intermediateId));
+                return intermediateId;
             }
 
             @Override
@@ -147,7 +145,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             }
         };
 
-        return new HighLimitIdMapAndProperties(
+        return new ShardedIdMapAndProperties(
             idMap,
             partialIdMap,
             nodes.schema(),
