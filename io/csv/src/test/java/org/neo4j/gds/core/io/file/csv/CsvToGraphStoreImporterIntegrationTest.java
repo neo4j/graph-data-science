@@ -22,6 +22,7 @@ package org.neo4j.gds.core.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.RelationshipType;
@@ -35,7 +36,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
-import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -225,8 +225,11 @@ class CsvToGraphStoreImporterIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {ArrayIdMapBuilder.ID, HighLimitIdMapBuilder.ID})
-    void shouldConsiderIdMapBuilderType(String idMapBuilderType) {
+    @CsvSource({
+        ArrayIdMapBuilder.ID + "," + ArrayIdMapBuilder.ID,
+        "highlimit,sharded"
+    })
+    void shouldConsiderIdMapBuilderType(String idMapBuilderType, String expectedTypeId) {
         var graphStore = GdlFactory.builder()
             .gdlGraph("()-[]->()")
             .idMapBuilderType(idMapBuilderType)
@@ -257,7 +260,7 @@ class CsvToGraphStoreImporterIntegrationTest {
         );
         var userGraphStore = importer.run();
 
-        assertThat(userGraphStore.graphStore().nodes().typeId()).startsWith(idMapBuilderType);
+        assertThat(userGraphStore.graphStore().nodes().typeId()).isEqualTo(expectedTypeId);
     }
 
     @Test
