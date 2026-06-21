@@ -101,13 +101,13 @@ public final class GraphMemoryUsageFactory {
                 relationshipsTotal.add(size);
             }
 
-            if (path.startsWith(".nodes.sparseLongArray")) {
+            if (path.startsWith(".nodes.nodeTranslator.sparseLongArray")) {
                 mappingSparseLongArray.add(size);
             }
-            if (path.startsWith(".nodes.internalToOriginalIds")) {
+            if (path.startsWith(".nodes.nodeTranslator.internalToOriginalIds")) {
                 mappingForward.add(size);
             }
-            if (path.startsWith(".nodes.originalToInternalIds")) {
+            if (path.startsWith(".nodes.nodeTranslator.originalToInternalIds")) {
                 mappingBackward.add(size);
             }
             if (ADJ_DEGREES.matcher(path).matches()) {
