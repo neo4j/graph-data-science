@@ -26,7 +26,6 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.ShardedIdMap;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -96,13 +95,10 @@ public final class NodePropertiesFromStoreBuilder {
         }
 
         // Imported property values are associated with the intermediate (dense) node ids.
-        // - HighLimitIdMap: the intermediate->mapped mapping is its rootIdMap.
-        // - ShardedIdMap: the dense intermediate id equals the mapped id, so resolution is
-        //   identity. Its own toMappedNodeId is an external->mapped lookup and must not be used.
+        // ShardedIdMap: the dense intermediate id equals the mapped id, so resolution is
+        // identity. Its own toMappedNodeId is an external->mapped lookup and must not be used.
         PartialIdMap actualIdMap;
-        if (idMap instanceof HighLimitIdMap) {
-            actualIdMap = idMap.rootIdMap();
-        } else if (idMap instanceof ShardedIdMap) {
+        if (idMap instanceof ShardedIdMap) {
             long nodeCount = idMap.nodeCount();
             actualIdMap = new PartialIdMap() {
                 @Override
