@@ -167,11 +167,6 @@ public final class TaskProgressLogger implements ProgressLogger {
     }
 
     @Override
-    public void logDebug(Supplier<String> msg) {
-        batchingProgressLogger.logDebug(msg);
-    }
-
-    @Override
     public void logWarning(String msg) {
         batchingProgressLogger.logWarning(msg);
     }

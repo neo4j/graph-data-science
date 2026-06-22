@@ -51,7 +51,6 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -290,22 +289,6 @@ class BatchingProgressLoggerTest {
         batchingProgressLogger.logMessage("Swiftly, and with style");
 
         verify(log).info("[%s] [%s] %s %s", "my request correlation id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
-    }
-
-    @Test
-    void shouldPrependCorrelationIdToDebugLogMessages() {
-        var log = mock(Log.class);
-        var batchingProgressLogger = BatchingProgressLogger.create(
-            new LoggerForProgressTrackingAdapter(log),
-            new RequestCorrelationIdForTesting("my request correlation id"),
-            new LeafTask("Monsieur Alfonse", new Concurrency(1), 42),
-            new Concurrency(87)
-        );
-
-        when(log.isDebugEnabled()).thenReturn(true);
-        batchingProgressLogger.logDebug("Swiftly, and with style");
-
-        verify(log).debug("[%s] [%s] %s %s", "my request correlation id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
     }
 
     @Test
