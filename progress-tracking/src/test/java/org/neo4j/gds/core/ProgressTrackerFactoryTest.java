@@ -28,8 +28,9 @@ import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.Progress;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -58,9 +59,8 @@ class ProgressTrackerFactoryTest {
             requestCorrelationId,
             taskRegistryFactory
         );
-
         var tracker = factory.create(task, new JobId("jid-test"), concurrency, true);
-        assertThat(tracker).isNotNull();
+        assertThat(tracker).isInstanceOf(TaskProgressTracker.class);
     }
 
     @Test
@@ -76,12 +76,7 @@ class ProgressTrackerFactoryTest {
         );
 
         var tracker = factory.create(task, new JobId("jid-test"), concurrency, false);
-        assertThat(tracker).isNotNull();
+        assertThat(tracker).isInstanceOf(TaskTreeProgressTracker.class);
     }
 
-    @Test
-    void shouldReturnNullTracker() {
-        var tracker = ProgressTracker.NULL_TRACKER;
-        assertThat(tracker).isSameAs(ProgressTracker.NULL_TRACKER);
-    }
 }
