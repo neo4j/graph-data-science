@@ -23,11 +23,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
@@ -70,25 +69,18 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
          */
         var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
 
-        if (configuration.logProgress()) {
-            return TaskProgressTracker.create(
-                new LoggerForProgressTrackingAdapter(log),
-                progressTask,
-                configuration.concurrency(),
-                configuration.jobId(),
-                requestCorrelationId,
-                taskRegistryFactory
-            );
-        }
-
-        return TaskTreeProgressTracker.create(
-            progressTask,
+        var progressTrackerFactory  = new ProgressTrackerFactory(
             new LoggerForProgressTrackingAdapter(log),
-            configuration.concurrency(),
-            configuration.jobId(),
             requestCorrelationId,
             taskRegistryFactory
         );
+
+         return progressTrackerFactory.create(
+             progressTask,
+             configuration.jobId(),
+             configuration.concurrency(),
+             configuration.logProgress()
+         );
     }
 
     ALGO build(
