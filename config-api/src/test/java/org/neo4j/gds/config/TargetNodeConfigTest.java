@@ -17,52 +17,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.config;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.TargetNodeConfig;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.api.IdMap;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@GdlExtension
 class TargetNodeConfigTest {
-
-    @GdlGraph
-    private static final String DB_CYPHER =
-        "CREATE " +
-            " (a0:Node)," +
-            " (a1:Node)";
-
-    @Inject
-    private GraphStore graphStore;
-    @Inject
-    private IdFunction idFunction;
 
     @Test
     void shouldThrowForInvalidNode() {
-        var config = SampleTargetConfigImpl.builder().targetNode(100).build();
+        var config = mock(TargetNodeConfig.class);
+        when(config.targetNode()).thenReturn(100L);
 
+        var graphStore = mock(GraphStore.class);
+        var idMap = mock(IdMap.class);
+        when(graphStore.nodes()).thenReturn(idMap);
+        when(idMap.safeToMappedNodeId(anyLong())).thenReturn(IdMap.NOT_FOUND);
+
+        doCallRealMethod().when(config).validateTargetNode(graphStore, List.of(NodeLabel.of("Node")), List.of());
         assertThatThrownBy(() -> config.validateTargetNode(
             graphStore,
             List.of(NodeLabel.of("Node")),
             List.of()
         ))
-            .hasMessageContaining("Target node does not exist in the in-memory graph: `100`");
+            .hasMessageContaining("targetNode nodes do not exist in the in-memory graph: [100]");
     }
 
     @Test
     void shouldNotThrowForExistingNode() {
-        var config = SampleTargetConfigImpl.builder().targetNode(idFunction.of("a0")).build();
+        var config = mock(TargetNodeConfig.class);
+        when(config.targetNode()).thenReturn(100L);
 
+        var graphStore = mock(GraphStore.class);
+        var idMap = mock(IdMap.class);
+        when(graphStore.nodes()).thenReturn(idMap);
+        when(idMap.safeToMappedNodeId(anyLong())).thenReturn(0L);
+        when(idMap.nodeLabels(anyLong())).thenReturn(List.of(NodeLabel.of("Node")));
+
+
+        doCallRealMethod().when(config).validateTargetNode(graphStore, List.of(NodeLabel.of("Node")), List.of());
         assertThatNoException().isThrownBy(() -> config.validateTargetNode(
             graphStore,
             List.of(NodeLabel.of("Node")),
@@ -70,8 +74,5 @@ class TargetNodeConfigTest {
         ));
     }
 
-    @Configuration
-    interface SampleTargetConfig extends TargetNodeConfig {
 
-    }
 }

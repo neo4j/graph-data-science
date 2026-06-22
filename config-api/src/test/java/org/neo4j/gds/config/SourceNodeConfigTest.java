@@ -17,52 +17,57 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.config;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.api.IdMap;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@GdlExtension
 class SourceNodeConfigTest {
 
-    @GdlGraph
-    private static final String DB_CYPHER =
-        "CREATE " +
-            " (a0:Node)," +
-            " (a1:Node)";
 
-    @Inject
-    private GraphStore graphStore;
-    @Inject
-    private IdFunction idFunction;
 
     @Test
     void shouldThrowForInvalidNode() {
-        var config = SampleSeedConfigImpl.builder().sourceNode(100).build();
+        var config = mock(SourceNodeConfig.class);
+        when(config.sourceNode()).thenReturn(100L);
 
+        var graphStore = mock(GraphStore.class);
+        var idMap = mock(IdMap.class);
+        when(graphStore.nodes()).thenReturn(idMap);
+        when(idMap.safeToMappedNodeId(anyLong())).thenReturn(IdMap.NOT_FOUND);
+
+        doCallRealMethod().when(config).validateSourceNode(graphStore, List.of(NodeLabel.of("Node")), List.of());
         assertThatThrownBy(() -> config.validateSourceNode(
             graphStore,
             List.of(NodeLabel.of("Node")),
             List.of()
         ))
-            .hasMessageContaining("Source node does not exist in the in-memory graph: `100`");
+            .hasMessageContaining("sourceNode nodes do not exist in the in-memory graph: [100]");
     }
 
     @Test
     void shouldNotThrowForExistingNode() {
-        var config = SampleSeedConfigImpl.builder().sourceNode(idFunction.of("a0")).build();
+        var config = mock(SourceNodeConfig.class);
+        when(config.sourceNode()).thenReturn(100L);
 
+        var graphStore = mock(GraphStore.class);
+        var idMap = mock(IdMap.class);
+        when(graphStore.nodes()).thenReturn(idMap);
+        when(idMap.safeToMappedNodeId(anyLong())).thenReturn(0L);
+        when(idMap.nodeLabels(anyLong())).thenReturn(List.of(NodeLabel.of("Node")));
+
+        doCallRealMethod().when(config).validateSourceNode(graphStore, List.of(NodeLabel.of("Node")), List.of());
         assertThatNoException().isThrownBy(() -> config.validateSourceNode(
             graphStore,
             List.of(NodeLabel.of("Node")),
@@ -70,8 +75,4 @@ class SourceNodeConfigTest {
         ));
     }
 
-    @Configuration
-    interface SampleSeedConfig extends SourceNodeConfig {
-
-    }
 }
