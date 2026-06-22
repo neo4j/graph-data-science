@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -103,7 +104,8 @@ public final class Tasks {
         return new IterativeTask(
             description,
             concurrency,
-            new ArrayList<>(),
+            // subtasks will be added on the fly, so we need a thread-safe list to allow concurrent reads
+            new CopyOnWriteArrayList<>(),
             subTasksSupplier,
             IterativeTask.Mode.OPEN
         );

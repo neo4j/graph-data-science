@@ -23,6 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,6 +108,60 @@ class IterativeTaskTest {
 
         root.nextSubtask();
         assertThat(root.currentIteration()).isEqualTo(1);
+    }
+
+    @Test
+    // Reproduces a flaky failure where reading progress (e.g. a `jobs.status` poll) races with an
+    // OPEN-mode task growing its subtask list (`addAll`) as the algorithm advances iterations,
+    // throwing a ConcurrentModificationException out of Task.getProgress.
+    void getProgressShouldNotRaceWithOpenIterationGrowth() throws InterruptedException {
+        Supplier<List<Task>> taskSupplier = () -> List.of(Tasks.leaf("leaf", new Concurrency(1), 100));
+
+        var root = Tasks.iterativeOpen("root", new Concurrency(1), taskSupplier);
+        root.start();
+
+        var error = new AtomicReference<Throwable>();
+        var startGate = new CountDownLatch(1);
+        var done = new AtomicBoolean(false);
+
+        // Mimics the algorithm thread: keep advancing iterations, which appends new subtasks.
+        var writer = new Thread(() -> {
+            try {
+                startGate.await();
+                for (int i = 0; i < 50_000 && error.get() == null; i++) {
+                    var subtask = root.nextSubtask();
+                    subtask.start();
+                    subtask.logProgress(100);
+                    subtask.finish();
+                }
+            } catch (Throwable t) {
+                error.compareAndSet(null, t);
+            } finally {
+                done.set(true);
+            }
+        }, "writer");
+
+        // Mimics the jobs.status poller reading progress concurrently.
+        var reader = new Thread(() -> {
+            try {
+                startGate.await();
+                while (!done.get() && error.get() == null) {
+                    root.getProgress();
+                }
+            } catch (Throwable t) {
+                error.compareAndSet(null, t);
+            }
+        }, "reader");
+
+        writer.start();
+        reader.start();
+        startGate.countDown();
+        writer.join();
+        reader.join();
+
+        assertThat(error.get())
+            .as("reading progress must not race with open-mode iteration growth")
+            .isNull();
     }
 
     @Test
