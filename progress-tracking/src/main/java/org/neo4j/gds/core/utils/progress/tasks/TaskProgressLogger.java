@@ -172,11 +172,6 @@ public final class TaskProgressLogger implements ProgressLogger {
     }
 
     @Override
-    public void logError(String msg) {
-        batchingProgressLogger.logError(msg);
-    }
-
-    @Override
     public long reset(long newTaskVolume) {
         return batchingProgressLogger.reset(newTaskVolume);
     }

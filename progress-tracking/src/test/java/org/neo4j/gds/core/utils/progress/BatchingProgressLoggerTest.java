@@ -305,19 +305,4 @@ class BatchingProgressLoggerTest {
 
         verify(log).warn("[%s] [%s] %s %s", "my request correlation id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
     }
-
-    @Test
-    void shouldPrependCorrelationIdToErrorLogMessages() {
-        var log = mock(Log.class);
-        var batchingProgressLogger = BatchingProgressLogger.create(
-            new LoggerForProgressTrackingAdapter(log),
-            new RequestCorrelationIdForTesting("my request correlation id"),
-            new LeafTask("Monsieur Alfonse", new Concurrency(1), 42),
-            new Concurrency(87)
-        );
-
-        batchingProgressLogger.logError("Swiftly, and with style");
-
-        verify(log).error("[%s] [%s] %s %s", "my request correlation id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
-    }
 }
