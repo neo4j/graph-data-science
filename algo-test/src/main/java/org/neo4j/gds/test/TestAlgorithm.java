@@ -23,7 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class TestAlgorithm implements Algorithm<TestAlgorithmResult> {
+public class TestAlgorithm implements Algorithm<Long> {
 
     private final ProgressTracker progressTracker;
     private final Graph graph;
@@ -40,7 +40,7 @@ public class TestAlgorithm implements Algorithm<TestAlgorithmResult> {
     }
 
     @Override
-    public TestAlgorithmResult compute() {
+    public Long compute() {
         progressTracker.beginSubTask(100);
 
         if (throwInCompute) {
@@ -50,6 +50,6 @@ public class TestAlgorithm implements Algorithm<TestAlgorithmResult> {
 
         progressTracker.endSubTask();
 
-        return new TestAlgorithmResult(graph.relationshipCount());
+        return Long.valueOf(graph.relationshipCount());
     }
 }

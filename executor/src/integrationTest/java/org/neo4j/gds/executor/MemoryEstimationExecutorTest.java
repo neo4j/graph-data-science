@@ -45,7 +45,6 @@ import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.test.TestAlgorithm;
-import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.Transaction;
@@ -62,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MemoryEstimationExecutorTest extends BaseTest {
 
     private Transaction procedureTransaction;
-    private MemoryEstimationExecutor<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> memoryEstimationExecutor;
+    private MemoryEstimationExecutor<TestAlgorithm, Long, TestMutateConfig> memoryEstimationExecutor;
 
     @BeforeEach
     void setup() throws Exception {

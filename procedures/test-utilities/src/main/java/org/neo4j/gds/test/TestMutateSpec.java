@@ -49,7 +49,7 @@ import static org.neo4j.gds.test.Constants.STATS_DESCRIPTION;
 @GdsCallable(
     name = "gds.testProc.mutate", description = STATS_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY
 )
-public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithmResult, TestMutateConfig, Stream<TestResult>, GraphAlgorithmFactory<TestAlgorithm, TestMutateConfig>> {
+public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, Long, TestMutateConfig, Stream<TestResult>, GraphAlgorithmFactory<TestAlgorithm, TestMutateConfig>> {
     @Override
     public String name() {
         return "TestMutateSpec";
@@ -96,7 +96,7 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
     }
 
     @Override
-    public ComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestMutateConfig, Stream<TestResult>> computationResultConsumer() {
+    public ComputationResultConsumer<TestAlgorithm, Long, TestMutateConfig, Stream<TestResult>> computationResultConsumer() {
         return  (computationResult,executionContext)->{
             return runWithExceptionLogging("Graph mutation failed", executionContext.log(), () -> {
                 var config = computationResult.config();
@@ -120,7 +120,7 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
                 var mutateResult = new TestResult(
                     computationResult.preProcessingMillis(),
                     computationResult.computeMillis(),
-                    computationResult.result().map(TestAlgorithmResult::relationshipCount).orElse(-1L),
+                    computationResult.result().orElse(-1L),
                     config.toMap()
                 );
                 return Stream.of(mutateResult);
@@ -129,7 +129,7 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
 
     }
 
-    private List<NodePropertyRecord> nodePropertyList(ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computationResult) {
+    private List<NodePropertyRecord> nodePropertyList(ComputationResult<TestAlgorithm, Long, TestMutateConfig> computationResult) {
         return List.of(NodePropertyRecord.of(
             computationResult.config().mutateProperty(),
             new LongNodePropertyValues() {

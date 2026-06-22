@@ -32,7 +32,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.test.Constants.STATS_DESCRIPTION;
 
 @GdsCallable(name = "gds.testProc.write", description = STATS_DESCRIPTION, executionMode = STATS)
-public class TestSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithmResult, TestWriteConfig, Stream<TestResult>, TestAlgorithmFactory<TestWriteConfig>> {
+public class TestSpec implements AlgorithmSpec<TestAlgorithm, Long, TestWriteConfig, Stream<TestResult>, TestAlgorithmFactory<TestWriteConfig>> {
     @Override
     public String name() {
         return "TestSpec";
@@ -49,14 +49,14 @@ public class TestSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithmResul
     }
 
     @Override
-    public ComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestWriteConfig, Stream<TestResult>> computationResultConsumer() {
+    public ComputationResultConsumer<TestAlgorithm, Long, TestWriteConfig, Stream<TestResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging("Stats call failed",
             executionContext.log(),
             () -> {
             var result = new TestResult(
                 computationResult.preProcessingMillis(),
                 computationResult.computeMillis(),
-                computationResult.result().map(TestAlgorithmResult::relationshipCount).orElse(-1L),
+                computationResult.result().orElse(-1L),
                 computationResult.config().toMap()
             );
                 return Stream.of(result);
