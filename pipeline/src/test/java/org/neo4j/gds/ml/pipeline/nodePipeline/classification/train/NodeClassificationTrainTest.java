@@ -563,8 +563,14 @@ class NodeClassificationTrainTest {
 
         var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount(), config.concurrency());
         var log = new GdsTestLog();
-        var progressTracker = InspectableTestProgressTracker.create(progressTask, config.username(), config.jobId(), new PerDatabaseTaskStore(
-            Duration.ofMinutes(1)), new LoggerForProgressTrackingAdapter(log));
+        var progressTracker = InspectableTestProgressTracker.create(
+            log,
+            progressTask,
+            config.username(),
+            config.jobId(),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
+            new LoggerForProgressTrackingAdapter(log)
+        );
 
         createWithExecutionContext(
             log,
@@ -602,7 +608,13 @@ class NodeClassificationTrainTest {
 
         var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount(), config.concurrency());
         var testLog = new GdsTestLog();
-        var progressTracker = TestProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(testLog), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = TestProgressTracker.create(
+            testLog,
+            new LoggerForProgressTrackingAdapter(testLog),
+            progressTask,
+            new Concurrency(1),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
 
         createWithExecutionContext(
             testLog,

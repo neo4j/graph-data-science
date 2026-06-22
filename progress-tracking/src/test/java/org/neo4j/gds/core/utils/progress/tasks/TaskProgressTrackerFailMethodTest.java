@@ -41,6 +41,7 @@ class TaskProgressTrackerFailMethodTest {
         var taskStore = new TestTaskStore();
 
         var tracker = TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             failingTask,
             new Concurrency(1),
@@ -74,6 +75,7 @@ class TaskProgressTrackerFailMethodTest {
         var taskStore = new TestTaskStore();
 
         var tracker = TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             rootTask,
             new Concurrency(1),

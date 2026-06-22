@@ -91,6 +91,7 @@ class PCSTFastTest {
             var log = new GdsTestLog();
 
             var progressTracker = TaskProgressTracker.create(
+                log,
                 new LoggerForProgressTrackingAdapter(log),
                 PCSTProgressTrackerTaskCreator.progressTask(new Concurrency(1), graph.nodeCount(),graph.relationshipCount()),
                 new Concurrency(1),

@@ -27,18 +27,23 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
+import org.neo4j.gds.logging.Log;
 
 public class ProgressTrackerFactory {
-    private final LoggerForProgressTracking log;
+    private final Log log;
+    private final LoggerForProgressTracking loggerForProgressTracking;
     private final RequestCorrelationId correlationId;
     private final TaskRegistryFactory taskRegistryFactory;
 
 
-    public ProgressTrackerFactory(LoggerForProgressTracking log,
+    public ProgressTrackerFactory(
+        Log log,
+        LoggerForProgressTracking loggerForProgressTracking,
         RequestCorrelationId correlationId,
         TaskRegistryFactory taskRegistryFactory
     ) {
         this.log = log;
+        this.loggerForProgressTracking = loggerForProgressTracking;
         this.correlationId = correlationId;
         this.taskRegistryFactory = taskRegistryFactory;
     }
@@ -53,6 +58,7 @@ public class ProgressTrackerFactory {
         if (logProgress) {
             progressTracker = TaskProgressTracker.create(
                 log,
+                loggerForProgressTracking,
                 task,
                 concurrency,
                 jobId,
@@ -61,8 +67,9 @@ public class ProgressTrackerFactory {
             );
         } else {
             progressTracker = TaskTreeProgressTracker.create(
-                task,
                 log,
+                loggerForProgressTracking,
+                task,
                 concurrency,
                 jobId,
                 correlationId,

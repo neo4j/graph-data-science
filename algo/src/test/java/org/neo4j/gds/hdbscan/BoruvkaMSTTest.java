@@ -259,6 +259,7 @@ class BoruvkaMSTTest {
             var log = new GdsTestLog();
 
             var progressTracker = TaskProgressTracker.create(
+                log,
                 new LoggerForProgressTrackingAdapter(log),
                 HDBScanProgressTrackerCreator.boruvkaTask("boruvka", new Concurrency(1), graph.nodeCount()),
                 new Concurrency(1),

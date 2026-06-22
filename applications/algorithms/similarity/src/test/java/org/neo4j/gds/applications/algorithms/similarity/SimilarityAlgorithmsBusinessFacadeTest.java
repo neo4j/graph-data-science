@@ -61,7 +61,11 @@ class SimilarityAlgorithmsBusinessFacadeTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(log), requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(
+            log,
+            new LoggerForProgressTrackingAdapter(log),
+            requestScopedDependencies
+        );
         var similarityAlgorithms = new SimilarityAlgorithms(requestScopedDependencies.terminationFlag());
 
         var similarityBusiness = new SimilarityAlgorithmsBusinessFacade(similarityAlgorithms,progressTrackerCreator);

@@ -345,8 +345,9 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            SteinerTreeProgressTask.create(parameters, graph.nodeCount()),
+            log,
             new LoggerForProgressTrackingAdapter(log),
+            SteinerTreeProgressTask.create(parameters, graph.nodeCount()),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -389,8 +390,9 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            SteinerTreeProgressTask.create(parameters, graph.nodeCount()),
+            log,
             new LoggerForProgressTrackingAdapter(log),
+            SteinerTreeProgressTask.create(parameters, graph.nodeCount()),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -440,8 +442,9 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            SteinerTreeProgressTask.create(parameters, invGraph.nodeCount()),
+            log,
             new LoggerForProgressTrackingAdapter(log),
+            SteinerTreeProgressTask.create(parameters, invGraph.nodeCount()),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );

@@ -192,7 +192,13 @@ class ModularityOptimizationTest {
             graph.relationshipCount(),
             maxIterations
         );
-        var progressTracker = TestProgressTracker.create(progressTask, new LoggerForProgressTrackingAdapter(log), concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = TestProgressTracker.create(
+            log,
+            new LoggerForProgressTrackingAdapter(log),
+            progressTask,
+            concurrency,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         return new ModularityOptimization(
             graph,
             maxIterations,

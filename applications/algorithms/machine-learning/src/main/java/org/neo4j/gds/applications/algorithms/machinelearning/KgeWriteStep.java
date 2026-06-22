@@ -66,6 +66,7 @@ class KgeWriteStep implements WriteStep<KGEPredictResult, RelationshipsWritten> 
         var topKGraph = new TopKGraph(graph, result.topKMap());
 
         var progressTracker = TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             NodePropertyExporter.baseTask(
                 AlgorithmLabel.KGE.asString(),

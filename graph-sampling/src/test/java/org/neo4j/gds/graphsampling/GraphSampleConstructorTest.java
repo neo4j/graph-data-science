@@ -312,6 +312,7 @@ class GraphSampleConstructorTest {
         var log = new GdsTestLog();
 
         var progressTracker = TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             GraphSampleConstructor.progressTask(naturalGraphStore, rwr, new Concurrency(1)),
             new Concurrency(1),

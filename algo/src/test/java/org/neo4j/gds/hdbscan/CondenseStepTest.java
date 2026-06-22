@@ -140,6 +140,7 @@ class CondenseStepTest {
         var log = new GdsTestLog();
 
         var progressTracker = TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             HDBScanProgressTrackerCreator.condenseTask("condense", new Concurrency(1), nodeCount),
             new Concurrency(1),

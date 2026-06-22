@@ -40,7 +40,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     private final CloseableThreadLocal<MutableLong> callCounter = CloseableThreadLocal.withInitial(MutableLong::new);
     private final LongAdder progressCounter = new LongAdder();
 
-    private final LoggerForProgressTracking log;
+    private final LoggerForProgressTracking loggerForProgressTracking;
     private final RequestCorrelationId requestCorrelationId;
     private final Concurrency concurrency;
 
@@ -70,14 +70,14 @@ public class BatchingProgressLogger implements ProgressLogger {
      * This is the only constructor, and it is just assignments
      */
     BatchingProgressLogger(
-        LoggerForProgressTracking log,
+        LoggerForProgressTracking loggerForProgressTracking,
         RequestCorrelationId requestCorrelationId,
         long taskVolume,
         long batchSize,
         String taskName,
         Concurrency concurrency
     ) {
-        this.log = log;
+        this.loggerForProgressTracking = loggerForProgressTracking;
         this.requestCorrelationId = requestCorrelationId;
         this.taskVolume = taskVolume;
         this.batchSize = batchSize;
@@ -156,17 +156,12 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     @Override
     public void logMessage(String msg) {
-        log.info("[%s] [%s] %s %s", requestCorrelationId.toString(), Thread.currentThread().getName(), taskName, msg);
+        loggerForProgressTracking.info("[%s] [%s] %s %s", requestCorrelationId.toString(), Thread.currentThread().getName(), taskName, msg);
     }
 
     @Override
     public void logMessage(Supplier<String> msg) {
         logMessage(Objects.requireNonNull(msg.get()));
-    }
-
-    @Override
-    public void logWarning(String message) {
-        log.warn("[%s] [%s] %s %s", requestCorrelationId.toString(), Thread.currentThread().getName(), taskName, message);
     }
 
     @Override

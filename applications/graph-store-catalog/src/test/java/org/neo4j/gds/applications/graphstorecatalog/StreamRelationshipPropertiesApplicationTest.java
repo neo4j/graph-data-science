@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 class StreamRelationshipPropertiesApplicationTest {
     @Test
     void shouldTrackProgress() {
-        var application = new StreamRelationshipPropertiesApplication(null) {
+        var application = new StreamRelationshipPropertiesApplication(null, null) {
             @Override
             <T> Stream<T> computeRelationshipPropertyStream(
                 GraphStore graphStore,

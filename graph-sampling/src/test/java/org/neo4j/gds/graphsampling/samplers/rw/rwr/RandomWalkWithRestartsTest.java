@@ -432,7 +432,14 @@ class RandomWalkWithRestartsTest {
 
         TestTaskStore taskStore = new TestTaskStore();
         var taskRegistryFactory = new LocalTaskRegistryFactory("user", taskStore);
-        var tracker = TestProgressTracker.create(task, new LoggerForProgressTrackingAdapter(new GdsTestLog()), new Concurrency(4), taskRegistryFactory);
+        var log = new GdsTestLog();
+        var tracker = TestProgressTracker.create(
+            log,
+            new LoggerForProgressTrackingAdapter(log),
+            task,
+            new Concurrency(4),
+            taskRegistryFactory
+        );
 
         rwr.compute(tinyGraph, tracker);
 

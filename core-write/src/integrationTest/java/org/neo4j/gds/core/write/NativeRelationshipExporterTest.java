@@ -181,6 +181,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         var log = new GdsTestLog();
 
         var progressTracker = TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             Tasks.leaf("WriteRelationships", RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY, graph.relationshipCount()),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,

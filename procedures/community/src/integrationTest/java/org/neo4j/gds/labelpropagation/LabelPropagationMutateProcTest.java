@@ -567,7 +567,11 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             null,
             null,
             null,
-            new ProgressTrackerCreator(new LoggerForProgressTrackingAdapter(logMock), requestScopedDependencies),
+            new ProgressTrackerCreator(
+                logMock,
+                new LoggerForProgressTrackingAdapter(logMock),
+                requestScopedDependencies
+            ),
             null,
             algorithmProcessingTemplate
         );

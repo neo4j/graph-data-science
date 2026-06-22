@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.FakeClockExtension;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
 
@@ -156,6 +157,7 @@ class ListProgressDetailProcTest extends BaseProgressTest {
             );
 
             var taskProgressTracker = TaskProgressTracker.create(
+                Log.noOpLog(),
                 LoggerForProgressTracking.noOpLog(),
                 task,
                 new Concurrency(1),

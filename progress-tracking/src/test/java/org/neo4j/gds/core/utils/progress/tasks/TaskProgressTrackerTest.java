@@ -87,6 +87,7 @@ class TaskProgressTrackerTest {
         var log = new GdsTestLog();
 
         var progressTracker = TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             task,
             new Concurrency(1),
@@ -141,6 +142,7 @@ class TaskProgressTrackerTest {
             var task = Tasks.leaf("leaf", new Concurrency(1), 4);
             var log = new GdsTestLog();
             var progressTracker = TaskProgressTracker.create(
+                log,
                 new LoggerForProgressTrackingAdapter(log),
                 task,
                 new Concurrency(1),
@@ -171,6 +173,7 @@ class TaskProgressTrackerTest {
             var task = Tasks.task("root", new Concurrency(1), Tasks.leaf("leaf", new Concurrency(1), 4));
             var log = new GdsTestLog();
             var progressTracker = TaskProgressTracker.create(
+                log,
                 new LoggerForProgressTrackingAdapter(log),
                 task,
                 new Concurrency(1),
@@ -204,6 +207,7 @@ class TaskProgressTrackerTest {
         var taskRegistry = new TaskRegistry("", taskStore);
 
         var progressTracker = TaskProgressTracker.create(
+            Log.noOpLog(),
             LoggerForProgressTracking.noOpLog(),
             task,
             new Concurrency(1),
@@ -238,6 +242,7 @@ class TaskProgressTrackerTest {
 
     private TaskProgressTracker progressTracker(Task task, Log log) {
         return TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             task,
             new Concurrency(1),

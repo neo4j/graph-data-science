@@ -85,7 +85,7 @@ class Node2VecProgressTrackingTest {
             Optional.of(1337L)
         );
 
-        var lazyMock = mock(Log.class);
+        var log = mock(Log.class);
         var iteration1reached100At = new MutableLong();
         doAnswer(invocation -> {
             var infoMessage = invocation.getArgument(0, String.class);
@@ -93,7 +93,7 @@ class Node2VecProgressTrackingTest {
                 iteration1reached100At.set(System.currentTimeMillis());
             }
             return  null;
-            }).when(lazyMock).info(anyString());
+            }).when(log).info(anyString());
         var finishedIteration1At = new MutableLong();
         doAnswer(invocation -> {
             var task = invocation.getArgument(2, String.class);
@@ -102,11 +102,12 @@ class Node2VecProgressTrackingTest {
                 finishedIteration1At.set(System.currentTimeMillis());
             }
             return null;
-        }).when(lazyMock).info(anyString(),anyString(),anyString(),anyString());
+        }).when(log).info(anyString(),anyString(),anyString(),anyString());
 
         var progressTracker = TestProgressTracker.create(
+            log,
+            new LoggerForProgressTrackingAdapter(log),
             Node2VecTask.create(graph, parameters),
-            new LoggerForProgressTrackingAdapter(lazyMock),
             new Concurrency(concurrency),
             EmptyTaskRegistryFactory.INSTANCE
         );

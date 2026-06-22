@@ -114,7 +114,7 @@ class NodeClassificationTrainComputationTest {
             .correlationId(PlainSimpleRequestCorrelationId.create())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .build();
-        var progressTrackerCreator = new ProgressTrackerCreator(null, requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(null, null, requestScopedDependencies);
 
         return new NodeClassificationTrainComputation(
             Log.noOpLog(),

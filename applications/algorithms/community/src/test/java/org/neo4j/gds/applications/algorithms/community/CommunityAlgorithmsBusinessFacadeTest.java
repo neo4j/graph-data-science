@@ -53,8 +53,9 @@ class CommunityAlgorithmsBusinessFacadeTest {
 
         when(progressCreator.createProgressTracker(any(),any())).thenReturn(
             TestProgressTracker.create(
-                Tasks.leaf("foo", new Concurrency(1), 2),
+                log,
                 new LoggerForProgressTrackingAdapter(log),
+                Tasks.leaf("foo", new Concurrency(1), 2),
                 new Concurrency(1),
                 TaskRegistryFactory.empty()
                 )

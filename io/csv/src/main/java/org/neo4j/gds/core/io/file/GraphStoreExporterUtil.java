@@ -57,6 +57,8 @@ public final class GraphStoreExporterUtil {
     ) {
         try {
             var exporter = GraphStoreToCsvExporter.create(
+                loggers.log(),
+                loggers.loggerForProgressTracking(),
                 graphStore,
                 parameters,
                 path,
@@ -64,7 +66,6 @@ public final class GraphStoreExporterUtil {
                 requestCorrelationId,
                 jobId,
                 taskRegistryFactory,
-                loggers.loggerForProgressTracking(),
                 executorService
             );
 

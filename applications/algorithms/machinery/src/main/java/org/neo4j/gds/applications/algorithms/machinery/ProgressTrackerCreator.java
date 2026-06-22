@@ -27,16 +27,23 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
+import org.neo4j.gds.logging.Log;
 
 /**
  * Just some convenience, address this one day when we attack ProgressTracker
  */
 public class ProgressTrackerCreator {
-    private final LoggerForProgressTracking log;
+    private final Log log;
+    private final LoggerForProgressTracking loggerForProgressTracking;
     private final RequestScopedDependencies requestScopedDependencies;
 
-    public ProgressTrackerCreator(LoggerForProgressTracking log, RequestScopedDependencies requestScopedDependencies) {
+    public ProgressTrackerCreator(
+        Log log,
+        LoggerForProgressTracking loggerForProgressTracking,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
         this.log = log;
+        this.loggerForProgressTracking = loggerForProgressTracking;
         this.requestScopedDependencies = requestScopedDependencies;
     }
 
@@ -64,6 +71,7 @@ public class ProgressTrackerCreator {
 
             return TaskProgressTracker.create(
                 log,
+                loggerForProgressTracking,
                 task,
                 concurrency,
                 jobId,
@@ -73,8 +81,9 @@ public class ProgressTrackerCreator {
         }
 
         return TaskTreeProgressTracker.create(
-            task,
             log,
+            loggerForProgressTracking,
+            task,
             concurrency,
             jobId,
             requestScopedDependencies.correlationId(),

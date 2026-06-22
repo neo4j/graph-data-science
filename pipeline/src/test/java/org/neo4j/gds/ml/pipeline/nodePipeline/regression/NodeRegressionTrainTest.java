@@ -271,6 +271,7 @@ class NodeRegressionTrainTest {
 
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(
+            log,
             progressTask,
             config.username(),
             config.jobId(),

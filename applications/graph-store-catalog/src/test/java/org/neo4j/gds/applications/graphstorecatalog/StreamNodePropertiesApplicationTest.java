@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 class StreamNodePropertiesApplicationTest {
     @Test
     void shouldTrackProgress() {
-        var application = new StreamNodePropertiesApplication(null) {
+        var application = new StreamNodePropertiesApplication(null, null) {
             @Override
             <T> Stream<T> computeNodePropertyStream(
                 GraphExportNodePropertiesConfig configuration,

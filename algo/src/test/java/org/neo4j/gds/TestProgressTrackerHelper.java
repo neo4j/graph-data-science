@@ -33,8 +33,9 @@ public final class TestProgressTrackerHelper {
         var log = new GdsTestLog();
 
         var progressTracker = TestProgressTracker.create(
-            task,
+            log,
             new LoggerForProgressTrackingAdapter(log),
+            task,
             concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );

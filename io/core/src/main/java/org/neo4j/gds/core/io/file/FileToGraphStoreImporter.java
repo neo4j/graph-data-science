@@ -152,6 +152,7 @@ public abstract class FileToGraphStoreImporter {
         importTasks.add(Tasks.leaf("Import relationships", concurrency, relationshipTaskVolume));
 
         return TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             Tasks.task(rootTaskName() + " import", concurrency, importTasks),
             concurrency,

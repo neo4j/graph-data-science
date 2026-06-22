@@ -44,8 +44,6 @@ public interface ProgressLogger {
         logMessage(() -> msg);
     }
 
-    void logWarning(String msg);
-
     default void logStart() {
         logStart("");
     }

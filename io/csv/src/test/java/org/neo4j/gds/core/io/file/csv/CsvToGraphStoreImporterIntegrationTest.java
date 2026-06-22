@@ -91,6 +91,8 @@ class CsvToGraphStoreImporterIntegrationTest {
         var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
 
         GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             exportParameters(concurrency),
             graphLocation,
@@ -98,7 +100,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -125,6 +126,8 @@ class CsvToGraphStoreImporterIntegrationTest {
         var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
 
         GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             exportParameters(concurrency),
             graphLocation,
@@ -132,7 +135,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -158,6 +160,8 @@ class CsvToGraphStoreImporterIntegrationTest {
         var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
 
         GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             exportParameters(4),
             graphLocation,
@@ -165,7 +169,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -196,6 +199,8 @@ class CsvToGraphStoreImporterIntegrationTest {
         var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
 
         GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStoreWithCapabilities,
             exportParameters(1),
             graphLocation,
@@ -203,7 +208,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -236,6 +240,8 @@ class CsvToGraphStoreImporterIntegrationTest {
         var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
 
         GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             exportParameters(1),
             graphLocation,
@@ -243,7 +249,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
@@ -270,6 +275,8 @@ class CsvToGraphStoreImporterIntegrationTest {
         var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
 
         GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             exportParameters(1),
             graphLocation,
@@ -277,7 +284,6 @@ class CsvToGraphStoreImporterIntegrationTest {
             requestCorrelationId,
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 

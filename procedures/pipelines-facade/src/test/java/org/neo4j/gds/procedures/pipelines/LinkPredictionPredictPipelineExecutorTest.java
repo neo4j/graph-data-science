@@ -41,6 +41,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
@@ -147,6 +148,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             Weights.ofVector(0.0)
         );
         var progressTracker = InspectableTestProgressTracker.create(
+            Log.noOpLog(),
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Train Pipeline",
                 pipeline,
@@ -388,6 +390,7 @@ class LinkPredictionPredictPipelineExecutorTest {
 
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(
+            log,
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Predict Pipeline",
                 pipeline,

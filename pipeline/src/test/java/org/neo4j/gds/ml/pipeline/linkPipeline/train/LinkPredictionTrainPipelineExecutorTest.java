@@ -395,6 +395,7 @@ class LinkPredictionTrainPipelineExecutorTest {
                 .sum();
             var log = new GdsTestLog();
             var progressTracker = InspectableTestProgressTracker.create(
+                log,
                 LinkPredictionTrainPipelineExecutor.progressTask(
                     "Link Prediction Train Pipeline",
                     config.concurrency(), pipeline,

@@ -24,8 +24,8 @@ import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.logging.Log;
 
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,6 +39,7 @@ public final class TaskProgressTracker implements ProgressTracker {
 
     private final Stack<Task> nestedTasks = new Stack<>();
 
+    private final Log log;
     private final Task baseTask;
     private final Consumer<RuntimeException> onError;
     private final TaskProgressLogger taskProgressLogger;
@@ -49,19 +50,21 @@ public final class TaskProgressTracker implements ProgressTracker {
     public double progressLeftOvers = 0;
 
     public static TaskProgressTracker create(
-        LoggerForProgressTracking log,
+        Log log,
+        LoggerForProgressTracking loggerForProgressTracking,
         Task baseTask,
         Concurrency concurrency,
         JobId jobId,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        var taskProgressLogger = TaskProgressLogger.create(log, requestCorrelationId, baseTask, concurrency);
+        var taskProgressLogger = TaskProgressLogger.create(loggerForProgressTracking, requestCorrelationId, baseTask, concurrency);
 
-        return create(baseTask, jobId, taskProgressLogger, taskRegistryFactory);
+        return create(log, baseTask, jobId, taskProgressLogger, taskRegistryFactory);
     }
 
     public static TaskProgressTracker create(
+        Log log,
         Task baseTask,
         JobId jobId,
         TaskProgressLogger taskProgressLogger,
@@ -70,7 +73,7 @@ public final class TaskProgressTracker implements ProgressTracker {
         var alreadyLoggedOnce = new AtomicBoolean(false);
         Consumer<RuntimeException> onError = error -> {
             if (!alreadyLoggedOnce.get()) {
-                taskProgressLogger.logWarning(String.format(Locale.US, ":: %s", error.getMessage()));
+                log.warn("Progress logging out of sync with declared task tree", error.getMessage());
                 alreadyLoggedOnce.set(true);
             }
         };
@@ -78,6 +81,7 @@ public final class TaskProgressTracker implements ProgressTracker {
         var taskRegistry = taskRegistryFactory.newInstance(jobId);
 
         return new TaskProgressTracker(
+            log,
             baseTask,
             onError,
             taskProgressLogger,
@@ -86,11 +90,13 @@ public final class TaskProgressTracker implements ProgressTracker {
     }
 
     private TaskProgressTracker(
+        Log log,
         Task baseTask,
         Consumer<RuntimeException> onError,
         TaskProgressLogger taskProgressLogger,
         TaskRegistry taskRegistry
     ) {
+        this.log = log;
         this.baseTask = baseTask;
         this.onError = onError;
         this.taskProgressLogger = taskProgressLogger;
@@ -254,7 +260,7 @@ public final class TaskProgressTracker implements ProgressTracker {
                 baseTask.description()
             );
 
-            taskProgressLogger.logWarning(message);
+            log.warn(message);
         }
     }
 

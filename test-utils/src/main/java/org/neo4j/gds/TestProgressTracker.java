@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.logging.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,13 +40,15 @@ public final class TestProgressTracker implements ProgressTracker {
     private final TaskProgressTracker delegate;
 
     public static TestProgressTracker create(
+        Log log,
+        LoggerForProgressTracking loggerForProgressTracking,
         Task baseTask,
-        LoggerForProgressTracking log,
         Concurrency concurrency,
         TaskRegistryFactory taskRegistryFactory
     ) {
         var delegate = TaskProgressTracker.create(
             log,
+            loggerForProgressTracking,
             baseTask,
             concurrency,
             new JobId(),

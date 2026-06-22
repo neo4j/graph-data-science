@@ -479,13 +479,12 @@ class LinkPredictionTrainTest {
 
         var log = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(
-            progressTask(
-                new Concurrency(1), pipeline.splitConfig(), trainGraph.relationshipCount(),
+            log, new LoggerForProgressTrackingAdapter(log), progressTask(
+                new Concurrency(1),
+                pipeline.splitConfig(),
+                trainGraph.relationshipCount(),
                 pipeline.numberOfModelSelectionTrials()
-            ),
-            new LoggerForProgressTrackingAdapter(log),
-            new Concurrency(1),
-            EmptyTaskRegistryFactory.INSTANCE
+            ), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE
         );
 
         progressTracker.beginSubTask();
@@ -572,13 +571,12 @@ class LinkPredictionTrainTest {
 
         var log = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(
-            progressTask(
-                new Concurrency(1), pipeline.splitConfig(), trainGraph.relationshipCount(),
+            log, new LoggerForProgressTrackingAdapter(log), progressTask(
+                new Concurrency(1),
+                pipeline.splitConfig(),
+                trainGraph.relationshipCount(),
                 pipeline.numberOfModelSelectionTrials()
-            ),
-            new LoggerForProgressTrackingAdapter(log),
-            new Concurrency(1),
-            EmptyTaskRegistryFactory.INSTANCE
+            ), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE
         );
 
         progressTracker.beginSubTask();
@@ -655,13 +653,12 @@ class LinkPredictionTrainTest {
 
         var log = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(
-            progressTask(
-                new Concurrency(1), pipeline.splitConfig(), 2 * trainGraph.relationshipCount(),
+            log, new LoggerForProgressTrackingAdapter(log), progressTask(
+                new Concurrency(1),
+                pipeline.splitConfig(),
+                2 * trainGraph.relationshipCount(),
                 pipeline.numberOfModelSelectionTrials()
-            ),
-            new LoggerForProgressTrackingAdapter(log),
-            new Concurrency(1),
-            EmptyTaskRegistryFactory.INSTANCE
+            ), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE
         );
 
         progressTracker.beginSubTask();

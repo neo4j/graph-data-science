@@ -70,6 +70,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
         var requestCorrelationId = PlainSimpleRequestCorrelationId.create();
 
         var progressTrackerFactory  = new ProgressTrackerFactory(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             requestCorrelationId,
             taskRegistryFactory

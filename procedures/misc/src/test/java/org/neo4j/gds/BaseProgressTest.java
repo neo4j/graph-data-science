@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extensions.shared.TaskStoreExtension;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.procedures.memory.MemoryFacade;
 import org.neo4j.gds.settings.GdsSettings;
@@ -73,6 +74,7 @@ public abstract class BaseProgressTest extends BaseTest {
             var task = createTask(taskName, withMemoryEstimation, concurrency);
 
             var taskProgressTracker = TaskProgressTracker.create(
+                Log.noOpLog(),
                 LoggerForProgressTracking.noOpLog(),
                 task,
                 concurrency,

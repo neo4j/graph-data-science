@@ -517,8 +517,10 @@ class GraphImporterTest {
     void shouldRegisterTaskAndLogProgress() {
         var log = new TestLogImpl();
         var taskStore = new TestTaskStore();
+        var adaptedLog = new LogAdapter(log);
         var progressTracker = TaskProgressTracker.create(
-            new LoggerForProgressTrackingAdapter(new LogAdapter(log)),
+            adaptedLog,
+            new LoggerForProgressTrackingAdapter(adaptedLog),
             GraphImporter.graphImporterTask(new Concurrency(1), 2),
             new Concurrency(1),
             new JobId(),

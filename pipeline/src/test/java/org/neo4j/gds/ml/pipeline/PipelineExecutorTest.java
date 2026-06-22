@@ -100,7 +100,11 @@ class PipelineExecutorTest {
             pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
-            TestProgressTracker.create(taskTree(new Concurrency(1), pipeline), new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE)
+            TestProgressTracker.create(
+                log,
+                new LoggerForProgressTrackingAdapter(log),
+                taskTree(new Concurrency(1), pipeline),
+                new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE)
         );
 
         assertThatNoException().isThrownBy(pipelineExecutor::compute);
@@ -139,7 +143,11 @@ class PipelineExecutorTest {
             pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
-            TestProgressTracker.create(taskTree(new Concurrency(1), pipeline), new LoggerForProgressTrackingAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE)
+            TestProgressTracker.create(
+                log,
+                new LoggerForProgressTrackingAdapter(log),
+                taskTree(new Concurrency(1), pipeline),
+                new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE)
         );
 
         assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestFailure.class);

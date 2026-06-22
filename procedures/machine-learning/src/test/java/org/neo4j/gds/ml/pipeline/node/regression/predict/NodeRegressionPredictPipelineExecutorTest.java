@@ -168,6 +168,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(
+            log,
             NodeRegressionPredictPipelineExecutor.progressTask(
                 "Node Regression Predict Pipeline",
                 new Concurrency(1),

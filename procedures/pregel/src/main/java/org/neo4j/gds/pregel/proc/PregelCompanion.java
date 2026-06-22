@@ -104,6 +104,7 @@ public final class PregelCompanion {
         );
 
         var progressTrackerCreator = new ProgressTrackerCreator(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             RequestScopedDependencies.builder()
                 .correlationId(PlainSimpleRequestCorrelationId.create())
@@ -118,11 +119,9 @@ public final class PregelCompanion {
             params.concurrency(),
             logProgress
         );
-        var miscAlgs = new MiscellaneousAlgorithms(
-            TerminationFlag.RUNNING_TRUE
-        );
 
-       miscAlgs.indexInverse(graphStore,params,progressTracker)
+        new MiscellaneousAlgorithms(TerminationFlag.RUNNING_TRUE)
+            .indexInverse(graphStore,params,progressTracker)
             .forEach((relationshipType, inverseIndex) -> graphStore.addInverseIndex(
                 relationshipType,
                 inverseIndex.topology(),

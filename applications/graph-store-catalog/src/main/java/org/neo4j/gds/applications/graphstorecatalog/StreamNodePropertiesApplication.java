@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -41,10 +42,12 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class StreamNodePropertiesApplication {
-    private final LoggerForProgressTracking log;
+    private final Log log;
+    private final LoggerForProgressTracking loggerForProgressTracking;
 
-    protected StreamNodePropertiesApplication(LoggerForProgressTracking log) {
+    protected StreamNodePropertiesApplication(Log log, LoggerForProgressTracking loggerForProgressTracking) {
         this.log = log;
+        this.loggerForProgressTracking = loggerForProgressTracking;
     }
 
     /*
@@ -92,6 +95,7 @@ public class StreamNodePropertiesApplication {
         var jobId = new JobId();
         var progressTracker = TaskProgressTracker.create(
             log,
+            loggerForProgressTracking,
             task,
             configuration.concurrency(),
             jobId,

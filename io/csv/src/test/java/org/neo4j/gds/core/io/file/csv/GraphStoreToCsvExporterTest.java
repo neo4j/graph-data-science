@@ -41,6 +41,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -137,6 +138,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         );
         // export db
         var exporter = GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             parameters,
             tempDir,
@@ -144,7 +147,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             PlainSimpleRequestCorrelationId.create(),
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -254,6 +256,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         // export db
         var exporter = GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             concurrentGraphStore,
             parameters,
             tempDir,
@@ -261,7 +265,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             PlainSimpleRequestCorrelationId.create(),
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -332,6 +335,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         );
 
         var exporter = GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             parameters,
             tempDir,
@@ -339,7 +344,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             PlainSimpleRequestCorrelationId.create(),
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -505,6 +509,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         );
 
         var exporter = GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             parameters,
             tempDir,
@@ -512,7 +518,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             PlainSimpleRequestCorrelationId.create(),
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -535,6 +540,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         );
 
         var exporter = GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             noPropertiesGraphStore,
             parameters,
             tempDir,
@@ -542,7 +549,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             PlainSimpleRequestCorrelationId.create(),
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -590,6 +596,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         // export db
         var exporter = GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             parameters,
             tempDir,
@@ -597,7 +605,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             PlainSimpleRequestCorrelationId.create(),
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();
@@ -638,6 +645,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         );
 
         var exporter = GraphStoreToCsvExporter.create(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
             graphStore,
             parameters,
             tempDir,
@@ -645,7 +654,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             PlainSimpleRequestCorrelationId.create(),
             new JobId(),
             TaskRegistryFactory.empty(),
-            LoggerForProgressTracking.noOpLog(),
             DefaultPool.INSTANCE
         );
         exporter.run();

@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
+import org.neo4j.gds.logging.Log;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -38,7 +39,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ProgressTrackerFactoryTest {
     @Mock
-    private LoggerForProgressTracking log;
+    private Log log;
+    @Mock
+    private LoggerForProgressTracking loggerForProgressTracking;
     @Mock
     private RequestCorrelationId requestCorrelationId;
     @Mock
@@ -56,6 +59,7 @@ class ProgressTrackerFactoryTest {
 
         var factory = new ProgressTrackerFactory(
             log,
+            loggerForProgressTracking,
             requestCorrelationId,
             taskRegistryFactory
         );
@@ -71,6 +75,7 @@ class ProgressTrackerFactoryTest {
 
         var factory = new ProgressTrackerFactory(
             log,
+            loggerForProgressTracking,
             requestCorrelationId,
             taskRegistryFactory
         );

@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
@@ -160,6 +161,7 @@ class ListProgressProcTest extends BaseProgressTest {
             this.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(taskRegistry);
 
             var taskProgressTracker = TaskProgressTracker.create(
+                Log.noOpLog(),
                 LoggerForProgressTracking.noOpLog(),
                 task,
                 new Concurrency(1),

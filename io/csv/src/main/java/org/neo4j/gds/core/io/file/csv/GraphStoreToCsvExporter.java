@@ -33,6 +33,7 @@ import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
+import org.neo4j.gds.logging.Log;
 
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -44,6 +45,8 @@ import java.util.concurrent.ExecutorService;
 public final class GraphStoreToCsvExporter {
 
     public static GraphStoreToFileExporter create(
+        Log log,
+        LoggerForProgressTracking loggerForProgressTracking,
         GraphStore graphStore,
         GraphStoreToFileExporterParameters parameters,
         Path exportPath,
@@ -51,7 +54,6 @@ public final class GraphStoreToCsvExporter {
         RequestCorrelationId requestCorrelationId,
         JobId jobId,
         TaskRegistryFactory taskRegistryFactory,
-        LoggerForProgressTracking log,
         ExecutorService executorService
     ) {
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
@@ -86,6 +88,8 @@ public final class GraphStoreToCsvExporter {
         var relationshipTypeMapper = relationshipTypeMapperBuilder.build();
 
         return new GraphStoreToFileExporter(
+            log,
+            loggerForProgressTracking,
             graphStore,
             parameters,
             neoNodeProperties,
@@ -109,7 +113,6 @@ public final class GraphStoreToCsvExporter {
             requestCorrelationId,
             jobId,
             taskRegistryFactory,
-            log,
             "Csv",
             executorService
         );

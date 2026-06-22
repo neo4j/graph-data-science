@@ -186,8 +186,14 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             )
         );
         var dropGraphApplication = new DropGraphApplication(globallyScopedDependencies.graphStoreCatalogService());
-        var dropNodePropertiesApplication = new DropNodePropertiesApplication(loggers.loggerForProgressTracking());
-        var dropRelationshipsApplication = new DropRelationshipsApplication(loggers.loggerForProgressTracking());
+        var dropNodePropertiesApplication = new DropNodePropertiesApplication(
+            loggers.log(),
+            loggers.loggerForProgressTracking()
+        );
+        var dropRelationshipsApplication = new DropRelationshipsApplication(
+            loggers.log(),
+            loggers.loggerForProgressTracking()
+        );
         var estimateCommonNeighbourAwareRandomWalkApplication = new EstimateCommonNeighbourAwareRandomWalkApplication();
         var exportToCsvApplication = new ExportToCsvApplication(
             loggers,
@@ -218,8 +224,14 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             )
         );
         var nodeLabelMutatorApplication = new NodeLabelMutatorApplication();
-        var streamNodePropertiesApplication = new StreamNodePropertiesApplication(loggers.loggerForProgressTracking());
-        var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(loggers.loggerForProgressTracking());
+        var streamNodePropertiesApplication = new StreamNodePropertiesApplication(
+            loggers.log(),
+            loggers.loggerForProgressTracking()
+        );
+        var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(
+            loggers.log(),
+            loggers.loggerForProgressTracking()
+        );
         var streamRelationshipsApplication = new StreamRelationshipsApplication();
         var subGraphProjectApplication = new SubGraphProjectApplication(
             loggers,

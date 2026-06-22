@@ -28,26 +28,31 @@ import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.logging.Log;
 
 public class DropRelationshipsApplication {
-    private final LoggerForProgressTracking log;
+    private final Log log;
+    private final LoggerForProgressTracking loggerForProgressTracking;
 
-    DropRelationshipsApplication(LoggerForProgressTracking log) {
+    DropRelationshipsApplication(Log log, LoggerForProgressTracking loggerForProgressTracking) {
         this.log = log;
+        this.loggerForProgressTracking = loggerForProgressTracking;
     }
 
     public DeletionResult compute(
         RequestScopedDependencies requestScopedDependencies,
         GraphStore graphStore,
-        Concurrency concurrency, String relationshipType
+        Concurrency concurrency,
+        String relationshipType
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
             log,
+            loggerForProgressTracking,
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory()
         );
         var task = Tasks.leaf("Graph :: Relationships :: Drop", concurrency, 1);
-        var progressTracker = progressTrackerFactory.create(task,concurrency,true);
+        var progressTracker = progressTrackerFactory.create(task, concurrency, true);
 
         return computeWithProgressTracking(graphStore, relationshipType, progressTracker);
     }

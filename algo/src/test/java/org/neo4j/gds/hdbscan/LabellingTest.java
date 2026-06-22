@@ -240,6 +240,7 @@ class LabellingTest {
         var log = new GdsTestLog();
 
         var progressTracker = TaskProgressTracker.create(
+            log,
             new LoggerForProgressTrackingAdapter(log),
             HDBScanProgressTrackerCreator.labellingTask("foo", new Concurrency(1), nodeCount),
             new Concurrency(1),

@@ -179,8 +179,9 @@ final class DeltaSteppingTest {
             var log = new GdsTestLog();
 
             var testTracker = TestProgressTracker.create(
-                DeltaSteppingProgressTask.create(new Concurrency(4)),
+                log,
                 new LoggerForProgressTrackingAdapter(log),
+                DeltaSteppingProgressTask.create(new Concurrency(4)),
                 new Concurrency(4),
                 EmptyTaskRegistryFactory.INSTANCE
             );

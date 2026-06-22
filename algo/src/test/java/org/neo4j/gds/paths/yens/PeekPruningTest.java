@@ -224,8 +224,9 @@ public class PeekPruningTest {
 
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            YensProgressTask.createYensWithPruning(new Concurrency(4), graph.nodeCount(), graph.relationshipCount(), 3),
+            log,
             new LoggerForProgressTrackingAdapter(log),
+            YensProgressTask.createYensWithPruning(new Concurrency(4), graph.nodeCount(), graph.relationshipCount(), 3),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -295,8 +296,9 @@ public class PeekPruningTest {
 
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            YensProgressTask.createYensWithPruning(new Concurrency(4), graph.nodeCount(), graph.relationshipCount(), 3),
+            log,
             new LoggerForProgressTrackingAdapter(log),
+            YensProgressTask.createYensWithPruning(new Concurrency(4), graph.nodeCount(), graph.relationshipCount(), 3),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );

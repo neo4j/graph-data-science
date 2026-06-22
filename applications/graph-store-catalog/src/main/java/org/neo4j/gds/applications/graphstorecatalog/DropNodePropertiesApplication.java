@@ -27,14 +27,17 @@ import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
 import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.logging.Log;
 
 import java.util.List;
 
 public class DropNodePropertiesApplication {
-    private final LoggerForProgressTracking log;
+    private final Log log;
+    private final LoggerForProgressTracking loggerForProgressTracking;
 
-    DropNodePropertiesApplication(LoggerForProgressTracking log) {
+    DropNodePropertiesApplication(Log log, LoggerForProgressTracking loggerForProgressTracking) {
         this.log = log;
+        this.loggerForProgressTracking = loggerForProgressTracking;
     }
 
     public long compute(
@@ -45,6 +48,7 @@ public class DropNodePropertiesApplication {
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
             log,
+            loggerForProgressTracking,
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory()
         );
@@ -65,7 +69,7 @@ public class DropNodePropertiesApplication {
     ) {
         var task = Tasks.leaf("Graph :: NodeProperties :: Drop", concurrency, nodeProperties.size());
 
-        var progressTracker = progressTrackerFactory.create(task,new Concurrency(1),true);
+        var progressTracker = progressTrackerFactory.create(task, new Concurrency(1), true);
 
         return computeWithErrorHandling(graphStore, progressTracker, nodeProperties);
     }
@@ -78,7 +82,7 @@ public class DropNodePropertiesApplication {
         try {
             return dropNodeProperties(graphStore, progressTracker, nodeProperties);
         } catch (RuntimeException e) {
-            log.warn("Node property removal failed", e);
+            loggerForProgressTracking.warn("Node property removal failed", e);
             throw e;
         }
     }

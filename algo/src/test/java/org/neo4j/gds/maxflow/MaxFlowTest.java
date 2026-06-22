@@ -401,8 +401,9 @@ class MaxFlowTest {
         var graph = generate(100L, 10, UNIFORM);
         var log = new GdsTestLog();
         var testTracker = TestProgressTracker.create(
-            MaxFlowTask.create(new Concurrency(4)),
+            log,
             new LoggerForProgressTrackingAdapter(log),
+            MaxFlowTask.create(new Concurrency(4)),
             new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );

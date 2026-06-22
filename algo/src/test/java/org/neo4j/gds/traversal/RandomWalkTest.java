@@ -529,8 +529,9 @@ class RandomWalkTest {
 
             assertThatNoException().isThrownBy(() -> {
                 var testTracker = TestProgressTracker.create(
-                    RandomWalkProgressTask.create(graph, new Concurrency(4)),
+                    log,
                     new LoggerForProgressTrackingAdapter(log),
+                    RandomWalkProgressTask.create(graph, new Concurrency(4)),
                     new Concurrency(4),
                     TaskRegistryFactory.local("rw", new PerDatabaseTaskStore(Duration.ZERO))
                 );
@@ -581,8 +582,9 @@ class RandomWalkTest {
 
             assertThatNoException().isThrownBy(() -> {
                 var testTracker = TestProgressTracker.create(
-                    RandomWalkProgressTask.create(weightedGraph, new Concurrency(4)),
+                    log,
                     new LoggerForProgressTrackingAdapter(log),
+                    RandomWalkProgressTask.create(weightedGraph, new Concurrency(4)),
                     new Concurrency(4),
                     TaskRegistryFactory.local("rw", new PerDatabaseTaskStore(Duration.ZERO))
                 );
@@ -633,6 +635,7 @@ class RandomWalkTest {
             var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
 
             var testTracker = TaskProgressTracker.create(
+                Log.noOpLog(),
                 LoggerForProgressTracking.noOpLog(),
                 RandomWalkProgressTask.create(graph, new Concurrency(4)),
                 new Concurrency(4),

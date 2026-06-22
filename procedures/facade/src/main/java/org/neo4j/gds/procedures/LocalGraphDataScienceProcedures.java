@@ -163,6 +163,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         );
 
         var progressTrackerCreator = new ProgressTrackerCreator(
+            loggers.log(),
             loggers.loggerForProgressTracking(),
             requestScopedDependencies
         );

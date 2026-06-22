@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.hits.HitsConfigImpl;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -64,7 +65,11 @@ class HitsETLHookTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .build();
 
-        var progressTrackerCreator = new ProgressTrackerCreator(LoggerForProgressTracking.noOpLog(),requestScopedDependencies);
+        var progressTrackerCreator = new ProgressTrackerCreator(
+            Log.noOpLog(),
+            LoggerForProgressTracking.noOpLog(),
+            requestScopedDependencies
+        );
 
         var hitsConfig = HitsConfigImpl
             .builder()
