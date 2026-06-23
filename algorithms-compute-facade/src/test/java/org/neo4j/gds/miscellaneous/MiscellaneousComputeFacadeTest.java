@@ -24,8 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
+import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
@@ -42,6 +45,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,10 +69,13 @@ class MiscellaneousComputeFacadeTest {
     private Log logMock;
 
     @GdlGraph
-    private static final String GDL = "(a {prop: 5})-[r:REL]->(b {prop: 10})";
+    private static final String GDL = "(a:Node {prop: 5})-[r:REL]->(b:Node {prop: 10})";
 
     @Inject
     private Graph graph;
+
+    @Inject
+    private GraphStore graphStore;
 
     @Inject
     private IdFunction idFunction;
@@ -85,6 +92,26 @@ class MiscellaneousComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
+    }
+
+    @Test
+    void collapsePath(){
+        var future = facade.collapsePath(
+            graphStore,
+            new CollapsePathParameters(
+                new Concurrency(1),
+                List.of(List.of("REL")),
+                Set.of(NodeLabel.of("Node")),
+                false,
+                "F"
+            ),
+            jobIdMock
+        );
+        var results = future.join();
+        var result = results.result();
+        assertThat(result).isNotNull();
+        assertThat(result.count()).isEqualTo(1);
+
     }
 
     @Test
