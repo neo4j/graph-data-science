@@ -60,6 +60,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 import static org.neo4j.configuration.GraphDatabaseSettings.SYSTEM_DATABASE_NAME;
 import static org.neo4j.gds.core.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
@@ -239,7 +240,7 @@ public final class GdsParallelBatchImporter {
         var progressOutput = new PrintStream(PrintStream.nullOutputStream(), true, StandardCharsets.UTF_8);
         var verboseProgressOutput = false;
 
-        IndexProvidersAccess indexProvidersAccess = new DefaultIndexProvidersAccess(
+        Supplier<IndexProvidersAccess> indexProvidersAccessSupplier = () -> new DefaultIndexProvidersAccess(
             storageEngineFactory,
             this.fileSystem,
             this.databaseConfig,
@@ -268,7 +269,7 @@ public final class GdsParallelBatchImporter {
             new IndexImporterFactoryImpl(),
             EmptyMemoryTracker.INSTANCE,
             CursorContextFactory.NULL_CONTEXT_FACTORY,
-            indexProvidersAccess,
+            indexProvidersAccessSupplier,
             1,
             EmptyDependencyResolver.EMPTY_RESOLVER,
             // Not sure the empty is actually correct here but it's on par with the rest.
