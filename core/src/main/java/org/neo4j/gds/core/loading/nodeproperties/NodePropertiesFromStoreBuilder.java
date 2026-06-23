@@ -21,17 +21,19 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.loading.HighLimitIdMap;
+import org.neo4j.gds.core.loading.ShardedIdMap;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.values.GdsNoValue;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 
+import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -92,11 +94,26 @@ public final class NodePropertiesFromStoreBuilder {
             }
         }
 
-        // For HighLimitIdMap, we need to use the rootIdMap to resolve intermediate
-        // node ids correctly. The rootIdMap in that case is the mapping between
-        // intermediate and mapped node ids. The imported property values are associated
-        // with the intermediate node ids.
-        var actualIdMap = (idMap instanceof HighLimitIdMap) ? idMap.rootIdMap() : idMap;
+        // Imported property values are associated with the intermediate (dense) node ids.
+        // ShardedIdMap: the dense intermediate id equals the mapped id, so resolution is
+        // identity. Its own toMappedNodeId is an external->mapped lookup and must not be used.
+        PartialIdMap actualIdMap;
+        if (idMap instanceof ShardedIdMap) {
+            long nodeCount = idMap.nodeCount();
+            actualIdMap = new PartialIdMap() {
+                @Override
+                public long toMappedNodeId(long originalNodeId) {
+                    return originalNodeId;
+                }
+
+                @Override
+                public OptionalLong rootNodeCount() {
+                    return OptionalLong.of(nodeCount);
+                }
+            };
+        } else {
+            actualIdMap = idMap;
+        }
 
         return innerBuilder.get().build(idMap.nodeCount(), actualIdMap, idMap.highestOriginalId());
     }

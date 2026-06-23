@@ -370,10 +370,10 @@ public final class GraphImporter {
 
         graphStoreBuilder.nodes(nodes);
 
-        // Relationships are added using their intermediate node ids.
-        // In order to map to the final internal ids, we need to use
-        // the mapping function of the wrapped id map.
-        return idMap.rootIdMap()::toMappedNodeId;
+        // Relationships are added using their intermediate node ids, which equal the
+        // mapped ids for the ShardedIdMap, so we map them through the (identity)
+        // intermediate id map.
+        return idMapAndProperties.intermediateIdMap()::toMappedNodeId;
     }
 
     private void buildRelationshipsWithProperties(

@@ -19,10 +19,16 @@
  */
 package org.neo4j.gds.core;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.FilteredIdMap;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.loading.FilteredIdMapFactory;
 import org.neo4j.gds.core.loading.IdMapBuilder;
+import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.mem.MemoryEstimation;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public interface IdMapBehavior {
@@ -48,4 +54,13 @@ public interface IdMapBehavior {
     );
 
     MemoryEstimation memoryEstimation();
+
+    default FilteredIdMap filteredIdMap(
+        IdMap rootIdMap,
+        LabelInformation labelInformation,
+        Collection<NodeLabel> nodeLabels,
+        Concurrency concurrency
+    ) {
+        return FilteredIdMapFactory.arrayBased(rootIdMap, labelInformation, nodeLabels, concurrency);
+    }
 }
