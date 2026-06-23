@@ -104,7 +104,7 @@ class TaskProgressTrackerTest {
             Assertions
                 .assertThat(log.getMessages(WARN))
                 .extracting(removingThreadId())
-                .containsExactly("leaf :: Tried to log progress, but there are no running tasks being tracked");
+                .containsExactly("Progress logging out of sync with declared task tree");
     }
 
     @Test
