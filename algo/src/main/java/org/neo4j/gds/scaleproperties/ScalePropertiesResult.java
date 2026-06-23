@@ -24,9 +24,11 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import java.util.List;
 import java.util.Map;
 
-public record  ScalePropertiesResult(
+public record ScalePropertiesResult(
         HugeObjectArray<double[]> scaledProperties,
         Map<String, Map<String, List<Double>>> scalerStatistics
     ) {
+
+    public static ScalePropertiesResult EMPTY = new ScalePropertiesResult(HugeObjectArray.newArray(double[].class,0), Map.of());
 
 }

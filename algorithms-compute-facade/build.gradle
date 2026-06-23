@@ -26,6 +26,7 @@ dependencies {
     implementation project(':path-finding-params')
     implementation project(":pregel")
     implementation project(':progress-tracking')
+    implementation project(':scaling-utils')
     implementation project(':similarity-params')
     implementation project(':termination')
     implementation project(':user-log')
