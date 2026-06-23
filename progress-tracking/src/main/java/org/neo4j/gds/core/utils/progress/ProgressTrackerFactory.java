@@ -79,8 +79,4 @@ public class ProgressTrackerFactory {
 
         return progressTracker;
     }
-
-    public ProgressTracker create(Task task, Concurrency concurrency, boolean logProgress) {
-        return create(task, new JobId(), concurrency, logProgress);
-    }
 }

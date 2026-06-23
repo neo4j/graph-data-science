@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
@@ -536,11 +537,15 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             configuration.failIfMissing()
         );
 
+        // job id was not injected, so we make one up
+        var jobId = new JobId();
+
         var numberOfPropertiesRemoved = dropNodePropertiesApplication.compute(
             requestScopedDependencies,
             configuration.concurrency(),
             droppedProperties,
-            graphStore
+            graphStore,
+            jobId
         );
 
         return new GraphDropNodePropertiesResult(
@@ -579,7 +584,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             requestScopedDependencies,
             graphStore,
             graphStoreWithConfig.config().readConcurrency(),
-            relationshipType
+            relationshipType,
+            graphStoreWithConfig.config().jobId()
         );
 
         return new GraphDropRelationshipResult(

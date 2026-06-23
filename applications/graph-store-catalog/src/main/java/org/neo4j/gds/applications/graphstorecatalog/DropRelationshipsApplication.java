@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
@@ -43,7 +44,8 @@ public class DropRelationshipsApplication {
         RequestScopedDependencies requestScopedDependencies,
         GraphStore graphStore,
         Concurrency concurrency,
-        String relationshipType
+        String relationshipType,
+        JobId jobId
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
             log,
@@ -52,7 +54,7 @@ public class DropRelationshipsApplication {
             requestScopedDependencies.taskRegistryFactory()
         );
         var task = Tasks.leaf("Graph :: Relationships :: Drop", concurrency, 1);
-        var progressTracker = progressTrackerFactory.create(task, concurrency, true);
+        var progressTracker = progressTrackerFactory.create(task, jobId, concurrency, true);
 
         return computeWithProgressTracking(graphStore, relationshipType, progressTracker);
     }
