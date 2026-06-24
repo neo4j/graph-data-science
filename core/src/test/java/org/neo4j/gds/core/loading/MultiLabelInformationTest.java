@@ -124,7 +124,7 @@ class MultiLabelInformationTest {
 
         var labelInformation = builder.build(1, LongUnaryOperator.identity());
 
-        var filteredLabelInformation = labelInformation.filter(List.of(labelA));
+        var filteredLabelInformation = labelInformation.filter(List.of(labelA), 4, LongUnaryOperator.identity());
 
         assertThat(filteredLabelInformation.availableNodeLabels()).containsExactly(labelA);
     }
@@ -140,7 +140,7 @@ class MultiLabelInformationTest {
 
         var labelInformation = builder.build(1, LongUnaryOperator.identity());
 
-        var filteredLabelInformation = labelInformation.filter(List.of(labelA));
+        var filteredLabelInformation = labelInformation.filter(List.of(labelA), 4, LongUnaryOperator.identity());
 
         assertThat(filteredLabelInformation.nodeLabelsForNodeId(1L)).containsExactly(labelA);
 
@@ -159,7 +159,7 @@ class MultiLabelInformationTest {
         var labelInformation = builder.build(1, LongUnaryOperator.identity());
 
         // Here we get NPE, because...well we don't check if the labels we try to filter by actually exist.
-        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("C")));
+        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("C")), 1, LongUnaryOperator.identity());
 
         // TODO: What is the expected behaviour?
     }

@@ -59,7 +59,7 @@ final class SingleLabelInformation implements LabelInformation {
     }
 
     @Override
-    public LabelInformation filter(Collection<NodeLabel> nodeLabels) {
+    public LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, LongUnaryOperator toFilteredNodeId) {
         return this;
     }
 

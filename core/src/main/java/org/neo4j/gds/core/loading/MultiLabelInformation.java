@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
@@ -61,10 +62,18 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
-    public MultiLabelInformation filter(Collection<NodeLabel> nodeLabels) {
+    public MultiLabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, LongUnaryOperator toFilteredNodeId) {
         return new MultiLabelInformation(nodeLabels
             .stream()
-            .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get)));
+            .collect(Collectors.toMap(nodeLabel -> nodeLabel, nodeLabel -> {
+                var rootBitSet = labelInformation.get(nodeLabel);
+                var filteredBitSet = new BitSet(filteredNodeCount);
+                var iterator = rootBitSet.iterator();
+                for (long rootId = iterator.nextSetBit(); rootId != BitSetIterator.NO_MORE; rootId = iterator.nextSetBit()) {
+                    filteredBitSet.set(toFilteredNodeId.applyAsLong(rootId));
+                }
+                return filteredBitSet;
+            })));
     }
 
     @Override

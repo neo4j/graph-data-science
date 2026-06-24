@@ -77,7 +77,7 @@ class SingleLabelInformationTest {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
             .build(1, LongUnaryOperator.identity());
 
-        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("NotLabelA")));
+        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("NotLabelA")), 1, LongUnaryOperator.identity());
         var filteredNodeLabels = filteredLabelInformation.availableNodeLabels();
 
         assertThat(filteredLabelInformation).isSameAs(labelInformation);

@@ -28,6 +28,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ArrayIdMapFilterTest {
     private static final NodeLabel A = NodeLabel.of("A");
     private static final NodeLabel B = NodeLabel.of("B");
+    private static final NodeLabel C = NodeLabel.of("C");
     private static final Concurrency CONCURRENCY = new Concurrency(1);
 
     private IdMap rootIdMap;
@@ -73,9 +75,41 @@ class ArrayIdMapFilterTest {
         var ids = new ArrayList<Long>();
         filtered.forEachNode(ids::add);
         assertThat(ids).containsExactly(0L, 1L, 2L, 3L, 4L);
-        var viaIterator = new ArrayList<Long>();
-        filtered.nodeIterator(Set.of(A)).forEachRemaining((long id) -> viaIterator.add(id));
-        assertThat(viaIterator).hasSize(5);
+        // label-restricted iteration must yield filtered ids, consistent with forEachNode
+        assertThat(collect(filtered.nodeIterator(Set.of(A)))).containsExactly(0L, 1L, 2L, 3L, 4L);
+    }
+
+    @Test
+    void shouldIterateLabelsInFilteredIdSpace() {
+        // root mapped ids 0..5 (original == mapped here)
+        var builder = ArrayIdMapBuilder.of(6);
+        builder.allocate(6).insert(new long[]{0, 1, 2, 3, 4, 5});
+        var lib = LabelInformationBuilders.multiLabelWithCapacity(6);
+        lib.addNodeIdToLabel(A, 0);
+        lib.addNodeIdToLabel(A, 2);
+        lib.addNodeIdToLabel(A, 4);
+        lib.addNodeIdToLabel(B, 1);
+        lib.addNodeIdToLabel(B, 5);
+        lib.addNodeIdToLabel(C, 3);
+        var localRootIdMap = builder.build(lib, 5, CONCURRENCY);
+
+        // keep A and B -> root id 3 (only C) is filtered out, so filtered ids shift:
+        // root 0,1,2 -> 0,1,2 ; root 4 -> 3 ; root 5 -> 4
+        var filteredView = localRootIdMap.withFilteredLabels(List.of(A, B), CONCURRENCY).orElseThrow();
+
+        assertThat(filteredView.nodeCount()).isEqualTo(5);
+        assertThat(filteredView.availableNodeLabels()).containsExactlyInAnyOrder(A, B);
+        assertThat(filteredView.nodeCount(A)).isEqualTo(3);
+        assertThat(filteredView.nodeCount(B)).isEqualTo(2);
+        assertThat(collect(filteredView.nodeIterator(Set.of(A)))).containsExactly(0L, 2L, 3L);
+        assertThat(collect(filteredView.nodeIterator(Set.of(B)))).containsExactly(1L, 4L);
+        assertThat(collect(filteredView.nodeIterator(Set.of(A, B)))).containsExactly(0L, 1L, 2L, 3L, 4L);
+    }
+
+    private static List<Long> collect(PrimitiveIterator.OfLong iterator) {
+        var ids = new ArrayList<Long>();
+        iterator.forEachRemaining((long id) -> ids.add(id));
+        return ids;
     }
 
     @Test

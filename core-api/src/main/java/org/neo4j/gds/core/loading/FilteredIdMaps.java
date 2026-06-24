@@ -67,7 +67,11 @@ public final class FilteredIdMaps {
 
         var unionBitSet = labelInformation.unionBitSet(nodeLabels, rootIdMap.nodeCount());
         var filteredTranslator = filterable.filteredNodeTranslator(unionBitSet, concurrency);
-        var filteredLabelInformation = labelInformation.filter(nodeLabels);
+        var filteredLabelInformation = labelInformation.filter(
+            nodeLabels,
+            filteredTranslator.nodeCount(),
+            filteredTranslator::toMappedNodeId
+        );
 
         return Optional.of(new FilteredView(rootIdMap, filteredTranslator, filteredLabelInformation));
     }

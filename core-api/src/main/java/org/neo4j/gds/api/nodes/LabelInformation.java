@@ -34,7 +34,12 @@ public interface LabelInformation {
 
     void forEach(LabelInformationConsumer consumer);
 
-    LabelInformation filter(Collection<NodeLabel> nodeLabels);
+    /**
+     * Restricts this label information to the given {@code nodeLabels} and re-indexes the
+     * retained node ids into a compact filtered id space via {@code toFilteredNodeId}. The
+     * returned label information is keyed by filtered node ids in {@code [0, filteredNodeCount)}.
+     */
+    LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, LongUnaryOperator toFilteredNodeId);
 
     BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount);
 

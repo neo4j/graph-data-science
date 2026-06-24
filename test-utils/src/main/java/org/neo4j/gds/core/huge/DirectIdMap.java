@@ -35,6 +35,7 @@ import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
+import java.util.function.LongUnaryOperator;
 
 public class DirectIdMap implements IdMap {
     private final long nodeCount;
@@ -172,7 +173,7 @@ public class DirectIdMap implements IdMap {
         }
 
         @Override
-        public LabelInformation filter(Collection<NodeLabel> nodeLabels) {
+        public LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, LongUnaryOperator toFilteredNodeId) {
             return this;
         }
 
