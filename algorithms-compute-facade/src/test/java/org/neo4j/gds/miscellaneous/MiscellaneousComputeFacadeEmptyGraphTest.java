@@ -35,6 +35,7 @@ import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.undirected.ToUndirectedParameters;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -111,6 +112,20 @@ public class MiscellaneousComputeFacadeEmptyGraphTest {
         var result = future.join();
         assertThat(result.result()).isEqualTo(ScalePropertiesResult.EMPTY);
 
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void toUndirected() {
+        var future = facade.toUndirected(
+            graphStore,
+            mock(ToUndirectedParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(SingleTypeRelationships.EMPTY);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }

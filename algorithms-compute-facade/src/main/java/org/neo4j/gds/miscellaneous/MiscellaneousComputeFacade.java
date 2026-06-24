@@ -36,6 +36,8 @@ import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.undirected.ToUndirected;
+import org.neo4j.gds.undirected.ToUndirectedParameters;
 import org.neo4j.gds.walking.CollapsePath;
 
 import java.util.Map;
@@ -141,6 +143,37 @@ public class MiscellaneousComputeFacade {
         );
         return algorithmCaller.run(
             scaleProperties::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<SingleTypeRelationships>> toUndirected(
+        GraphStore graphStore,
+        ToUndirectedParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graphStore.nodeCount() == 0) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SingleTypeRelationships.EMPTY));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            MiscellaneousAlgorithmsTasks.toUndirected(graphStore, parameters.concurrency()),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var toUndirected = new ToUndirected(
+            graphStore,
+            parameters,
+            progressTracker,
+            DefaultPool.INSTANCE,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            toUndirected::compute,
             jobId
         );
     }

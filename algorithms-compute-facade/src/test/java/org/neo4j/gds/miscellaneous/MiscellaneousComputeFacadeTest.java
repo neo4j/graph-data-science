@@ -44,9 +44,11 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaling.ScalerFactory;
 import org.neo4j.gds.scaling.ScalerType;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.undirected.ToUndirectedParameters;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 
@@ -156,6 +158,26 @@ class MiscellaneousComputeFacadeTest {
         aList.add(result.scaledProperties().get(0)[0]);
         aList.add(result.scaledProperties().get(1)[0]);
         assertThat(aList).contains(-0.5, 0.5);
+    }
+
+    @Test
+    void toUndirected(){
+        var future = facade.toUndirected(
+            graphStore,
+            new ToUndirectedParameters(
+                new Concurrency(1),
+                Optional.empty(),
+                "FOO",
+                RelationshipType.of("REL")
+            ),
+            jobIdMock,
+            false
+        );
+        var results = future.join();
+        var result = results.result();
+        assertThat(result).isNotNull();
+        assertThat(result.count()).isEqualTo(2 );
+
     }
 
 }
