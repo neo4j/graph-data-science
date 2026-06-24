@@ -21,7 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.scaling.compute.L1NormComputer;
 import org.neo4j.gds.scaling.compute.L2NormComputer;
 import org.neo4j.gds.scaling.compute.MinMaxAverageComputer;

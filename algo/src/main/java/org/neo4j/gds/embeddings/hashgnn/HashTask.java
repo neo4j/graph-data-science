@@ -23,7 +23,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.apache.commons.math3.primes.Primes;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.termination.TerminationFlag;
 

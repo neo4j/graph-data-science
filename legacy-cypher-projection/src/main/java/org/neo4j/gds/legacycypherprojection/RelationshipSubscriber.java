@@ -23,7 +23,7 @@ import org.eclipse.collections.api.map.primitive.ObjectDoubleMap;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.graphdb.QueryStatistics;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NumberValue;

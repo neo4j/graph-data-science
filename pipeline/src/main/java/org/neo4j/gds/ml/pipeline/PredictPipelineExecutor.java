@@ -23,7 +23,7 @@ package org.neo4j.gds.ml.pipeline;
  import org.neo4j.gds.api.GraphStore;
  import org.neo4j.gds.config.AlgoBaseConfig;
  import org.neo4j.gds.config.GraphNameConfig;
- import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+ import org.neo4j.gds.progress.tracking.ProgressTracker;
  import org.neo4j.gds.executor.ExecutionContext;
 
  public abstract class PredictPipelineExecutor<

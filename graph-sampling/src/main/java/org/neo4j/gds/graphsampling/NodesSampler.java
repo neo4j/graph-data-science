@@ -22,8 +22,8 @@ package org.neo4j.gds.graphsampling;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public abstract class NodesSampler {

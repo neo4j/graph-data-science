@@ -21,7 +21,7 @@ package org.neo4j.gds.memory.tracking;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.UserTask;
+import org.neo4j.gds.progress.registration.UserTask;
 
 import java.util.HashSet;
 import java.util.Set;

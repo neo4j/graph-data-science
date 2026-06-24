@@ -32,7 +32,7 @@ import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.logging.Log;
 
 import java.util.ArrayList;

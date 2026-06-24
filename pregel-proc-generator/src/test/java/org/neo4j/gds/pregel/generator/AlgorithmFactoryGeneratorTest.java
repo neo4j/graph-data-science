@@ -50,7 +50,7 @@ class AlgorithmFactoryGeneratorTest {
             "@java.lang.Override" + NL +
             "public gds.test.BazAlgorithm build(org.neo4j.gds.api.Graph graph," + NL +
             "    gds.testconfig.TheConfig configuration," + NL +
-            "    org.neo4j.gds.core.utils.progress.tasks.ProgressTracker progressTracker," + NL +
+            "    org.neo4j.gds.progress.tracking.ProgressTracker progressTracker," + NL +
             "    org.neo4j.gds.termination.TerminationFlag terminationFlag) {" + NL +
             "  return new gds.test.BazAlgorithm(graph, configuration, progressTracker, terminationFlag);" + NL +
             "}" + NL
@@ -77,7 +77,7 @@ class AlgorithmFactoryGeneratorTest {
         var type = generator.progressTaskMethod();
         assertThat(type.toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
-            "public org.neo4j.gds.core.utils.progress.tasks.Task progressTask(org.neo4j.gds.api.Graph graph," + NL +
+            "public org.neo4j.gds.progress.tasks.Task progressTask(org.neo4j.gds.api.Graph graph," + NL +
             "    gds.testconfig.TheConfig configuration, org.neo4j.gds.mem.MemoryRange memoryEstimationInBytes) {" + NL +
             "  return org.neo4j.gds.beta.pregel.Pregel.progressTask(graph, configuration, memoryEstimationInBytes);" + NL +
             "}" + NL

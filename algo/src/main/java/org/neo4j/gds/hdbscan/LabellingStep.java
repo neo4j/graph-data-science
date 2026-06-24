@@ -22,7 +22,7 @@ package org.neo4j.gds.hdbscan;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 class LabellingStep {
 

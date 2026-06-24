@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.operations;
 
-import org.neo4j.gds.core.utils.progress.UserTask;
+import org.neo4j.gds.progress.registration.UserTask;
 
 import java.util.Optional;
 import java.util.stream.Stream;

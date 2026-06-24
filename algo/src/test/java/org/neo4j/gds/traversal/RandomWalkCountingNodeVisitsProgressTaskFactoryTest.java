@@ -22,7 +22,7 @@ package org.neo4j.gds.traversal;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
+import org.neo4j.gds.progress.tasks.LeafTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

@@ -20,11 +20,11 @@
 package org.neo4j.gds;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
-import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
-import org.neo4j.gds.core.utils.progress.tasks.Status;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.TaskVisitor;
+import org.neo4j.gds.progress.tasks.IterativeTask;
+import org.neo4j.gds.progress.tasks.LeafTask;
+import org.neo4j.gds.progress.tasks.Status;
+import org.neo4j.gds.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.TaskVisitor;
 
 public class SubTaskCountingVisitor implements TaskVisitor {
 

@@ -32,7 +32,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 

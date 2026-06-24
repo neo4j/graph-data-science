@@ -31,7 +31,7 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;

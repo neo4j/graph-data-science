@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.TaskStoreService;
+import org.neo4j.gds.progress.registration.TaskStore;
+import org.neo4j.gds.progress.registration.TaskStoreService;
 
 /**
  * This is a general purpose task store service that you use to obtain task stores from data source ids.

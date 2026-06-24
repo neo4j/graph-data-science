@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.operations;
 
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.tasks.DepthAwareTaskVisitor;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.DepthAwareTaskVisitor;
+import org.neo4j.gds.progress.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;

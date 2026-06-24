@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.operations;
 
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.UserTask;
+import org.neo4j.gds.progress.registration.UserTask;
 
 import java.util.stream.Stream;
 

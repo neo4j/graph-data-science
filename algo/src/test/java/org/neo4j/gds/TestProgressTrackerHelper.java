@@ -21,8 +21,8 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.logging.GdsTestLog;
 
 public final class TestProgressTrackerHelper {

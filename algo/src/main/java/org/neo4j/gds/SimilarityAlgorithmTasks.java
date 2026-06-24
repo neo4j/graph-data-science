@@ -20,7 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.similarity.filteredknn.FilteredKNNTask;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityParameters;

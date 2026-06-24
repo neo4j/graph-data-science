@@ -45,7 +45,7 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
 import org.neo4j.gds.embeddings.graphsage.algo.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;

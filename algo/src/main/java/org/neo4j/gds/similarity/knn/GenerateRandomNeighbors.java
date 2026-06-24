@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.knn;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.SplittableRandom;
 

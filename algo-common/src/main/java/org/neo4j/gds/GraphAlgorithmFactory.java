@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 public abstract class GraphAlgorithmFactory<ALGO extends Algorithm<?>, CONFIG extends AlgoBaseConfig>
     implements AlgorithmFactory<Graph, ALGO, CONFIG> {

@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
 
@@ -67,8 +67,8 @@ public abstract class RelationshipExporterBuilder {
 
     /**
      * Set the {@link ProgressTracker} to use for logging progress during export.
-     * If a {@link org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker} is used, caller must manage beginning and finishing the subtasks.
-     * By default, an {@link org.neo4j.gds.core.utils.progress.tasks.ProgressTracker#NULL_TRACKER} is used. That one doesn't require caller to manage any tasks.
+     * If a {@link org.neo4j.gds.progress.tracking.TaskProgressTracker} is used, caller must manage beginning and finishing the subtasks.
+     * By default, an {@link org.neo4j.gds.progress.tracking.ProgressTracker#NULL_TRACKER} is used. That one doesn't require caller to manage any tasks.
      *
      * @param progressTracker The progress tracker to use for logging progress during export.
      * @return this

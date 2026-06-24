@@ -42,7 +42,7 @@ import org.neo4j.gds.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.LongNodePropertiesBuilder;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Iterator;

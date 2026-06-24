@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.progress.registration.TaskStore;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.operations;
 
-import org.neo4j.gds.core.utils.progress.tasks.Progress;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Progress;
+import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.text.DecimalFormat;

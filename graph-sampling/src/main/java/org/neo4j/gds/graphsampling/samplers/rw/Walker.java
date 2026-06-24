@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.LongSet;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
 import org.neo4j.gds.termination.TerminationFlag;

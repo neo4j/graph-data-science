@@ -21,7 +21,7 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.List;
 import java.util.SplittableRandom;

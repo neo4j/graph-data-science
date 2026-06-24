@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.yens;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.function.LongPredicate;
 import java.util.function.LongToDoubleFunction;

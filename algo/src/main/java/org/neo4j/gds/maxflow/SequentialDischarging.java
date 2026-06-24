@@ -26,7 +26,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.mcmf.MinCostFunctions;
 import org.neo4j.gds.termination.TerminationFlag;
 

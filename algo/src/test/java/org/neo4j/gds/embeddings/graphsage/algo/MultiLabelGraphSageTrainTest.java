@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;

@@ -21,7 +21,7 @@ package org.neo4j.gds.test;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 public class TestAlgorithm implements Algorithm<Long> {
 

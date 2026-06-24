@@ -27,7 +27,7 @@ import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.settings.GdsSettings;
 
 import java.io.IOException;

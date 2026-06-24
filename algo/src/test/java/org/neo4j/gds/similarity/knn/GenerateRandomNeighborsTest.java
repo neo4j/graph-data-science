@@ -26,7 +26,7 @@ import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.nodeproperties.IdentityPropertyValues;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;

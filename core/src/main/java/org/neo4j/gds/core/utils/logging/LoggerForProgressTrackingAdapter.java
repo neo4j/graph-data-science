@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.logging;
 
-import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
+import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
 import org.neo4j.gds.logging.Log;
 
 /**
@@ -50,11 +50,6 @@ public class LoggerForProgressTrackingAdapter implements LoggerForProgressTracki
     @Override
     public void error(String format, Object... arguments) {
         log.error(format, arguments);
-    }
-
-    @Override
-    public boolean isDebugEnabled() {
-        return log.isDebugEnabled();
     }
 
     @Override

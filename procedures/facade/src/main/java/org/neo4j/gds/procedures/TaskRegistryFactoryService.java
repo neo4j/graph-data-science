@@ -21,17 +21,17 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.TaskStoreService;
+import org.neo4j.gds.progress.registration.LocalTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskStoreService;
 
 /**
- * This should be the one-stop-shop for {@link org.neo4j.gds.core.utils.progress.TaskRegistryFactory}s.
+ * This should be the one-stop-shop for {@link org.neo4j.gds.progress.registration.TaskRegistryFactory}s.
  * Therefore, it must be s application-wide singleton, created exactly once in the Procedure Facade,
  * and it lives for the lifetime of the plugin.
  * Factories are unique to a database and user as that allows us neat reporting,
  * like the running jobs for this user for this database.
- * In turn these factories rely on database-scoped {@link org.neo4j.gds.core.utils.progress.TaskStore}s.
+ * In turn these factories rely on database-scoped {@link org.neo4j.gds.progress.registration.TaskStore}s.
  */
 public class TaskRegistryFactoryService {
     private final boolean progressTrackingEnabled;
