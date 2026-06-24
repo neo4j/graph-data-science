@@ -99,8 +99,9 @@ class TestIdMapTest {
         var idMap = TestIdMap.builder().add(42, 0).build();
         assertThat(idMap.rootIdMap()).isEqualTo(idMap);
         assertThat(idMap.rootNodeCount()).isEqualTo(OptionalLong.of(1));
+        // ComposedIdMap is its own root, so root mapping is the identity
         assertThat(idMap.toRootNodeId(0)).isEqualTo(0);
-        assertThat(idMap.toRootNodeId(1)).isEqualTo(NOT_FOUND);
+        assertThat(idMap.toRootNodeId(1)).isEqualTo(1);
     }
 
     @Test

@@ -21,15 +21,19 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.api.nodes.IdMap;
-import org.neo4j.gds.api.DefaultIdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
-
-import java.util.OptionalLong;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class TestIdMap extends DefaultIdMap {
+/**
+ * A {@link NodeTranslator} for tests. Use {@link Builder#build()} to obtain an
+ * {@link org.neo4j.gds.api.nodes.IdMap} by composing this translator with the
+ * built {@link LabelInformation} into a {@link ComposedIdMap}.
+ */
+public final class TestIdMap implements NodeTranslator {
 
     private final LongLongHashMap forwardMap;
     private final LongLongHashMap reverseMap;
@@ -42,10 +46,8 @@ public final class TestIdMap extends DefaultIdMap {
     private TestIdMap(
         LongLongHashMap forwardMap,
         LongLongHashMap reverseMap,
-        long highestOriginalId,
-        LabelInformation labelInformation
+        long highestOriginalId
     ) {
-        super(labelInformation, forwardMap.size());
         this.forwardMap = forwardMap;
         this.reverseMap = reverseMap;
         this.highestOriginalId = highestOriginalId;
@@ -53,19 +55,17 @@ public final class TestIdMap extends DefaultIdMap {
 
     @Override
     public String typeId() {
-        return NO_TYPE;
+        return IdMap.NO_TYPE;
+    }
+
+    @Override
+    public long nodeCount() {
+        return this.forwardMap.size();
     }
 
     @Override
     public long toOriginalNodeId(long mappedNodeId) {
         return this.reverseMap.getOrDefault(mappedNodeId, NOT_FOUND);
-    }
-
-    @Override
-    public long toRootNodeId(long mappedNodeId) {
-        return this.reverseMap.containsKey(mappedNodeId)
-            ? mappedNodeId
-            : NOT_FOUND;
     }
 
     @Override
@@ -79,18 +79,8 @@ public final class TestIdMap extends DefaultIdMap {
     }
 
     @Override
-    public IdMap rootIdMap() {
-        return this;
-    }
-
-    @Override
     public long toMappedNodeId(long originalNodeId) {
         return this.forwardMap.getOrDefault(originalNodeId, NOT_FOUND);
-    }
-
-    @Override
-    public OptionalLong rootNodeCount() {
-        return OptionalLong.of(this.nodeCount());
     }
 
     public static final class Builder {
@@ -144,13 +134,14 @@ public final class TestIdMap extends DefaultIdMap {
             return this;
         }
 
-        public TestIdMap build() {
-            return new TestIdMap(
+        public ComposedIdMap build() {
+            var translator = new TestIdMap(
                 this.forwardMap,
                 this.reverseMap,
-                this.highestOriginalId,
-                labelInformationBuilder.build(this.forwardMap.size(), operand -> operand)
+                this.highestOriginalId
             );
+            var labelInformation = labelInformationBuilder.build(this.forwardMap.size(), operand -> operand);
+            return ComposedIdMap.of(translator, labelInformation);
         }
     }
 }

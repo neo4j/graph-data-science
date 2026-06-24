@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.FilteredIdMap;
+import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.NodeTranslator;
 
@@ -245,11 +246,11 @@ class FilteredViewTest {
         assertThat(idMap.nodeLabels(1)).containsExactly(aLabel, bLabel, cLabel);
     }
 
-    private static FilteredIdMap filteredView(IdMap originalToRoot, TestIdMap rootToFiltered) {
+    private static FilteredIdMap filteredView(IdMap originalToRoot, ComposedIdMap rootToFiltered) {
         return new FilteredIdMaps.FilteredView(originalToRoot, rootToFiltered, rootToFiltered.labelInformation());
     }
 
-    private static TestIdMap idMap(long... mappings) {
+    private static ComposedIdMap idMap(long... mappings) {
         return TestIdMap.builder().addAll(mappings).build();
     }
 
@@ -260,9 +261,9 @@ class FilteredViewTest {
      */
     private static final class StrictTranslator implements NodeTranslator {
 
-        private final TestIdMap delegate;
+        private final NodeTranslator delegate;
 
-        StrictTranslator(TestIdMap delegate) {
+        StrictTranslator(NodeTranslator delegate) {
             this.delegate = delegate;
         }
 
