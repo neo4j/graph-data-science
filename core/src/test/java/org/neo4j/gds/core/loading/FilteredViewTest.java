@@ -21,8 +21,9 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.nodes.IdMap;
-import org.neo4j.gds.api.DefaultIdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 
 import java.util.ArrayList;
 import java.util.OptionalLong;
@@ -30,11 +31,11 @@ import java.util.OptionalLong;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
 
-class FilteredLabeledIdMapTest {
+class FilteredViewTest {
 
     @Test
     void nodeCount() {
-        var idMap = new FilteredLabeledIdMap(
+        var idMap = filteredView(
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
@@ -43,7 +44,7 @@ class FilteredLabeledIdMapTest {
 
     @Test
     void rootNodeCount() {
-        var idMap = new FilteredLabeledIdMap(
+        var idMap = filteredView(
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
@@ -52,7 +53,7 @@ class FilteredLabeledIdMapTest {
 
     @Test
     void toOriginalNodeId() {
-        var idMap = new FilteredLabeledIdMap(
+        var idMap = filteredView(
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
@@ -63,7 +64,7 @@ class FilteredLabeledIdMapTest {
 
     @Test
     void toMappedNodeId() {
-        var idMap = new FilteredLabeledIdMap(
+        var idMap = filteredView(
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
@@ -74,29 +75,33 @@ class FilteredLabeledIdMapTest {
 
     @Test
     void toMappedNodeIdMustNotPropagateNotFoundToTheFilteredIdMap() {
-        var idMap = new FilteredLabeledIdMap(
+        var rootToFiltered = idMap(0, 0, 2, 1);
+        var idMap = new FilteredIdMaps.FilteredView(
             idMap(42, 0, 43, 1, 1337, 2),
-            new StrictIdMap(idMap(0, 0, 2, 1))
+            new StrictTranslator(rootToFiltered),
+            rootToFiltered.labelInformation()
         );
         // 1338 is not in the root id map; the lookup must short-circuit
-        // instead of passing NOT_FOUND to the root-to-filtered id map
+        // instead of passing NOT_FOUND to the root-to-filtered translator
         assertThat(idMap.toMappedNodeId(1338)).isEqualTo(NOT_FOUND);
     }
 
     @Test
     void containsOriginalIdMustNotPropagateNotFoundToTheFilteredIdMap() {
-        var idMap = new FilteredLabeledIdMap(
+        var rootToFiltered = idMap(0, 0, 2, 1);
+        var idMap = new FilteredIdMaps.FilteredView(
             idMap(42, 0, 43, 1, 1337, 2),
-            new StrictIdMap(idMap(0, 0, 2, 1))
+            new StrictTranslator(rootToFiltered),
+            rootToFiltered.labelInformation()
         );
         // 1338 is not in the root id map; the lookup must short-circuit
-        // instead of passing NOT_FOUND to the root-to-filtered id map
+        // instead of passing NOT_FOUND to the root-to-filtered translator
         assertThat(idMap.containsOriginalId(1338)).isFalse();
     }
 
     @Test
     void toFilteredNodeId() {
-        var idMap = new FilteredLabeledIdMap(
+        var idMap = filteredView(
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
@@ -107,7 +112,7 @@ class FilteredLabeledIdMapTest {
 
     @Test
     void toRootNodeId() {
-        var idMap = new FilteredLabeledIdMap(
+        var idMap = filteredView(
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
@@ -120,14 +125,14 @@ class FilteredLabeledIdMapTest {
     void toRootIdMap() {
         var originalToRootIdMap = idMap(42, 0, 43, 1, 1337, 2);
         var rootToFilteredIdMap = idMap(0, 0, 2, 1);
-        var idMap = new FilteredLabeledIdMap(originalToRootIdMap, rootToFilteredIdMap);
+        var idMap = filteredView(originalToRootIdMap, rootToFilteredIdMap);
 
         assertThat(idMap.rootIdMap()).isEqualTo(originalToRootIdMap);
     }
 
     @Test
     void contains() {
-        var idMap = new FilteredLabeledIdMap(
+        var idMap = filteredView(
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
@@ -139,7 +144,7 @@ class FilteredLabeledIdMapTest {
 
     @Test
     void containsRootNodeId() {
-        var idMap = new FilteredLabeledIdMap(
+        var idMap = filteredView(
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
@@ -151,7 +156,7 @@ class FilteredLabeledIdMapTest {
 
     @Test
     void highestOriginalId() {
-        var idMap = new FilteredLabeledIdMap(
+        var idMap = filteredView(
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
@@ -171,7 +176,7 @@ class FilteredLabeledIdMapTest {
             .build();
         var rootToFilteredIdMap = idMap(0, 0, 2, 1);
 
-        var idMap = new FilteredLabeledIdMap(originalToRootIdMap, rootToFilteredIdMap);
+        var idMap = filteredView(originalToRootIdMap, rootToFilteredIdMap);
 
         assertThat(idMap.hasLabel(0, aLabel)).isTrue();
         assertThat(idMap.hasLabel(0, bLabel)).isFalse();
@@ -191,7 +196,7 @@ class FilteredLabeledIdMapTest {
             .build();
         var rootToFilteredIdMap = idMap(0, 0, 2, 1);
 
-        var idMap = new FilteredLabeledIdMap(originalToRootIdMap, rootToFilteredIdMap);
+        var idMap = filteredView(originalToRootIdMap, rootToFilteredIdMap);
         idMap.addNodeLabel(cLabel);
         idMap.addNodeIdToLabel(1, cLabel);
         assertThat(idMap.hasLabel(1, cLabel)).isTrue();
@@ -210,7 +215,7 @@ class FilteredLabeledIdMapTest {
             .build();
         var rootToFilteredIdMap = idMap(0, 0, 2, 1);
 
-        var idMap = new FilteredLabeledIdMap(originalToRootIdMap, rootToFilteredIdMap);
+        var idMap = filteredView(originalToRootIdMap, rootToFilteredIdMap);
 
         var labels_0 = new ArrayList<>();
         idMap.forEachNodeLabel(0, labels_0::add);
@@ -234,10 +239,14 @@ class FilteredLabeledIdMapTest {
             .build();
         var rootToFilteredIdMap = idMap(0, 0, 2, 1);
 
-        var idMap = new FilteredLabeledIdMap(originalToRootIdMap, rootToFilteredIdMap);
+        var idMap = filteredView(originalToRootIdMap, rootToFilteredIdMap);
 
         assertThat(idMap.nodeLabels(0)).containsExactly(aLabel);
         assertThat(idMap.nodeLabels(1)).containsExactly(aLabel, bLabel, cLabel);
+    }
+
+    private static FilteredIdMap filteredView(IdMap originalToRoot, TestIdMap rootToFiltered) {
+        return new FilteredIdMaps.FilteredView(originalToRoot, rootToFiltered, rootToFiltered.labelInformation());
     }
 
     private static TestIdMap idMap(long... mappings) {
@@ -245,16 +254,15 @@ class FilteredLabeledIdMapTest {
     }
 
     /**
-     * Delegating id map that rejects negative original ids on lookup.
-     * Real id map implementations are not required to handle {@link org.neo4j.gds.api.nodes.IdMap#NOT_FOUND}
+     * Delegating translator that rejects negative original ids on lookup.
+     * Real id map implementations are not required to handle {@link IdMap#NOT_FOUND}
      * as lookup input, so composing id maps must never pass it along.
      */
-    private static final class StrictIdMap extends DefaultIdMap {
+    private static final class StrictTranslator implements NodeTranslator {
 
         private final TestIdMap delegate;
 
-        StrictIdMap(TestIdMap delegate) {
-            super(delegate.labelInformation(), delegate.nodeCount());
+        StrictTranslator(TestIdMap delegate) {
             this.delegate = delegate;
         }
 
@@ -275,18 +283,13 @@ class FilteredLabeledIdMapTest {
         }
 
         @Override
-        public String typeId() {
-            return delegate.typeId();
-        }
-
-        @Override
         public long toOriginalNodeId(long mappedNodeId) {
             return delegate.toOriginalNodeId(mappedNodeId);
         }
 
         @Override
-        public long toRootNodeId(long mappedNodeId) {
-            return delegate.toRootNodeId(mappedNodeId);
+        public long nodeCount() {
+            return delegate.nodeCount();
         }
 
         @Override
@@ -295,13 +298,8 @@ class FilteredLabeledIdMapTest {
         }
 
         @Override
-        public IdMap rootIdMap() {
-            return delegate.rootIdMap();
-        }
-
-        @Override
-        public OptionalLong rootNodeCount() {
-            return delegate.rootNodeCount();
+        public String typeId() {
+            return delegate.typeId();
         }
     }
 }

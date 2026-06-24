@@ -76,7 +76,6 @@ public final class FilteredIdMaps {
      * Composes original -> root -> filtered translation; per-node label reads
      * delegate to the root id map at root mapped ids; aggregate label queries and
      * label-filtered iteration use the filtered {@link LabelInformation}.
-     * Replicates the previous {@code FilteredLabeledIdMap}.
      */
     static final class FilteredView implements FilteredIdMap {
 
@@ -93,9 +92,18 @@ public final class FilteredIdMaps {
         @Override
         public String typeId() {return rootIdMap.typeId();}
 
+        /**
+         * If the original node id is not present in the root id map, the lookup
+         * must short-circuit to {@link IdMap#NOT_FOUND}. {@code NOT_FOUND} is not
+         * a valid input for the root-to-filtered lookup.
+         */
         @Override
         public long toMappedNodeId(long originalNodeId) {
-            return filteredTranslator.toMappedNodeId(rootIdMap.toMappedNodeId(originalNodeId));
+            var rootNodeId = rootIdMap.toMappedNodeId(originalNodeId);
+            if (rootNodeId == IdMap.NOT_FOUND) {
+                return IdMap.NOT_FOUND;
+            }
+            return filteredTranslator.toMappedNodeId(rootNodeId);
         }
 
         @Override
@@ -103,9 +111,17 @@ public final class FilteredIdMaps {
             return rootIdMap.toOriginalNodeId(filteredTranslator.toOriginalNodeId(filteredNodeId));
         }
 
+        /**
+         * If the original node id is not present in the root id map, the lookup
+         * must short-circuit; see {@link #toMappedNodeId(long)}.
+         */
         @Override
         public boolean containsOriginalId(long originalNodeId) {
-            return filteredTranslator.containsOriginalId(rootIdMap.toMappedNodeId(originalNodeId));
+            var rootNodeId = rootIdMap.toMappedNodeId(originalNodeId);
+            if (rootNodeId == IdMap.NOT_FOUND) {
+                return false;
+            }
+            return filteredTranslator.containsOriginalId(rootNodeId);
         }
 
         @Override
