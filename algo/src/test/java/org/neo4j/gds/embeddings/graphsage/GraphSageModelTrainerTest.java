@@ -36,7 +36,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
 import org.neo4j.gds.embeddings.graphsage.algo.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;

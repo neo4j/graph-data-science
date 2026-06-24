@@ -26,8 +26,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.wcc.WccStreamConfigImpl;
 

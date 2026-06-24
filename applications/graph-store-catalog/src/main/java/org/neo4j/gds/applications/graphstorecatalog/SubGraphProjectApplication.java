@@ -30,8 +30,8 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 
 import java.util.concurrent.atomic.AtomicLong;
 

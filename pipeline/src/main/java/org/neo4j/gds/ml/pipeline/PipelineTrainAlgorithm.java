@@ -23,7 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.model.CatalogModelContainer;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 

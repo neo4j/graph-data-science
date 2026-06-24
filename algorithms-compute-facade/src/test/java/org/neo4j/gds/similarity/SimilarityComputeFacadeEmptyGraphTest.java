@@ -27,7 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;

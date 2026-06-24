@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.function.Supplier;
 

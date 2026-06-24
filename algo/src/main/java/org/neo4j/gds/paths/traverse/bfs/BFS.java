@@ -29,7 +29,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.paths.traverse.Aggregator;
 import org.neo4j.gds.paths.traverse.ExitPredicate;
 import org.neo4j.gds.termination.TerminationFlag;

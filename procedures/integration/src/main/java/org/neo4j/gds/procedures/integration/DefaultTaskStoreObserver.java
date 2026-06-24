@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.TaskStoreService;
+import org.neo4j.gds.progress.registration.TaskStore;
+import org.neo4j.gds.progress.registration.TaskStoreService;
 
 class DefaultTaskStoreObserver implements TaskStoreObserver {
     private final TaskStoreRepository taskStoreRepository;

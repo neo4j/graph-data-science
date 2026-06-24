@@ -23,7 +23,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;

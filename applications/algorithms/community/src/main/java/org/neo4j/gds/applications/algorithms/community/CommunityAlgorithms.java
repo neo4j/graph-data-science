@@ -34,7 +34,7 @@ import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;

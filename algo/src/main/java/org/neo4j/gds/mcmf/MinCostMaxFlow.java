@@ -25,7 +25,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.maxflow.IgnoreNodeConstraints;
 import org.neo4j.gds.maxflow.MaxFlowPhase;
 import org.neo4j.gds.maxflow.NodeConstraintsFromPropertyIdMap;

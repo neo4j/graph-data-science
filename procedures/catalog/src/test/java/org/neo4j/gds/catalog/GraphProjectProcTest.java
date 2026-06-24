@@ -46,9 +46,9 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.UserTask;
-import org.neo4j.gds.core.utils.progress.tasks.Status;
+import org.neo4j.gds.progress.registration.TaskStore;
+import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.tasks.Status;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
 

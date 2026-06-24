@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.Iterator;
 import java.util.SplittableRandom;

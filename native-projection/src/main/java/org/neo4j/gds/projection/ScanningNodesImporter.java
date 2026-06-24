@@ -36,7 +36,7 @@ import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.NodeImporterBuilder;
 import org.neo4j.gds.core.loading.Nodes;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.logging.Log;

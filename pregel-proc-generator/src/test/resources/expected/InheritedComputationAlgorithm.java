@@ -27,7 +27,7 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 @Generated("org.neo4j.gds.pregel.PregelProcessor")

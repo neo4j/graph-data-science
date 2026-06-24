@@ -26,9 +26,9 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.UserTask;
-import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
+import org.neo4j.gds.progress.registration.TaskStore;
+import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.tasks.LeafTask;
 
 import java.util.stream.Stream;
 

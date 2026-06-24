@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.progress.registration.EmptyTaskStore;
+import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
+import org.neo4j.gds.progress.registration.TaskStore;
 
 import java.time.Duration;
 

@@ -31,7 +31,7 @@ import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;

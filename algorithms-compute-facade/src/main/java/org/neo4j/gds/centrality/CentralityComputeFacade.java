@@ -40,7 +40,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.degree.DegreeCentralityResult;

@@ -21,8 +21,8 @@ package org.neo4j.gds.procedures.operations;
 
 import org.neo4j.gds.applications.operations.ResultRenderer;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.UserTask;
-import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
+import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.tasks.TaskTraversal;
 
 import java.util.Optional;
 import java.util.stream.Stream;

@@ -38,7 +38,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 

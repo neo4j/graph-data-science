@@ -21,8 +21,8 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Tasks;
 
 import java.util.List;
 

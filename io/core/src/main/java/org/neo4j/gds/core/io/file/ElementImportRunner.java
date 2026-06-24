@@ -22,7 +22,7 @@ package org.neo4j.gds.core.io.file;
 import org.neo4j.batchimport.api.InputIterator;
 import org.neo4j.batchimport.api.input.InputEntityVisitor;
 import org.neo4j.gds.core.io.GraphStoreInput;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.io.IOException;
 

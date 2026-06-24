@@ -28,8 +28,8 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;

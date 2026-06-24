@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.UserTask;
+import org.neo4j.gds.progress.registration.UserTask;
 import org.neo4j.gds.logging.Log;
 
 import static org.assertj.core.api.Assertions.assertThat;

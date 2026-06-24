@@ -20,9 +20,9 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
-import org.neo4j.gds.core.utils.progress.UserTask;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
+import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.tasks.Task;
 
 import java.time.Duration;
 import java.util.ArrayList;

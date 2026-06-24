@@ -29,7 +29,7 @@ import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.utils.progress.TaskStoreService;
+import org.neo4j.gds.progress.registration.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;

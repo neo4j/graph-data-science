@@ -30,7 +30,7 @@ import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;

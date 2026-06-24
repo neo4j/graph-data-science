@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.progress.registration.TaskStore;
 
 /**
  * This is responsible for bridging the gap between the global GDS extension,

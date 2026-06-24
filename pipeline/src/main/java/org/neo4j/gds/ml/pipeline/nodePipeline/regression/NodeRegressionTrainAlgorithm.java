@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;

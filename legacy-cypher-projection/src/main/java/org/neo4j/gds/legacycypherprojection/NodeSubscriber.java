@@ -21,7 +21,7 @@ package org.neo4j.gds.legacycypherprojection;
 
 import org.neo4j.gds.values.GdsNeo4jValueConverter;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.values.CypherNodeLabelTokens;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.graphdb.QueryStatistics;

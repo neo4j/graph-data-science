@@ -28,7 +28,7 @@ import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.RecordScannerTask;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.utils.RawValues;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.PropertyCursor;

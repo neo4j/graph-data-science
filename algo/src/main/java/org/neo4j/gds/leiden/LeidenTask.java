@@ -21,8 +21,8 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Tasks;
 
 import java.util.List;
 

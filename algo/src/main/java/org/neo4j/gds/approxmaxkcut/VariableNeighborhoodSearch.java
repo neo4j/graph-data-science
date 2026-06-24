@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.approxmaxkcut.localsearch.LocalSearch;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.List;
 import java.util.SplittableRandom;

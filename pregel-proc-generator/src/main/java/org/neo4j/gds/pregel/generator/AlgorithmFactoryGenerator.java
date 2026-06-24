@@ -28,8 +28,8 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminationFlag;
 

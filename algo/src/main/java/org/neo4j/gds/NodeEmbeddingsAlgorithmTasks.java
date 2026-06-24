@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPTask;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTask;

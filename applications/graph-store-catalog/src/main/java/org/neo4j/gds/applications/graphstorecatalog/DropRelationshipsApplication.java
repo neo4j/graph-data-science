@@ -25,10 +25,10 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.DeletionResult;
-import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
-import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
+import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.logging.Log;
 
 public class DropRelationshipsApplication {

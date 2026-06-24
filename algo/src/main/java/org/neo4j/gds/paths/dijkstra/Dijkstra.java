@@ -26,7 +26,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.PathResultBuilder;

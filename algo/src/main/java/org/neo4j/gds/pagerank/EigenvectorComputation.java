@@ -34,7 +34,7 @@ import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.scaling.ScalerFactory;
 import org.neo4j.gds.scaling.ScalerType;

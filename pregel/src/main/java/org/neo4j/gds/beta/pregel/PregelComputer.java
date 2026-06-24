@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.pregel;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;

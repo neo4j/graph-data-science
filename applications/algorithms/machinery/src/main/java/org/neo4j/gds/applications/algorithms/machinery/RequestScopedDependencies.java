@@ -24,8 +24,8 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.termination.TerminationFlag;
 
 /**

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.logging;
 
-import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
+import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
 import org.neo4j.gds.logging.Log;
 
 /**

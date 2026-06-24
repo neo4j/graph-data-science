@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelConfig;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.Set;
 

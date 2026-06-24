@@ -22,8 +22,8 @@ package org.neo4j.gds.paths.yens;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.paths.delta.DeltaSteppingProgressTask;
 
 public final class YensProgressTask {

@@ -21,7 +21,7 @@ package org.neo4j.gds.hdbscan;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestGraph;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;

@@ -20,7 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 

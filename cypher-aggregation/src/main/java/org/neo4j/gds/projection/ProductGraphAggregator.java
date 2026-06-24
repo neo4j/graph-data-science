@@ -23,7 +23,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;

@@ -37,7 +37,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 

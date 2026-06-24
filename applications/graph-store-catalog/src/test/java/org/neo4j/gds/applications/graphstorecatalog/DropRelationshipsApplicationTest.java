@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

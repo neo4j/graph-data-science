@@ -37,9 +37,9 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.tasks.LoggerForProgressTracking;
+import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.Log;
 

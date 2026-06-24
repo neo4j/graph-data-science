@@ -22,9 +22,9 @@ package org.neo4j.gds.procedures;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.TaskStoreService;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskStore;
+import org.neo4j.gds.progress.registration.TaskStoreService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

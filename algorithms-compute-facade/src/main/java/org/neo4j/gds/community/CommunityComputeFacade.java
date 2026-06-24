@@ -42,7 +42,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;

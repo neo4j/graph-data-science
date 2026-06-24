@@ -22,7 +22,7 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;

@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.dag.longestPath.LongestPathTask;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortTask;
 import org.neo4j.gds.kspanningtree.KSpanningTreeTask;

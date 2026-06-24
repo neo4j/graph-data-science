@@ -25,7 +25,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.UserFunctionSignatureBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.Metrics;

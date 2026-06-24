@@ -35,7 +35,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.model.TestCustomInfo;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.logging.Log;

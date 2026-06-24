@@ -25,7 +25,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;

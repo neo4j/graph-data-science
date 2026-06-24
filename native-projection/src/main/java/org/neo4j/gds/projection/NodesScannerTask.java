@@ -25,7 +25,7 @@ import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.RecordScannerTask;
 import org.neo4j.gds.core.utils.RawValues;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.api.KernelTransaction;

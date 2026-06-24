@@ -25,7 +25,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Set;

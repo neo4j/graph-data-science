@@ -23,8 +23,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.logging.Log;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 

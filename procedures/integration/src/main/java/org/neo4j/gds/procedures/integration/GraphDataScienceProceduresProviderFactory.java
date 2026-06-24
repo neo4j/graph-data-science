@@ -25,7 +25,7 @@ import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.utils.progress.TaskStoreService;
+import org.neo4j.gds.progress.registration.TaskStoreService;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.memory.tracking.MemoryTracker;

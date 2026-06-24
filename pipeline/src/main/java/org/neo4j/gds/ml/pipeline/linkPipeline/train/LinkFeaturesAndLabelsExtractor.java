@@ -33,7 +33,7 @@ import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.ml.gradientdescent.GradientDescentConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
