@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.ToMappedNodeId;
 import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
@@ -124,36 +125,37 @@ public final class LazyIdMapBuilder implements PartialIdMap {
 
     public record ShardedIdMapAndProperties(
         IdMap idMap,
-        PartialIdMap intermediateIdMap,
         NodeSchemaRecord schema,
         NodePropertyStore propertyStore
-    ) {}
+    ) {
+        // The inner builder is forced to identity (see constructor), so the inner id map maps
+        // the dense intermediate ids to themselves: exactly the identity intermediate -> mapped
+        // id translation that node-property finalization and relationship value mapping require.
+        public ToMappedNodeId toMappedNodeId() {
+            return id -> id;
+        }
+    }
 
     public ShardedIdMapAndProperties build() {
         var nodes = this.nodesBuilder.build();
-        var intermediateIdMap = this.intermediateIdMapBuilder.build();
+        var shardedIdMap = this.intermediateIdMapBuilder.build();
 
         // The inner builder is forced to identity (see constructor), so its mapped ids equal the
         // intermediate ids that ShardedIdMap exposes and label/property keying lines up. Guard the
         // invariant defensively in case that ever changes.
-        if (nodes.idMap().nodeCount() != intermediateIdMap.size()) {
+        if (nodes.idMap().nodeCount() != shardedIdMap.size()) {
             throw new IllegalStateException(
                 "ShardedIdMap requires inner mapped ids to equal intermediate ids: " +
                 "inner node count = " + nodes.idMap().nodeCount() +
-                ", intermediate map size = " + intermediateIdMap.size()
+                ", intermediate map size = " + shardedIdMap.size()
             );
         }
 
-        var innerIdMap = nodes.idMap();
-        var labelInformation = innerIdMap.labelInformation();
-        var idMap = ComposedIdMap.of(new ShardedIdMap(intermediateIdMap), labelInformation);
+        var identityIdMap = nodes.idMap();
+        var composedIdMap = ComposedIdMap.of(new ShardedIdMap(shardedIdMap), identityIdMap.labelInformation());
 
         return new ShardedIdMapAndProperties(
-            idMap,
-            // The inner builder is forced to identity (see constructor), so the inner id map maps
-            // the dense intermediate ids to themselves: exactly the identity intermediate -> mapped
-            // id translation that node-property finalization and relationship value mapping require.
-            innerIdMap,
+            composedIdMap,
             nodes.schema(),
             nodes.properties()
         );

@@ -46,10 +46,10 @@ import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tasks.Tasks;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -87,7 +87,8 @@ public final class GraphImporter {
             "Graph aggregation",
             concurrency,
             Tasks.leaf("Update aggregation", concurrency, taskVolume),
-            Tasks.task("Build graph store", concurrency,
+            Tasks.task(
+                "Build graph store", concurrency,
                 Tasks.leaf("Nodes", concurrency, 1),
                 Tasks.leaf("Relationships", concurrency, 1)
             )
@@ -371,9 +372,8 @@ public final class GraphImporter {
         graphStoreBuilder.nodes(nodes);
 
         // Relationships are added using their intermediate node ids, which equal the
-        // mapped ids for the ShardedIdMap, so we map them through the (identity)
-        // intermediate id map.
-        return idMapAndProperties.intermediateIdMap()::toMappedNodeId;
+        // mapped ids for the ShardedIdMap, so we map them through the identity function.
+        return AdjacencyCompressor.ValueMapper.Identity.INSTANCE;
     }
 
     private void buildRelationshipsWithProperties(

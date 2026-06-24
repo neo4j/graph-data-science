@@ -49,7 +49,7 @@ public class LongNodePropertiesBuilderTest {
             builder.set(originalIds[i], i * 1337L);
         }
 
-        var longNodeProperties = builder.build(10, idMap, idMap.highestOriginalId());
+        var longNodeProperties = builder.build(10, idMap::toMappedNodeId, idMap.highestOriginalId());
 
         for (int i = 0; i < nodeCount; i++) {
             assertThat(longNodeProperties.longValue(i)).isEqualTo(i * 1337L);

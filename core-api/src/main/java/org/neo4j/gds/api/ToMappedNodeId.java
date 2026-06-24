@@ -17,20 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading.nodeproperties;
+package org.neo4j.gds.api;
 
-import org.neo4j.gds.api.ToMappedNodeId;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.values.GdsValue;
-
-public interface InnerNodePropertiesBuilder {
-
-    void setValue(long neoNodeId, GdsValue value);
-
-    /**
-     * Builds the underlying node properties and performs a remapping
-     * to the internal id space using the given mapping function.
-     */
-    NodePropertyValues build(long size, ToMappedNodeId toMappedNodeIdFn, long highestOriginalId);
-
+/**
+ * Maps an original (e.g. intermediate or Neo4j) node id to a mapped node id. A narrow
+ * functional view used when only the forward id translation is required, e.g. when
+ * re-indexing node properties into the mapped id space.
+ */
+@FunctionalInterface
+public interface ToMappedNodeId {
+    long toMappedNodeId(long originalNodeId);
 }

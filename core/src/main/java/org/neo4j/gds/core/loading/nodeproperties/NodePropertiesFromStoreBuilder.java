@@ -20,9 +20,9 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.PartialIdMap;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -33,7 +33,6 @@ import org.neo4j.gds.values.GdsNoValue;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 
-import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -94,28 +93,14 @@ public final class NodePropertiesFromStoreBuilder {
             }
         }
 
-        // Imported property values are associated with the intermediate (dense) node ids.
-        // ShardedIdMap: the dense intermediate id equals the mapped id, so resolution is
-        // identity. Its own toMappedNodeId is an external->mapped lookup and must not be used.
-        PartialIdMap actualIdMap;
-        if (idMap.typeId().equals(ShardedIdMapBuilder.ID)) {
-            long nodeCount = idMap.nodeCount();
-            actualIdMap = new PartialIdMap() {
-                @Override
-                public long toMappedNodeId(long originalNodeId) {
-                    return originalNodeId;
-                }
+        ToMappedNodeId toMappedNodeId = idMap.typeId().equals(ShardedIdMapBuilder.ID)
+            // Imported property values are associated with the intermediate (dense) node ids.
+            // ShardedIdMap: the dense intermediate id equals the mapped id, so resolution is
+            // identity. Its own toMappedNodeId is an external->mapped lookup and must not be used.
+            ? (mappedNodeId -> mappedNodeId)
+            : idMap::toMappedNodeId;
 
-                @Override
-                public OptionalLong rootNodeCount() {
-                    return OptionalLong.of(nodeCount);
-                }
-            };
-        } else {
-            actualIdMap = idMap;
-        }
-
-        return innerBuilder.get().build(idMap.nodeCount(), actualIdMap, idMap.highestOriginalId());
+        return innerBuilder.get().build(idMap.nodeCount(), toMappedNodeId, idMap.highestOriginalId());
     }
 
     // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.

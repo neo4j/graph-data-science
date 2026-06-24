@@ -319,7 +319,7 @@ public final class NodesFilter {
         public abstract void accept(long inputNode, long filteredNode);
 
         public NodePropertyValues build(long size, IdMap idMap) {
-            return propertyBuilder.build(size, idMap, idMap.highestOriginalId());
+            return propertyBuilder.build(size, idMap::toMappedNodeId, idMap.highestOriginalId());
         }
     }
 }

@@ -108,11 +108,6 @@ class LazyShardedIdMapTest {
         assertThat(idMap.typeId()).isEqualTo("sharded");
         assertThat(idMap.nodeCount()).isEqualTo(3);
         assertThat(idMap.toOriginalNodeId(idMap.toMappedNodeId(2000))).isEqualTo(2000);
-        // intermediate id map collapses to identity
-        idMap.forEachNode(mappedId -> {
-            assertThat(result.intermediateIdMap().toMappedNodeId(mappedId)).isEqualTo(mappedId);
-            return true;
-        });
     }
 
     @Test
