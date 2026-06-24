@@ -49,12 +49,16 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Boolean> usePooledLocalNodesBuilder,
-        Optional<String> innerIdMapBuilderType,
         PropertyState propertyState
     ) {
         this.intermediateIdMapBuilder = ShardedLongLongMap.builder(concurrency);
         this.nodesBuilder = GraphFactory.initNodesBuilder()
-            .idMapBuilderType(innerIdMapBuilderType)
+            // The inner builder's label/property output is keyed by its inner mapped id, while
+            // the final ShardedIdMap exposes the intermediate id as the mapped id. Only an
+            // identity inner builder keeps those two id spaces aligned; a reordering builder
+            // (e.g. the array-based default under concurrency) would mis-attribute labels and
+            // properties to the wrong nodes.
+            .idMapBuilderType(IdentityIdMap.Builder.ID)
             .concurrency(concurrency)
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(hasProperties)
@@ -129,8 +133,9 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         var nodes = this.nodesBuilder.build();
         var intermediateIdMap = this.intermediateIdMapBuilder.build();
 
-        // The label information is indexed against intermediate ids (0..size-1). ShardedIdMap
-        // uses those same ids as its mapped ids. Guard that the invariant holds before proceeding.
+        // The inner builder is forced to identity (see constructor), so its mapped ids equal the
+        // intermediate ids that ShardedIdMap exposes and label/property keying lines up. Guard the
+        // invariant defensively in case that ever changes.
         if (nodes.idMap().nodeCount() != intermediateIdMap.size()) {
             throw new IllegalStateException(
                 "ShardedIdMap requires inner mapped ids to equal intermediate ids: " +

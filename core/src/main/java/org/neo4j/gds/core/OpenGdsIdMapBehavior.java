@@ -23,6 +23,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.GrowingArrayIdMapBuilder;
+import org.neo4j.gds.core.loading.IdentityIdMap;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ShardedIdMapBuilder;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -53,6 +54,9 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
         var idLowerCase = id.toLowerCase(Locale.US);
         if (idLowerCase.equals(ArrayIdMapBuilder.ID)) {
             return create(concurrency, maxOriginalId, nodeCount);
+        }
+        if (idLowerCase.equals(IdentityIdMap.Builder.ID)) {
+            return new IdentityIdMap.Builder();
         }
         if (ShardedIdMapBuilder.isShardedIdMapType(idLowerCase)) {
             return ShardedIdMapBuilder.of(concurrency);

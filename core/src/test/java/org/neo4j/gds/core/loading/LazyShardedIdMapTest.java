@@ -20,15 +20,73 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 
+import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LazyShardedIdMapTest {
+
+    @Test
+    void labelInformationIsAttributedToCorrectNodesUnderConcurrency() throws Exception {
+        var builder = new LazyIdMapBuilderBuilder()
+            .concurrency(new Concurrency(4))
+            .hasLabelInformation(true)
+            .hasProperties(false)
+            .propertyState(PropertyState.PERSISTENT)
+            .build();
+
+        int nodeCount = 20_000;
+        var even = NodeLabel.of("Even");
+        var odd = NodeLabel.of("Odd");
+
+        // Add nodes concurrently so that the inner id-map builder's allocation order
+        // diverges from the intermediate id order. Each original id carries a label
+        // determined by its parity, so any mis-attribution is detectable per node.
+        var executor = Executors.newFixedThreadPool(4);
+        try {
+            var futures = new ArrayList<Future<?>>();
+            int chunk = nodeCount / 4;
+            for (int t = 0; t < 4; t++) {
+                long start = (long) t * chunk;
+                long end = (t == 3) ? nodeCount : start + chunk;
+                futures.add(executor.submit(() -> {
+                    for (long original = start; original < end; original++) {
+                        var label = (original % 2 == 0) ? "Even" : "Odd";
+                        builder.addNode(original, NodeLabelTokens.ofStrings(label));
+                    }
+                }));
+            }
+            for (var future : futures) {
+                future.get();
+            }
+        } finally {
+            executor.shutdown();
+        }
+
+        var idMap = builder.build().idMap();
+        assertThat(idMap.nodeCount()).isEqualTo(nodeCount);
+
+        for (long original = 0; original < nodeCount; original++) {
+            long mapped = idMap.toMappedNodeId(original);
+            var expected = (original % 2 == 0) ? even : odd;
+            var unexpected = (original % 2 == 0) ? odd : even;
+            assertThat(idMap.hasLabel(mapped, expected))
+                .as("original node %d (mapped %d) should have label %s", original, mapped, expected.name())
+                .isTrue();
+            assertThat(idMap.hasLabel(mapped, unexpected))
+                .as("original node %d (mapped %d) should not have label %s", original, mapped, unexpected.name())
+                .isFalse();
+        }
+    }
 
     @Test
     void lazyBuilderProducesShardedIdMap() {
