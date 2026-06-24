@@ -48,10 +48,6 @@ public final class ComposedIdMap implements IdMap {
         this.labelInformation = labelInformation;
     }
 
-    public NodeTranslator nodeTranslator() {
-        return this.nodeTranslator;
-    }
-
     // NodeTranslator
 
     @Override

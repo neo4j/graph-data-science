@@ -40,7 +40,6 @@ class ShardedIdMapBuilderTest {
         var idMap = builder.build(LabelInformationBuilders.allNodes(), nodes.length - 1, concurrency);
 
         assertThat(idMap).isInstanceOf(ComposedIdMap.class);
-        assertThat(((ComposedIdMap) idMap).nodeTranslator()).isInstanceOf(ShardedIdMap.class);
         assertThat(idMap.typeId()).isEqualTo("sharded");
         assertThat(idMap.nodeCount()).isEqualTo(10);
         assertThat(idMap.toMappedNodeId(offset)).isGreaterThanOrEqualTo(0);

@@ -105,7 +105,6 @@ class LazyShardedIdMapTest {
         var idMap = result.idMap();
 
         assertThat(idMap).isInstanceOf(ComposedIdMap.class);
-        assertThat(((ComposedIdMap) idMap).nodeTranslator()).isInstanceOf(ShardedIdMap.class);
         assertThat(idMap.typeId()).isEqualTo("sharded");
         assertThat(idMap.nodeCount()).isEqualTo(3);
         assertThat(idMap.toOriginalNodeId(idMap.toMappedNodeId(2000))).isEqualTo(2000);
