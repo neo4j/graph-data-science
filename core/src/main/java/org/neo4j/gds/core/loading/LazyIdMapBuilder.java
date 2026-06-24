@@ -144,26 +144,16 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             );
         }
 
-        var labelInformation = ((ComposedIdMap) nodes.idMap()).labelInformation();
+        var innerIdMap = nodes.idMap();
+        var labelInformation = innerIdMap.labelInformation();
         var idMap = ComposedIdMap.of(new ShardedIdMap(intermediateIdMap), labelInformation);
-
-        // The intermediate (dense) id equals the mapped id, so this id map is the identity.
-        // It is consumed by node-property finalization (arrow) and relationship value mapping.
-        var partialIdMap = new PartialIdMap() {
-            @Override
-            public long toMappedNodeId(long intermediateId) {
-                return intermediateId;
-            }
-
-            @Override
-            public OptionalLong rootNodeCount() {
-                return OptionalLong.of(intermediateIdMap.size());
-            }
-        };
 
         return new ShardedIdMapAndProperties(
             idMap,
-            partialIdMap,
+            // The inner builder is forced to identity (see constructor), so the inner id map maps
+            // the dense intermediate ids to themselves: exactly the identity intermediate -> mapped
+            // id translation that node-property finalization and relationship value mapping require.
+            innerIdMap,
             nodes.schema(),
             nodes.properties()
         );
