@@ -19,17 +19,18 @@
  */
 package org.neo4j.gds.core.huge;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.collections.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
@@ -108,7 +109,9 @@ public class DirectIdMap implements IdMap {
 
     @Override
     public LabelInformation labelInformation() {
-        return LabelInformationBuilders.allNodes().build(nodeCount, operand -> operand);
+        // DirectIdMap carries no label information; report an empty view that
+        // agrees with availableNodeLabels()/nodeLabels()/hasLabel() below.
+        return EmptyLabelInformation.INSTANCE;
     }
 
     @Override
@@ -150,5 +153,100 @@ public class DirectIdMap implements IdMap {
 
     public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
         throw new UnsupportedOperationException("Assigning Node labels to nodes is not supported");
+    }
+
+    /**
+     * Label information for an id map that carries no labels. Read queries report
+     * "no labels"; mutating or transforming the label information is unsupported.
+     */
+    private enum EmptyLabelInformation implements LabelInformation {
+        INSTANCE;
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public void forEach(LabelInformationConsumer consumer) {
+        }
+
+        @Override
+        public LabelInformation filter(Collection<NodeLabel> nodeLabels) {
+            return this;
+        }
+
+        @Override
+        public BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount) {
+            return new BitSet(nodeCount);
+        }
+
+        @Override
+        public BitSet bitSetForLabel(NodeLabel nodeLabel) {
+            return new BitSet();
+        }
+
+        @Override
+        public long nodeCountForLabel(NodeLabel nodeLabel) {
+            return 0L;
+        }
+
+        @Override
+        public boolean hasLabel(long nodeId, NodeLabel nodeLabel) {
+            return false;
+        }
+
+        @Override
+        public Set<NodeLabel> availableNodeLabels() {
+            return Set.of();
+        }
+
+        @Override
+        public List<NodeLabel> nodeLabelsForNodeId(long nodeId) {
+            return List.of();
+        }
+
+        @Override
+        public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+        }
+
+        @Override
+        public void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels) {
+        }
+
+        @Override
+        public PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels, long nodeCount) {
+            return new PrimitiveIterator.OfLong() {
+                @Override
+                public boolean hasNext() {
+                    return false;
+                }
+
+                @Override
+                public long nextLong() {
+                    throw new NoSuchElementException();
+                }
+            };
+        }
+
+        @Override
+        public void addLabel(NodeLabel nodeLabel) {
+            throw new UnsupportedOperationException("Adding labels is not supported");
+        }
+
+        @Override
+        public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
+            throw new UnsupportedOperationException("Adding node id to label is not supported");
+        }
+
+        @Override
+        public boolean isSingleLabel() {
+            return false;
+        }
+
+        @Override
+        public LabelInformation toMultiLabel(NodeLabel nodeLabelToMutate) {
+            throw new UnsupportedOperationException("Mutating empty label information is not supported");
+        }
     }
 }
