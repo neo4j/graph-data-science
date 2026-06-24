@@ -122,6 +122,8 @@ public class ArrayIdMap implements FilterableNodeTranslator {
             filteredToRoot.set(cursor++, rootMappedId);
         }
 
+        // The root mapped space this translator keys on is dense 0..nodeCount-1,
+        // so its highest original id is the highest root mapped id.
         long highestRootMappedId = nodeCount - 1;
 
         HugeSparseLongArray rootToFiltered = ArrayIdMapBuilderOps.buildSparseIdMap(
@@ -135,7 +137,7 @@ public class ArrayIdMap implements FilterableNodeTranslator {
             filteredToRoot,
             rootToFiltered,
             filteredNodeCount,
-            highestNeoId
+            highestRootMappedId
         );
     }
 }
