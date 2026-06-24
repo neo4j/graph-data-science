@@ -22,7 +22,7 @@ package org.neo4j.gds.config;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 
 import java.util.List;
 
