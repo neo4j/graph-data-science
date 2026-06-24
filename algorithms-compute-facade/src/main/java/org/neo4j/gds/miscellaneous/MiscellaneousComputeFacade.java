@@ -20,6 +20,7 @@
 package org.neo4j.gds.miscellaneous;
 
 import org.neo4j.gds.MiscellaneousAlgorithmsTasks;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
@@ -28,6 +29,8 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.ProgressTrackerFactory;
+import org.neo4j.gds.indexInverse.InverseRelationships;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
@@ -35,6 +38,7 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.walking.CollapsePath;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class MiscellaneousComputeFacade {
@@ -75,6 +79,38 @@ public class MiscellaneousComputeFacade {
 
         return algorithmCaller.run(
             collapsePath::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<Map<RelationshipType, SingleTypeRelationships>>> indexInverse(
+        GraphStore graphStore,
+        InverseRelationshipsParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+
+        if (graphStore.nodeCount() == 0) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Map.of()));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            MiscellaneousAlgorithmsTasks.inverseIndex(graphStore.nodeCount(), parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var inverseRelationships = new InverseRelationships(
+            graphStore,
+            parameters,
+            progressTracker,
+            DefaultPool.INSTANCE,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            inverseRelationships::compute,
             jobId
         );
     }

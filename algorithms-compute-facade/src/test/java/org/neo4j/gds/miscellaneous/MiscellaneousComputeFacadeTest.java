@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
@@ -37,6 +38,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
 import org.neo4j.gds.scaling.ScalerFactory;
@@ -111,6 +113,24 @@ class MiscellaneousComputeFacadeTest {
         var result = results.result();
         assertThat(result).isNotNull();
         assertThat(result.count()).isEqualTo(1);
+
+    }
+
+    @Test
+    void inverseIndex(){
+        var future = facade.indexInverse(
+            graphStore,
+            new InverseRelationshipsParameters(
+                new Concurrency(1),
+                Set.of(RelationshipType.of("REL"))
+            ),
+            jobIdMock,
+            false
+        );
+        var results = future.join();
+        var result = results.result();
+        assertThat(result).isNotNull();
+        assertThat(result).containsKey(RelationshipType.of("REL"));
 
     }
 
