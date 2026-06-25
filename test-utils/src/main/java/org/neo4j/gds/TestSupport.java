@@ -49,9 +49,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
-import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -448,18 +446,5 @@ public final class TestSupport {
         Arrays.stream(originalIds).forEach(builder::addNode);
 
         return builder.build().idMap();
-    }
-
-    public static class OffsetIdSupplier implements LongSupplier {
-        private final AtomicLong offset;
-
-        public OffsetIdSupplier(long offset) {
-            this.offset = new AtomicLong(offset);
-        }
-
-        @Override
-        public long getAsLong() {
-            return offset.getAndIncrement();
-        }
     }
 }
