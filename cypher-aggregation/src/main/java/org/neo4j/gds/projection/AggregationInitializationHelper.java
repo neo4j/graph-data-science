@@ -24,7 +24,7 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.database.DatabaseReferenceImpl;
 import org.neo4j.kernel.database.DatabaseReferenceRepository;
-import org.neo4j.kernel.impl.api.KernelTransactions;
+import org.neo4j.kernel.impl.api.TransactionRegistry;
 
 public final class AggregationInitializationHelper {
 
@@ -47,8 +47,8 @@ public final class AggregationInitializationHelper {
         if (runsOnCompositeDatabase) {
             queryProvider = ExecutingQueryProvider.empty();
         } else {
-            assert GraphDatabaseApiProxy.containsDependency(databaseService, KernelTransactions.class);
-            var ktxs = GraphDatabaseApiProxy.resolveDependency(databaseService, KernelTransactions.class);
+            assert GraphDatabaseApiProxy.containsDependency(databaseService, TransactionRegistry.class);
+            var ktxs = GraphDatabaseApiProxy.resolveDependency(databaseService, TransactionRegistry.class);
             queryProvider = ExecutingQueryProvider.fromTransaction(ktxs, transaction);
         }
 

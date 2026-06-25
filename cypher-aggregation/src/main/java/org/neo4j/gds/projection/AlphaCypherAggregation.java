@@ -36,7 +36,7 @@ import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.database.DatabaseReferenceImpl;
 import org.neo4j.kernel.database.DatabaseReferenceRepository;
-import org.neo4j.kernel.impl.api.KernelTransactions;
+import org.neo4j.kernel.impl.api.TransactionRegistry;
 import org.neo4j.procedure.Name;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.TextValue;
@@ -92,7 +92,7 @@ public class AlphaCypherAggregation implements CallableUserAggregationFunction {
         var metrics = GraphDatabaseApiProxy.lookupComponentProvider(ctx, Metrics.class, true);
         var username = ctx.kernelTransaction().securityContext().subject().executingUser();
         var transaction = ctx.transaction();
-        var ktxs = GraphDatabaseApiProxy.resolveDependency(databaseService, KernelTransactions.class);
+        var ktxs = GraphDatabaseApiProxy.resolveDependency(databaseService, TransactionRegistry.class);
         var queryProvider = ExecutingQueryProvider.fromTransaction(ktxs, transaction);
 
         var databaseId = GraphDatabaseApiProxy.databaseId(databaseService);

@@ -21,7 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.api.KernelTransactions;
+import org.neo4j.kernel.impl.api.TransactionRegistry;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Optional;
@@ -29,7 +29,7 @@ import java.util.Optional;
 public interface ExecutingQueryProvider {
     Optional<String> executingQuery();
 
-    static ExecutingQueryProvider fromTransaction(KernelTransactions ktxs, Transaction transaction) {
+    static ExecutingQueryProvider fromTransaction(TransactionRegistry ktxs, Transaction transaction) {
         return new TxQuery(ktxs, transaction);
     }
 
@@ -40,10 +40,10 @@ public interface ExecutingQueryProvider {
 
 
 final class TxQuery implements ExecutingQueryProvider {
-    private final KernelTransactions ktxs;
+    private final TransactionRegistry ktxs;
     private final Transaction transaction;
 
-    TxQuery(KernelTransactions ktxs, Transaction transaction) {
+    TxQuery(TransactionRegistry ktxs, Transaction transaction) {
         this.ktxs = ktxs;
         this.transaction = transaction;
     }

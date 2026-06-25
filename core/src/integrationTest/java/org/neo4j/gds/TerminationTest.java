@@ -26,7 +26,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.graphdb.TransactionFailureException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.query.ExecutingQuery;
-import org.neo4j.kernel.impl.api.KernelTransactions;
+import org.neo4j.kernel.impl.api.TransactionRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,12 +46,12 @@ class TerminationTest extends BaseProcTest {
 
     public static final String QUERY = "CALL test.testProc()";
 
-    private KernelTransactions kernelTransactions;
+    private TransactionRegistry kernelTransactions;
 
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(TerminateProcedure.class);
-        kernelTransactions = resolveDependency(KernelTransactions.class);
+        kernelTransactions = resolveDependency(TransactionRegistry.class);
     }
 
     // terminate a transaction by its id
