@@ -20,7 +20,9 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.extension.IdFunction;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -43,22 +45,43 @@ public final class CommunityHelper {
         }
     }
 
-    public static void assertCommunities(HugeLongArray communityData, long[]... communities) {
-        assertCommunities(communityData.toArray(), communities);
-    }
-
     /**
      * Helper method that checks if the result of a community algorithm has the expected communities.
      * It only tests if members are in the same or different communities, given the input and
      * disregards specific community values.
      *
-     * @param actual   The output of a community detection algorithm.
-     * @param expected The expected membership of communities. Elements within an array are
-     *                 expected to be in the same community, whereas all elements of different
-     *                 arrays are expected to be in different communities.
+     * @param idFunction Lookup function for a node id from a variable name
+     * @param actual     The output of a community detection algorithm.
+     * @param expected   The expected membership of communities. Elements within an array are
+     *                   expected to be in the same community, whereas all elements of different
+     *                   arrays are expected to be in different communities.
      */
+    public static void assertCommunities(IdFunction idFunction, long[] actual, String[]... expected) {
+        List<Long> actualList = Arrays.stream(actual).boxed().toList();
+        List<List<Long>> expectedList = new ArrayList<>();
+        for (var communityVariables : expected ) {
+            List<Long> expectedCommunity = new ArrayList<>(communityVariables.length);
+            for (var variable : communityVariables) {
+                expectedCommunity.add(idFunction.of(variable));
+            }
+            expectedList.add(expectedCommunity);
+        }
+
+        assertCommunities(actualList, expectedList);
+    }
+
+    /**
+         * Helper method that checks if the result of a community algorithm has the expected communities.
+         * It only tests if members are in the same or different communities, given the input and
+         * disregards specific community values.
+         *
+         * @param actual   The output of a community detection algorithm.
+         * @param expected The expected membership of communities. Elements within an array are
+         *                 expected to be in the same community, whereas all elements of different
+         *                 arrays are expected to be in different communities.
+         */
     public static void assertCommunities(long[] actual, long[]... expected) {
-        List<Long> actualList = Arrays.stream(actual).boxed().collect(toList());
+        List<Long> actualList = Arrays.stream(actual).boxed().toList();
         List<List<Long>> expectedList = Arrays.stream(expected).map(
             a -> Arrays.stream(a).boxed().collect(toList())
         ).collect(toList());

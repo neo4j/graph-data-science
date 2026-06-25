@@ -51,7 +51,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
@@ -103,8 +102,8 @@ class ModularityOptimizationTest {
         assertEquals(0.12244, pmo.modularity(), 0.001);
         CommunityHelper.assertCommunities(
             getCommunityIds(graph.nodeCount(), pmo),
-            ids(mappedId, "a", "b", "c", "e"),
-            ids(mappedId, "d", "f")
+            mappedId.of("a", "b", "c", "e"),
+            mappedId.of("d", "f")
         );
         assertTrue(pmo.ranIterations() <= 3);
     }
@@ -113,11 +112,12 @@ class ModularityOptimizationTest {
     void testWeighted() {
         var pmo = compute(graph, 3, null, new Concurrency(3), 2);
 
+        IdFunction idFunction = graph::toMappedNodeId;
         assertEquals(0.4985, pmo.modularity(), 0.001);
         CommunityHelper.assertCommunities(
             getCommunityIds(graph.nodeCount(), pmo),
-            ids(graph::toMappedNodeId, "a", "e", "f"),
-            ids(graph::toMappedNodeId, "b", "c", "d")
+            idFunction.of("a", "e", "f"),
+            idFunction.of("b", "c", "d")
         );
         assertTrue(pmo.ranIterations() <= 3);
     }
@@ -135,7 +135,7 @@ class ModularityOptimizationTest {
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.modularity(), 0.001);
-        CommunityHelper.assertCommunities(actualCommunities, ids(mappedId, EXPECTED_SEED_COMMUNITIES));
+        CommunityHelper.assertCommunities(mappedId, actualCommunities, EXPECTED_SEED_COMMUNITIES);
         assertThat(actualCommunities).containsExactlyInAnyOrder(43, 42, 33, 43, 42, 33);
         assertTrue(pmo.ranIterations() <= 3);
     }
@@ -153,7 +153,7 @@ class ModularityOptimizationTest {
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.modularity(), 0.001);
-        CommunityHelper.assertCommunities(actualCommunities, ids(mappedId, EXPECTED_SEED_COMMUNITIES));
+        CommunityHelper.assertCommunities(mappedId, actualCommunities, EXPECTED_SEED_COMMUNITIES);
         assertTrue(actualCommunities[0] == 4 && actualCommunities[2] == 2 || actualCommunities[3] == 3);
         assertTrue(pmo.ranIterations() <= 3);
     }

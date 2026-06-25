@@ -35,7 +35,6 @@ import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminatedException;
@@ -92,14 +91,6 @@ public final class TestSupport {
                 leftObjects.addAll(new ArrayList<>(Arrays.asList(rightArgs.get())));
                 return Arguments.of(leftObjects.toArray());
             }));
-    }
-
-    public static long[][] ids(IdFunction idFunction, String[][] variables) {
-        return Arrays.stream(variables).map(vs -> ids(idFunction, vs)).toArray(long[][]::new);
-    }
-
-    public static long[] ids(IdFunction idFunction, String... variables) {
-        return Arrays.stream(variables).mapToLong(idFunction::of).toArray();
     }
 
     public static void assertLongValues(TestGraph graph, Function<Long, Long> actualValues, Map<String, Long> expectedValues) {

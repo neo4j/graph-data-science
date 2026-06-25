@@ -38,7 +38,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
-import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 @GdlExtension
@@ -121,7 +120,7 @@ class WccThresholdTest {
             return true;
         });
 
-        CommunityHelper.assertCommunities(communityData, ids(graph::toMappedNodeId, expectedComponents));
+        CommunityHelper.assertCommunities(graph::toMappedNodeId, communityData, expectedComponents);
     }
 
     static Stream<Arguments> thresholdParams() {

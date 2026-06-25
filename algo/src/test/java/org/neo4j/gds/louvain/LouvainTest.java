@@ -54,7 +54,6 @@ import java.util.function.LongUnaryOperator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
@@ -144,18 +143,18 @@ class LouvainTest {
         final double[] modularities = result.modularities();
 
         CommunityHelper.assertCommunities(
-            dendrogram[0],
-            ids(mappedId, "a", "b", "d"),
-            ids(mappedId, "c", "e", "f", "x"),
-            ids(mappedId, "g", "h", "i"),
-            ids(mappedId, "j", "k", "l", "m", "n")
+            dendrogram[0].toArray(),
+            mappedId.of("a", "b", "d"),
+            mappedId.of("c", "e", "f", "x"),
+            mappedId.of("g", "h", "i"),
+            mappedId.of("j", "k", "l", "m", "n")
         );
 
         CommunityHelper.assertCommunities(
-            dendrogram[1],
-            ids(mappedId, "a", "b", "c", "d", "e", "f", "x"),
-            ids(mappedId, "g", "h", "i"),
-            ids(mappedId, "j", "k", "l", "m", "n")
+            dendrogram[1].toArray(),
+            mappedId.of("a", "b", "c", "d", "e", "f", "x"),
+            mappedId.of("g", "h", "i"),
+            mappedId.of("j", "k", "l", "m", "n")
         );
 
         assertEquals(2, result.ranLevels());
@@ -191,18 +190,18 @@ class LouvainTest {
         final double[] modularities = result.modularities();
 
         CommunityHelper.assertCommunities(
-            dendrogram[0],
-            ids(mappedId, "a", "b", "d"),
-            ids(mappedId, "c", "e", "x"),
-            ids(mappedId, "f", "g"),
-            ids(mappedId, "h", "i"),
-            ids(mappedId, "j", "k", "l", "m", "n")
+            dendrogram[0].toArray(),
+            mappedId.of("a", "b", "d"),
+            mappedId.of("c", "e", "x"),
+            mappedId.of("f", "g"),
+            mappedId.of("h", "i"),
+            mappedId.of("j", "k", "l", "m", "n")
         );
 
         CommunityHelper.assertCommunities(
-            dendrogram[1],
-            ids(mappedId, "a", "b", "c", "d", "e", "f", "g", "x"),
-            ids(mappedId, "h", "i", "j", "k", "l", "m", "n")
+            dendrogram[1].toArray(),
+            mappedId.of("a", "b", "c", "d", "e", "f", "g", "x"),
+            mappedId.of("h", "i", "j", "k", "l", "m", "n")
         );
 
         assertEquals(2, result.ranLevels());
@@ -238,9 +237,9 @@ class LouvainTest {
         final double[] modularities = result.modularities();
 
         var expectedCommunitiesWithLabels = Map.of(
-            1L, ids(mappedId, "a", "b", "c", "d", "e", "f", "x"),
-            2L, ids(mappedId, "g", "h", "i"),
-            42L, ids(mappedId, "j", "k", "l", "m", "n")
+            1L, mappedId.of("a", "b", "c", "d", "e", "f", "x"),
+            2L, mappedId.of("g", "h", "i"),
+            42L, mappedId.of("j", "k", "l", "m", "n")
         );
 
         CommunityHelper.assertCommunitiesWithLabels(
