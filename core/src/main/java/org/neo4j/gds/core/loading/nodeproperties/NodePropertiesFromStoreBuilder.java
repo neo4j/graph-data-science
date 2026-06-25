@@ -97,7 +97,7 @@ public final class NodePropertiesFromStoreBuilder {
             // Imported property values are associated with the intermediate (dense) node ids.
             // ShardedIdMap: the dense intermediate id equals the mapped id, so resolution is
             // identity. Its own toMappedNodeId is an external->mapped lookup and must not be used.
-            ? (mappedNodeId -> mappedNodeId)
+            ? ToMappedNodeId.IDENTITY
             : idMap::toMappedNodeId;
 
         return innerBuilder.get().build(idMap.nodeCount(), toMappedNodeId, idMap.highestOriginalId());

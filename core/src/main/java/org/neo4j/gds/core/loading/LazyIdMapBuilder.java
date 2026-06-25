@@ -132,7 +132,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         // the dense intermediate ids to themselves: exactly the identity intermediate -> mapped
         // id translation that node-property finalization and relationship value mapping require.
         public ToMappedNodeId toMappedNodeId() {
-            return id -> id;
+            return ToMappedNodeId.IDENTITY;
         }
     }
 

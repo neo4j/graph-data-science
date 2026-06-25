@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading.nodeproperties;
 
-import org.jspecify.annotations.NonNull;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.ToMappedNodeId;
 import org.neo4j.gds.api.nodes.IdMap;
