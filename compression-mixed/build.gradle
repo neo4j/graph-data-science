@@ -19,7 +19,6 @@ dependencies {
     implementation project(':compression-packed')
     implementation project(':core-api')
     implementation project(':collections')
-    implementation project(':graph-projection-api')
     implementation project(':histogram')
     implementation project(':memory-access')
     implementation project(':memory-info')

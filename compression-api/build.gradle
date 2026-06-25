@@ -15,7 +15,6 @@ dependencies {
     implementation project(':annotations')
     implementation project(':core-api')
     implementation project(':core-utils')
-    implementation project(':graph-projection-api')
     implementation project(':histogram')
     implementation project(':memory-usage')
     implementation project(':collections')

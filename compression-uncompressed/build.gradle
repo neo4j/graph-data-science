@@ -18,7 +18,6 @@ dependencies {
     implementation project(':collections')
     implementation project(':concurrency')
     implementation project(':graph-dimensions')
-    implementation project(':graph-projection-api')
     implementation project(':memory-access')
     implementation project(':memory-info')
     implementation project(':memory-usage')

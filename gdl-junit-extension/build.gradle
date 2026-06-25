@@ -23,8 +23,6 @@ dependencies {
     implementation project(':core-test-utils')
 
     implementation project(':gdl-graph')
-    implementation project(':graph-projection-api')
-    implementation project(':graph-schema-api')
 
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic

@@ -30,7 +30,6 @@ dependencies {
         project(':concurrency'),
         project(':concurrency-validation-api'),
         project(':core-api'),
-        project(':graph-projection-api'),
         project(':string-formatting'),
     )
 

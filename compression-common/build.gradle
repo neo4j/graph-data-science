@@ -17,7 +17,6 @@ dependencies {
     implementation project(':core-utils')
     implementation project(':collections')
     implementation project(':core-api')
-    implementation project(':graph-projection-api')
     implementation project(':histogram')
     implementation project(':memory-access')
     implementation project(':memory-info')

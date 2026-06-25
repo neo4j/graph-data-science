@@ -32,7 +32,6 @@ dependencies {
     implementation project(':core')
     implementation project(':core-api')
     implementation project(':core-utils')
-    implementation project(':graph-projection-api')
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':neo4j-utility')
