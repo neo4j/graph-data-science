@@ -24,11 +24,12 @@ dependencies {
     // `ExportedRelationship` references `org.neo4j.values.storable.Value`
     compileOnly(neo4j.common) { transitive = false }
 
+    api project(':graph-schema-api')
+    api project(':graph-projection-api')
+
     implementation project(':annotations')
     implementation project(':collections')
     implementation project(':concurrency')
-    implementation project(':graph-projection-api')
-    implementation project(':graph-schema-api')
     implementation project(':memory-info')
     implementation project(':string-formatting')
 
