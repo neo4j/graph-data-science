@@ -60,11 +60,25 @@ public class FloatArrayNodePropertiesBuilder implements InnerNodePropertiesBuild
 
     @Override
     public FloatArrayNodePropertyValues build(long size, ToMappedNodeId toMappedNodeIdFn, long highestOriginalId) {
+        if (toMappedNodeIdFn == ToMappedNodeId.IDENTITY) {
+            // Values are already keyed by the internal id, so the source array can be reused
+            return buildWithoutMapping(size);
+        }
+        return buildWithMapping(size, toMappedNodeIdFn, highestOriginalId);
+    }
+
+    private FloatArrayStoreNodePropertyValues buildWithoutMapping(long size) {
+        return new FloatArrayStoreNodePropertyValues(builder.build(), size);
+    }
+
+    private FloatArrayStoreNodePropertyValues buildWithMapping(
+        long size,
+        ToMappedNodeId toMappedNodeIdFn,
+        long highestOriginalId
+    ) {
         var propertiesByNeoIds = builder.build();
 
-        var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.builder(
-            defaultValue
-        );
+        var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.builder(defaultValue);
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 

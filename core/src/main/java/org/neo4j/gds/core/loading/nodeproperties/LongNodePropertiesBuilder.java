@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading.nodeproperties;
 
+import org.jspecify.annotations.NonNull;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.ToMappedNodeId;
 import org.neo4j.gds.api.nodes.IdMap;
@@ -94,11 +95,27 @@ public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuild
 
     @Override
     public NodePropertyValues build(long size, ToMappedNodeId toMappedNodeIdFn, long highestOriginalId) {
+        if (toMappedNodeIdFn == ToMappedNodeId.IDENTITY) {
+            // Values are already keyed by the internal id, so the source array can be reused
+            return buildWithoutMapping(size);
+        }
+        return buildWithMapping(size, toMappedNodeIdFn, highestOriginalId);
+    }
+
+    private LongStoreNodePropertyValues buildWithoutMapping(long size) {
+        var propertyValues = builder.build();
+        var maybeMaxValue = getMaxValue(propertyValues);
+        return new LongStoreNodePropertyValues(propertyValues, size, maybeMaxValue);
+    }
+
+    private LongStoreNodePropertyValues buildWithMapping(
+        long size,
+        ToMappedNodeId toMappedNodeIdFn,
+        long highestOriginalId
+    ) {
         var propertiesByNeoIds = builder.build();
 
-        var propertiesByMappedIdsBuilder = HugeSparseLongArray.builder(
-            defaultValue
-        );
+        var propertiesByMappedIdsBuilder = HugeSparseLongArray.builder(defaultValue);
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 
@@ -129,11 +146,16 @@ public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuild
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
+        var maybeMaxValue = getMaxValue(propertyValues);
+
+        return new LongStoreNodePropertyValues(propertyValues, size, maybeMaxValue);
+    }
+
+    private @NonNull OptionalLong getMaxValue(HugeSparseLongArray propertyValues) {
         var maybeMaxValue = propertyValues.capacity() > 0
             ? OptionalLong.of((long) MAX_VALUE.getVolatile(LongNodePropertiesBuilder.this))
             : OptionalLong.empty();
-
-        return new LongStoreNodePropertyValues(propertyValues, size, maybeMaxValue);
+        return maybeMaxValue;
     }
 
     private void updateMaxValue(long value) {

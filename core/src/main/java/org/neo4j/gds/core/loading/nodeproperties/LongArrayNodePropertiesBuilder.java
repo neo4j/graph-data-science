@@ -60,11 +60,25 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
 
     @Override
     public LongArrayNodePropertyValues build(long size, ToMappedNodeId toMappedNodeIdFn, long highestOriginalId) {
+        if (toMappedNodeIdFn == ToMappedNodeId.IDENTITY) {
+            // Values are already keyed by the internal id, so the source array can be reused
+            return buildWithoutMapping(size);
+        }
+        return buildWithMapping(size, toMappedNodeIdFn, highestOriginalId);
+    }
+
+    private LongArrayStoreNodePropertyValues buildWithoutMapping(long size) {
+        return new LongArrayStoreNodePropertyValues(builder.build(), size);
+    }
+
+    private LongArrayStoreNodePropertyValues buildWithMapping(
+        long size,
+        ToMappedNodeId toMappedNodeIdFn,
+        long highestOriginalId
+    ) {
         var propertiesByNeoIds = builder.build();
 
-        var propertiesByMappedIdsBuilder = HugeSparseLongArrayArray.builder(
-            defaultValue
-        );
+        var propertiesByMappedIdsBuilder = HugeSparseLongArrayArray.builder(defaultValue);
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 

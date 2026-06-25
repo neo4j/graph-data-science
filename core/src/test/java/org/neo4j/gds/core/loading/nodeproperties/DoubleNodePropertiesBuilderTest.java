@@ -25,46 +25,17 @@ import org.neo4j.gds.api.ToMappedNodeId;
 import org.neo4j.gds.config.ConcurrencyConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.idMap;
 
-public class LongNodePropertiesBuilderTest {
-
-    @Test
-    void singleLabelAssignmentWithNonDirectMapping() {
-        int nodeCount = 10;
-        var defaultValue = DefaultValue.of(10L);
-
-        var originalIds = new long[nodeCount];
-        for (int i = 0; i < nodeCount; i++) {
-            originalIds[i] = i * 42L;
-        }
-
-        var idMap = idMap(originalIds);
-
-        var builder = LongNodePropertiesBuilder.of(
-            defaultValue,
-            ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY
-        );
-
-        for (int i = 0; i < nodeCount; i++) {
-            builder.set(originalIds[i], i * 1337L);
-        }
-
-        var longNodeProperties = builder.build(10, idMap::toMappedNodeId, idMap.highestOriginalId());
-
-        for (int i = 0; i < nodeCount; i++) {
-            assertThat(longNodeProperties.longValue(i)).isEqualTo(i * 1337L);
-        }
-    }
+class DoubleNodePropertiesBuilderTest {
 
     @Test
     void identityFastPathPreservesValuesMaxAndCount() {
         int nodeCount = 1000;
-        var builder = LongNodePropertiesBuilder.of(DefaultValue.of(10L), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
+        var builder = new DoubleNodePropertiesBuilder(DefaultValue.of(10.0), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
 
-        long expectedMax = Long.MIN_VALUE;
+        double expectedMax = Double.NEGATIVE_INFINITY;
         for (long i = 0; i < nodeCount; i++) {
-            long value = i * 7L;
+            double value = i * 7.0;
             builder.set(i, value);
             expectedMax = Math.max(expectedMax, value);
         }
@@ -72,10 +43,10 @@ public class LongNodePropertiesBuilderTest {
         var properties = builder.build(nodeCount, ToMappedNodeId.IDENTITY, nodeCount - 1);
 
         for (long i = 0; i < nodeCount; i++) {
-            assertThat(properties.longValue(i)).as("value at %d", i).isEqualTo(i * 7L);
+            assertThat(properties.doubleValue(i)).as("value at %d", i).isEqualTo(i * 7.0);
         }
         assertThat(properties.nodeCount()).isEqualTo(nodeCount);
-        assertThat(properties.getMaxLongPropertyValue()).hasValue(expectedMax);
+        assertThat(properties.getMaxDoublePropertyValue()).hasValue(expectedMax);
     }
 
     @Test
@@ -83,22 +54,22 @@ public class LongNodePropertiesBuilderTest {
         // The fast-path reuses the source array (the copy path would drop defaults), but
         // hasValue/contains is value-based (value != defaultValue), so an explicitly-set
         // default is observably absent on both paths — the fast-path leaks nothing.
-        var builder = LongNodePropertiesBuilder.of(DefaultValue.of(10L), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
-        builder.set(0, 10L);   // explicit default
-        builder.set(1, 42L);
+        var builder = new DoubleNodePropertiesBuilder(DefaultValue.of(10.0), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
+        builder.set(0, 10.0);   // explicit default
+        builder.set(1, 42.0);
 
         var properties = builder.build(2, ToMappedNodeId.IDENTITY, 1);
 
         assertThat(properties.hasValue(0)).isFalse();
-        assertThat(properties.longValue(0)).isEqualTo(10L);
+        assertThat(properties.doubleValue(0)).isEqualTo(10.0);
         assertThat(properties.hasValue(1)).isTrue();
-        assertThat(properties.longValue(1)).isEqualTo(42L);
+        assertThat(properties.doubleValue(1)).isEqualTo(42.0);
     }
 
     @Test
     void identityFastPathOnEmptyBuilderHasNoMax() {
-        var builder = LongNodePropertiesBuilder.of(DefaultValue.of(10L), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
+        var builder = new DoubleNodePropertiesBuilder(DefaultValue.of(10.0), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
         var properties = builder.build(0, ToMappedNodeId.IDENTITY, -1);
-        assertThat(properties.getMaxLongPropertyValue()).isEmpty();
+        assertThat(properties.getMaxDoublePropertyValue()).isEmpty();
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading.nodeproperties;
 
+import org.jspecify.annotations.NonNull;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.ToMappedNodeId;
 import org.neo4j.gds.api.nodes.IdMap;
@@ -68,9 +69,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
         this.defaultValue = defaultValue.doubleValue();
         this.concurrency = concurrency;
         this.maxValue = Double.NEGATIVE_INFINITY;
-        this.builder = HugeSparseDoubleArray.builder(
-            this.defaultValue
-        );
+        this.builder = HugeSparseDoubleArray.builder(this.defaultValue);
     }
 
     public void set(long neoNodeId, double value) {
@@ -86,11 +85,27 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
     @Override
     public DoubleNodePropertyValues build(long size, ToMappedNodeId toMappedNodeIdFn, long highestOriginalId) {
+        if (toMappedNodeIdFn == ToMappedNodeId.IDENTITY) {
+            // Values are already keyed by the internal id, so the source array can be reused
+            return buildWithoutMapping(size);
+        }
+        return buildWithMapping(size, toMappedNodeIdFn, highestOriginalId);
+    }
+
+    private DoubleStoreNodePropertyValues buildWithoutMapping(long size) {
+        var propertyValues = builder.build();
+        var maybeMaxValue = getMaxValue(propertyValues.capacity());
+        return new DoubleStoreNodePropertyValues(propertyValues, size, maybeMaxValue);
+    }
+
+    private DoubleStoreNodePropertyValues buildWithMapping(
+        long size,
+        ToMappedNodeId toMappedNodeIdFn,
+        long highestOriginalId
+    ) {
         var propertiesByNeoIds = builder.build();
 
-        var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.builder(
-            defaultValue
-        );
+        var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.builder(defaultValue);
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 
@@ -120,12 +135,14 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
         ParallelUtil.run(tasks, DefaultPool.INSTANCE);
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
+        var maybeMaxValue = getMaxValue(propertyValues.capacity());
+        return new DoubleStoreNodePropertyValues(propertyValues, size, maybeMaxValue);
+    }
 
-        var maybeMaxValue = propertyValues.capacity() > 0
+    private OptionalDouble getMaxValue(long capacity) {
+        return capacity > 0
             ? OptionalDouble.of((double) MAX_VALUE.getVolatile(DoubleNodePropertiesBuilder.this))
             : OptionalDouble.empty();
-
-        return new DoubleStoreNodePropertyValues(propertyValues, size, maybeMaxValue);
     }
 
     private void updateMaxValue(double value) {
