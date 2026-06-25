@@ -30,7 +30,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.GdlBuilder;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.Graph;
@@ -686,7 +685,7 @@ class PregelTest {
     }
 
     static Stream<Arguments> partitioningAndAsynchronous() {
-        return crossArguments(PregelTest::partitionings, TestSupport::trueFalseArguments);
+        return crossArguments(PregelTest::partitionings, () -> Stream.of(true, false).map(Arguments::of));
     }
 
     @ParameterizedTest

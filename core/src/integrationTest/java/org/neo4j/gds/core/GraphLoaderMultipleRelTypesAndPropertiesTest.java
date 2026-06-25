@@ -59,12 +59,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.GdlSupport.fromGdl;
 import static org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.NATIVE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.crossArguments;
-import static org.neo4j.gds.TestSupport.toArguments;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -206,11 +206,14 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     }
 
     static Stream<Arguments> deduplicateWithWeightsParams() {
-        return crossArguments(toArguments(GraphFactoryTestSupport::allFactoryTypes), () -> Stream.of(
-            Arguments.of(Aggregation.SUM, 1379.0),
-            Arguments.of(Aggregation.MAX, 1337.0),
-            Arguments.of(Aggregation.MIN, 42.0)
-        ));
+        return crossArguments(
+            () -> GraphFactoryTestSupport.allFactoryTypes().map(Arguments::arguments),
+            () -> Stream.of(
+                arguments(Aggregation.SUM, 1379.0),
+                arguments(Aggregation.MAX, 1337.0),
+                arguments(Aggregation.MIN, 42.0)
+            )
+        );
     }
 
     @ParameterizedTest
@@ -504,18 +507,18 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
     static Stream<Arguments> globalAndLocalAggregationsArguments() {
         return Stream.of(
-            Arguments.of(Aggregation.MAX, Aggregation.DEFAULT, Aggregation.DEFAULT, 44, 46, 1339, 1341),
-            Arguments.of(Aggregation.MIN, Aggregation.DEFAULT, Aggregation.MAX, 42, 45, 1339, 1341),
-            Arguments.of(Aggregation.MIN, Aggregation.MAX, Aggregation.SUM, 44, 46, 4014, 2681)
+            arguments(Aggregation.MAX, Aggregation.DEFAULT, Aggregation.DEFAULT, 44, 46, 1339, 1341),
+            arguments(Aggregation.MIN, Aggregation.DEFAULT, Aggregation.MAX, 42, 45, 1339, 1341),
+            arguments(Aggregation.MIN, Aggregation.MAX, Aggregation.SUM, 44, 46, 4014, 2681)
         );
     }
 
     static Stream<Arguments> localAggregationArguments() {
         return Stream.of(
-            Arguments.of(Aggregation.MIN, 42, 45, Aggregation.MAX, 1339, 1341),
-            Arguments.of(Aggregation.MAX, 44, 46, Aggregation.MIN, 1337, 1340),
-            Arguments.of(Aggregation.SUM, 129, 91, Aggregation.COUNT, 3, 2),
-            Arguments.of(Aggregation.COUNT, 3, 2, Aggregation.SUM, 4014, 2681)
+            arguments(Aggregation.MIN, 42, 45, Aggregation.MAX, 1339, 1341),
+            arguments(Aggregation.MAX, 44, 46, Aggregation.MIN, 1337, 1340),
+            arguments(Aggregation.SUM, 129, 91, Aggregation.COUNT, 3, 2),
+            arguments(Aggregation.COUNT, 3, 2, Aggregation.SUM, 4014, 2681)
         );
     }
 

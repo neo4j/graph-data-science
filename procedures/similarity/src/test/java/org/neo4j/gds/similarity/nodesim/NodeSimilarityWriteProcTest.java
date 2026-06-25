@@ -31,7 +31,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -84,6 +83,10 @@ class NodeSimilarityWriteProcTest extends BaseProcTest {
         ", (b)-[:LIKES]->(i2)" +
         ", (c)-[:LIKES]->(i3)";
 
+    static Stream<Orientation> allDirectedProjections() {
+        return Stream.of(Orientation.NATURAL, REVERSE);
+    }
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
@@ -91,7 +94,7 @@ class NodeSimilarityWriteProcTest extends BaseProcTest {
             GraphProjectProc.class
         );
 
-        TestSupport.allDirectedProjections().forEach(orientation -> {
+        allDirectedProjections().forEach(orientation -> {
             String name = "myGraph" + orientation.name();
             String createQuery = GdsCypher.call(name)
                 .graphProject()
@@ -111,7 +114,7 @@ class NodeSimilarityWriteProcTest extends BaseProcTest {
     }
 
     static Stream<Arguments> allValidGraphVariationsWithProjections() {
-        return TestSupport.allDirectedProjections().flatMap(orientation -> {
+        return allDirectedProjections().flatMap(orientation -> {
             String name = "myGraph" + orientation.name();
             return Stream.of(
                 arguments(

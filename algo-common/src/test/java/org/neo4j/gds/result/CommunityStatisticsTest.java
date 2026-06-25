@@ -39,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.TestSupport.toArguments;
 import static org.neo4j.gds.result.CommunityStatistics.communityStats;
 
 class CommunityStatisticsTest {
@@ -110,12 +109,8 @@ class CommunityStatisticsTest {
     private static Stream<Arguments> testInput() {
         return TestSupport.crossArguments(
             CommunityStatisticsTest::expectedResults,
-            toArguments(CommunityStatisticsTest::concurrencies)
+            () -> Stream.of(new Concurrency(1), new Concurrency(4)).map(Arguments::of)
         );
-    }
-
-    private static Stream<Concurrency> concurrencies() {
-        return Stream.of(new Concurrency(1), new Concurrency(4));
     }
 
     private static Stream<Arguments> expectedResults() {

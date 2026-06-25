@@ -45,9 +45,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.TestSupport.crossArguments;
-import static org.neo4j.gds.TestSupport.toArguments;
-import static org.neo4j.gds.TestSupport.toArgumentsFlat;
 
 @GdlExtension
 final class DegreeCentralityTest {
@@ -85,44 +84,45 @@ final class DegreeCentralityTest {
 
     private static Stream<Arguments> degreeCentralityParameters() {
         return crossArguments(
-            toArgumentsFlat(() ->
-                Stream.of(
-                    // Orientation NATURAL
-                    List.of(
-                        false,
-                        Orientation.NATURAL,
-                        Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D)
-                    ),
-                    List.of(
-                        true,
-                        Orientation.NATURAL,
-                        Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
-                    ),
-                    // Orientation REVERSE
-                    List.of(
-                        false,
-                        Orientation.REVERSE,
-                        Map.of("a", 1.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D)
-                    ),
-                    List.of(
-                        true,
-                        Orientation.REVERSE,
-                        Map.of("a", 2.0D, "b", 10.0D, "c", 2.0D, "d", 2.0D, "e", 0.0D, "f", 2.0D)
-                    ),
-                    // Orientation UNDIRECTED
-                    List.of(
-                        false,
-                        Orientation.UNDIRECTED,
-                        Map.of("a", 1.0D, "b", 5.0D, "c", 2.0D, "d", 3.0D, "e", 4.0D, "f", 3.0D)
-                    ),
-                    List.of(
-                        true,
-                        Orientation.UNDIRECTED,
-                        Map.of("a", 2.0D, "b", 12.0D, "c", 4.0D, "d", 6.0D, "e", 6.0D, "f", 6.0D)
-                    )
+            () -> Stream.of(
+                // Orientation NATURAL
+                arguments(
+                    false,
+                    Orientation.NATURAL,
+                    Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D)
+                ),
+                arguments(
+                    true,
+                    Orientation.NATURAL,
+                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
+                ),
+                // Orientation REVERSE
+                arguments(
+                    false,
+                    Orientation.REVERSE,
+                    Map.of("a", 1.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D)
+                ),
+                arguments(
+                    true,
+                    Orientation.REVERSE,
+                    Map.of("a", 2.0D, "b", 10.0D, "c", 2.0D, "d", 2.0D, "e", 0.0D, "f", 2.0D)
+                ),
+                // Orientation UNDIRECTED
+                arguments(
+                    false,
+                    Orientation.UNDIRECTED,
+                    Map.of("a", 1.0D, "b", 5.0D, "c", 2.0D, "d", 3.0D, "e", 4.0D, "f", 3.0D)
+                ),
+                arguments(
+                    true,
+                    Orientation.UNDIRECTED,
+                    Map.of("a", 2.0D, "b", 12.0D, "c", 4.0D, "d", 6.0D, "e", 6.0D, "f", 6.0D)
                 )
             ),
-            toArguments(() -> Stream.of(1, 4).map(Concurrency::new))
+            () -> Stream.of(
+                arguments(new Concurrency(1)),
+                arguments(new Concurrency(4))
+            )
         );
     }
 

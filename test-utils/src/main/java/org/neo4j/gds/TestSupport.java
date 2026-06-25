@@ -60,7 +60,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatNumber;
@@ -71,18 +70,6 @@ public final class TestSupport {
         System.getenv("TEAMCITY_VERSION") != null || System.getenv("CI") != null || System.getenv("BUILD_ID") != null;
 
     private TestSupport() {}
-
-    public static Stream<Orientation> allDirectedProjections() {
-        return Stream.of(Orientation.NATURAL, REVERSE);
-    }
-
-    public static <T> Supplier<Stream<Arguments>> toArguments(Supplier<Stream<T>> fn) {
-        return () -> fn.get().map(Arguments::of);
-    }
-
-    public static <T> Supplier<Stream<Arguments>> toArgumentsFlat(Supplier<Stream<List<T>>> fn) {
-        return () -> fn.get().map(List::toArray).map(Arguments::of);
-    }
 
     @SafeVarargs
     public static Stream<Arguments> crossArguments(
@@ -105,17 +92,6 @@ public final class TestSupport {
                 leftObjects.addAll(new ArrayList<>(Arrays.asList(rightArgs.get())));
                 return Arguments.of(leftObjects.toArray());
             }));
-    }
-
-    public static <Left, Right> Stream<Arguments> crossArgument(
-        Supplier<Stream<Left>> leftFn,
-        Supplier<Stream<Right>> rightFn
-    ) {
-        return leftFn.get().flatMap(leftArg -> rightFn.get().map(rightArg -> Arguments.of(leftArg, rightArg)));
-    }
-
-    public static Stream<Arguments> trueFalseArguments() {
-        return Stream.of(true, false).map(Arguments::of);
     }
 
     public static long[][] ids(IdFunction idFunction, String[][] variables) {

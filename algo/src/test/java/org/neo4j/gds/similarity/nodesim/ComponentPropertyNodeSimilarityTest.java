@@ -45,7 +45,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.TestSupport.crossArguments;
-import static org.neo4j.gds.TestSupport.toArguments;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -127,7 +126,7 @@ public class ComponentPropertyNodeSimilarityTest {
             arguments(NATURAL),
             arguments(REVERSE)
         );
-        return crossArguments(() -> directions, toArguments(ComponentPropertyNodeSimilarityTest::concurrencies));
+        return crossArguments(() -> directions, () -> ComponentPropertyNodeSimilarityTest.concurrencies().map(Arguments::arguments));
     }
 
 

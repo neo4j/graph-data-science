@@ -28,7 +28,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTrackerHelper;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -58,7 +57,6 @@ import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.crossArguments;
-import static org.neo4j.gds.TestSupport.toArguments;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -256,15 +254,7 @@ final class NodeSimilarityTest {
             arguments(NATURAL),
             arguments(REVERSE)
         );
-        return crossArguments(() -> directions, toArguments(NodeSimilarityTest::concurrencies));
-    }
-
-    static Stream<Arguments> topKAndConcurrencies() {
-        Stream<Integer> topKStream = Stream.of(10, 100);
-        return TestSupport.crossArguments(
-            toArguments(() -> topKStream),
-            toArguments(NodeSimilarityTest::concurrencies)
-        );
+        return crossArguments(() -> directions, () -> NodeSimilarityTest.concurrencies().map(Arguments::arguments));
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
