@@ -197,6 +197,9 @@ project(':gdl-junit-extension').projectDir = file('gdl-junit-extension')
 include('gds-values')
 project(':gds-values').projectDir = file('gds-values')
 
+include('graph-api-test-utils')
+project(':graph-api-test-utils').projectDir = file('graph-api-test-utils')
+
 include('graph-catalog-facade-api')
 project(':graph-catalog-facade-api').projectDir = file('procedures/graph-catalog-facade-api')
 

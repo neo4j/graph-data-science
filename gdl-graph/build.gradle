@@ -17,9 +17,10 @@ dependencies {
     compileOnly openGds.jetbrains.annotations
     compileOnly(neo4j.values) { transitive = false }
 
+    api project(':core')
+
     implementation project(':annotations')
     implementation project(':config-api')
-    implementation project(':core')
     implementation project(':core-test-utils')
     implementation project(':gds-values')
     implementation project(':graph-schema-api')

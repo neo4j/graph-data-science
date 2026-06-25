@@ -16,6 +16,8 @@ dependencies {
     compileOnly openGds.immutables.builder
     compileOnly openGds.jetbrains.annotations
 
+    api project(':graph-api-test-utils')
+
     implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':compression-api')

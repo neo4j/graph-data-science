@@ -1,0 +1,20 @@
+plugins {
+    id 'buildlogic-gds-java'
+}
+
+description = 'Neo4j Graph Data Science :: Graph API Test Utils'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    api project(':core-api')
+    implementation project(':string-formatting')
+
+    testImplementation project(':gdl-graph')
+    testImplementation(
+        platform(openGds.junit.bom),
+        openGds.jqwik,
+        openGds.junit.pioneer,
+        openGds.junit.jupiter.engine,
+    )
+}
