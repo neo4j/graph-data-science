@@ -32,9 +32,7 @@ import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class BatchingProgressLogger implements ProgressLogger {
-    public static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
-
+class BatchingProgressLogger extends ProgressLoggerDefaults {
     private static final BatchSizeCalculator BatchSizeCalculator = new BatchSizeCalculator();
 
     private final CloseableThreadLocal<MutableLong> callCounter = CloseableThreadLocal.withInitial(MutableLong::new);

@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.progress.logging;
 
-/**
- * There are very few progress-logging methods that are used from outside this package.
- * Neat and manageable little interface.
- */
-public interface ProgressLogger {
-    void logProgress(long progress);
+public final class Constants {
+    /**
+     * Interestingly, this is referenced from outside the module, but not used inside the module :shrug:
+     */
+    public static final long MAXIMUM_LOG_INTERVAL = 8192;
 
-    long reset(long newTaskVolume);
-
-    void release();
+    private Constants() {}
 }
