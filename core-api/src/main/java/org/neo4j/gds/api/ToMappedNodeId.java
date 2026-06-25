@@ -26,5 +26,8 @@ package org.neo4j.gds.api;
  */
 @FunctionalInterface
 public interface ToMappedNodeId {
+
+    ToMappedNodeId IDENTITY = id -> id;
+
     long toMappedNodeId(long originalNodeId);
 }
