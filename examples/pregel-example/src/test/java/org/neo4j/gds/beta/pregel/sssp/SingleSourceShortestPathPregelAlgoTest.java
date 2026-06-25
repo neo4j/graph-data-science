@@ -33,7 +33,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
-import static org.neo4j.gds.TestSupport.assertLongValues;
+import static org.neo4j.gds.beta.pregel.TestSupport.assertLongValues;
 import static org.neo4j.gds.beta.pregel.sssp.SingleSourceShortestPathPregel.DISTANCE;
 
 @GdlExtension

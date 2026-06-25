@@ -32,7 +32,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 
-import static org.neo4j.gds.TestSupport.assertDoubleValues;
+import static org.neo4j.gds.beta.pregel.TestSupport.assertDoubleValues;
 import static org.neo4j.gds.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 
 @GdlExtension

@@ -22,7 +22,6 @@ package org.neo4j.gds.beta.pregel.cc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestGraph;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
@@ -37,6 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.beta.pregel.TestSupport.assertLongValues;
 import static org.neo4j.gds.beta.pregel.cc.ConnectedComponentsPregel.COMPONENT;
 import static org.neo4j.gds.core.ExceptionMessageMatcher.containsMessage;
 
@@ -108,7 +108,7 @@ class ConnectedComponentsPregelAlgoTest {
         expected.put("i", 0L);
         expected.put("j", 2L);
 
-        TestSupport.assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(COMPONENT, nodeId), expected);
+        assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(COMPONENT, nodeId), expected);
     }
 
     @Test

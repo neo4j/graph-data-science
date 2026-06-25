@@ -21,7 +21,6 @@ package org.neo4j.gds.beta.pregel.bfs;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestGraph;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
@@ -34,6 +33,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.beta.pregel.TestSupport.assertLongValues;
 
 @GdlExtension
 class BFSPregelAlgoTest {
@@ -133,7 +133,7 @@ class BFSPregelAlgoTest {
             "i", -1L
         );
 
-        TestSupport.assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(BFSLevelPregel.LEVEL,nodeId), expected);
+        assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(BFSLevelPregel.LEVEL,nodeId), expected);
     }
 
     @Test
@@ -170,7 +170,7 @@ class BFSPregelAlgoTest {
             "i", Long.MAX_VALUE
         );
 
-        TestSupport.assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(BFSParentPregel.PARENT,nodeId), expected);
+        assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(BFSParentPregel.PARENT,nodeId), expected);
     }
 
     @Test
@@ -209,6 +209,6 @@ class BFSPregelAlgoTest {
         assertTrue(result.didConverge(), "Algorithm did not converge.");
         assertEquals(3, result.ranIterations());
 
-        TestSupport.assertLongValues(parentGraph, (nodeId) -> result.nodeValues().longValue(BFSParentPregel.PARENT,nodeId), expected);
+        assertLongValues(parentGraph, (nodeId) -> result.nodeValues().longValue(BFSParentPregel.PARENT,nodeId), expected);
     }
 }
