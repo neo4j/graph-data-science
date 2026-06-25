@@ -95,6 +95,36 @@ public final class TaskProgressLogger extends ProgressLoggerDefaults {
         }
     }
 
+    @Override
+    public String getTask() {
+        return batchingProgressLogger.getTask();
+    }
+
+    @Override
+    public void setTask(String task) {
+        batchingProgressLogger.setTask(task);
+    }
+
+    @Override
+    public void logMessage(Supplier<String> msg) {
+        batchingProgressLogger.logMessage(msg);
+    }
+
+    @Override
+    public void logProgress(long progress) {
+        batchingProgressLogger.logProgress(progress, () -> null);
+    }
+
+    @Override
+    public long reset(long newTaskVolume) {
+        return batchingProgressLogger.reset(newTaskVolume);
+    }
+
+    @Override
+    public void release() {
+        batchingProgressLogger.release();
+    }
+
     private String boundedIterationsTaskName(
         IterativeTask iterativeTask,
         Task task
@@ -148,43 +178,13 @@ public final class TaskProgressLogger extends ProgressLoggerDefaults {
         task.visit(loggingLeafTaskVisitor);
     }
 
-    @Override
-    public String getTask() {
-        return batchingProgressLogger.getTask();
-    }
-
-    @Override
-    public void setTask(String task) {
-        batchingProgressLogger.setTask(task);
-    }
-
-    @Override
-    public void logProgress(Supplier<String> msgFactory) {
-        batchingProgressLogger.logProgress(msgFactory);
-    }
-
-    @Override
-    public void logProgress(long progress, Supplier<String> msgFactory) {
-        batchingProgressLogger.logProgress(progress, msgFactory);
-    }
-
-    @Override
-    public void logMessage(Supplier<String> msg) {
-        batchingProgressLogger.logMessage(msg);
-    }
-
-    @Override
-    public void logFinishPercentage() {
-        batchingProgressLogger.logFinishPercentage();
-    }
-
-    @Override
-    public long reset(long newTaskVolume) {
-        return batchingProgressLogger.reset(newTaskVolume);
-    }
-
-    @Override
-    public void release() {
-        batchingProgressLogger.release();
+    private void logFinishSubtaskWithFailure(String subTaskName) {
+        logFinishWithFailure();
+        var endIndex = getTask().indexOf(TASK_SEPARATOR + subTaskName);
+        if (endIndex == -1) {
+            throw new IllegalArgumentException("Unknown subtask: " + subTaskName);
+        }
+        var task = getTask().substring(0, endIndex);
+        setTask(task);
     }
 }

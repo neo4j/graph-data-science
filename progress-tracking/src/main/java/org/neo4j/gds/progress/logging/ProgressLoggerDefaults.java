@@ -28,15 +28,6 @@ import java.util.function.Supplier;
 abstract class ProgressLoggerDefaults implements ProgressLogger {
     String TASK_SEPARATOR = " :: ";
 
-    @Override
-    public void logProgress(long progress) {
-        logProgress(progress, () -> null);
-    }
-
-    abstract void logProgress(Supplier<String> msgFactory);
-
-    abstract void logProgress(long progress, Supplier<String> msgFactory);
-
     abstract String getTask();
 
     abstract void setTask(String task);
@@ -71,16 +62,6 @@ abstract class ProgressLoggerDefaults implements ProgressLogger {
         logMessage((message + TASK_SEPARATOR + "Failed").trim());
     }
 
-    final void logFinishSubtaskWithFailure(String subTaskName) {
-        logFinishWithFailure();
-        var endIndex = getTask().indexOf(TASK_SEPARATOR + subTaskName);
-        if (endIndex == -1) {
-            throw new IllegalArgumentException("Unknown subtask: " + subTaskName);
-        }
-        var task = getTask().substring(0, endIndex);
-        setTask(task);
-    }
-
     public final void startSubTask(String subTaskName) {
         setTask(getTask() + TASK_SEPARATOR + subTaskName);
         logStart();
@@ -95,6 +76,4 @@ abstract class ProgressLoggerDefaults implements ProgressLogger {
         var task = getTask().substring(0, endIndex);
         setTask(task);
     }
-
-    abstract void logFinishPercentage();
 }

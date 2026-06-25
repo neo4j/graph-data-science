@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class BatchingProgressLogger extends ProgressLoggerDefaults {
+class BatchingProgressLogger {
     private static final BatchSizeCalculator BatchSizeCalculator = new BatchSizeCalculator();
 
     private final CloseableThreadLocal<MutableLong> callCounter = CloseableThreadLocal.withInitial(MutableLong::new);
@@ -83,29 +83,15 @@ class BatchingProgressLogger extends ProgressLoggerDefaults {
         this.concurrency = concurrency;
     }
 
-    @Override
-    public String getTask() {
+    String getTask() {
         return taskName;
     }
 
-    @Override
-    public void setTask(String task) {
+    void setTask(String task) {
         this.taskName = task;
     }
 
-    @Override
-    public void logProgress(Supplier<String> msgFactory) {
-        var localProgress = callCounter.get();
-        if (localProgress.incrementAndGet() >= batchSize) {
-            doLogPercentage(msgFactory, 1);
-            localProgress.setValue(0L);
-        } else {
-            progressCounter.increment();
-        }
-    }
-
-    @Override
-    public void logProgress(long progress, Supplier<String> msgFactory) {
+    void logProgress(long progress, Supplier<String> msgFactory) {
         if (progress == 0) {
             return;
         }
@@ -118,16 +104,45 @@ class BatchingProgressLogger extends ProgressLoggerDefaults {
         }
     }
 
-    @Override
-    public void logFinishPercentage() {
+    void logFinishPercentage() {
         if (globalPercentage < 100) {
             logProgress(100);
         }
     }
 
-    @Override
-    public void release() {
+    void release() {
         callCounter.close();
+    }
+
+    void logMessage(Supplier<String> msg) {
+        logMessage(Objects.requireNonNull(msg.get()));
+    }
+
+    long reset(long newTaskVolume) {
+        var remainingVolume = taskVolume - progressCounter.sum();
+        this.taskVolume = newTaskVolume;
+        this.batchSize = BatchSizeCalculator.calculateBatchSize(newTaskVolume, concurrency);
+        progressCounter.reset();
+        globalPercentage = -1;
+        return remainingVolume;
+    }
+
+    private void logMessage(String msg) {
+        loggerForProgressTracking.info(
+            "[%s] [%s] %s %s",
+            requestCorrelationId.toString(),
+            Thread.currentThread().getName(),
+            taskName,
+            msg
+        );
+    }
+
+    private void logProgressWithMessage(int nextPercentage, String msg) {
+        logMessage(formatWithLocale("%d%% %s", nextPercentage, msg));
+    }
+
+    private void logProgress(int nextPercentage) {
+        logMessage(formatWithLocale("%d%%", nextPercentage));
     }
 
     private synchronized void doLogPercentage(Supplier<String> msgFactory, long progress) {
@@ -142,33 +157,5 @@ class BatchingProgressLogger extends ProgressLoggerDefaults {
                 logProgressWithMessage(nextPercentage, message);
             }
         }
-    }
-
-    private void logProgress(int nextPercentage) {
-        logMessage(formatWithLocale("%d%%", nextPercentage));
-    }
-
-    private void logProgressWithMessage(int nextPercentage, String msg) {
-        logMessage(formatWithLocale("%d%% %s", nextPercentage, msg));
-    }
-
-    @Override
-    public void logMessage(String msg) {
-        loggerForProgressTracking.info("[%s] [%s] %s %s", requestCorrelationId.toString(), Thread.currentThread().getName(), taskName, msg);
-    }
-
-    @Override
-    public void logMessage(Supplier<String> msg) {
-        logMessage(Objects.requireNonNull(msg.get()));
-    }
-
-    @Override
-    public long reset(long newTaskVolume) {
-        var remainingVolume = taskVolume - progressCounter.sum();
-        this.taskVolume = newTaskVolume;
-        this.batchSize = BatchSizeCalculator.calculateBatchSize(newTaskVolume, concurrency);
-        progressCounter.reset();
-        globalPercentage = -1;
-        return remainingVolume;
     }
 }

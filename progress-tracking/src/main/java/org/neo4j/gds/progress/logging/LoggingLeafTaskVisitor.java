@@ -28,14 +28,14 @@ final class LoggingLeafTaskVisitor implements TaskVisitor {
      * it is a compromise so that we do not expose this internal stuff outside this module.
      * Also, this design can be iterated on.
      */
-    private final ProgressLoggerDefaults progressLogger;
+    private final BatchingProgressLogger batchingProgressLogger;
 
-    LoggingLeafTaskVisitor(ProgressLoggerDefaults progressLogger) {
-        this.progressLogger = progressLogger;
+    LoggingLeafTaskVisitor(BatchingProgressLogger batchingProgressLogger) {
+        this.batchingProgressLogger = batchingProgressLogger;
     }
 
     @Override
     public void visitLeafTask(LeafTask leafTask) {
-        progressLogger.logFinishPercentage();
+        batchingProgressLogger.logFinishPercentage();
     }
 }

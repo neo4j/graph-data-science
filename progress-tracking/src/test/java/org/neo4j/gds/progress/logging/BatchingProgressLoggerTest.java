@@ -72,7 +72,7 @@ class BatchingProgressLoggerTest {
 
         for (int i = 0; i < taskVolume; i++) {
             int currentProgress = i;
-            logger.logProgress(() -> String.valueOf(currentProgress));
+            logger.logProgress(1, () -> String.valueOf(currentProgress));
         }
 
         var threadName = Thread.currentThread().getName();
@@ -105,7 +105,7 @@ class BatchingProgressLoggerTest {
         );
 
         for (int i = 0; i < taskVolume; i += progressStep) {
-            logger.logProgress(progressStep);
+            logger.logProgress(progressStep, () -> null);
         }
 
         var threadName = Thread.currentThread().getName();
@@ -162,12 +162,12 @@ class BatchingProgressLoggerTest {
             Tasks.leaf("Test", concurrency, taskVolume),
             concurrency); // batchSize is 13
         logger.reset(taskVolume);
-        logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
+        logger.logProgress(20, () -> null); // callCount is 20, call count after logging == 20 - 13 = 7
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactly("Test 1%");
         logger.reset(420); // batchSize is now 4, which is smaller than the callCount 7
-        logger.logProgress(10);
+        logger.logProgress(10, () -> null);
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactly("Test 1%", "Test 2%"); // regardless of previous callCount, this should log an additional message
@@ -195,7 +195,7 @@ class BatchingProgressLoggerTest {
             concurrency
         ), concurrency);
         testProgressLogger.reset(1);
-        testProgressLogger.logProgress(1);
+        testProgressLogger.logProgress(1, () -> null);
         testProgressLogger.logFinishPercentage();
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(Extractors.removingThreadId())
@@ -210,8 +210,8 @@ class BatchingProgressLoggerTest {
             concurrency
         ), concurrency);
         testProgressLogger.reset(1);
-        testProgressLogger.logProgress(1); // reaches 100 %
-        testProgressLogger.logProgress(1); // exceeds 100 %
+        testProgressLogger.logProgress(1, () -> null); // reaches 100 %
+        testProgressLogger.logProgress(1, () -> null); // exceeds 100 %
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(Extractors.removingThreadId())
             .containsExactly("Test 100%");
@@ -258,7 +258,7 @@ class BatchingProgressLoggerTest {
             .mapToObj(i -> (Runnable) () ->
                 IntStream.range(0, batchSize).forEach(ignore -> {
                     LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
-                    logger.logProgress(() -> null);
+                    logger.logProgress(1, () -> null);
                 }))
             .toList();
 
@@ -285,7 +285,7 @@ class BatchingProgressLoggerTest {
             new Concurrency(87)
         );
 
-        batchingProgressLogger.logMessage("Swiftly, and with style");
+        batchingProgressLogger.logMessage(() -> "Swiftly, and with style");
 
         verify(log).info("[%s] [%s] %s %s", "my request correlation id", "Test worker", "Monsieur Alfonse", "Swiftly, and with style");
     }
