@@ -23,9 +23,14 @@ import org.neo4j.gds.progress.tasks.LeafTask;
 import org.neo4j.gds.progress.tasks.TaskVisitor;
 
 final class LoggingLeafTaskVisitor implements TaskVisitor {
-    private final ProgressLogger progressLogger;
+    /**
+     * Not great having this type here, but,
+     * it is a compromise so that we do not expose this internal stuff outside this module.
+     * Also, this design can be iterated on.
+     */
+    private final ProgressLoggerDefaults progressLogger;
 
-    LoggingLeafTaskVisitor(ProgressLogger progressLogger) {
+    LoggingLeafTaskVisitor(ProgressLoggerDefaults progressLogger) {
         this.progressLogger = progressLogger;
     }
 

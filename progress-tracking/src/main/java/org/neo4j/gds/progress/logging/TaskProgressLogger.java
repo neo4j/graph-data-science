@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class TaskProgressLogger implements ProgressLogger {
+public final class TaskProgressLogger extends ProgressLoggerDefaults {
     private final BatchingProgressLogger batchingProgressLogger;
     private final Task baseTask;
     private final TaskVisitor loggingLeafTaskVisitor;

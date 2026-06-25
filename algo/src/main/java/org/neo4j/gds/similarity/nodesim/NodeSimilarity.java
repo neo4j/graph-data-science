@@ -31,7 +31,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
-import org.neo4j.gds.progress.logging.BatchingProgressLogger;
+import org.neo4j.gds.progress.logging.Constants;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
@@ -451,7 +451,7 @@ public class NodeSimilarity implements Algorithm<NodeSimilarityResult> {
 
     private LongStream checkProgress(LongStream stream) {
         return stream.peek(node -> {
-            if ((node & BatchingProgressLogger.MAXIMUM_LOG_INTERVAL) == 0) {
+            if ((node & Constants.MAXIMUM_LOG_INTERVAL) == 0) {
                 terminationFlag.assertRunning();
             }
         });
