@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import com.carrotsearch.hppc.BitSet;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -26,6 +28,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.mem.BitUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -127,6 +130,53 @@ class HugeAtomicGrowingBitSetTest {
         bitSet.forEachSetBit(actualSetBits::add);
 
         assertThat(actualSetBits).isEqualTo(expectedSetBits);
+    }
+
+    @Test
+    void toLongArrayExportsSetBitsAcrossPages() {
+        var bitSet = HugeAtomicGrowingBitSet.create(0);
+        long page = 1L << PAGE_SHIFT_BITS;
+        var setBits = List.of(0L, 1L, 63L, 64L, 65L, page + 1, 2 * page + 41);
+        setBits.forEach(bitSet::set);
+
+        long numBits = 2 * page + 42;
+        long[] words = bitSet.toLongArray(numBits);
+
+        assertThat(words).hasSize((int) BitUtil.ceilDiv(numBits, Long.SIZE));
+
+        var reconstructed = new BitSet(words, words.length);
+        for (long bit : setBits) {
+            assertThat(reconstructed.get(bit)).as("bit %d should be set", bit).isTrue();
+        }
+        assertThat(reconstructed.cardinality()).isEqualTo(setBits.size());
+    }
+
+    @Test
+    void toLongArrayIgnoresBitsBeyondNumBits() {
+        var bitSet = HugeAtomicGrowingBitSet.create(0);
+        bitSet.set(5);
+        bitSet.set(200); // beyond the requested number of bits
+
+        long[] words = bitSet.toLongArray(64); // a single word, bits [0, 64)
+
+        assertThat(words).hasSize(1);
+        var reconstructed = new BitSet(words, words.length);
+        assertThat(reconstructed.get(5)).isTrue();
+        assertThat(reconstructed.cardinality()).isEqualTo(1);
+    }
+
+    @Test
+    void toLongArrayPadsBeyondAllocatedCapacity() {
+        var bitSet = HugeAtomicGrowingBitSet.create(0);
+        bitSet.set(5);
+
+        long numBits = 3L << PAGE_SHIFT_BITS; // exceeds the single allocated page
+        long[] words = bitSet.toLongArray(numBits);
+
+        assertThat(words).hasSize((int) BitUtil.ceilDiv(numBits, Long.SIZE));
+        var reconstructed = new BitSet(words, words.length);
+        assertThat(reconstructed.get(5)).isTrue();
+        assertThat(reconstructed.cardinality()).isEqualTo(1);
     }
 
     @ParameterizedTest

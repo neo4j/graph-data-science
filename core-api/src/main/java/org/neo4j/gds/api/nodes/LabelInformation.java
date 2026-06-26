@@ -21,6 +21,7 @@ package org.neo4j.gds.api.nodes;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.ToMappedNodeId;
 
 import java.util.Collection;
 import java.util.List;
@@ -74,6 +75,6 @@ public interface LabelInformation {
     interface Builder {
         void addNodeIdToLabel(NodeLabel nodeLabel, long nodeId);
 
-        LabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn);
+        LabelInformation build(long nodeCount, ToMappedNodeId mappedIdFn);
     }
 }

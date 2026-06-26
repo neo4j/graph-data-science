@@ -198,6 +198,33 @@ public final class HugeAtomicGrowingBitSet {
     }
 
     /**
+     * Copies the underlying words into a single {@code long[]} sized to hold {@code numBits}
+     * bits, i.e. {@code ceil(numBits / 64)} words.
+     * <p>
+     * Bits at indices {@code >= numBits} are not copied; words that are not backed by an
+     * allocated page are left zero. This allows callers to size the result to a known node
+     * count even when the bit set grew to a smaller or larger capacity.
+     * <p>
+     * Note: this method is not thread-safe.
+     */
+    public long[] toLongArray(long numBits) {
+        int wordCount = Math.toIntExact(BitUtil.ceilDiv(numBits, NUM_BITS));
+        long[] words = new long[wordCount];
+
+        var pages = this.pages.get();
+        long allocatedWords = (long) pages.length() * pageSize;
+        int wordsToCopy = Math.toIntExact(Math.min(wordCount, allocatedWords));
+
+        for (int wordIndex = 0; wordIndex < wordsToCopy; wordIndex++) {
+            int pageIndex = HugeArrays.pageIndex(wordIndex, pageShift);
+            int indexInPage = HugeArrays.indexInPage(wordIndex, pageMask);
+            words[wordIndex] = pages.getPage(pageIndex).get(indexInPage);
+        }
+
+        return words;
+    }
+
+    /**
      * Resets the bit at the given index.
      */
     public void clear(long index) {
