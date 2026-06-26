@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -63,7 +62,7 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
-    public MultiLabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, LongUnaryOperator toFilteredNodeId) {
+    public MultiLabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, NodeIdMapper toFilteredNodeId) {
         return new MultiLabelInformation(nodeLabels
             .stream()
             .collect(Collectors.toMap(nodeLabel -> nodeLabel, nodeLabel -> {
@@ -71,7 +70,7 @@ public final class MultiLabelInformation implements LabelInformation {
                 var filteredBitSet = new BitSet(filteredNodeCount);
                 var iterator = rootBitSet.iterator();
                 for (long rootId = iterator.nextSetBit(); rootId != BitSetIterator.NO_MORE; rootId = iterator.nextSetBit()) {
-                    filteredBitSet.set(toFilteredNodeId.applyAsLong(rootId));
+                    filteredBitSet.set(toFilteredNodeId.map(rootId));
                 }
                 return filteredBitSet;
             })));

@@ -21,6 +21,7 @@ package org.neo4j.gds.core.huge;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
@@ -35,7 +36,6 @@ import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.function.LongUnaryOperator;
 
 public class DirectIdMap implements IdMap {
     private final long nodeCount;
@@ -173,7 +173,7 @@ public class DirectIdMap implements IdMap {
         }
 
         @Override
-        public LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, LongUnaryOperator toFilteredNodeId) {
+        public LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, NodeIdMapper toFilteredNodeId) {
             return this;
         }
 

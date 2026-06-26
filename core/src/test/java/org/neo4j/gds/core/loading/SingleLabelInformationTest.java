@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongConsumer;
-import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -78,7 +77,7 @@ class SingleLabelInformationTest {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
             .build(1, NodeIdMapper.IDENTITY);
 
-        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("NotLabelA")), 1, LongUnaryOperator.identity());
+        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("NotLabelA")), 1, NodeIdMapper.IDENTITY);
         var filteredNodeLabels = filteredLabelInformation.availableNodeLabels();
 
         assertThat(filteredLabelInformation).isSameAs(labelInformation);

@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -60,7 +59,7 @@ final class SingleLabelInformation implements LabelInformation {
     }
 
     @Override
-    public LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, LongUnaryOperator toFilteredNodeId) {
+    public LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, NodeIdMapper toFilteredNodeId) {
         return this;
     }
 
