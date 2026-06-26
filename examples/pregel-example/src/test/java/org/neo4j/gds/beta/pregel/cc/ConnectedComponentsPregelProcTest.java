@@ -134,7 +134,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .addParameter("maxIterations", 10)
             .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
 
-        assertCypherMemoryEstimation(db, query, MemoryRange.of(4_448), 10, 9);
+        assertCypherMemoryEstimation(db, query, Map.of(), MemoryRange.of(4_448), 10, 9);
     }
 
     @Test

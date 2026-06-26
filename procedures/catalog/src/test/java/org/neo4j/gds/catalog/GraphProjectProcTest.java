@@ -85,7 +85,6 @@ import static org.neo4j.gds.RelationshipProjection.INDEX_INVERSE_KEY;
 import static org.neo4j.gds.RelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.gds.RelationshipProjection.TYPE_KEY;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.getCypherAggregation;
 import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
@@ -602,8 +601,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
     @ParameterizedTest(name = "aggregation={0}")
     @EnumSource(Aggregation.class)
-    void relationshipProjectionPropertyAggregationsNativeVsCypher(Aggregation aggregationParam) {
-        String aggregation = aggregationParam.toString();
+    void relationshipProjectionPropertyAggregationsNativeVsCypher(Aggregation aggregation) {
 
         runQuery(
             " CREATE (p:Person)-[:KNOWS]->(k:Person)," +
@@ -626,7 +624,7 @@ class GraphProjectProcTest extends BaseProcTest {
                 RelationshipProjection.builder()
                     .type("KNOWS")
                     .orientation(Orientation.NATURAL)
-                    .addProperty("weight", "weight", DefaultValue.of(Double.NaN), Aggregation.parse(aggregation))
+                    .addProperty("weight", "weight", DefaultValue.of(Double.NaN), aggregation)
                     .build()
             )
             .yields();
@@ -674,6 +672,18 @@ class GraphProjectProcTest extends BaseProcTest {
                 relationshipCountCypher
             )
         );
+    }
+
+    private static String getCypherAggregation(Aggregation aggregation, String property) {
+        String cypherAggregation = switch (aggregation) {
+            case SINGLE -> "head(collect(%s))";
+            case SUM -> "sum(%s)";
+            case MIN -> "min(%s)";
+            case MAX -> "max(%s)";
+            case COUNT -> "count(%s)";
+            default -> "%s";
+        };
+        return formatWithLocale(cypherAggregation, property);
     }
 
     @Test

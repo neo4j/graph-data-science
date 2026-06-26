@@ -197,8 +197,8 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
             .stream()
             .map(mapping -> formatWithLocale(
                 "%s AS %s",
-                TestSupport.getCypherAggregation(
-                    mapping.aggregation().name(),
+                getCypherAggregation(
+                    mapping.aggregation(),
                     formatWithLocale(
                         "COALESCE(%s.%s, %f)",
                         entityVar,
@@ -210,6 +210,18 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
             ))
             .collect(Collectors.joining(", ", ", ", ""))
             : "";
+    }
+
+    private static String getCypherAggregation(Aggregation aggregation, String property) {
+        String cypherAggregation = switch (aggregation) {
+            case SINGLE -> "head(collect(%s))";
+            case SUM -> "sum(%s)";
+            case MIN -> "min(%s)";
+            case MAX -> "max(%s)";
+            case COUNT -> "count(%s)";
+            default -> "%s";
+        };
+        return formatWithLocale(cypherAggregation, property);
     }
 
     private static final String SUFFIX = "___";

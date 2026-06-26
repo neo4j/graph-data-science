@@ -22,16 +22,16 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ClockService;
-import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
-import org.neo4j.gds.progress.tasks.Status;
-import org.neo4j.gds.progress.tracking.TaskProgressTracker;
-import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
+import org.neo4j.gds.progress.tasks.Status;
+import org.neo4j.gds.progress.tasks.Tasks;
+import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
 
@@ -74,8 +74,8 @@ class ListProgressDetailProcTest extends BaseProgressTest {
         var expectedLocalTime = LocalTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault());
         assertCypherResult(
             "CALL gds.listProgress('" + jobId + "')" +
-            "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId " +
-            "RETURN taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId ",
+                "YIELD taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId " +
+                "RETURN taskName, progressBar, progress, timeStarted, elapsedTime, status, jobId ",
             List.of(
                 Map.of(
                     "taskName", "|-- root",

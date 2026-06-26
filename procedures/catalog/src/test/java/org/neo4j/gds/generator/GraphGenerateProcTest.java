@@ -126,7 +126,7 @@ class GraphGenerateProcTest extends BaseProcTest {
             "  {} " +
             ") YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
 
-        assertCypherMemoryEstimation(db, estimateQ, expected, nodeCount, nodeCount * avgDegree);
+        assertCypherMemoryEstimation(db, estimateQ, Map.of(), expected, nodeCount, nodeCount * avgDegree);
     }
 
     @Test

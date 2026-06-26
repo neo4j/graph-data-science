@@ -36,6 +36,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -200,7 +201,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
             .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
-        assertCypherMemoryEstimation(db, query, MemoryRange.of(4_016, 100_032), 5, 12);
+        assertCypherMemoryEstimation(db, query, Map.of(), MemoryRange.of(4_016, 100_032), 5, 12);
     }
 
 

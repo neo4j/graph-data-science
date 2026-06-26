@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.HamcrestCondition;
-import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
@@ -45,13 +44,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
+import static org.neo4j.gds.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.gds.utils.StringFormatting.formatNumber;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -121,25 +119,6 @@ public final class TestSupport {
         assertTrue(equals, message);
     }
 
-    public static void assertCypherResult(
-        GraphDatabaseService db,
-        @Language("Cypher") String query,
-        List<Map<String, Object>> expected
-    ) {
-        assertCypherResult(db, query, emptyMap(), expected);
-    }
-
-    // should be used with YIELD bytesMin, bytesMax, nodeCount, relationshipCount
-    public static void assertCypherMemoryEstimation(
-        GraphDatabaseService db,
-        @Language("Cypher") String query,
-        MemoryRange expected,
-        long expectedNodeCount,
-        long expectedRelationshipCount
-    ) {
-        assertCypherMemoryEstimation(db, query, Map.of(), expected, expectedNodeCount, expectedRelationshipCount);
-    }
-
     // should be used with YIELD bytesMin, bytesMax, nodeCount, relationshipCount
     public static void assertCypherMemoryEstimation(
         GraphDatabaseService db,
@@ -150,33 +129,18 @@ public final class TestSupport {
         long expectedRelationshipCount
     ) {
         SoftAssertions softly = new SoftAssertions();
-        QueryRunner.runQueryWithRowConsumer(
-            db,
-            query,
-            queryParameters,
+        runQueryWithRowConsumer(db, query, queryParameters,
             (transaction, row) -> {
-                try {
-                    assertThat(MemoryRange.of((long) row.getNumber("bytesMin"), (long) row.getNumber("bytesMax")))
-                        .withRepresentation(new MemoryRangeRepresentation())
-                            .isEqualTo(expected);
-                } catch (Throwable e) {
-                    softly.fail(e.getMessage());
-                }
+                softly.assertThat(MemoryRange.of((long) row.getNumber("bytesMin"), (long) row.getNumber("bytesMax")))
+                    .withRepresentation(new MemoryRangeRepresentation())
+                        .isEqualTo(expected);
                 var actualNodeCount = (long) row.getNumber("nodeCount");
                 var actualRelationshipCount = (long) row.getNumber("relationshipCount");
                 softly.assertThat(expectedNodeCount)
-                    .withFailMessage(() -> formatWithLocale(
-                        "Got nodeCount %s but expected %s",
-                        formatNumber(actualNodeCount),
-                        formatNumber(expectedNodeCount)
-                    ))
+                    .withFailMessage(() -> formatWithLocale("Got nodeCount %s but expected %s", formatNumber(actualNodeCount), formatNumber(expectedNodeCount)))
                     .isEqualTo(actualNodeCount);
                 softly.assertThat(expectedRelationshipCount)
-                    .withFailMessage(() -> formatWithLocale(
-                        "Got relationshipCount %s but expected %s",
-                        formatNumber(actualRelationshipCount),
-                        formatNumber(expectedRelationshipCount)
-                    ))
+                    .withFailMessage(() -> formatWithLocale("Got relationshipCount %s but expected %s", formatNumber(actualRelationshipCount), formatNumber(expectedRelationshipCount)))
                     .isEqualTo(actualRelationshipCount);
             }
         );
@@ -190,35 +154,25 @@ public final class TestSupport {
         Map<String, Object> queryParameters,
         List<Map<String, Object>> expected
     ) {
-        runInFullAccessTransaction(db, tx -> {
-            var softAssertions = new SoftAssertions();
-            List<Map<String, Object>> actual = new ArrayList<>();
-            runQueryWithResultConsumer(db, query, queryParameters, result -> {
-                result.accept(row -> {
-                    Map<String, Object> _row = new HashMap<>();
-                    for (String column : result.columns()) {
-                        _row.put(column, row.get(column));
-                    }
-                    actual.add(_row);
-                    return true;
-                });
+        var softAssertions = new SoftAssertions();
+        List<Map<String, Object>> actual = new ArrayList<>();
+        runQueryWithResultConsumer(db, query, queryParameters, result -> {
+            result.accept(row -> {
+                Map<String, Object> _row = new HashMap<>();
+                for (String column : result.columns()) {
+                    _row.put(column, row.get(column));
+                }
+                actual.add(_row);
+                return true;
             });
-
-            assertThat(actual)
-                .withFailMessage("Different amount of rows returned for actual result (%d) than expected (%d)",
-                    actual.size(),
-                    expected.size()
-                )
-                .hasSize(expected.size());
-
-            for (int rowId = 0; rowId < expected.size(); ++rowId) {
-                Map<String, Object> expectedRow = expected.get(rowId);
-                Map<String, Object> actualRow = actual.get(rowId);
-
-                assertRow(softAssertions, rowId, expectedRow, actualRow);
-            }
-            softAssertions.assertAll();
         });
+        assertThat(actual)
+            .withFailMessage("Different amount of rows returned for actual result (%d) than expected (%d)", actual.size(), expected.size())
+            .hasSize(expected.size());
+        for (int rowId = 0; rowId < expected.size(); ++rowId) {
+            assertRow(softAssertions, rowId, expected.get(rowId), actual.get(rowId));
+        }
+        softAssertions.assertAll();
     }
 
     private static void assertRow(
@@ -230,51 +184,17 @@ public final class TestSupport {
         softAssertions.assertThat(actualRow.keySet()).containsExactlyInAnyOrderElementsOf(expectedRow.keySet());
 
         expectedRow.forEach((key, expectedValue) -> {
-            Object actualValue = actualRow.get(key);
-            ObjectAssert<Object> assertion = softAssertions.assertThat(actualValue)
-                .withFailMessage(
-                    "Different value for column '%s' of row %d (expected %s, but got %s)",
-                    key,
-                    rowId,
-                    expectedValue,
-                    actualValue
-                );
+            var actualValue = actualRow.get(key);
+            var assertion = softAssertions.assertThat(actualValue)
+                .withFailMessage("Different value for column '%s' of row %d (expected %s, but got %s)", key, rowId, expectedValue, actualValue);
 
-            if (expectedValue instanceof Matcher) {
-                assertion.is(new HamcrestCondition<>((Matcher<Object>) expectedValue));
-            } else if (expectedValue instanceof Condition) {
-                assertion.is((Condition<Object>) expectedValue);
-            } else if (expectedValue instanceof Map) {
-                assertRow(softAssertions, rowId, (Map<String, Object>) expectedValue, (Map<String, Object>) actualValue);
-            } else {
-                assertion.isEqualTo(expectedValue);
+            switch (expectedValue) {
+                case Matcher matcher -> assertion.is(new HamcrestCondition<Object>(matcher));
+                case Condition condition -> assertion.is(condition);
+                case Map __ -> assertRow(softAssertions, rowId, (Map<String, Object>) expectedValue, (Map<String, Object>) actualValue);
+                case null, default -> assertion.isEqualTo(expectedValue);
             }
         });
-    }
-
-    public static String getCypherAggregation(String aggregation, String property) {
-        String cypherAggregation;
-        switch (Aggregation.parse(aggregation)) {
-            case SINGLE:
-                cypherAggregation = "head(collect(%s))";
-                break;
-            case SUM:
-                cypherAggregation = "sum(%s)";
-                break;
-            case MIN:
-                cypherAggregation = "min(%s)";
-                break;
-            case MAX:
-                cypherAggregation = "max(%s)";
-                break;
-            case COUNT:
-                cypherAggregation = "count(%s)";
-                break;
-            default:
-                cypherAggregation = "%s";
-                break;
-        }
-        return formatWithLocale(cypherAggregation, property);
     }
 
     public static TransactionContext fullAccessTransaction(GraphDatabaseService databaseService) {

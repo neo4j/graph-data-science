@@ -128,7 +128,7 @@ class PageRankPregelProcTest extends BaseProcTest {
             .addParameter("maxIterations", 10)
             .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
 
-        assertCypherMemoryEstimation(db, query, MemoryRange.of(768), 11, 17);
+        assertCypherMemoryEstimation(db, query, Map.of(), MemoryRange.of(768), 11, 17);
     }
 
     @Test
