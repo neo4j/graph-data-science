@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.progress.tasks;
+package org.neo4j.gds.progress.logging;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
-import org.neo4j.gds.progress.logging.TaskProgressLogger;
+import org.neo4j.gds.progress.tasks.Tasks;
 
 import java.util.List;
 

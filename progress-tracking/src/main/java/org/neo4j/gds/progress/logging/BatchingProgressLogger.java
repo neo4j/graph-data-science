@@ -51,7 +51,7 @@ class BatchingProgressLogger {
     /**
      * A little bit of convenience
      */
-    public static BatchingProgressLogger create(
+    static BatchingProgressLogger create(
         LoggerForProgressTracking log,
         RequestCorrelationId requestCorrelationId,
         Task task,
