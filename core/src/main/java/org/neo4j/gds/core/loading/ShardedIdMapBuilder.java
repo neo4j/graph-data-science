@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.api.ToMappedNodeId;
 import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
@@ -55,8 +56,9 @@ public final class ShardedIdMapBuilder implements IdMapBuilder {
     @Override
     public IdMap build(LabelInformation.Builder labelInformationBuilder, long highestNodeId, Concurrency concurrency) {
         var shardedMap = this.builder.build();
-        // Dense ids: the label keys (already dense intermediate ids) map to themselves.
-        var labelInformation = labelInformationBuilder.build(shardedMap.size(), id -> id);
+        // Dense ids: the label keys (already dense intermediate ids) map to themselves, so the
+        // label bit sets can be built without remapping (see LabelInformation.Builder.IDENTITY).
+        var labelInformation = labelInformationBuilder.build(shardedMap.size(), ToMappedNodeId.IDENTITY);
         return ComposedIdMap.of(new ShardedIdMap(shardedMap), labelInformation);
     }
 
