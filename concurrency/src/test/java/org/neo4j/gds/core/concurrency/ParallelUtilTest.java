@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.function.ThrowingConsumer;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.AbstractCollection;
@@ -64,7 +65,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStream;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.gds.utils.ExceptionUtil.throwIfUnchecked;
@@ -355,7 +355,8 @@ final class ParallelUtilTest {
 
     @Test
     void shouldBailOnTermination() {
-        assertTransactionTermination(
+        assertThrows(
+            TerminatedException.class,
             () -> withPool(4, pool -> {
                 Tasks tasks = new Tasks(6, 100);
                 AtomicReference<Throwable> thrownException = new AtomicReference<>();

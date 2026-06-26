@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.TestGraph;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -48,6 +47,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.scaling.ScalerParser;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
@@ -57,6 +57,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
 
@@ -301,7 +302,9 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            TestSupport.assertTransactionTermination(() -> pageRank(graph, config, ProgressTracker.NULL_TRACKER,
+            assertThrows(
+                TerminatedException.class,
+                () -> pageRank(graph, config, ProgressTracker.NULL_TRACKER,
                 TerminationFlag.STOP_RUNNING).compute()
             );
         }

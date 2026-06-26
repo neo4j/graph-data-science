@@ -26,7 +26,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodes.IdMap;
@@ -34,7 +33,6 @@ import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -53,7 +51,6 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
@@ -124,13 +121,6 @@ public final class TestSupport {
         );
 
         assertTrue(equals, message);
-    }
-
-    public static void assertTransactionTermination(Executable executable) {
-        assertThrows(
-            TerminatedException.class,
-            executable
-        );
     }
 
     public static void assertCypherResult(

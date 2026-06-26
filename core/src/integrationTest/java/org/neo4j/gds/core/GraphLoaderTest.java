@@ -47,6 +47,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -58,10 +59,10 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.GdlSupport.fromGdl;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.NATIVE;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class GraphLoaderTest extends BaseTest {
@@ -333,7 +334,8 @@ class GraphLoaderTest extends BaseTest {
     @Test
     void stopsImportingWhenTransactionHasBeenTerminated() {
         TerminationFlag terminationFlag = () -> false;
-        assertTransactionTermination(
+        assertThrows(
+            TerminatedException.class,
             () -> initialiseStoreLoaderBuilder()
                 .terminationFlag(terminationFlag)
                 .build()

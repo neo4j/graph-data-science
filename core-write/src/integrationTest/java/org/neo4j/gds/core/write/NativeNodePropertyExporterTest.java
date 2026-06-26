@@ -45,6 +45,7 @@ import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
@@ -55,9 +56,9 @@ import java.util.concurrent.ExecutorService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.GdlSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class NativeNodePropertyExporterTest extends BaseTest {
@@ -235,7 +236,10 @@ class NativeNodePropertyExporterTest extends BaseTest {
             .parallel(executorService, new Concurrency(4))
             .build();
 
-        assertTransactionTermination(() -> exporter.write("foo", new DoubleTestPropertyValues(ignore -> 42.0)));
+        assertThrows(
+            TerminatedException.class,
+            () -> exporter.write("foo", new DoubleTestPropertyValues(ignore -> 42.0))
+        );
 
         runQueryWithRowConsumer(db, "MATCH (n) WHERE n.foo IS NOT NULL RETURN COUNT(*) AS count", row -> {
             Number count = row.getNumber("count");

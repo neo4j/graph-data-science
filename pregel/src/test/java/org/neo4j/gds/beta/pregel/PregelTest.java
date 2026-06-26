@@ -60,6 +60,7 @@ import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
@@ -75,7 +76,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
@@ -136,7 +136,7 @@ class PregelTest {
             () -> false
         );
 
-        assertTransactionTermination(pregelJob::run);
+        assertThrows(TerminatedException.class, pregelJob::run);
     }
 
     @ParameterizedTest
