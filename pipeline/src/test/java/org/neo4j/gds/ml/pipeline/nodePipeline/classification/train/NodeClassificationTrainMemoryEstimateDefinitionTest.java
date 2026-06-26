@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.mem.MemoryRange;
@@ -38,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeClassificationTrainMemoryEstimateDefinitionTest {
 
@@ -80,7 +82,8 @@ class NodeClassificationTrainMemoryEstimateDefinitionTest {
         var graphDimensions = GraphDimensions.of(9, 7);
         var concurrency = config.concurrency();
         var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected);
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+        assertThat(actual).isEqualTo(expected);
     }
 
     private static Stream<Arguments> trainerMethodConfigs() {

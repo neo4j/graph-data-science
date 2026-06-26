@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -35,6 +36,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.TestLog;
@@ -43,8 +45,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -72,6 +72,8 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
@@ -86,7 +88,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.config.MutateNodePropertyConfig.MUTATE_PROPERTY_KEY;
@@ -522,7 +523,8 @@ class LinkPredictionTrainPipelineExecutorTest {
                 .estimate(graphDimensions, config.concurrency())
                 .memoryUsage();
 
-            assertMemoryRange(actualRange, expectedRange);
+            Assertions.useRepresentation(new MemoryRangeRepresentation());
+            assertThat(actualRange).isEqualTo(expectedRange);
         }
 
         @Test

@@ -19,17 +19,24 @@
  */
 package org.neo4j.gds.ml.models.logisticregression;
 
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 
 class LogisticRegressionDataTest {
+
+    @BeforeAll
+    static void setupAll() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+    }
 
     @Test
     void shouldEstimateMemory() {
@@ -91,7 +98,7 @@ class LogisticRegressionDataTest {
             .memoryEstimation(true, 2, estimatedFeatureCount)
             .estimate(dimensions, new Concurrency(5000));
 
-        assertMemoryRange(memoryEstimation.memoryUsage(), MemoryRange.of(minEstimation, maxEstimation));
+        assertThat(memoryEstimation.memoryUsage()).isEqualTo(MemoryRange.of(minEstimation, maxEstimation));
     }
 
     @Test

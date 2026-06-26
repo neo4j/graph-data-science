@@ -19,28 +19,31 @@
  */
 package org.neo4j.gds.ml.nodeClassification;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestGraph;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -48,7 +51,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Percentage.withPercentage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
@@ -66,6 +68,11 @@ class NodeClassificationPredictTest {
 
     @Inject
     private TestGraph graph;
+
+    @BeforeAll
+    static void setupAll() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+    }
 
     @Test
     void shouldPredict() {
@@ -267,7 +274,7 @@ class NodeClassificationPredictTest {
 
         var estimate = NodeClassificationPredict.memoryEstimation(produceProbabilities, batchSize, featureCount, classCount)
             .estimate(GraphDimensions.of(nodeCount), concurrency);
-        assertMemoryRange(estimate.memoryUsage(), MemoryRange.of(expected));
+        assertThat(estimate.memoryUsage()).isEqualTo(MemoryRange.of(expected));
     }
 
     @Test

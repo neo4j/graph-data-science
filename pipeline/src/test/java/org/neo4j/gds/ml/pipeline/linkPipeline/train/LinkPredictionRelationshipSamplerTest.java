@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
+import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.Orientation;
@@ -27,6 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.ElementSchemaEntry;
 import org.neo4j.gds.assertj.Extractors;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -55,7 +58,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionRelationshipSampler.progressTask;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionRelationshipSampler.splitEstimation;
 
@@ -136,6 +138,11 @@ class LinkPredictionRelationshipSamplerTest {
 
     @Inject
     private GraphStore multiGraphStore;
+
+    @BeforeAll
+    static void setupAll() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+    }
 
     @Test
     void splitWeightedGraph() {
@@ -249,7 +256,7 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(17_760));
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(17_760));
 
         splitConfig = splitConfigBuilder.testFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
@@ -257,7 +264,7 @@ class LinkPredictionRelationshipSamplerTest {
 
         // higher testFraction -> lower estimation as test-complement is smaller
         // the test_complement is kept until the end of all splitting
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_424));
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(19_424));
     }
 
     @Test
@@ -272,13 +279,13 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(17_760));
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(17_760));
 
         splitConfig = splitConfigBuilder.trainFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_424));
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(19_424));
     }
 
     @Test
@@ -293,13 +300,13 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(18_024));
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(18_024));
 
         splitConfig = splitConfigBuilder.negativeSamplingRatio(4).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(36_384));
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(36_384));
     }
 
     @Test
@@ -320,12 +327,12 @@ class LinkPredictionRelationshipSamplerTest {
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 1000L)).build(), "REL"), concurrency);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(47_760));
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(47_760));
 
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
             .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 2000L)).build(), "REL"), concurrency);
 
-        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(59_760));
+        assertThat(actualEstimation.memoryUsage()).isEqualTo(MemoryRange.of(59_760));
     }
 
     @Test

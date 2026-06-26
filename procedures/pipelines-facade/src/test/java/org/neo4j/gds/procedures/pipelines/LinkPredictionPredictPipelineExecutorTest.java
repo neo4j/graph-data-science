@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.NodeLabel;
@@ -27,6 +29,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -34,8 +37,6 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
@@ -64,6 +65,8 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.time.Duration;
@@ -75,7 +78,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -118,6 +120,11 @@ class LinkPredictionPredictPipelineExecutorTest {
     @Inject
     private GraphStore multiLabelGraphStore;
     private final String username = "user";
+
+    @BeforeEach
+    void setUp() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+    }
 
     @AfterEach
     void tearDown() {
@@ -476,7 +483,7 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
         var graphDimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
         var actual = memoryEstimation.estimate(graphDimensions, config.concurrency()).memoryUsage();
-        assertMemoryRange(actual, expected);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -509,7 +516,7 @@ class LinkPredictionPredictPipelineExecutorTest {
         var graphDimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
         var concurrency = config.concurrency();
         var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

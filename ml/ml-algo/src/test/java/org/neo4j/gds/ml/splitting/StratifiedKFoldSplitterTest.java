@@ -19,14 +19,16 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.mem.MemoryRange;
@@ -43,7 +45,6 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
 class StratifiedKFoldSplitterTest {
@@ -149,7 +150,8 @@ class StratifiedKFoldSplitterTest {
             .estimate(dimensions, new Concurrency(4))
             .memoryUsage();
 
-        assertMemoryRange(actualEstimation, MemoryRange.of(expectedMemory));
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+        assertThat(actualEstimation).isEqualTo(MemoryRange.of(expectedMemory));
     }
 
     private LongMultiSet classCounts(HugeLongArray values) {

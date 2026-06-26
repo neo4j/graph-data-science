@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Percentage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -28,6 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -68,7 +71,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
@@ -219,6 +221,11 @@ class LinkPredictionTrainTest {
                 MemoryRange.of(12_815_664, 405_293_904)
             )
         );
+    }
+
+    @BeforeAll
+    static void setupAll() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
     }
 
     @Test
@@ -372,7 +379,7 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertMemoryRange(actualRange, MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
+        assertThat(actualRange).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -398,7 +405,7 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertMemoryRange(actualRange, expectedRange);
+        assertThat(actualRange).isEqualTo(expectedRange);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -428,7 +435,7 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertMemoryRange(actualRange, expectedRange);
+        assertThat(actualRange).isEqualTo(expectedRange);
     }
 
     @ParameterizedTest
@@ -458,7 +465,7 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertMemoryRange(actualRange, MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
+        assertThat(actualRange).isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
     }
 
     @Test

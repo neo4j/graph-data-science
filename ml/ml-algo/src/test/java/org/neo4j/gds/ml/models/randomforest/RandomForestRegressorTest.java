@@ -19,28 +19,30 @@
  */
 package org.neo4j.gds.ml.models.randomforest;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 
 class RandomForestRegressorTest {
     private static final long NUM_SAMPLES = 10;
@@ -48,6 +50,11 @@ class RandomForestRegressorTest {
     private final HugeDoubleArray targets = HugeDoubleArray.newArray(NUM_SAMPLES);
     private ReadOnlyHugeLongArray trainSet;
     private Features allFeatureVectors;
+
+    @BeforeAll
+    static void setupAll() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+    }
 
     @BeforeEach
     void setup() {
@@ -166,7 +173,7 @@ class RandomForestRegressorTest {
     void predictOverheadMemoryEstimation() {
         var estimation = RandomForestRegressor.runtimeOverheadMemoryEstimation();
 
-        assertMemoryRange(estimation, MemoryRange.of(16));
+        assertThat(estimation).isEqualTo(MemoryRange.of(16));
     }
 
     @ParameterizedTest
@@ -209,7 +216,7 @@ class RandomForestRegressorTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
 
-        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
+        assertThat(estimation).isEqualTo(MemoryRange.of(expectedMin, expectedMax));
     }
 
     @ParameterizedTest
@@ -243,6 +250,6 @@ class RandomForestRegressorTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), new Concurrency(4)).memoryUsage();
 
-        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
+        assertThat(estimation).isEqualTo(MemoryRange.of(expectedMin, expectedMax));
     }
 }

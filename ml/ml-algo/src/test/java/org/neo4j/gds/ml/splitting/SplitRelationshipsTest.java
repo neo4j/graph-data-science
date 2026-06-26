@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -27,6 +29,7 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.mem.MemoryRange;
@@ -40,7 +43,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 
 @GdlExtension
 class SplitRelationshipsTest {
@@ -50,6 +52,11 @@ class SplitRelationshipsTest {
 
     @Inject
     private GraphStore graphStore;
+
+    @BeforeAll
+    static void setupAll() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+    }
 
     @Test
     void computeWithOffset() {
@@ -84,7 +91,7 @@ class SplitRelationshipsTest {
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(160_000, 208_000));
     }
 
     public static Stream<Arguments> withTypesParams() {
@@ -123,7 +130,7 @@ class SplitRelationshipsTest {
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), expectedMemory);
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(expectedMemory);
     }
 
     @Test
@@ -136,13 +143,13 @@ class SplitRelationshipsTest {
         MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
-        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(160_000, 208_000));
 
         graphDimensions = GraphDimensions.of(100_000, 10_000);
         actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
-        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(160_000, 208_000));
     }
 
     @Test
@@ -160,14 +167,14 @@ class SplitRelationshipsTest {
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(160_000, 208_000));
 
         config = configBuilder.negativeSamplingRatio(2.0).build();
         actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(184_000, 256_000));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(184_000, 256_000));
     }
 
     @Test
@@ -184,13 +191,13 @@ class SplitRelationshipsTest {
         MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
-        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(160_000, 208_000));
 
         config = configBuilder.holdoutFraction(0.1).build();
         actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 176_000));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(160_000, 176_000));
     }
 }

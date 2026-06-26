@@ -19,30 +19,32 @@
  */
 package org.neo4j.gds.ml.models.randomforest;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 
 class RandomForestClassifierTest {
@@ -51,6 +53,11 @@ class RandomForestClassifierTest {
     private ReadOnlyHugeLongArray trainSet;
     private Features allFeatureVectors;
     private int numberOfClasses;
+
+    @BeforeAll
+    static void setupAll() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+    }
 
     @BeforeEach
     void setup() {
@@ -266,7 +273,7 @@ class RandomForestClassifierTest {
     ) {
         var estimation = RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
 
-        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
+        assertThat(estimation).isEqualTo(MemoryRange.of(expectedMin, expectedMax));
     }
 
     @ParameterizedTest
@@ -313,7 +320,7 @@ class RandomForestClassifierTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
 
-        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
+        assertThat(estimation).isEqualTo(MemoryRange.of(expectedMin, expectedMax));
     }
 
     @ParameterizedTest
@@ -347,6 +354,6 @@ class RandomForestClassifierTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), new Concurrency(4)).memoryUsage();
 
-        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
+        assertThat(estimation).isEqualTo(MemoryRange.of(expectedMin, expectedMax));
     }
 }

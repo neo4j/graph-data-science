@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -37,6 +39,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -47,9 +50,6 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
-import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.GdsTestLog;
@@ -77,6 +77,9 @@ import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurati
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineBaseConfigImpl;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineExecutor;
+import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
+import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.TestProc;
 
@@ -89,7 +92,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -115,6 +117,11 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                         ", (n2)-[:T]->(n4)";
 
     private GraphStore graphStore;
+
+    @BeforeAll
+    static void setupAll() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -438,7 +445,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         );
         var concurrency = config.concurrency();
         var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected);
+        assertThat(actual).isEqualTo(expected);
     }
 
     /**
@@ -535,7 +542,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         );
         var concurrency = config.concurrency();
         var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

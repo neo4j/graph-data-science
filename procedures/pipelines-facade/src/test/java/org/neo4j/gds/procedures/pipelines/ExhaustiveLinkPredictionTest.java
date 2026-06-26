@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.NodeLabel;
@@ -26,6 +28,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
@@ -48,7 +51,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.procedures.pipelines.ApproximateLinkPredictionTest.compareWithPrecision;
 
 @GdlExtension
@@ -88,6 +90,10 @@ class ExhaustiveLinkPredictionTest {
     @Inject
     private GraphStore multiLabelGraphStore;
 
+    @BeforeAll
+    static void setupAll() {
+        Assertions.useRepresentation(new MemoryRangeRepresentation());
+    }
     @ParameterizedTest
     @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
     void shouldPredictWithTopN(int topN, int concurrency) {
@@ -284,7 +290,7 @@ class ExhaustiveLinkPredictionTest {
             .estimate(config, 100)
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(expectedEstimation));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(expectedEstimation));
     }
 
     @ParameterizedTest
@@ -304,7 +310,7 @@ class ExhaustiveLinkPredictionTest {
             .estimate(config, linkFeatureDimension)
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(expectedEstimation));
+        assertThat(actualEstimate.memoryUsage()).isEqualTo(MemoryRange.of(expectedEstimation));
     }
 
 }

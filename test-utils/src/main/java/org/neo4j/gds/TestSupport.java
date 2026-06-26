@@ -30,6 +30,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.mem.MemoryRange;
@@ -125,18 +126,6 @@ public final class TestSupport {
         assertTrue(equals, message);
     }
 
-    public static void assertMemoryRange(MemoryRange actual, MemoryRange expected) {
-        assertThat(actual)
-            .withFailMessage(
-        "Got (%s, %s), but expected (%s, %s)",
-                formatNumber(actual.min),
-                formatNumber(actual.max),
-                formatNumber(expected.min),
-                formatNumber(expected.max)
-            )
-            .isEqualTo(expected);
-    }
-
     public static void assertTransactionTermination(Executable executable) {
         assertThrows(
             TerminatedException.class,
@@ -179,10 +168,9 @@ public final class TestSupport {
             queryParameters,
             (transaction, row) -> {
                 try {
-                    assertMemoryRange(
-                        MemoryRange.of((long) row.getNumber("bytesMin"), (long) row.getNumber("bytesMax")),
-                        expected
-                    );
+                    assertThat(MemoryRange.of((long) row.getNumber("bytesMin"), (long) row.getNumber("bytesMax")))
+                        .withRepresentation(new MemoryRangeRepresentation())
+                            .isEqualTo(expected);
                 } catch (Throwable e) {
                     softly.fail(e.getMessage());
                 }
