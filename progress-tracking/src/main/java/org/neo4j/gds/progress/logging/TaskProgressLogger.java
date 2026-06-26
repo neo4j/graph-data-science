@@ -71,20 +71,6 @@ public final class TaskProgressLogger implements ProgressLogger {
     }
 
     @Override
-    public void logProgress(long progress) {
-        batchingProgressLogger.logProgress(progress, () -> null);
-    }
-
-    @Override
-    public long reset(long newTaskVolume) {
-        return batchingProgressLogger.reset(newTaskVolume);
-    }
-
-    @Override
-    public void release() {
-        batchingProgressLogger.release();
-    }
-
     public void logBeginSubTask(Task task, Task parentTask) {
         var taskName = taskDescription(task, parentTask);
         if (parentTask == null) {
@@ -95,6 +81,12 @@ public final class TaskProgressLogger implements ProgressLogger {
         reset(task.getProgress().volume());
     }
 
+    @Override
+    public void logProgress(long progress) {
+        batchingProgressLogger.logProgress(progress, () -> null);
+    }
+
+    @Override
     public void logEndSubTask(Task task, Task parentTask) {
         var taskName = taskDescription(task, parentTask);
         log100OnLeafTaskFinish(task);
@@ -105,6 +97,7 @@ public final class TaskProgressLogger implements ProgressLogger {
         }
     }
 
+    @Override
     public void logEndSubTaskWithFailure(Task task, Task parentTask) {
         var taskName = taskDescription(task, parentTask);
 
@@ -114,6 +107,16 @@ public final class TaskProgressLogger implements ProgressLogger {
         } else {
             logFinishSubtaskWithFailure(taskName);
         }
+    }
+
+    @Override
+    public long reset(long newTaskVolume) {
+        return batchingProgressLogger.reset(newTaskVolume);
+    }
+
+    @Override
+    public void release() {
+        batchingProgressLogger.release();
     }
 
     void startSubTask(String subTaskName) {

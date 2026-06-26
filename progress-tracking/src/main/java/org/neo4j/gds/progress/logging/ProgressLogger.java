@@ -19,12 +19,39 @@
  */
 package org.neo4j.gds.progress.logging;
 
+import org.neo4j.gds.progress.tasks.Task;
+
 /**
- * There are very few progress-logging methods that are used from outside this package.
- * Neat and manageable little interface.
+ * Progress logging follows the structure of progress tracking:
+ *
+ * <ol>
+ *     <li>Begin a subtask</li>
+ *     <li>Log some progress</li>
+ *     <li>End the subtask</li>
+ * </ol>
+ *
+ * Of course, it can work nested-ly:
+ *
+ * <ol>
+ *     <li>Begin a subtask</li>
+ *     <li>Log some progress</li>
+ *     <li>Begin a nested subtask</li>
+ *     <li>Log some progress</li>
+ *     <li>End the nested subtask</li>
+ *     <li>Log some progress</li>
+ *     <li>End the subtask</li>
+ * </ol>
+ *
+ * Remember in the latter case that sometimes you might need to ise the reset method.
  */
 public interface ProgressLogger {
+    void logBeginSubTask(Task task, Task parentTask);
+
     void logProgress(long progress);
+
+    void logEndSubTask(Task task, Task parentTask);
+
+    void logEndSubTaskWithFailure(Task task, Task parentTask);
 
     long reset(long newTaskVolume);
 

@@ -22,6 +22,7 @@ package org.neo4j.gds.progress.tracking;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.progress.logging.ProgressLogger;
 import org.neo4j.gds.progress.registration.TaskRegistry;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
@@ -46,7 +47,7 @@ public final class TaskProgressTracker implements ProgressTracker {
     private final Log log;
     private final Task baseTask;
     private final Consumer<RuntimeException> onError;
-    private final TaskProgressLogger taskProgressLogger;
+    private final ProgressLogger progressLogger;
     private final TaskRegistry taskRegistry;
 
     public Optional<Task> currentTask = Optional.empty();
@@ -71,7 +72,7 @@ public final class TaskProgressTracker implements ProgressTracker {
         Log log,
         Task baseTask,
         JobId jobId,
-        TaskProgressLogger taskProgressLogger,
+        ProgressLogger progressLogger,
         TaskRegistryFactory taskRegistryFactory
     ) {
         var alreadyLoggedOnce = new AtomicBoolean(false);
@@ -88,7 +89,7 @@ public final class TaskProgressTracker implements ProgressTracker {
             log,
             baseTask,
             onError,
-            taskProgressLogger,
+            progressLogger,
             taskRegistry
         );
     }
@@ -97,13 +98,13 @@ public final class TaskProgressTracker implements ProgressTracker {
         Log log,
         Task baseTask,
         Consumer<RuntimeException> onError,
-        TaskProgressLogger taskProgressLogger,
+        ProgressLogger progressLogger,
         TaskRegistry taskRegistry
     ) {
         this.log = log;
         this.baseTask = baseTask;
         this.onError = onError;
-        this.taskProgressLogger = taskProgressLogger;
+        this.progressLogger = progressLogger;
         this.taskRegistry = taskRegistry;
     }
 
@@ -120,7 +121,7 @@ public final class TaskProgressTracker implements ProgressTracker {
             return baseTask;
         }).orElse(baseTask);
         nextTask.start();
-        taskProgressLogger.logBeginSubTask(nextTask, parentTask());
+        progressLogger.logBeginSubTask(nextTask, parentTask());
         currentTask = Optional.of(nextTask);
         currentTotalSteps = UNKNOWN_STEPS;
         progressLeftOvers = 0;
@@ -169,7 +170,7 @@ public final class TaskProgressTracker implements ProgressTracker {
         requireCurrentTask();
         currentTask.ifPresent(
             task -> {
-                taskProgressLogger.logEndSubTask(task, parentTask());
+                progressLogger.logEndSubTask(task, parentTask());
                 task.finish();
                 if (nestedTasks.isEmpty()) {
                     this.currentTask = Optional.empty();
@@ -187,7 +188,7 @@ public final class TaskProgressTracker implements ProgressTracker {
         requireCurrentTask();
         currentTask.ifPresent(task -> {
             task.logProgress(value);
-            taskProgressLogger.logProgress(value);
+            progressLogger.logProgress(value);
         });
     }
 
@@ -208,7 +209,7 @@ public final class TaskProgressTracker implements ProgressTracker {
         requireCurrentTask();
         currentTask.ifPresent(task -> {
             task.setVolume(volume);
-            taskProgressLogger.reset(volume);
+            progressLogger.reset(volume);
         });
     }
 
@@ -216,20 +217,20 @@ public final class TaskProgressTracker implements ProgressTracker {
     public void release() {
         validateTaskNotRunning();
         taskRegistry.markCompleted();
-        taskProgressLogger.release();
+        progressLogger.release();
     }
 
     @Override
     public void endSubTaskWithFailure() {
          currentTask.ifPresent(task -> {
             task.fail();
-            taskProgressLogger.logEndSubTaskWithFailure(task, parentTask());
+            progressLogger.logEndSubTaskWithFailure(task, parentTask());
         });
 
         while (!nestedTasks.isEmpty()) {
             var task = nestedTasks.pop();
             task.fail();
-            taskProgressLogger.logEndSubTaskWithFailure(task, parentTask());
+            progressLogger.logEndSubTaskWithFailure(task, parentTask());
         }
 
         release();
