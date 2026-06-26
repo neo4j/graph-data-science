@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
@@ -220,12 +220,12 @@ public final class MultiLabelInformation implements LabelInformation {
                 ).set(nodeId);
         }
 
-        private Map<NodeLabel, BitSet> buildInner(long nodeCount, ToMappedNodeId mappedIdFn) {
+        private Map<NodeLabel, BitSet> buildInner(long nodeCount, NodeIdMapper mappedIdFn) {
             // When the import bit sets are already keyed by the final mapped id (e.g. nodes loaded
             // through the internal id space), there is nothing to remap. We can hand the underlying
             // words straight to the hppc BitSet via a bulk copy instead of iterating and re-setting
             // every bit through mappedIdFn.
-            boolean isIdentity = mappedIdFn == ToMappedNodeId.IDENTITY;
+            boolean isIdentity = mappedIdFn == NodeIdMapper.IDENTITY;
 
             return this.labelInformation
                 .entrySet()
@@ -246,7 +246,7 @@ public final class MultiLabelInformation implements LabelInformation {
         }
 
         @Override
-        public LabelInformation build(long nodeCount, ToMappedNodeId mappedIdFn) {
+        public LabelInformation build(long nodeCount, NodeIdMapper mappedIdFn) {
             var labelInformation = buildInner(nodeCount, mappedIdFn);
 
             if (labelInformation.isEmpty() && starNodeLabelMappings.isEmpty()) {

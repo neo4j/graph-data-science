@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArrayArray;
@@ -59,8 +59,8 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
     }
 
     @Override
-    public LongArrayNodePropertyValues build(long size, ToMappedNodeId toMappedNodeIdFn, long highestOriginalId) {
-        if (toMappedNodeIdFn == ToMappedNodeId.IDENTITY) {
+    public LongArrayNodePropertyValues build(long size, NodeIdMapper toMappedNodeIdFn, long highestOriginalId) {
+        if (toMappedNodeIdFn == NodeIdMapper.IDENTITY) {
             // Values are already keyed by the internal id, so the source array can be reused
             return buildWithoutMapping(size);
         }
@@ -73,7 +73,7 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
 
     private LongArrayStoreNodePropertyValues buildWithMapping(
         long size,
-        ToMappedNodeId toMappedNodeIdFn,
+        NodeIdMapper toMappedNodeIdFn,
         long highestOriginalId
     ) {
         var propertiesByNeoIds = builder.build();

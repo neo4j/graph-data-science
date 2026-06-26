@@ -20,14 +20,15 @@
 package org.neo4j.gds.api;
 
 /**
- * Maps an original (e.g. intermediate or Neo4j) node id to a mapped node id. A narrow
- * functional view used when only the forward id translation is required, e.g. when
- * re-indexing node properties into the mapped id space.
+ * Maps a node id from one id space to another (e.g. original to mapped, mapped to
+ * original, or root to filtered). A narrow functional view for forward id translation.
+ * The {@link #IDENTITY} instance can be checked by reference to enable fast paths that
+ * skip translation entirely.
  */
 @FunctionalInterface
-public interface ToMappedNodeId {
+public interface NodeIdMapper {
 
-    ToMappedNodeId IDENTITY = id -> id;
+    NodeIdMapper IDENTITY = id -> id;
 
     long toMappedNodeId(long originalNodeId);
 }
