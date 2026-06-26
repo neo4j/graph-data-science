@@ -29,10 +29,22 @@ import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class TaskProgressLogger extends ProgressLoggerDefaults {
+public final class TaskProgressLogger implements ProgressLogger {
+    private static final String TASK_SEPARATOR = " :: ";
+
     private final BatchingProgressLogger batchingProgressLogger;
     private final Task baseTask;
     private final TaskVisitor loggingLeafTaskVisitor;
+
+    private TaskProgressLogger(
+        BatchingProgressLogger batchingProgressLogger,
+        Task baseTask,
+        TaskVisitor loggingLeafTaskVisitor
+    ) {
+        this.batchingProgressLogger = batchingProgressLogger;
+        this.baseTask = baseTask;
+        this.loggingLeafTaskVisitor = loggingLeafTaskVisitor;
+    }
 
     public static TaskProgressLogger create(
         LoggerForProgressTracking log,
@@ -58,10 +70,19 @@ public final class TaskProgressLogger extends ProgressLoggerDefaults {
         return new TaskProgressLogger(batchingProgressLogger, baseTask, leafTaskVisitor);
     }
 
-    private TaskProgressLogger(BatchingProgressLogger batchingProgressLogger, Task baseTask, TaskVisitor loggingLeafTaskVisitor) {
-        this.batchingProgressLogger = batchingProgressLogger;
-        this.baseTask = baseTask;
-        this.loggingLeafTaskVisitor = loggingLeafTaskVisitor;
+    @Override
+    public void logProgress(long progress) {
+        batchingProgressLogger.logProgress(progress, () -> null);
+    }
+
+    @Override
+    public long reset(long newTaskVolume) {
+        return batchingProgressLogger.reset(newTaskVolume);
+    }
+
+    @Override
+    public void release() {
+        batchingProgressLogger.release();
     }
 
     public void logBeginSubTask(Task task, Task parentTask) {
@@ -95,34 +116,60 @@ public final class TaskProgressLogger extends ProgressLoggerDefaults {
         }
     }
 
-    @Override
-    public String getTask() {
+    void startSubTask(String subTaskName) {
+        setTask(getTask() + TASK_SEPARATOR + subTaskName);
+        logStart();
+    }
+
+    void finishSubTask(String subTaskName) {
+        logFinish();
+        var endIndex = getTask().lastIndexOf(TASK_SEPARATOR + subTaskName);
+        if (endIndex == -1) {
+            throw new IllegalArgumentException("Unknown subtask: " + subTaskName);
+        }
+        var task = getTask().substring(0, endIndex);
+        setTask(task);
+    }
+
+    private String getTask() {
         return batchingProgressLogger.getTask();
     }
 
-    @Override
-    public void setTask(String task) {
+    private void setTask(String task) {
         batchingProgressLogger.setTask(task);
     }
 
-    @Override
-    public void logMessage(Supplier<String> msg) {
+    private void logMessage(Supplier<String> msg) {
         batchingProgressLogger.logMessage(msg);
     }
 
-    @Override
-    public void logProgress(long progress) {
-        batchingProgressLogger.logProgress(progress, () -> null);
+    private void logMessage(String msg) {
+        logMessage(() -> msg);
     }
 
-    @Override
-    public long reset(long newTaskVolume) {
-        return batchingProgressLogger.reset(newTaskVolume);
+
+    private void logStart() {
+        logStart("");
     }
 
-    @Override
-    public void release() {
-        batchingProgressLogger.release();
+    private void logStart(String message) {
+        logMessage((message + TASK_SEPARATOR + "Start").trim());
+    }
+
+    private void logFinish() {
+        logFinish("");
+    }
+
+    private void logFinish(String message) {
+        logMessage((message + TASK_SEPARATOR + "Finished").trim());
+    }
+
+    private void logFinishWithFailure() {
+        logFinishWithFailure("");
+    }
+
+    private void logFinishWithFailure(String message) {
+        logMessage((message + TASK_SEPARATOR + "Failed").trim());
     }
 
     private String boundedIterationsTaskName(
