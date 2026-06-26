@@ -23,11 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.idMap;
 
-public class LongNodePropertiesBuilderTest {
+class LongNodePropertiesBuilderTest {
 
     @Test
     void singleLabelAssignmentWithNonDirectMapping() {
@@ -39,7 +41,14 @@ public class LongNodePropertiesBuilderTest {
             originalIds[i] = i * 42L;
         }
 
-        var idMap = idMap(originalIds);
+        var idMapBuilder = GraphFactory
+            .initNodesBuilder()
+            .nodeCount(originalIds.length)
+            .maxOriginalId(originalIds[nodeCount - 1])
+            .build();
+        Arrays.stream(originalIds).forEach(idMapBuilder::addNode);
+
+        var idMap =  idMapBuilder.build().idMap();
 
         var builder = LongNodePropertiesBuilder.of(
             defaultValue,

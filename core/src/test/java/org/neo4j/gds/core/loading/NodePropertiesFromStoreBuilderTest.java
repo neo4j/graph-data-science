@@ -27,9 +27,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
@@ -47,7 +49,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.idMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class NodePropertiesFromStoreBuilderTest {
@@ -342,6 +343,20 @@ final class NodePropertiesFromStoreBuilderTest {
         // e.g. `this.maxValue = Math.max(value, this.maxValue);`
         // this would occasionally be 2^41.
         assertEquals(1L << 42, maxPropertyValue.getAsDouble());
+    }
+
+    private static IdMap idMap(long nodeCount) {
+        var builder = GraphFactory
+            .initNodesBuilder()
+            .nodeCount(nodeCount)
+            .maxOriginalId(nodeCount - 1)
+            .build();
+
+        for (long i = 0; i < nodeCount; i++) {
+            builder.addNode(i);
+        }
+
+        return builder.build().idMap();
     }
 
     static NodePropertyValues createNodeProperties(long nodeCount, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {

@@ -28,10 +28,8 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -281,31 +279,5 @@ public final class TestSupport {
 
     public static TransactionContext fullAccessTransaction(GraphDatabaseService databaseService) {
         return DatabaseTransactionContext.withFullAccess(databaseService);
-    }
-
-    public static IdMap idMap(long nodeCount) {
-        var builder = GraphFactory
-            .initNodesBuilder()
-            .nodeCount(nodeCount)
-            .maxOriginalId(nodeCount - 1)
-            .build();
-
-        for (long i = 0; i < nodeCount; i++) {
-            builder.addNode(i);
-        }
-
-        return builder.build().idMap();
-    }
-
-    public static IdMap idMap(long[] originalIds) {
-        var builder = GraphFactory
-            .initNodesBuilder()
-            .nodeCount(originalIds.length)
-            .maxOriginalId(Arrays.stream(originalIds).max().orElse(0))
-            .build();
-
-        Arrays.stream(originalIds).forEach(builder::addNode);
-
-        return builder.build().idMap();
     }
 }
