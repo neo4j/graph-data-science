@@ -239,7 +239,7 @@ public final class MultiLabelInformation implements LabelInformation {
                     }
 
                     var internBitSet = new BitSet(nodeCount);
-                    importBitSet.forEachSetBit(neoId -> internBitSet.set(mappedIdFn.toMappedNodeId(neoId)));
+                    importBitSet.forEachSetBit(neoId -> internBitSet.set(mappedIdFn.map(neoId)));
 
                     return internBitSet;
                 }));

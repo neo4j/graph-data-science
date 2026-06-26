@@ -30,5 +30,5 @@ public interface NodeIdMapper {
 
     NodeIdMapper IDENTITY = id -> id;
 
-    long toMappedNodeId(long originalNodeId);
+    long map(long nodeId);
 }

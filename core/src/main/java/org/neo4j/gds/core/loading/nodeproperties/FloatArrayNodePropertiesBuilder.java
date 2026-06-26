@@ -92,7 +92,7 @@ public class FloatArrayNodePropertiesBuilder implements InnerNodePropertiesBuild
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
-                    var mappedId = toMappedNodeIdFn.toMappedNodeId(neoId);
+                    var mappedId = toMappedNodeIdFn.map(neoId);
                     if (mappedId == IdMap.NOT_FOUND) {
                         continue;
                     }
