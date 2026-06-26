@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.config.ConcurrencyConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +37,7 @@ class LongArrayNodePropertiesBuilderTest {
             builder.set(i, new long[]{i, i * 2});
         }
 
-        var properties = builder.build(nodeCount, ToMappedNodeId.IDENTITY, nodeCount - 1);
+        var properties = builder.build(nodeCount, NodeIdMapper.IDENTITY, nodeCount - 1);
 
         for (long i = 0; i < nodeCount; i++) {
             assertThat(properties.longArrayValue(i)).as("value at %d", i).containsExactly(i, i * 2);
@@ -54,7 +54,7 @@ class LongArrayNodePropertiesBuilderTest {
         builder.set(0, new long[]{-1L});   // explicit default
         builder.set(1, new long[]{7L});
 
-        var properties = builder.build(2, ToMappedNodeId.IDENTITY, 1);
+        var properties = builder.build(2, NodeIdMapper.IDENTITY, 1);
 
         assertThat(properties.hasValue(0)).isFalse();
         assertThat(properties.longArrayValue(0)).containsExactly(-1L);

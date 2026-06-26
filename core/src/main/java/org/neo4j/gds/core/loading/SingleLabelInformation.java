@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.utils.StringJoining;
@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -60,7 +59,7 @@ final class SingleLabelInformation implements LabelInformation {
     }
 
     @Override
-    public LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, LongUnaryOperator toFilteredNodeId) {
+    public LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, NodeIdMapper toFilteredNodeId) {
         return this;
     }
 
@@ -164,7 +163,7 @@ final class SingleLabelInformation implements LabelInformation {
         }
 
         @Override
-        public LabelInformation build(long nodeCount, ToMappedNodeId mappedIdFn) {
+        public LabelInformation build(long nodeCount, NodeIdMapper mappedIdFn) {
             return new SingleLabelInformation(nodeCount, label);
         }
     }

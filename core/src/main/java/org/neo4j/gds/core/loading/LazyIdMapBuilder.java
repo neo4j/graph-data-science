@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
 import org.neo4j.gds.api.PartialIdMap;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
@@ -131,8 +131,8 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         // The inner builder is forced to identity (see constructor), so the inner id map maps
         // the dense intermediate ids to themselves: exactly the identity intermediate -> mapped
         // id translation that node-property finalization and relationship value mapping require.
-        public ToMappedNodeId toMappedNodeId() {
-            return ToMappedNodeId.IDENTITY;
+        public NodeIdMapper toMappedNodeId() {
+            return NodeIdMapper.IDENTITY;
         }
     }
 

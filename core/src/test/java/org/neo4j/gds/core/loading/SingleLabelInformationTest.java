@@ -25,14 +25,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongConsumer;
-import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -48,7 +47,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldBeSingleLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         assertThat(labelInformation.isSingleLabel()).isTrue();
     }
@@ -56,7 +55,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldAlwaysBeEmpty() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         var informationEmpty = labelInformation.isEmpty();
 
@@ -66,7 +65,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldOnlyContainTheLabelItWasBuiltWith() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         var availableNodeLabels = labelInformation.availableNodeLabels();
 
@@ -76,9 +75,9 @@ class SingleLabelInformationTest {
     @Test
     void shouldReturnItselfWhenFiltered() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
-        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("NotLabelA")), 1, LongUnaryOperator.identity());
+        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("NotLabelA")), 1, NodeIdMapper.IDENTITY);
         var filteredNodeLabels = filteredLabelInformation.availableNodeLabels();
 
         assertThat(filteredLabelInformation).isSameAs(labelInformation);
@@ -88,7 +87,7 @@ class SingleLabelInformationTest {
     @Test
     void hasLabelShouldBeTrueRegardlessOfThePassedNodeId() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
         var nodeId = new Random().nextLong();
 
         var hasLabel = labelInformation.hasLabel(nodeId, LABEL_A);
@@ -99,7 +98,7 @@ class SingleLabelInformationTest {
     @Test
     void hasLabelShouldBeFalseForDifferentNodeLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
         var nodeId = new Random().nextLong();
 
         var hasLabel = labelInformation.hasLabel(nodeId, NodeLabel.of("NodeLabelA"));
@@ -111,7 +110,7 @@ class SingleLabelInformationTest {
     @ValueSource(longs = {1, 3, 19, 42, 1337})
     void nodeCountShouldReturnTheNodeCountWhenTheLabelMatch(long inputNodeCount) {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(inputNodeCount, ToMappedNodeId.IDENTITY);
+            .build(inputNodeCount, NodeIdMapper.IDENTITY);
 
         var nodeCount = labelInformation.nodeCountForLabel(LABEL_A);
 
@@ -121,7 +120,7 @@ class SingleLabelInformationTest {
     @Test
     void forEachNodeLabelShouldAcceptNodeLabelConsumer() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
         var nodeLabelConsumerMock = mock(NodeLabelConsumer.class);
 
         labelInformation.forEachNodeLabel(19, nodeLabelConsumerMock);
@@ -133,7 +132,7 @@ class SingleLabelInformationTest {
     @Test
     void nodeLabelsForNodeIdShouldAlwaysReturnListWithTheSingleNodeLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
         var nodeId = new Random().nextLong();
 
         var nodeLabels = labelInformation.nodeLabelsForNodeId(nodeId);
@@ -146,7 +145,7 @@ class SingleLabelInformationTest {
     @Test
     void nodeCountShouldRaiseAnErrorWhenTheLabelDontMatch() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> labelInformation.nodeCountForLabel(NodeLabel.of("NotLabelA")));
@@ -155,7 +154,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldNotFailOnNodeLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         assertThatNoException()
             .isThrownBy(
@@ -166,7 +165,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldNotAllowForEach() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
             .isThrownBy(() -> labelInformation.forEach((nodeLabel, bitSet) -> false));
@@ -175,7 +174,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldNotAllowUnionBitSet() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
             .isThrownBy(() -> labelInformation.unionBitSet(List.of(), 1337));
@@ -184,7 +183,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldFailOnUnknownNodeLabels() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(
@@ -195,7 +194,7 @@ class SingleLabelInformationTest {
     @Test
     void nodeIteratorShouldWorkForTheCorrectLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         var nodeIterator = labelInformation.nodeIterator(List.of(LABEL_A), 2);
 
@@ -212,7 +211,7 @@ class SingleLabelInformationTest {
     @Test
     void nodeIteratorShouldWorkForAllNodesLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         var nodeIterator = labelInformation.nodeIterator(List.of(NodeLabel.ALL_NODES), 2);
 
@@ -229,7 +228,7 @@ class SingleLabelInformationTest {
     @Test
     void nodeIteratorShouldFailForIncorrectLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> labelInformation.nodeIterator(List.of(NodeLabel.of("NotLabelA")), 1));
@@ -238,7 +237,7 @@ class SingleLabelInformationTest {
     @Test
     void nodeIteratorShouldFailForMoreThanOneLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() ->
@@ -254,7 +253,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldDisallowAddingNodeLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
@@ -264,7 +263,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldDisallowAddingNodeIdToLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
             .isThrownBy(() -> labelInformation.addNodeIdToLabel(19L, LABEL_A));
@@ -272,7 +271,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldConvertToMultiLabel() {
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         var nodeLabelB = NodeLabel.of("B");
         var multiLabelInformation = labelInformation.toMultiLabel(nodeLabelB);
@@ -289,7 +288,7 @@ class SingleLabelInformationTest {
     @Test
     void shouldConvertStarProjectionToMultiLabel() {
         var labelInformation = LabelInformationBuilders.allNodes()
-            .build(1, ToMappedNodeId.IDENTITY);
+            .build(1, NodeIdMapper.IDENTITY);
 
         var nodeLabelB = NodeLabel.of("B");
         var multiLabelInformation = labelInformation.toMultiLabel(nodeLabelB);
@@ -309,7 +308,7 @@ class SingleLabelInformationTest {
         @Test
         void shouldBuildSingleLabelInformation() {
             var builder = new SingleLabelInformation.Builder(LABEL_A);
-            var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+            var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
             assertThat(labelInformation).isNotNull();
         }
 

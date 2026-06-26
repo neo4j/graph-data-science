@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.jspecify.annotations.NonNull;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -94,8 +94,8 @@ public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuild
     }
 
     @Override
-    public NodePropertyValues build(long size, ToMappedNodeId toMappedNodeIdFn, long highestOriginalId) {
-        if (toMappedNodeIdFn == ToMappedNodeId.IDENTITY) {
+    public NodePropertyValues build(long size, NodeIdMapper toMappedNodeIdFn, long highestOriginalId) {
+        if (toMappedNodeIdFn == NodeIdMapper.IDENTITY) {
             // Values are already keyed by the internal id, so the source array can be reused
             return buildWithoutMapping(size);
         }
@@ -110,7 +110,7 @@ public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuild
 
     private LongStoreNodePropertyValues buildWithMapping(
         long size,
-        ToMappedNodeId toMappedNodeIdFn,
+        NodeIdMapper toMappedNodeIdFn,
         long highestOriginalId
     ) {
         var propertiesByNeoIds = builder.build();
@@ -129,7 +129,7 @@ public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuild
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
-                    var mappedId = toMappedNodeIdFn.toMappedNodeId(neoId);
+                    var mappedId = toMappedNodeIdFn.map(neoId);
                     if (mappedId == IdMap.NOT_FOUND) {
                         continue;
                     }

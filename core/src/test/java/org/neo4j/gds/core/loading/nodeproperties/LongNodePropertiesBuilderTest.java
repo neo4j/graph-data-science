@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.config.ConcurrencyConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,7 +69,7 @@ public class LongNodePropertiesBuilderTest {
             expectedMax = Math.max(expectedMax, value);
         }
 
-        var properties = builder.build(nodeCount, ToMappedNodeId.IDENTITY, nodeCount - 1);
+        var properties = builder.build(nodeCount, NodeIdMapper.IDENTITY, nodeCount - 1);
 
         for (long i = 0; i < nodeCount; i++) {
             assertThat(properties.longValue(i)).as("value at %d", i).isEqualTo(i * 7L);
@@ -87,7 +87,7 @@ public class LongNodePropertiesBuilderTest {
         builder.set(0, 10L);   // explicit default
         builder.set(1, 42L);
 
-        var properties = builder.build(2, ToMappedNodeId.IDENTITY, 1);
+        var properties = builder.build(2, NodeIdMapper.IDENTITY, 1);
 
         assertThat(properties.hasValue(0)).isFalse();
         assertThat(properties.longValue(0)).isEqualTo(10L);
@@ -98,7 +98,7 @@ public class LongNodePropertiesBuilderTest {
     @Test
     void identityFastPathOnEmptyBuilderHasNoMax() {
         var builder = LongNodePropertiesBuilder.of(DefaultValue.of(10L), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
-        var properties = builder.build(0, ToMappedNodeId.IDENTITY, -1);
+        var properties = builder.build(0, NodeIdMapper.IDENTITY, -1);
         assertThat(properties.getMaxLongPropertyValue()).isEmpty();
     }
 }

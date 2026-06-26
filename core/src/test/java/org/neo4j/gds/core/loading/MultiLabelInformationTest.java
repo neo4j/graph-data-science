@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongConsumer;
-import java.util.function.LongUnaryOperator;
 import java.util.stream.LongStream;
 
 import static java.util.stream.Collectors.toList;
@@ -61,7 +60,7 @@ class MultiLabelInformationTest {
         var labelB = NodeLabel.of("B");
         var builder = MultiLabelInformation.Builder.of(1, List.of(labelA, labelB), List.of());
 
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         assertThat(labelInformation.isSingleLabel()).isFalse();
     }
@@ -69,7 +68,7 @@ class MultiLabelInformationTest {
     @Test
     void shouldBeEmptyWhenThereIsNoLabelInformation() {
         var builder = MultiLabelInformation.Builder.of(19, List.of(), List.of());
-        var labelInformation = builder.build(19, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(19, NodeIdMapper.IDENTITY);
 
         assertThat(labelInformation.isEmpty()).isTrue();
     }
@@ -82,7 +81,7 @@ class MultiLabelInformationTest {
             List.of(NodeLabel.of("A"), NodeLabel.of("B")),
             List.of()
         );
-        var labelInformation = builder.build(19, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(19, NodeIdMapper.IDENTITY);
 
         assertThat(labelInformation.isEmpty()).isFalse();
     }
@@ -90,7 +89,7 @@ class MultiLabelInformationTest {
     @Test
     void shouldNotBeEmptyWhenThereIsNoLabelInformationButHasStarLabels() {
         var builder = MultiLabelInformation.Builder.of(19, List.of(), List.of(NodeLabel.of("B")));
-        var labelInformation = builder.build(19, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(19, NodeIdMapper.IDENTITY);
 
         assertThat(labelInformation.isEmpty()).isFalse();
     }
@@ -103,7 +102,7 @@ class MultiLabelInformationTest {
             List.of(NodeLabel.of("A"), NodeLabel.of("B")),
             List.of()
         );
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         var labelInformationConsumerMock = mock(LabelInformation.LabelInformationConsumer.class);
         when(labelInformationConsumerMock.accept(any(), any())).thenReturn(true, true, false);
@@ -125,7 +124,7 @@ class MultiLabelInformationTest {
         aIds.forEach(id -> builder.addNodeIdToLabel(labelA, id));
         bIds.forEach(id -> builder.addNodeIdToLabel(labelB, id));
 
-        var labelInformation = builder.build(256, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(256, NodeIdMapper.IDENTITY);
 
         aIds.forEach(id -> assertThat(labelInformation.hasLabel(id, labelA)).as("A has %d", id).isTrue());
         bIds.forEach(id -> assertThat(labelInformation.hasLabel(id, labelB)).as("B has %d", id).isTrue());
@@ -140,7 +139,7 @@ class MultiLabelInformationTest {
         var labelB = NodeLabel.of("B");
         long nodeCount = 300;
 
-        var fast = builderWithLabels(labelA, labelB).build(nodeCount, ToMappedNodeId.IDENTITY);
+        var fast = builderWithLabels(labelA, labelB).build(nodeCount, NodeIdMapper.IDENTITY);
         var slow = builderWithLabels(labelA, labelB).build(nodeCount, id -> id);
 
         for (long id = 0; id < nodeCount; id++) {
@@ -171,7 +170,7 @@ class MultiLabelInformationTest {
         originalToMapped[30] = 2L;
         originalToMapped[40] = 3L;
         originalToMapped[50] = 4L;
-        ToMappedNodeId mappedIdFn = originalId -> originalToMapped[(int) originalId];
+        NodeIdMapper mappedIdFn = originalId -> originalToMapped[(int) originalId];
 
         var labelInformation = builder.build(5, mappedIdFn);
 
@@ -200,7 +199,7 @@ class MultiLabelInformationTest {
         for (long id = 0; id < nodeCount; id++) {
             builder.addNodeIdToLabel(id % 2 == 0 ? labelA : labelB, id);
         }
-        ToMappedNodeId reverse = originalId -> nodeCount - 1 - originalId;
+        NodeIdMapper reverse = originalId -> nodeCount - 1 - originalId;
 
         var labelInformation = builder.build(nodeCount, reverse);
 
@@ -235,9 +234,9 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(labelB, 2L);
         builder.addNodeIdToLabel(labelB, 3L);
 
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
-        var filteredLabelInformation = labelInformation.filter(List.of(labelA), 4, LongUnaryOperator.identity());
+        var filteredLabelInformation = labelInformation.filter(List.of(labelA), 4, NodeIdMapper.IDENTITY);
 
         assertThat(filteredLabelInformation.availableNodeLabels()).containsExactly(labelA);
     }
@@ -251,9 +250,9 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(labelB, 2L);
         builder.addNodeIdToLabel(labelB, 3L);
 
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
-        var filteredLabelInformation = labelInformation.filter(List.of(labelA), 4, LongUnaryOperator.identity());
+        var filteredLabelInformation = labelInformation.filter(List.of(labelA), 4, NodeIdMapper.IDENTITY);
 
         assertThat(filteredLabelInformation.nodeLabelsForNodeId(1L)).containsExactly(labelA);
 
@@ -269,10 +268,10 @@ class MultiLabelInformationTest {
             List.of(NodeLabel.of("A"), NodeLabel.of("B")),
             List.of()
         );
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         // Here we get NPE, because...well we don't check if the labels we try to filter by actually exist.
-        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("C")), 1, LongUnaryOperator.identity());
+        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("C")), 1, NodeIdMapper.IDENTITY);
 
         // TODO: What is the expected behaviour?
     }
@@ -286,7 +285,7 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(labelB, 2L);
         builder.addNodeIdToLabel(labelB, 3L);
 
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         assertThat(labelInformation.nodeCountForLabel(labelA)).isEqualTo(1L);
         assertThat(labelInformation.nodeCountForLabel(labelB)).isEqualTo(2L);
@@ -301,7 +300,7 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(labelB, 2L);
         builder.addNodeIdToLabel(labelB, 3L);
 
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> labelInformation.nodeCountForLabel(NodeLabel.of("U")));
@@ -312,7 +311,7 @@ class MultiLabelInformationTest {
         var builder = MultiLabelInformation.Builder.of(1, List.of(NodeLabel.of("A"), NodeLabel.of("B")), List.of());
         var nodeId = new Random().nextLong();
 
-        var labelInformation = builder.build(3, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(3, NodeIdMapper.IDENTITY);
 
         assertThat(labelInformation.hasLabel(nodeId, NodeLabel.ALL_NODES)).isTrue();
     }
@@ -326,7 +325,7 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(labelB, 2L);
         builder.addNodeIdToLabel(labelB, 3L);
 
-        var labelInformation = builder.build(3, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(3, NodeIdMapper.IDENTITY);
 
         assertThat(labelInformation.hasLabel(1L, labelA)).isTrue();
         assertThat(labelInformation.hasLabel(2L, labelB)).isTrue();
@@ -340,7 +339,7 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(NodeLabel.of("B"), 2L);
         builder.addNodeIdToLabel(NodeLabel.of("B"), 3L);
 
-        var labelInformation = builder.build(3, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(3, NodeIdMapper.IDENTITY);
 
         assertThat(labelInformation.hasLabel(1L, NodeLabel.of("C"))).isFalse();
         assertThat(labelInformation.hasLabel(2L, NodeLabel.of("D"))).isFalse();
@@ -355,7 +354,7 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(NodeLabel.of("B"), 3L);
         builder.addNodeIdToLabel(NodeLabel.of("C"), 4L);
 
-        var labelInformation = builder.build(3, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(3, NodeIdMapper.IDENTITY);
 
         var unionBitSet = labelInformation.unionBitSet(List.of(NodeLabel.of("C"), NodeLabel.of("A")), 4);
 
@@ -368,7 +367,7 @@ class MultiLabelInformationTest {
     @Test
     void shouldValidateSuccessfully() {
         var builder = MultiLabelInformation.Builder.of(1, List.of(NodeLabel.of("A"), NodeLabel.of("B")), List.of());
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         assertThatNoException()
             .isThrownBy(
@@ -379,7 +378,7 @@ class MultiLabelInformationTest {
     @Test
     void shouldFailOnUnknownNodeLabels() {
         var builder = MultiLabelInformation.Builder.of(1, List.of(NodeLabel.of("A"), NodeLabel.of("B")), List.of());
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(
@@ -395,7 +394,7 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(NodeLabel.of("B"), 2L);
         builder.addNodeIdToLabel(NodeLabel.of("B"), 3L);
 
-        var labelInformation = builder.build(3, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(3, NodeIdMapper.IDENTITY);
 
         var nodeLabelConsumerMock = mock(NodeLabelConsumer.class);
         when(nodeLabelConsumerMock.accept(any())).thenReturn(true);
@@ -415,7 +414,7 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(NodeLabel.of("B"), 2L);
         builder.addNodeIdToLabel(NodeLabel.of("C"), 3L);
         builder.addNodeIdToLabel(NodeLabel.of("A"), 4L);
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         var nodeIterator = labelInformation.nodeIterator(List.of(NodeLabel.of("A"), NodeLabel.of("C")), 4);
 
@@ -432,7 +431,7 @@ class MultiLabelInformationTest {
     @Test
     void nodeIteratorShouldWorkForAllNodesLabel() {
         var builder = MultiLabelInformation.Builder.of(1, List.of(NodeLabel.of("A"), NodeLabel.of("B")), List.of());
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         var nodeIterator = labelInformation.nodeIterator(List.of(NodeLabel.ALL_NODES), 2);
 
@@ -460,7 +459,7 @@ class MultiLabelInformationTest {
 
         // Act
         var newLabel = NodeLabel.of("C");
-        var labelInformation = builder.build(42, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(42, NodeIdMapper.IDENTITY);
         labelInformation.addLabel(newLabel);
 
         // Assert
@@ -489,7 +488,7 @@ class MultiLabelInformationTest {
         var builder = LabelInformationBuilders
             .multiLabelWithCapacityAndLabelInformation(42, availableNodeLabels, Collections.emptyList());
 
-        var labelInformation = builder.build(42, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(42, NodeIdMapper.IDENTITY);
         var newLabel = NodeLabel.of("C");
         labelInformation.addLabel(newLabel);
 
@@ -519,7 +518,7 @@ class MultiLabelInformationTest {
         var labelB = NodeLabel.of("B");
         var builder = MultiLabelInformation.Builder.of(1, List.of(labelA, labelB), List.of());
 
-        var labelInformation = builder.build(1, ToMappedNodeId.IDENTITY);
+        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         var labelC = NodeLabel.of("C");
 
@@ -541,7 +540,7 @@ class MultiLabelInformationTest {
         @Test
         void shouldBuildLabelInformationWithCapacity() {
             var builder = MultiLabelInformation.Builder.of(2);
-            var labelInformation = builder.build(2, ToMappedNodeId.IDENTITY);
+            var labelInformation = builder.build(2, NodeIdMapper.IDENTITY);
 
             assertThat(labelInformation).isNotNull();
             assertThat(labelInformation.isEmpty()).isTrue();
@@ -551,7 +550,7 @@ class MultiLabelInformationTest {
         @Test
         void shouldBuildLabelInformationWithCapacityAndEmptyLabelInformation() {
             var builder = MultiLabelInformation.Builder.of(19, List.of(), List.of());
-            var labelInformation = builder.build(19, ToMappedNodeId.IDENTITY);
+            var labelInformation = builder.build(19, NodeIdMapper.IDENTITY);
 
             assertThat(labelInformation).isNotNull();
             assertThat(labelInformation.isEmpty()).isTrue();
@@ -561,7 +560,7 @@ class MultiLabelInformationTest {
         @Test
         void shouldBuildLabelInformationWithCapacityAndStarLabelInformation() {
             var builder = MultiLabelInformation.Builder.of(21, List.of(), List.of(NodeLabel.of("Star")));
-            var labelInformation = builder.build(21, ToMappedNodeId.IDENTITY);
+            var labelInformation = builder.build(21, NodeIdMapper.IDENTITY);
 
             assertThat(labelInformation).isNotNull();
             assertThat(labelInformation.isEmpty()).isFalse();
@@ -577,7 +576,7 @@ class MultiLabelInformationTest {
             builder.addNodeIdToLabel(NodeLabel.of("B"), 3L);
 
             // TODO: Figure out why we get the three nodes when we build the `MultiLabelInformation` with `nodeCount=2`
-            var labelInformation = builder.build(2, ToMappedNodeId.IDENTITY);
+            var labelInformation = builder.build(2, NodeIdMapper.IDENTITY);
 
             assertThat(labelInformation.availableNodeLabels())
                 .containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));

@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.ComposedIdMap;
 import org.neo4j.gds.api.nodes.FilterableNodeTranslator;
 import org.neo4j.gds.api.nodes.LabelInformation;
@@ -116,7 +116,7 @@ public final class IdentityIdMap implements FilterableNodeTranslator {
             var nodeCount = this.nodeCount.longValue();
             // The id map is identity, so label bit sets are already keyed by the mapped id and can
             // be built without remapping (see LabelInformation.Builder.IDENTITY).
-            var labelInformation = labelInformationBuilder.build(nodeCount, ToMappedNodeId.IDENTITY);
+            var labelInformation = labelInformationBuilder.build(nodeCount, NodeIdMapper.IDENTITY);
             return ComposedIdMap.of(new IdentityIdMap(nodeCount), labelInformation);
         }
     }

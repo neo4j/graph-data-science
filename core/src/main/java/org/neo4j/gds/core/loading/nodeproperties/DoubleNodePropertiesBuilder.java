@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.ToMappedNodeId;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
@@ -83,8 +83,8 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
     }
 
     @Override
-    public DoubleNodePropertyValues build(long size, ToMappedNodeId toMappedNodeIdFn, long highestOriginalId) {
-        if (toMappedNodeIdFn == ToMappedNodeId.IDENTITY) {
+    public DoubleNodePropertyValues build(long size, NodeIdMapper toMappedNodeIdFn, long highestOriginalId) {
+        if (toMappedNodeIdFn == NodeIdMapper.IDENTITY) {
             // Values are already keyed by the internal id, so the source array can be reused
             return buildWithoutMapping(size);
         }
@@ -99,7 +99,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
     private DoubleStoreNodePropertyValues buildWithMapping(
         long size,
-        ToMappedNodeId toMappedNodeIdFn,
+        NodeIdMapper toMappedNodeIdFn,
         long highestOriginalId
     ) {
         var propertiesByNeoIds = builder.build();
@@ -118,7 +118,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
                 for (int pageIndex = 0; pageIndex < end; pageIndex++) {
                     var neoId = offset + pageIndex;
-                    var mappedId = toMappedNodeIdFn.toMappedNodeId(neoId);
+                    var mappedId = toMappedNodeIdFn.map(neoId);
                     if (mappedId == IdMap.NOT_FOUND) {
                         continue;
                     }
