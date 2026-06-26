@@ -23,7 +23,6 @@ import org.assertj.core.api.Condition;
 import org.assertj.core.api.HamcrestCondition;
 import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.data.Percentage;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
@@ -32,10 +31,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
@@ -129,51 +125,12 @@ public final class TestSupport {
         assertTrue(equals, message);
     }
 
-    public static void assertMemoryEstimation(
-        Supplier<MemoryEstimation> actualMemoryEstimation,
-        long nodeCount,
-        Concurrency concurrency,
-        MemoryRange expected
-    ) {
-        assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, concurrency, expected);
-    }
-
-    public static void assertMemoryEstimation(
-        Supplier<MemoryEstimation> actualMemoryEstimation,
-        long nodeCount,
-        long relationshipCount,
-        Concurrency concurrency,
-        MemoryRange expected
-    ) {
-        assertMemoryEstimation(
-            actualMemoryEstimation.get(),
-            GraphDimensions.of(nodeCount, relationshipCount),
-            concurrency,
-            expected
-        );
-    }
-
-    public static void assertMemoryEstimation(
-        MemoryEstimation memoryEstimation,
-        GraphDimensions graphDimensions,
-        Concurrency concurrency,
-        MemoryRange expected
-    ) {
-        MemoryRange actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected.min, expected.max);
-    }
-
     public static void assertMemoryRange(MemoryRange actual, long expected) {
         assertMemoryRange(actual, expected, expected);
     }
 
     public static void assertMemoryRange(MemoryRange actual, MemoryRange expected) {
         assertMemoryRange(actual, expected.min, expected.max);
-    }
-
-    public static void assertMemoryRangeIsClose(MemoryRange actual, MemoryRange expected, Percentage p) {
-        assertThat(actual.min).isCloseTo(expected.min, p);
-        assertThat(actual.max).isCloseTo(expected.max, p);
     }
 
     public static void assertMemoryRange(MemoryRange actual, long expectedMin, long expectedMax) {

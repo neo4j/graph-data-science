@@ -27,6 +27,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -74,7 +75,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -465,13 +466,17 @@ class LinkPredictionPredictPipelineExecutorTest {
             .graphName("DUMMY")
             .build();
 
-        assertMemoryEstimation(
-            () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData, null),
-            graphStore.nodeCount(),
-            graphStore.relationshipCount(),
-            config.concurrency(),
-            MemoryRange.of(433)
+        var expected = MemoryRange.of(433);
+        var memoryEstimation = LinkPredictionPredictPipelineExecutor.estimate(
+            new OpenModelCatalog(),
+            pipeline,
+            config,
+            modelData,
+            null
         );
+        var graphDimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
+        var actual = memoryEstimation.estimate(graphDimensions, config.concurrency()).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
     @Test
@@ -493,13 +498,18 @@ class LinkPredictionPredictPipelineExecutorTest {
             .graphName("DUMMY")
             .build();
 
-        assertMemoryEstimation(
-            () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData, null),
-            graphStore.nodeCount(),
-            graphStore.relationshipCount(),
-            config.concurrency(),
-            MemoryRange.of(489)
+        var expected = MemoryRange.of(489);
+        var memoryEstimation = LinkPredictionPredictPipelineExecutor.estimate(
+            new OpenModelCatalog(),
+            pipeline,
+            config,
+            modelData,
+            null
         );
+        var graphDimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
+        var concurrency = config.concurrency();
+        var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
     @Test

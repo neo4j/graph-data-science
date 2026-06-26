@@ -166,7 +166,7 @@ class RandomForestRegressorTest {
     void predictOverheadMemoryEstimation() {
         var estimation = RandomForestRegressor.runtimeOverheadMemoryEstimation();
 
-        assertMemoryRange(estimation, 16);
+        assertMemoryRange(estimation, 16, 16);
     }
 
     @ParameterizedTest

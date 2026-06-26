@@ -61,9 +61,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.Orientation.NATURAL;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
-import static org.neo4j.gds.TestSupport.assertMemoryRangeIsClose;
 
 @GdlExtension
 class CommonNeighbourAwareRandomWalkTest {
@@ -548,10 +546,12 @@ class CommonNeighbourAwareRandomWalkTest {
             concurrency
         ).memoryUsage();
 
-        assertMemoryRange(mem1k, 116_232L);
-        assertMemoryRange(mem10k, 1_161_360L);
+        assertMemoryRange(mem1k, 116_232L, 116_232L);
+        assertMemoryRange(mem10k, 1_161_360L, 1_161_360L);
 
-        assertMemoryRangeIsClose(mem10k, mem1k.times(10), Percentage.withPercentage(1));
+        var testTolerance = Percentage.withPercentage(1);
+        assertThat(mem10k.min).isCloseTo(mem1k.times(10).min, testTolerance);
+        assertThat(mem10k.max).isCloseTo(mem1k.times(10).max, testTolerance);
     }
 
     @Test
@@ -576,13 +576,16 @@ class CommonNeighbourAwareRandomWalkTest {
             concurrency
         ).memoryUsage();
 
-        assertMemoryRange(mem01, 745_360L);
-        assertMemoryRange(mem05, 1_161_360L);
-        assertMemoryRange(mem09, 1_577_360L);
+        assertMemoryRange(mem01, 745_360L, 745_360L);
+        assertMemoryRange(mem05, 1_161_360L, 1_161_360L);
+        assertMemoryRange(mem09, 1_577_360L, 1_577_360L);
 
         MemoryRange delta = mem05.elementWiseSubtract(mem01);
         MemoryRange twoDelta = mem09.elementWiseSubtract(mem01);
-        assertMemoryRangeIsClose(twoDelta, delta.times(2), Percentage.withPercentage(1));
+
+        var testTolerance = Percentage.withPercentage(1);
+        assertThat(twoDelta.min).isCloseTo(delta.times(2).min, testTolerance);
+        assertThat(twoDelta.max).isCloseTo(delta.times(2).max, testTolerance);
     }
 
     @Test
@@ -592,12 +595,10 @@ class CommonNeighbourAwareRandomWalkTest {
             .startNodes(LongStream.range(0, 1000).boxed().collect(Collectors.toList()))
             .build();
 
-        assertMemoryEstimation(
-            CommonNeighbourAwareRandomWalk.memoryEstimation(config),
-            GraphDimensions.of(1000),
-            new Concurrency(1),
-            MemoryRange.of(132_232L)
-        );
+        var expected = MemoryRange.of(132_232L);
+        var memoryEstimation = CommonNeighbourAwareRandomWalk.memoryEstimation(config);
+        var actual = memoryEstimation.estimate(GraphDimensions.of(1000), new Concurrency(1)).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
     @Test
@@ -633,13 +634,15 @@ class CommonNeighbourAwareRandomWalkTest {
             concurrency
         ).memoryUsage();
 
-        assertMemoryRange(mem1k, 1_177_360L);
-        assertMemoryRange(mem3k, 1_209_360L);
-        assertMemoryRange(mem5k, 1_241_360L);
+        assertMemoryRange(mem1k, 1_177_360L, 1_177_360L);
+        assertMemoryRange(mem3k, 1_209_360L, 1_209_360L);
+        assertMemoryRange(mem5k, 1_241_360L, 1_241_360L);
 
         MemoryRange delta = mem3k.elementWiseSubtract(mem1k);
         MemoryRange twoDelta = mem5k.elementWiseSubtract(mem1k);
-        assertMemoryRangeIsClose(twoDelta, delta.times(2), Percentage.withPercentage(1));
+        var testTolerance = Percentage.withPercentage(1);
+        assertThat(twoDelta.min).isCloseTo(delta.times(2).min, testTolerance);
+        assertThat(twoDelta.max).isCloseTo(delta.times(2).max, testTolerance);
     }
 
     @Test
@@ -649,12 +652,10 @@ class CommonNeighbourAwareRandomWalkTest {
             .concurrency(1)
             .build();
 
-        assertMemoryEstimation(
-            CommonNeighbourAwareRandomWalk.memoryEstimation(config),
-            GraphDimensions.of(1000),
-            new Concurrency(1),
-            MemoryRange.of(32_232L)
-        );
+        var expected = MemoryRange.of(32_232L);
+        var memoryEstimation = CommonNeighbourAwareRandomWalk.memoryEstimation(config);
+        var actual = memoryEstimation.estimate(GraphDimensions.of(1000), new Concurrency(1)).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
     @Test
@@ -664,12 +665,12 @@ class CommonNeighbourAwareRandomWalkTest {
             .relationshipWeightProperty("prop")
             .build();
 
-        assertMemoryEstimation(
-            CommonNeighbourAwareRandomWalk.memoryEstimation(config),
-            GraphDimensions.of(1000),
-            new Concurrency(1),
-            MemoryRange.of(124_272L)
-        );
+        var memoryEstimation = CommonNeighbourAwareRandomWalk.memoryEstimation(config);
+        var graphDimensions = GraphDimensions.of(1000);
+        var concurrency = new Concurrency(1);
+        var expected = MemoryRange.of(124_272L);
+        var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
     @Test

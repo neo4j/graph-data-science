@@ -40,6 +40,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -88,7 +89,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -428,16 +429,16 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .modelUser("user")
             .build();
 
+        var expected = MemoryRange.of(824);
         var algorithmsProcedureFacade = createAlgorithmsProcedureFacade();
         var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog(), algorithmsProcedureFacade);
-        assertMemoryEstimation(
-            () -> memoryEstimation,
+        var graphDimensions = GraphDimensions.of(
             graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
-            graphStore.relationshipCount(),
-            config.concurrency(),
-            MemoryRange.of(824)
+            graphStore.relationshipCount()
         );
-
+        var concurrency = config.concurrency();
+        var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
     /**
@@ -521,13 +522,20 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .modelUser("user")
             .build();
 
-        assertMemoryEstimation(
-            () -> NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog(), null),
-            graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
-            graphStore.relationshipCount(),
-            config.concurrency(),
-            MemoryRange.of(352)
+        var expected = MemoryRange.of(352);
+        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(
+            model,
+            config,
+            new OpenModelCatalog(),
+            null
         );
+        var graphDimensions = GraphDimensions.of(
+            graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
+            graphStore.relationshipCount()
+        );
+        var concurrency = config.concurrency();
+        var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
     @Test

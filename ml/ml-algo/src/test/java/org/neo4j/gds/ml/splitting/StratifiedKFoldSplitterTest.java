@@ -148,7 +148,7 @@ class StratifiedKFoldSplitterTest {
             .estimate(dimensions, new Concurrency(4))
             .memoryUsage();
 
-        assertMemoryRange(actualEstimation, expectedMemory);
+        assertMemoryRange(actualEstimation, expectedMemory, expectedMemory);
     }
 
     private LongMultiSet classCounts(HugeLongArray values) {

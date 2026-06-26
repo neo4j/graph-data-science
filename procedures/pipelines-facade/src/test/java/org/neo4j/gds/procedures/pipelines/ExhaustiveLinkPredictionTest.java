@@ -283,7 +283,7 @@ class ExhaustiveLinkPredictionTest {
             .estimate(config, 100)
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation);
+        assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation, expectedEstimation);
     }
 
     @ParameterizedTest
@@ -303,7 +303,7 @@ class ExhaustiveLinkPredictionTest {
             .estimate(config, linkFeatureDimension)
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation);
+        assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation, expectedEstimation);
     }
 
 }

@@ -266,7 +266,7 @@ class NodeClassificationPredictTest {
 
         var estimate = NodeClassificationPredict.memoryEstimation(produceProbabilities, batchSize, featureCount, classCount)
             .estimate(GraphDimensions.of(nodeCount), concurrency);
-        assertMemoryRange(estimate.memoryUsage(), expected);
+        assertMemoryRange(estimate.memoryUsage(), expected, expected);
     }
 
     @Test

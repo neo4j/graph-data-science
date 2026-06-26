@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.api.TrainingMethod;
@@ -37,13 +38,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 
 class NodeClassificationTrainMemoryEstimateDefinitionTest {
 
     @ParameterizedTest
     @MethodSource("trainerMethodConfigs")
-    void shouldEstimateMemory(List<TunableTrainerConfig> tunableConfigs, MemoryRange memoryRange) {
+    void shouldEstimateMemory(List<TunableTrainerConfig> tunableConfigs, MemoryRange expected) {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             "testProc",
@@ -76,14 +77,10 @@ class NodeClassificationTrainMemoryEstimateDefinitionTest {
 
         var memoryEstimation = new NodeClassificationTrainMemoryEstimateDefinition(pipeline, config, new OpenModelCatalog(), null).memoryEstimation();
 
-        // TODO: replace this with proper asserts
-        assertMemoryEstimation(
-            () -> memoryEstimation,
-            9,
-            7,
-            config.concurrency(),
-            memoryRange
-        );
+        var graphDimensions = GraphDimensions.of(9, 7);
+        var concurrency = config.concurrency();
+        var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
     private static Stream<Arguments> trainerMethodConfigs() {
