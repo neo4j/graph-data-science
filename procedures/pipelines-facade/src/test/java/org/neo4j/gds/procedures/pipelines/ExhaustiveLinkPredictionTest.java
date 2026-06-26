@@ -28,6 +28,7 @@ import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -283,7 +284,7 @@ class ExhaustiveLinkPredictionTest {
             .estimate(config, 100)
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation, expectedEstimation);
+        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(expectedEstimation));
     }
 
     @ParameterizedTest
@@ -303,7 +304,7 @@ class ExhaustiveLinkPredictionTest {
             .estimate(config, linkFeatureDimension)
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
-        assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation, expectedEstimation);
+        assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(expectedEstimation));
     }
 
 }

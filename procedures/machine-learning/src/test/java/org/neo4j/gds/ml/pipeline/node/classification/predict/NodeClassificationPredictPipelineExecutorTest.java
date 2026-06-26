@@ -438,7 +438,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         );
         var concurrency = config.concurrency();
         var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected.min, expected.max);
+        assertMemoryRange(actual, expected);
     }
 
     /**
@@ -535,7 +535,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         );
         var concurrency = config.concurrency();
         var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected.min, expected.max);
+        assertMemoryRange(actual, expected);
     }
 
     @Test

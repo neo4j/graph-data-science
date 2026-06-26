@@ -266,7 +266,7 @@ class RandomForestClassifierTest {
     ) {
         var estimation = RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
 
-        assertMemoryRange(estimation, expectedMin, expectedMax);
+        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
     }
 
     @ParameterizedTest
@@ -313,7 +313,7 @@ class RandomForestClassifierTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
 
-        assertMemoryRange(estimation, expectedMin, expectedMax);
+        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
     }
 
     @ParameterizedTest
@@ -347,6 +347,6 @@ class RandomForestClassifierTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), new Concurrency(4)).memoryUsage();
 
-        assertMemoryRange(estimation, expectedMin, expectedMax);
+        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
     }
 }

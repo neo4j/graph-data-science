@@ -166,7 +166,7 @@ class RandomForestRegressorTest {
     void predictOverheadMemoryEstimation() {
         var estimation = RandomForestRegressor.runtimeOverheadMemoryEstimation();
 
-        assertMemoryRange(estimation, 16, 16);
+        assertMemoryRange(estimation, MemoryRange.of(16));
     }
 
     @ParameterizedTest
@@ -209,7 +209,7 @@ class RandomForestRegressorTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
 
-        assertMemoryRange(estimation, expectedMin, expectedMax);
+        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
     }
 
     @ParameterizedTest
@@ -243,6 +243,6 @@ class RandomForestRegressorTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), new Concurrency(4)).memoryUsage();
 
-        assertMemoryRange(estimation, expectedMin, expectedMax);
+        assertMemoryRange(estimation, MemoryRange.of(expectedMin, expectedMax));
     }
 }

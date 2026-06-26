@@ -91,7 +91,7 @@ class LogisticRegressionDataTest {
             .memoryEstimation(true, 2, estimatedFeatureCount)
             .estimate(dimensions, new Concurrency(5000));
 
-        assertMemoryRange(memoryEstimation.memoryUsage(), minEstimation, maxEstimation);
+        assertMemoryRange(memoryEstimation.memoryUsage(), MemoryRange.of(minEstimation, maxEstimation));
     }
 
     @Test

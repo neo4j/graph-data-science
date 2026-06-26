@@ -476,7 +476,7 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
         var graphDimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
         var actual = memoryEstimation.estimate(graphDimensions, config.concurrency()).memoryUsage();
-        assertMemoryRange(actual, expected.min, expected.max);
+        assertMemoryRange(actual, expected);
     }
 
     @Test
@@ -509,7 +509,7 @@ class LinkPredictionPredictPipelineExecutorTest {
         var graphDimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
         var concurrency = config.concurrency();
         var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected.min, expected.max);
+        assertMemoryRange(actual, expected);
     }
 
     @Test

@@ -546,8 +546,8 @@ class CommonNeighbourAwareRandomWalkTest {
             concurrency
         ).memoryUsage();
 
-        assertMemoryRange(mem1k, 116_232L, 116_232L);
-        assertMemoryRange(mem10k, 1_161_360L, 1_161_360L);
+        assertMemoryRange(mem1k, MemoryRange.of(116_232L));
+        assertMemoryRange(mem10k, MemoryRange.of(1_161_360L));
 
         var testTolerance = Percentage.withPercentage(1);
         assertThat(mem10k.min).isCloseTo(mem1k.times(10).min, testTolerance);
@@ -576,9 +576,9 @@ class CommonNeighbourAwareRandomWalkTest {
             concurrency
         ).memoryUsage();
 
-        assertMemoryRange(mem01, 745_360L, 745_360L);
-        assertMemoryRange(mem05, 1_161_360L, 1_161_360L);
-        assertMemoryRange(mem09, 1_577_360L, 1_577_360L);
+        assertMemoryRange(mem01, MemoryRange.of(745_360L));
+        assertMemoryRange(mem05, MemoryRange.of(1_161_360L));
+        assertMemoryRange(mem09, MemoryRange.of(1_577_360L));
 
         MemoryRange delta = mem05.elementWiseSubtract(mem01);
         MemoryRange twoDelta = mem09.elementWiseSubtract(mem01);
@@ -598,7 +598,7 @@ class CommonNeighbourAwareRandomWalkTest {
         var expected = MemoryRange.of(132_232L);
         var memoryEstimation = CommonNeighbourAwareRandomWalk.memoryEstimation(config);
         var actual = memoryEstimation.estimate(GraphDimensions.of(1000), new Concurrency(1)).memoryUsage();
-        assertMemoryRange(actual, expected.min, expected.max);
+        assertMemoryRange(actual, expected);
     }
 
     @Test
@@ -634,9 +634,9 @@ class CommonNeighbourAwareRandomWalkTest {
             concurrency
         ).memoryUsage();
 
-        assertMemoryRange(mem1k, 1_177_360L, 1_177_360L);
-        assertMemoryRange(mem3k, 1_209_360L, 1_209_360L);
-        assertMemoryRange(mem5k, 1_241_360L, 1_241_360L);
+        assertMemoryRange(mem1k, MemoryRange.of(1_177_360L));
+        assertMemoryRange(mem3k, MemoryRange.of(1_209_360L));
+        assertMemoryRange(mem5k, MemoryRange.of(1_241_360L));
 
         MemoryRange delta = mem3k.elementWiseSubtract(mem1k);
         MemoryRange twoDelta = mem5k.elementWiseSubtract(mem1k);
@@ -655,7 +655,7 @@ class CommonNeighbourAwareRandomWalkTest {
         var expected = MemoryRange.of(32_232L);
         var memoryEstimation = CommonNeighbourAwareRandomWalk.memoryEstimation(config);
         var actual = memoryEstimation.estimate(GraphDimensions.of(1000), new Concurrency(1)).memoryUsage();
-        assertMemoryRange(actual, expected.min, expected.max);
+        assertMemoryRange(actual, expected);
     }
 
     @Test
@@ -670,7 +670,7 @@ class CommonNeighbourAwareRandomWalkTest {
         var concurrency = new Concurrency(1);
         var expected = MemoryRange.of(124_272L);
         var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected.min, expected.max);
+        assertMemoryRange(actual, expected);
     }
 
     @Test

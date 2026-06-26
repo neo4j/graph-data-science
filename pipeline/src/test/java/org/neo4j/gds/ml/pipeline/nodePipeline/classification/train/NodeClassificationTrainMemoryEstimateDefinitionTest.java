@@ -80,7 +80,7 @@ class NodeClassificationTrainMemoryEstimateDefinitionTest {
         var graphDimensions = GraphDimensions.of(9, 7);
         var concurrency = config.concurrency();
         var actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expected.min, expected.max);
+        assertMemoryRange(actual, expected);
     }
 
     private static Stream<Arguments> trainerMethodConfigs() {

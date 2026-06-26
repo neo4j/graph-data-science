@@ -29,6 +29,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -148,7 +149,7 @@ class StratifiedKFoldSplitterTest {
             .estimate(dimensions, new Concurrency(4))
             .memoryUsage();
 
-        assertMemoryRange(actualEstimation, expectedMemory, expectedMemory);
+        assertMemoryRange(actualEstimation, MemoryRange.of(expectedMemory));
     }
 
     private LongMultiSet classCounts(HugeLongArray values) {

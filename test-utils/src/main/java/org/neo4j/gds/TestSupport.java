@@ -125,24 +125,16 @@ public final class TestSupport {
         assertTrue(equals, message);
     }
 
-    public static void assertMemoryRange(MemoryRange actual, long expected) {
-        assertMemoryRange(actual, expected, expected);
-    }
-
     public static void assertMemoryRange(MemoryRange actual, MemoryRange expected) {
-        assertMemoryRange(actual, expected.min, expected.max);
-    }
-
-    public static void assertMemoryRange(MemoryRange actual, long expectedMin, long expectedMax) {
         assertThat(actual)
             .withFailMessage(
-                "Got (%s, %s), but expected (%s, %s)",
+        "Got (%s, %s), but expected (%s, %s)",
                 formatNumber(actual.min),
                 formatNumber(actual.max),
-                formatNumber(expectedMin),
-                formatNumber(expectedMax)
+                formatNumber(expected.min),
+                formatNumber(expected.max)
             )
-            .isEqualTo(MemoryRange.of(expectedMin, expectedMax));
+            .isEqualTo(expected);
     }
 
     public static void assertTransactionTermination(Executable executable) {
@@ -189,7 +181,7 @@ public final class TestSupport {
                 try {
                     assertMemoryRange(
                         MemoryRange.of((long) row.getNumber("bytesMin"), (long) row.getNumber("bytesMax")),
-                        expected.min, expected.max
+                        expected
                     );
                 } catch (Throwable e) {
                     softly.fail(e.getMessage());
