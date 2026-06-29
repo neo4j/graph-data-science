@@ -73,10 +73,10 @@ public class CELF implements Algorithm<CELFResult> {
         this.seedSetNodes = new LongDoubleScatterMap(seedSetCount);
         this.spreads = new HugeLongPriorityQueue(graph.nodeCount()) {
             @Override
-            protected boolean lessThan(long a, long b) {
-                return (Double.compare(costValues.get(a), costValues.get(b)) == 0) // when equal costs
-                    ? a < b                                                        // the smaller node ID is less
-                    : costValues.get(a) > costValues.get(b);                       // otherwise compare the costs
+            protected boolean lessThan(long a, double costA, long b, double costB) {
+                return (Double.compare(costA, costB) == 0) // when equal costs
+                    ? a < b                                // the smaller node ID is less
+                    : costA > costB;                       // otherwise compare the costs
             }
         };
 

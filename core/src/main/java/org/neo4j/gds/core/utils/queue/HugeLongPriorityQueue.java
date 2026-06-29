@@ -34,6 +34,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         return MemoryEstimations.builder(HugeLongPriorityQueue.class)
             .perNode("heap", HugeLongArray::memoryEstimation)
             .perNode("costs", HugeDoubleArray::memoryEstimation)
+            .perNode("heap costs", HugeDoubleArray::memoryEstimation)
             .perNode("inverted index", HugeLongArray::memoryEstimation)
             .build();
     }
@@ -43,6 +44,13 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     private final HugeLongArray heap;
     private final HugeLongArray mapIndexTo;
     protected final HugeDoubleArray costValues;
+    /**
+     * Mirrors {@link #costValues} but is indexed by heap <em>position</em> rather than by
+     * element. Keeping a node's cost next to its heap slot turns the cost reads done during
+     * sifting into cache-local accesses (a node's up-to-four children live in contiguous
+     * positions) instead of scattered, element-indexed lookups into {@link #costValues}.
+     */
+    private final HugeDoubleArray heapCosts;
 
     private long size = 0;
 
@@ -64,14 +72,17 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         this.heap = HugeLongArray.newArray(heapSize);
         this.mapIndexTo = HugeLongArray.newArray(heapSize);
         this.costValues = HugeDoubleArray.newArray(capacity);
+        this.heapCosts = HugeDoubleArray.newArray(heapSize);
     }
 
     /**
-     * Adds the element at the specified position in the heap array
+     * Places {@code element} (with its already-known {@code cost}) at the given heap position,
+     * keeping the element-&gt;position index and the position-indexed cost mirror in sync.
      */
-    private void placeElement(long position, long element) {
+    private void placeElement(long position, long element, double cost) {
         heap.set(position, element);
         mapIndexTo.set(element, position);
+        heapCosts.set(position, cost);
     }
 
     /**
@@ -81,7 +92,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         assert element < capacity;
         addCost(element, cost);
         size++;
-        placeElement(size, element);
+        placeElement(size, element, cost);
         upHeap(size);
     }
 
@@ -96,7 +107,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
             update(element);
         } else {
             size++;
-            placeElement(size, element);
+            placeElement(size, element, cost);
             upHeap(size);
         }
     }
@@ -136,7 +147,8 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     public long pop() {
         if (size > 0) {
             long result = heap.get(1);    // save first value
-            placeElement(1, heap.get(size));    // move last to first
+            // move last to first, carrying its cached cost so we avoid an element-indexed lookup
+            placeElement(1, heap.get(size), heapCosts.get(size));
             size--;
             downHeap(1);           // adjust heap
             removeCost(result);
@@ -155,13 +167,18 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
     /**
      * Defines the ordering of the queue.
-     * Returns true iff {@code a} is strictly less than {@code b}.
+     * Returns true iff element {@code a} is strictly less than element {@code b}.
+     * <p>
+     * Both the element id and its associated cost are supplied for each operand. The cost is
+     * passed in (read cache-locally from the position-indexed mirror) so implementations can
+     * avoid an element-indexed {@link #costValues} lookup; the element id is still available
+     * for orderings that depend on it (e.g. a heuristic function or a tie-break on id).
      * <p>
      * The default behavior assumes a min queue, where the value with smallest cost is on top.
-     * To implement a max queue, return {@code b < a}.
+     * To implement a max queue, return {@code costB < costA}.
      * The resulting order is not stable.
      */
-    protected abstract boolean lessThan(long a, long b);
+    protected abstract boolean lessThan(long a, double costA, long b, double costB);
 
     /**
      * Adds the given element to the queue.
@@ -197,48 +214,52 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
     private boolean upHeap(long origPos) {
         long newPos = origPos;
-        // save bottom node
+        // save bottom node and its cost
         long node = heap.get(newPos);
+        double nodeCost = heapCosts.get(newPos);
         // find parent of current node in a 4-ary heap: (i + 2) / 4
         long parentPos = (newPos + 2) >>> 2;
         while (parentPos > 0) {
             long parent = heap.get(parentPos);
-            if (!lessThan(node, parent)) {
+            double parentCost = heapCosts.get(parentPos);
+            if (!lessThan(node, nodeCost, parent, parentCost)) {
                 break;
             }
             // shift parent down
-            placeElement(newPos, parent);
+            placeElement(newPos, parent, parentCost);
             newPos = parentPos;
             // find new parent of swapped node
             parentPos = (parentPos + 2) >>> 2;
         }
         // install saved node
-        placeElement(newPos, node);
+        placeElement(newPos, node, nodeCost);
         return newPos != origPos;
     }
 
     private void downHeap(long pos) {
         // hoist field read across the abstract lessThan call sites below
         long size = this.size;
-        // save top node
+        // save top node and its cost
         long node = heap.get(pos);
+        double nodeCost = heapCosts.get(pos);
         // find first of up to four children: 4i - 2
         long firstChildPos = (pos << 2) - 2;
         long smallestChildPos = smallestChildPosition(firstChildPos, size);
         while (smallestChildPos <= size) {
             long smallestChild = heap.get(smallestChildPos);
-            if (!lessThan(smallestChild, node)) {
+            double smallestChildCost = heapCosts.get(smallestChildPos);
+            if (!lessThan(smallestChild, smallestChildCost, node, nodeCost)) {
                 break;
             }
             // shift up smallest child
-            placeElement(pos, smallestChild);
+            placeElement(pos, smallestChild, smallestChildCost);
             pos = smallestChildPos;
             // find smallest child of swapped node
             firstChildPos = (pos << 2) - 2;
             smallestChildPos = smallestChildPosition(firstChildPos, size);
         }
         // install saved node
-        placeElement(pos, node);
+        placeElement(pos, node, nodeCost);
     }
 
     /**
@@ -251,16 +272,19 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
             return firstChild;
         }
         long smallest = firstChild;
-        long smallestVal = heap.get(firstChild);
+        long smallestElement = heap.get(firstChild);
+        double smallestCost = heapCosts.get(firstChild);
         long last = firstChild + 3;
         if (last > size) {
             last = size;
         }
         for (long k = firstChild + 1; k <= last; k++) {
             long candidate = heap.get(k);
-            if (lessThan(candidate, smallestVal)) {
+            double candidateCost = heapCosts.get(k);
+            if (lessThan(candidate, candidateCost, smallestElement, smallestCost)) {
                 smallest = k;
-                smallestVal = candidate;
+                smallestElement = candidate;
+                smallestCost = candidateCost;
             }
         }
         return smallest;
@@ -269,6 +293,9 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     private void update(long element) {
         long pos = findElementPosition(element);
         if (pos != 0) {
+            // the cost in costValues was just changed; refresh the position-indexed mirror
+            // before sifting so comparisons see the updated value
+            heapCosts.set(pos, costValues.get(element));
             if (!upHeap(pos) && pos < size) {
                 downHeap(pos);
             }
@@ -307,8 +334,8 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     public static HugeLongPriorityQueue min(long capacity) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
-            protected boolean lessThan(long a, long b) {
-                return costValues.get(a) < costValues.get(b);
+            protected boolean lessThan(long a, double costA, long b, double costB) {
+                return costA < costB;
             }
         };
     }
@@ -320,8 +347,8 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     public static HugeLongPriorityQueue max(long capacity) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
-            protected boolean lessThan(long a, long b) {
-                return costValues.get(a) > costValues.get(b);
+            protected boolean lessThan(long a, double costA, long b, double costB) {
+                return costA > costB;
             }
         };
     }

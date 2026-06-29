@@ -29,10 +29,10 @@ class MinCostMaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,     1_000,      295_472",
-            "1_000,     10_000,     1_051_472",
-            "1_000_000, 1_000_000,  293_505_616",
-            "1_000_000, 10_000_000, 1_049_516_600"
+            "1_000,     1_000,      303_520",
+            "1_000,     10_000,     1_059_520",
+            "1_000_000, 1_000_000,  301_505_664",
+            "1_000_000, 10_000_000, 1_057_516_648"
         }
     )
     void shouldEstimateMemoryWithChangingGraphDimensionsCorrectly(
@@ -51,10 +51,10 @@ class MinCostMaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,   1,  295_472",
-            "1_000,   4,  298_616",
-            "100_000, 1,  29_352_336",
-            "100_000, 4,  29_652_480"
+            "1_000,   1,  303_520",
+            "1_000,   4,  306_664",
+            "100_000, 1,  30_152_384",
+            "100_000, 4,  30_452_528"
         }
     )
     void shouldEstimateMemoryWithChangingConcurrencyCorrectly(long nodeAndRelCount, int concurrency, long expected) {
@@ -69,10 +69,10 @@ class MinCostMaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,  1,   1,   295_472",
-            "1_000,  10,  1,   296_048",
-            "1_000,  1,   10,  296_048",
-            "1_000,  10,  10,  296_624"
+            "1_000,  1,   1,   303_520",
+            "1_000,  10,  1,   304_096",
+            "1_000,  1,   10,  304_096",
+            "1_000,  10,  10,  304_672"
 
         }
     )
@@ -93,10 +93,10 @@ class MinCostMaxFlowMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1_000,false, 295_472",
-            "1_000,true,  327_584",
-            "10_000,false, 2_937_000",
-            "10_000,true,  3_257_112"
+            "1_000,false, 303_520",
+            "1_000,true,  335_632",
+            "10_000,false, 3_017_048",
+            "10_000,true,  3_337_160"
         }
     )
     void shouldEstimateWithNodeConstraints(
