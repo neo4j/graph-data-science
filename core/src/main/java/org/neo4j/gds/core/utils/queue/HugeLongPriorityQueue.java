@@ -27,6 +27,22 @@ import org.neo4j.gds.mem.MemoryEstimations;
 
 import java.util.PrimitiveIterator;
 
+/**
+ * An indexed priority queue over {@code long} elements keyed by {@code double} costs, backed by
+ * {@link HugeLongArray}/{@link HugeDoubleArray} so it scales beyond the {@code 2^31} array limit.
+ * <p>
+ * Elements are dense ids in {@code [0, capacity)} and the capacity is fixed: the queue can neither
+ * grow nor shrink. An element-to-position index gives {@code O(1)} {@link #containsElement} and
+ * {@link #cost}, and turns {@link #set} into an {@code O(log n)} decrease/increase-key operation.
+ * The heap is laid out as a <em>4-ary</em> heap (each node has up to four children), which keeps
+ * the tree shallow and makes the sift-up dominated decrease-key path cheap. A position-indexed
+ * cost mirror keeps comparison reads cache-local during sifting (see {@link #lessThan}).
+ * <p>
+ * {@link #add}, {@link #set}, {@link #pop} and the internal updates run in {@code O(log n)};
+ * {@link #top}, {@link #cost}, {@link #containsElement} and {@link #size} are {@code O(1)}.
+ * Use {@link #min(long)} or {@link #max(long)} to obtain a min- or max-ordered queue. The ordering
+ * is not stable, and the queue is not thread-safe.
+ */
 public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
 
