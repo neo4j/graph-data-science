@@ -427,8 +427,8 @@ CALL gds.session.estimate(
 |===
 | Name                       | Type           | Optional | Default | Description
 | nodeLabelCount             | Integer        | yes      | 0       | The number of distinct node labels in the graph.
-| nodePropertyCount          | Integer        | yes      | 0       | The number of node properties in the graph.
-| relationshipPropertyCount  | Integer        | yes      | 0       | The number of relationship properties in the graph.
+| nodePropertyCount          | Integer        | yes      | 0       | The number of node properties per node in the graph.
+| relationshipPropertyCount  | Integer        | yes      | 0       | The number of relationship properties per relationship in the graph.
 | algorithmCategories        | List of String | yes      | []      | The categories of algorithms you plan to run in the session. Providing this helps produce a more tailored estimate. See the valid values below.
 |===
 

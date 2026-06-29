@@ -22,7 +22,7 @@ package org.neo4j.gds.legacycypherprojection;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.immutables.value.Value;
 import org.neo4j.common.DependencyResolver;
-import org.neo4j.gds.ImmutablePropertyMappings;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -33,7 +33,6 @@ import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.HashMap;
@@ -103,7 +102,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
                 ))
                 .collect(Collectors.toList());
 
-            initFromPropertyMappings(ImmutablePropertyMappings.of(propertyMappings));
+            initFromPropertyMappings(PropertyMappings.of(propertyMappings));
 
             initializedFromResult = true;
         }

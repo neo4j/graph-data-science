@@ -44,11 +44,11 @@ import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.List;
 
@@ -116,9 +116,13 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         // node information
         builder.add("nodeIdMap", IdMapBehaviorServiceProvider.idMapBehavior().memoryEstimation());
 
-        // nodeProperties
-        nodeProjections.allProperties()
-            .forEach(property -> builder.add(property, NodePropertiesFromStoreBuilder.memoryEstimation()));
+        int numNodeProperties = nodeProjections.allProperties().size();
+        if (numNodeProperties > 100) {
+            builder.add("nodeProperties", NodePropertiesFromStoreBuilder.memoryEstimation().times(numNodeProperties));
+        } else {
+            nodeProjections.allProperties()
+                .forEach(property -> builder.add(property, NodePropertiesFromStoreBuilder.memoryEstimation()));
+        }
 
         // relationships
         relationshipProjections.projections().forEach((relationshipType, relationshipProjection) -> {
@@ -185,7 +189,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             ),
             AdjacencyBuffer.memoryEstimation(
                 relationshipType,
-                (int) relationshipProjection.properties().stream().count(),
+                relationshipProjection.properties().count(),
                 undirected
             )
         );
@@ -199,10 +203,15 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             formatWithLocale("degrees for '%s'%s", relationshipType, indexSuffix),
             HugeIntArray::memoryEstimation
         );
-        relationshipProjection
-            .properties()
-            .mappings()
-            .forEach(
+        int numRelPropertiesDuringLoading = relationshipProjection.properties().count();
+        var relPropertiesDuringLoading = relationshipProjection.properties().mappings();
+        if (numRelPropertiesDuringLoading > 100) {
+            estimationBuilder.perNode(
+                formatWithLocale("relationship properties for '%s'%s", relationshipType, indexSuffix),
+                nodeCount -> HugeLongArray.memoryEstimation(nodeCount) * numRelPropertiesDuringLoading
+            );
+        } else {
+            relPropertiesDuringLoading.forEach(
                 resolvedPropertyMapping -> estimationBuilder.perNode(
                     formatWithLocale(
                         "property '%s.%s'%s",
@@ -213,6 +222,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
                     HugeLongArray::memoryEstimation
                 )
             );
+        }
     }
 
     private static MemoryEstimation relationshipEstimationAfterLoading(
@@ -257,16 +267,25 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             AdjacencyListBehavior.adjacencyListEstimation(relationshipType, undirected)
         );
         // all properties per projection
-        relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
+        int numRelPropertiesAfterLoading = relationshipProjection.properties().count();
+        var relPropertiesAfterLoading = relationshipProjection.properties().mappings();
+        if (numRelPropertiesAfterLoading > 100) {
             afterLoadingEstimation.add(
-                formatWithLocale(
-                    "property '%s.%s%s",
-                    relationshipType,
-                    resolvedPropertyMapping.propertyKey(),
-                    indexSuffix
-                ),
-                AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
+                formatWithLocale("relationship properties for '%s'%s", relationshipType, indexSuffix),
+                AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected).times(numRelPropertiesAfterLoading)
             );
-        });
+        } else {
+            relPropertiesAfterLoading.forEach(resolvedPropertyMapping -> {
+                afterLoadingEstimation.add(
+                    formatWithLocale(
+                        "property '%s.%s%s",
+                        relationshipType,
+                        resolvedPropertyMapping.propertyKey(),
+                        indexSuffix
+                    ),
+                    AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
+                );
+            });
+        }
     }
 }
