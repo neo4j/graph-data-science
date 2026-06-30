@@ -44,11 +44,11 @@ import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.List;
 
@@ -116,7 +116,6 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         // node information
         builder.add("nodeIdMap", IdMapBehaviorServiceProvider.idMapBehavior().memoryEstimation());
 
-        // nodeProperties
         nodeProjections.allProperties()
             .forEach(property -> builder.add(property, NodePropertiesFromStoreBuilder.memoryEstimation()));
 
@@ -185,7 +184,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             ),
             AdjacencyBuffer.memoryEstimation(
                 relationshipType,
-                (int) relationshipProjection.properties().stream().count(),
+                relationshipProjection.properties().count(),
                 undirected
             )
         );
@@ -202,17 +201,16 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         relationshipProjection
             .properties()
             .mappings()
-            .forEach(
-                resolvedPropertyMapping -> estimationBuilder.perNode(
-                    formatWithLocale(
-                        "property '%s.%s'%s",
-                        relationshipType,
-                        resolvedPropertyMapping.propertyKey(),
-                        indexSuffix
-                    ),
-                    HugeLongArray::memoryEstimation
-                )
-            );
+            .forEach(resolvedPropertyMapping -> estimationBuilder.perNode(
+                formatWithLocale(
+                    "property '%s.%s'%s",
+                    relationshipType,
+                    resolvedPropertyMapping.propertyKey(),
+                    indexSuffix
+                ),
+                HugeLongArray::memoryEstimation
+            )
+        );
     }
 
     private static MemoryEstimation relationshipEstimationAfterLoading(

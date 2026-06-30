@@ -23,7 +23,6 @@ import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,11 +42,23 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
 
     public abstract List<PropertyMapping> mappings();
 
+    @Value.Default
+    public int count() {
+        return mappings().size();
+    }
+
     public static PropertyMappings of(PropertyMapping... mappings) {
-        if (mappings == null) {
+        if (mappings == null || mappings.length == 0) {
             return ImmutablePropertyMappings.of();
         }
-        return ImmutablePropertyMappings.of(Arrays.asList(mappings));
+        return ImmutablePropertyMappings.builder().addMappings(mappings).build();
+    }
+
+    public static PropertyMappings of(List<PropertyMapping> mappings) {
+        if (mappings == null || mappings.isEmpty()) {
+            return ImmutablePropertyMappings.of();
+        }
+        return ImmutablePropertyMappings.builder().addAllMappings(mappings).build();
     }
 
     public static PropertyMappings fromObject(Object propertyMappingInput) {
@@ -55,16 +66,14 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
     }
 
     public static PropertyMappings fromObject(Object propertyMappingInput, Aggregation defaultAggregation) {
-        if (propertyMappingInput instanceof ImmutablePropertyMappings) {
-            ImmutablePropertyMappings properties = (ImmutablePropertyMappings) propertyMappingInput;
+        if (propertyMappingInput instanceof ImmutablePropertyMappings properties) {
             return ImmutablePropertyMappings.builder().from(properties).withDefaultAggregation(defaultAggregation).build();
         }
-        if (propertyMappingInput instanceof String) {
-            String propertyMapping = (String) propertyMappingInput;
+        if (propertyMappingInput instanceof String propertyMapping) {
             return fromObject(singletonMap(propertyMapping, propertyMapping), defaultAggregation);
-        } else if (propertyMappingInput instanceof List) {
+        } else if (propertyMappingInput instanceof List<?> inputList) {
             PropertyMappings.Builder builder = PropertyMappings.builder().withDefaultAggregation(defaultAggregation);
-            for (Object mapping : (List<?>) propertyMappingInput) {
+            for (Object mapping : inputList) {
                 List<PropertyMapping> propertyMappings = fromObject(mapping, defaultAggregation).mappings();
                 for (PropertyMapping propertyMapping : propertyMappings) {
                     if (builder.mappings != null && builder.mappings.contains(propertyMapping)) {
@@ -110,7 +119,7 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
     }
 
     public boolean hasMappings() {
-        return !mappings().isEmpty();
+        return count() > 0;
     }
 
     public int numberOfMappings() {

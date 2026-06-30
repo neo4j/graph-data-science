@@ -662,8 +662,8 @@ public abstract class GdsCypher {
             .graphName(graphName.orElse(""))
             .nodeProjections(NodeProjections.create(nodeProjections))
             .relationshipProjections(ImmutableRelationshipProjections.builder().putAllProjections(relProjections).build())
-            .nodeProperties(ImmutablePropertyMappings.of(nodeProperties))
-            .relationshipProperties(ImmutablePropertyMappings.of(relProperties))
+            .nodeProperties(PropertyMappings.of(nodeProperties))
+            .relationshipProperties(PropertyMappings.of(relProperties))
             .build();
     }
 

@@ -22,8 +22,8 @@ package org.neo4j.gds;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfigImpl;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -126,7 +126,7 @@ public final class GraphProjectConfigBuilders {
             .graphName(graphName.orElse(""))
             .nodeProjections(np)
             .relationshipProjections(rp)
-            .nodeProperties(ImmutablePropertyMappings.of(nodeProperties))
+            .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
             .readConcurrency(concurrency.orElse(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY))
             // TODO: should be able to just not set readConcurrency
