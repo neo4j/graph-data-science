@@ -31,6 +31,7 @@ import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -209,7 +210,7 @@ public final class GraphStoreCatalog {
                         config.username(),
                         graphStore.databaseInfo().databaseId().databaseName(),
                         config.graphName(),
-                        0
+                        MemoryUsage.sizeOf(graphStore)
                     )
                 ),
                 log.orElseGet(Log::noOpLog)::warn
@@ -426,7 +427,7 @@ public final class GraphStoreCatalog {
                                     config.username(),
                                     graphStore.databaseInfo().databaseId().databaseName(),
                                     config.graphName(),
-                                    0
+                                    MemoryUsage.sizeOf(graphStore)
                                 )
                             ),
                             log.orElseGet(Log::noOpLog)::warn
