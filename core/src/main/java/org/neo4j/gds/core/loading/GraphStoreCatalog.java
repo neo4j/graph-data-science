@@ -30,8 +30,8 @@ import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.GraphMemoryUsage;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -63,6 +63,7 @@ public final class GraphStoreCatalog {
 
     public static void registerGraphStoreAddedListener(GraphStoreAddedEventListener listener) {
         graphStoreAddedEventListeners.add(listener);
+
     }
 
     public static void unregisterGraphStoreAddedListener(GraphStoreAddedEventListener listener) {
@@ -210,7 +211,7 @@ public final class GraphStoreCatalog {
                         config.username(),
                         graphStore.databaseInfo().databaseId().databaseName(),
                         config.graphName(),
-                        MemoryUsage.sizeOf(graphStore)
+                        GraphMemoryUsage.of(new GraphStoreCatalogEntry(graphStore,config,null)).sizeInBytes
                     )
                 ),
                 log.orElseGet(Log::noOpLog)::warn
@@ -427,7 +428,7 @@ public final class GraphStoreCatalog {
                                     config.username(),
                                     graphStore.databaseInfo().databaseId().databaseName(),
                                     config.graphName(),
-                                    MemoryUsage.sizeOf(graphStore)
+                                    GraphMemoryUsage.of(new GraphStoreCatalogEntry(graphStore,config,null)).sizeInBytes
                                 )
                             ),
                             log.orElseGet(Log::noOpLog)::warn

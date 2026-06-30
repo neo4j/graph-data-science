@@ -23,8 +23,8 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.mem.Estimate;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.openjdk.jol.info.GraphWalker;
 
 import java.util.Collections;
@@ -40,7 +40,7 @@ public final class GraphMemoryUsage {
     public final long nodeCount;
     public final long relationshipCount;
 
-    static GraphMemoryUsage of(GraphStoreCatalogEntry graphStoreCatalogEntry) {
+    public static GraphMemoryUsage of(GraphStoreCatalogEntry graphStoreCatalogEntry) {
         var totalSize = new MutableLong();
         var graphStore = graphStoreCatalogEntry.graphStore();
         var detailMemory = internalSizeOfGraph(graphStore, totalSize);

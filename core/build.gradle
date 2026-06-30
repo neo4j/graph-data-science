@@ -14,6 +14,8 @@ dependencies {
     compileOnly         openGds.immutables.builder
     compileOnly         openGds.immutables.value.annotations
     compileOnly         openGds.jetbrains.annotations
+    implementation openGds.jol.core
+
     compileOnly project(':progress-tracking')
 
     compileOnly group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
