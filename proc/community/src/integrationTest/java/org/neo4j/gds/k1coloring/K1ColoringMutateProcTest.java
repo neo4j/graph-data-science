@@ -38,9 +38,7 @@ import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +57,6 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
     private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
     private static final String K1COLORING_GRAPH = "myGraph";
     private static final String MUTATE_PROPERTY = "color";
-    private GdsTestLog log = new GdsTestLog();
 
     @Neo4jGraph
     public static final String DB_CYPHER =
@@ -73,7 +70,6 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        var start = System.nanoTime();
         registerProcedures(
             K1ColoringMutateProc.class,
             GraphWriteNodePropertiesProc.class,
@@ -85,16 +81,11 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
                 .loadEverything(Orientation.NATURAL)
                 .yields()
         );
-        log.info("setup took %d ms", Duration.ofNanos(System.nanoTime() - start).toMillis());
     }
 
     @AfterEach
     void tearDown() {
-        var start = System.nanoTime();
         GraphStoreCatalog.removeAllLoadedGraphs();
-        log.info("tearDown took %d ms", Duration.ofNanos(System.nanoTime() - start).toMillis());
-        assertThat(log.getMessages(GdsTestLog.INFO)).containsExactlyInAnyOrder("a");
-
     }
 
     private String expectedMutatedGraph() {
@@ -109,7 +100,6 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
     @ParameterizedTest
     @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
     void testMutate(String tieredProcedure) {
-        var start = System.nanoTime();
         @Language("Cypher")
         String query = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .mutateMode()
@@ -143,13 +133,12 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
             );
         assertThat(containsMutateProperty).isTrue();
 
-        log.info("testMutate [%s] took %d ms", tieredProcedure, Duration.ofNanos(System.nanoTime() - start).toMillis());
+
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"gds.k1coloring","gds.beta.k1coloring"})
     void testMutateEstimate(String tieredProcedure) {
-        var start = System.nanoTime();
         @Language("Cypher")
         String query = GdsCypher.call(K1COLORING_GRAPH).algo(tieredProcedure)
             .mutateEstimation()
@@ -162,12 +151,10 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
             "bytesMax", 544L,
             "requiredMemory", "544 Bytes"
         )));
-        log.info("testMutateEstimate [%s] took %d ms", tieredProcedure, Duration.ofNanos(System.nanoTime() - start).toMillis());
     }
 
     @Test
     void testWriteBackGraphMutationOnFilteredGraph() {
-        var start = System.nanoTime();
         runQuery("MATCH (n) DETACH DELETE n");
         GraphStoreCatalog.removeAllLoadedGraphs();
 
@@ -212,14 +199,13 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         );
 
         assertThat(rowCountB).isEqualTo(2L);
-        log.info("testWriteBackGraphMutationOnFilteredGraph took %d ms", Duration.ofNanos(System.nanoTime() - start).toMillis());
+
     }
 
 
 
     @Test
     void testGraphMutationOnFilteredGraph() {
-        var start = System.nanoTime();
         runQuery("MATCH (n) DETACH DELETE n");
         GraphStoreCatalog.removeAllLoadedGraphs();
 
@@ -245,12 +231,10 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         var expectedProperties = Set.of(MUTATE_PROPERTY);
         assertEquals(expectedProperties, mutatedGraph.nodePropertyKeys(NodeLabel.of("A")));
         assertEquals(Set.of(), mutatedGraph.nodePropertyKeys(NodeLabel.of("B")));
-        log.info("testGraphMutationOnFilteredGraph took %d ms", Duration.ofNanos(System.nanoTime() - start).toMillis());
     }
 
     @Test
     void testMutateFailsOnExistingToken() {
-        var start = System.nanoTime();
         String query = GdsCypher.call(K1COLORING_GRAPH).algo("gds", "k1coloring")
             .mutateMode()
             .addParameter("mutateProperty", MUTATE_PROPERTY)
@@ -261,12 +245,10 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         "Node property `%s` already exists in the in-memory graph.",
         MUTATE_PROPERTY
         ));
-        log.info("testMutateFailsOnExistingToken took %d ms", Duration.ofNanos(System.nanoTime() - start).toMillis());
     }
 
     @Test
     void testRunOnEmptyGraph() {
-        var start = System.nanoTime();
         // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
 
         runQuery("CALL db.createLabel('X')");
@@ -294,7 +276,6 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         });
 
         AssertionsForClassTypes.assertThat(rowCount).isEqualTo(1L);
-        log.info("testRunOnEmptyGraph took %d ms", Duration.ofNanos(System.nanoTime() - start).toMillis());
     }
 
 
