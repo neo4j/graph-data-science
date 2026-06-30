@@ -64,12 +64,12 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
     @Neo4jGraph
     public static final String DB_CYPHER =
         "CREATE" +
-        " (a)" +
-        ",(b)" +
-        ",(c)" +
-        ",(d)" +
-        ",(a)-[:REL]->(b)" +
-        ",(a)-[:REL]->(c)";
+            " (a)" +
+            ",(b)" +
+            ",(c)" +
+            ",(d)" +
+            ",(a)-[:REL]->(b)" +
+            ",(a)-[:REL]->(c)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -100,10 +100,10 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
     private String expectedMutatedGraph() {
         return
             "  (x { color: 0 }) " +
-            ", (y { color: 0 }) " +
-            ", (z { color: 0 }) " +
-            ", (w { color: 1 })-->(y) " +
-            ", (w)-->(z) ";
+                ", (y { color: 0 }) " +
+                ", (z { color: 0 }) " +
+                ", (w { color: 1 })-->(y) " +
+                ", (w)-->(z) ";
     }
 
     @ParameterizedTest
@@ -127,9 +127,10 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         });
 
         assertThat(rowCount).isEqualTo(1L);
-
+        var t0 = System.nanoTime();
         var graphStore = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), K1COLORING_GRAPH).graphStore();
-
+        var t1 = System.nanoTime();
+        log.info("graph-store-add [%s] took %d ms", tieredProcedure, Duration.ofNanos(t1 - t0).toMillis());
         var mutatedGraph=graphStore.getUnion();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
 
@@ -189,9 +190,9 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
         String graphWriteQuery =
             "CALL gds.graph.nodeProperties.write(" +
-            "   $graph, " +
-            "   [$property]" +
-            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
+                "   $graph, " +
+                "   [$property]" +
+                ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
 
         runQuery(graphWriteQuery, Map.of("graph", K1COLORING_GRAPH, "property", MUTATE_PROPERTY));
 
@@ -240,8 +241,10 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
         runQuery(query);
 
+        var t0= System.nanoTime();
         var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), K1COLORING_GRAPH).graphStore();
-
+        var t1 = System.nanoTime();
+        log.info("graph-store-add took %d ms", Duration.ofNanos(t1 - t0).toMillis());
         var expectedProperties = Set.of(MUTATE_PROPERTY);
         assertEquals(expectedProperties, mutatedGraph.nodePropertyKeys(NodeLabel.of("A")));
         assertEquals(Set.of(), mutatedGraph.nodePropertyKeys(NodeLabel.of("B")));
@@ -258,8 +261,8 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
         runQuery(query);
 
         assertThatException().isThrownBy( () -> runQuery(query)).withMessageContaining(formatWithLocale(
-        "Node property `%s` already exists in the in-memory graph.",
-        MUTATE_PROPERTY
+            "Node property `%s` already exists in the in-memory graph.",
+            MUTATE_PROPERTY
         ));
         log.info("testMutateFailsOnExistingToken took %d ms", Duration.ofNanos(System.nanoTime() - start).toMillis());
     }
