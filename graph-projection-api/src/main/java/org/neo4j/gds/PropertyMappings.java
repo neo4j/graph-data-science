@@ -72,11 +72,6 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
         if (propertyMappingInput instanceof String propertyMapping) {
             return fromObject(singletonMap(propertyMapping, propertyMapping), defaultAggregation);
         } else if (propertyMappingInput instanceof List<?> inputList) {
-            // We assume that at this size the input must come form an estimation query, so we don't create an actual
-            // PropertyMappings object but one that holds only the relevant count information for estimations.
-            if (inputList.size() > 1_000) {
-                return ImmutablePropertyMappings.builder().count(inputList.size()).build();
-            }
             PropertyMappings.Builder builder = PropertyMappings.builder().withDefaultAggregation(defaultAggregation);
             for (Object mapping : inputList) {
                 List<PropertyMapping> propertyMappings = fromObject(mapping, defaultAggregation).mappings();

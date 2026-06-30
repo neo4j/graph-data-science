@@ -116,13 +116,8 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         // node information
         builder.add("nodeIdMap", IdMapBehaviorServiceProvider.idMapBehavior().memoryEstimation());
 
-        int numNodeProperties = nodeProjections.allProperties().size();
-        if (numNodeProperties > 100) {
-            builder.add("nodeProperties", NodePropertiesFromStoreBuilder.memoryEstimation().times(numNodeProperties));
-        } else {
-            nodeProjections.allProperties()
-                .forEach(property -> builder.add(property, NodePropertiesFromStoreBuilder.memoryEstimation()));
-        }
+        nodeProjections.allProperties()
+            .forEach(property -> builder.add(property, NodePropertiesFromStoreBuilder.memoryEstimation()));
 
         // relationships
         relationshipProjections.projections().forEach((relationshipType, relationshipProjection) -> {
@@ -203,26 +198,19 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             formatWithLocale("degrees for '%s'%s", relationshipType, indexSuffix),
             HugeIntArray::memoryEstimation
         );
-        int numRelPropertiesDuringLoading = relationshipProjection.properties().count();
-        var relPropertiesDuringLoading = relationshipProjection.properties().mappings();
-        if (numRelPropertiesDuringLoading > 100) {
-            estimationBuilder.perNode(
-                formatWithLocale("relationship properties for '%s'%s", relationshipType, indexSuffix),
-                nodeCount -> HugeLongArray.memoryEstimation(nodeCount) * numRelPropertiesDuringLoading
-            );
-        } else {
-            relPropertiesDuringLoading.forEach(
-                resolvedPropertyMapping -> estimationBuilder.perNode(
-                    formatWithLocale(
-                        "property '%s.%s'%s",
-                        relationshipType,
-                        resolvedPropertyMapping.propertyKey(),
-                        indexSuffix
-                    ),
-                    HugeLongArray::memoryEstimation
-                )
-            );
-        }
+        relationshipProjection
+            .properties()
+            .mappings()
+            .forEach(resolvedPropertyMapping -> estimationBuilder.perNode(
+                formatWithLocale(
+                    "property '%s.%s'%s",
+                    relationshipType,
+                    resolvedPropertyMapping.propertyKey(),
+                    indexSuffix
+                ),
+                HugeLongArray::memoryEstimation
+            )
+        );
     }
 
     private static MemoryEstimation relationshipEstimationAfterLoading(
@@ -267,25 +255,16 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             AdjacencyListBehavior.adjacencyListEstimation(relationshipType, undirected)
         );
         // all properties per projection
-        int numRelPropertiesAfterLoading = relationshipProjection.properties().count();
-        var relPropertiesAfterLoading = relationshipProjection.properties().mappings();
-        if (numRelPropertiesAfterLoading > 100) {
+        relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {
             afterLoadingEstimation.add(
-                formatWithLocale("relationship properties for '%s'%s", relationshipType, indexSuffix),
-                AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected).times(numRelPropertiesAfterLoading)
+                formatWithLocale(
+                    "property '%s.%s%s",
+                    relationshipType,
+                    resolvedPropertyMapping.propertyKey(),
+                    indexSuffix
+                ),
+                AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
             );
-        } else {
-            relPropertiesAfterLoading.forEach(resolvedPropertyMapping -> {
-                afterLoadingEstimation.add(
-                    formatWithLocale(
-                        "property '%s.%s%s",
-                        relationshipType,
-                        resolvedPropertyMapping.propertyKey(),
-                        indexSuffix
-                    ),
-                    AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)
-                );
-            });
-        }
+        });
     }
 }
