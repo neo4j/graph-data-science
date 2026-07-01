@@ -83,10 +83,7 @@ public final class ArticleRankComputation<C extends ArticleRankConfig> implement
         double delta = rank;
 
         if (!context.isInitialSuperstep()) {
-            double sum = 0;
-            for (var message : messages) {
-                sum += message;
-            }
+            double sum = messages.isEmpty() ? 0 : messages.doubleIterator().nextDouble();
             delta = dampingFactor * sum;
             context.setNodeValue(PAGE_RANK, rank + delta);
         }

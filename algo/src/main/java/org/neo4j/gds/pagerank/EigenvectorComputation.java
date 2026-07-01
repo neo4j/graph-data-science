@@ -100,8 +100,8 @@ public final class EigenvectorComputation<C extends EigenvectorConfig> implement
         // more distinguishable.
         double nextRank = context.doubleNodeValue(RANK);
 
-        for (var message : messages) {
-            nextRank += message;
+        if (!messages.isEmpty()) {
+            nextRank += messages.doubleIterator().nextDouble();
         }
 
         // The degree function returns either 1 if the graph is unweighted
