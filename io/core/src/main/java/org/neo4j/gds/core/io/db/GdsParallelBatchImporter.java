@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Locale;
 import java.util.function.Supplier;
 
@@ -204,9 +203,7 @@ public final class GdsParallelBatchImporter {
     }
 
     private void validateDatabaseDoesNotExist(DatabaseLayout databaseLayout) {
-        var metaDataPath = databaseLayout.metadataStore();
-        var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
-        if (dbExists && !config.force()) {
+        if (databaseLayout.metadataStore().exists(fileSystem) && !config.force()) {
             throw new IllegalArgumentException(
                 formatWithLocale(
                     "The database [%s] already exists. The graph export procedure can only create new databases.",
