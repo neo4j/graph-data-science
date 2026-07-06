@@ -32,11 +32,11 @@ public class GraphMemoryUsageApplication {
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 
-    public GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, GraphName graphName) {
+    public org.neo4j.gds.core.loading.GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, GraphName graphName) {
         var catalogRequest = CatalogRequest.of(user.getUsername(), databaseId.databaseName());
 
         var graphStoreWithConfig = graphStoreCatalogService.get(catalogRequest, graphName);
 
-        return GraphMemoryUsage.of(graphStoreWithConfig);
+        return org.neo4j.gds.core.loading.GraphMemoryUsage.of(graphStoreWithConfig);
     }
 }

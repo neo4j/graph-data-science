@@ -30,7 +30,6 @@ import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.GraphMemoryUsage;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;

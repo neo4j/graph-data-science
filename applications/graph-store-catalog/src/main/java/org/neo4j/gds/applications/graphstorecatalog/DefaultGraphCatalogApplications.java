@@ -512,7 +512,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     }
 
     @Override
-    public GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphNameAsString) {
+    public org.neo4j.gds.core.loading.GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphNameAsString) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         if (!graphStoreCatalogService.graphExists(user, databaseId, graphName)) {

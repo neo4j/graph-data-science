@@ -128,7 +128,7 @@ public interface GraphCatalogApplications {
         Map<String, Object> configuration
     );
 
-    GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphName);
+    org.neo4j.gds.core.loading.GraphMemoryUsage sizeOf(User user, DatabaseId databaseId, String graphName);
 
     GraphDropNodePropertiesResult dropNodeProperties(
         User user,

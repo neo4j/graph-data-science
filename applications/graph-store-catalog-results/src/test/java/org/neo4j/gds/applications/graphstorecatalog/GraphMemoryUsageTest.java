@@ -44,7 +44,7 @@ class GraphMemoryUsageTest {
                 var graphStore = gdlFactory.build();
 
                 var graphStoreWithConfig = new GraphStoreCatalogEntry(graphStore, config, ResultStore.EMPTY);
-                var graphMemoryUsage = GraphMemoryUsage.of(graphStoreWithConfig);
+                var graphMemoryUsage = org.neo4j.gds.core.loading.GraphMemoryUsage.of(graphStoreWithConfig);
                 assertThat(graphMemoryUsage.detailSizeInBytes.get("adjacencyLists"))
                     .asInstanceOf(InstanceOfAssertFactories.MAP)
                     .hasEntrySatisfying(

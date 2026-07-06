@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
+import org.neo4j.gds.core.loading.GraphMemoryUsage;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Internal;
