@@ -196,7 +196,7 @@ public final class GraphStoreCatalog {
             );
             return userCatalog;
         });
-
+        var memory = GraphMemoryUsage.of(new GraphStoreCatalogEntry(graphStore,config,null)).sizeInBytes;
         graphStoreAddedEventListeners.forEach(
             listener -> ExceptionUtil.safeRunWithLogException(
                 () -> String.format(
@@ -210,7 +210,7 @@ public final class GraphStoreCatalog {
                         config.username(),
                         graphStore.databaseInfo().databaseId().databaseName(),
                         config.graphName(),
-                        GraphMemoryUsage.of(new GraphStoreCatalogEntry(graphStore,config,null)).sizeInBytes
+                        memory
                     )
                 ),
                 log.orElseGet(Log::noOpLog)::warn

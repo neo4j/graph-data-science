@@ -346,6 +346,9 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public Map<RelationshipType, Topology> relationshipTopologies() {
+        if (schema().relationshipSchema().availableTypes().isEmpty()){
+            return Map.of();
+        }
         return Map.of(relationshipType(), relationshipTopology());
     }
 
