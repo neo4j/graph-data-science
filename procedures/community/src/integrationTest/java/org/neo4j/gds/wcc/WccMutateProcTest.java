@@ -412,11 +412,14 @@ class WccMutateProcTest extends BaseProcTest {
         GraphStore graphStore = runMutation(ensureGraphExists(), Map.of());
         assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), graphStore.getUnion());
         GraphSchema schema = graphStore.schema();
-        boolean nodesContainMutateProperty = schema.nodeSchema().entries().stream()
-            .flatMap(e -> e.properties().entrySet().stream())
-            .anyMatch(props -> props.getKey().equals(MUTATE_PROPERTY) && props.getValue()
-                .valueType() == ValueType.LONG);
-        assertTrue(nodesContainMutateProperty);
+
+        var containsMutateProperty =  graphStore.schema().nodeSchema()
+            .allProperties().stream()
+            .anyMatch(propertySchema ->
+                propertySchema.key().equals(MUTATE_PROPERTY)
+                    && propertySchema.valueType() == ValueType.LONG
+            );
+        assertTrue(containsMutateProperty);
     }
 
     @Test

@@ -28,7 +28,7 @@ import java.util.Set;
 
 public interface GraphSchema {
 
-    NodeSchema nodeSchema();
+    NodeSchemaRecord nodeSchema();
 
     RelationshipSchema relationshipSchema();
 

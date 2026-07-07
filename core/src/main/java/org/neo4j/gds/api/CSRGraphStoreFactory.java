@@ -27,7 +27,6 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -72,10 +71,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
     }
 
     protected CSRGraphStore createGraphStore(Nodes nodes, RelationshipImportResult relationshipImportResult) {
-        var schema = MutableGraphSchema.of(
-            NodeSchemaUtils.fromRecordType(nodes.schema()),
-            relationshipImportResult.relationshipSchema()
-        );
+        var schema = MutableGraphSchema.of(nodes.schema(), relationshipImportResult.relationshipSchema());
 
         var databaseInfo = DatabaseInfo.create(
             loadingContext.databaseId(),

@@ -101,8 +101,8 @@ public record NodeSchemaRecord(Map<NodeLabel, List<PropertySchema>> entries) {
     }
 
     public List<PropertySchema> allProperties() {
-        return entries.entrySet().stream()
-            .flatMap(entry -> entry.getValue().stream())
+        return entries.values().stream()
+            .flatMap(List::stream)
             .distinct()
             .toList();
     }

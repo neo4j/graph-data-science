@@ -23,7 +23,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.beta.filter.GraphStoreFilter;
 import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.beta.filter.RelationshipsFilter;
@@ -138,7 +137,7 @@ public class GraphSampleConstructor {
             .databaseInfo(inputGraphStore.databaseInfo())
             .capabilities(inputGraphStore.capabilities())
             .schema(filteredSchema)
-            .nodes(new Nodes(NodeSchemaUtils.toRecordType(filteredSchema.nodeSchema()), idMap, nodePropertyStore))
+            .nodes(new Nodes(filteredSchema.nodeSchema(), idMap, nodePropertyStore))
             .relationshipImportResult(relationshipImportResult)
             .concurrency(concurrency)
             .build();

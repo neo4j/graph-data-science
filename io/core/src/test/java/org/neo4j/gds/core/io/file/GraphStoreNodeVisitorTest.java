@@ -26,9 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -56,7 +54,7 @@ class GraphStoreNodeVisitorTest {
 
     @Test
     void shouldAddNodesToNodesBuilder() {
-        var nodeSchema = NodeSchemaUtils.toRecordType(graphStore.schema().nodeSchema());
+        var nodeSchema = graphStore.schema().nodeSchema();
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .nodeSchema(nodeSchema)
             .concurrency(new Concurrency(1))
@@ -84,7 +82,7 @@ class GraphStoreNodeVisitorTest {
         relationshipSchema.getOrCreateRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Direction.UNDIRECTED);
 
         var graphSchema = MutableGraphSchema.of(
-            MutableNodeSchema.from(graphStore.schema().nodeSchema()),
+            graphStore.schema().nodeSchema(),
             relationshipSchema
         );
 

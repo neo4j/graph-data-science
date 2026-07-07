@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.GraphInfoBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -122,7 +121,7 @@ class GraphStoreMetadataMapperTest {
 
         var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
 
-        var expected = NodeSchemaUtils.toRecordType(graphStore.schema().nodeSchema());
+        var expected = graphStore.schema().nodeSchema();
         assertThat(result).isEqualTo(expected);
     }
 
@@ -141,7 +140,7 @@ class GraphStoreMetadataMapperTest {
 
         var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
 
-        var expected = NodeSchemaUtils.toRecordType(graphStore.schema().nodeSchema());
+        var expected = graphStore.schema().nodeSchema();
         assertThat(result).isEqualTo(expected);
     }
 

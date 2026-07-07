@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.loading.Capabilities;
 
@@ -41,7 +40,7 @@ public final class GraphStoreMetadataFactory {
         var writeMode = toWriteMode(graphStore.capabilities().writeMode());
         var idMapInfo = toIdMapInfo(graphStore.nodes());
         var relationshipInfo = toRelationshipInfo(graphStore);
-        var nodeSchema = toNodeSchema(NodeSchemaUtils.toRecordType(graphStore.schema().nodeSchema()));
+        var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema());
         var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema());
 
         return new GraphStoreMetadata(

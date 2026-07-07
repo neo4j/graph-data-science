@@ -72,7 +72,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     ) {
         validatePropertiesCanBeWritten(
             graphStore.capabilities().writeMode(),
-            graph.schema().nodeSchema().unionProperties(),
+            graph.schema().nodeSchema().properties(),
             nodeProperties,
             resultStore.isPresent()
         );

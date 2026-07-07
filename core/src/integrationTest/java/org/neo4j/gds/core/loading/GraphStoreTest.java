@@ -183,6 +183,17 @@ class GraphStoreTest extends BaseTest {
     }
 
     @Test
+    void testAddNodeProperty() {
+        var graphStore = initialiseStoreLoaderBuilder().build().graphStore();
+        var nodeLabel = NodeLabel.of("A");
+        var nodeProperty = "a";
+
+        graphStore.addNodeProperty(Set.of(nodeLabel), nodeProperty, new DoubleNullPropertyMap(42.0));
+
+        assertTrue(graphStore.hasNodeProperty(nodeLabel, nodeProperty));
+    }
+
+    @Test
     void testRemoveNodeProperty() {
         runQuery("CREATE (a {nodeProp: 42})-[:REL]->(b {nodeProp: 23})");
 

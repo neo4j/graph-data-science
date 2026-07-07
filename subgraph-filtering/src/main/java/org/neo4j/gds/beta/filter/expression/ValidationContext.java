@@ -56,7 +56,7 @@ public record ValidationContext(
         var propertiesAndTypes = graphStore
             .schema()
             .nodeSchema()
-            .unionProperties()
+            .properties()
             .entrySet()
             .stream()
             .collect(Collectors.toMap(

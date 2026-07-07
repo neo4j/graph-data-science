@@ -27,7 +27,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.io.IOException;
@@ -99,7 +98,7 @@ class NodeSchemaLoaderTest {
         FileUtils.writeLines(nodeSchemaFile, lines);
 
         var schemaLoader = new NodeSchemaLoader(exportDir);
-        var nodeSchema = NodeSchemaUtils.fromRecordType(schemaLoader.load());
+        var nodeSchema = schemaLoader.load();
 
         assertThat(nodeSchema).isNotNull();
         assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));

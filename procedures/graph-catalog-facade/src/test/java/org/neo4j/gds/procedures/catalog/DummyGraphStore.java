@@ -36,9 +36,8 @@ import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
 import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
-import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
@@ -72,38 +71,10 @@ class DummyGraphStore implements GraphStore {
     public GraphSchema schema() {
         return new GraphSchema() {
             @Override
-            public NodeSchema nodeSchema() {
-                return new NodeSchema() {
-                    @Override
-                    public Set<NodeLabel> availableLabels() {
-                        throw new UnsupportedOperationException("TODO");
-                    }
-
-                    @Override
-                    public boolean containsOnlyAllNodesLabel() {
-                        throw new UnsupportedOperationException("TODO");
-                    }
-
-                    @Override
-                    public NodeSchema filter(Set<NodeLabel> labelsToKeep) {
-                        throw new UnsupportedOperationException("TODO");
-                    }
-
-                    @Override
-                    public NodeSchema union(NodeSchema other) {
-                        throw new UnsupportedOperationException("TODO");
-                    }
-
-                    @Override
-                    public Collection<MutableNodeSchemaEntry> entries() {
-                        return Set.of(MutableNodeSchemaEntry.of(NodeLabel.of("A"), Map.of()));
-                    }
-
-                    @Override
-                    public MutableNodeSchemaEntry get(NodeLabel identifier) {
-                        throw new UnsupportedOperationException("TODO");
-                    }
-                };
+            public NodeSchemaRecord nodeSchema() {
+                return NodeSchemaRecord.builder()
+                    .addLabel("A")
+                    .build();
             }
 
             @Override

@@ -29,7 +29,7 @@ import java.util.Set;
 @SuppressWarnings({"immutables:subtype", "immutables:from"})
 public interface MutableGraphSchema extends GraphSchema {
     @Override
-    MutableNodeSchema nodeSchema();
+    NodeSchemaRecord nodeSchema();
 
     @Override
     MutableRelationshipSchema relationshipSchema();
@@ -53,18 +53,18 @@ public interface MutableGraphSchema extends GraphSchema {
     }
 
     static MutableGraphSchema empty() {
-        return of(MutableNodeSchema.empty(), MutableRelationshipSchema.empty());
+        return of(NodeSchemaRecord.empty(), MutableRelationshipSchema.empty());
     }
 
     static MutableGraphSchema from(GraphSchema from) {
         return of(
-            MutableNodeSchema.from(from.nodeSchema()),
+            from.nodeSchema(),
             MutableRelationshipSchema.from(from.relationshipSchema())
         );
     }
 
     static MutableGraphSchema of(
-        MutableNodeSchema nodeSchema,
+        NodeSchemaRecord nodeSchema,
         MutableRelationshipSchema relationshipSchema
     ) {
         return ImmutableMutableGraphSchema.builder()
@@ -79,7 +79,7 @@ public interface MutableGraphSchema extends GraphSchema {
 
     static ImmutableMutableGraphSchema.Builder builderFrom(GraphSchema parent) {
         return builder()
-            .nodeSchema(MutableNodeSchema.from(parent.nodeSchema()))
+            .nodeSchema(parent.nodeSchema())
             .relationshipSchema(MutableRelationshipSchema.from(parent.relationshipSchema()));
     }
 }

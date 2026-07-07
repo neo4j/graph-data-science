@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -34,7 +35,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
@@ -78,7 +78,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
             .build()
             .graph();
 
-        assertEquals(expectedSchema, graph.schema().nodeSchema().get(NodeLabel.of("Node")).properties().get("prop"));
+        assertEquals(expectedSchema, graph.schema().nodeSchema().propertiesForLabel(NodeLabel.of("Node")).get("prop"));
     }
 
     @ParameterizedTest

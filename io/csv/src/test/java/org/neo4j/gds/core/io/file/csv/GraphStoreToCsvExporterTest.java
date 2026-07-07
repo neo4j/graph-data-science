@@ -158,9 +158,9 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var rel2Type = RelationshipType.of("REL2");
 
         var nodeSchema = graphStore.schema().nodeSchema();
-        var abSchema = nodeSchema.filter(Set.of(barLabel, bazLabel)).unionProperties();
-        var acSchema = nodeSchema.filter(Set.of(barLabel, fooLabel)).unionProperties();
-        var bSchema = nodeSchema.filter(Set.of(bazLabel)).unionProperties();
+        var abSchema = nodeSchema.filter(Set.of(barLabel, bazLabel)).properties();
+        var acSchema = nodeSchema.filter(Set.of(barLabel, fooLabel)).properties();
+        var bSchema = nodeSchema.filter(Set.of(bazLabel)).properties();
         var rel1Schema = graphStore.schema().relationshipSchema().filter(Set.of(rel1Type)).unionProperties();
         var rel2Schema = graphStore.schema().relationshipSchema().filter(Set.of(rel2Type)).unionProperties();
 
@@ -271,7 +271,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         // Assert headers
         var nodeSchema = concurrentGraphStore.schema().nodeSchema();
-        assertHeaderFile("nodes_header.csv", NODE_COLUMNS, nodeSchema.unionProperties());
+        assertHeaderFile("nodes_header.csv", NODE_COLUMNS, nodeSchema.properties());
         assertHeaderFile("relationships_type1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
         // Sometimes we end up with only one file, so we cannot make absolute assumptions about the files created

@@ -22,7 +22,6 @@ package org.neo4j.gds.core.io;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.NodeSchemaRecord;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
 
@@ -69,7 +68,7 @@ public record MetaDataStore(
         var schema = graphStore.schema();
         return new MetaDataStore(
             graphInfo,
-            NodeSchemaUtils.toRecordType(schema.nodeSchema()),
+            schema.nodeSchema(),
             schema.relationshipSchema()
         );
     }

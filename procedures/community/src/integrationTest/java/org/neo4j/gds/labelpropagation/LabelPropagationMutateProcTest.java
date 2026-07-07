@@ -364,13 +364,11 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
     void testGraphMutation() {
         var graphStore = runMutation(ensureGraphExists(), Map.of("mutateProperty", MUTATE_PROPERTY));
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
-        boolean containsMutateProperty = graphStore.schema().nodeSchema()
-            .entries()
-            .stream()
-            .flatMap(e -> e.properties().entrySet().stream())
-            .anyMatch(
-                props -> props.getKey().equals(MUTATE_PROPERTY) &&
-                    props.getValue().valueType() == ValueType.LONG
+        var containsMutateProperty =  graphStore.schema().nodeSchema()
+            .allProperties().stream()
+            .anyMatch(propertySchema ->
+                propertySchema.key().equals(MUTATE_PROPERTY)
+                    && propertySchema.valueType() == ValueType.LONG
             );
         assertThat(containsMutateProperty).isTrue();
     }

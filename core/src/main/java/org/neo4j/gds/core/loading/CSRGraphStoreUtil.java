@@ -34,7 +34,6 @@ import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
 import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchemaRecord;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -102,7 +101,7 @@ public final class CSRGraphStoreUtil {
         Concurrency concurrency
     ) {
 
-        var nodeSchema = NodeSchemaUtils.toRecordType(mutableGraphSchema.nodeSchema());
+        var nodeSchema = mutableGraphSchema.nodeSchema();
         var nodeProperties = constructNodePropertiesFromSchemaAndProperties(
             nodeSchema,
             valuesFunction

@@ -20,6 +20,7 @@
 package org.neo4j.gds.beta.generator;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -33,7 +34,6 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchemaRecord;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeArray;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -48,7 +48,6 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
-import org.neo4j.gds.Aggregation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -195,7 +194,7 @@ public final class RandomGraphGenerator {
         relationshipSchema.set(relationships.relationshipSchemaEntry());
 
         var graphSchema = MutableGraphSchema.of(
-            NodeSchemaUtils.fromRecordType(nodePropertiesAndSchema.nodeSchema()),
+            nodePropertiesAndSchema.nodeSchema(),
             relationshipSchema
         );
 

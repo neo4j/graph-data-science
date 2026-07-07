@@ -61,6 +61,7 @@ public final class MemoryUsage {
         @SuppressForbidden(reason = "we want to use system.out here")
         private static boolean isVmInfoAvailable() {
             macWorkaround();
+            javaRecordWorkaround();
 
             var sysOut = System.out;
             try {
@@ -89,6 +90,16 @@ public final class MemoryUsage {
             if (System.getProperty("os.name").contains("Mac")) {
                 System.setProperty("jol.skipHotspotSAAttach", "true");
             }
+        }
+
+        /**
+         * Workaround to make JOL work with Java records. Not ideal according to documentation:
+         * <a href="https://github.com/openjdk/jol/blob/db2cc744485031c8149991a004ab02f2ea9b24dd/jol-core/src/main/java/org/openjdk/jol/vm/HotspotUnsafe.java#L50">
+         *     HotspotUnsafe.java
+         * </a>
+         */
+        private static void javaRecordWorkaround() {
+            System.setProperty("jol.magicFieldOffset", "true");
         }
 
         private static final class NullOutputStream extends OutputStream {

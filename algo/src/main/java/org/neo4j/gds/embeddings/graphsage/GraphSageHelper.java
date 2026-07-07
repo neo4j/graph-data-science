@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.NodeSchemaEntry;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.embeddings.graphsage.algo.ActivationFunctionType;
 import org.neo4j.gds.embeddings.graphsage.algo.AggregatorType;
@@ -305,8 +305,13 @@ public final class GraphSageHelper {
         return graphSchema
             .nodeSchema()
             .entries()
-            .stream()
-            .collect(Collectors.toMap(NodeSchemaEntry::identifier, e -> e.properties().keySet()));
+            .entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    entry -> entry.getKey(),
+                    entry -> entry.getValue().stream().map(PropertySchema::key).collect(Collectors.toSet())
+                )
+            );
     }
 
     private static Map<NodeLabel, Set<String>> filteredPropertyKeysPerNodeLabel(Graph graph, List<String> featureProperties) {

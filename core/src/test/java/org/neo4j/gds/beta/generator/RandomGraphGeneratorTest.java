@@ -36,7 +36,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchemaRecord;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
@@ -527,7 +526,7 @@ class RandomGraphGeneratorTest {
     ) {
         var graph = generator.generate();
 
-        assertThat(graph.schema().nodeSchema()).isEqualTo(NodeSchemaUtils.fromRecordType(expectedNodeSchema));
+        assertThat(graph.schema().nodeSchema()).isEqualTo(expectedNodeSchema);
         assertThat(graph.schema().relationshipSchema()).isEqualTo(expectedRelationshipSchema);
     }
 

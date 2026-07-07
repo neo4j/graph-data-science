@@ -22,6 +22,7 @@ package org.neo4j.gds.canonization;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +54,8 @@ public final class CanonicalAdjacencyMatrix {
 
             String sortedProperties = g.nodeLabels(nodeId)
                 .stream()
-                .flatMap(label -> g.schema().nodeSchema().allProperties(label).stream())
+                .flatMap(label -> g.schema().nodeSchema().entries().get(label).stream())
+                .map(PropertySchema::key)
                 .distinct()
                 .map(propertyKey -> {
                     var nodeProperties = g.nodeProperties(propertyKey);

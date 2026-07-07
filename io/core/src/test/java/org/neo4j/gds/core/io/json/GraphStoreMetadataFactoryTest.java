@@ -28,7 +28,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.NodeSchemaRecord;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.extension.GdlExtension;
@@ -435,7 +434,7 @@ class GraphStoreMetadataFactoryTest {
 
     @Test
     void toNodeSchema() {
-        var result = GraphStoreMetadataFactory.toNodeSchema(NodeSchemaUtils.toRecordType(graphStore.schema().nodeSchema()));
+        var result = GraphStoreMetadataFactory.toNodeSchema(graphStore.schema().nodeSchema());
 
         assertThat(result).isEqualTo(Map.of(
             "Label1", new NodeSchema(Map.of(

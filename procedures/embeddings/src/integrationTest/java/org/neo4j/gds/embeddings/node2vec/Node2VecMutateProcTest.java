@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -89,7 +90,12 @@ class Node2VecMutateProcTest extends BaseProcTest {
     @Test
     void mutation() {
         var graphBeforeMutation = findLoadedGraph("graph");
-        assertThat(graphBeforeMutation.schema().nodeSchema().allProperties()).doesNotContain("testProp");
+        var propertiesBeforeMutation = graphBeforeMutation.schema()
+            .nodeSchema()
+            .allProperties().stream()
+            .map(PropertySchema::key)
+            .toList();
+        assertThat(propertiesBeforeMutation).doesNotContain("testProp");
 
         var rowCount = runQueryWithRowConsumer(
             "CALL gds.node2vec.mutate('graph', {" +
@@ -111,7 +117,12 @@ class Node2VecMutateProcTest extends BaseProcTest {
             .isEqualTo(1);
 
         var graphAfterMutation = findLoadedGraph("graph");
-        assertThat(graphAfterMutation.schema().nodeSchema().allProperties()).contains("testProp");
+        var propertiesAfterMutation = graphAfterMutation.schema()
+            .nodeSchema()
+            .allProperties().stream()
+            .map(PropertySchema::key)
+            .toList();
+        assertThat(propertiesAfterMutation).contains("testProp");
 
         var mutatedProperty = graphAfterMutation.nodeProperties("testProp");
         graphAfterMutation.forEachNode(nodeId -> {

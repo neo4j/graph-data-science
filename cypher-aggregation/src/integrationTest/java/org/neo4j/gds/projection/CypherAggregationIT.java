@@ -239,9 +239,9 @@ class CypherAggregationIT extends BaseProcTest {
 
         var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
 
-        assertThat(graph.schema().nodeSchema().get(NodeLabel.of("a")).properties().keySet()).isEmpty();
-        assertThat(graph.schema().nodeSchema().get(NodeLabel.of("b")).properties().keySet()).containsExactly("x");
-        assertThat(graph.schema().nodeSchema().get(NodeLabel.of("c")).properties().keySet()).containsExactly("y");
+        assertThat(graph.schema().nodeSchema().allPropertyKeysWithLabel("a")).isEmpty();
+        assertThat(graph.schema().nodeSchema().allPropertyKeysWithLabel("b")).containsExactly("x");
+        assertThat(graph.schema().nodeSchema().allPropertyKeysWithLabel("c")).containsExactly("y");
 
         assertThat(
             graph

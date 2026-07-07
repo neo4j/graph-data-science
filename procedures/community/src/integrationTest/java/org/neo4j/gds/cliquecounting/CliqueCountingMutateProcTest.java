@@ -133,12 +133,10 @@ public class CliqueCountingMutateProcTest extends BaseProcTest {
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph(), Orientation.UNDIRECTED), mutatedGraph);
 
         var containsMutateProperty =  graphStore.schema().nodeSchema()
-            .entries()
-            .stream()
-            .flatMap(e -> e.properties().entrySet().stream())
-            .anyMatch(
-                props -> props.getKey().equals(MUTATE_PROPERTY) &&
-                    props.getValue().valueType() == ValueType.LONG_ARRAY
+            .allProperties().stream()
+            .anyMatch(propertySchema ->
+                propertySchema.key().equals(MUTATE_PROPERTY)
+                && propertySchema.valueType() == ValueType.LONG_ARRAY
             );
         assertThat(containsMutateProperty).isTrue();
     }

@@ -38,7 +38,6 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchemaRecord;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -349,7 +348,7 @@ public final class GraphFactory {
         relationshipSchema.set(relationships.relationshipSchemaEntry());
 
         return create(
-            MutableGraphSchema.of(NodeSchemaUtils.fromRecordType(nodeSchema), relationshipSchema),
+            MutableGraphSchema.of(nodeSchema, relationshipSchema),
             idMap,
             Map.of(),
             relationships

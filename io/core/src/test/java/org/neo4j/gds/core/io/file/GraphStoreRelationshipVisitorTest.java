@@ -28,7 +28,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -167,7 +166,7 @@ class GraphStoreRelationshipVisitorTest {
 
         assertThat(actualRelationshipCount).isEqualTo(expectedImportedRelationshipsCount);
 
-        var nodes = new Nodes(NodeSchemaUtils.toRecordType(expectedGraph.schema().nodeSchema()), expectedGraph, NodePropertyStore.empty());
+        var nodes = new Nodes(expectedGraph.schema().nodeSchema(), expectedGraph, NodePropertyStore.empty());
 
         return new GraphStoreBuilder()
             .schema(MutableGraphSchema.from(expectedGraph.schema()))

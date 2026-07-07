@@ -73,14 +73,7 @@ public final class NodeSchemaUtils {
         return result;
     }
 
-    public static Map<String, Object> toMap(NodeSchema nodeSchema) {
-        return toMap(toRecordType(nodeSchema));
-    }
-
-    /**
-     * Private for now, will become public once we fully transition to NodeSchemaRecord
-     */
-    private static Map<String, Object> toMap(NodeSchemaRecord nodeSchema) {
+    public static Map<String, Object> toMap(NodeSchemaRecord nodeSchema) {
         var result = new HashMap<String, Object>();
 
         nodeSchema.entries().forEach((nodeLabel, propertySchemas) -> {

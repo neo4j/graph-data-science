@@ -21,12 +21,11 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.NodeSchemaRecord;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.EvaluationScores;
@@ -93,7 +92,7 @@ class NodeClassificationToModelConverterTest {
         var converter = new NodeClassificationToModelConverter(pipeline, config);
 
         var originalSchema = MutableGraphSchema.builder()
-            .nodeSchema(MutableNodeSchema.empty().addLabel(NodeLabel.of("M")))
+            .nodeSchema(NodeSchemaRecord.builder().addLabel("M").build())
             .relationshipSchema(MutableRelationshipSchema
                 .empty().addRelationshipType(RelationshipType.of("R"), Direction.UNDIRECTED))
             .build();

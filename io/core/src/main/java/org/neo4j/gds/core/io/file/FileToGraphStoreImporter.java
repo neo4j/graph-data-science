@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
-import org.neo4j.gds.api.schema.NodeSchemaUtils;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -167,7 +166,7 @@ public abstract class FileToGraphStoreImporter {
         var nodeSchema = fileInput.nodeSchema();
         nodeSchema.entries().keySet()
             .forEach(nodeLabel -> log.info("Imported node label schema: %s", nodeLabel.name()));
-        graphSchemaBuilder.nodeSchema(NodeSchemaUtils.fromRecordType(nodeSchema));
+        graphSchemaBuilder.nodeSchema(nodeSchema);
         var labelMapping = fileInput.labelMapping();
         if (labelMapping.isPresent()) {
             labelMapping.get()

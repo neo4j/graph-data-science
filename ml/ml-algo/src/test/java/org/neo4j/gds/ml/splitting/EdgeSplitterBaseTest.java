@@ -27,7 +27,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.relationships.Properties;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
-import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -43,7 +42,7 @@ abstract class EdgeSplitterBaseTest {
 
     Graph createGraph(SingleTypeRelationships relationships, GraphStore graphStore) {
         var schema = MutableGraphSchema.of(
-            (MutableNodeSchema) graphStore.schema().nodeSchema(),
+            graphStore.schema().nodeSchema(),
             new MutableRelationshipSchema(Map.of(
                 relationships.relationshipSchemaEntry().identifier(),
                 relationships.relationshipSchemaEntry()
