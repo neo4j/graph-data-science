@@ -27,52 +27,6 @@ import java.util.stream.Collectors;
 public final class NodeSchemaUtils {
     private NodeSchemaUtils() {}
 
-    public static NodeSchemaRecord toRecordType(NodeSchema nodeSchema) {
-        var result = NodeSchemaRecord.builder();
-
-        for (var nodeSchemaEntry : nodeSchema.entries()) {
-            var nodeLabelName = nodeSchemaEntry.identifier().name();
-            var propertySchemas = nodeSchemaEntry.properties().values();
-
-            if (propertySchemas.isEmpty()) {
-                result.addLabel(nodeLabelName);
-
-            } else {
-                for (var propertySchema : propertySchemas) {
-                    result.addProperty(
-                        nodeLabelName,
-                        propertySchema.key(),
-                        propertySchema.valueType(),
-                        propertySchema.defaultValue(),
-                        propertySchema.state()
-                    );
-                }
-            }
-        }
-
-        return result.build();
-    }
-
-    public static MutableNodeSchema fromRecordType(NodeSchemaRecord nodeSchema) {
-        var result = MutableNodeSchema.empty();
-
-        for (var labelEntry : nodeSchema.entries().entrySet()) {
-            var nodeLabel = labelEntry.getKey();
-            var propertySchemas = labelEntry.getValue();
-
-            if (propertySchemas.isEmpty()) {
-                result.addLabel(nodeLabel);
-
-            } else {
-                for (var propertySchema : propertySchemas) {
-                    result.addProperty(nodeLabel, propertySchema);
-                }
-            }
-        }
-
-        return result;
-    }
-
     public static Map<String, Object> toMap(NodeSchemaRecord nodeSchema) {
         var result = new HashMap<String, Object>();
 
