@@ -25,7 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.EvaluationScores;
@@ -92,7 +92,7 @@ class NodeClassificationToModelConverterTest {
         var converter = new NodeClassificationToModelConverter(pipeline, config);
 
         var originalSchema = MutableGraphSchema.builder()
-            .nodeSchema(NodeSchemaRecord.builder().addLabel("M").build())
+            .nodeSchema(NodeSchema.builder().addLabel("M").build())
             .relationshipSchema(MutableRelationshipSchema
                 .empty().addRelationshipType(RelationshipType.of("R"), Direction.UNDIRECTED))
             .build();

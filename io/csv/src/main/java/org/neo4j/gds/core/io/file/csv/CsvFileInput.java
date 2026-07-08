@@ -31,7 +31,7 @@ import org.neo4j.batchimport.api.InputIterator;
 import org.neo4j.batchimport.api.input.InputChunk;
 import org.neo4j.batchimport.api.input.InputEntityVisitor;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.io.GraphStoreInput;
@@ -75,7 +75,7 @@ public final class CsvFileInput implements FileInput {
     private final Path importPath;
     private final String userName;
     private final GraphInfo graphInfo;
-    private final NodeSchemaRecord nodeSchema;
+    private final NodeSchema nodeSchema;
     // TODO: type that has the mapping
     private final Optional<HashMap<String, String>> labelMapping;
     private final MutableRelationshipSchema relationshipSchema;
@@ -137,7 +137,7 @@ public final class CsvFileInput implements FileInput {
     }
 
     @Override
-    public NodeSchemaRecord nodeSchema() {
+    public NodeSchema nodeSchema() {
         return nodeSchema;
     }
 
@@ -190,11 +190,11 @@ public final class CsvFileInput implements FileInput {
         }
     }
 
-    static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchemaRecord, PropertySchema> {
+    static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchema, PropertySchema> {
 
         NodeImporter(
             Map<NodeFileHeader, List<Path>> headerToDataFilesMapping,
-            NodeSchemaRecord nodeSchema
+            NodeSchema nodeSchema
         ) {
             super(headerToDataFilesMapping, nodeSchema);
         }
@@ -269,9 +269,9 @@ public final class CsvFileInput implements FileInput {
         }
     }
 
-    static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchemaRecord, PropertySchema> {
+    static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchema, PropertySchema> {
 
-        NodeLineChunk(NodeSchemaRecord nodeSchema) {
+        NodeLineChunk(NodeSchema nodeSchema) {
             super(nodeSchema);
         }
 

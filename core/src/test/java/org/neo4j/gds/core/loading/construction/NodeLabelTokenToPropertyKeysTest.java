@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.List;
@@ -65,7 +65,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void testPropertySchemasFixed() {
-        var nodeSchema = NodeSchemaRecord.builder()
+        var nodeSchema = NodeSchema.builder()
             .addProperty("A", "foo", ValueType.LONG)
             .addProperty("A", "bar", ValueType.DOUBLE)
             .addProperty("A", "baz", ValueType.LONG)
@@ -97,7 +97,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void testMissingNodeLabelFixed() {
-        var nodeSchema = NodeSchemaRecord.empty();
+        var nodeSchema = NodeSchema.empty();
         var fixed = NodeLabelTokenToPropertyKeys.fixed(nodeSchema);
 
         var mapping = fixed.propertySchemas(
@@ -122,7 +122,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void shouldFailForMissingProperties() {
-        var nodeSchema = NodeSchemaRecord.builder()
+        var nodeSchema = NodeSchema.builder()
             .addProperty("A", "foo", ValueType.LONG)
             .addProperty("A", "baz", ValueType.LONG)
             .build();
@@ -142,7 +142,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void shouldFailForIncompatibleTypes() {
-        var nodeSchema = NodeSchemaRecord.builder()
+        var nodeSchema = NodeSchema.builder()
             .addProperty("A", "foo", ValueType.LONG)
             .addProperty("A", "baz", ValueType.LONG)
             .build();
@@ -215,7 +215,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
     @Test
     void testNodeLabelsFixed() {
-        var mapping = NodeLabelTokenToPropertyKeys.fixed(NodeSchemaRecord.builder()
+        var mapping = NodeLabelTokenToPropertyKeys.fixed(NodeSchema.builder()
             .addLabel(NodeLabel.ALL_LABEL)
             .addLabel("A")
             .addLabel("B")

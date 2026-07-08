@@ -44,7 +44,7 @@ import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
@@ -183,7 +183,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
             nodes.addNodeLabel(nodeLabel);
             var newNodeSchema = schema.nodeSchema().allProperties().stream()
                 .collect(
-                    NodeSchemaRecord::builder,
+                    NodeSchema::builder,
                     (builder, propertySchema) -> builder.addProperty(
                         nodeLabel.name(),
                         propertySchema.key(),
@@ -191,7 +191,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
                         propertySchema.defaultValue(),
                         propertySchema.state()
                     ),
-                    NodeSchemaRecord.NodeSchemaBuilder::addBuilder
+                    NodeSchema.NodeSchemaBuilder::addBuilder
                 )
                 .addLabel(nodeLabel.name()) // In case no property exists
                 .addSchema(schema.nodeSchema())
@@ -254,7 +254,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
 
             var nodeSchema = labels.stream()
                 .collect(
-                    NodeSchemaRecord::builder,
+                    NodeSchema::builder,
                     (builder, label) -> builder.addProperty(
                         label.name(),
                         propertyKey,
@@ -262,7 +262,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
                         propertyValues.valueType().fallbackValue(),
                         PropertyState.TRANSIENT
                     ),
-                    NodeSchemaRecord.NodeSchemaBuilder::addBuilder
+                    NodeSchema.NodeSchemaBuilder::addBuilder
                 )
                 .addSchema(schema().nodeSchema())
                 .build();
@@ -279,7 +279,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
                 .removeProperty(propertyKey)
                 .build();
 
-            var nodeSchemaBuilder = NodeSchemaRecord.builder();
+            var nodeSchemaBuilder = NodeSchema.builder();
             schema().nodeSchema().entries().forEach((nodeLabel, propertySchemas) -> {
                 if (propertySchemas.isEmpty()) {
                     nodeSchemaBuilder.addLabel(nodeLabel.name());
@@ -632,7 +632,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
     private CSRGraph createGraphFromRelationshipType(
         Optional<? extends FilteredIdMap> filteredNodes,
         Map<String, NodePropertyValues> filteredNodeProperties,
-        NodeSchemaRecord nodeSchema,
+        NodeSchema nodeSchema,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {

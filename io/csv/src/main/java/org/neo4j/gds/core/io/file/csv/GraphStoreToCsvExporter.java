@@ -23,7 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.io.IdentifierMapper;
@@ -60,7 +60,7 @@ public final class GraphStoreToCsvExporter {
         var nodeSchema = graphStore.schema().nodeSchema();
         var relationshipSchema = graphStore.schema().relationshipSchema();
 
-        var neoNodeSchemaBuilder = NodeSchemaRecord.builder().addSchema(nodeSchema);
+        var neoNodeSchemaBuilder = NodeSchema.builder().addSchema(nodeSchema);
 
         // Add additional properties to each label present in the graph store.
         neoNodeProperties.ifPresent(additionalProps -> additionalProps

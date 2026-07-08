@@ -28,11 +28,11 @@ import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.ImmutablePropertySchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 
 import java.util.Map;
 
-public record Nodes(NodeSchemaRecord schema, IdMap idMap, NodePropertyStore properties) {
+public record Nodes(NodeSchema schema, IdMap idMap, NodePropertyStore properties) {
 
     public static Nodes of(
         IdMap idMap,
@@ -40,7 +40,7 @@ public record Nodes(NodeSchemaRecord schema, IdMap idMap, NodePropertyStore prop
         Map<PropertyMapping, NodePropertyValues> propertyValues,
         PropertyState propertyState
     ) {
-        var nodeSchemaBuilder = NodeSchemaRecord.builder();
+        var nodeSchemaBuilder = NodeSchema.builder();
         var nodePropertyStoreBuilder = NodePropertyStore.builder();
 
         propertyMappings.forEach(((nodeLabel, mappings) -> {

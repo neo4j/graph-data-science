@@ -25,7 +25,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
@@ -190,7 +190,7 @@ public final class NodesBuilder {
         return new Nodes(nodeSchema, idMap, nodePropertyStore);
     }
 
-    private NodeSchemaRecord buildNodeSchema(
+    private NodeSchema buildNodeSchema(
         IdMap idMap,
         Map<String, NodeProperty> nodeProperties
     ) {
@@ -218,7 +218,7 @@ public final class NodesBuilder {
         // key mapping to construct the final node schema.
         return nodeLabels.stream()
             .collect(
-                NodeSchemaRecord::builder,
+                NodeSchema::builder,
                 (builder, nodeLabel) -> {
                     var propertySchemas = globalLabelTokenToPropertyKeys.propertySchemas(nodeLabel, propertyKeysToSchema).values();
 
@@ -237,7 +237,7 @@ public final class NodesBuilder {
                         }
                     }
                 },
-                NodeSchemaRecord.NodeSchemaBuilder::addBuilder
+                NodeSchema.NodeSchemaBuilder::addBuilder
             )
             .build();
     }

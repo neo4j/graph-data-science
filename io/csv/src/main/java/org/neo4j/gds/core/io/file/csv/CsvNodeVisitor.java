@@ -22,7 +22,7 @@ package org.neo4j.gds.core.io.file.csv;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.file.NodeVisitor;
@@ -52,7 +52,7 @@ public class CsvNodeVisitor extends NodeVisitor {
 
     CsvNodeVisitor(
         Path fileLocation,
-        NodeSchemaRecord nodeSchema,
+        NodeSchema nodeSchema,
         Set<String> headerFiles,
         int visitorId,
         IdentifierMapper<NodeLabel> nodeLabelMapping
@@ -66,7 +66,7 @@ public class CsvNodeVisitor extends NodeVisitor {
     }
 
     @TestOnly
-    public CsvNodeVisitor(Path fileLocation, NodeSchemaRecord nodeSchema, IdentifierMapper<NodeLabel> nodeLabelMapping) {
+    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema, IdentifierMapper<NodeLabel> nodeLabelMapping) {
         this(fileLocation, nodeSchema, new HashSet<>(), 0, nodeLabelMapping);
     }
 
@@ -176,6 +176,6 @@ public class CsvNodeVisitor extends NodeVisitor {
             : currentLabels.stream()
                 .map(this.nodeLabelMapping::forIdentifier)
                 .collect(Collectors.toSet());
-        return nodeSchemaRecord.filter(nodeLabelList).allProperties();
+        return nodeSchema.filter(nodeLabelList).allProperties();
     }
 }

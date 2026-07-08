@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public final class NodeSchemaUtils {
     private NodeSchemaUtils() {}
 
-    public static Map<String, Object> toMap(NodeSchemaRecord nodeSchema) {
+    public static Map<String, Object> toMap(NodeSchema nodeSchema) {
         var result = new HashMap<String, Object>();
 
         nodeSchema.entries().forEach((nodeLabel, propertySchemas) -> {

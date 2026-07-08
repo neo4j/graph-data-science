@@ -23,7 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
@@ -53,8 +53,8 @@ public final class GraphStoreMetadataMapper {
         return new Capabilities(toWriteMode(graphStoreMetadata));
     }
 
-    public static org.neo4j.gds.api.schema.NodeSchemaRecord toNodeSchema(GraphStoreMetadata graphStoreMetadata) {
-        var result = NodeSchemaRecord.builder();
+    public static NodeSchema toNodeSchema(GraphStoreMetadata graphStoreMetadata) {
+        var result = NodeSchema.builder();
 
         for (var entry : graphStoreMetadata.nodeSchema().entrySet()) {
             var propertySchemas = entry.getValue().propertySchemas();

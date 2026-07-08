@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.core.io.schema;
 
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 
 public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
 
-    private final NodeSchemaRecord.NodeSchemaBuilder builder;
+    private final NodeSchema.NodeSchemaBuilder builder;
 
     public NodeSchemaBuilderVisitor() {
-        builder = NodeSchemaRecord.builder();
+        builder = NodeSchema.builder();
     }
 
     @Override
@@ -39,7 +39,7 @@ public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
         }
     }
 
-    public NodeSchemaRecord schema() {
+    public NodeSchema schema() {
         return builder.build();
     }
 }

@@ -39,9 +39,9 @@ import static java.util.stream.Collectors.flatMapping;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toCollection;
 
-public record NodeSchemaRecord(Map<NodeLabel, List<PropertySchema>> entries) {
+public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
 
-    public NodeSchemaRecord {
+    public NodeSchema {
         // Assumes NodeLabel and PropertySchema are immutable classes
         entries = entries.entrySet().stream()
             .collect(Collectors.toUnmodifiableMap(
@@ -50,8 +50,8 @@ public record NodeSchemaRecord(Map<NodeLabel, List<PropertySchema>> entries) {
             ));
     }
 
-    static NodeSchemaRecord of(Map<NodeLabel, List<PropertySchema>> entries) {
-        return new NodeSchemaRecord(entries);
+    static NodeSchema of(Map<NodeLabel, List<PropertySchema>> entries) {
+        return new NodeSchema(entries);
     }
 
     public Optional<DefaultValue> getDefaultValueFor(String label, String propertyKey) {
@@ -61,8 +61,8 @@ public record NodeSchemaRecord(Map<NodeLabel, List<PropertySchema>> entries) {
             .map(PropertySchema::defaultValue);
     }
 
-    public NodeSchemaRecord filter(Set<NodeLabel> labels) {
-        return NodeSchemaRecord.of(entries.entrySet().stream()
+    public NodeSchema filter(Set<NodeLabel> labels) {
+        return NodeSchema.of(entries.entrySet().stream()
             .filter((entry) -> labels.contains(entry.getKey()))
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
@@ -71,8 +71,8 @@ public record NodeSchemaRecord(Map<NodeLabel, List<PropertySchema>> entries) {
         );
     }
 
-    public NodeSchemaRecord union(NodeSchemaRecord other) {
-        return NodeSchemaRecord.builder()
+    public NodeSchema union(NodeSchema other) {
+        return NodeSchema.builder()
             .addSchema(this)
             .addSchema(other)
             .build();
@@ -136,8 +136,8 @@ public record NodeSchemaRecord(Map<NodeLabel, List<PropertySchema>> entries) {
             );
     }
 
-    public static NodeSchemaRecord empty() {
-        return new NodeSchemaRecord(Collections.emptyMap());
+    public static NodeSchema empty() {
+        return new NodeSchema(Collections.emptyMap());
     }
 
     /**
@@ -176,7 +176,7 @@ public record NodeSchemaRecord(Map<NodeLabel, List<PropertySchema>> entries) {
             return this;
         }
 
-        public NodeSchemaBuilder addSchema(NodeSchemaRecord nodeSchema) {
+        public NodeSchemaBuilder addSchema(NodeSchema nodeSchema) {
             nodeSchema.entries()
                 .forEach(
                     (nodeLabel, propertySchemas) -> {
@@ -205,8 +205,8 @@ public record NodeSchemaRecord(Map<NodeLabel, List<PropertySchema>> entries) {
             );
         }
 
-        public NodeSchemaRecord build() {
-            return NodeSchemaRecord.of(rows.stream()
+        public NodeSchema build() {
+            return NodeSchema.of(rows.stream()
                 .collect(
                     groupingBy(
                         row -> NodeLabel.of(row.nodeLabel),

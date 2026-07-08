@@ -21,7 +21,7 @@ package org.neo4j.gds.core.io;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
 
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 public record MetaDataStore(
     GraphInfo graphInfo,
-    NodeSchemaRecord nodeSchema,
+    NodeSchema nodeSchema,
     RelationshipSchema relationshipSchema
 ) {
     public static MetaDataStore of(GraphStore graphStore) {

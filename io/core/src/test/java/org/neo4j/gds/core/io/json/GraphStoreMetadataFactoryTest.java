@@ -27,7 +27,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.extension.GdlExtension;
@@ -79,7 +79,7 @@ class GraphStoreMetadataFactoryTest {
                         Map.of(NodeLabel.ALL_NODES.name(), 2L)
                     ),
                     Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
-                    Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of())),
+                    Map.of(NodeLabel.ALL_NODES.name(), new org.neo4j.gds.core.io.json.NodeSchema(Map.of())),
                     Map.of(
                         RelationshipType.ALL_RELATIONSHIPS.name(),
                         new RelationshipSchema(Direction.DIRECTED, Map.of())
@@ -107,7 +107,7 @@ class GraphStoreMetadataFactoryTest {
                         Map.of(NodeLabel.ALL_NODES.name(), 2L)
                     ),
                     Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
-                    Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of())),
+                    Map.of(NodeLabel.ALL_NODES.name(), new org.neo4j.gds.core.io.json.NodeSchema(Map.of())),
                     Map.of(
                         RelationshipType.ALL_RELATIONSHIPS.name(),
                         new RelationshipSchema(Direction.DIRECTED, Map.of())
@@ -139,7 +139,7 @@ class GraphStoreMetadataFactoryTest {
                         Map.of(NodeLabel.ALL_NODES.name(), 2L)
                     ),
                     Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
-                    Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of())),
+                    Map.of(NodeLabel.ALL_NODES.name(), new org.neo4j.gds.core.io.json.NodeSchema(Map.of())),
                     Map.of(
                         RelationshipType.ALL_RELATIONSHIPS.name(),
                         new RelationshipSchema(Direction.DIRECTED, Map.of())
@@ -164,7 +164,7 @@ class GraphStoreMetadataFactoryTest {
                     ),
                     Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(2, false, 0)),
                     Map.of(
-                        "A", new NodeSchema(Map.of(
+                        "A", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "prop1",
                             new NodePropertySchema(
                                 ValueType.LONG,
@@ -178,7 +178,7 @@ class GraphStoreMetadataFactoryTest {
                                 PropertyState.TRANSIENT
                             )
                         )),
-                        "B", new NodeSchema(Map.of(
+                        "B", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "prop3",
                             new NodePropertySchema(
                                 ValueType.FLOAT_ARRAY,
@@ -192,7 +192,7 @@ class GraphStoreMetadataFactoryTest {
                                 PropertyState.TRANSIENT
                             )
                         )),
-                        "C", new NodeSchema(Collections.emptyMap())
+                        "C", new org.neo4j.gds.core.io.json.NodeSchema(Collections.emptyMap())
                     ),
                     Map.of(
                         RelationshipType.ALL_RELATIONSHIPS.name(),
@@ -223,7 +223,7 @@ class GraphStoreMetadataFactoryTest {
                     ),
                     Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
                     Map.of(
-                        "A", new NodeSchema(Map.of(
+                        "A", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "prop1",
                             new NodePropertySchema(
                                 ValueType.LONG,
@@ -237,7 +237,7 @@ class GraphStoreMetadataFactoryTest {
                                 PropertyState.PERSISTENT
                             )
                         )),
-                        "B", new NodeSchema(Map.of(
+                        "B", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "prop3",
                             new NodePropertySchema(
                                 ValueType.FLOAT_ARRAY,
@@ -282,7 +282,7 @@ class GraphStoreMetadataFactoryTest {
                         "REL1", new RelationshipInfo(2, false, 1),
                         "REL2", new RelationshipInfo(1, false, 0)
                     ),
-                    Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of())),
+                    Map.of(NodeLabel.ALL_NODES.name(), new org.neo4j.gds.core.io.json.NodeSchema(Map.of())),
                     Map.of(
                         "REL1",
                         new RelationshipSchema(
@@ -331,7 +331,7 @@ class GraphStoreMetadataFactoryTest {
                     "REL_TYPE2", new RelationshipInfo(2, false, 0)
                 ),
                 Map.of(
-                    "Label1", new NodeSchema(Map.of(
+                    "Label1", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "prop1",
                         new NodePropertySchema(
                             ValueType.LONG,
@@ -345,7 +345,7 @@ class GraphStoreMetadataFactoryTest {
                             PropertyState.TRANSIENT
                         )
                     )),
-                    "Label2", new NodeSchema(Map.of(
+                    "Label2", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "prop3",
                         new NodePropertySchema(
                             ValueType.LONG_ARRAY,
@@ -359,7 +359,7 @@ class GraphStoreMetadataFactoryTest {
                             PropertyState.TRANSIENT
                         )
                     )),
-                    "Label3", new NodeSchema(Map.of())
+                    "Label3", new org.neo4j.gds.core.io.json.NodeSchema(Map.of())
                 ),
                 Map.of(
                     "REL_TYPE1", new RelationshipSchema(
@@ -437,7 +437,7 @@ class GraphStoreMetadataFactoryTest {
         var result = GraphStoreMetadataFactory.toNodeSchema(graphStore.schema().nodeSchema());
 
         assertThat(result).isEqualTo(Map.of(
-            "Label1", new NodeSchema(Map.of(
+            "Label1", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                 "prop1",
                 new NodePropertySchema(
                     ValueType.LONG,
@@ -451,7 +451,7 @@ class GraphStoreMetadataFactoryTest {
                     PropertyState.TRANSIENT
                 )
             )),
-            "Label2", new NodeSchema(Map.of(
+            "Label2", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                 "prop3", new NodePropertySchema(
                     ValueType.LONG_ARRAY,
                     new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
@@ -463,7 +463,7 @@ class GraphStoreMetadataFactoryTest {
                     PropertyState.TRANSIENT
                 )
             )),
-            "Label3", new NodeSchema(Map.of())
+            "Label3", new org.neo4j.gds.core.io.json.NodeSchema(Map.of())
         ));
     }
 
@@ -492,22 +492,22 @@ class GraphStoreMetadataFactoryTest {
         return Stream.of(
             Arguments.of(
                 // empty
-                NodeSchemaRecord.empty(),
+                NodeSchema.empty(),
                 Map.of()
             ),
             Arguments.of(
                 // all nodes label, no properties
-                NodeSchemaRecord.builder().addLabel(NodeLabel.ALL_LABEL).build(),
-                Map.of(NodeLabel.ALL_NODES.name(), new NodeSchema(Map.of()))
+                NodeSchema.builder().addLabel(NodeLabel.ALL_LABEL).build(),
+                Map.of(NodeLabel.ALL_NODES.name(), new org.neo4j.gds.core.io.json.NodeSchema(Map.of()))
             ),
             Arguments.of(
                 // no label, with properties
-                NodeSchemaRecord.builder()
+                NodeSchema.builder()
                     .addProperty(NodeLabel.ALL_LABEL, "foo", org.neo4j.gds.api.nodeproperties.ValueType.LONG)
                     .build(),
                 Map.of(
                     NodeLabel.ALL_NODES.name(),
-                    new NodeSchema(Map.of(
+                    new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "foo",
                         new NodePropertySchema(
                             ValueType.LONG,
@@ -519,7 +519,7 @@ class GraphStoreMetadataFactoryTest {
             ),
             Arguments.of(
                 // label and properties
-                NodeSchemaRecord.builder()
+                NodeSchema.builder()
                     .addProperty("A", "foo", org.neo4j.gds.api.nodeproperties.ValueType.LONG)
                     .addProperty(
                         "B",
@@ -531,7 +531,7 @@ class GraphStoreMetadataFactoryTest {
                     .build(),
                 Map.of(
                     "A",
-                    new NodeSchema(Map.of(
+                    new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "foo",
                         new NodePropertySchema(
                             ValueType.LONG,
@@ -540,7 +540,7 @@ class GraphStoreMetadataFactoryTest {
                         )
                     )),
                     "B",
-                    new NodeSchema(Map.of(
+                    new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "bar",
                         new NodePropertySchema(
                             ValueType.LONG,
@@ -555,7 +555,7 @@ class GraphStoreMetadataFactoryTest {
 
     @ParameterizedTest
     @MethodSource("nodeSchemas")
-    void toNodeSchema(org.neo4j.gds.api.schema.NodeSchemaRecord input, Map<String, NodeSchema> expected) {
+    void toNodeSchema(NodeSchema input, Map<String, org.neo4j.gds.core.io.json.NodeSchema> expected) {
         assertThat(GraphStoreMetadataFactory.toNodeSchema(input)).isEqualTo(expected);
     }
 

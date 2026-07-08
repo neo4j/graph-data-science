@@ -29,7 +29,7 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.DirectIdMap;
@@ -69,7 +69,7 @@ class WriteConfigTest {
         var config = CypherMapWrapper.empty();
         var testConfig = new TestWriteConfigImpl(config);
 
-        var nodes = new Nodes(NodeSchemaRecord.empty(), new DirectIdMap(0), NodePropertyStore.empty());
+        var nodes = new Nodes(NodeSchema.empty(), new DirectIdMap(0), NodePropertyStore.empty());
 
         var testGraphStore = new GraphStoreBuilder()
             .databaseInfo(DatabaseInfo.create(DatabaseId.of("neo4j"), DatabaseLocation.LOCAL))
@@ -106,7 +106,7 @@ class WriteConfigTest {
             .writeToResultStore(true)
             .build();
 
-        var nodes = new Nodes(NodeSchemaRecord.empty(), new DirectIdMap(0), NodePropertyStore.empty());
+        var nodes = new Nodes(NodeSchema.empty(), new DirectIdMap(0), NodePropertyStore.empty());
 
         var testGraphStore = new GraphStoreBuilder()
             .databaseInfo(DatabaseInfo.create(DatabaseId.of("neo4j"), DatabaseLocation.LOCAL))

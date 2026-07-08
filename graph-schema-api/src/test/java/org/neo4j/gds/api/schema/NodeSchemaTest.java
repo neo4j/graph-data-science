@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class NodeSchemaRecordTest {
+class NodeSchemaTest {
 
     @Test
     void labelInsertionOrderDoesNotMatter() {
@@ -50,11 +50,11 @@ class NodeSchemaRecordTest {
         var valueType1 = ValueType.LONG;
         var valueType2 = ValueType.DOUBLE;
 
-        var result1 = NodeSchemaRecord.builder()
+        var result1 = NodeSchema.builder()
             .addProperty(label, propertyKey1, valueType1)
             .addProperty(label, propertyKey2, valueType2)
             .build();
-        var result2 = NodeSchemaRecord.builder()
+        var result2 = NodeSchema.builder()
             .addProperty(label, propertyKey2, valueType2)
             .addProperty(label, propertyKey1, valueType1)
             .build();
@@ -70,14 +70,14 @@ class NodeSchemaRecordTest {
         var valueType1 = ValueType.LONG;
         var valueType2 = ValueType.DOUBLE;
 
-        var result1 = NodeSchemaRecord.builder()
+        var result1 = NodeSchema.builder()
             .addProperty(label, propertyKey2, valueType2)
             .addProperty(label, propertyKey1, valueType1)
             .addProperty(label, propertyKey2, valueType2)
             .addProperty(label, propertyKey2, valueType2)
             .addProperty(label, propertyKey1, valueType1)
             .build();
-        var result2 = NodeSchemaRecord.builder()
+        var result2 = NodeSchema.builder()
             .addProperty(label, propertyKey1, valueType1)
             .addProperty(label, propertyKey2, valueType2)
             .build();
@@ -91,7 +91,7 @@ class NodeSchemaRecordTest {
         var label = "LabelA";
         var propertyKey = "Property" + valueType.name();
 
-        var result = NodeSchemaRecord.builder()
+        var result = NodeSchema.builder()
             .addProperty(label, propertyKey, valueType)
             .build();
 
@@ -107,9 +107,9 @@ class NodeSchemaRecordTest {
         var propertyKey1 = "PropertyX";
         var propertyKey2 = "PropertyY";
         var valueType = ValueType.LONG;
-        var schemaWithLabel1 = NodeSchemaRecord.builder().addProperty(label, propertyKey1, valueType).build();
+        var schemaWithLabel1 = NodeSchema.builder().addProperty(label, propertyKey1, valueType).build();
 
-        var result = NodeSchemaRecord.builder()
+        var result = NodeSchema.builder()
             .addProperty(label, propertyKey2, valueType)
             .addSchema(schemaWithLabel1)
             .build();
@@ -125,7 +125,7 @@ class NodeSchemaRecordTest {
     void buildingWithOnlyLabel() {
         var label = "LabelA";
 
-        var result = NodeSchemaRecord.builder().addLabel(label).build();
+        var result = NodeSchema.builder().addLabel(label).build();
 
         var expected = createSchema(
             SchemaEntry.of(label)
@@ -137,7 +137,7 @@ class NodeSchemaRecordTest {
     void builderFiltersDuplicateLabels() {
         var label = "LabelA";
 
-        var result = NodeSchemaRecord.builder()
+        var result = NodeSchema.builder()
             .addLabel(label)
             .addLabel(label)
             .addLabel(label)
@@ -155,11 +155,11 @@ class NodeSchemaRecordTest {
         var propertyKey = "PropertyX";
         var valueType = ValueType.LONG;
 
-        var result1 = NodeSchemaRecord.builder()
+        var result1 = NodeSchema.builder()
             .addLabel(label)
             .addProperty(label, propertyKey, valueType)
             .build();
-        var result2 = NodeSchemaRecord.builder()
+        var result2 = NodeSchema.builder()
             .addProperty(label, propertyKey, valueType)
             .addLabel(label)
             .build();
@@ -173,10 +173,10 @@ class NodeSchemaRecordTest {
 
     @Test
     void buildingWithAnotherBuilder() {
-        var builder1 = NodeSchemaRecord.builder()
+        var builder1 = NodeSchema.builder()
             .addProperty("LabelA", "PropertyX", ValueType.LONG)
             .addProperty("LabelB", "PropertyY", ValueType.DOUBLE);
-        var builder2 = NodeSchemaRecord.builder()
+        var builder2 = NodeSchema.builder()
             .addProperty("LabelB", "PropertyY", ValueType.DOUBLE)
             .addProperty("LabelC", "PropertyZ", ValueType.LONG);
 
@@ -192,7 +192,7 @@ class NodeSchemaRecordTest {
 
     @Test
     void buildingWithSelf() {
-        var builder1 = NodeSchemaRecord.builder()
+        var builder1 = NodeSchema.builder()
             .addProperty("LabelA", "PropertyX", ValueType.LONG)
             .addProperty("LabelB", "PropertyY", ValueType.DOUBLE);
 
@@ -212,7 +212,7 @@ class NodeSchemaRecordTest {
         var valueType = ValueType.LONG;
         var defaultvalue = DefaultValue.of(42L);
         var propertyState = PropertyState.PERSISTENT;
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty(label, propertyKey, valueType, defaultvalue, propertyState)
             .build();
 
@@ -225,7 +225,7 @@ class NodeSchemaRecordTest {
     void readDefaultValueFromNonExistingLabel() {
         var label = "LabelA";
         var propertyKey = "PropertyX";
-        var schema = NodeSchemaRecord.empty();
+        var schema = NodeSchema.empty();
 
         var result = schema.getDefaultValueFor(label, propertyKey);
 
@@ -236,7 +236,7 @@ class NodeSchemaRecordTest {
     void readDefaultValueFromNonExistingProperty() {
         var label = "LabelA";
         var propertyKey = "PropertyX";
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addLabel(label)
             .build();
 
@@ -251,7 +251,7 @@ class NodeSchemaRecordTest {
         var label2 = "LabelB";
         var propertyKey = "PropertyX";
         var valueType = ValueType.LONG;
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty(label1, propertyKey, valueType)
             .addProperty(label2, propertyKey, valueType)
             .build();
@@ -270,7 +270,7 @@ class NodeSchemaRecordTest {
         var label2 = "LabelB";
         var propertyKey = "PropertyX";
         var valueType = ValueType.LONG;
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty(label1, propertyKey, valueType)
             .addProperty(label2, propertyKey, valueType)
             .build();
@@ -286,7 +286,7 @@ class NodeSchemaRecordTest {
         var label2 = "LabelB";
         var propertyKey = "PropertyX";
         var valueType = ValueType.LONG;
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty(label1, propertyKey, valueType)
             .addProperty(label2, propertyKey, valueType)
             .build();
@@ -300,7 +300,7 @@ class NodeSchemaRecordTest {
     @Test
     void clientNotAllowedToMutateNodeSchemasEntries() {
         assertThrows(UnsupportedOperationException.class, () ->
-            new NodeSchemaRecord(new HashMap<>()).entries()
+            new NodeSchema(new HashMap<>()).entries()
                 .put(NodeLabel.of("LabelA"), List.of())
         );
     }
@@ -310,7 +310,7 @@ class NodeSchemaRecordTest {
         var entries = new HashMap<NodeLabel, List<PropertySchema>>();
         var label1 = NodeLabel.of("LabelA");
         entries.put(label1, new ArrayList<>());
-        var schema = new NodeSchemaRecord(entries);
+        var schema = new NodeSchema(entries);
 
         assertThrows(UnsupportedOperationException.class, () ->
             schema.entries()
@@ -325,7 +325,7 @@ class NodeSchemaRecordTest {
         var label2 = "LabelB";
         var propertyKey = "PropertyX";
         var valueType = ValueType.LONG;
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty(label1, propertyKey, valueType)
             .addProperty(label2, propertyKey, valueType)
             .build();
@@ -345,7 +345,7 @@ class NodeSchemaRecordTest {
         entries.put(label1, propertySchemas);
         entries.put(NodeLabel.of("LabelB"), new ArrayList<>());
 
-        var schema = new NodeSchemaRecord(entries);
+        var schema = new NodeSchema(entries);
         var filteredSchema = schema.filter(Set.of(NodeLabel.of("LabelA")));
 
         // Changing original map should not change the schema, nor the filtered schema
@@ -367,8 +367,8 @@ class NodeSchemaRecordTest {
         var label2 = "LabelB";
         var propertyKey = "PropertyX";
         var valueType = ValueType.LONG;
-        var schemaWithLabel1 = NodeSchemaRecord.builder().addProperty(label1, propertyKey, valueType).build();
-        var schemaWithLabel2 = NodeSchemaRecord.builder().addProperty(label2, propertyKey, valueType).build();
+        var schemaWithLabel1 = NodeSchema.builder().addProperty(label1, propertyKey, valueType).build();
+        var schemaWithLabel2 = NodeSchema.builder().addProperty(label2, propertyKey, valueType).build();
 
         var result = schemaWithLabel1.union(schemaWithLabel2);
 
@@ -387,8 +387,8 @@ class NodeSchemaRecordTest {
         var propertyKey1 = "PropertyX";
         var propertyKey2 = "PropertyY";
         var valueType = ValueType.LONG;
-        var schemaWithPropertyKey1 = NodeSchemaRecord.builder().addProperty(label, propertyKey1, valueType).build();
-        var schemaWithPropertyKey2 = NodeSchemaRecord.builder().addProperty(label, propertyKey2, valueType).build();
+        var schemaWithPropertyKey1 = NodeSchema.builder().addProperty(label, propertyKey1, valueType).build();
+        var schemaWithPropertyKey2 = NodeSchema.builder().addProperty(label, propertyKey2, valueType).build();
 
         var result = schemaWithPropertyKey1.union(schemaWithPropertyKey2);
 
@@ -403,15 +403,15 @@ class NodeSchemaRecordTest {
     void unionBetweenSchemasWithSamePropertyButDifferentTypeIsInvalid() {
         var label = "LabelA";
         var propertyKey = "PropertyX";
-        var schemaWithValueType1 = NodeSchemaRecord.builder().addProperty(label, propertyKey, ValueType.LONG).build();
-        var schemaWithValueType2 = NodeSchemaRecord.builder().addProperty(label, propertyKey, ValueType.DOUBLE).build();
+        var schemaWithValueType1 = NodeSchema.builder().addProperty(label, propertyKey, ValueType.LONG).build();
+        var schemaWithValueType2 = NodeSchema.builder().addProperty(label, propertyKey, ValueType.DOUBLE).build();
 
         assertThrows(IllegalArgumentException.class, () -> schemaWithValueType1.union(schemaWithValueType2));
     }
 
     @Test
     void schemaHasNoPropertiesWhenEmpty() {
-        var schema = NodeSchemaRecord.empty();
+        var schema = NodeSchema.empty();
 
         var result = schema.hasProperties();
 
@@ -420,7 +420,7 @@ class NodeSchemaRecordTest {
 
     @Test
     void schemaHasNoPropertiesWhenLabelsHaveNoProperties() {
-        var schema = NodeSchemaRecord.builder().addLabel("LabelA").build();
+        var schema = NodeSchema.builder().addLabel("LabelA").build();
 
         var result = schema.hasProperties();
 
@@ -429,10 +429,10 @@ class NodeSchemaRecordTest {
 
     @Test
     void schemaHasProperties() {
-        var schema1 = NodeSchemaRecord.builder()
+        var schema1 = NodeSchema.builder()
             .addProperty("LabelA", "PropertyX", ValueType.LONG)
             .build();
-        var schema2 = NodeSchemaRecord.builder()
+        var schema2 = NodeSchema.builder()
             .addLabel("LabelA")
             .addProperty("LabelB", "PropertyX", ValueType.LONG)
             .build();
@@ -443,7 +443,7 @@ class NodeSchemaRecordTest {
 
     @Test
     void listAllLabelsWhenEmpty() {
-        var schema = NodeSchemaRecord.empty();
+        var schema = NodeSchema.empty();
 
         var result = schema.availableLabels();
 
@@ -454,7 +454,7 @@ class NodeSchemaRecordTest {
     void listAllLabels() {
         var label1 = "LabelA";
         var label2 = "LabelB";
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty(label1, "PropertyX", ValueType.LONG)
             .addProperty(label2, "PropertyX", ValueType.LONG)
             .build();
@@ -467,8 +467,8 @@ class NodeSchemaRecordTest {
 
     @Test
     void allLabelsSchema() {
-        var schema1 = NodeSchemaRecord.builder().addLabel(NodeLabel.ALL_LABEL).build();
-        var schema2 = NodeSchemaRecord.empty();
+        var schema1 = NodeSchema.builder().addLabel(NodeLabel.ALL_LABEL).build();
+        var schema2 = NodeSchema.empty();
 
         assertThat(schema1.containsOnlyAllNodesLabel()).isTrue();
         assertThat(schema2.containsOnlyAllNodesLabel()).isFalse();
@@ -479,8 +479,8 @@ class NodeSchemaRecordTest {
         var labelA = "LabelA";
         var allLabel = NodeLabel.ALL_LABEL;
 
-        var schema1 = NodeSchemaRecord.builder().addLabel(labelA).addLabel(allLabel).build();
-        var schema2 = NodeSchemaRecord.builder().addLabel(allLabel).addLabel(labelA).build();
+        var schema1 = NodeSchema.builder().addLabel(labelA).addLabel(allLabel).build();
+        var schema2 = NodeSchema.builder().addLabel(allLabel).addLabel(labelA).build();
 
         var expected = Set.of(NodeLabel.of(labelA), NodeLabel.of(allLabel));
         assertThat(schema1.availableLabels()).isEqualTo(expected);
@@ -489,7 +489,7 @@ class NodeSchemaRecordTest {
 
     @Test
     void getAllPropertiesWhenEmpty() {
-        var schema = NodeSchemaRecord.empty();
+        var schema = NodeSchema.empty();
 
         var result = schema.allProperties();
 
@@ -501,7 +501,7 @@ class NodeSchemaRecordTest {
         var property1 = "PropertyX";
         var property2 = "PropertyY";
         var property3 = "PropertyZ";
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addLabel("LabelA")
             .addProperty("LabelB", property1, ValueType.LONG)
             .addProperty("LabelC", property2, ValueType.LONG)
@@ -522,7 +522,7 @@ class NodeSchemaRecordTest {
     void getAllPropertiesWithDuplicates() {
         var property1 = "PropertyX";
         var property2 = "PropertyY";
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addLabel("LabelA")
             .addProperty("LabelB", property1, ValueType.LONG)
             .addProperty("LabelC", property1, ValueType.LONG)
@@ -546,7 +546,7 @@ class NodeSchemaRecordTest {
         var property1 = "PropertyX";
         var property2 = "PropertyY";
         var property3 = "PropertyZ";
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty(label1, property1, ValueType.LONG)
             .addProperty(label1, property2, ValueType.LONG)
             .addProperty(label2, property3, ValueType.LONG)
@@ -560,7 +560,7 @@ class NodeSchemaRecordTest {
 
     @Test
     void getAllPropertyKeysWithNonExistingLabel() {
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty("LabelA", "PropertyX", ValueType.LONG)
             .addProperty("LabelA", "PropertyY", ValueType.LONG)
             .addProperty("LabelB", "PropertyZ", ValueType.LONG)
@@ -575,7 +575,7 @@ class NodeSchemaRecordTest {
     void containsPropertyKeyForLabel() {
         var label = "LabelA";
         var property = "PropertyX";
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty(label, property, ValueType.LONG)
             .build();
 
@@ -584,14 +584,14 @@ class NodeSchemaRecordTest {
 
     @Test
     void doesNotContainPropertyKeyForLabel() {
-        var schema = NodeSchemaRecord.empty();
+        var schema = NodeSchema.empty();
 
         assertThat(schema.hasProperty("FOO", "BAR")).isFalse();
     }
 
     @Test
     void getPropertyKeysMappedToSchema() {
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty("LabelA", "PropertyX", ValueType.LONG)
             .addProperty("LabelA", "PropertyY", ValueType.LONG)
             .addProperty("LabelB", "PropertyZ", ValueType.LONG)
@@ -609,7 +609,7 @@ class NodeSchemaRecordTest {
 
     @Test
     void duplicatePropertyKeysWillOnlyMapToOneSchema() {
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty("LabelA", "PropertyX", ValueType.LONG)
             .addProperty("LabelB", "PropertyX", ValueType.LONG)
             .build();
@@ -622,7 +622,7 @@ class NodeSchemaRecordTest {
 
     @Test
     void getPropertyKeysMappedToSchemaForLabel() {
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty("LabelA", "PropertyX", ValueType.LONG)
             .addProperty("LabelA", "PropertyY", ValueType.LONG)
             .addProperty("LabelB", "PropertyZ", ValueType.LONG)
@@ -639,7 +639,7 @@ class NodeSchemaRecordTest {
 
     @Test
     void getPropertyKeysMappedToSchemaForLabelNotInSchema() {
-        var schema = NodeSchemaRecord.builder()
+        var schema = NodeSchema.builder()
             .addProperty("LabelA", "PropertyX", ValueType.LONG)
             .addProperty("LabelA", "PropertyY", ValueType.LONG)
             .addProperty("LabelB", "PropertyZ", ValueType.LONG)
@@ -650,8 +650,8 @@ class NodeSchemaRecordTest {
         assertThat(result).isEqualTo(Collections.emptyMap());
     }
 
-    private static NodeSchemaRecord createSchema(SchemaEntry... entries) {
-        return NodeSchemaRecord.of(
+    private static NodeSchema createSchema(SchemaEntry... entries) {
+        return NodeSchema.of(
             Arrays.stream(entries).collect(
                 Collectors.groupingBy(
                     row -> NodeLabel.of(row.label()),

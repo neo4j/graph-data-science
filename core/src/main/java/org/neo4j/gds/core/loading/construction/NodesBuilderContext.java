@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -67,7 +67,7 @@ abstract class NodesBuilderContext {
     /**
      * Used if a node schema is available upfront.
      */
-    static NodesBuilderContext fixed(NodeSchemaRecord nodeSchema, Concurrency concurrency) {
+    static NodesBuilderContext fixed(NodeSchema nodeSchema, Concurrency concurrency) {
         var propertyBuildersByPropertyKey = nodeSchema.properties().entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             e -> NodePropertiesFromStoreBuilder.of(e.getValue().defaultValue(), concurrency)

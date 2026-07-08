@@ -21,7 +21,7 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.batchimport.api.InputIterable;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public interface FileInput {
     InputIterable relationships();
     String userName();
     GraphInfo graphInfo();
-    NodeSchemaRecord nodeSchema();
+    NodeSchema nodeSchema();
     Optional<HashMap<String, String>> labelMapping();
     MutableRelationshipSchema relationshipSchema();
     Capabilities capabilities();

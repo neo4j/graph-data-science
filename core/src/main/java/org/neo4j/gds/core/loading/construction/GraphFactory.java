@@ -37,7 +37,7 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -77,7 +77,7 @@ public final class GraphFactory {
     static NodesBuilder nodesBuilder(
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount,
-        Optional<NodeSchemaRecord> nodeSchema,
+        Optional<NodeSchema> nodeSchema,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Boolean> deduplicateIds,
@@ -156,7 +156,7 @@ public final class GraphFactory {
         long maxIntermediateId,
         IdMapBuilder idMapBuilder,
         Concurrency concurrency,
-        NodeSchemaRecord nodeSchema,
+        NodeSchema nodeSchema,
         boolean hasLabelInformation,
         boolean deduplicateIds,
         boolean usePooledBuilderProvider
@@ -334,9 +334,9 @@ public final class GraphFactory {
         var nodeSchema = idMap.availableNodeLabels().stream()
             .map(NodeLabel::name)
             .collect(
-                NodeSchemaRecord::builder,
-                NodeSchemaRecord.NodeSchemaBuilder::addLabel,
-                NodeSchemaRecord.NodeSchemaBuilder::addBuilder
+                NodeSchema::builder,
+                NodeSchema.NodeSchemaBuilder::addLabel,
+                NodeSchema.NodeSchemaBuilder::addBuilder
             ).build();
 
         relationships.properties().ifPresent(relationshipPropertyStore -> {

@@ -37,7 +37,7 @@ import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
@@ -71,8 +71,8 @@ class DummyGraphStore implements GraphStore {
     public GraphSchema schema() {
         return new GraphSchema() {
             @Override
-            public NodeSchemaRecord nodeSchema() {
-                return NodeSchemaRecord.builder()
+            public NodeSchema nodeSchema() {
+                return NodeSchema.builder()
                     .addLabel("A")
                     .build();
             }

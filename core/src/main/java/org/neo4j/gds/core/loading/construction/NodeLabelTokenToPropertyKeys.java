@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -46,7 +46,7 @@ abstract class NodeLabelTokenToPropertyKeys {
      * <p>
      * The property schemas are inferred from given schema.
      */
-    static NodeLabelTokenToPropertyKeys fixed(NodeSchemaRecord nodeSchema) {
+    static NodeLabelTokenToPropertyKeys fixed(NodeSchema nodeSchema) {
         return new Fixed(nodeSchema);
     }
 
@@ -95,9 +95,9 @@ abstract class NodeLabelTokenToPropertyKeys {
 
     private static class Fixed extends NodeLabelTokenToPropertyKeys {
 
-        private final NodeSchemaRecord nodeSchema;
+        private final NodeSchema nodeSchema;
 
-        Fixed(NodeSchemaRecord nodeSchema) {
+        Fixed(NodeSchema nodeSchema) {
             this.nodeSchema = nodeSchema;
         }
 

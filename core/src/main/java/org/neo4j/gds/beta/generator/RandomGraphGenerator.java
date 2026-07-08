@@ -33,7 +33,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeArray;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -318,11 +318,11 @@ public final class RandomGraphGenerator {
         }
     }
 
-    record NodePropertiesAndSchema(NodeSchemaRecord nodeSchema, Map<String, NodePropertyValues> nodeProperties) {}
+    record NodePropertiesAndSchema(NodeSchema nodeSchema, Map<String, NodePropertyValues> nodeProperties) {}
 
     private NodePropertiesAndSchema generateNodeProperties(IdMap idMap) {
         if (this.nodePropertyProducers.isEmpty()) {
-            var nodeSchemaBuilder = NodeSchemaRecord.builder();
+            var nodeSchemaBuilder = NodeSchema.builder();
             idMap.availableNodeLabels().forEach(nodeLabel -> nodeSchemaBuilder.addLabel(nodeLabel.name()));
             return new NodePropertiesAndSchema(nodeSchemaBuilder.build(), Map.of());
         }
@@ -381,7 +381,7 @@ public final class RandomGraphGenerator {
                 .map(nodeLabel -> new PropertyRow(nodeLabel.name(), entry.getKey(), entry.getValue().valueType()))
             )
             .collect(
-                NodeSchemaRecord::builder,
+                NodeSchema::builder,
                 (builder, row) -> builder.addProperty(row.label, row.propertyKey, row.valueType),
                 (leftBuilder, rightBuilder) -> leftBuilder.addBuilder(rightBuilder)
             )

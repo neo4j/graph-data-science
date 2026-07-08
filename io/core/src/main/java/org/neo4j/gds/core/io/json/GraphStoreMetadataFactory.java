@@ -107,7 +107,7 @@ public final class GraphStoreMetadataFactory {
             ));
     }
 
-    static Map<String, NodeSchema> toNodeSchema(org.neo4j.gds.api.schema.NodeSchemaRecord nodeSchema) {
+    static Map<String, NodeSchema> toNodeSchema(org.neo4j.gds.api.schema.NodeSchema nodeSchema) {
         var result = new HashMap<String, NodeSchema>();
 
         for (var entry : nodeSchema.entries().entrySet()) {

@@ -27,7 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
@@ -202,7 +202,7 @@ public final class GraphStoreFilter {
     ) {
         var nodeSchema = inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels());
         if (nodeSchema.availableLabels().isEmpty()) {
-            nodeSchema = NodeSchemaRecord.builder().addLabel(NodeLabel.ALL_LABEL).build();
+            nodeSchema = NodeSchema.builder().addLabel(NodeLabel.ALL_LABEL).build();
         }
 
         var relationshipSchema = MutableRelationshipSchema.from(

@@ -33,7 +33,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.loading.CollectingConsumer;
 
 import java.util.ArrayList;
@@ -262,7 +262,7 @@ class GdlFactoryTest {
         );
 
         var nodeSchema = graph.schema().nodeSchema();
-        var expectedNodeSchema = NodeSchemaRecord.builder()
+        var expectedNodeSchema = NodeSchema.builder()
             .addProperty("A", "double", ValueType.DOUBLE)
             .addProperty("A", "long", ValueType.LONG)
             .addProperty("A", "doubleArray", ValueType.DOUBLE_ARRAY)

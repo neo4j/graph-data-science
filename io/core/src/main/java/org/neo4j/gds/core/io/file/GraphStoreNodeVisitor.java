@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.io.file;
 
-import org.neo4j.gds.api.schema.NodeSchemaRecord;
+import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.values.GdsValue;
@@ -32,7 +32,7 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
 
     private final NodesBuilder nodesBuilder;
 
-    public GraphStoreNodeVisitor(NodeSchemaRecord nodeSchema, NodesBuilder nodesBuilder) {
+    public GraphStoreNodeVisitor(NodeSchema nodeSchema, NodesBuilder nodesBuilder) {
         super(nodeSchema);
         this.nodesBuilder = nodesBuilder;
     }
