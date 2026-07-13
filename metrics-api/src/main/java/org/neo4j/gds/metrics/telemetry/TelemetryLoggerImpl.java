@@ -63,7 +63,7 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
         try {
             var configuredParameters = ConfigAnalyzer.nonDefaultParameters(config, log);
 
-            var logEntry = new AlgorithmLogEntry(graphIdentifier, algorithm, computeMillis, configuredParameters);
+            var logEntry = new AlgorithmLogEntry(graphIdentifier, config.jobId().asString(), algorithm, computeMillis, configuredParameters);
 
             var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
             log.info("Algorithm Telemetry: %s", jsonEntry);
@@ -87,6 +87,7 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
 
     public record AlgorithmLogEntry(
         int graphId,
+        String jobId,
         String algorithm,
         long computeMillis,
         List<String> configuredParameters

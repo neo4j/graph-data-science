@@ -48,6 +48,7 @@ class TelemetryLoggerImplTest {
 
         assertThat(entry).isEqualTo(new TelemetryLoggerImpl.AlgorithmLogEntry(
             42,
+            testConfig.jobId().asString(),
             "pageRank",
             1500L,
             List.of()
@@ -71,6 +72,7 @@ class TelemetryLoggerImplTest {
 
         assertThat(entry).isEqualTo(new TelemetryLoggerImpl.AlgorithmLogEntry(
             1337,
+            configWithParams.jobId().asString(),
             "louvain",
             2500L,
             List.of("optionalParam")
