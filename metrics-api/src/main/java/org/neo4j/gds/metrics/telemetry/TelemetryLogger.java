@@ -21,12 +21,18 @@ package org.neo4j.gds.metrics.telemetry;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.JobId;
 
 public interface TelemetryLogger {
 
     void logGraph(GraphStore graphStore);
 
-    void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis);
+    default void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis) {
+        logAlgorithm(graphIdentifier, config.jobId(), algorithm, computeMillis, config);
+    };
+
+    void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config);
 
     TelemetryLogger DISABLED = new TelemetryLogger() {
         @Override
@@ -37,7 +43,7 @@ public interface TelemetryLogger {
         }
 
         @Override
-        public void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis) {
+        public void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config) {
 
         }
     };

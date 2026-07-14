@@ -20,7 +20,7 @@
 package org.neo4j.gds.metrics.telemetry;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.logging.Log;
 
 import java.lang.invoke.MethodHandles;
@@ -33,7 +33,7 @@ import java.util.Optional;
 
 public final class ConfigAnalyzer {
 
-    public static List<String> nonDefaultParameters(AlgoBaseConfig config, Log log) {
+    public static List<String> nonDefaultParameters(ToMapConvertible config, Log log) {
         Class<?>[] interfaces = config.getClass().getInterfaces();
 
         if (interfaces.length != 1) {
@@ -54,7 +54,7 @@ public final class ConfigAnalyzer {
             .toList();
     }
 
-    private static boolean optionalValueIsSet(AlgoBaseConfig config, Method method) {
+    private static boolean optionalValueIsSet(ToMapConvertible config, Method method) {
         if (method.getReturnType().equals(Optional.class)) {
             try {
                 return !method.invoke(config).equals(Optional.empty());
@@ -66,7 +66,7 @@ public final class ConfigAnalyzer {
     }
 
     private static boolean isNotDefaultValue(
-        AlgoBaseConfig config,
+        ToMapConvertible config,
         Class<?> configInterface,
         Method method,
         Log log

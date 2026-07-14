@@ -26,6 +26,7 @@ import org.neo4j.gds.GdlGraphStoreBuilder;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.List;
@@ -75,6 +76,30 @@ class TelemetryLoggerImplTest {
             configWithParams.jobId().asString(),
             "louvain",
             2500L,
+            List.of("optionalParam")
+        ));
+    }
+
+    @Test
+    void shouldLogPythonRuntimeAlgorithmTelemetryWithOnlyConfiguredParameters() throws JsonProcessingException {
+        var testLog = new GdsTestLog();
+        var telemetryLogger = new TelemetryLoggerImpl(testLog);
+
+        var configWithParams = new TelemetryConfigImpl(
+            CypherMapWrapper.create(Map.of(
+                "optionalParam", "custom-value"
+            ))
+        );
+
+        telemetryLogger.logAlgorithm(7, new JobId("job-42"), "fastPath", 99L, configWithParams);
+
+        var entry = extractLog(testLog, "Algorithm Telemetry:", TelemetryLoggerImpl.AlgorithmLogEntry.class);
+
+        assertThat(entry).isEqualTo(new TelemetryLoggerImpl.AlgorithmLogEntry(
+            7,
+            "job-42",
+            "fastPath",
+            99L,
             List.of("optionalParam")
         ));
     }

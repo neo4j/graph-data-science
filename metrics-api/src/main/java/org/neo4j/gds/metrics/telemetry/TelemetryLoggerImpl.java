@@ -21,7 +21,8 @@ package org.neo4j.gds.metrics.telemetry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
 
 import java.util.List;
@@ -59,11 +60,11 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
     }
 
     @Override
-    public void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis) {
+    public void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config) {
         try {
             var configuredParameters = ConfigAnalyzer.nonDefaultParameters(config, log);
 
-            var logEntry = new AlgorithmLogEntry(graphIdentifier, config.jobId().asString(), algorithm, computeMillis, configuredParameters);
+            var logEntry = new AlgorithmLogEntry(graphId, jobId.asString(), algorithm, computeMillis, configuredParameters);
 
             var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
             log.info("Algorithm Telemetry: %s", jsonEntry);
