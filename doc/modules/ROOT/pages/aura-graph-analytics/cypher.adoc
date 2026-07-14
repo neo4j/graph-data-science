@@ -429,7 +429,8 @@ CALL gds.session.estimate(
 | nodeLabelCount             | Integer        | yes      | 0       | The number of distinct node labels in the graph.
 | nodePropertyCount          | Integer        | yes      | 0       | The number of node properties per node in the graph.
 | relationshipPropertyCount  | Integer        | yes      | 0       | The number of relationship properties per relationship in the graph.
-| algorithmCategories        | List of String | yes      | []      | The categories of algorithms you plan to run in the session. Providing this helps produce a more tailored estimate. See the valid values below.
+| algorithmCategories        | List of String | yes      | []      | The categories of algorithms you plan to run in the session. Providing this helps produce a more tailored estimate. See the valid values below. Cannot be used together with `algorithms`.
+| algorithms                 | Map            | yes      | {}      | The specific algorithms you plan to run in the session, along with their configuration, e.g. `{fastRP: {embeddingDimension: 512}}`. Providing this produces a more tailored estimate than `algorithmCategories`. Cannot be used together with `algorithmCategories`.
 |===
 
 The following values are accepted for `algorithmCategories` (case-insensitive; hyphens and underscores are interchangeable):
