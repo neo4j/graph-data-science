@@ -254,8 +254,8 @@ public final class Dijkstra implements Algorithm<PathFindingResult> {
     private static HugeLongPriorityQueue minPriorityQueue(long capacity, HeuristicFunction heuristicFunction) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
-            protected boolean lessThan(long a, long b) {
-                return heuristicFunction.applyAsDouble(a) + costValues.get(a) < heuristicFunction.applyAsDouble(b) + costValues.get(b);
+            protected boolean lessThan(long a, double costA, long b, double costB) {
+                return heuristicFunction.applyAsDouble(a) + costA < heuristicFunction.applyAsDouble(b) + costB;
             }
         };
     }

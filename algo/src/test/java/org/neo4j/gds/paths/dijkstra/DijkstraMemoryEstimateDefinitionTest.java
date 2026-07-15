@@ -33,13 +33,13 @@ class DijkstraMemoryEstimateDefinitionTest {
     private static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
             // trackRelationships = false
-            Arguments.of(1_000, false, 40_616),
-            Arguments.of(1_000_000, false, 40_125_488L),
-            Arguments.of(1_000_000_000, false, 40_131_104_128L),
+            Arguments.of(1_000, false, 48_664),
+            Arguments.of(1_000_000, false, 48_125_536L),
+            Arguments.of(1_000_000_000, false, 48_132_324_904L),
             // trackRelationships = true
-            Arguments.of(1_000, true, 56_832L),
-            Arguments.of(1_000_000, true, 56_125_704, 56_125_704L),
-            Arguments.of(1_000_000_000, true, 56_133_545_800L)
+            Arguments.of(1_000, true, 64_880L),
+            Arguments.of(1_000_000, true, 64_125_752L),
+            Arguments.of(1_000_000_000, true, 64_134_766_576L)
         );
     }
 
@@ -68,7 +68,7 @@ class DijkstraMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(actualMemoryEstimation)
             .memoryRange(1_000, new Concurrency(1))
-            .hasSameMinAndMaxEqualTo(40_616 + 168);
+            .hasSameMinAndMaxEqualTo(48_664 + 168);
     }
 
 

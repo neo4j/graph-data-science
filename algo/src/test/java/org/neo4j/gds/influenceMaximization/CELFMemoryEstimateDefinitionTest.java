@@ -32,12 +32,12 @@ class CELFMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1, 1, 3_280",
-            "1, 4, 4_864",
-            "1, 64, 36_544",
-            "10, 1, 3_528",
-            "10, 4, 5_112",
-            "10, 64, 36_792",
+            "1, 1, 3_664",
+            "1, 4, 5_248",
+            "1, 64, 36_928",
+            "10, 1, 3_912",
+            "10, 4, 5_496",
+            "10, 64, 37_176",
         }
     )
     void memoryEstimation(int seedSetSize, int concurrency, long expectedMemory) {

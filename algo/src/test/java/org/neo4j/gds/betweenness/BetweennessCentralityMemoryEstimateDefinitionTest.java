@@ -42,9 +42,9 @@ class BetweennessCentralityMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "Concurrency: {0}")
     @CsvSource({
-        "1, 7_213_000",
-        "4, 26_451_688",
-        "42, 270_141_736"
+        "1, 8_013_048",
+        "4, 29_651_880",
+        "42, 303_743_752"
     })
     void testMemoryEstimationWithRelationshipWeight(int concurrency, long expectedBytes) {
         var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition(true).memoryEstimation();
