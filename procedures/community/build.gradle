@@ -41,5 +41,4 @@ dependencies {
     integrationTestImplementation project(':string-formatting')
     integrationTestImplementation project(':termination')
     integrationTestImplementation project(':transaction')
-    integrationTestImplementation project(':user-log')
 }

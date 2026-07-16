@@ -73,5 +73,4 @@ dependencies {
     testImplementation project(':opengds-extension')
     testImplementation project(':proc-test-utilities')
     testImplementation project(':test-utils')
-    testImplementation project(':user-log')
 }

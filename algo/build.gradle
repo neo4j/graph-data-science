@@ -62,6 +62,5 @@ dependencies {
     testImplementation project(':gdl-junit-extension')
     testImplementation project(':ml-test-utils')
     testImplementation project(':test-utils')
-    testImplementation project(':user-log')
     testImplementation openGds.gdl
 }

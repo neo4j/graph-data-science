@@ -52,5 +52,4 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':termination')
     implementation project(':transaction')
-    implementation project(':user-log')
 }

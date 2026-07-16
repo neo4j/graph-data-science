@@ -34,7 +34,6 @@ dependencies {
     testImplementation project(':logging')
     testImplementation project(':test-utils')
     testImplementation project(':termination')
-    testImplementation project(':user-log')
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations

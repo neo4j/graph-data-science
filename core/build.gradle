@@ -40,7 +40,6 @@ dependencies {
     implementation project(':collections-memory-estimation')
     implementation project(':transaction')
     implementation project(':termination')
-    implementation project(':user-log')
 
     api(
         project(':core-api'),

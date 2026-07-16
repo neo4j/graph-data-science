@@ -11,5 +11,4 @@ dependencies {
     implementation project(":core-utils")
     implementation project(":progress-tracking")
     implementation project(":string-formatting")
-    implementation project(":user-log")
 }

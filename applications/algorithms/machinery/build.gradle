@@ -29,7 +29,6 @@ dependencies {
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')
-    implementation project(':user-log')
 
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic

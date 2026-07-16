@@ -41,7 +41,6 @@ dependencies {
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')
-    implementation project(':user-log')
 
     implementation openGds.jackson.databind
     implementation openGds.jackson.dataformat.csv

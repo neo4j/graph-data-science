@@ -45,7 +45,6 @@ dependencies {
     implementation project(':transaction')
     implementation project(':string-formatting')
     implementation project(':termination')
-    implementation project(':user-log')
 
     implementation openGds.reflections
 

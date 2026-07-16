@@ -36,5 +36,4 @@ dependencies {
     testImplementation project(':gdl-junit-extension')
     testImplementation project(':logging')
     testImplementation project(':test-utils')
-    testImplementation project(':user-log')
 }

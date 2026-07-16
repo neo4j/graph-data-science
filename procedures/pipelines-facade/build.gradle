@@ -37,7 +37,6 @@ dependencies {
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')
-    implementation project(':user-log')
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')

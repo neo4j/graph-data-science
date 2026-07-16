@@ -44,7 +44,6 @@ dependencies {
     implementation project(':projection')
     implementation project(':termination')
     implementation project(':transaction')
-    implementation project(':user-log')
 
     compileOnly openGds.immutables.value
     compileOnly openGds.jetbrains.annotations

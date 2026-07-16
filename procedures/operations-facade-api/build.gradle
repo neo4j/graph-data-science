@@ -12,7 +12,6 @@ dependencies {
     implementation project(':core-utils')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
-    implementation project(':user-log')
 
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic

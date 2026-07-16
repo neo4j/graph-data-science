@@ -29,7 +29,6 @@ dependencies {
     implementation project(':scaling-utils')
     implementation project(':similarity-params')
     implementation project(':termination')
-    implementation project(':user-log')
 
     // Test dependencies
     testImplementation platform(openGds.junit.bom)

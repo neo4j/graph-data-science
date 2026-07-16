@@ -15,7 +15,6 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':neo4j-kernel-adapter-api')
     implementation project(':string-formatting')
-    implementation project(':user-log')
 
     implementation openGds.commons.lang3
 

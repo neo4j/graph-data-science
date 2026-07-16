@@ -30,5 +30,4 @@ dependencies {
     implementation project(':core-write')
     implementation project(':progress-tracking')
     implementation project(':termination')
-    implementation project(':user-log')
 }

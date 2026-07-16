@@ -511,6 +511,3 @@ project(':transaction').projectDir = file('transaction')
 
 include('triplet-graph-builder')
 project(':triplet-graph-builder').projectDir = file('triplet-graph-builder')
-
-include('user-log')
-project(':user-log').projectDir = file('user-log')

@@ -280,9 +280,6 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.influenceMaximization.celf.write",
         "gds.influenceMaximization.celf.write.estimate",
 
-
-        "gds.userLog",
-
         "gds.articleRank.mutate",
         "gds.articleRank.mutate.estimate",
         "gds.articleRank.stats",

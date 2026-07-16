@@ -24,7 +24,6 @@ dependencies {
     implementation project(':neo4j-settings')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
-    implementation project(':user-log')
 
     implementation openGds.jackson.databind
     implementation openGds.jackson.dataformat.csv

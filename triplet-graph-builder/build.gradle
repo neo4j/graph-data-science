@@ -27,7 +27,6 @@ dependencies {
     implementation project(':neo4j-log-adapter')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
-    implementation project(':user-log')
 
     // Test dependencies
     testAnnotationProcessor project(':annotations')

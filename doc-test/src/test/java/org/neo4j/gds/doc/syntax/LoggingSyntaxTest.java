@@ -31,8 +31,7 @@ class LoggingSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.LIST_PROGRESS),
-            SyntaxModeMeta.of(SyntaxMode.USER_LOG)
+            SyntaxModeMeta.of(SyntaxMode.LIST_PROGRESS)
         );
     }
 

@@ -36,5 +36,4 @@ dependencies {
     testImplementation project(':logging')
     testImplementation project(':ml-test-utils')
     testImplementation project(':test-utils')
-    testImplementation project(':user-log')
 }

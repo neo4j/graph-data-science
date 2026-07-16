@@ -15,7 +15,6 @@ dependencies {
     implementation project(':operations-facade-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
-    implementation project(':user-log')
 
     testImplementation platform(openGds.junit.bom)
     testImplementation project(':algorithms-machinery')

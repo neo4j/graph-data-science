@@ -42,7 +42,6 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':transaction')
     implementation project(':triplet-graph-builder')
-    implementation project(':user-log')
 
     // Test dependencies
     testAnnotationProcessor project(':annotations')

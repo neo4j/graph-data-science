@@ -55,7 +55,6 @@ dependencies {
     implementation project(':subgraph-filtering')
     implementation project(':termination')
     implementation project(':transaction')
-    implementation project(':user-log')
 
     // Test dependencies
     testImplementation openGds.assertj.core
