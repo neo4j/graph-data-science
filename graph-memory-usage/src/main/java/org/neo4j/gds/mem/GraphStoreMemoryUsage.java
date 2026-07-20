@@ -19,18 +19,11 @@
  */
 package org.neo4j.gds.mem;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.gdl.GdlFactory;
+import java.util.Map;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
-
-class GraphMemoryUsageFactoryTest {
-
-    @Test
-    void shouldReturnEmptyMapWhenNoRelationshipTypes() {
-        var graphStore  = GdlFactory.builder().gdlGraph("(a),(b)").build().build();
-        assertThatNoException().isThrownBy(() -> GraphMemoryUsageFactory.of(graphStore));
-
-    }
-
+public record GraphStoreMemoryUsage(
+    String memoryUsage,
+    long sizeInBytes,
+    Map<String, Object> detailSizeInBytes
+) {
 }

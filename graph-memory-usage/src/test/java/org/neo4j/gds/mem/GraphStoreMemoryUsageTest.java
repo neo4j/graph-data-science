@@ -32,7 +32,7 @@ import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GraphMemoryUsageTest {
+class GraphStoreMemoryUsageTest {
 
     @Test
     void shouldContainArrayIdMapInformation() {
@@ -41,7 +41,7 @@ class GraphMemoryUsageTest {
             .idMapBuilderType(ArrayIdMapBuilder.ID)
             .build();
 
-        var graphMemoryUsage = GraphMemoryUsageFactory.of(graphStore);
+        var graphMemoryUsage = GraphStoreMemoryUsageFactory.of(graphStore);
 
         assertThat(graphMemoryUsage.sizeInBytes()).isGreaterThan(0L);
         assertThat(graphMemoryUsage.detailSizeInBytes().get("nodes"))
@@ -80,7 +80,7 @@ class GraphMemoryUsageTest {
     void shouldContainAdjacencyListInformation() {
         var graphStore = GdlSupport.graphStoreFromGDL("()-[:R1]->()");
 
-        var graphMemoryUsage = GraphMemoryUsageFactory.of(graphStore);
+        var graphMemoryUsage = GraphStoreMemoryUsageFactory.of(graphStore);
 
         assertThat(graphMemoryUsage.sizeInBytes()).isGreaterThan(0L);
         assertThat(graphMemoryUsage.detailSizeInBytes().get("relationships"))
@@ -122,7 +122,7 @@ class GraphMemoryUsageTest {
         void shouldContainAdjacencyListMemoryInfo(TestMethodRunner runner) {
             runner.run(() -> {
                 var graphStore = GdlSupport.graphStoreFromGDL("()-[:R1]->()");
-                var graphMemoryUsage = GraphMemoryUsageFactory.of(graphStore);
+                var graphMemoryUsage = GraphStoreMemoryUsageFactory.of(graphStore);
                 assertThat(graphMemoryUsage.detailSizeInBytes().get("adjacencyLists"))
                     .asInstanceOf(InstanceOfAssertFactories.MAP)
                     .hasEntrySatisfying(

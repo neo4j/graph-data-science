@@ -31,17 +31,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public final class GraphMemoryUsageFactory {
+public final class GraphStoreMemoryUsageFactory {
 
-    private GraphMemoryUsageFactory() {}
+    private GraphStoreMemoryUsageFactory() {}
 
-    public static GraphMemoryUsage of(GraphStore graphStore) {
+    public static GraphStoreMemoryUsage of(GraphStore graphStore) {
         var totalSize = new MutableLong();
         var detailMemory = internalSizeOfGraph(graphStore, totalSize);
 
         var memoryUsage = Estimate.humanReadable(totalSize.longValue());
 
-        return new GraphMemoryUsage(
+        return new GraphStoreMemoryUsage(
             memoryUsage,
             totalSize.longValue(),
             detailMemory

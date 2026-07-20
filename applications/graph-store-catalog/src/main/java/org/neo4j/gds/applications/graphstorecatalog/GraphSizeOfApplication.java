@@ -23,7 +23,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.mem.GraphMemoryUsageFactory;
+import org.neo4j.gds.mem.GraphStoreMemoryUsageFactory;
 
 class GraphSizeOfApplication {
     private final GraphStoreCatalogService graphStoreCatalogService;
@@ -40,7 +40,7 @@ class GraphSizeOfApplication {
 
         var graphStoreWithConfig = graphStoreCatalogService.getGraphStoreCatalogEntry(catalogRequest, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
-        var graphMemoryUsage = GraphMemoryUsageFactory.of(graphStore);
+        var graphMemoryUsage = GraphStoreMemoryUsageFactory.of(graphStore);
 
         return new GraphSizeOfResult(
             graphName.value(),
