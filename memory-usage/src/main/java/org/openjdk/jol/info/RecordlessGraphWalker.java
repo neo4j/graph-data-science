@@ -70,9 +70,7 @@ public class RecordlessGraphWalker extends AbstractGraphWalker {
                     Object e = arr[i];
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new ArrayGraphPathRecord(cGpr, i, cGpr.depth() + 1, e);
-                        if (e.getClass().isRecord()) {
-                            gpr.setSize(VM.current().objectHeaderSize());
-                        }
+                        gpr.setSize(sizeOf(e));
                         data.addRecord(gpr);
                         for (GraphVisitor v : visitors) {
                             v.visit(gpr);
@@ -81,24 +79,14 @@ public class RecordlessGraphWalker extends AbstractGraphWalker {
                     }
                 }
             } else {
-                Long knownSize = sizeCache.get(cl);
-                if (knownSize == null) {
-                    if (cl.isRecord()) {
-                        knownSize = (long) VM.current().objectHeaderSize();
-                    } else {
-                        knownSize = VM.current().sizeOf(o);
-                    }
-                    sizeCache.put(cl, knownSize);
-                }
-                cGpr.setSize(knownSize);
-
+                // current (parent)
+                cGpr.setSize(sizeOf(o));
+                // children
                 for (Field f : getAllReferenceFields(cl)) {
                     Object e = ObjectUtils.value(o, f);
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new FieldGraphPathRecord(cGpr, f.getName(), cGpr.depth() + 1, e);
-                        if (e.getClass().isRecord()) {
-                            gpr.setSize(VM.current().objectHeaderSize());
-                        }
+                        gpr.setSize(sizeOf(e));
                         data.addRecord(gpr);
                         for (GraphVisitor v : visitors) {
                             v.visit(gpr);
@@ -108,7 +96,27 @@ public class RecordlessGraphWalker extends AbstractGraphWalker {
                 }
             }
         }
-
         return data;
+    }
+
+    private long sizeOf(Object o) {
+        var size = this.sizeCache.get(o.getClass());
+        if (size == null) {
+            if (o.getClass().isRecord()) {
+                // Jol only supports calling sizeOf for record types if
+                // jol.magicFieldOffset is enabled. However, this leads
+                // to potential problems, such as long execution times
+                // and the flag is generally only recommended for one-offs
+                // and not for production-use.
+                // We instead just use a fixed size for record types, which
+                // might be very well underestimated.
+                size = (long) VM.current().objectHeaderSize();
+            } else {
+                size = VM.current().sizeOf(o);
+            }
+
+            this.sizeCache.put(o.getClass(), size);
+        }
+        return size;
     }
 }
