@@ -70,6 +70,9 @@ public class RecordlessGraphWalker extends AbstractGraphWalker {
                     Object e = arr[i];
                     if (e != null && visited.add(e)) {
                         GraphPathRecord gpr = new ArrayGraphPathRecord(cGpr, i, cGpr.depth() + 1, e);
+                        if (e.getClass().isRecord()) {
+                            gpr.setSize(VM.current().objectHeaderSize());
+                        }
                         data.addRecord(gpr);
                         for (GraphVisitor v : visitors) {
                             v.visit(gpr);
