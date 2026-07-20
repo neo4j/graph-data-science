@@ -26,10 +26,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.telemetry.TelemetryLoggerImpl;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedHelper;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -144,7 +144,7 @@ public class ProcedureExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT,
                     timer.stop();
 
                     var graphIdentifier = System.identityHashCode(graphStore);
-                    telemetryLogger.logAlgorithm(graphIdentifier, algoSpec.name(), config, timer.getDuration());
+                    telemetryLogger.logAlgorithm(graphIdentifier, algoSpec.name(), config, timer.getDuration(), timer.startTime());
 
                     return result;
                 } catch (Exception e) {

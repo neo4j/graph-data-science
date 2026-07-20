@@ -43,7 +43,7 @@ class TelemetryLoggerImplTest {
         var telemetryLogger = new TelemetryLoggerImpl(testLog);
         var testConfig = new TelemetryConfigImpl(CypherMapWrapper.empty());
 
-        telemetryLogger.logAlgorithm(42, "pageRank", testConfig, 1500L);
+        telemetryLogger.logAlgorithm(42, "pageRank", testConfig, 1500L, 1337L);
 
         var entry = extractLog(testLog, "Algorithm Telemetry:", TelemetryLoggerImpl.AlgorithmLogEntry.class);
 
@@ -52,7 +52,8 @@ class TelemetryLoggerImplTest {
             testConfig.jobId().asString(),
             "pageRank",
             1500L,
-            List.of()
+            List.of(),
+            1337L
         ));
     }
 
@@ -67,7 +68,7 @@ class TelemetryLoggerImplTest {
             ))
         );
 
-        telemetryLogger.logAlgorithm(1337, "louvain", configWithParams, 2500L);
+        telemetryLogger.logAlgorithm(1337, "louvain", configWithParams, 2500L, 1337L);
 
         var entry = extractLog(testLog, "Algorithm Telemetry:", TelemetryLoggerImpl.AlgorithmLogEntry.class);
 
@@ -76,7 +77,8 @@ class TelemetryLoggerImplTest {
             configWithParams.jobId().asString(),
             "louvain",
             2500L,
-            List.of("optionalParam")
+            List.of("optionalParam"),
+            1337L
         ));
     }
 
@@ -91,7 +93,7 @@ class TelemetryLoggerImplTest {
             ))
         );
 
-        telemetryLogger.logAlgorithm(7, new JobId("job-42"), "fastPath", 99L, configWithParams);
+        telemetryLogger.logAlgorithm(7, new JobId("job-42"), "fastPath", 99L, configWithParams, 1337L);
 
         var entry = extractLog(testLog, "Algorithm Telemetry:", TelemetryLoggerImpl.AlgorithmLogEntry.class);
 
@@ -100,7 +102,8 @@ class TelemetryLoggerImplTest {
             "job-42",
             "fastPath",
             99L,
-            List.of("optionalParam")
+            List.of("optionalParam"),
+            1337L
         ));
     }
 

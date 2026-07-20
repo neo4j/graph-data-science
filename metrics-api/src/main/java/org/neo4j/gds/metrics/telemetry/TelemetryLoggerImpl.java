@@ -60,11 +60,11 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
     }
 
     @Override
-    public void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config) {
+    public void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config, long startTime) {
         try {
             var configuredParameters = ConfigAnalyzer.nonDefaultParameters(config, log);
 
-            var logEntry = new AlgorithmLogEntry(graphId, jobId.asString(), algorithm, computeMillis, configuredParameters);
+            var logEntry = new AlgorithmLogEntry(graphId, jobId.asString(), algorithm, computeMillis, configuredParameters, startTime);
 
             var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
             log.info("Algorithm Telemetry: %s", jsonEntry);
@@ -91,7 +91,9 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
         String jobId,
         String algorithm,
         long computeMillis,
-        List<String> configuredParameters
+        List<String> configuredParameters,
+        // as jobId can be set by the user we use jobId + startTime. and we dont want to introduce yet another id
+        long startTime
     ) {
 
     }

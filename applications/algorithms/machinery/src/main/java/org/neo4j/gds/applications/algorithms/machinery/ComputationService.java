@@ -94,7 +94,7 @@ class ComputationService {
 
             var graphIdentifier = System.identityHashCode(graphResources.graphStore());
 
-            telemetryLogger.logAlgorithm(graphIdentifier, label.asString(), configuration, timer.getDuration());
+            telemetryLogger.logAlgorithm(graphIdentifier, label.asString(), configuration, timer.getDuration(), timer.startTime());
 
             return result;
         } catch (RuntimeException e) {

@@ -28,11 +28,11 @@ public interface TelemetryLogger {
 
     void logGraph(GraphStore graphStore);
 
-    default void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis) {
-        logAlgorithm(graphIdentifier, config.jobId(), algorithm, computeMillis, config);
+    default void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis, long startTime) {
+        logAlgorithm(graphIdentifier, config.jobId(), algorithm, computeMillis, config, startTime);
     };
 
-    void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config);
+    void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config, long startTime);
 
     TelemetryLogger DISABLED = new TelemetryLogger() {
         @Override
@@ -43,7 +43,7 @@ public interface TelemetryLogger {
         }
 
         @Override
-        public void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config) {
+        public void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config, long startTime) {
 
         }
     };

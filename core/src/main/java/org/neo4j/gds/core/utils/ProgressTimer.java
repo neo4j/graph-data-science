@@ -39,6 +39,10 @@ public final class ProgressTimer implements AutoCloseable {
         return this;
     }
 
+    public long startTime() {
+        return this.startTime;
+    }
+
     public long getDuration() {
         return duration;
     }
