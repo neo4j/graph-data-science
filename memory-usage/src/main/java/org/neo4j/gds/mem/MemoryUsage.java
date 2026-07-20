@@ -20,7 +20,7 @@
 package org.neo4j.gds.mem;
 
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.openjdk.jol.info.GraphWalker;
+import org.openjdk.jol.info.RecordlessGraphWalker;
 import org.openjdk.jol.vm.VM;
 
 import java.io.OutputStream;
@@ -38,7 +38,7 @@ public final class MemoryUsage {
         }
 
         try {
-            return new GraphWalker().walk(thing).totalSize();
+            return new RecordlessGraphWalker().walk(thing).totalSize();
         } catch (RuntimeException e) {
             return -1;
         }
