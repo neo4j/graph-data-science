@@ -24,7 +24,7 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.openjdk.jol.info.GraphWalker;
+import org.openjdk.jol.info.RecordlessGraphWalker;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -88,7 +88,7 @@ public final class GraphMemoryUsageFactory {
         var adjacencyLists = new MutableLong();
         var relationshipsTotal = new MutableLong();
 
-        var graphWalker = new GraphWalker(gpr -> {
+        var graphWalker = new RecordlessGraphWalker(gpr -> {
             PackedUnsupported.check(gpr.klass());
 
             var size = gpr.size();
