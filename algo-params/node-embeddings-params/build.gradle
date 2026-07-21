@@ -9,8 +9,8 @@ group = 'org.neo4j.gds'
 dependencies {
     compileOnly openGds.jetbrains.annotations
 
-    implementation project(':algo-params-common')
+    api project(':algo-params-common')
     implementation project(':annotations')
-    implementation project(':concurrency')
+    api project(':concurrency')
     implementation project(':string-formatting')
 }
