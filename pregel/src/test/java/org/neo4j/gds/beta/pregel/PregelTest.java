@@ -33,6 +33,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -229,7 +230,7 @@ class PregelTest {
             config.concurrency(),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            jobId -> new TaskRegistry("", taskStore, jobId)
+            jobId -> new TaskRegistry(User.DEFAULT, taskStore, jobId)
         );
 
         var pregelAlgo = Pregel.create(

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.progress.registration;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Task;
 
@@ -29,33 +30,33 @@ public enum EmptyTaskStore implements TaskStore {
     INSTANCE;
 
     @Override
-    public void store(String username, JobId jobId, Task task) {}
+    public void store(User user, JobId jobId, Task task) {}
 
     @Override
-    public void remove(String username, JobId jobId) {}
+    public void remove(User user, JobId jobId) {}
 
     @Override
-    public void markCompleted(String username, JobId jobId) {
+    public void markCompleted(User user, JobId jobId) {
 
     }
 
     @Override
-    public Stream<UserTask> query() {
+    public Stream<StoredTask> query() {
         return Stream.empty();
     }
 
     @Override
-    public Stream<UserTask> query(JobId jobId) {
+    public Stream<StoredTask> query(JobId jobId) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<UserTask> query(String username) {
+    public Stream<StoredTask> query(User user) {
         return Stream.empty();
     }
 
     @Override
-    public Optional<UserTask> query(String username, JobId jobId) {
+    public Optional<StoredTask> query(User user, JobId jobId) {
         return Optional.empty();
     }
 
@@ -66,5 +67,4 @@ public enum EmptyTaskStore implements TaskStore {
 
     @Override
     public void addListener(TaskStoreListener listener) {}
-
 }

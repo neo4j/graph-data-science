@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.applications.operations;
 
-import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.registration.StoredTask;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface ResultRenderer<RESULT> {
-    Stream<RESULT> renderAdministratorView(Stream<UserTask> results);
+    Stream<RESULT> renderAdministratorView(Stream<StoredTask> results);
 
-    Stream<RESULT> render(Optional<UserTask> results);
+    Stream<RESULT> render(Optional<StoredTask> results);
 }

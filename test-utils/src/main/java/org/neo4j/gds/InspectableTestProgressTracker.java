@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -44,28 +45,28 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
 
     private final ProgressTracker delegate;
     private final TaskStore taskStore;
+    private final User user;
     private final JobId jobId;
-    private final String userName;
 
     private InspectableTestProgressTracker(
         ProgressTracker delegate,
         TaskStore taskStore,
-        JobId jobId,
-        String userName
+        User user,
+        JobId jobId
     ) {
         this.delegate = delegate;
         this.taskStore = taskStore;
+        this.user = user;
         this.jobId = jobId;
-        this.userName = userName;
     }
 
     public static InspectableTestProgressTracker create(
         Log log,
-        Task baseTask,
-        String userName,
-        JobId jobId,
+        LoggerForProgressTracking loggerForProgressTracking,
         TaskStore taskStore,
-        LoggerForProgressTracking loggerForProgressTracking
+        Task baseTask,
+        User user,
+        JobId jobId
     ) {
         var delegate = TaskProgressTracker.create(
             log,
@@ -74,10 +75,10 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
             new Concurrency(1),
             jobId,
             PlainSimpleRequestCorrelationId.create(),
-            TaskRegistryFactory.local(userName, taskStore)
+            TaskRegistryFactory.local(taskStore, user)
         );
 
-        return new InspectableTestProgressTracker(delegate, taskStore, jobId, userName);
+        return new InspectableTestProgressTracker(delegate, taskStore, user, jobId);
     }
 
     @Override
@@ -93,7 +94,7 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     @Override
     public void beginSubTask() {
         delegate.beginSubTask();
-        progressHistory.add(taskStore.query(userName, jobId).map(userTask -> userTask.task().getProgress()));
+        progressHistory.add(taskStore.query(user, jobId).map(userTask -> userTask.task().getProgress()));
     }
 
     @Override
@@ -109,7 +110,7 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     @Override
     public void endSubTask() {
         delegate.endSubTask();
-        progressHistory.add(taskStore.query(userName, jobId).map(userTask -> userTask.task().getProgress()));
+        progressHistory.add(taskStore.query(user, jobId).map(userTask -> userTask.task().getProgress()));
     }
 
     @Override

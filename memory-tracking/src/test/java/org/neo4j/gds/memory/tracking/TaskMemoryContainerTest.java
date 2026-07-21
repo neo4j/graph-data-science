@@ -20,8 +20,9 @@
 package org.neo4j.gds.memory.tracking;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.registration.StoredTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +45,7 @@ class TaskMemoryContainerTest {
         taskMemoryContainer.reserve("alice", "foo", jobId, 10);
         taskMemoryContainer.reserve("alice", "foo2", new JobId("JobId2"), 20);
         assertThat(taskMemoryContainer.taskReservedMemory()).isEqualTo(30L);
-        taskMemoryContainer.removeTask(new UserTask("alice",jobId,null));
+        taskMemoryContainer.removeTask(new StoredTask(new User("alice", false),jobId,null));
         assertThat(taskMemoryContainer.taskReservedMemory()).isEqualTo(20L);
 
     }

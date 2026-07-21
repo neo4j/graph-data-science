@@ -29,6 +29,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -169,16 +170,16 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(
             log,
+            new LoggerForProgressTrackingAdapter(log),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             NodeRegressionPredictPipelineExecutor.progressTask(
                 "Node Regression Predict Pipeline",
                 new Concurrency(1),
                 pipeline,
                 graphStore
             ),
-            getUsername(),
-            config.jobId(),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
-            new LoggerForProgressTrackingAdapter(log)
+            new User(getUsername(), false),
+            config.jobId()
         );
 
         TestProcedureRunner.applyOnProcedure(

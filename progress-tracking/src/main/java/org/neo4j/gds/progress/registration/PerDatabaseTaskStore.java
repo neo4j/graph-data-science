@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.progress.registration;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Status;
 import org.neo4j.gds.progress.tasks.Task;
@@ -30,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class PerDatabaseTaskStore extends ObservableTaskStore {
-    private final Map<String, Map<JobId, UserTask>> registeredTasks;
+    private final Map<User, Map<JobId, StoredTask>> registeredTasks;
 
     public PerDatabaseTaskStore(Duration retentionPeriod) {
         this.registeredTasks = new ConcurrentHashMap<>();
@@ -39,23 +40,24 @@ public class PerDatabaseTaskStore extends ObservableTaskStore {
     }
 
     @Override
-    protected UserTask storeUserTask(String username, JobId jobId, Task task) {
-        var userTask = new UserTask(username, jobId, task);
-        this.registeredTasks
-            .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
-            .put(jobId, userTask);
+    protected StoredTask storeTask(User user, JobId jobId, Task task) {
+        var storedTask = new StoredTask(user, jobId, task);
 
-        return userTask;
+        this.registeredTasks
+            .computeIfAbsent(user, __ -> new ConcurrentHashMap<>())
+            .put(jobId, storedTask);
+
+        return storedTask;
     }
 
     @Override
-    protected Optional<UserTask> removeUserTask(String username, JobId jobId) {
-        return Optional.ofNullable(this.registeredTasks.get(username))
+    protected Optional<StoredTask> removeTask(User user, JobId jobId) {
+        return Optional.ofNullable(this.registeredTasks.get(user))
             .map(userTasks -> userTasks.remove(jobId));
     }
 
     @Override
-    public Stream<UserTask> query() {
+    public Stream<StoredTask> query() {
         return registeredTasks
             .entrySet()
             .stream()
@@ -66,21 +68,21 @@ public class PerDatabaseTaskStore extends ObservableTaskStore {
     }
 
     @Override
-    public Stream<UserTask> query(JobId jobId) {
-        return query().filter(userTask -> userTask.jobId().equals(jobId));
+    public Stream<StoredTask> query(JobId jobId) {
+        return query().filter(storedTask -> storedTask.jobId().equals(jobId));
     }
 
     @Override
-    public Stream<UserTask> query(String username) {
+    public Stream<StoredTask> query(User user) {
         return registeredTasks
-            .getOrDefault(username, Map.of())
+            .getOrDefault(user, Map.of())
             .values()
             .stream();
     }
 
     @Override
-    public Optional<UserTask> query(String username, JobId jobId) {
-        return Optional.ofNullable(registeredTasks.get(username))
+    public Optional<StoredTask> query(User user, JobId jobId) {
+        return Optional.ofNullable(registeredTasks.get(user))
             .map(userTasks -> userTasks.get(jobId));
     }
 
@@ -91,5 +93,4 @@ public class PerDatabaseTaskStore extends ObservableTaskStore {
             .filter(task -> task.task().status() == Status.PENDING || task.task().status() == Status.RUNNING)
             .count();
     }
-
 }

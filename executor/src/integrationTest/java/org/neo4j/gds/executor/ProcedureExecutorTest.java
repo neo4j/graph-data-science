@@ -32,10 +32,10 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
+import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.registration.TaskRegistry;
 import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.progress.registration.TaskStoreListener;
-import org.neo4j.gds.progress.registration.UserTask;
 import org.neo4j.gds.progress.tasks.Status;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -136,7 +136,7 @@ class ProcedureExecutorTest {
             Metrics.DISABLED,
             ProcedureReturnColumns.EMPTY,
             PlainSimpleRequestCorrelationId.create(),
-            jobId -> new TaskRegistry("", taskStore, jobId),
+            jobId -> new TaskRegistry(new User("", false), taskStore, jobId),
             TerminationMonitor.EMPTY,
             new User("", false),
             null,
@@ -149,12 +149,12 @@ class ProcedureExecutorTest {
         int registerTaskInvocations;
 
         @Override
-        public void onTaskAdded(UserTask userTask) {
+        public void onTaskAdded(StoredTask storedTask) {
             registerTaskInvocations++;
         }
 
         @Override
-        public void onTaskCompleted(UserTask userTask) {
+        public void onTaskCompleted(StoredTask storedTask) {
 
         }
     }
@@ -163,12 +163,12 @@ class ProcedureExecutorTest {
         Set<JobId> seenJobIds = new HashSet<>();
 
         @Override
-        public void onTaskAdded(UserTask userTask) {
-            seenJobIds.add(userTask.jobId());
+        public void onTaskAdded(StoredTask storedTask) {
+            seenJobIds.add(storedTask.jobId());
         }
 
         @Override
-        public void onTaskCompleted(UserTask userTask) {
+        public void onTaskCompleted(StoredTask storedTask) {
 
         }
     }

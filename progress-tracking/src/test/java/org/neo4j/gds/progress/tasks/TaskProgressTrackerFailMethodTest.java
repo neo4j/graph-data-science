@@ -21,6 +21,7 @@ package org.neo4j.gds.progress.tasks;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestTaskStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
@@ -48,7 +49,7 @@ class TaskProgressTrackerFailMethodTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            TaskRegistryFactory.local("", taskStore)
+            TaskRegistryFactory.local(taskStore, User.DEFAULT)
         );
 
         tracker.beginSubTask();
@@ -82,7 +83,7 @@ class TaskProgressTrackerFailMethodTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            TaskRegistryFactory.local("", taskStore)
+            TaskRegistryFactory.local(taskStore, User.DEFAULT)
         );
 
         tracker.beginSubTask(/*rootTask*/);

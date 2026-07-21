@@ -22,11 +22,12 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.registration.TaskRegistry;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
-import org.neo4j.gds.progress.registration.UserTask;
 import org.neo4j.gds.progress.tasks.Status;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.test.TestProc;
@@ -54,7 +55,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     @Test
     void completeTaskUnderRegularExecution() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, proc -> {
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -70,7 +71,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     @Test
     void failTaskWhenTheAlgorithmFails() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, proc -> {
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -78,7 +79,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
 
             assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
             assertThat(taskStore.query())
-                .map(UserTask::task)
+                .map(StoredTask::task)
                 .map(Task::status)
                 .containsExactly(Status.FAILED);
             assertThat(taskStore.tasksSeen())

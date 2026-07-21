@@ -31,8 +31,8 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.ExceptionMessageMatcher;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.registration.TaskStore;
-import org.neo4j.gds.progress.registration.UserTask;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
@@ -64,9 +64,9 @@ public class BaseProcTest extends BaseTest {
         // wait for tasks to be removed in async processes
         TaskStoreHelper.awaitEmptyTaskStore(taskStore);
 
-        List<UserTask> hangingTasks = taskStore.queryRunning().toList();
+        List<StoredTask> hangingTasks = taskStore.queryRunning().toList();
         // if we had any, dont spill tasks to next test
-        hangingTasks.forEach(task -> taskStore.remove(task.username(), task.jobId()));
+        hangingTasks.forEach(task -> taskStore.remove(task.user(), task.jobId()));
 
         assertThat(hangingTasks).map(i -> i.task().render()).isEmpty();
     }

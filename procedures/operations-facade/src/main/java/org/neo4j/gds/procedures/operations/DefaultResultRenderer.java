@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.operations;
 
 import org.neo4j.gds.applications.operations.ResultRenderer;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.tasks.TaskTraversal;
 
 import java.util.Optional;
@@ -37,7 +37,7 @@ class DefaultResultRenderer implements ResultRenderer<ProgressResult> {
     }
 
     @Override
-    public Stream<ProgressResult> renderAdministratorView(Stream<UserTask> results) {
+    public Stream<ProgressResult> renderAdministratorView(Stream<StoredTask> results) {
         var progressResultStream = results.flatMap(this::jobProgress);
 
         var progressResults = progressResultStream.toList();
@@ -48,7 +48,7 @@ class DefaultResultRenderer implements ResultRenderer<ProgressResult> {
     }
 
     @Override
-    public Stream<ProgressResult> render(Optional<UserTask> results) {
+    public Stream<ProgressResult> render(Optional<StoredTask> results) {
         return results
             .map(this::jobProgress)
             .orElseThrow(this::createException);
@@ -63,8 +63,8 @@ class DefaultResultRenderer implements ResultRenderer<ProgressResult> {
         );
     }
 
-    private Stream<ProgressResult> jobProgress(UserTask userTask) {
-        var jobProgressVisitor = new JobProgressVisitor(userTask.jobId(), userTask.username());
+    private Stream<ProgressResult> jobProgress(StoredTask userTask) {
+        var jobProgressVisitor = new JobProgressVisitor(userTask.jobId(), userTask.user().getUsername());
         TaskTraversal.visitPreOrderWithDepth(userTask.task(), jobProgressVisitor);
         return jobProgressVisitor.progressRowsStream();
     }

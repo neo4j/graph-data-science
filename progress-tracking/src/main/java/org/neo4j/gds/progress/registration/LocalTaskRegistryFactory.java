@@ -21,25 +21,25 @@ package org.neo4j.gds.progress.registration;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Status;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LocalTaskRegistryFactory implements TaskRegistryFactory {
-
-    private final String username;
     private final TaskStore taskStore;
+    private final User user;
 
-    public LocalTaskRegistryFactory(String username, TaskStore taskStore) {
-        this.username = username;
+    public LocalTaskRegistryFactory(TaskStore taskStore, User user) {
         this.taskStore = taskStore;
+        this.user = user;
     }
 
     @Override
     public TaskRegistry newInstance(JobId jobId) {
         taskStore
-            .query(username, jobId)
+            .query(user, jobId)
             .filter(userTask -> {
                 Status status = userTask.task().status();
                 return status == Status.RUNNING || status == Status.PENDING;
@@ -55,7 +55,7 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
                 );
             });
 
-        return new TaskRegistry(username, taskStore, jobId);
+        return new TaskRegistry(user, taskStore, jobId);
     }
 
     /**

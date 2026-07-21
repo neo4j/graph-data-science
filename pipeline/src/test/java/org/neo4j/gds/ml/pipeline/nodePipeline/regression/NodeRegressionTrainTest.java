@@ -27,6 +27,7 @@ import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -272,11 +273,11 @@ class NodeRegressionTrainTest {
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(
             log,
-            progressTask,
-            config.username(),
-            config.jobId(),
+            new LoggerForProgressTrackingAdapter(log),
             new PerDatabaseTaskStore(Duration.ofMinutes(1)),
-            new LoggerForProgressTrackingAdapter(log)
+            progressTask,
+            new User(config.username(), false),
+            config.jobId()
         );
 
         createWithExecutionContext(log, graphStore, pipeline, config, progressTracker).run();

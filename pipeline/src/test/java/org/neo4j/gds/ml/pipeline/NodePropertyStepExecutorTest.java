@@ -24,6 +24,7 @@ import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -228,12 +229,11 @@ class NodePropertyStepExecutorTest {
         var configuration = new NodePropertyStepExecutorTestConfig();
         var progressTracker = InspectableTestProgressTracker.create(
             log,
+            new LoggerForProgressTrackingAdapter(log),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             NodePropertyStepExecutor.tasks(configuration.concurrency(), steps, graphStore.nodeCount()),
-            "user",
-            new JobId("42"),
-            new PerDatabaseTaskStore(
-                Duration.ofMinutes(1)),
-            new LoggerForProgressTrackingAdapter(log)
+            new User("user", false),
+            new JobId("42")
         );
 
         new NodePropertyStepExecutor<>(

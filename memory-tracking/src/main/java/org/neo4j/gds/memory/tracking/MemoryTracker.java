@@ -25,8 +25,8 @@ import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.registration.TaskStoreListener;
-import org.neo4j.gds.progress.registration.UserTask;
 
 import java.util.stream.Stream;
 
@@ -102,16 +102,16 @@ public final class MemoryTracker implements TaskStoreListener, GraphStoreAddedEv
     }
 
     @Override
-    public void onTaskAdded(UserTask userTask) {
+    public void onTaskAdded(StoredTask storedTask) {
         // do nothing, we add the memory explicitly prior to execution
     }
 
     @Override
-    public synchronized void onTaskCompleted(UserTask userTask) {
-        var taskDescription = userTask.task().description();
+    public synchronized void onTaskCompleted(StoredTask storedTask) {
+        var taskDescription = storedTask.task().description();
         log.debug("Removing task: %s", taskDescription);
-        var jobId = userTask.jobId();
-        var removed = taskMemoryContainer.removeTask(userTask);
+        var jobId = storedTask.jobId();
+        var removed = taskMemoryContainer.removeTask(storedTask);
         log.debug("Removed task %s (%s):  %s bytes", taskDescription, jobId.asString(), removed);
         log.debug("Available memory after removing task: %s bytes", availableMemory());
         log.debug("Done removing task: %s", taskDescription);

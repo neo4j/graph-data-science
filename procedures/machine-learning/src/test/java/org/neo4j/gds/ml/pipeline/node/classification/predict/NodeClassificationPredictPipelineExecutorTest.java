@@ -347,16 +347,16 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(
             log,
+            new LoggerForProgressTrackingAdapter(log),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             NodeClassificationPredictPipelineExecutor.progressTask(
                 "Node Classification Predict Pipeline",
                 new Concurrency(1),
                 pipeline,
                 graphStore
             ),
-            getUsername(),
-            config.jobId(),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
-            new LoggerForProgressTrackingAdapter(log)
+            new User(getUsername(), false),
+            config.jobId()
         );
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {

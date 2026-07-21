@@ -21,6 +21,7 @@ package org.neo4j.gds.progress.registration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.progress.tasks.LeafTask;
@@ -40,7 +41,7 @@ class LocalTaskRegistryFactoryTest {
     @BeforeEach
     void setup() {
         this.taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-        this.taskRegistryFactory = new LocalTaskRegistryFactory("", taskStore);
+        this.taskRegistryFactory = new LocalTaskRegistryFactory(taskStore, User.DEFAULT);
     }
 
     @Test
@@ -49,17 +50,17 @@ class LocalTaskRegistryFactoryTest {
         var taskRegistry1 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry1.registerTask(task1);
 
-        assertThat(taskStore.query("")).size().isEqualTo(1);
+        assertThat(taskStore.query(User.DEFAULT)).size().isEqualTo(1);
 
         var task2 = Tasks.leaf("root2", new Concurrency(1));
         var taskRegistry2 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry2.registerTask(task2);
 
-        assertThat(taskStore.query("")).size().isEqualTo(2);
+        assertThat(taskStore.query(User.DEFAULT)).size().isEqualTo(2);
 
         taskRegistry1.markCompleted();
 
-        assertThat(taskStore.queryRunning().map(UserTask::task)).contains(task2).doesNotContain(task1);
+        assertThat(taskStore.queryRunning().map(StoredTask::task)).contains(task2).doesNotContain(task1);
     }
 
     @Test

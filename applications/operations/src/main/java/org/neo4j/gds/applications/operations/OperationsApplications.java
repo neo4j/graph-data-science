@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.operations;
 
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.registration.StoredTask;
 
 import java.util.stream.Stream;
 
@@ -57,15 +57,13 @@ public final class OperationsApplications {
     /**
      * List progress for the given user, or for all users if in administrator mode
      */
-    public Stream<UserTask> listProgress() {
+    public Stream<StoredTask> listProgress() {
         var taskStore = requestScopedDependencies.taskStore();
         var user = requestScopedDependencies.user();
 
         if (user.isAdmin()) return taskStore.query();
 
-        // TODO only fetch ongoing tasks here and name listProgressOngoing
-        //      (add listProgress which fetches all tasks)
-        return taskStore.query(user.getUsername());
+        return taskStore.query(user);
     }
 
     /**
@@ -81,7 +79,7 @@ public final class OperationsApplications {
             return resultRenderer.renderAdministratorView(results);
         }
 
-        var results = taskStore.query(user.getUsername(), jobId);
+        var results = taskStore.query(user, jobId);
 
         return resultRenderer.render(results);
     }

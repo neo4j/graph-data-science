@@ -525,7 +525,7 @@ class GraphImporterTest {
             new Concurrency(1),
             new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            new LocalTaskRegistryFactory("", taskStore)
+            new LocalTaskRegistryFactory(taskStore, User.DEFAULT)
         );
         var gdsLog = new GdsTestLog();
         var importer = new GraphImporter(

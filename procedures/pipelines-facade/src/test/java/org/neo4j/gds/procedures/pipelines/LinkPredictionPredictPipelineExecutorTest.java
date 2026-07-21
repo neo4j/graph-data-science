@@ -28,6 +28,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.core.GraphDimensions;
@@ -157,16 +158,16 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
         var progressTracker = InspectableTestProgressTracker.create(
             Log.noOpLog(),
+            new LoggerForProgressTrackingAdapter(new GdsTestLog()),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Train Pipeline",
                 pipeline,
                 graphStore,
                 config
             ),
-            "",
-            config.jobId(),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
-            new LoggerForProgressTrackingAdapter(new GdsTestLog())
+            User.DEFAULT,
+            config.jobId()
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
@@ -399,16 +400,16 @@ class LinkPredictionPredictPipelineExecutorTest {
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(
             log,
+            new LoggerForProgressTrackingAdapter(log),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Predict Pipeline",
                 pipeline,
                 graphStore,
                 config
             ),
-            username,
-            config.jobId(),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
-            new LoggerForProgressTrackingAdapter(log)
+            new User(username, false),
+            config.jobId()
         );
 
         var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(

@@ -29,6 +29,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.GdlSupport;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -533,7 +534,7 @@ class RandomWalkTest {
                     new LoggerForProgressTrackingAdapter(log),
                     RandomWalkProgressTask.create(graph, new Concurrency(4)),
                     new Concurrency(4),
-                    TaskRegistryFactory.local("rw", new PerDatabaseTaskStore(Duration.ZERO))
+                    TaskRegistryFactory.local(new PerDatabaseTaskStore(Duration.ZERO), new User("rw", false))
                 );
 
                 var randomWalksStream = RandomWalk.create(
@@ -586,7 +587,7 @@ class RandomWalkTest {
                     new LoggerForProgressTrackingAdapter(log),
                     RandomWalkProgressTask.create(weightedGraph, new Concurrency(4)),
                     new Concurrency(4),
-                    TaskRegistryFactory.local("rw", new PerDatabaseTaskStore(Duration.ZERO))
+                    TaskRegistryFactory.local(new PerDatabaseTaskStore(Duration.ZERO), new User("rw", false))
                 );
 
                 var randomWalksStream = RandomWalk.create(
@@ -641,7 +642,7 @@ class RandomWalkTest {
                 new Concurrency(4),
                 new JobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                TaskRegistryFactory.local("rw", taskStore)
+                TaskRegistryFactory.local(taskStore, new User("rw", false))
             );
 
             // run the algorithm and consume the result stream

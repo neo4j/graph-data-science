@@ -51,6 +51,6 @@ public class TaskRegistryFactoryService {
 
         var taskStoreForDatabase = taskStoreService.getOrCreateTaskStore(databaseId);
 
-        return new LocalTaskRegistryFactory(user.getUsername(), taskStoreForDatabase);
+        return new LocalTaskRegistryFactory(taskStoreForDatabase, user);
     }
 }

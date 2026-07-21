@@ -19,21 +19,18 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
-import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.tasks.Task;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class TestTaskStore extends PerDatabaseTaskStore {
-
-    private final Map<JobId, String> tasks = new HashMap<>();
     private final List<String> tasksSeen = new ArrayList<>();
 
     public TestTaskStore() {
@@ -45,17 +42,15 @@ public class TestTaskStore extends PerDatabaseTaskStore {
     }
 
     @Override
-    protected UserTask storeUserTask(String username, JobId jobId, Task task) {
-        tasks.put(jobId, task.description());
+    protected StoredTask storeTask(User user, JobId jobId, Task task) {
         tasksSeen.add(task.description());
 
-        return super.storeUserTask(username, jobId, task);
+        return super.storeTask(user, jobId, task);
     }
 
     @Override
-    protected Optional<UserTask> removeUserTask(String username, JobId jobId) {
-        tasks.remove(jobId);
-        return super.removeUserTask(username, jobId);
+    protected Optional<StoredTask> removeTask(User user, JobId jobId) {
+        return super.removeTask(user, jobId);
     }
 
     public List<String> tasksSeen() {

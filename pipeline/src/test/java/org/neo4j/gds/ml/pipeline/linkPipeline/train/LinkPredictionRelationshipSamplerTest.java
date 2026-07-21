@@ -27,6 +27,7 @@ import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.schema.ElementSchemaEntry;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.assertj.MemoryRangeRepresentation;
@@ -220,12 +221,11 @@ class LinkPredictionRelationshipSamplerTest {
         var log = new GdsTestLog();
         var progressTracker = InspectableTestProgressTracker.create(
             log,
+            new LoggerForProgressTrackingAdapter(log),
+            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
             progressTask(trainConfig.concurrency(), splitConfig.expectedSetSizes(graphStore.relationshipCount())),
-            "user",
-            new JobId(),
-            new PerDatabaseTaskStore(
-                Duration.ofMinutes(1)),
-            new LoggerForProgressTrackingAdapter(log)
+            new User("user", false),
+            new JobId()
         );
 
         var relationshipSplitter = new LinkPredictionRelationshipSampler(

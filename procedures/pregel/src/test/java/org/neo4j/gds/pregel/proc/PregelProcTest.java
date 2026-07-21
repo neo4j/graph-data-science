@@ -30,6 +30,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.assertj.ConditionFactory;
 import org.neo4j.gds.beta.pregel.Element;
@@ -206,7 +207,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void failTaskWhenTheAlgorithmFailsInStreamMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new StreamProc();
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -236,7 +237,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void failTaskWhenTheAlgorithmFailsInWriteMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new WriteProc();
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -265,7 +266,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void failTaskWhenTheAlgorithmFailsInMutateMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new MutateProc();
             proc.taskRegistryFactory = taskRegistryFactory;

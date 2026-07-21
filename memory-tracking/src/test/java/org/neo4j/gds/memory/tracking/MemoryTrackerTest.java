@@ -21,10 +21,11 @@ package org.neo4j.gds.memory.tracking;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.registration.StoredTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -130,9 +131,9 @@ class MemoryTrackerTest {
         memoryTracker.track("a", "b", new JobId("foo"), 9);
         memoryTracker.track("a", "b", new JobId("bar"), 3);
 
-        var userTaskMock = mock(UserTask.class, Answers.RETURNS_MOCKS);
+        var userTaskMock = mock(StoredTask.class, Answers.RETURNS_MOCKS);
         when(userTaskMock.jobId()).thenReturn(new JobId("foo"));
-        when(userTaskMock.username()).thenReturn("a");
+        when(userTaskMock.user()).thenReturn(new User("a", false));
 
         memoryTracker.onTaskCompleted(userTaskMock);
 

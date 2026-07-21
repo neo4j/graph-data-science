@@ -30,27 +30,27 @@ class TaskStoreCleaner implements TaskStoreListener {
     private final TaskStore taskStore;
 
 
-    public TaskStoreCleaner(TaskStore taskStore, Duration retentionPeriod) {
+    TaskStoreCleaner(TaskStore taskStore, Duration retentionPeriod) {
         this.taskStore = taskStore;
         this.retentionPeriod = retentionPeriod;
         this.cleanerPool = new ScheduledThreadPoolExecutor(1, ExecutorServiceUtil.DEFAULT_THREAD_FACTORY);
     }
 
     @Override
-    public void onTaskAdded(UserTask userTask) {
+    public void onTaskAdded(StoredTask storedTask) {
 
     }
 
     @Override
-    public void onTaskCompleted(UserTask userTask) {
+    public void onTaskCompleted(StoredTask storedTask) {
         // avoid scheduler if task should be cleaned up immediately
         if (retentionPeriod.toMillis() == 0) {
-            taskStore.remove(userTask.username(), userTask.jobId());
+            taskStore.remove(storedTask.user(), storedTask.jobId());
             return;
         }
 
         this.cleanerPool.schedule(
-            () -> taskStore.remove(userTask.username(), userTask.jobId()),
+            () -> taskStore.remove(storedTask.user(), storedTask.jobId()),
             retentionPeriod.toMillis(),
             java.util.concurrent.TimeUnit.MILLISECONDS
         );

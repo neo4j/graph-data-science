@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.progress.registration;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 
 public enum EmptyTaskRegistryFactory implements TaskRegistryFactory {
@@ -26,6 +27,6 @@ public enum EmptyTaskRegistryFactory implements TaskRegistryFactory {
 
     @Override
     public TaskRegistry newInstance(JobId jobId) {
-        return new TaskRegistry("", EmptyTaskStore.INSTANCE, jobId);
+        return new TaskRegistry(User.DEFAULT, EmptyTaskStore.INSTANCE, jobId);
     }
 }

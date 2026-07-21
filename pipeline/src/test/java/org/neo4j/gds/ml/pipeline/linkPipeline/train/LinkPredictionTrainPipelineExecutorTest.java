@@ -36,6 +36,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
@@ -397,15 +398,15 @@ class LinkPredictionTrainPipelineExecutorTest {
             var log = new GdsTestLog();
             var progressTracker = InspectableTestProgressTracker.create(
                 log,
+                new LoggerForProgressTrackingAdapter(log),
+                new PerDatabaseTaskStore(Duration.ofMinutes(1)),
                 LinkPredictionTrainPipelineExecutor.progressTask(
                     "Link Prediction Train Pipeline",
                     config.concurrency(), pipeline,
                     relationshipCount
                 ),
-                getUsername(),
-                config.jobId(),
-                new PerDatabaseTaskStore(Duration.ofMinutes(1)),
-                new LoggerForProgressTrackingAdapter(log)
+                new User(getUsername(), false),
+                config.jobId()
             );
 
             TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {

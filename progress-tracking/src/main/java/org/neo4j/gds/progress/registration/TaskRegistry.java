@@ -19,40 +19,41 @@
  */
 package org.neo4j.gds.progress.registration;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Task;
 
 public class TaskRegistry {
-    private final String username;
     private final TaskStore taskStore;
+    private final User user;
     private final JobId jobId;
 
     public TaskRegistry(TaskRegistry taskRegistry) {
-        this(taskRegistry.username, taskRegistry.taskStore);
+        this(taskRegistry.user, taskRegistry.taskStore);
     }
 
-    public TaskRegistry(String username, TaskStore taskStore) {
-        this.username = username;
+    public TaskRegistry(User user, TaskStore taskStore) {
+        this.user = user;
         this.taskStore = taskStore;
         this.jobId = new JobId();
     }
 
-    public TaskRegistry(String username, TaskStore taskStore, JobId jobId) {
-        this.username = username;
+    public TaskRegistry(User user, TaskStore taskStore, JobId jobId) {
+        this.user = user;
         this.taskStore = taskStore;
         this.jobId = jobId;
     }
 
     public void registerTask(Task task) {
-        taskStore.store(username, jobId, task);
+        taskStore.store(user, jobId, task);
     }
 
     public void markCompleted() {
-        taskStore.markCompleted(username, jobId);
+        taskStore.markCompleted(user, jobId);
     }
 
     public boolean containsTask(Task task) {
-        return taskStore.query(username, jobId)
+        return taskStore.query(user, jobId)
             .map(t -> t.task() == task)
             .orElse(false);
     }

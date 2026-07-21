@@ -20,6 +20,7 @@
 package org.neo4j.gds.progress.registration;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.progress.tasks.Tasks;
 
@@ -32,34 +33,34 @@ class TaskRegistryTest {
     @Test
     void shouldStoreIncomingTasks() {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-        var taskRegistry1 = new TaskRegistry("", taskStore);
+        var taskRegistry1 = new TaskRegistry(User.DEFAULT, taskStore);
 
         assertThat(taskStore.query()).isEmpty();
 
         var task1 = Tasks.leaf("task1", new Concurrency(1));
         taskRegistry1.registerTask(task1);
 
-        assertThat(taskStore.query("").map(UserTask::task)).contains(task1);
+        assertThat(taskStore.query(User.DEFAULT).map(StoredTask::task)).contains(task1);
 
-        var taskRegistry2 = new TaskRegistry("", taskStore);
+        var taskRegistry2 = new TaskRegistry(User.DEFAULT, taskStore);
         var task2 = Tasks.leaf("task2", new Concurrency(1));
         taskRegistry2.registerTask(task2);
 
-        assertThat(taskStore.query("").map(UserTask::task)).contains(task1, task2);
+        assertThat(taskStore.query(User.DEFAULT).map(StoredTask::task)).contains(task1, task2);
     }
 
     @Test
     void shouldRemoveStoredTasks() {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-        var taskRegistry = new TaskRegistry("", taskStore);
+        var taskRegistry = new TaskRegistry(User.DEFAULT, taskStore);
 
         var task = Tasks.leaf("task", new Concurrency(1));
         taskRegistry.registerTask(task);
 
         assertThat(taskStore.query()).hasSize(1);
 
-        var jobId = taskStore.query("").map(UserTask::jobId).iterator().next();
-        taskStore.remove("", jobId);
+        var jobId = taskStore.query(User.DEFAULT).map(StoredTask::jobId).iterator().next();
+        taskStore.remove(User.DEFAULT, jobId);
 
         assertThat(taskStore.query()).isEmpty();
     }
@@ -67,7 +68,7 @@ class TaskRegistryTest {
     @Test
     void shouldDetectAlreadyRegisteredTasks() {
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-        var taskRegistry = new TaskRegistry("", taskStore);
+        var taskRegistry = new TaskRegistry(User.DEFAULT, taskStore);
 
         var task = Tasks.leaf("task", new Concurrency(1));
 

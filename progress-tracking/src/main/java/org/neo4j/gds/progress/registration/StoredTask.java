@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.progress.registration;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Task;
 
-public record UserTask(
-    String username,
-    JobId jobId,
-    Task task
-) {
+/**
+ * The internal representation of a stored task with metadata
+ */
+public record StoredTask(User user, JobId jobId, Task task) {
 }

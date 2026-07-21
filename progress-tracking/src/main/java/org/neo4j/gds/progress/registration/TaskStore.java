@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.progress.registration;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Task;
 
@@ -26,24 +27,23 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface TaskStore {
+    void store(User user, JobId jobId, Task task);
 
-    void store(String username, JobId jobId, Task task);
+    void remove(User user, JobId jobId);
 
-    void remove(String username, JobId jobId);
+    void markCompleted(User user, JobId jobId);
 
-    void markCompleted(String username, JobId jobId);
+    Stream<StoredTask> query();
 
-    Stream<UserTask> query();
+    Stream<StoredTask> query(JobId jobId);
 
-    default Stream<UserTask> queryRunning() {
-        return query().filter(userTask -> userTask.task().status().isOngoing());
+    Stream<StoredTask> query(User user);
+
+    Optional<StoredTask> query(User user, JobId jobId);
+
+    default Stream<StoredTask> queryRunning() {
+        return query().filter(storedTask -> storedTask.task().status().isOngoing());
     }
-
-    Stream<UserTask> query(JobId jobId);
-
-    Stream<UserTask> query(String username);
-
-    Optional<UserTask> query(String username, JobId jobId);
 
     long ongoingTaskCount();
 

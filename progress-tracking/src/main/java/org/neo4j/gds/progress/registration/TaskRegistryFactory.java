@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.progress.registration;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 
 @FunctionalInterface
 public interface TaskRegistryFactory {
     TaskRegistry newInstance(JobId jobId);
 
-    static TaskRegistryFactory local(String username, TaskStore taskStore) {
-        return new LocalTaskRegistryFactory(username, taskStore);
+    static TaskRegistryFactory local(TaskStore taskStore, User user) {
+        return new LocalTaskRegistryFactory(taskStore, user);
     }
 
     static TaskRegistryFactory empty() {

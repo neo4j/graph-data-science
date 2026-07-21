@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.compat.TestLogImpl;
 import org.neo4j.gds.core.Username;
@@ -85,7 +86,7 @@ class ProcedureRunnerTest extends BaseTest {
             var log = (TestLog) new TestLogImpl();
             var username = Username.of("foo");
             TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry(
-                username.username(),
+                new User(username.username(), false),
                 new PerDatabaseTaskStore(Duration.ZERO),
                 jobId
             );

@@ -26,8 +26,8 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.registration.TaskStore;
-import org.neo4j.gds.progress.registration.UserTask;
 import org.neo4j.gds.progress.tasks.LeafTask;
 
 import java.util.stream.Stream;
@@ -41,11 +41,12 @@ class LocalOperationsProcedureFacadeTest {
     @Test
     void shouldQueryProgressOnlyOngoing() {
         var taskStore = mock(TaskStore.class);
+        var alice = new User("alice", false);
         var operationsApplications = OperationsApplications.create(
             null,
             RequestScopedDependencies.builder()
                 .taskStore(taskStore)
-                .user(new User("alice", false))
+                .user(alice)
                 .build()
         );
 
@@ -69,16 +70,15 @@ class LocalOperationsProcedureFacadeTest {
         var failed = new LeafTask("t5", new Concurrency(1), 1);
         failed.fail();
 
-
         var jobId = new JobId("a job id");
         var mockedTasks = Stream.of(
-            new UserTask("alice", jobId, pending),
-            new UserTask("alice", jobId, running),
-            new UserTask("alice", jobId, failed),
-            new UserTask("alice", jobId, cancelled),
-            new UserTask("alice", jobId, finished)
+            new StoredTask(alice, jobId, pending),
+            new StoredTask(alice, jobId, running),
+            new StoredTask(alice, jobId, failed),
+            new StoredTask(alice, jobId, cancelled),
+            new StoredTask(alice, jobId, finished)
         );
-        when(taskStore.query("alice")).thenReturn(mockedTasks);
+        when(taskStore.query(alice)).thenReturn(mockedTasks);
 
         var actualProgress = operationsProcedureFacade.listProgress("", false);
         assertThat(actualProgress).map(ProgressResult::taskName).containsExactlyInAnyOrder(
@@ -90,11 +90,12 @@ class LocalOperationsProcedureFacadeTest {
     @Test
     void shouldQueryProgress() {
         var taskStore = mock(TaskStore.class);
+        var alice = new User("alice", false);
         var operationsApplications = OperationsApplications.create(
             null,
             RequestScopedDependencies.builder()
                 .taskStore(taskStore)
-                .user(new User("alice", false))
+                .user(alice)
                 .build()
         );
 
@@ -120,13 +121,13 @@ class LocalOperationsProcedureFacadeTest {
 
         var jobId = new JobId("another job id");
         var mockedTasks = Stream.of(
-            new UserTask("alice", jobId, pending),
-            new UserTask("alice", jobId, running),
-            new UserTask("alice", jobId, failed),
-            new UserTask("alice", jobId, cancelled),
-            new UserTask("alice", jobId, finished)
+            new StoredTask(alice, jobId, pending),
+            new StoredTask(alice, jobId, running),
+            new StoredTask(alice, jobId, failed),
+            new StoredTask(alice, jobId, cancelled),
+            new StoredTask(alice, jobId, finished)
         );
-        when(taskStore.query("alice")).thenReturn(mockedTasks);
+        when(taskStore.query(alice)).thenReturn(mockedTasks);
 
         var actualProgress = operationsProcedureFacade.listProgress("", true);
         assertThat(actualProgress).map(ProgressResult::taskName).containsExactlyInAnyOrder(

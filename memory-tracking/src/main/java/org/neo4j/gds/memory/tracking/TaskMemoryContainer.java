@@ -21,7 +21,7 @@ package org.neo4j.gds.memory.tracking;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.registration.UserTask;
+import org.neo4j.gds.progress.registration.StoredTask;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -42,8 +42,8 @@ class TaskMemoryContainer {
         allocatedMemory.addAndGet(memoryAmount);
     }
 
-    long removeTask(UserTask task){
-            var memPair=  memoryInUse.getOrDefault(task.username(), EMPTY_HASH_MAP).remove(task.jobId());
+    long removeTask(StoredTask storedTask){
+            var memPair=  memoryInUse.getOrDefault(storedTask.user().getUsername(), EMPTY_HASH_MAP).remove(storedTask.jobId());
             if (memPair !=null){
                 var mem = memPair.getRight();
                  allocatedMemory.addAndGet(-mem);

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.progress.registration;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Status;
 import org.neo4j.gds.progress.tasks.Task;
@@ -31,27 +32,28 @@ public abstract class ObservableTaskStore implements TaskStore {
     private final Set<TaskStoreListener> listeners = new HashSet<>();
 
     @Override
-    public final void store(String username, JobId jobId, Task task) {
-        var userTask = storeUserTask(username, jobId, task);
+    public void store(User user, JobId jobId, Task task) {
+        var userTask = storeTask(user, jobId, task);
         listeners.forEach(listener -> listener.onTaskAdded(userTask));
     }
 
     @Override
-    public final void remove(String username, JobId jobId) {
-        removeUserTask(username, jobId);
+    public void remove(User user, JobId jobId) {
+        removeTask(user, jobId);
     }
 
     @Override
-    public final void markCompleted(String username, JobId jobId) {
-        var userTask = query(username, jobId);
-        userTask.map(UserTask::task).ifPresent(task -> {
+    public void markCompleted(User user, JobId jobId) {
+        var storedTask = query(user, jobId);
+
+        storedTask.map(StoredTask::task).ifPresent(task -> {
             if (task.status() == Status.PENDING) {
                 task.cancel();
             } else if (task.status() == Status.RUNNING) {
                 task.finish();
             }
         });
-        userTask.ifPresent(task -> listeners.forEach(listener -> listener.onTaskCompleted(task)));
+        storedTask.ifPresent(task -> listeners.forEach(listener -> listener.onTaskCompleted(task)));
     }
 
     @Override
@@ -59,7 +61,7 @@ public abstract class ObservableTaskStore implements TaskStore {
         this.listeners.add(listener);
     }
 
-    protected abstract UserTask storeUserTask(String username, JobId jobId, Task task);
+    protected abstract StoredTask storeTask(User user, JobId jobId, Task task);
 
-    protected abstract Optional<UserTask> removeUserTask(String username, JobId jobId);
+    protected abstract Optional<StoredTask> removeTask(User user, JobId jobId);
 }

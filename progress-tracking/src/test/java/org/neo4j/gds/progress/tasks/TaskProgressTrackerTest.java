@@ -21,9 +21,11 @@ package org.neo4j.gds.progress.tasks;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
+import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.utilities.RequestCorrelationIdForTesting;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
@@ -31,7 +33,6 @@ import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
 import org.neo4j.gds.progress.registration.TaskRegistry;
-import org.neo4j.gds.progress.registration.UserTask;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
@@ -206,7 +207,7 @@ class TaskProgressTrackerTest {
         var task = Tasks.leaf("root", new Concurrency(1));
 
         var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
-        var taskRegistry = new TaskRegistry("", taskStore);
+        var taskRegistry = new TaskRegistry(User.DEFAULT, taskStore);
 
         var progressTracker = TaskProgressTracker.create(
             Log.noOpLog(),
@@ -218,11 +219,11 @@ class TaskProgressTrackerTest {
             jobId -> taskRegistry
         );
 
-        assertThat(taskStore.query("")).isEmpty();
+        assertThat(taskStore.query(User.DEFAULT)).isEmpty();
 
         progressTracker.beginSubTask();
 
-        assertThat(taskStore.query("").map(UserTask::task)).contains(task);
+        assertThat(taskStore.query(User.DEFAULT).map(StoredTask::task)).contains(task);
     }
 
     @Test

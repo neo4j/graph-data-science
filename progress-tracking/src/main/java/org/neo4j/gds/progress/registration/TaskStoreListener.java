@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.progress.registration;
 
-// TODO: Split this in two listeners
 public interface TaskStoreListener {
-    void onTaskAdded(UserTask userTask);
-    void onTaskCompleted(UserTask userTask);
+    void onTaskAdded(StoredTask storedTask);
+
+    void onTaskCompleted(StoredTask storedTask);
 }
