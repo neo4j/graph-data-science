@@ -23,11 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.registration.UserTask;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.registration.UserTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -137,5 +138,38 @@ class MemoryTrackerTest {
 
         assertThat(memoryTracker.availableMemory())
             .isEqualTo(16L);
+    }
+
+    @Test
+    void tryToTrackShouldSucceedWhenEnoughMemoryIsAvailable() throws MemoryGuardException {
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
+
+        // Should not throw exception
+        memoryTracker.tryToTrack("alice", "task1", new JobId("job1"), 50L);
+
+        assertThat(memoryTracker.availableMemory()).isEqualTo(50L);
+    }
+
+    @Test
+    void tryToTrackShouldFailWhenExceedingInitialMemory() {
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
+
+        assertThatThrownBy(() ->
+                memoryTracker.tryToTrack("alice", "task1", new JobId("job1"), 150L)
+            ).isInstanceOf(MemoryReservationExceededTotalMemoryException.class)
+            .hasFieldOrPropertyWithValue("bytesRequired", 150L)
+            .hasFieldOrPropertyWithValue("bytesAvailable", 100L);
+    }
+
+    @Test
+    void tryToTrackShouldFailWhenExceedingAvailableMemory() throws MemoryGuardException {
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
+        memoryTracker.track("alice", "task1", new JobId("job1"), 80L);
+
+        assertThatThrownBy(() ->
+                memoryTracker.tryToTrack("bob", "task2", new JobId("job2"), 30L)
+            ).isInstanceOf(MemoryReservationExceededException.class)
+            .hasFieldOrPropertyWithValue("bytesRequired", 30L)
+            .hasFieldOrPropertyWithValue("bytesAvailable", 20L);
     }
 }

@@ -27,9 +27,9 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.memory.tracking.MemoryGuardException;
 import org.neo4j.gds.memory.tracking.MemoryReservationExceededException;
 import org.neo4j.gds.memory.tracking.MemoryTracker;
-import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
 import java.util.function.Supplier;
@@ -74,7 +74,7 @@ public final class DefaultMemoryGuard implements MemoryGuard {
         String username,
         JobId jobId,
         boolean bypassMemoryEstimation
-    ) throws IllegalStateException {
+    ) throws MemoryGuardException {
 
         try {
             var memoryRequirement = MemoryRequirement.create(
@@ -96,15 +96,7 @@ public final class DefaultMemoryGuard implements MemoryGuard {
         } catch (MemoryEstimationNotImplementedException e) {
             log.info("Memory usage estimate not available for " + label + ", skipping guard");
         } catch (MemoryReservationExceededException e) {
-            var message = StringFormatting.formatWithLocale(
-                "Memory required to run %s (%db) exceeds available memory (%db)",
-                label,
-                e.bytesRequired(),
-                e.bytesAvailable()
-            );
-
-            throw new IllegalStateException(message);
-
+            throw e;
         }
     }
 

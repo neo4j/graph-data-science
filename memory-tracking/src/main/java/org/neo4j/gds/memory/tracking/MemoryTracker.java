@@ -24,9 +24,9 @@ import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.TaskStoreListener;
 import org.neo4j.gds.progress.registration.UserTask;
-import org.neo4j.gds.logging.Log;
 
 import java.util.stream.Stream;
 
@@ -58,8 +58,10 @@ public final class MemoryTracker implements TaskStoreListener, GraphStoreAddedEv
         log.debug("Available memory after tracking task: %s bytes", availableMemory());
     }
 
-    public synchronized void tryToTrack(String username, String taskName, JobId jobId, long memoryEstimate) throws
-        MemoryReservationExceededException {
+    public synchronized void tryToTrack(String username, String taskName, JobId jobId, long memoryEstimate) throws MemoryGuardException {
+        if (memoryEstimate > initialMemory) {
+            throw new MemoryReservationExceededTotalMemoryException(memoryEstimate, initialMemory);
+        }
         var availableMemory = availableMemory();
         if (memoryEstimate > availableMemory) {
             throw new MemoryReservationExceededException(memoryEstimate, availableMemory);

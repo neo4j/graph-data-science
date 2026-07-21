@@ -17,11 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.exceptions;
+package org.neo4j.gds.memory.tracking;
 
-public class MemoryEstimationNotImplementedException extends RuntimeException {
+public class MemoryReservationExceededTotalMemoryException extends MemoryGuardException {
 
-    public MemoryEstimationNotImplementedException() {
-        super("Memory estimation is not implemented for this algorithm.");
+    private final long bytesRequired;
+    private final long bytesAvailable;
+
+    public MemoryReservationExceededTotalMemoryException(long bytesRequired, long bytesAvailable) {
+        this.bytesRequired = bytesRequired;
+        this.bytesAvailable = bytesAvailable;
     }
+
+    public long bytesRequired() {
+        return bytesRequired;
+    }
+    public long bytesAvailable() {
+        return bytesAvailable;
+    }
+
 }

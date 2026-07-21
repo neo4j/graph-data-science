@@ -24,6 +24,7 @@ import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.memory.tracking.MemoryGuardException;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 
@@ -60,18 +61,22 @@ class ComputationService {
         Computation<RESULT_FROM_ALGORITHM> computation,
         DimensionTransformer dimensionTransformer
     ) {
-        memoryGuard.assertAlgorithmCanRun(
-            graphResources.graph(),
-            graphResources.graphStore(),
-            configuration.relationshipTypesFilter(),
-            configuration.concurrency(),
-            estimationSupplier,
-            label,
-            dimensionTransformer,
-            username,
-            configuration.jobId(),
-            configuration.sudo()
-        );
+        try {
+            memoryGuard.assertAlgorithmCanRun(
+                graphResources.graph(),
+                graphResources.graphStore(),
+                configuration.relationshipTypesFilter(),
+                configuration.concurrency(),
+                estimationSupplier,
+                label,
+                dimensionTransformer,
+                username,
+                configuration.jobId(),
+                configuration.sudo()
+            );
+        } catch (MemoryGuardException e) {
+            MemoryGuardExceptionParser.transformException(label, e);
+        }
 
         return computeWithMetrics(configuration, graphResources, label, computation);
     }

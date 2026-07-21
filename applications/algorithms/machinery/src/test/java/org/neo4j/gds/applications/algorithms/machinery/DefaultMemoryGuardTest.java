@@ -33,11 +33,12 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
+import org.neo4j.gds.memory.tracking.MemoryGuardException;
 import org.neo4j.gds.memory.tracking.MemoryTracker;
 
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -79,6 +80,9 @@ class DefaultMemoryGuardTest {
     @Mock
     private MemoryTree memoryTree;
 
+    @Mock
+    private MemoryGuardException memoryGuardException;
+
     @BeforeEach
     void setUp() {
         when(graphDimensionFactoryMock.graphDimensions(any(GraphStore.class), any(Graph.class),anyCollection()))
@@ -88,7 +92,7 @@ class DefaultMemoryGuardTest {
     }
 
     @Test
-    void shouldAllowExecution() {
+    void shouldAllowExecution() throws MemoryGuardException {
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(13, 19));
 
         var memoryTracker = mock(MemoryTracker.class);
@@ -115,7 +119,7 @@ class DefaultMemoryGuardTest {
     }
 
     @Test
-    void shouldGuardExecutionUsingMinimumEstimate() {
+    void shouldGuardExecutionUsingMinimumEstimate() throws MemoryGuardException {
 
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
@@ -127,15 +131,14 @@ class DefaultMemoryGuardTest {
             memoryTracker
         );
 
-        doThrow(new IllegalStateException("another error from memory tracker")).when(memoryTracker).tryToTrack(
+        doThrow(memoryGuardException).when(memoryTracker).tryToTrack(
             "Alice",
             "some other label",
             jobIdMock,
             117L
         );
-        assertThatIllegalStateException()
-            .isThrownBy(
-                () -> memoryGuard.assertAlgorithmCanRun(
+        assertThatThrownBy(
+            () -> memoryGuard.assertAlgorithmCanRun(
                     graphMock,
                     graphStoreMock,
                     Set.of(),
@@ -148,11 +151,11 @@ class DefaultMemoryGuardTest {
                     false
                 )
             )
-            .withMessage("another error from memory tracker");
+            .isSameAs(memoryGuardException);
     }
 
     @Test
-    void shouldGuardExecutionUsingMaximumEstimate() {
+    void shouldGuardExecutionUsingMaximumEstimate() throws MemoryGuardException {
 
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
@@ -164,15 +167,14 @@ class DefaultMemoryGuardTest {
             memoryTracker
         );
 
-        doThrow(new IllegalStateException("error from memory tracker")).when(memoryTracker).tryToTrack(
+        doThrow(memoryGuardException).when(memoryTracker).tryToTrack(
             "Bob",
             "yet another label",
             jobIdMock,
             243L
         );
-        assertThatIllegalStateException()
-            .isThrownBy(
-                () -> memoryGuard.assertAlgorithmCanRun(
+        assertThatThrownBy(
+            ()  -> memoryGuard.assertAlgorithmCanRun(
                     graphMock,
                     graphStoreMock,
                     Set.of(),
@@ -185,7 +187,7 @@ class DefaultMemoryGuardTest {
                     false
                 )
             )
-            .withMessage("error from memory tracker");
+            .isSameAs(memoryGuardException);
     }
 
     @Test

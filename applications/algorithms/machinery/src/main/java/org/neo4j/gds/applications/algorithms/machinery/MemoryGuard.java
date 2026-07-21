@@ -22,9 +22,10 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.memory.tracking.MemoryGuardException;
 
 import java.util.Collection;
 import java.util.function.Supplier;
@@ -68,5 +69,5 @@ public interface MemoryGuard {
         String username,
         JobId jobId,
         boolean bypassMemoryEstimation
-    ) throws IllegalStateException;
+    ) throws MemoryGuardException;
 }

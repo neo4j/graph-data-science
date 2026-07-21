@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.memory.tracking;
 
-public class MemoryReservationExceededException extends RuntimeException {
+public class MemoryReservationExceededException extends MemoryGuardException {
 
     private final long bytesRequired;
     private final long bytesAvailable;
 
-    MemoryReservationExceededException(long bytesRequired, long bytesAvailable) {
+    public MemoryReservationExceededException(long bytesRequired, long bytesAvailable) {
         this.bytesRequired = bytesRequired;
         this.bytesAvailable = bytesAvailable;
     }
