@@ -37,7 +37,7 @@ public final class MemoryGuardExceptionParser {
                 exceededTotalException.bytesRequired(),
                 exceededTotalException.bytesAvailable()
             );
-            throw new IllegalStateException(message);
+            throw new IllegalStateException(message, e);
         } else if (e instanceof MemoryReservationExceededException exceededException) {
             message = StringFormatting.formatWithLocale(
                 "Memory required to run %s (%db) exceeds current available memory (%db)",
@@ -45,10 +45,10 @@ public final class MemoryGuardExceptionParser {
                 exceededException.bytesRequired(),
                 exceededException.bytesAvailable()
             );
-            throw new IllegalStateException(message);
+            throw new IllegalStateException(message, e);
 
         } else {
-            throw new RuntimeException("Unrecognized exception: " + e.getClass().getSimpleName());
+            throw new RuntimeException("Unrecognized exception: " + e.getClass().getSimpleName(), e);
         }
     }
 }
