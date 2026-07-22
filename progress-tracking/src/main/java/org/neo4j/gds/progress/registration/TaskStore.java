@@ -39,7 +39,7 @@ public interface TaskStore {
 
     Stream<StoredTask> query(User user);
 
-    Optional<StoredTask> query(User user, JobId jobId);
+    Optional<StoredTask> lookup(User user, JobId jobId);
 
     default Stream<StoredTask> queryRunning() {
         return query().filter(storedTask -> storedTask.task().status().isOngoing());

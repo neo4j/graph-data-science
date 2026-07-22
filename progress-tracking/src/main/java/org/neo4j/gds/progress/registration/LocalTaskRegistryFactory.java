@@ -39,7 +39,7 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
     @Override
     public TaskRegistry newInstance(JobId jobId) {
         taskStore
-            .query(user, jobId)
+            .lookup(user, jobId)
             .filter(userTask -> {
                 Status status = userTask.task().status();
                 return status == Status.RUNNING || status == Status.PENDING;

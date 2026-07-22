@@ -53,7 +53,7 @@ public class TaskRegistry {
     }
 
     public boolean containsTask(Task task) {
-        return taskStore.query(user, jobId)
+        return taskStore.lookup(user, jobId)
             .map(t -> t.task() == task)
             .orElse(false);
     }
