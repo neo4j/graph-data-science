@@ -33,8 +33,10 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
+import org.neo4j.gds.memory.tracking.AvailableMemoryReservationExceededException;
 import org.neo4j.gds.memory.tracking.MemoryGuardException;
 import org.neo4j.gds.memory.tracking.MemoryTracker;
+import org.neo4j.gds.memory.tracking.TotalMemoryReservationExceededException;
 
 import java.util.Set;
 
@@ -79,9 +81,6 @@ class DefaultMemoryGuardTest {
 
     @Mock
     private MemoryTree memoryTree;
-
-    @Mock
-    private MemoryGuardException memoryGuardException;
 
     @BeforeEach
     void setUp() {
@@ -131,6 +130,7 @@ class DefaultMemoryGuardTest {
             memoryTracker
         );
 
+        var memoryGuardException = new TotalMemoryReservationExceededException("foo", 7, 5);
         doThrow(memoryGuardException).when(memoryTracker).tryToTrack(
             "Alice",
             "some other label",
@@ -167,6 +167,7 @@ class DefaultMemoryGuardTest {
             memoryTracker
         );
 
+        var memoryGuardException = new AvailableMemoryReservationExceededException("bar", 19, 15);
         doThrow(memoryGuardException).when(memoryTracker).tryToTrack(
             "Bob",
             "yet another label",

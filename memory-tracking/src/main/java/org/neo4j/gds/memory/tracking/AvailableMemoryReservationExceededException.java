@@ -19,17 +19,21 @@
  */
 package org.neo4j.gds.memory.tracking;
 
-import org.junit.jupiter.api.Test;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public final class AvailableMemoryReservationExceededException extends MemoryGuardException {
 
-class MemoryReservationExceededTotalMemoryExceptionTest {
-
-    @Test
-    void shouldReturnProperMessage() {
-        var memoryException = new MemoryReservationExceededTotalMemoryException(4, 3);
-
-        assertThat(memoryException).hasMessage("Required memory 4 bytes exceeds the available 3 bytes.");
+    public AvailableMemoryReservationExceededException(String taskName, long bytesRequired, long bytesAvailable) {
+        super(taskName, bytesRequired, bytesAvailable);
     }
 
+    @Override
+    public String getMessage() {
+        return formatWithLocale(
+            "Memory required to run %s (%db) exceeds current available memory (%db).",
+            taskName,
+            bytesRequired,
+            bytesAvailable
+        );
+    }
 }

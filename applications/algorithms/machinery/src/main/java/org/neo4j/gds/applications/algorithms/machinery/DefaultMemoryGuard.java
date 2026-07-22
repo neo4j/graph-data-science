@@ -28,7 +28,6 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.memory.tracking.MemoryGuardException;
-import org.neo4j.gds.memory.tracking.MemoryReservationExceededException;
 import org.neo4j.gds.memory.tracking.MemoryTracker;
 
 import java.util.Collection;
@@ -95,8 +94,6 @@ public final class DefaultMemoryGuard implements MemoryGuard {
 
         } catch (MemoryEstimationNotImplementedException e) {
             log.info("Memory usage estimate not available for " + label + ", skipping guard");
-        } catch (MemoryReservationExceededException e) {
-            throw e;
         }
     }
 

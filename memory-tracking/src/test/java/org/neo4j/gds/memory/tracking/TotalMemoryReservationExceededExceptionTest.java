@@ -19,16 +19,17 @@
  */
 package org.neo4j.gds.memory.tracking;
 
-public abstract sealed class MemoryGuardException extends RuntimeException permits
-    AvailableMemoryReservationExceededException,
-    TotalMemoryReservationExceededException {
-    final String taskName;
-    final long bytesRequired;
-    final long bytesAvailable;
+import org.junit.jupiter.api.Test;
 
-    public MemoryGuardException(String taskName, long bytesRequired, long bytesAvailable) {
-        this.taskName = taskName;
-        this.bytesRequired = bytesRequired;
-        this.bytesAvailable = bytesAvailable;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class TotalMemoryReservationExceededExceptionTest {
+
+    @Test
+    void shouldReturnCorrectMessage() {
+        var memoryException = new TotalMemoryReservationExceededException("node2vec", 4, 3);
+
+        assertThat(memoryException).hasMessage("Memory required to run node2vec (4b) exceeds total available memory (3b).");
     }
+
 }

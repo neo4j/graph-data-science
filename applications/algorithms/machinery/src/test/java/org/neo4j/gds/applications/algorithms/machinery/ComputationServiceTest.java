@@ -24,6 +24,7 @@ import org.mockito.MockedStatic;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.memory.tracking.AvailableMemoryReservationExceededException;
 import org.neo4j.gds.memory.tracking.MemoryGuardException;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -39,7 +40,7 @@ class ComputationServiceTest {
 
     @Test
     void shouldCallMemoryExceptionParserOnMemoryGuardError() throws MemoryGuardException {
-        var exception = mock(MemoryGuardException.class);
+        var exception = new AvailableMemoryReservationExceededException("test-failure", 11, 9);
         var guard = mock(MemoryGuard.class);
         var label = mock(Label.class);
 
@@ -67,7 +68,7 @@ class ComputationServiceTest {
         var config = mock(AlgoBaseConfig.class);
         var graphResources = mock(GraphResources.class);
 
-        try (MockedStatic<MemoryGuardExceptionParser> parser = mockStatic(MemoryGuardExceptionParser.class)) {
+        try (MockedStatic<MemoryGuardExceptionTransformer> parser = mockStatic(MemoryGuardExceptionTransformer.class)) {
 
             try {
                 computationService.computeAlgorithm(
@@ -81,7 +82,7 @@ class ComputationServiceTest {
             } catch (Exception e) {
                 //irrelevant
             }
-            parser.verify(() -> MemoryGuardExceptionParser.transformException(label, exception), times(1));
+            parser.verify(() -> MemoryGuardExceptionTransformer.throwAsIllegalStateException(exception), times(1));
         }
     }
 }

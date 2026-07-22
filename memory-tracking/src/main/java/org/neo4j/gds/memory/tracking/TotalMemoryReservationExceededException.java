@@ -19,16 +19,21 @@
  */
 package org.neo4j.gds.memory.tracking;
 
-public abstract sealed class MemoryGuardException extends RuntimeException permits
-    AvailableMemoryReservationExceededException,
-    TotalMemoryReservationExceededException {
-    final String taskName;
-    final long bytesRequired;
-    final long bytesAvailable;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-    public MemoryGuardException(String taskName, long bytesRequired, long bytesAvailable) {
-        this.taskName = taskName;
-        this.bytesRequired = bytesRequired;
-        this.bytesAvailable = bytesAvailable;
+public final class TotalMemoryReservationExceededException extends MemoryGuardException {
+
+    public TotalMemoryReservationExceededException(String taskName, long bytesRequired, long bytesAvailable) {
+        super(taskName, bytesRequired, bytesAvailable);
+    }
+
+    @Override
+    public String getMessage() {
+        return formatWithLocale(
+            "Memory required to run %s (%db) exceeds total available memory (%db).",
+            taskName,
+            bytesRequired,
+            bytesAvailable
+        );
     }
 }

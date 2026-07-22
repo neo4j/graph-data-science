@@ -17,22 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.memory.tracking;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-public class MemoryReservationExceededException extends MemoryGuardException {
+import org.neo4j.gds.memory.tracking.MemoryGuardException;
 
-    private final long bytesRequired;
-    private final long bytesAvailable;
+public final class MemoryGuardExceptionTransformer {
 
-    public MemoryReservationExceededException(long bytesRequired, long bytesAvailable) {
-        this.bytesRequired = bytesRequired;
-        this.bytesAvailable = bytesAvailable;
-    }
+    private MemoryGuardExceptionTransformer() {}
 
-    public long bytesRequired() {
-        return bytesRequired;
-    }
-    public long bytesAvailable() {
-        return bytesAvailable;
+    static void throwAsIllegalStateException(MemoryGuardException e) {
+        throw new IllegalStateException(e.getMessage(), e);
     }
 }

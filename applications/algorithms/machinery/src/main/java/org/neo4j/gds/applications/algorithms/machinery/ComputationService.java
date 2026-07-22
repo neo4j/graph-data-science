@@ -75,7 +75,7 @@ class ComputationService {
                 configuration.sudo()
             );
         } catch (MemoryGuardException e) {
-            MemoryGuardExceptionParser.transformException(label, e);
+            MemoryGuardExceptionTransformer.throwAsIllegalStateException(e);
         }
 
         return computeWithMetrics(configuration, graphResources, label, computation);

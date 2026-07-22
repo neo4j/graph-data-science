@@ -157,7 +157,7 @@ class MemoryTrackerTest {
 
         assertThatThrownBy(() ->
                 memoryTracker.tryToTrack("alice", "task1", new JobId("job1"), 150L)
-            ).isInstanceOf(MemoryReservationExceededTotalMemoryException.class)
+            ).isInstanceOf(TotalMemoryReservationExceededException.class)
             .hasFieldOrPropertyWithValue("bytesRequired", 150L)
             .hasFieldOrPropertyWithValue("bytesAvailable", 100L);
     }
@@ -169,7 +169,7 @@ class MemoryTrackerTest {
 
         assertThatThrownBy(() ->
                 memoryTracker.tryToTrack("bob", "task2", new JobId("job2"), 30L)
-            ).isInstanceOf(MemoryReservationExceededException.class)
+            ).isInstanceOf(AvailableMemoryReservationExceededException.class)
             .hasFieldOrPropertyWithValue("bytesRequired", 30L)
             .hasFieldOrPropertyWithValue("bytesAvailable", 20L);
     }

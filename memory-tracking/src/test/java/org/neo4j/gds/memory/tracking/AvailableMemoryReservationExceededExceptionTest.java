@@ -19,27 +19,18 @@
  */
 package org.neo4j.gds.memory.tracking;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import org.junit.jupiter.api.Test;
 
-public class MemoryReservationExceededTotalMemoryException extends MemoryGuardException {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    private final long bytesRequired;
-    private final long bytesAvailable;
+class AvailableMemoryReservationExceededExceptionTest {
 
-    public MemoryReservationExceededTotalMemoryException(long bytesRequired, long bytesAvailable) {
-        this.bytesRequired = bytesRequired;
-        this.bytesAvailable = bytesAvailable;
+    @Test
+    void shouldReturnCorrectMessage() {
+        var memoryException = new AvailableMemoryReservationExceededException("wcc", 4, 3);
+
+        assertThat(memoryException)
+            .hasMessage("Memory required to run wcc (4b) exceeds current available memory (3b).");
     }
 
-    public long bytesRequired() {
-        return bytesRequired;
-    }
-    public long bytesAvailable() {
-        return bytesAvailable;
-    }
-
-    @Override
-    public String getMessage() {
-        return formatWithLocale("Required memory %s bytes exceeds the available %s bytes.", bytesRequired, bytesAvailable);
-    }
 }
