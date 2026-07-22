@@ -81,7 +81,7 @@ public class PerDatabaseTaskStore extends ObservableTaskStore {
     }
 
     @Override
-    public Optional<StoredTask> query(User user, JobId jobId) {
+    public Optional<StoredTask> lookup(User user, JobId jobId) {
         return Optional.ofNullable(registeredTasks.get(user))
             .map(userTasks -> userTasks.get(jobId));
     }

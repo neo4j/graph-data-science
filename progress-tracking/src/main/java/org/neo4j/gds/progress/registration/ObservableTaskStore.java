@@ -44,7 +44,7 @@ public abstract class ObservableTaskStore implements TaskStore {
 
     @Override
     public void markCompleted(User user, JobId jobId) {
-        var storedTask = query(user, jobId);
+        var storedTask = lookup(user, jobId);
 
         storedTask.map(StoredTask::task).ifPresent(task -> {
             if (task.status() == Status.PENDING) {

@@ -56,7 +56,7 @@ public enum EmptyTaskStore implements TaskStore {
     }
 
     @Override
-    public Optional<StoredTask> query(User user, JobId jobId) {
+    public Optional<StoredTask> lookup(User user, JobId jobId) {
         return Optional.empty();
     }
 

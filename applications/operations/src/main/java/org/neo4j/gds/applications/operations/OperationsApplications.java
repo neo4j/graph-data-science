@@ -79,7 +79,7 @@ public final class OperationsApplications {
             return resultRenderer.renderAdministratorView(results);
         }
 
-        var results = taskStore.query(user, jobId);
+        var results = taskStore.lookup(user, jobId);
 
         return resultRenderer.render(results);
     }

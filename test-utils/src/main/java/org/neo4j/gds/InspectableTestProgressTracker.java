@@ -94,7 +94,7 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     @Override
     public void beginSubTask() {
         delegate.beginSubTask();
-        progressHistory.add(taskStore.query(user, jobId).map(userTask -> userTask.task().getProgress()));
+        progressHistory.add(taskStore.lookup(user, jobId).map(userTask -> userTask.task().getProgress()));
     }
 
     @Override
@@ -110,7 +110,7 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     @Override
     public void endSubTask() {
         delegate.endSubTask();
-        progressHistory.add(taskStore.query(user, jobId).map(userTask -> userTask.task().getProgress()));
+        progressHistory.add(taskStore.lookup(user, jobId).map(userTask -> userTask.task().getProgress()));
     }
 
     @Override
