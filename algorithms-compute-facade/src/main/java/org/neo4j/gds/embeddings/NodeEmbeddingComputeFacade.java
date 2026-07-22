@@ -23,7 +23,6 @@ import org.neo4j.gds.NodeEmbeddingsAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
@@ -35,6 +34,7 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecParameters;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -135,7 +135,8 @@ public class NodeEmbeddingComputeFacade {
         Graph graph,
         Node2VecParameters parameters,
         JobId jobId,
-        boolean logProgress
+        boolean logProgress,
+        TerminationFlag terminationFlag
     ) {
         if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Node2VecResult.empty()));

@@ -38,6 +38,7 @@ import org.neo4j.gds.embeddings.validation.FeaturePropertiesMustExistOnAllNodeLa
 import org.neo4j.gds.embeddings.validation.Node2VecGraphValidation;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -131,7 +132,10 @@ public class NodeEmbeddingComputeBusinessFacade {
         Node2VecParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<Node2VecResult>, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<Node2VecResult>, TR> resultTransformerBuilder,
+        User user,
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
@@ -152,7 +156,8 @@ public class NodeEmbeddingComputeBusinessFacade {
             parameters,
             jobId,
             logProgress,
-            resultTransformerBuilder
+            resultTransformerBuilder,
+            terminationFlag
         );
     }
 
@@ -161,13 +166,15 @@ public class NodeEmbeddingComputeBusinessFacade {
         Node2VecParameters parameters,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<Node2VecResult>, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<Node2VecResult>, TR> resultTransformerBuilder,
+        TerminationFlag terminationFlag
     ) {
         return computeFacade.node2Vec(
             graphResources.graph(),
             parameters,
             jobId,
-            logProgress
+            logProgress,
+            terminationFlag
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 }

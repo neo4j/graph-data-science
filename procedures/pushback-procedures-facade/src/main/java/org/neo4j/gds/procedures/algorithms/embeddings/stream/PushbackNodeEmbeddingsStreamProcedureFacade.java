@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.embeddings.stream;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.embeddings.NodeEmbeddingComputeBusinessFacade;
 import org.neo4j.gds.embeddings.fastrp.FastRPConfigTransformer;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
@@ -35,12 +36,16 @@ import java.util.stream.Stream;
 
 public class PushbackNodeEmbeddingsStreamProcedureFacade {
 
+    private final RequestScopedDependencies requestScopedDependencies;
     private final NodeEmbeddingComputeBusinessFacade businessFacade;
     private final UserSpecificConfigurationParser configurationParser;
 
-    public PushbackNodeEmbeddingsStreamProcedureFacade(NodeEmbeddingComputeBusinessFacade businessFacade,
+    public PushbackNodeEmbeddingsStreamProcedureFacade(
+        RequestScopedDependencies requestScopedDependencies,
+        NodeEmbeddingComputeBusinessFacade businessFacade,
         UserSpecificConfigurationParser configurationParser
     ) {
+        this.requestScopedDependencies = requestScopedDependencies;
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
     }
@@ -88,7 +93,10 @@ public class PushbackNodeEmbeddingsStreamProcedureFacade {
             Node2VecConfigTransformer.toParameters(config),
             config.jobId(),
             config.logProgress(),
-            graphResources -> new Node2VecStreamResultTransformer(graphResources.graph())
+            graphResources -> new Node2VecStreamResultTransformer(graphResources.graph()),
+            requestScopedDependencies.user(),
+            requestScopedDependencies.databaseId(),
+            requestScopedDependencies.terminationFlag()
         ).join();
 
     }

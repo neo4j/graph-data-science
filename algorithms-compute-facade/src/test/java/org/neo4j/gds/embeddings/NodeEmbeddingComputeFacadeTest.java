@@ -29,8 +29,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.hashgnn.BinarizeParameters;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
@@ -43,6 +41,8 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -235,7 +235,8 @@ class NodeEmbeddingComputeFacadeTest {
                 node2VecGraph,
                 parameters,
                 jobIdMock,
-                true
+                true,
+                TerminationFlag.RUNNING_TRUE
             ).join();
 
             assertThat(timedAlgorithmResult.computeMillis()).isNotNegative();
