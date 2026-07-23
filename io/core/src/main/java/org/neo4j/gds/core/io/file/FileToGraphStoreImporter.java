@@ -150,14 +150,15 @@ public abstract class FileToGraphStoreImporter {
             : graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum();
         importTasks.add(Tasks.leaf("Import relationships", concurrency, relationshipTaskVolume));
 
+        var taskRegistry = taskRegistryFactory.newInstance(jobId);
+
         return TaskProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
             Tasks.task(rootTaskName() + " import", concurrency, importTasks),
             concurrency,
-            jobId,
             requestCorrelationId,
-            taskRegistryFactory
+            taskRegistry
         );
     }
 

@@ -228,9 +228,8 @@ class PregelTest {
             new LoggerForProgressTrackingAdapter(Log.noOpLog()),
             Pregel.progressTask(graph, config, MemoryRange.empty(), computation.getClass().getSimpleName()),
             config.concurrency(),
-            new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            jobId -> new TaskRegistry(User.DEFAULT, taskStore, jobId)
+            new TaskRegistry(User.DEFAULT, taskStore, new JobId())
         );
 
         var pregelAlgo = Pregel.create(

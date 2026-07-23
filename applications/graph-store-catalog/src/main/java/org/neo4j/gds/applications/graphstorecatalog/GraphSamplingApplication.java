@@ -62,16 +62,17 @@ public final class GraphSamplingApplication {
             var cypherMap = CypherMapWrapper.create(configuration);
             var samplerProvider = SamplerProvider.of(samplerType, cypherMap);
             var samplerConfig = samplerProvider.config();
-
             var samplerAlgorithm = samplerProvider.algorithm();
+
+            var taskRegistry = requestScopedDependencies.taskRegistryFactory().newInstance(samplerConfig.jobId());
+
             var progressTracker = TaskProgressTracker.create(
                 log,
                 loggerForProgressTracking,
                 GraphSampleConstructor.progressTask(graphStore, samplerAlgorithm, samplerConfig.concurrency()),
                 samplerConfig.concurrency(),
-                samplerConfig.jobId(),
                 requestScopedDependencies.correlationId(),
-                requestScopedDependencies.taskRegistryFactory()
+                taskRegistry
             );
             var graphSampleConstructor = new GraphSampleConstructor(
                 log,

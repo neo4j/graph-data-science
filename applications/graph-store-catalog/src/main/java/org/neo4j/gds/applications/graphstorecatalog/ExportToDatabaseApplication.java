@@ -62,14 +62,15 @@ class ExportToDatabaseApplication {
         GraphStoreToDatabaseExporterConfig configuration,
         GraphStore graphStore
     ) {
+        var taskRegistry = requestScopedDependencies.taskRegistryFactory().newInstance(configuration.jobId());
+
         var progressTracker = TaskProgressTracker.create(
             loggers.log(),
             loggers.loggerForProgressTracking(),
             ProgressTrackerExecutionMonitor.progressTask(graphStore, configuration.typedWriteConcurrency()),
             configuration.typedWriteConcurrency(),
-            configuration.jobId(),
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
+            taskRegistry
         );
 
         @SuppressWarnings("removal") var parameters = new GraphStoreToDatabaseExporterParameters(

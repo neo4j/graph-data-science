@@ -32,10 +32,9 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistry;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -185,9 +184,8 @@ class NativeRelationshipExporterTest extends BaseTest {
             new LoggerForProgressTrackingAdapter(log),
             Tasks.leaf("WriteRelationships", RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY, graph.relationshipCount()),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
-            new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE
+            TaskRegistry.noOpTaskRegistry()
         );
 
         var exporter = NativeRelationshipExporter

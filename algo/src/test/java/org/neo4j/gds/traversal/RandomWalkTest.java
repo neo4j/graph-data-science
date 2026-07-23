@@ -635,14 +635,16 @@ class RandomWalkTest {
         void shouldLeaveNoOngoingTasksBehind() {
             var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
 
+            var taskRegistryFactory = TaskRegistryFactory.local(taskStore, new User("rw", false));
+            var taskRegistry = taskRegistryFactory.newInstance(new JobId());
+
             var testTracker = TaskProgressTracker.create(
                 Log.noOpLog(),
                 LoggerForProgressTracking.noOpLog(),
                 RandomWalkProgressTask.create(graph, new Concurrency(4)),
                 new Concurrency(4),
-                new JobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                TaskRegistryFactory.local(taskStore, new User("rw", false))
+                taskRegistry
             );
 
             // run the algorithm and consume the result stream

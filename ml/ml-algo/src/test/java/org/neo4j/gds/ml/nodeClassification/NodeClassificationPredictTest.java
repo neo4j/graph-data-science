@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
@@ -41,7 +40,7 @@ import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistry;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -225,9 +224,8 @@ class NodeClassificationPredictTest {
             new LoggerForProgressTrackingAdapter(log),
             NodeClassificationPredict.progressTask(concurrency, graph.nodeCount()),
             concurrency,
-            new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE
+            TaskRegistry.noOpTaskRegistry()
         );
 
         var mcnlrPredict = new NodeClassificationPredict(

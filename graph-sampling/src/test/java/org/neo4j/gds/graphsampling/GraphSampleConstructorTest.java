@@ -27,12 +27,11 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistry;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
@@ -316,9 +315,8 @@ class GraphSampleConstructorTest {
             new LoggerForProgressTrackingAdapter(log),
             GraphSampleConstructor.progressTask(naturalGraphStore, rwr, new Concurrency(1)),
             new Concurrency(1),
-            new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE
+            TaskRegistry.noOpTaskRegistry()
         );
 
         var rwrGraphConstructor = new GraphSampleConstructor(

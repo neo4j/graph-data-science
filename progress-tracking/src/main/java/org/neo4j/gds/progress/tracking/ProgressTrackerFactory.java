@@ -59,9 +59,8 @@ public class ProgressTrackerFactory {
                 loggerForProgressTracking,
                 task,
                 concurrency,
-                jobId,
                 correlationId,
-                taskRegistryFactory
+                taskRegistryFactory.newInstance(jobId)
             );
         } else {
             progressTracker = TaskTreeProgressTracker.create(

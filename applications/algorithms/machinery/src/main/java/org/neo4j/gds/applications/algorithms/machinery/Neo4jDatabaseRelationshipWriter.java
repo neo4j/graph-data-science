@@ -53,14 +53,15 @@ final class Neo4jDatabaseRelationshipWriter {
         Optional<ResultStore> resultStore,
         JobId jobId
     ) {
+        var taskRegistry = requestScopedDependencies.taskRegistryFactory().newInstance(jobId);
+
         var progressTracker = TaskProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
             RelationshipExporter.baseTask(taskName, RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY, graph.relationshipCount()),
             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
-            jobId,
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
+            taskRegistry
         );
 
         var exporter = relationshipExporterBuilder
@@ -111,16 +112,15 @@ final class Neo4jDatabaseRelationshipWriter {
         // we should be keying tasks under unique task ids, and grouping them under job ids.
         // future work i guess
         var alternativeJobId = new JobId();
+        var taskRegistry = requestScopedDependencies.taskRegistryFactory().newInstance(alternativeJobId);
 
-        var concurrency = new Concurrency(1);
         var progressTracker = TaskProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
-            RelationshipStreamExporter.baseTask(taskName, concurrency),
-            concurrency,
-            alternativeJobId,
+            RelationshipStreamExporter.baseTask(taskName, new Concurrency(1)),
+            new Concurrency(1),
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
+            taskRegistry
         );
 
         // When we are writing to the result store, the result stream might not be consumed

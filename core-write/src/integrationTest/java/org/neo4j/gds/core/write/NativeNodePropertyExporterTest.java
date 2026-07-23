@@ -30,13 +30,12 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistry;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
@@ -184,9 +183,8 @@ class NativeNodePropertyExporterTest extends BaseTest {
             new LoggerForProgressTrackingAdapter(log),
             NodePropertyExporter.baseTask("AlgoNameGoesHere", writeConcurrency, graph.nodeCount()),
             writeConcurrency,
-            new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE
+            TaskRegistry.noOpTaskRegistry()
         );
 
         var exporterBuilder = NativeNodePropertyExporter

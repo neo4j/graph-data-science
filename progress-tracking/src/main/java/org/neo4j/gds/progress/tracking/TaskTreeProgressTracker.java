@@ -55,12 +55,13 @@ public final class TaskTreeProgressTracker implements ProgressTracker {
             taskVisitor
         );
 
+        var taskRegistry = taskRegistryFactory.newInstance(jobId);
+
         var delegate = TaskProgressTracker.create(
             log,
             baseTask,
-            jobId,
             taskProgressLogger,
-            taskRegistryFactory
+            taskRegistry
         );
 
         return new TaskTreeProgressTracker(delegate);

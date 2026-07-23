@@ -23,14 +23,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.utilities.RequestCorrelationIdForTesting;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
 import org.neo4j.gds.progress.registration.TaskRegistry;
 import org.neo4j.gds.logging.GdsTestLog;
@@ -94,9 +92,8 @@ class TaskProgressTrackerTest {
             new LoggerForProgressTrackingAdapter(log),
             task,
             new Concurrency(1),
-            new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE
+            TaskRegistry.noOpTaskRegistry()
         );
         progressTracker.beginSubTask();
         progressTracker.endSubTask();
@@ -149,9 +146,8 @@ class TaskProgressTrackerTest {
                 new LoggerForProgressTrackingAdapter(log),
                 task,
                 new Concurrency(1),
-                new JobId(),
                 new RequestCorrelationIdForTesting("our request correlation id"),
-                EmptyTaskRegistryFactory.INSTANCE
+                TaskRegistry.noOpTaskRegistry()
             );
             progressTracker.beginSubTask();
             progressTracker.onProgress();
@@ -180,9 +176,8 @@ class TaskProgressTrackerTest {
                 new LoggerForProgressTrackingAdapter(log),
                 task,
                 new Concurrency(1),
-                new JobId(),
                 new RequestCorrelationIdForTesting("what request correlation id?"),
-                EmptyTaskRegistryFactory.INSTANCE
+                TaskRegistry.noOpTaskRegistry()
             );
 
             progressTracker.beginSubTask(/*root*/);
@@ -214,9 +209,8 @@ class TaskProgressTrackerTest {
             LoggerForProgressTracking.noOpLog(),
             task,
             new Concurrency(1),
-            new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            jobId -> taskRegistry
+            taskRegistry
         );
 
         assertThat(taskStore.query(User.DEFAULT)).isEmpty();
@@ -249,9 +243,8 @@ class TaskProgressTrackerTest {
             new LoggerForProgressTrackingAdapter(log),
             task,
             new Concurrency(1),
-            new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE
+            TaskRegistry.noOpTaskRegistry()
         );
     }
 

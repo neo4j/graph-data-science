@@ -38,7 +38,7 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistry;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -219,9 +219,8 @@ class PageRankTest {
                 new LoggerForProgressTrackingAdapter(log),
                 CentralityAlgorithmTasks.pageRank(graph, config),
                 config.concurrency(),
-                config.jobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                EmptyTaskRegistryFactory.INSTANCE
+                TaskRegistry.noOpTaskRegistry()
             );
 
             pageRank(graph, config, progressTracker, TerminationFlag.RUNNING_TRUE)

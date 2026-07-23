@@ -518,14 +518,15 @@ class GraphImporterTest {
         var log = new TestLogImpl();
         var taskStore = new TestTaskStore();
         var adaptedLog = new LogAdapter(log);
+        var taskRegistryFactory = new LocalTaskRegistryFactory(taskStore, User.DEFAULT);
+        var taskRegistry = taskRegistryFactory.newInstance(new JobId());
         var progressTracker = TaskProgressTracker.create(
             adaptedLog,
             new LoggerForProgressTrackingAdapter(adaptedLog),
             GraphImporter.graphImporterTask(new Concurrency(1), 2),
             new Concurrency(1),
-            new JobId(),
             PlainSimpleRequestCorrelationId.create(),
-            new LocalTaskRegistryFactory(taskStore, User.DEFAULT)
+            taskRegistry
         );
         var gdsLog = new GdsTestLog();
         var importer = new GraphImporter(

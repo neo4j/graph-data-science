@@ -216,14 +216,17 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         var idMapBuilder = idMapBuilder(config.readConcurrency());
 
         var taskVolume = queryEstimator.estimateRows(query);
+
+        var taskRegistryFactory = TaskRegistryFactory.local(taskStore, new User(username, false));
+        var taskRegistry = taskRegistryFactory.newInstance(config.jobId());
+
         var internalProgressTracker = TaskProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
             GraphImporter.graphImporterTask(config.readConcurrency(), taskVolume),
             config.readConcurrency(),
-            config.jobId(),
             requestCorrelationId,
-            TaskRegistryFactory.local(taskStore, new User(username, false))
+            taskRegistry
         );
         this.progressTracker = new BatchingTaskProgressTrackerFactory().create(internalProgressTracker, taskVolume, config.readConcurrency());
 

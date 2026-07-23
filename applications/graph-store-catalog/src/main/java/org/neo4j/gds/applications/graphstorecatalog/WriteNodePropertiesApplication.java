@@ -70,15 +70,17 @@ public class WriteNodePropertiesApplication {
             () -> List.of(NodePropertyExporter.innerTask("Label", concurrency, subGraph.nodeCount())),
             validNodeLabels.size()
         );
+
         var jobId = new JobId();
+        var taskRegistry = requestScopedDependencies.taskRegistryFactory().newInstance(jobId);
+
         var progressTracker = TaskProgressTracker.create(
             loggers.log(),
             loggers.loggerForProgressTracking(),
             task,
             concurrency,
-            jobId,
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
+            taskRegistry
         );
 
         var allNodeProperties = configuration

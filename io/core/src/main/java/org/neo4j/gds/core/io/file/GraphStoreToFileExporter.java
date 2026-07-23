@@ -165,14 +165,15 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
 
         var task = Tasks.task(rootTaskName + " export", concurrency, importTasks);
 
+        var taskRegistry = taskRegistryFactory.newInstance(jobId);
+
         return TaskProgressTracker.create(
             log,
             loggerForProgressTracking,
             task,
             concurrency,
-            jobId,
             requestCorrelationId,
-            taskRegistryFactory
+            taskRegistry
         );
     }
 

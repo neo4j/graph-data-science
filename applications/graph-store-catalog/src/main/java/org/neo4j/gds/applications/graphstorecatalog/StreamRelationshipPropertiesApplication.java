@@ -78,15 +78,16 @@ public class StreamRelationshipPropertiesApplication {
             graphStore.nodeCount() * relationshipPropertyKeysAndValues.size()
         );
 
-        final JobId jobId = new JobId();
+        var jobId = new JobId();
+        var taskRegistry = requestScopedDependencies.taskRegistryFactory().newInstance(jobId);
+
         var taskProgressTracker = TaskProgressTracker.create(
             log,
             loggerForProgressTracking,
             task,
             configuration.concurrency(),
-            jobId,
             requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
+            taskRegistry
         );
 
         return computeWithProgressTracking(

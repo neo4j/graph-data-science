@@ -68,14 +68,16 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
         User user,
         JobId jobId
     ) {
+        var taskRegistryFactory = TaskRegistryFactory.local(taskStore, user);
+        var taskRegistry = taskRegistryFactory.newInstance(jobId);
+
         var delegate = TaskProgressTracker.create(
             log,
             loggerForProgressTracking,
             baseTask,
             new Concurrency(1),
-            jobId,
             PlainSimpleRequestCorrelationId.create(),
-            TaskRegistryFactory.local(taskStore, user)
+            taskRegistry
         );
 
         return new InspectableTestProgressTracker(delegate, taskStore, user, jobId);

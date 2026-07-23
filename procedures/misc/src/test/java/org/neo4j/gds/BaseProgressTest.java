@@ -72,15 +72,15 @@ public abstract class BaseProgressTest extends BaseTest {
             var concurrency = withConcurrency ? new Concurrency(REQUESTED_CPU_CORES) : new Concurrency(1);
 
             var task = createTask(taskName, withMemoryEstimation, concurrency);
+            var taskRegistry = taskRegistryFactory.newInstance(new JobId());
 
             var taskProgressTracker = TaskProgressTracker.create(
                 Log.noOpLog(),
                 LoggerForProgressTracking.noOpLog(),
                 task,
                 concurrency,
-                new JobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                taskRegistryFactory
+                taskRegistry
             );
             taskProgressTracker.beginSubTask();
             taskProgressTracker.beginSubTask();

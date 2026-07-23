@@ -116,14 +116,15 @@ final class Neo4jDatabaseNodePropertyWriter {
         Log log,
         JobId jobId
     ) {
+        var taskRegistry = taskRegistryFactory.newInstance(jobId);
+
         return TaskProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
             NodePropertyExporter.baseTask(name, concurrency, taskVolume),
             concurrency,
-            jobId,
             requestCorrelationId,
-            taskRegistryFactory
+            taskRegistry
         );
     }
 

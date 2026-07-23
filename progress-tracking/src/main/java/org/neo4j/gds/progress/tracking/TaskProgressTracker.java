@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.progress.tracking;
 
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.progress.logging.ProgressLogger;
 import org.neo4j.gds.progress.registration.TaskRegistry;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
 import org.neo4j.gds.progress.tasks.Status;
 import org.neo4j.gds.progress.tasks.Task;
@@ -59,21 +57,19 @@ public final class TaskProgressTracker implements ProgressTracker {
         LoggerForProgressTracking loggerForProgressTracking,
         Task baseTask,
         Concurrency concurrency,
-        JobId jobId,
         RequestCorrelationId requestCorrelationId,
-        TaskRegistryFactory taskRegistryFactory
+        TaskRegistry taskRegistry
     ) {
         var taskProgressLogger = TaskProgressLogger.create(loggerForProgressTracking, requestCorrelationId, baseTask, concurrency);
 
-        return create(log, baseTask, jobId, taskProgressLogger, taskRegistryFactory);
+        return create(log, baseTask, taskProgressLogger, taskRegistry);
     }
 
     public static TaskProgressTracker create(
         Log log,
         Task baseTask,
-        JobId jobId,
         ProgressLogger progressLogger,
-        TaskRegistryFactory taskRegistryFactory
+        TaskRegistry taskRegistry
     ) {
         var alreadyLoggedOnce = new AtomicBoolean(false);
         Consumer<RuntimeException> onError = error -> {
@@ -82,8 +78,6 @@ public final class TaskProgressTracker implements ProgressTracker {
                 alreadyLoggedOnce.set(true);
             }
         };
-
-        var taskRegistry = taskRegistryFactory.newInstance(jobId);
 
         return new TaskProgressTracker(
             log,

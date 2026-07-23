@@ -24,6 +24,10 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Task;
 
 public class TaskRegistry {
+    public static TaskRegistry noOpTaskRegistry() {
+        return new TaskRegistry(User.DEFAULT, EmptyTaskStore.INSTANCE, new JobId());
+    }
+
     private final TaskStore taskStore;
     private final User user;
     private final JobId jobId;

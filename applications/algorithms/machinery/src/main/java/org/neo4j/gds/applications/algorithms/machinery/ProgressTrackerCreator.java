@@ -63,20 +63,15 @@ public class ProgressTrackerCreator {
         boolean logProgress
     ) {
         if (logProgress) {
-            /*
-             * What we would really want is, for this progress tracker to use the injected request correlation id.
-             * Because that would tie it up to the integrating system.
-             */
-            var requestCorrelationId = requestScopedDependencies.correlationId();
+            var taskRegistry = requestScopedDependencies.taskRegistryFactory().newInstance(jobId);
 
             return TaskProgressTracker.create(
                 log,
                 loggerForProgressTracking,
                 task,
                 concurrency,
-                jobId,
-                requestCorrelationId,
-                requestScopedDependencies.taskRegistryFactory()
+                requestScopedDependencies.correlationId(),
+                taskRegistry
             );
         }
 

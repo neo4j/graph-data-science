@@ -129,14 +129,15 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         );
 
         if (graphProjectConfig.logProgress()) {
+            var taskRegistry = loadingContext.taskRegistryFactory().newInstance(graphProjectConfig.jobId());
+
             return TaskProgressTracker.create(
                 loadingContext.log(),
                 new LoggerForProgressTrackingAdapter(loadingContext.log()),
                 task,
                 concurrency,
-                graphProjectConfig.jobId(),
                 PlainSimpleRequestCorrelationId.create(),
-                loadingContext.taskRegistryFactory()
+                taskRegistry
             );
         }
 
