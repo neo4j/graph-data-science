@@ -1,0 +1,20 @@
+plugins {
+    id 'buildlogic-gds-java'
+}
+
+description = 'Neo4j Graph Data Science :: Python Runtime Configurations'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    compileOnly openGds.jetbrains.annotations
+
+    implementation project(':annotations')
+    implementation project(':config-api')
+    implementation project(':graph-projection-api')
+
+    testImplementation project(':test-utils')
+}
