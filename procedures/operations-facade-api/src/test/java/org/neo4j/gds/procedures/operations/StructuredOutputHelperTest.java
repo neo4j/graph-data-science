@@ -46,6 +46,27 @@ class StructuredOutputHelperTest {
 
     @ParameterizedTest
     @CsvSource(value = {
+        "0.0, 10, [~~~~~~~~~~]",
+        "0.5, 10, [#####~~~~~]",
+        "1.0, 10, [##########]"
+    })
+    void shouldComputeProgressBarFromRelativeProgress(double relativeProgress, int progressBarLength, String expected) {
+        assertThat(StructuredOutputHelper.progressBar(relativeProgress, progressBarLength)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "0.0, 0%",
+        "0.5, 50%",
+        "1.0, 100%",
+        "0.3333, 33.33%"
+    })
+    void shouldComputeProgressFromRelativeProgress(double relativeProgress, String expectedPercentage) {
+        assertThat(StructuredOutputHelper.computeProgress(relativeProgress)).isEqualTo(expectedPercentage);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
         "42, 100, 42%",
         "0, 100, 0%",
         "100, 100, 100%",

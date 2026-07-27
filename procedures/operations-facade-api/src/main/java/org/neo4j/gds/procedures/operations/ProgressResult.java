@@ -49,6 +49,27 @@ public record ProgressResult(
         );
     }
 
+    public static ProgressResult fromArrowProcess(
+        String username,
+        String jobId,
+        String taskName,
+        double relativeProgress,
+        String status,
+        long startTimeMillis,
+        long finishOrNowMillis
+    ) {
+        return new ProgressResult(
+            username,
+            jobId,
+            taskName,
+            StructuredOutputHelper.computeProgress(relativeProgress),
+            StructuredOutputHelper.progressBar(relativeProgress, 10),
+            status,
+            startTime(startTimeMillis),
+            prettyElapsedTime(startTimeMillis, finishOrNowMillis)
+        );
+    }
+
     static ProgressResult fromTaskWithDepth(String username, Task task, JobId jobId, int depth) {
         var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
         return new ProgressResult(username, task, jobId, treeViewTaskName);
@@ -71,9 +92,15 @@ public record ProgressResult(
         if (task.hasNotStarted()) {
             return null;
         }
-        var zoneId = ZoneId.systemDefault();
-        var instant = Instant.ofEpochMilli(task.startTime());
-        return LocalTime.ofInstant(instant, zoneId);
+        return startTime(task.startTime());
+    }
+
+    private static LocalTime startTime(long startTimeMillis) {
+        if (startTimeMillis < 0) {
+            return null;
+        }
+        var instant = Instant.ofEpochMilli(startTimeMillis);
+        return LocalTime.ofInstant(instant, ZoneId.systemDefault());
     }
 
     private static String prettyElapsedTime(Task task) {
@@ -84,7 +111,14 @@ public record ProgressResult(
         var finishTimeOrNow = finishTime != -1
             ? finishTime
             : ClockService.clock().millis();
-        var elapsedTime = finishTimeOrNow - task.startTime();
+        return prettyElapsedTime(task.startTime(), finishTimeOrNow);
+    }
+
+    private static String prettyElapsedTime(long startTimeMillis, long finishOrNowMillis) {
+        if (startTimeMillis < 0) {
+            return "Not yet started";
+        }
+        var elapsedTime = finishOrNowMillis - startTimeMillis;
         return DurationFormatUtils.formatDurationWords(elapsedTime, true, true);
     }
 }

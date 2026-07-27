@@ -44,8 +44,14 @@ public final class StructuredOutputHelper {
             return StringFormatting.formatWithLocale("[~~~~%s~~~]", UNKNOWN);
         }
 
-        var progressPercentage = progress.relativeProgress();
-        var scaledPercentage = (int) (progressPercentage * progressBarLength);
+        return progressBar(progress.relativeProgress(), progressBarLength);
+    }
+
+    /**
+     * Produce a progress bar string in the format of: [######~~~~] from a relative progress in [0, 1].
+     */
+    public static String progressBar(double relativeProgress, int progressBarLength) {
+        var scaledPercentage = (int) (relativeProgress * progressBarLength);
 
         var filledProgressBar = "#".repeat(scaledPercentage);
         var remainingProgressBar = "~".repeat(progressBarLength - scaledPercentage);
@@ -60,9 +66,12 @@ public final class StructuredOutputHelper {
             return UNKNOWN;
         }
 
-        var progressPercentage = progress.relativeProgress();
+        return computeProgress(progress.relativeProgress());
+    }
+
+    public static String computeProgress(double relativeProgress) {
         var decimalFormat = new DecimalFormat("###.##%", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-        return decimalFormat.format(progressPercentage);
+        return decimalFormat.format(relativeProgress);
     }
 
     public static String treeViewDescription(String description, int depth) {
