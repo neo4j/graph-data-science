@@ -171,7 +171,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
         var progressTracker = InspectableTestProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
+            PerDatabaseTaskStore.create(Duration.ofMinutes(1)),
             NodeRegressionPredictPipelineExecutor.progressTask(
                 "Node Regression Predict Pipeline",
                 new Concurrency(1),

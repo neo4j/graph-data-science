@@ -567,7 +567,7 @@ class NodeClassificationTrainTest {
         var progressTracker = InspectableTestProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
+            PerDatabaseTaskStore.create(Duration.ofMinutes(1)),
             progressTask,
             new User(config.username(), false),
             config.jobId()

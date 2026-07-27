@@ -78,7 +78,7 @@ class ProcedureExecutorTest {
     void shouldRegisterTaskWithCorrectJobId() {
         // Arrange
         var jobIdTracker = new JobIdTracker();
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
         taskStore.addListener(jobIdTracker);
         var executor = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var someJobId = new JobId();
@@ -102,7 +102,7 @@ class ProcedureExecutorTest {
     void shouldCompleteTaskAfterComputation() {
         // Arrange
         var invocationCounter = new TaskCreatedCounter();
-        var taskStore = new PerDatabaseTaskStore(Duration.ofMinutes(1));
+        var taskStore = PerDatabaseTaskStore.create(Duration.ofMinutes(1));
         taskStore.addListener(invocationCounter);
         var executor1 = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var executor2 = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));

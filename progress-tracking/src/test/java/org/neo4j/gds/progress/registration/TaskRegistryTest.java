@@ -32,7 +32,7 @@ class TaskRegistryTest {
 
     @Test
     void shouldStoreIncomingTasks() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
         var taskRegistry1 = new TaskRegistry(User.DEFAULT, taskStore);
 
         assertThat(taskStore.query()).isEmpty();
@@ -51,7 +51,7 @@ class TaskRegistryTest {
 
     @Test
     void shouldRemoveStoredTasks() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
         var taskRegistry = new TaskRegistry(User.DEFAULT, taskStore);
 
         var task = Tasks.leaf("task", new Concurrency(1));
@@ -67,7 +67,7 @@ class TaskRegistryTest {
 
     @Test
     void shouldDetectAlreadyRegisteredTasks() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
         var taskRegistry = new TaskRegistry(User.DEFAULT, taskStore);
 
         var task = Tasks.leaf("task", new Concurrency(1));

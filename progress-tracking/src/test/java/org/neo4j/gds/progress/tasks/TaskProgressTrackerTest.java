@@ -201,7 +201,7 @@ class TaskProgressTrackerTest {
     void shouldRegisterBaseTaskOnBaseTaskStart() {
         var task = Tasks.leaf("root", new Concurrency(1));
 
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
         var taskRegistry = new TaskRegistry(User.DEFAULT, taskStore);
 
         var progressTracker = TaskProgressTracker.create(

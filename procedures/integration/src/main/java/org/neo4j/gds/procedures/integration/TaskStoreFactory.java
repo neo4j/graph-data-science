@@ -47,6 +47,6 @@ public class TaskStoreFactory {
     }
 
     TaskStore create() {
-        return new PerDatabaseTaskStore(retentionPeriod);
+        return PerDatabaseTaskStore.create(retentionPeriod);
     }
 }

@@ -222,7 +222,7 @@ class LinkPredictionRelationshipSamplerTest {
         var progressTracker = InspectableTestProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
+            PerDatabaseTaskStore.create(Duration.ofMinutes(1)),
             progressTask(trainConfig.concurrency(), splitConfig.expectedSetSizes(graphStore.relationshipCount())),
             new User("user", false),
             new JobId()

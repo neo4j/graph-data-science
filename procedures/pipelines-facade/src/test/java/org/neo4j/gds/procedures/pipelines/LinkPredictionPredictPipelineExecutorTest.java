@@ -159,7 +159,7 @@ class LinkPredictionPredictPipelineExecutorTest {
         var progressTracker = InspectableTestProgressTracker.create(
             Log.noOpLog(),
             new LoggerForProgressTrackingAdapter(new GdsTestLog()),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
+            PerDatabaseTaskStore.create(Duration.ofMinutes(1)),
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Train Pipeline",
                 pipeline,
@@ -401,7 +401,7 @@ class LinkPredictionPredictPipelineExecutorTest {
         var progressTracker = InspectableTestProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
+            PerDatabaseTaskStore.create(Duration.ofMinutes(1)),
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Predict Pipeline",
                 pipeline,

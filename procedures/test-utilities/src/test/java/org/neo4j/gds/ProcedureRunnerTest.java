@@ -87,7 +87,7 @@ class ProcedureRunnerTest extends BaseTest {
             var username = Username.of("foo");
             TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry(
                 new User(username.username(), false),
-                new PerDatabaseTaskStore(Duration.ZERO),
+                PerDatabaseTaskStore.create(Duration.ZERO),
                 jobId
             );
             ProcedureRunner.applyOnProcedure(

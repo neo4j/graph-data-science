@@ -230,7 +230,7 @@ class NodePropertyStepExecutorTest {
         var progressTracker = InspectableTestProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),
-            new PerDatabaseTaskStore(Duration.ofMinutes(1)),
+            PerDatabaseTaskStore.create(Duration.ofMinutes(1)),
             NodePropertyStepExecutor.tasks(configuration.concurrency(), steps, graphStore.nodeCount()),
             new User("user", false),
             new JobId("42")

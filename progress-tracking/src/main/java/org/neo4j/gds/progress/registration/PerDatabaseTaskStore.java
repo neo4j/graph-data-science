@@ -27,33 +27,64 @@ import org.neo4j.gds.progress.tasks.Task;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class PerDatabaseTaskStore extends ObservableTaskStore {
-    private final Map<User, Map<JobId, StoredTask>> registeredTasks;
+public class PerDatabaseTaskStore implements TaskStore {
+    private final Map<User, Map<JobId, StoredTask>> registeredTasks = new ConcurrentHashMap<>();
+    private final Set<TaskStoreListener> listeners = ConcurrentHashMap.newKeySet();
 
-    public PerDatabaseTaskStore(Duration retentionPeriod) {
-        this.registeredTasks = new ConcurrentHashMap<>();
+    protected PerDatabaseTaskStore() {
 
-        this.addListener(new TaskStoreCleaner(this, retentionPeriod));
+    }
+
+    public static PerDatabaseTaskStore create(Duration retentionPeriod) {
+        var taskStore = new PerDatabaseTaskStore();
+
+        var taskStoreCleaner = new TaskStoreCleaner(taskStore, retentionPeriod);
+        taskStore.addListener(taskStoreCleaner);
+
+        return taskStore;
     }
 
     @Override
-    protected StoredTask storeTask(User user, JobId jobId, Task task) {
+    public void store(User user, JobId jobId, Task task) {
         var storedTask = new StoredTask(user, jobId, task);
 
-        this.registeredTasks
+        registeredTasks
             .computeIfAbsent(user, __ -> new ConcurrentHashMap<>())
             .put(jobId, storedTask);
 
-        return storedTask;
+        listeners.forEach(listener -> listener.onTaskAdded(storedTask));
     }
 
     @Override
-    protected Optional<StoredTask> removeTask(User user, JobId jobId) {
-        return Optional.ofNullable(this.registeredTasks.get(user))
-            .map(userTasks -> userTasks.remove(jobId));
+    public void remove(User user, JobId jobId) {
+        var tasksForUser = this.registeredTasks.get(user);
+
+        if (tasksForUser == null) return;
+
+        tasksForUser.remove(jobId);
+    }
+
+    @Override
+    public void markCompleted(User user, JobId jobId) {
+        var possibleStoredTask = lookup(user, jobId);
+
+        if (possibleStoredTask.isEmpty()) return;
+
+        var storedTask = possibleStoredTask.get();
+
+        var task = storedTask.task();
+
+        if (task.status() == Status.PENDING) {
+            task.cancel();
+        } else if (task.status() == Status.RUNNING) {
+            task.finish();
+        }
+
+        listeners.forEach(listener -> listener.onTaskCompleted(storedTask));
     }
 
     @Override
@@ -92,5 +123,10 @@ public class PerDatabaseTaskStore extends ObservableTaskStore {
             .flatMap(taskPerJob -> taskPerJob.values().stream())
             .filter(task -> task.task().status() == Status.PENDING || task.task().status() == Status.RUNNING)
             .count();
+    }
+
+    @Override
+    public void addListener(TaskStoreListener listener) {
+        this.listeners.add(listener);
     }
 }

@@ -22,35 +22,19 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
-import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.tasks.Task;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class TestTaskStore extends PerDatabaseTaskStore {
     private final List<String> tasksSeen = new ArrayList<>();
 
-    public TestTaskStore() {
-        this(Duration.ofMinutes(5));
-    }
-
-    public TestTaskStore(Duration retentionPeriod) {
-        super(retentionPeriod);
-    }
-
     @Override
-    protected StoredTask storeTask(User user, JobId jobId, Task task) {
+    public void store(User user, JobId jobId, Task task) {
+        super.store(user, jobId, task);
+
         tasksSeen.add(task.description());
-
-        return super.storeTask(user, jobId, task);
-    }
-
-    @Override
-    protected Optional<StoredTask> removeTask(User user, JobId jobId) {
-        return super.removeTask(user, jobId);
     }
 
     public List<String> tasksSeen() {

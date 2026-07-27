@@ -35,7 +35,7 @@ class PerDatabaseTaskStoreTest {
 
     @Test
     void shouldBeIdempotentOnRemove() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
         var jobId = new JobId();
         taskStore.store(User.DEFAULT, jobId, Tasks.leaf("leaf", new Concurrency(1)));
         taskStore.remove(User.DEFAULT, jobId);
@@ -44,14 +44,14 @@ class PerDatabaseTaskStoreTest {
 
     @Test
     void shouldReturnEmptyResultWhenStoreIsEmpty() {
-        assertThat(new PerDatabaseTaskStore(Duration.ZERO).query(User.DEFAULT))
+        assertThat(PerDatabaseTaskStore.create(Duration.ZERO).query(User.DEFAULT))
             .isNotNull()
             .isEmpty();
     }
 
     @Test
     void shouldCountOngoingAcrossUsers() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
 
         var a = new User("a", false);
         taskStore.store(a, new JobId(), Tasks.leaf("v", new Concurrency(1)));
@@ -83,7 +83,7 @@ class PerDatabaseTaskStoreTest {
 
     @Test
     void shouldCountAcrossUsers() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
 
         var a = new User("a", false);
         taskStore.store(a, new JobId(), Tasks.leaf("v", new Concurrency(1)));
@@ -99,7 +99,7 @@ class PerDatabaseTaskStoreTest {
 
     @Test
     void shouldLookupByUser() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
 
         var alice = new User("alice", false);
         taskStore.store(alice, new JobId("42"), Tasks.leaf("leaf", new Concurrency(1)));
@@ -117,7 +117,7 @@ class PerDatabaseTaskStoreTest {
 
     @Test
     void shouldQueryAcrossUsers() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
 
         taskStore.store(new User("alice", false), new JobId("42"), Tasks.leaf("leaf", new Concurrency(1)));
         taskStore.store(new User("bob", false), new JobId("42"), Tasks.leaf("other", new Concurrency(1)));
@@ -130,7 +130,7 @@ class PerDatabaseTaskStoreTest {
 
     @Test
     void shouldReturnEmptyOptionalForNonExistingUser() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
 
         var bogus = taskStore.lookup(new User("bogus", false), null);
 
@@ -139,7 +139,7 @@ class PerDatabaseTaskStoreTest {
 
     @Test
     void shouldReturnNonEmptyOptionalForExistingUser() {
-        var taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
         var aliceLeafTask = Tasks.leaf("leaf", new Concurrency(1));
         var alice = new User("alice", false);
         taskStore.store(alice, new JobId("42"), aliceLeafTask);
@@ -154,7 +154,7 @@ class PerDatabaseTaskStoreTest {
 
     @Test
     void shouldCleanupOnReachingLimit() throws InterruptedException {
-        var taskStore = new PerDatabaseTaskStore(Duration.ofMillis(100));
+        var taskStore = PerDatabaseTaskStore.create(Duration.ofMillis(100));
 
         var aliceLeafTask = Tasks.leaf("leaf", new Concurrency(1));
         JobId jobId = new JobId("42");

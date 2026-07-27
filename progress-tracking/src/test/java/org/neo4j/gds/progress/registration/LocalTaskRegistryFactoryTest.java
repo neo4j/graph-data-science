@@ -40,7 +40,7 @@ class LocalTaskRegistryFactoryTest {
 
     @BeforeEach
     void setup() {
-        this.taskStore = new PerDatabaseTaskStore(Duration.ZERO);
+        this.taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
         this.taskRegistryFactory = new LocalTaskRegistryFactory(taskStore, User.DEFAULT);
     }
 
