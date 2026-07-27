@@ -39,7 +39,7 @@ class Node2VecStreamResultTransformer implements ResultTransformer<TimedAlgorith
     @Override
     public Stream<DefaultNodeEmbeddingsStreamResult> apply(TimedAlgorithmResult<Node2VecResult> algorithmResult) {
         var node2VecResult = algorithmResult.result();
-        var nodePropertyValues = Node2VecProperties.create(node2VecResult);
+        var nodePropertyValues = org.neo4j.gds.algorithms.embeddings.Node2VecProperties.create(node2VecResult);
 
         return LongStream
             .range(IdMap.START_NODE_ID, graph.nodeCount())

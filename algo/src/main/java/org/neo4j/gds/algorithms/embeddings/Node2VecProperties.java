@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.embeddings.stream;
+package org.neo4j.gds.algorithms.embeddings;
 
-import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
+//temporary place it in this module
 public final class Node2VecProperties {
 
     private Node2VecProperties() {}

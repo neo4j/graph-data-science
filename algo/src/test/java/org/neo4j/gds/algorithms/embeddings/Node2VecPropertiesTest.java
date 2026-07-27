@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.embeddings.stream;
+package org.neo4j.gds.algorithms.embeddings;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -41,7 +41,7 @@ class Node2VecPropertiesTest {
                 new FloatVector(vector2)
             ), List.of()
         );
-        var asProps= Node2VecProperties.create(node2VecResult);
+        var asProps= org.neo4j.gds.algorithms.embeddings.Node2VecProperties.create(node2VecResult);
         assertThat(asProps.nodeCount()).isEqualTo(2L);
         assertThat(asProps.floatArrayValue(0)).isEqualTo(vector1);
         assertThat(asProps.floatArrayValue(1)).isEqualTo(vector2);
