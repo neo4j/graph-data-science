@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.storageengine.api.StorageEngineFactory;
 
 public final class NativeExportBuildersProvider implements ExportBuildersProvider {
     private final Log log;
@@ -30,7 +32,15 @@ public final class NativeExportBuildersProvider implements ExportBuildersProvide
 
     @Override
     public NodePropertyExporterBuilder nodePropertyExporterBuilder(ExporterContext ctx) {
-        return new NativeNodePropertiesExporterBuilder(transactionContext(ctx));
+        return new NativeNodePropertiesExporterBuilder(transactionContext(ctx), supportsVectorProperties(ctx));
+    }
+
+    private static boolean supportsVectorProperties(ExporterContext ctx) {
+        var storageEngineFactory = GraphDatabaseApiProxy.resolveDependency(
+            ctx.graphDatabaseAPI(),
+            StorageEngineFactory.class
+        );
+        return storageEngineFactory.supportsVectorData();
     }
 
     @Override

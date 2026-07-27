@@ -31,7 +31,7 @@ public record Neo4jNodeProperty(
     public static Neo4jNodeProperty of(NodePropertyRecord nodeProperty) {
         return new Neo4jNodeProperty(
             nodeProperty.key(),
-            Neo4jNodePropertyValuesUtil.of(nodeProperty.values())
+            Neo4jNodePropertyValuesUtil.of(nodeProperty.values(), nodeProperty.writeAsVector())
         );
     }
     public static Neo4jNodeProperty of(String key, NodePropertyValues values) {

@@ -23,9 +23,11 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 public class NativeNodePropertiesExporterBuilder extends NodePropertyExporterBuilder {
     protected final TransactionContext transactionContext;
+    private final boolean supportsVectorProperties;
 
-    public NativeNodePropertiesExporterBuilder(TransactionContext transactionContext) {
+    public NativeNodePropertiesExporterBuilder(TransactionContext transactionContext, boolean supportsVectorProperties) {
         this.transactionContext = transactionContext;
+        this.supportsVectorProperties = supportsVectorProperties;
     }
 
     @Override
@@ -41,7 +43,8 @@ public class NativeNodePropertiesExporterBuilder extends NodePropertyExporterBui
             terminationFlag,
             progressTracker,
             writeConcurrency,
-            executorService
+            executorService,
+            supportsVectorProperties
         );
     }
 }

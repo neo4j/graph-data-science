@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.FLOAT_ARRAY;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.anyMatch;
@@ -102,6 +103,22 @@ class FastRPWriteProcTest extends BaseProcTest {
                 .hasSize(embeddingDimension)
                 .matches(vector -> anyMatch(vector, v -> v != 0.0));
         });
+    }
+
+    @Test
+    void shouldFailToWriteVectorOnNonBlockStoreFormat() {
+        String writeQuery = GdsCypher.call(FAST_RP_GRAPH)
+            .algo("fastRP")
+            .writeMode()
+            .addParameter("embeddingDimension", 128)
+            .addParameter("featureProperties", List.of("f1", "f2"))
+            .addParameter("writeProperty", "embedding")
+            .addParameter("writeAsVector", true)
+            .yields();
+
+        assertThatThrownBy(() -> runQuery(writeQuery))
+            .hasMessageContaining("requires a database whose store format supports vector properties")
+            .hasMessageContaining("embedding");
     }
 
     @Test

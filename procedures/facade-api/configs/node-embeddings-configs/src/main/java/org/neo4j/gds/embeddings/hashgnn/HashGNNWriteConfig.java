@@ -20,11 +20,11 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.embeddings.NodeEmbeddingsWriteConfig;
 
 @Configuration
-public interface HashGNNWriteConfig extends HashGNNConfig, WritePropertyConfig {
+public interface HashGNNWriteConfig extends HashGNNConfig, NodeEmbeddingsWriteConfig {
 
     static HashGNNWriteConfig of(CypherMapWrapper config) {
         return new HashGNNWriteConfigImpl(config);

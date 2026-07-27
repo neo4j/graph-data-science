@@ -58,7 +58,8 @@ class FastRPWriteStep implements WriteStep<FastRPResult, NodePropertiesWritten> 
             configuration,
             FastRP,
             jobId,
-            nodePropertyValues
+            nodePropertyValues,
+            configuration.writeAsVector()
         );
     }
 }
