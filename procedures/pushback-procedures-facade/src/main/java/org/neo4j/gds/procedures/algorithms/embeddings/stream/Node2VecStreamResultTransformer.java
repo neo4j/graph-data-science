@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings.stream;
 
-import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
@@ -40,7 +39,7 @@ class Node2VecStreamResultTransformer implements ResultTransformer<TimedAlgorith
     @Override
     public Stream<DefaultNodeEmbeddingsStreamResult> apply(TimedAlgorithmResult<Node2VecResult> algorithmResult) {
         var node2VecResult = algorithmResult.result();
-        var nodePropertyValues = new FloatEmbeddingNodePropertyValues(node2VecResult.embeddings());
+        var nodePropertyValues = Node2VecProperties.create(node2VecResult);
 
         return LongStream
             .range(IdMap.START_NODE_ID, graph.nodeCount())
