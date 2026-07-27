@@ -27,7 +27,7 @@ public final class Node2VecProperties {
 
     private Node2VecProperties() {}
 
-    static NodePropertyValues create(Node2VecResult node2VecResult){
+    public static NodePropertyValues create(Node2VecResult node2VecResult){
         return new FloatEmbeddingNodePropertyValues(node2VecResult.embeddings());
     }
 
