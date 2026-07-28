@@ -49,6 +49,22 @@ class ProgressResultTest {
     }
 
     @Test
+    void shouldClampElapsedTimeWhenFinishPrecedesStart() {
+        var result = ProgressResult.fromArrowProcess(
+            "neo4j",
+            "job-3",
+            "FastPath",
+            0.0,
+            "RUNNING",
+            6_000L,
+            1_000L
+        );
+
+        assertThat(result.timeStarted()).isNotNull();
+        assertThat(result.elapsedTime()).isEqualTo("0 seconds");
+    }
+
+    @Test
     void shouldRenderNotStartedWhenStartTimeUnknown() {
         var result = ProgressResult.fromArrowProcess(
             "neo4j",

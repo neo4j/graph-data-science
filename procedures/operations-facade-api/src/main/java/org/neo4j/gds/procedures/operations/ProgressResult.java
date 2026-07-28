@@ -118,7 +118,8 @@ public record ProgressResult(
         if (startTimeMillis < 0) {
             return "Not yet started";
         }
-        var elapsedTime = finishOrNowMillis - startTimeMillis;
+        // safety max to avoid negative values
+        var elapsedTime = Math.max(0, finishOrNowMillis - startTimeMillis);
         return DurationFormatUtils.formatDurationWords(elapsedTime, true, true);
     }
 }
