@@ -54,33 +54,8 @@ public class WriteNodePropertyService {
         JobId jobId,
         NodePropertyValues nodePropertyValues
     ) {
-        return perform(
-            graph,
-            graphStore,
-            resultStore,
-            writePropertyConfiguration,
-            label,
-            jobId,
-            nodePropertyValues,
-            false
-        );
-    }
 
-    public NodePropertiesWritten perform(
-        Graph graph,
-        GraphStore graphStore,
-        ResultStore resultStore,
-        WritePropertyConfig writePropertyConfiguration,
-        Label label,
-        JobId jobId,
-        NodePropertyValues nodePropertyValues,
-        boolean writeAsVector
-    ) {
-        var nodePropertyRecord = NodePropertyRecord.of(
-            writePropertyConfiguration.writeProperty(),
-            nodePropertyValues,
-            writeAsVector
-        );
+        var nodePropertyRecord = NodePropertyRecord.of(writePropertyConfiguration.writeProperty(), nodePropertyValues);
         return perform(
             graph,
             graphStore,

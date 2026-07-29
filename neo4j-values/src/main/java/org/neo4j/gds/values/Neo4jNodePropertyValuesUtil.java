@@ -26,13 +26,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 public final class Neo4jNodePropertyValuesUtil {
 
     public static Neo4jNodePropertyValues of(NodePropertyValues internal) {
-        return of(internal, false);
-    }
-
-    public static Neo4jNodePropertyValues of(NodePropertyValues internal, boolean asVector) {
-        if (asVector) {
-            return asVector(internal);
-        }
         if (internal instanceof BinaryArrayNodePropertyValues asBinaryArrayNodePropertyValues) {
             return new Neo4jBinaryArrayNodePropertyValues(asBinaryArrayNodePropertyValues);
         }
@@ -46,18 +39,6 @@ public final class Neo4jNodePropertyValuesUtil {
 //            case UNTYPED_ARRAY -> null;
 //            case UNKNOWN -> null;
             default -> throw new IllegalArgumentException("Exporting values of type " + internal.valueType().csvName() + " is not supported.");
-        };
-    }
-
-    private static Neo4jNodePropertyValues asVector(NodePropertyValues internal) {
-        return switch (internal.valueType()) {
-            case FLOAT_ARRAY -> new Neo4jFloatArrayVectorNodePropertyValues(internal);
-            case DOUBLE_ARRAY -> new Neo4jDoubleArrayVectorNodePropertyValues(internal);
-            case LONG_ARRAY -> new Neo4jLongArrayVectorNodePropertyValues(internal);
-            default -> throw new IllegalArgumentException(
-                "Writing a property as a vector is only supported for float, double or long array properties, but got: "
-                    + internal.valueType().csvName()
-            );
         };
     }
 

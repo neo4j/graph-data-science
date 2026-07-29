@@ -348,7 +348,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-include::partial$/machine-learning/node-embeddings/write-as-vector-configuration-entry.adoc[]
 include::partial$/machine-learning/node-embeddings/fastrp/specific-configuration.adoc[]
 |===
 

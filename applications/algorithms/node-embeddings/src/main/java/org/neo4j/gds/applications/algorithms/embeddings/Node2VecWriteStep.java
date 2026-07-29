@@ -30,7 +30,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Node2Vec;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
 
 class Node2VecWriteStep implements WriteStep<Node2VecResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
@@ -56,10 +56,9 @@ class Node2VecWriteStep implements WriteStep<Node2VecResult, NodePropertiesWritt
             graphStore,
             resultStore,
             configuration,
-            Node2Vec,
+            GraphSage,
             jobId,
-            nodePropertyValues,
-            configuration.writeAsVector()
+            nodePropertyValues
         );
     }
 }

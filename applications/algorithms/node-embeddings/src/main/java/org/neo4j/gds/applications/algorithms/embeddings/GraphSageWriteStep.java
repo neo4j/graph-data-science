@@ -58,8 +58,7 @@ class GraphSageWriteStep implements WriteStep<GraphSageResult, NodePropertiesWri
             configuration,
             GraphSage,
             jobId,
-            nodePropertyValues,
-            configuration.writeAsVector()
+            nodePropertyValues
         );
     }
 }

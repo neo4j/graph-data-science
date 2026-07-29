@@ -37,7 +37,6 @@ import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
@@ -53,12 +52,9 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     protected final long nodeCount;
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
-    private final boolean supportsVectorProperties;
 
     public static NodePropertyExporterBuilder builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
-        // This entry point has no access to the store format, so it does not block vector writes;
-        // also only used for tests and benchmarks
-        return new NativeNodePropertiesExporterBuilder(transactionContext, true)
+        return new NativeNodePropertiesExporterBuilder(transactionContext)
             .withIdMap(idMap)
             .withTerminationFlag(terminationFlag);
     }
@@ -69,7 +65,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
             return new ResolvedNodeProperty(
                 token,
                 nodeProperty.key(),
-                Neo4jNodePropertyValuesUtil.of(nodeProperty.values(), nodeProperty.writeAsVector())
+                Neo4jNodePropertyValuesUtil.of(nodeProperty.values())
             );
         }
     }
@@ -85,8 +81,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
         Concurrency concurrency,
-        ExecutorService executorService,
-        boolean supportsVectorProperties
+        ExecutorService executorService
     ) {
         super(tx);
         this.nodeCount = nodeCount;
@@ -96,7 +91,6 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.propertiesWritten = new LongAdder();
-        this.supportsVectorProperties = supportsVectorProperties;
     }
 
     @Override
@@ -118,20 +112,6 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     @Override
     public void write(Collection<NodePropertyRecord> nodeProperties) {
-        if (!supportsVectorProperties && nodeProperties.stream().anyMatch(NodePropertyRecord::writeAsVector)) {
-            var vectorProperties = nodeProperties.stream()
-                .filter(NodePropertyRecord::writeAsVector)
-                .map(NodePropertyRecord::key)
-                .collect(Collectors.toList());
-            throw new IllegalArgumentException(String.format(
-                Locale.US,
-                "Writing a node property as a vector (`writeAsVector`) requires a database whose store format " +
-                "supports vector properties, but the target database's store format " +
-                "does not. Affected properties: %s.",
-                vectorProperties
-            ));
-        }
-
         var resolvedNodeProperties = nodeProperties.stream()
             .map(desc -> resolveWith(desc, getOrCreatePropertyToken(desc.key())))
             .collect(Collectors.toList());

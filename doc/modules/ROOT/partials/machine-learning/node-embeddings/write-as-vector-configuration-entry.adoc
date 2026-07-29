@@ -1,1 +1,0 @@
-| writeAsVector | Boolean | false | yes | If enabled, the embedding is written as a Neo4j vector property (a `Float32Vector` for float embeddings, a `Float64Vector` for double embeddings) instead of a plain array, so that it can back a vector index. Requires a database whose store format supports vector properties.

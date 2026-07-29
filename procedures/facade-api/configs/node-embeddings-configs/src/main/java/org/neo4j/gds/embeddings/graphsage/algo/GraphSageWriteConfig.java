@@ -20,11 +20,11 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.NodeEmbeddingsWriteConfig;
 
 @Configuration
-public interface GraphSageWriteConfig extends GraphSageBaseConfig, NodeEmbeddingsWriteConfig {
+public interface GraphSageWriteConfig extends GraphSageBaseConfig, WritePropertyConfig {
 
     long serialVersionUID = 0x42L;
 

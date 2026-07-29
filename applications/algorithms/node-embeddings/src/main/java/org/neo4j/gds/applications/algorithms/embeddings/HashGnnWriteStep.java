@@ -29,7 +29,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HashGNN;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
 
 class HashGnnWriteStep implements WriteStep<HashGNNResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
@@ -55,10 +55,9 @@ class HashGnnWriteStep implements WriteStep<HashGNNResult, NodePropertiesWritten
             graphStore,
             resultStore,
             configuration,
-            HashGNN,
+            GraphSage,
             jobId,
-            nodePropertyValues,
-            configuration.writeAsVector()
+            nodePropertyValues
         );
     }
 }

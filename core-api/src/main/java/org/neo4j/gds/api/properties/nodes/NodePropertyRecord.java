@@ -21,15 +21,9 @@ package org.neo4j.gds.api.properties.nodes;
 
 public record NodePropertyRecord(
     String key,
-    NodePropertyValues values,
-    // when true, write the property as a Neo4j vector value instead of a plain array value
-    boolean writeAsVector
+    NodePropertyValues values
 ) {
     public static NodePropertyRecord of(String key, NodePropertyValues values) {
-        return new NodePropertyRecord(key, values, false);
-    }
-
-    public static NodePropertyRecord of(String key, NodePropertyValues values, boolean writeAsVector) {
-        return new NodePropertyRecord(key, values, writeAsVector);
+        return new NodePropertyRecord(key, values);
     }
 }
