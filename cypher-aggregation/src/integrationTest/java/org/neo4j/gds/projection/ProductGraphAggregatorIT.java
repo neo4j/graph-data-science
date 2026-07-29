@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
@@ -32,6 +31,8 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
 import org.neo4j.gds.progress.registration.EmptyTaskStore;
+import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
+import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.progress.tasks.Status;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
@@ -40,11 +41,14 @@ import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 
+import java.time.Duration;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 class ProductGraphAggregatorIT {
 
@@ -109,8 +113,7 @@ class ProductGraphAggregatorIT {
     @ParameterizedTest(name = "graphName=`{1}`")
     @MethodSource("emptyGraphNames")
     void shouldFailOnEmptyGraphName(String emptyGraphName, String description) throws Exception {
-
-        TestTaskStore taskStore = new TestTaskStore();
+        var taskStore = mock(TaskStore.class);
         try (
             var aggregator = new ProductGraphAggregator(
                 DatabaseId.random(),
@@ -134,9 +137,9 @@ class ProductGraphAggregatorIT {
                     MapValue.EMPTY,
                     NoValue.NO_VALUE
                 )).withMessageContaining("`graphName` can not be null or blank");
-
-            assertThat(taskStore.tasksSeen()).isEmpty();
         }
+
+        verifyNoInteractions(taskStore);
     }
 
     private static Stream<Arguments> emptyGraphNames() {
@@ -150,7 +153,7 @@ class ProductGraphAggregatorIT {
 
     @Test
     void shouldFailTaskOnFailure() throws Exception {
-        TestTaskStore taskStore = new TestTaskStore();
+        var taskStore = PerDatabaseTaskStore.create(Duration.ofMinutes(5));
         var aggregator = new ProductGraphAggregator(
             DatabaseId.random(),
             "neo4j",

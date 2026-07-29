@@ -534,7 +534,7 @@ class RandomWalkTest {
                     new LoggerForProgressTrackingAdapter(log),
                     RandomWalkProgressTask.create(graph, new Concurrency(4)),
                     new Concurrency(4),
-                    TaskRegistryFactory.local(PerDatabaseTaskStore.create(Duration.ZERO), new User("rw", false))
+                    TaskRegistryFactory.local(log, PerDatabaseTaskStore.create(Duration.ZERO), new User("rw", false))
                 );
 
                 var randomWalksStream = RandomWalk.create(
@@ -587,7 +587,7 @@ class RandomWalkTest {
                     new LoggerForProgressTrackingAdapter(log),
                     RandomWalkProgressTask.create(weightedGraph, new Concurrency(4)),
                     new Concurrency(4),
-                    TaskRegistryFactory.local(PerDatabaseTaskStore.create(Duration.ZERO), new User("rw", false))
+                    TaskRegistryFactory.local(log, PerDatabaseTaskStore.create(Duration.ZERO), new User("rw", false))
                 );
 
                 var randomWalksStream = RandomWalk.create(
@@ -635,7 +635,7 @@ class RandomWalkTest {
         void shouldLeaveNoOngoingTasksBehind() {
             var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
 
-            var taskRegistryFactory = TaskRegistryFactory.local(taskStore, new User("rw", false));
+            var taskRegistryFactory = TaskRegistryFactory.local(Log.noOpLog(), taskStore, new User("rw", false));
             var taskRegistry = taskRegistryFactory.newInstance(new JobId());
 
             var testTracker = TaskProgressTracker.create(

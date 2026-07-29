@@ -19,19 +19,10 @@
  */
 package org.neo4j.gds.progress.registration;
 
-import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.progress.tasks.Status;
 
-public enum EmptyTaskRegistryFactory implements TaskRegistryFactory {
-    INSTANCE;
+import java.util.EnumSet;
 
-    @Override
-    public TaskRegistry newInstance(JobId jobId) {
-        return new TaskRegistry(User.DEFAULT, EmptyTaskStore.INSTANCE, jobId);
-    }
-
-    @Override
-    public TaskRegistry attach(JobId jobId) {
-        return new TaskRegistry(User.DEFAULT, EmptyTaskStore.INSTANCE, jobId);
-    }
+class ActiveStatuses {
+    static final EnumSet<Status> Statuses = EnumSet.of(Status.PENDING, Status.RUNNING);
 }

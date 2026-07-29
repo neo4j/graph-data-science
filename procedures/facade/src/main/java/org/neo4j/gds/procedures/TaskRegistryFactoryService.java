@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.LocalTaskRegistryFactory;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.progress.registration.TaskStoreService;
@@ -34,10 +35,12 @@ import org.neo4j.gds.progress.registration.TaskStoreService;
  * In turn these factories rely on database-scoped {@link org.neo4j.gds.progress.registration.TaskStore}s.
  */
 public class TaskRegistryFactoryService {
+    private final Log log;
     private final boolean progressTrackingEnabled;
     private final TaskStoreService taskStoreService;
 
-    public TaskRegistryFactoryService(boolean progressTrackingEnabled, TaskStoreService taskStoreService) {
+    public TaskRegistryFactoryService(Log log, boolean progressTrackingEnabled, TaskStoreService taskStoreService) {
+        this.log = log;
         this.taskStoreService = taskStoreService;
         this.progressTrackingEnabled = progressTrackingEnabled;
     }
@@ -51,6 +54,6 @@ public class TaskRegistryFactoryService {
 
         var taskStoreForDatabase = taskStoreService.getOrCreateTaskStore(databaseId);
 
-        return new LocalTaskRegistryFactory(taskStoreForDatabase, user);
+        return new LocalTaskRegistryFactory(log, taskStoreForDatabase, user);
     }
 }

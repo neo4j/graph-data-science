@@ -85,12 +85,16 @@ public class Task {
     }
 
     public void finish() {
-        if (this.status != Status.RUNNING) {
-            throw new UnsupportedOperationException(formatWithLocale(
-                "Task `%s` with state %s cannot be finished",
-                this.description,
-                this.status
-            ));
+        switch (this.status) {
+            case CANCELED:
+            case FAILED:
+            case PENDING: {
+                throw new UnsupportedOperationException(formatWithLocale(
+                    "Task `%s` with state %s cannot be finished",
+                    this.description,
+                    this.status
+                ));
+            }
         }
         this.status = Status.FINISHED;
         this.finishTime = ClockService.clock().millis();

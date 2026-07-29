@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.registration.TaskRegistry;
@@ -55,7 +56,18 @@ class AlgorithmCleanupTest extends BaseProcTest {
     @Test
     void completeTaskUnderRegularExecution() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+        var taskRegistryFactory = new TaskRegistryFactory() {
+
+            @Override
+            public TaskRegistry newInstance(JobId jobId) {
+                return new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+            }
+
+            @Override
+            public TaskRegistry attach(JobId jobId) {
+                throw new UnsupportedOperationException("TODO");
+            }
+        };
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, proc -> {
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -71,7 +83,18 @@ class AlgorithmCleanupTest extends BaseProcTest {
     @Test
     void failTaskWhenTheAlgorithmFails() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+        var taskRegistryFactory = new TaskRegistryFactory() {
+
+            @Override
+            public TaskRegistry newInstance(JobId jobId) {
+                return new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+            }
+
+            @Override
+            public TaskRegistry attach(JobId jobId) {
+                throw new UnsupportedOperationException("TODO");
+            }
+        };
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, proc -> {
             proc.taskRegistryFactory = taskRegistryFactory;

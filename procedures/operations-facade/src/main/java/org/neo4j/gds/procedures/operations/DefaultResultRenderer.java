@@ -24,7 +24,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.tasks.TaskTraversal;
 
-import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -48,10 +48,10 @@ class DefaultResultRenderer implements ResultRenderer<ProgressResult> {
     }
 
     @Override
-    public Stream<ProgressResult> render(Optional<StoredTask> results) {
-        return results
-            .map(this::jobProgress)
-            .orElseThrow(this::createException);
+    public Stream<ProgressResult> render(Set<StoredTask> results) {
+        if (results.isEmpty()) throw createException();
+
+        return results.stream().flatMap(this::jobProgress);
     }
 
     private IllegalArgumentException createException() {

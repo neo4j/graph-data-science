@@ -31,7 +31,7 @@ public class DefaultTaskStoreService implements TaskStoreService {
     private final TaskStoreFactory taskStoreFactory;
     private final TaskStoreRepository taskStoreRepository;
 
-    public DefaultTaskStoreService(TaskStoreFactory taskStoreFactory, TaskStoreRepository taskStoreRepository) {
+    DefaultTaskStoreService(TaskStoreFactory taskStoreFactory, TaskStoreRepository taskStoreRepository) {
         this.taskStoreFactory = taskStoreFactory;
         this.taskStoreRepository = taskStoreRepository;
     }

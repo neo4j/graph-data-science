@@ -19,23 +19,26 @@
  */
 package org.neo4j.gds.progress.registration;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.tasks.Status;
 import org.neo4j.gds.progress.tasks.Task;
 
 import java.time.Duration;
+import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PerDatabaseTaskStore implements TaskStore {
-    private final Map<User, Map<JobId, StoredTask>> registeredTasks = new ConcurrentHashMap<>();
+public final class PerDatabaseTaskStore implements TaskStore {
+    private final Map<Pair<User, JobId>, TaskContainer> registeredTasks = new ConcurrentHashMap<>();
+
     private final Set<TaskStoreListener> listeners = ConcurrentHashMap.newKeySet();
 
-    protected PerDatabaseTaskStore() {
+    private PerDatabaseTaskStore() {
 
     }
 
@@ -50,83 +53,92 @@ public class PerDatabaseTaskStore implements TaskStore {
 
     @Override
     public void store(User user, JobId jobId, Task task) {
-        var storedTask = new StoredTask(user, jobId, task);
+        var taskContainer = getTaskContainer(user, jobId);
 
-        registeredTasks
-            .computeIfAbsent(user, __ -> new ConcurrentHashMap<>())
-            .put(jobId, storedTask);
+        taskContainer.add(task);
+
+        var storedTask = new StoredTask(user, jobId, task);
 
         listeners.forEach(listener -> listener.onTaskAdded(storedTask));
     }
 
     @Override
     public void remove(User user, JobId jobId) {
-        var tasksForUser = this.registeredTasks.get(user);
+        var taskContainer = getTaskContainer(user, jobId);
 
-        if (tasksForUser == null) return;
-
-        tasksForUser.remove(jobId);
+        taskContainer.removeAll();
     }
 
     @Override
     public void markCompleted(User user, JobId jobId) {
-        var possibleStoredTask = lookup(user, jobId);
+        var taskContainer = getTaskContainer(user, jobId);
 
-        if (possibleStoredTask.isEmpty()) return;
+        var tasks = taskContainer.markAllCompleted();
 
-        var storedTask = possibleStoredTask.get();
+        listeners.forEach(listener -> tasks.forEach(task -> {
+            var storedTask = new StoredTask(user, jobId, task);
 
-        var task = storedTask.task();
-
-        if (task.status() == Status.PENDING) {
-            task.cancel();
-        } else if (task.status() == Status.RUNNING) {
-            task.finish();
-        }
-
-        listeners.forEach(listener -> listener.onTaskCompleted(storedTask));
+            listener.onTaskCompleted(storedTask);
+        }));
     }
 
     @Override
     public Stream<StoredTask> query() {
-        return registeredTasks
-            .entrySet()
-            .stream()
-            .flatMap(tasksPerUsers -> tasksPerUsers
-                .getValue()
-                .values()
-                .stream());
+        return queryWithFilter(__ -> true);
     }
 
     @Override
     public Stream<StoredTask> query(JobId jobId) {
-        return query().filter(storedTask -> storedTask.jobId().equals(jobId));
+        return queryWithFilter(entry -> entry.getRight().equals(jobId));
     }
 
     @Override
     public Stream<StoredTask> query(User user) {
-        return registeredTasks
-            .getOrDefault(user, Map.of())
-            .values()
-            .stream();
+        return queryWithFilter(entry -> entry.getLeft().equals(user));
     }
 
     @Override
-    public Optional<StoredTask> lookup(User user, JobId jobId) {
-        return Optional.ofNullable(registeredTasks.get(user))
-            .map(userTasks -> userTasks.get(jobId));
+    public Set<StoredTask> lookup(User user, JobId jobId) {
+        var taskContainer = getTaskContainer(user, jobId);
+
+        return taskContainer.getAll().stream()
+            .map(task -> new StoredTask(user, jobId, task))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
     public long ongoingTaskCount() {
         return registeredTasks.values().stream()
-            .flatMap(taskPerJob -> taskPerJob.values().stream())
-            .filter(task -> task.task().status() == Status.PENDING || task.task().status() == Status.RUNNING)
-            .count();
+            .mapToLong(taskContainer -> taskContainer.getAll().stream()
+                .filter(task -> ActiveStatuses.Statuses.contains(task.status()))
+                .count()
+            )
+            .sum();
     }
 
     @Override
     public void addListener(TaskStoreListener listener) {
         this.listeners.add(listener);
+    }
+
+    /**
+     * This ensures you never have to deal with a null task container
+     */
+    private TaskContainer getTaskContainer(User user, JobId jobId) {
+        return registeredTasks.computeIfAbsent(
+            Pair.of(user, jobId),
+            __ -> new TaskContainer()
+        );
+    }
+
+    private Stream<StoredTask> queryWithFilter(Predicate<Pair<User, JobId>> filter) {
+        return registeredTasks.entrySet().stream()
+            .filter(entry -> filter.test(entry.getKey()))
+            .flatMap(entry -> {
+                var key = entry.getKey();
+                var value = entry.getValue();
+
+                return value.getAll().stream().map(task -> new StoredTask(key.getKey(), key.getValue(), task));
+            });
     }
 }

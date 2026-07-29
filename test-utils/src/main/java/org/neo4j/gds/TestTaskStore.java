@@ -22,19 +22,67 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
+import org.neo4j.gds.progress.registration.StoredTask;
+import org.neo4j.gds.progress.registration.TaskStore;
+import org.neo4j.gds.progress.registration.TaskStoreListener;
 import org.neo4j.gds.progress.tasks.Task;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
-public class TestTaskStore extends PerDatabaseTaskStore {
+public class TestTaskStore implements TaskStore {
     private final List<String> tasksSeen = new ArrayList<>();
+
+    private final TaskStore delegate = PerDatabaseTaskStore.create(Duration.ofMinutes(3));
 
     @Override
     public void store(User user, JobId jobId, Task task) {
-        super.store(user, jobId, task);
+        delegate.store(user, jobId, task);
 
         tasksSeen.add(task.description());
+    }
+
+    @Override
+    public void remove(User user, JobId jobId) {
+        delegate.remove(user, jobId);
+    }
+
+    @Override
+    public void markCompleted(User user, JobId jobId) {
+        delegate.markCompleted(user, jobId);
+    }
+
+    @Override
+    public Stream<StoredTask> query() {
+        return delegate.query();
+    }
+
+    @Override
+    public Stream<StoredTask> query(JobId jobId) {
+        return delegate.query(jobId);
+    }
+
+    @Override
+    public Stream<StoredTask> query(User user) {
+        return delegate.query(user);
+    }
+
+    @Override
+    public Set<StoredTask> lookup(User user, JobId jobId) {
+        return delegate.lookup(user, jobId);
+    }
+
+    @Override
+    public long ongoingTaskCount() {
+        return delegate.ongoingTaskCount();
+    }
+
+    @Override
+    public void addListener(TaskStoreListener listener) {
+        delegate.addListener(listener);
     }
 
     public List<String> tasksSeen() {

@@ -19,33 +19,32 @@
  */
 package org.neo4j.gds.progress.registration;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tasks.LeafTask;
 import org.neo4j.gds.progress.tasks.Tasks;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class LocalTaskRegistryFactoryTest {
-
-    TaskStore taskStore;
-    TaskRegistryFactory taskRegistryFactory;
-
-    @BeforeEach
-    void setup() {
-        this.taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
-        this.taskRegistryFactory = new LocalTaskRegistryFactory(taskStore, User.DEFAULT);
-    }
-
     @Test
     void shouldPutAndMarkCompletedDistinctTasks() {
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
+        var taskRegistryFactory = new LocalTaskRegistryFactory(Log.noOpLog(), taskStore, User.DEFAULT);
+
         var task1 = Tasks.leaf("root1", new Concurrency(1));
         var taskRegistry1 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry1.registerTask(task1);
@@ -65,8 +64,10 @@ class LocalTaskRegistryFactoryTest {
 
     @Test
     void shouldThrowOnDuplicateJobId() {
-        var jobId = new JobId();
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
+        var taskRegistryFactory = new LocalTaskRegistryFactory(Log.noOpLog(), taskStore, User.DEFAULT);
 
+        var jobId = new JobId();
         var task1 = Tasks.leaf("root1", new Concurrency(1));
         var taskRegistry1 = taskRegistryFactory.newInstance(jobId);
         taskRegistry1.registerTask(task1);
@@ -76,8 +77,10 @@ class LocalTaskRegistryFactoryTest {
 
     @Test
     void shouldAllowReplacingCompletedTasks() {
-        var jobId = new JobId();
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
+        var taskRegistryFactory = new LocalTaskRegistryFactory(Log.noOpLog(), taskStore, User.DEFAULT);
 
+        var jobId = new JobId();
         var task1 = Tasks.leaf("root1", new Concurrency(1));
         var taskRegistry1 = taskRegistryFactory.newInstance(jobId);
         taskRegistry1.registerTask(task1);
@@ -104,5 +107,33 @@ class LocalTaskRegistryFactoryTest {
         task3.cancel();
 
         assertDoesNotThrow(() -> taskRegistryFactory.newInstance(jobId));
+    }
+
+    @Test
+    void shouldAttachWhenJobExists() {
+        var taskStore = mock(TaskStore.class);
+        var taskRegistryFactory = new LocalTaskRegistryFactory(Log.noOpLog(), taskStore, User.DEFAULT);
+
+        var jobId = new JobId();
+        when(taskStore.lookup(User.DEFAULT, jobId)).thenReturn(Set.of(mock(StoredTask.class)));
+        var taskRegistry = taskRegistryFactory.attach(jobId);
+
+        assertNotNull(taskRegistry);
+    }
+
+    @Test
+    void shouldNeverEverFailToAttachNoMatterWhatBecauseUsersWorkIsMoreImportantThanProgressTrackingNitPickings() {
+        var log = mock(Log.class);
+        var taskStore = mock(TaskStore.class);
+        var taskRegistryFactory = new LocalTaskRegistryFactory(log, taskStore, User.DEFAULT);
+
+        var jobId = new JobId("my expired job");
+        when(taskStore.lookup(User.DEFAULT, jobId)).thenReturn(Collections.emptySet());
+        var taskRegistry = taskRegistryFactory.attach(jobId);
+
+        assertNotNull(taskRegistry);
+
+        verify(log).warn("cannot attach to job 'my expired job'");
+        verify(log).warn("falling back to overriding job 'my expired job'");
     }
 }

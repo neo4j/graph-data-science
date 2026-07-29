@@ -43,6 +43,7 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.progress.registration.TaskRegistry;
@@ -207,7 +208,18 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void failTaskWhenTheAlgorithmFailsInStreamMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+        var taskRegistryFactory = new TaskRegistryFactory() {
+
+            @Override
+            public TaskRegistry newInstance(JobId jobId) {
+                return new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+            }
+
+            @Override
+            public TaskRegistry attach(JobId jobId) {
+                throw new UnsupportedOperationException("TODO");
+            }
+        };
         try (var transactions = newKernelTransaction(db)) {
             var proc = new StreamProc();
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -237,7 +249,17 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void failTaskWhenTheAlgorithmFailsInWriteMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+        var taskRegistryFactory = new TaskRegistryFactory() {
+            @Override
+            public TaskRegistry newInstance(JobId jobId) {
+                return new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+            }
+
+            @Override
+            public TaskRegistry attach(JobId jobId) {
+                throw new UnsupportedOperationException("TODO");
+            }
+        };
         try (var transactions = newKernelTransaction(db)) {
             var proc = new WriteProc();
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -266,7 +288,18 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void failTaskWhenTheAlgorithmFailsInMutateMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+        var taskRegistryFactory = new TaskRegistryFactory() {
+
+            @Override
+            public TaskRegistry newInstance(JobId jobId) {
+                return new TaskRegistry(new User(getUsername(), false), taskStore, jobId);
+            }
+
+            @Override
+            public TaskRegistry attach(JobId jobId) {
+                throw new UnsupportedOperationException("TODO");
+            }
+        };
         try (var transactions = newKernelTransaction(db)) {
             var proc = new MutateProc();
             proc.taskRegistryFactory = taskRegistryFactory;

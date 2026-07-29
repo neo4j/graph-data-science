@@ -25,13 +25,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.progress.registration.LocalTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Status;
 import org.neo4j.gds.progress.tasks.Task;
@@ -45,6 +45,7 @@ import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -431,9 +432,9 @@ class RandomWalkWithRestartsTest {
         var rwr = new RandomWalkWithRestarts(config);
         Task task = rwr.progressTask(tinyGraphStore);
 
-        TestTaskStore taskStore = new TestTaskStore();
-        var taskRegistryFactory = new LocalTaskRegistryFactory(taskStore, new User("user", false));
         var log = new GdsTestLog();
+        var taskStore = PerDatabaseTaskStore.create(Duration.ofMinutes(5));
+        var taskRegistryFactory = new LocalTaskRegistryFactory(log, taskStore, new User("user", false));
         var tracker = TestProgressTracker.create(
             log,
             new LoggerForProgressTrackingAdapter(log),

@@ -34,6 +34,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
 import org.neo4j.gds.progress.registration.StoredTask;
 import org.neo4j.gds.progress.registration.TaskRegistry;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.progress.registration.TaskStoreListener;
 import org.neo4j.gds.progress.tasks.Status;
@@ -128,6 +129,19 @@ class ProcedureExecutorTest {
     }
 
     private ExecutionContext executionContext(TaskStore taskStore) {
+        var taskRegistryFactory = new TaskRegistryFactory() {
+
+            @Override
+            public TaskRegistry newInstance(JobId jobId) {
+                return new TaskRegistry(new User("", false), taskStore, jobId);
+            }
+
+            @Override
+            public TaskRegistry attach(JobId jobId) {
+                throw new UnsupportedOperationException("TODO");
+            }
+        };
+
         return new ExecutionContext(
             CloseableResourceRegistry.EMPTY,
             graphStore.databaseInfo().databaseId(),
@@ -136,7 +150,7 @@ class ProcedureExecutorTest {
             Metrics.DISABLED,
             ProcedureReturnColumns.EMPTY,
             PlainSimpleRequestCorrelationId.create(),
-            jobId -> new TaskRegistry(new User("", false), taskStore, jobId),
+            taskRegistryFactory,
             TerminationMonitor.EMPTY,
             new User("", false),
             null,

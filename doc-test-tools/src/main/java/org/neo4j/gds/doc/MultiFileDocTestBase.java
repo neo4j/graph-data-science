@@ -29,6 +29,7 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
@@ -108,6 +109,7 @@ public abstract class MultiFileDocTestBase {
     protected void configureDbms(TestDatabaseManagementServiceBuilder builder) {
         builder.noOpSystemGraphInitializer();
         builder.setConfig(Neo4jSettings.procedureUnrestricted(), singletonList("gds.*"));
+        builder.setConfig(GdsSettings.progressTrackingEnabled(), false);
     }
 
     @TestFactory

@@ -25,7 +25,7 @@ import org.neo4j.gds.progress.tasks.Task;
 
 public class TaskRegistry {
     public static TaskRegistry noOpTaskRegistry() {
-        return new TaskRegistry(User.DEFAULT, EmptyTaskStore.INSTANCE, new JobId());
+        return new TaskRegistry(User.DEFAULT, EmptyTaskStore.INSTANCE);
     }
 
     private final TaskStore taskStore;
@@ -57,8 +57,6 @@ public class TaskRegistry {
     }
 
     public boolean containsTask(Task task) {
-        return taskStore.lookup(user, jobId)
-            .map(t -> t.task() == task)
-            .orElse(false);
+        return taskStore.lookup(user, jobId).stream().anyMatch(storedTask -> storedTask.task() == task);
     }
 }

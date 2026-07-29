@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.compat.TestLogImpl;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
@@ -51,7 +52,7 @@ class ProcedureRunnerTest extends BaseTest {
             .filter(method -> method.getName().equals(instantiateProcedureMethodName))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException(formatWithLocale(
-                "Did not find any method with name",
+                "Did not find any method with name %s",
                 instantiateProcedureMethodName
             )));
 
@@ -85,11 +86,21 @@ class ProcedureRunnerTest extends BaseTest {
             var procedureCallContext = ProcedureCallContext.EMPTY;
             var log = (TestLog) new TestLogImpl();
             var username = new Username("foo");
-            TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry(
-                new User(username.username(), false),
-                PerDatabaseTaskStore.create(Duration.ZERO),
-                jobId
-            );
+            var taskRegistryFactory = new TaskRegistryFactory() {
+                @Override
+                public TaskRegistry newInstance(JobId jobId) {
+                    return new TaskRegistry(
+                        new User(username.username(), false),
+                        PerDatabaseTaskStore.create(Duration.ZERO),
+                        jobId
+                    );
+                }
+
+                @Override
+                public TaskRegistry attach(JobId jobId) {
+                    throw new UnsupportedOperationException("TODO");
+                }
+            };
             ProcedureRunner.applyOnProcedure(
                 db,
                 TestProc.class,

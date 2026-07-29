@@ -109,8 +109,7 @@ class PerDatabaseTaskStoreTest {
         assertThat(taskStore.query(alice)).hasSize(2)
             .allMatch(task -> task.user().equals(alice));
 
-        assertThat(taskStore.lookup(alice, new JobId("42"))).isPresent()
-            .get()
+        assertThat(taskStore.lookup(alice, new JobId("42"))).first()
             .matches(task -> task.jobId().asString().equals("42"))
             .matches(task -> task.user().equals(alice));
     }
@@ -146,10 +145,8 @@ class PerDatabaseTaskStoreTest {
         taskStore.store(alice, new JobId("43"), Tasks.leaf("leaf_2", new Concurrency(1)));
         taskStore.store(new User("bob", false), new JobId("1337"), Tasks.leaf("other", new Concurrency(1)));
 
-        var optionalAlice = taskStore.lookup(alice, new JobId("42"));
-        assertThat(optionalAlice)
-            .isPresent()
-            .hasValue(new StoredTask(alice, new JobId("42"), aliceLeafTask));
+        var tasks = taskStore.lookup(alice, new JobId("42"));
+        assertThat(tasks).containsExactly(new StoredTask(alice, new JobId("42"), aliceLeafTask));
     }
 
     @Test

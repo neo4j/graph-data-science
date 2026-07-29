@@ -27,6 +27,8 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
+import org.neo4j.gds.progress.registration.TaskRegistry;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.extension.FakeClockExtension;
@@ -158,7 +160,17 @@ class ListProgressProcTest extends BaseProgressTest {
                 Tasks.leaf("foo", new Concurrency(1), 3)
             );
             var taskRegistry = taskRegistryFactory.newInstance(null);
-            this.taskRegistryFactory = __ -> new NonReleasingTaskRegistry(taskRegistry);
+            this.taskRegistryFactory = new TaskRegistryFactory() {
+                @Override
+                public TaskRegistry newInstance(JobId jobId) {
+                    return new NonReleasingTaskRegistry(taskRegistry);
+                }
+
+                @Override
+                public TaskRegistry attach(JobId jobId) {
+                    throw new UnsupportedOperationException("TODO");
+                }
+            };
 
             var taskProgressTracker = TaskProgressTracker.create(
                 Log.noOpLog(),

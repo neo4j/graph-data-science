@@ -23,7 +23,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Task;
 
-import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public interface TaskStore {
@@ -33,13 +33,24 @@ public interface TaskStore {
 
     void markCompleted(User user, JobId jobId);
 
+    /**
+     * @return all tasks across users and jobs - we hope only admins call this
+     */
     Stream<StoredTask> query();
 
+    /**
+     * Oddly enough there seems to be a use case - certainly usage - of getting task information, for a given job id,
+     * _regardless of user_. Some might call that information leakage or a back door.
+     * Could it not be resolved by querying using the default user?
+     */
     Stream<StoredTask> query(JobId jobId);
 
     Stream<StoredTask> query(User user);
 
-    Optional<StoredTask> lookup(User user, JobId jobId);
+    /**
+     * @return stored tasks in task id order, i.e. original insertion order
+     */
+    Set<StoredTask> lookup(User user, JobId jobId);
 
     default Stream<StoredTask> queryRunning() {
         return query().filter(storedTask -> storedTask.task().status().isOngoing());

@@ -25,7 +25,7 @@ import org.neo4j.gds.progress.registration.TaskStore;
 
 import java.time.Duration;
 
-public class TaskStoreFactory {
+class TaskStoreFactory {
     private final Duration retentionPeriod;
 
     private TaskStoreFactory(Duration retentionPeriod) {

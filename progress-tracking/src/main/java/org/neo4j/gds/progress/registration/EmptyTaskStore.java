@@ -23,7 +23,8 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Task;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public enum EmptyTaskStore implements TaskStore {
@@ -36,9 +37,7 @@ public enum EmptyTaskStore implements TaskStore {
     public void remove(User user, JobId jobId) {}
 
     @Override
-    public void markCompleted(User user, JobId jobId) {
-
-    }
+    public void markCompleted(User user, JobId jobId) {}
 
     @Override
     public Stream<StoredTask> query() {
@@ -56,8 +55,8 @@ public enum EmptyTaskStore implements TaskStore {
     }
 
     @Override
-    public Optional<StoredTask> lookup(User user, JobId jobId) {
-        return Optional.empty();
+    public Set<StoredTask> lookup(User user, JobId jobId) {
+        return Collections.emptySet();
     }
 
     @Override

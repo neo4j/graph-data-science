@@ -21,13 +21,27 @@ package org.neo4j.gds.progress.registration;
 
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.logging.Log;
 
-@FunctionalInterface
 public interface TaskRegistryFactory {
+    /**
+     * If you know you are the first or only thing doing tasks for a job id, use this method.
+     * You use this at the very start of a job. You will need to know in your code, what the situation is.
+     * For example, you use this at the point where you construct an algorithm.
+     *
+     * @throws IllegalArgumentException if a job with that id is already active (finished jobs get overwritten)
+     */
     TaskRegistry newInstance(JobId jobId);
 
-    static TaskRegistryFactory local(TaskStore taskStore, User user) {
-        return new LocalTaskRegistryFactory(taskStore, user);
+    /**
+     * If you know you are _not_ the first, and therefore not the only, thing doing tasks for a job id, use this method.
+     * Something came before you. You are composing onto it.
+     * You are most likely a write mode tacking on to an algorithm.
+     */
+    TaskRegistry attach(JobId jobId);
+
+    static TaskRegistryFactory local(Log log, TaskStore taskStore, User user) {
+        return new LocalTaskRegistryFactory(log, taskStore, user);
     }
 
     static TaskRegistryFactory empty() {

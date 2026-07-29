@@ -42,7 +42,7 @@ class TaskProgressTrackerFailMethodTest {
         var log = new GdsTestLog();
         var taskStore = new TestTaskStore();
 
-        var taskRegistryFactory = TaskRegistryFactory.local(taskStore, User.DEFAULT);
+        var taskRegistryFactory = TaskRegistryFactory.local(log, taskStore, User.DEFAULT);
         var taskRegistry = taskRegistryFactory.newInstance(new JobId());
 
         var tracker = TaskProgressTracker.create(
@@ -78,7 +78,7 @@ class TaskProgressTrackerFailMethodTest {
         var log = new GdsTestLog();
         var taskStore = new TestTaskStore();
 
-        var taskRegistryFactory = TaskRegistryFactory.local(taskStore, User.DEFAULT);
+        var taskRegistryFactory = TaskRegistryFactory.local(log, taskStore, User.DEFAULT);
         var taskRegistry = taskRegistryFactory.newInstance(new JobId());
 
         var tracker = TaskProgressTracker.create(

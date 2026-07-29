@@ -518,7 +518,7 @@ class GraphImporterTest {
         var log = new TestLogImpl();
         var taskStore = new TestTaskStore();
         var adaptedLog = new LogAdapter(log);
-        var taskRegistryFactory = new LocalTaskRegistryFactory(taskStore, User.DEFAULT);
+        var taskRegistryFactory = new LocalTaskRegistryFactory(adaptedLog, taskStore, User.DEFAULT);
         var taskRegistry = taskRegistryFactory.newInstance(new JobId());
         var progressTracker = TaskProgressTracker.create(
             adaptedLog,

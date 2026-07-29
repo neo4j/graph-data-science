@@ -217,7 +217,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
 
         var taskVolume = queryEstimator.estimateRows(query);
 
-        var taskRegistryFactory = TaskRegistryFactory.local(taskStore, new User(username, false));
+        var taskRegistryFactory = TaskRegistryFactory.local(log, taskStore, new User(username, false));
         var taskRegistry = taskRegistryFactory.newInstance(config.jobId());
 
         var internalProgressTracker = TaskProgressTracker.create(

@@ -150,8 +150,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var progressTrackingEnabled = neo4jConfiguration.get(GdsSettings.progressTrackingEnabled());
         var retentionPeriod = neo4jConfiguration.get(GdsSettings.taskRetentionPeriod());
         log.info("Progress tracking: " + (progressTrackingEnabled
-            ? "enabled"
-            : "disabled" + ", retentionPeriod: " + retentionPeriod.toString()));
+            ? "enabled, retentionPeriod: " + retentionPeriod.toString()
+            : "disabled"));
         var useMaxMemoryEstimation = neo4jConfiguration.get(GdsSettings.validateUsingMaxMemoryEstimation());
         log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
 
@@ -160,7 +160,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var taskStoreRepository = new TaskStoreRepository(); // only one! an instance-singleton
         var taskStoreService = new DefaultTaskStoreService(taskStoreFactory, taskStoreRepository);
         var taskStoreObserver = new DefaultTaskStoreObserver(taskStoreRepository, taskStoreService);
-        var taskRegistryFactoryService = new TaskRegistryFactoryService(progressTrackingEnabled, taskStoreService);
+        var taskRegistryFactoryService = new TaskRegistryFactoryService(log, progressTrackingEnabled, taskStoreService);
 
         // Memory gauge integrates with the JVM
         // First, it is state held in an AtomicLong

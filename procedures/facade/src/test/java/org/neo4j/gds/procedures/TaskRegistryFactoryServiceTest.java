@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.progress.registration.TaskStoreService;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.when;
 class TaskRegistryFactoryServiceTest {
     @Test
     void shouldHandOutDummiesWhenProgressTrackingEnabled() {
-        var service = new TaskRegistryFactoryService(false, null);
+        var service = new TaskRegistryFactoryService(Log.noOpLog(), false, null);
 
         var databaseId = DatabaseId.of("some database");
         var user = new User("some user", false);
@@ -47,7 +48,7 @@ class TaskRegistryFactoryServiceTest {
     @Test
     void shouldCreateNewFactoriesWhenNeeded() {
         var taskStoreService = mock(TaskStoreService.class);
-        var service = new TaskRegistryFactoryService(true, taskStoreService);
+        var service = new TaskRegistryFactoryService(Log.noOpLog(), true, taskStoreService);
 
         var databaseId = DatabaseId.of("some database");
         var user = new User("some user", false);
@@ -60,7 +61,7 @@ class TaskRegistryFactoryServiceTest {
     @Test
     void shouldEnsureFactoriesAreUniqueToDatabaseAndUser() {
         var taskStoreService = mock(TaskStoreService.class);
-        var service = new TaskRegistryFactoryService(true, taskStoreService);
+        var service = new TaskRegistryFactoryService(Log.noOpLog(), true, taskStoreService);
 
         var databaseId1 = DatabaseId.of("some database");
         var databaseId2 = DatabaseId.of("some other database");

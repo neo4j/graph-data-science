@@ -68,7 +68,7 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
         User user,
         JobId jobId
     ) {
-        var taskRegistryFactory = TaskRegistryFactory.local(taskStore, user);
+        var taskRegistryFactory = TaskRegistryFactory.local(log, taskStore, user);
         var taskRegistry = taskRegistryFactory.newInstance(jobId);
 
         var delegate = TaskProgressTracker.create(
@@ -96,7 +96,8 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     @Override
     public void beginSubTask() {
         delegate.beginSubTask();
-        progressHistory.add(taskStore.lookup(user, jobId).map(userTask -> userTask.task().getProgress()));
+
+        registerProgress();
     }
 
     @Override
@@ -112,7 +113,8 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
     @Override
     public void endSubTask() {
         delegate.endSubTask();
-        progressHistory.add(taskStore.lookup(user, jobId).map(userTask -> userTask.task().getProgress()));
+
+        registerProgress();
     }
 
     @Override
@@ -146,5 +148,11 @@ public final class InspectableTestProgressTracker implements ProgressTracker {
             }
         }
         assertThat(previousProgress.progress()).isEqualTo(previousProgress.volume());
+    }
+
+    private void registerProgress() {
+        var tasks = taskStore.lookup(user, jobId);
+
+        tasks.forEach(storedTask -> progressHistory.add(Optional.of(storedTask.task().getProgress())));
     }
 }

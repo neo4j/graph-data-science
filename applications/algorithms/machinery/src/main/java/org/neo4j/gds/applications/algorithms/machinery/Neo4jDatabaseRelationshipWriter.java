@@ -101,18 +101,7 @@ final class Neo4jDatabaseRelationshipWriter {
         Optional<ResultStore> maybeResultStore,
         JobId jobId
     ) {
-        // see, this is interesting. not "interesting, good",
-        // more "interesting, we should really have thought this through".
-        // so, if we use the job id that gets, some algorithms start failing. AStar writes for example.
-        // and the reason they do that is, when writes start and we register the write task,
-        // the key (the job id) is still in use,
-        // because e.g. AStar is one of those "lazy" algorithms that do not compute their entire result before writing.
-        // hence, the algorithm task is still registered.
-        // the root cause of the problem is not that race per se, but the lack of indirection:
-        // we should be keying tasks under unique task ids, and grouping them under job ids.
-        // future work i guess
-        var alternativeJobId = new JobId();
-        var taskRegistry = requestScopedDependencies.taskRegistryFactory().newInstance(alternativeJobId);
+        var taskRegistry = requestScopedDependencies.taskRegistryFactory().attach(jobId);
 
         var progressTracker = TaskProgressTracker.create(
             log,
