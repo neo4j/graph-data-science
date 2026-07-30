@@ -49,7 +49,9 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
                 graphStore.nodeLabels().size(),
                 graphStore.relationshipTypes().size(),
                 !graphStore.nodePropertyKeys().isEmpty(),
+                graphStore.nodePropertyKeys().size(),
                 !graphStore.relationshipPropertyKeys().isEmpty(),
+                graphStore.relationshipPropertyKeys().size(),
                 !graphStore.inverseIndexedRelationshipTypes().isEmpty()
             );
             var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
@@ -80,7 +82,9 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
         long labelCount,
         long typeCount,
         boolean hasNodeProperties,
+        long nodePropertyCount,
         boolean hasRelationshipProperties,
+        long relationshipPropertyCount,
         boolean hasInverseIndexedRelationships
     ) {
 

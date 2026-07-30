@@ -128,7 +128,9 @@ class TelemetryLoggerImplTest {
             2L,
             1L,
             false,
+            0,
             false,
+            0,
             false
         ));
     }
