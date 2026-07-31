@@ -19,27 +19,14 @@
  */
 package org.neo4j.gds.core;
 
-/**
- * This username microtype is very much tied to Neo4j.
- * It is the type we inject in Pregel and places.
- */
-public final class Username {
+public record Username(String username) {
     /**
      * In Neo4j, the anonymous user has <i>blank</i> username.
      */
     public static final Username EMPTY_USERNAME = new Username("");
 
-    private final String value;
-
+    // TODO: remove
     public static Username of(String username) {
         return new Username(username);
-    }
-
-    private Username(String value) {
-        this.value = value;
-    }
-
-    public String username() {
-        return value;
     }
 }
