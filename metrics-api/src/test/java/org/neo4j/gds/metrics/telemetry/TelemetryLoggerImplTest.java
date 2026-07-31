@@ -117,7 +117,7 @@ class TelemetryLoggerImplTest {
             .name("test")
             .build();
 
-        telemetryLogger.logGraph(graphStore);
+        telemetryLogger.logGraph(graphStore, 1234L);
 
         var entry = extractLog(testLog, "Graph Telemetry: ", TelemetryLoggerImpl.GraphLogEntry.class);
 
@@ -128,8 +128,11 @@ class TelemetryLoggerImplTest {
             2L,
             1L,
             false,
+            0,
             false,
-            false
+            0,
+            false,
+            1234L
         ));
     }
 

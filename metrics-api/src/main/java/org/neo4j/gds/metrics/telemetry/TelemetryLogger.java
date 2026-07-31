@@ -26,7 +26,11 @@ import org.neo4j.gds.core.JobId;
 
 public interface TelemetryLogger {
 
-    void logGraph(GraphStore graphStore);
+    /**
+     * Called explicitly by every graph-creation code path. There is no central
+     * catalog hook; new endpoints that add a graph to the catalog must call this.
+     */
+    void logGraph(GraphStore graphStore, long projectMillis);
 
     default void logAlgorithm(int graphIdentifier, String algorithm, AlgoBaseConfig config, long computeMillis, long startTime) {
         logAlgorithm(graphIdentifier, config.jobId(), algorithm, computeMillis, config, startTime);
@@ -37,7 +41,8 @@ public interface TelemetryLogger {
     TelemetryLogger DISABLED = new TelemetryLogger() {
         @Override
         public void logGraph(
-            GraphStore graphStore
+            GraphStore graphStore,
+            long projectMillis
         ) {
 
         }

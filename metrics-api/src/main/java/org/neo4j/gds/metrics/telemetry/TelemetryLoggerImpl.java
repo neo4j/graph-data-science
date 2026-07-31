@@ -39,7 +39,8 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
 
     @Override
     public void logGraph(
-        GraphStore graphStore
+        GraphStore graphStore,
+        long projectMillis
     ) {
         try {
             var logEntry = new GraphLogEntry(
@@ -49,8 +50,11 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
                 graphStore.nodeLabels().size(),
                 graphStore.relationshipTypes().size(),
                 !graphStore.nodePropertyKeys().isEmpty(),
+                graphStore.nodePropertyKeys().size(),
                 !graphStore.relationshipPropertyKeys().isEmpty(),
-                !graphStore.inverseIndexedRelationshipTypes().isEmpty()
+                graphStore.relationshipPropertyKeys().size(),
+                !graphStore.inverseIndexedRelationshipTypes().isEmpty(),
+                projectMillis
             );
             var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
             log.info("Graph Telemetry: %s", jsonEntry);
@@ -80,8 +84,11 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
         long labelCount,
         long typeCount,
         boolean hasNodeProperties,
+        long nodePropertyCount,
         boolean hasRelationshipProperties,
-        boolean hasInverseIndexedRelationships
+        long relationshipPropertyCount,
+        boolean hasInverseIndexedRelationships,
+        long projectMillis
     ) {
 
     }
