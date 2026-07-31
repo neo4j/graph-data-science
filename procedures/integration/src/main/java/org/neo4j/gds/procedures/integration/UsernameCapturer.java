@@ -31,6 +31,6 @@ final class UsernameCapturer {
     static Username capture(Context context) {
         var username = context.securityContext().subject().executingUser();
 
-        return Username.of(username);
+        return new Username(username);
     }
 }

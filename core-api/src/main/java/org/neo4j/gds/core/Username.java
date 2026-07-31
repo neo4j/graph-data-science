@@ -24,9 +24,4 @@ public record Username(String username) {
      * In Neo4j, the anonymous user has <i>blank</i> username.
      */
     public static final Username EMPTY_USERNAME = new Username("");
-
-    // TODO: remove
-    public static Username of(String username) {
-        return new Username(username);
-    }
 }

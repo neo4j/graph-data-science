@@ -84,7 +84,7 @@ class ProcedureRunnerTest extends BaseTest {
         try (var tx = db.beginTx()) {
             var procedureCallContext = ProcedureCallContext.EMPTY;
             var log = (TestLog) new TestLogImpl();
-            var username = Username.of("foo");
+            var username = new Username("foo");
             TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry(
                 new User(username.username(), false),
                 PerDatabaseTaskStore.create(Duration.ZERO),
