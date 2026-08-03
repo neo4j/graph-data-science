@@ -130,13 +130,15 @@ The operation is idempotent, and skips loading if the model is already loaded.
 [[catalog-model-delete]]
 == Deleting models from disk
 
-include::partial$/product-limitations/not-in-serverless.adoc[]
-
 To remove a stored model from disk, it has to be deleted.
 This is different from dropping a model.
 Dropping a model will remove it from the in-memory model catalog, but not from disk.
 Deleting a model will remove it from disk, but keep it in the in-memory model catalog if it was already loaded.
 
+[NOTE]
+====
+In Aura Graph Analytics, deleting a model removes it from the project-level model catalog.
+====
 
 === Syntax
 
