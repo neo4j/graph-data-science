@@ -24,24 +24,33 @@ import java.util.NoSuchElementException;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GraphNotFoundException extends NoSuchElementException {
-    private final GraphStoreCatalog.UserCatalogKey userCatalogKey;
+    private final String graphName;
+    private final String databaseName;
 
-    public GraphNotFoundException(GraphStoreCatalog.UserCatalogKey userCatalogKey) {
+    public GraphNotFoundException(String graphName, String databaseName) {
         super(
             formatWithLocale(
                 "Graph with name `%s` does not exist on database `%s`. It might exist on another database.",
-                userCatalogKey.graphName(),
-                userCatalogKey.databaseName()
+                graphName,
+                databaseName
             )
         );
-        this.userCatalogKey = userCatalogKey;
+        this.graphName = graphName;
+        this.databaseName = databaseName;
+    }
+
+    public GraphNotFoundException(GraphStoreCatalog.UserCatalogKey userCatalogKey) {
+        this(
+            userCatalogKey.graphName(),
+            userCatalogKey.databaseName()
+        );
     }
 
     public String graphName() {
-        return userCatalogKey.graphName();
+        return graphName;
     }
 
     public String databaseName() {
-        return userCatalogKey.databaseName();
+        return databaseName;
     }
 }
