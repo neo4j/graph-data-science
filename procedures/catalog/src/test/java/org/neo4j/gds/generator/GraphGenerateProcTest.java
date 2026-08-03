@@ -104,8 +104,8 @@ class GraphGenerateProcTest extends BaseProcTest {
             () -> runQuery(generateQuery)
         );
         Throwable throwable = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, throwable.getClass());
-        assertEquals("A graph with name 'foo' already exists.", throwable.getMessage());
+        assertThat(throwable).isInstanceOf(IllegalArgumentException.class);
+        assertEquals("Graph with name `foo` already exists on database `neo4j`.", throwable.getMessage());
     }
 
     @ParameterizedTest

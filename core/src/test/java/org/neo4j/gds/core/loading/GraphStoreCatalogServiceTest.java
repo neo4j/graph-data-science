@@ -29,6 +29,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -104,6 +105,37 @@ class GraphStoreCatalogServiceTest {
         )).isInstanceOf(GraphNotFoundException.class)
             .hasMessageContaining(
                 "Graph with name `some graph` does not exist on database `some database`. It might exist on another database.");
+    }
+
+    @Test
+    void shouldThrowIfGraphExists() {
+        var configuration = GraphProjectConfig.emptyWithName("some user", "some graph");
+        var graphStore = mock(GraphStore.class);
+        when(graphStore.databaseInfo()).thenReturn(
+            DatabaseInfo.create(
+                DatabaseId.of("some database"),
+                DatabaseLocation.LOCAL
+            )
+        );
+        GraphStoreCatalog.set(configuration, graphStore);
+        var service = new LocalGraphStoreCatalogService();
+
+        var user = new User("some user", false);
+        var databaseId = DatabaseId.of("some database");
+        var graphName = GraphName.parse("some graph");
+
+        assertThatThrownBy(() -> service.ensureGraphDoesNotExist(user, databaseId, graphName))
+            .isInstanceOf(GraphAlreadyExistsException.class);
+    }
+
+    @Test
+    void shouldNotThrowIfGraphDoesNotExist() {
+        var service = new LocalGraphStoreCatalogService();
+
+        var user = new User("some user", false);
+        var databaseId = DatabaseId.of("some database");
+        var graphName = GraphName.parse("some graph");
+        assertThatNoException().isThrownBy(() -> service.ensureGraphDoesNotExist(user, databaseId, graphName));
     }
 
 }

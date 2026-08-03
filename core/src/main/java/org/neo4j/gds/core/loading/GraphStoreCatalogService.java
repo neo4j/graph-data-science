@@ -122,11 +122,7 @@ public interface GraphStoreCatalogService {
      */
     default void ensureGraphDoesNotExist(User user, DatabaseId databaseId, GraphName graphName) {
         if (graphExists(user, databaseId, graphName)) {
-            String message = formatWithLocale(
-                "A graph with name '%s' already exists.",
-                graphName
-            );
-            throw new IllegalArgumentException(message);
+            throw new GraphAlreadyExistsException(new GraphStoreCatalog.UserCatalogKey(databaseId.databaseName(), graphName.value()));
         }
     }
 
