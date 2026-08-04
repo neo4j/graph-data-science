@@ -78,7 +78,7 @@ YIELD
 
 GDS will discover available models from the configured store location upon database startup.
 During discovery, only model metadata is loaded, not the actual model data.
-In order to use a stored model, it has to be explicitly loaded.
+In order to use a stored model, it has to be loaded.
 
 === Syntax
 
@@ -122,6 +122,13 @@ YIELD
   loadMillis
 ----
 --
+
+[NOTE]
+====
+In xref:aura-graph-analytics/index.adoc[Aura Graph Analytics], calling `gds.model.load` is not required -- a stored model is loaded automatically the first time it is used.
+Because of this, `gds.model.list` may report a stored model as not loaded until it is used for the first time.
+You can still call `gds.model.load` to load a model ahead of time, so that its first use does not incur the loading cost.
+====
 
 To verify if a model is loaded, we can use the xref:model-catalog/list.adoc[`gds.model.list`] procedure.
 The procedure returns flags to indicate if the model is stored and if the model is loaded into memory.
