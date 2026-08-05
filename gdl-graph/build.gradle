@@ -27,7 +27,6 @@ dependencies {
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':neo4j-settings')
-    implementation project(':proc-common')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
