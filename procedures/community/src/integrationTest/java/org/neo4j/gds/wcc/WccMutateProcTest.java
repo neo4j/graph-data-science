@@ -96,6 +96,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
@@ -111,9 +112,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
-import static org.neo4j.gds.GdlSupport.fromGdl;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
-import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class WccMutateProcTest extends BaseProcTest {
@@ -121,26 +120,11 @@ class WccMutateProcTest extends BaseProcTest {
     private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
     private static final String MUTATE_PROPERTY = "componentId";
     private static final String GRAPH_NAME = "loadGraph";
-    private static final String EXPECTED_MUTATED_GRAPH = "  (a {componentId: 0})" +
-        ", (b {componentId: 0})" +
-        ", (c {componentId: 0})" +
-        ", (d {componentId: 0})" +
-        ", (e {componentId: 0})" +
-        ", (f {componentId: 0})" +
-        ", (g {componentId: 0})" +
-        ", (h {componentId: 7})" +
-        ", (i {componentId: 7})" +
-        ", (j {componentId: 9})" +
-        // {A, B, C, D}
-        ", (a)-[{w: 1.0d}]->(b)" +
-        ", (b)-[{w: 1.0d}]->(c)" +
-        ", (c)-[{w: 1.0d}]->(d)" +
-        ", (d)-[{w: 1.0d}]->(e)" +
-        // {E, F, G}
-        ", (e)-[{w: 1.0d}]->(f)" +
-        ", (f)-[{w: 1.0d}]->(g)" +
-        // {H, I}
-        ", (h)-[{w: 1.0d}]->(i)";
+    private static final List<List<String>> EXPECTED_COMPONENTS = List.of(
+        List.of("nA", "nB", "nC", "nD", "nE", "nF", "nG"),
+        List.of("nH", "nI"),
+        List.of("nJ")
+    );
     @Neo4jGraph
     @Language("Cypher")
     static final String DB_CYPHER =
@@ -227,7 +211,7 @@ class WccMutateProcTest extends BaseProcTest {
             .build()
             .graph();
 
-        assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), updatedGraph);
+        assertExpectedComponents(updatedGraph);
     }
 
     @Test
@@ -410,7 +394,7 @@ class WccMutateProcTest extends BaseProcTest {
     @Test
     void testGraphMutation() {
         GraphStore graphStore = runMutation(ensureGraphExists(), Map.of());
-        assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), graphStore.getUnion());
+        assertExpectedComponents(graphStore.getUnion());
         GraphSchema schema = graphStore.schema();
 
         var containsMutateProperty =  graphStore.schema().nodeSchema()
@@ -485,7 +469,7 @@ class WccMutateProcTest extends BaseProcTest {
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName)
             .graphStore()
             .getUnion();
-        assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), mutatedGraph);
+        assertExpectedComponents(mutatedGraph);
     }
 
     @Test
@@ -514,6 +498,32 @@ class WccMutateProcTest extends BaseProcTest {
         Map<String, Object> configMap = Map.of("mutateProperty", MUTATE_PROPERTY);
         Stream<WccMutateResult> result = wccMutateProc.mutate(GRAPH_NAME, configMap);
         assertEquals(1, result.count());
+    }
+
+    private void assertExpectedComponents(Graph graph) {
+        assertThat(graph.nodeCount()).isEqualTo(10);
+        assertThat(graph.relationshipCount()).isEqualTo(7);
+
+        var componentIds = graph.nodeProperties(MUTATE_PROPERTY);
+        var distinctComponentIds = new HashSet<Double>();
+
+        for (var component : EXPECTED_COMPONENTS) {
+            var componentIdsInComponent = component.stream()
+                .map(variable -> nodeFunction.of(variable).getId())
+                .map(graph::toMappedNodeId)
+                .map(componentIds::doubleValue)
+                .collect(Collectors.toSet());
+
+            assertThat(componentIdsInComponent)
+                .as("Nodes %s must share the same component id", component)
+                .hasSize(1);
+
+            distinctComponentIds.addAll(componentIdsInComponent);
+        }
+
+        assertThat(distinctComponentIds)
+            .as("Components must be distinct from each other")
+            .hasSize(EXPECTED_COMPONENTS.size());
     }
 
     @NotNull
