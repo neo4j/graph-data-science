@@ -24,7 +24,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
@@ -151,24 +150,6 @@ public class NodeEmbeddingComputeBusinessFacade {
             databaseId
         );
 
-        return node2Vec(
-            graphResources,
-            parameters,
-            jobId,
-            logProgress,
-            resultTransformerBuilder,
-            terminationFlag
-        );
-    }
-
-    public <TR> CompletableFuture<TR> node2Vec(
-        GraphResources graphResources,
-        Node2VecParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<Node2VecResult>, TR> resultTransformerBuilder,
-        TerminationFlag terminationFlag
-    ) {
         return computeFacade.node2Vec(
             graphResources.graph(),
             parameters,
@@ -177,4 +158,5 @@ public class NodeEmbeddingComputeBusinessFacade {
             terminationFlag
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
+
 }
