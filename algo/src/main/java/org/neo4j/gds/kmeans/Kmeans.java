@@ -30,8 +30,8 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -313,7 +313,8 @@ public final class Kmeans implements Algorithm<KmeansResult> {
             concurrency,
             TerminationFlag.RUNNING_TRUE,
             nodeId -> {
-                if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
+                var valueType = nodePropertyValues.valueType();
+                if (valueType == ValueType.FLOAT_ARRAY || valueType == ValueType.FLOAT_VECTOR) {
                     var value = nodePropertyValues.floatArrayValue(nodeId);
                     if (value == null) {
                         throw new IllegalArgumentException("Property '" + parameters.nodeProperty() + "' does not exist for all nodes");
@@ -328,7 +329,7 @@ public final class Kmeans implements Algorithm<KmeansResult> {
                             }
                         }
                     }
-                } else if (nodePropertyValues.valueType() == ValueType.DOUBLE_ARRAY) {
+                } else if (valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.DOUBLE_VECTOR) {
                     var value = nodePropertyValues.doubleArrayValue(nodeId);
                     if (value == null) {
                         throw new IllegalArgumentException("Property '" + parameters.nodeProperty() + "' does not exist for all nodes");
@@ -343,7 +344,7 @@ public final class Kmeans implements Algorithm<KmeansResult> {
                             }
                         }
                     }
-                } else if (nodePropertyValues.valueType() == ValueType.DOUBLE) {
+                } else if (valueType == ValueType.DOUBLE) {
                     if (Double.isNaN(nodePropertyValues.doubleValue(nodeId))) {
                         throw new IllegalArgumentException("Input for K-Means should not contain any NaN values");
                     }
@@ -438,11 +439,13 @@ public final class Kmeans implements Algorithm<KmeansResult> {
     }
 
     private static int dimensions(NodePropertyValues values) {
-        if (values.valueType() == ValueType.FLOAT_ARRAY) {
+        var valueType = values.valueType();
+        // a vector has the same dimensions as a plain array of its coordinate type
+        if (valueType == ValueType.FLOAT_ARRAY || valueType == ValueType.FLOAT_VECTOR) {
             return values.floatArrayValue(0).length;
-        } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
+        } else if (valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.DOUBLE_VECTOR) {
             return values.doubleArrayValue(0).length;
-        } else if (values.valueType() == ValueType.DOUBLE) {
+        } else if (valueType == ValueType.DOUBLE) {
             return 1;
         }
         throw new RuntimeException("Values type not accepted:  " + values.valueType());

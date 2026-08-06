@@ -42,20 +42,14 @@ abstract class AbstractLinkFeatureAppenderFactory {
 
         var dimension = FeatureStepUtil.propertyDimension(graph, propertyName);
 
-        switch (propertyType) {
-            case DOUBLE_ARRAY:
-                return doubleArrayAppender(props, dimension);
-            case FLOAT_ARRAY:
-                return floatArrayAppender(props, dimension);
-            case LONG_ARRAY:
-                return longArrayAppender(props, dimension);
-            case LONG:
-                return longAppender(props, dimension);
-            case DOUBLE:
-                return doubleAppender(props, dimension);
-            default:
-                throw new IllegalStateException(formatWithLocale("Unsupported ValueType %s", propertyType));
-        }
+        return switch (propertyType) {
+            case DOUBLE_ARRAY, DOUBLE_VECTOR -> doubleArrayAppender(props, dimension);
+            case FLOAT_ARRAY, FLOAT_VECTOR -> floatArrayAppender(props, dimension);
+            case LONG_ARRAY -> longArrayAppender(props, dimension);
+            case LONG -> longAppender(props, dimension);
+            case DOUBLE -> doubleAppender(props, dimension);
+            default -> throw new IllegalStateException(formatWithLocale("Unsupported ValueType %s", propertyType));
+        };
     }
 
     LinkFeatureAppender[] createAppenders(Graph graph, List<String> propertyNames) {

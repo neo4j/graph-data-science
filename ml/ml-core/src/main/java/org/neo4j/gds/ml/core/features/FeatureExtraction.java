@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.core.features;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
@@ -123,25 +122,30 @@ public final class FeatureExtraction {
             .map(propertyKey -> {
                 var property = graph.nodeProperties(propertyKey);
                 var propertyType = property.valueType();
-                if ((ValueType.DOUBLE_ARRAY == propertyType) || (ValueType.FLOAT_ARRAY == propertyType)) {
-                    var propertyValues = EmbeddingUtils.getCheckedDoubleArrayNodeProperty(
-                        graph,
-                        propertyKey,
-                        initNodeId
-                    );
-                    return new ArrayPropertyExtractor(propertyValues.length, graph, propertyKey);
-                }
-                if (ValueType.LONG_ARRAY == propertyType) {
-                    var propertyValues = EmbeddingUtils.getCheckedLongArrayNodeProperty(
-                        graph,
-                        propertyKey,
-                        initNodeId
-                    );
-                    return new LongArrayPropertyExtractor(propertyValues.length, graph, propertyKey);
-                } else if ((ValueType.DOUBLE == propertyType) || (ValueType.LONG == propertyType)) {
-                    return new ScalarPropertyExtractor(graph, propertyKey);
-                } else {
-                    throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
+                switch (propertyType) {
+                    case DOUBLE_ARRAY, FLOAT_ARRAY, DOUBLE_VECTOR, FLOAT_VECTOR -> {
+                        var propertyValues = EmbeddingUtils.getCheckedDoubleArrayNodeProperty(
+                            graph,
+                            propertyKey,
+                            initNodeId
+                        );
+                        return new ArrayPropertyExtractor(propertyValues.length, graph, propertyKey);
+                    }
+                    case LONG_ARRAY -> {
+                        var propertyValues = EmbeddingUtils.getCheckedLongArrayNodeProperty(
+                            graph,
+                            propertyKey,
+                            initNodeId
+                        );
+                        return new LongArrayPropertyExtractor(propertyValues.length, graph, propertyKey);
+                    }
+                    case DOUBLE, LONG -> {
+                        return new ScalarPropertyExtractor(graph, propertyKey);
+                    }
+                    case null, default -> throw new IllegalStateException(formatWithLocale(
+                        "Unknown ValueType %s",
+                        propertyType
+                    ));
                 }
             }).collect(Collectors.toList());
     }

@@ -28,8 +28,8 @@ public final class DistancesFactory {
     public static Distances create(NodePropertyValues nodePropertyValues) {
 
         return switch (nodePropertyValues.valueType()) {
-            case DOUBLE_ARRAY -> new DoubleArrayDistances(nodePropertyValues);
-            case FLOAT_ARRAY -> new FloatArrayDistances(nodePropertyValues);
+            case DOUBLE_ARRAY, DOUBLE_VECTOR -> new DoubleArrayDistances(nodePropertyValues);
+            case FLOAT_ARRAY, FLOAT_VECTOR -> new FloatArrayDistances(nodePropertyValues);
             default -> throw new IllegalArgumentException("Wrong property type");
         };
     }

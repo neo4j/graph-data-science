@@ -20,11 +20,11 @@
 package org.neo4j.gds.functions;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.config.NodeIdParser;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.config.NodeIdParser;
 
 import java.util.Objects;
 
@@ -86,27 +86,34 @@ class NodePropertyApplication {
         var propertyValues = graphStore.nodeProperty(propertyKey).values();
 
         switch (propertyValues.valueType()) {
-            case LONG:
+            case LONG -> {
                 var longValue = propertyValues.longValue(internalId);
-                return longValue == DefaultValue.LONG_DEFAULT_FALLBACK ? DefaultValue.DOUBLE_DEFAULT_FALLBACK : (double) longValue;
-            case DOUBLE:
+                return longValue == DefaultValue.LONG_DEFAULT_FALLBACK
+                    ? DefaultValue.DOUBLE_DEFAULT_FALLBACK
+                    : (double) longValue;
+            }
+            case DOUBLE -> {
                 var propertyValue = propertyValues.doubleValue(internalId);
                 return Double.isNaN(propertyValue) ? null : propertyValue;
-            case DOUBLE_ARRAY:
+            }
+            case DOUBLE_ARRAY, DOUBLE_VECTOR -> {
                 var doubleArray = propertyValues.doubleArrayValue(internalId);
-                return doubleArray == null ? new double[] {} : doubleArray;
-            case FLOAT_ARRAY:
+                return doubleArray == null ? new double[]{} : doubleArray;
+            }
+            case FLOAT_ARRAY, FLOAT_VECTOR -> {
                 var floatArray = propertyValues.floatArrayValue(internalId);
-                return floatArray == null ? new float[] {} : floatArray;
-            case LONG_ARRAY:
+                return floatArray == null ? new float[]{} : floatArray;
+            }
+            case LONG_ARRAY -> {
                 var longArray = propertyValues.longArrayValue(internalId);
-                return longArray == null ? new long[] {} : longArray;
-            case UNKNOWN:
+                return longArray == null ? new long[]{} : longArray;
+            }
+            default -> throw new UnsupportedOperationException(formatWithLocale(
+                "Cannot retrieve value from a property with type %s",
+                propertyValues.valueType()
+            ));
         }
 
-        throw new UnsupportedOperationException(formatWithLocale(
-            "Cannot retrieve value from a property with type %s",
-            propertyValues.valueType()
-        ));
+
     }
 }

@@ -36,24 +36,13 @@ public final class FeatureStepUtil {
     }
 
     public static int propertyDimension(NodePropertyValues nodeProperties, String propertyName) {
-        int dimension = 0;
-        switch (nodeProperties.valueType()) {
-            case LONG:
-            case DOUBLE:
-                dimension = 1;
-                break;
-            case DOUBLE_ARRAY:
-            case FLOAT_ARRAY:
-                dimension = nodeProperties.doubleArrayValue(0).length;
-                break;
-            case LONG_ARRAY:
-                dimension = nodeProperties.longArrayValue(0).length;
-                break;
-            case UNKNOWN:
-                throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyName));
-        }
-
-        return dimension;
+        return switch (nodeProperties.valueType()) {
+            case LONG, DOUBLE -> 1;
+            case DOUBLE_ARRAY, FLOAT_ARRAY, DOUBLE_VECTOR, FLOAT_VECTOR -> nodeProperties.doubleArrayValue(0).length;
+            case LONG_ARRAY -> nodeProperties.longArrayValue(0).length;
+            case UNKNOWN -> throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyName));
+            default -> 0;
+        };
     }
 
     public static void validateComputedFeatures(

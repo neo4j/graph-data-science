@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.function.Supplier;
@@ -36,13 +35,11 @@ public final class CoordinatesSupplier implements Supplier<Coordinate> {
 
     @Override
     public Coordinate get() {
-        if (values.valueType() == ValueType.FLOAT_ARRAY) {
-            return new FloatArrayCoordinate(dimensions, values);
-         } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
-            return new DoubleArrayCoordinate(dimensions, values);
-        }else if (values.valueType()== ValueType.DOUBLE){
-            return  new ScalarCoordinate(values);
-        }
-        throw new IllegalArgumentException("Incorrect data type");
+        return switch (values.valueType()) {
+            case FLOAT_ARRAY, FLOAT_VECTOR -> new FloatArrayCoordinate(dimensions, values);
+            case DOUBLE_ARRAY, DOUBLE_VECTOR -> new DoubleArrayCoordinate(dimensions, values);
+            case DOUBLE -> new ScalarCoordinate(values);
+            case null, default -> throw new IllegalArgumentException("Incorrect data type");
+        };
     }
 }

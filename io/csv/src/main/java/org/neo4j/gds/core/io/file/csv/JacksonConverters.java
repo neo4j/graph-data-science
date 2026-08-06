@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.util.StdConverter;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.nodeproperties.ValueTypeToken;
 
 class JacksonConverters {
 
@@ -43,7 +44,7 @@ class JacksonConverters {
     static class ValueTypeConverter extends StdConverter<String, ValueType> {
         @Override
         public ValueType convert(String value) {
-            return ValueType.fromCsvName(value);
+            return ValueTypeToken.parse(value).valueType();
         }
     }
 }

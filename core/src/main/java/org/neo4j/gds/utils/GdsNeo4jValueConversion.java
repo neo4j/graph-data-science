@@ -20,7 +20,9 @@
 package org.neo4j.gds.utils;
 
 import org.neo4j.gds.values.DoubleArray;
+import org.neo4j.gds.values.DoubleVector;
 import org.neo4j.gds.values.FloatArray;
+import org.neo4j.gds.values.FloatVector;
 import org.neo4j.gds.values.FloatingPointArray;
 import org.neo4j.gds.values.FloatingPointValue;
 import org.neo4j.gds.values.GdsValue;
@@ -71,27 +73,23 @@ public final class GdsNeo4jValueConversion {
     }
 
     public static double[] getDoubleArray(GdsValue value) {
-        if (value instanceof DoubleArray) {
-            return ((DoubleArray) value).doubleArrayValue();
-        } else if (value instanceof FloatArray) {
-            return floatToDoubleArray((FloatArray) value);
-        } else if (value instanceof IntegralArray) {
-            return integralToDoubleArray((IntegralArray) value);
-        } else {
-            throw conversionError(value, "Double Array");
-        }
+        return switch (value) {
+            case DoubleArray doubleArray -> doubleArray.doubleArrayValue();
+            case DoubleVector doubleVector -> doubleVector.doubleVectorValue();
+            case FloatArray floatArray -> floatToDoubleArray(floatArray);
+            case IntegralArray integralArray -> integralToDoubleArray(integralArray);
+            case null, default -> throw conversionError(value, "Double Array");
+        };
     }
 
     public static float[] getFloatArray(GdsValue value) {
-        if (value instanceof FloatArray) {
-            return ((FloatArray) value).floatArrayValue();
-        } else if (value instanceof DoubleArray) {
-            return doubleToFloatArray((DoubleArray) value);
-        } else if (value instanceof IntegralArray) {
-            return longToFloatArray((IntegralArray) value);
-        }else {
-            throw conversionError(value, "Float Array");
-        }
+        return switch (value) {
+            case FloatArray floatArray -> floatArray.floatArrayValue();
+            case FloatVector floatVector -> floatVector.floatVectorValue();
+            case DoubleArray doubleArray -> doubleToFloatArray(doubleArray);
+            case IntegralArray integralArray -> longToFloatArray(integralArray);
+            case null, default -> throw conversionError(value, "Float Array");
+        };
     }
 
     private static double[] integralToDoubleArray(IntegralArray intArray) {

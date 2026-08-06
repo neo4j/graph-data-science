@@ -53,26 +53,15 @@ final class DefaultValueIOHelper {
                 return valueType.fallbackValue();
             }
 
-            Object parseValue;
-            switch (valueType) {
-                case DOUBLE:
-                    parseValue = OBJECT_MAPPER.readValue(value, double.class);
-                    break;
-                case LONG:
-                    parseValue = OBJECT_MAPPER.readValue(value, long.class);
-                    break;
-                case LONG_ARRAY:
-                    parseValue = OBJECT_MAPPER.readValue(value, long[].class);
-                    break;
-                case FLOAT_ARRAY:
-                    parseValue = OBJECT_MAPPER.readValue(value, float[].class);
-                    break;
-                case DOUBLE_ARRAY:
-                    parseValue = OBJECT_MAPPER.readValue(value, double[].class);
-                    break;
-                default:
+            Object parseValue = switch (valueType) {
+                case DOUBLE -> OBJECT_MAPPER.readValue(value, double.class);
+                case LONG -> OBJECT_MAPPER.readValue(value, long.class);
+                case LONG_ARRAY -> OBJECT_MAPPER.readValue(value, long[].class);
+                case FLOAT_ARRAY, FLOAT_VECTOR -> OBJECT_MAPPER.readValue(value, float[].class);
+                case DOUBLE_ARRAY, DOUBLE_VECTOR -> OBJECT_MAPPER.readValue(value, double[].class);
+                default ->
                     throw new IllegalArgumentException("Cannot deserialize type `" + valueType + "` to DefaultValue");
-            }
+            };
             return DefaultValue.of(parseValue, valueType, isUserDefined);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

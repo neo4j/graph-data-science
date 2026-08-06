@@ -21,7 +21,9 @@ package org.neo4j.gds.hdbscan;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.DoubleVectorNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.FloatVectorNodePropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,6 +60,49 @@ class DistancesFactoryTest {
         assertThat(DistancesFactory.create(doubleProps)).isInstanceOf(DoubleArrayDistances.class);
         assertThat(DistancesFactory.create(floatProps)).isInstanceOf(FloatArrayDistances.class);
 
+    }
+
+    @Test
+    void shouldAcceptVectorProperties() {
+        var doubleProps = new DoubleVectorNodePropertyValues() {
+            @Override
+            public double[] doubleArrayValue(long nodeId) {
+                return new double[]{1.0D, 2.0D};
+            }
+
+            @Override
+            public int vectorDimension() {
+                return 2;
+            }
+
+            @Override
+            public long nodeCount() {
+                return 5;
+            }
+        };
+
+        var floatProps = new FloatVectorNodePropertyValues() {
+            @Override
+            public float[] floatArrayValue(long nodeId) {
+                return new float[]{1.0F, 2.0F};
+            }
+
+            @Override
+            public int vectorDimension() {
+                return 2;
+            }
+
+            @Override
+            public long nodeCount() {
+                return 5;
+            }
+        };
+
+        // a vector holds the same coordinates as its array counterpart, so it must be measurable too
+        assertThat(DistancesFactory.create(doubleProps))
+            .isInstanceOf(DoubleArrayDistances.class);
+        assertThat(DistancesFactory.create(floatProps))
+            .isInstanceOf(FloatArrayDistances.class);
     }
 
 }

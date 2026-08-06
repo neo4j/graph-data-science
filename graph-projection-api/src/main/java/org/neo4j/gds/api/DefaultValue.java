@@ -73,11 +73,14 @@ public final class DefaultValue {
                 return DefaultValue.of(Long.parseLong(defaultValue.toString()), isUserDefined);
             case DOUBLE:
                 return DefaultValue.of(Double.parseDouble(defaultValue.toString()), isUserDefined);
+            // a vector's default value is a plain array of its coordinate type
             case DOUBLE_ARRAY:
+            case DOUBLE_VECTOR:
                 return DefaultValue.of(parseDoubleArrayValue(defaultValue, type), isUserDefined);
             case LONG_ARRAY:
                 return DefaultValue.of(parseLongArrayValue(defaultValue, type), isUserDefined);
             case FLOAT_ARRAY:
+            case FLOAT_VECTOR:
                 return DefaultValue.of(parseFloatArrayValue(defaultValue, type), isUserDefined);
             default:
                 return DefaultValue.of(defaultValue, isUserDefined);

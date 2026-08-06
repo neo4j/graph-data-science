@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.VectorNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -34,14 +36,18 @@ import org.neo4j.gds.values.Neo4jNodePropertyValues;
 import org.neo4j.gds.values.Neo4jNodePropertyValuesUtil;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.VectorValue;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.BooleanSupplier;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NativeNodePropertyExporter extends StatementApi implements NodePropertyExporter {
 
@@ -52,9 +58,11 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     protected final long nodeCount;
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
+    private final BooleanSupplier supportsVectorProperties;
 
+    @TestOnly
     public static NodePropertyExporterBuilder builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
-        return new NativeNodePropertiesExporterBuilder(transactionContext)
+        return new NativeNodePropertiesExporterBuilder(transactionContext, () -> true)
             .withIdMap(idMap)
             .withTerminationFlag(terminationFlag);
     }
@@ -83,6 +91,19 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         Concurrency concurrency,
         ExecutorService executorService
     ) {
+        this(tx, nodeCount, toOriginalId, terminationFlag, progressTracker, concurrency, executorService, () -> true);
+    }
+
+    NativeNodePropertyExporter(
+        TransactionContext tx,
+        long nodeCount,
+        LongUnaryOperator toOriginalId,
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker,
+        Concurrency concurrency,
+        ExecutorService executorService,
+        BooleanSupplier supportsVectorProperties
+    ) {
         super(tx);
         this.nodeCount = nodeCount;
         this.toOriginalId = toOriginalId;
@@ -90,6 +111,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         this.progressTracker = progressTracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
+        this.supportsVectorProperties = supportsVectorProperties;
         this.propertiesWritten = new LongAdder();
     }
 
@@ -112,6 +134,8 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     @Override
     public void write(Collection<NodePropertyRecord> nodeProperties) {
+        validateVectorProperties(nodeProperties);
+
         var resolvedNodeProperties = nodeProperties.stream()
             .map(desc -> resolveWith(desc, getOrCreatePropertyToken(desc.key())))
             .collect(Collectors.toList());
@@ -127,6 +151,41 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         } catch (Exception e) {
             progressTracker.endSubTaskWithFailure();
             throw e;
+        }
+    }
+
+    /**
+     * Rejects vector properties we know Neo4j will refuse, before any progress is reported. Without
+     * this, {@code Values.float32Vector} throws once per node from inside the write transaction.
+     */
+    private void validateVectorProperties(Collection<NodePropertyRecord> nodeProperties) {
+        var vectorProperties = nodeProperties.stream()
+            .filter(nodeProperty -> nodeProperty.values().valueType().isVector())
+            .toList();
+
+        if (vectorProperties.isEmpty()) {
+            return;
+        }
+
+        if (!supportsVectorProperties.getAsBoolean()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Writing a node property as a vector requires a database whose store format supports " +
+                    "vector properties, but the target database's store format does not. Affected properties: %s.",
+                vectorProperties.stream().map(NodePropertyRecord::key).collect(Collectors.toList())
+            ));
+        }
+
+        for (NodePropertyRecord vectorProperty : vectorProperties) {
+            var dimension = ((VectorNodePropertyValues) vectorProperty.values()).vectorDimension();
+            if (dimension < VectorValue.MIN_VECTOR_DIMENSIONS || dimension > VectorValue.MAX_VECTOR_DIMENSIONS) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Writing the node property `%s` as a vector requires between %d and %d dimensions, but it has %d.",
+                    vectorProperty.key(),
+                    VectorValue.MIN_VECTOR_DIMENSIONS,
+                    VectorValue.MAX_VECTOR_DIMENSIONS,
+                    dimension
+                ));
+            }
         }
     }
 

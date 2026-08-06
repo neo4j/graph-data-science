@@ -29,23 +29,27 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.FloatVectorNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.TaskRegistry;
-import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
+import org.neo4j.gds.progress.registration.TaskRegistry;
+import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.values.storable.VectorValue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,6 +57,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -225,6 +230,105 @@ class NativeNodePropertyExporterTest extends BaseTest {
                 "AlgoNameGoesHere :: WriteNodeProperties 100%",
                 "AlgoNameGoesHere :: WriteNodeProperties :: Finished"
             );
+    }
+
+    @Test
+    void rejectsAVectorWhenTheStoreFormatDoesNotSupportIt() {
+        var exporter = new NativeNodePropertiesExporterBuilder(
+            TestSupport.fullAccessTransaction(db),
+            () -> false
+        )
+            .withIdMap(new DirectIdMap(3))
+            .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+            .build();
+
+        var record = NodePropertyRecord.of("embedding", floatVectorValues(3, 4));
+
+        assertThatThrownBy(() -> exporter.write(List.of(record)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("store format supports vector properties")
+            .hasMessageContaining("embedding");
+
+        assertNoPropertyWritten("embedding");
+    }
+
+    @Test
+    void rejectsAVectorWithTooManyDimensions() {
+        var exporter = new NativeNodePropertiesExporterBuilder(
+            TestSupport.fullAccessTransaction(db),
+            () -> true
+        )
+            .withIdMap(new DirectIdMap(3))
+            .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+            .build();
+
+        var tooManyDimensions = VectorValue.MAX_VECTOR_DIMENSIONS + 1;
+        var record = NodePropertyRecord.of("embedding", floatVectorValues(3, tooManyDimensions));
+
+        // GDS must reject this up front rather than let Values.float32Vector throw per node from
+        // inside the write transaction
+        assertThatThrownBy(() -> exporter.write(List.of(record)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("embedding")
+            .hasMessageContaining("dimensions");
+
+        assertNoPropertyWritten("embedding");
+    }
+
+    @Test
+    void aPlainArrayIsNotSubjectToTheVectorGuard() {
+        var exporter = new NativeNodePropertiesExporterBuilder(
+            TestSupport.fullAccessTransaction(db),
+            () -> false
+        )
+            .withIdMap(new DirectIdMap(3))
+            .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
+            .build();
+
+        exporter.write(List.of(NodePropertyRecord.of("plainArray", floatArrayValues(3, 4))));
+
+        assertThat(exporter.propertiesWritten()).isEqualTo(3L);
+    }
+
+    private static NodePropertyValues floatArrayValues(long nodeCount, int dimension) {
+        return new FloatArrayNodePropertyValues() {
+            @Override
+            public float[] floatArrayValue(long nodeId) {
+                return new float[dimension];
+            }
+
+            @Override
+            public long nodeCount() {
+                return nodeCount;
+            }
+        };
+    }
+
+    private static NodePropertyValues floatVectorValues(long nodeCount, int dimension) {
+        return new FloatVectorNodePropertyValues() {
+            @Override
+            public int vectorDimension() {
+                return dimension;
+            }
+
+            @Override
+            public float[] floatArrayValue(long nodeId) {
+                return new float[dimension];
+            }
+
+            @Override
+            public long nodeCount() {
+                return nodeCount;
+            }
+        };
+    }
+
+    private void assertNoPropertyWritten(String propertyKey) {
+        runQueryWithRowConsumer(
+            db,
+            "MATCH (n) WHERE n." + propertyKey + " IS NOT NULL RETURN COUNT(*) AS count",
+            row -> assertEquals(0, row.getNumber("count").intValue())
+        );
     }
 
     private void transactionTerminationTest(ExecutorService executorService) {

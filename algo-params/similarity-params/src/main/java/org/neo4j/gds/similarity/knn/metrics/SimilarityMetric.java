@@ -32,23 +32,17 @@ public enum SimilarityMetric {
     }
 
     public static SimilarityMetric defaultMetricForType(ValueType valueType) {
-        switch (valueType) {
-            case LONG:
-                return LONG_PROPERTY_METRIC;
-            case DOUBLE:
-                return DOUBLE_PROPERTY_METRIC;
-            case DOUBLE_ARRAY:
-            case FLOAT_ARRAY:
-                return COSINE;
-            case LONG_ARRAY:
-                return JACCARD;
-            default:
-                throw new IllegalArgumentException(
-                    formatWithLocale(
-                        "No default similarity metric exists for value type [%s].",
-                        valueType
-                    )
-                );
-        }
+        return switch (valueType) {
+            case LONG -> LONG_PROPERTY_METRIC;
+            case DOUBLE -> DOUBLE_PROPERTY_METRIC;
+            case DOUBLE_ARRAY, FLOAT_ARRAY, DOUBLE_VECTOR, FLOAT_VECTOR -> COSINE;
+            case LONG_ARRAY -> JACCARD;
+            default -> throw new IllegalArgumentException(
+                formatWithLocale(
+                    "No default similarity metric exists for value type [%s].",
+                    valueType
+                )
+            );
+        };
     }
 }

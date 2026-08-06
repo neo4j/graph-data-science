@@ -178,8 +178,7 @@ public class ScaleProperties implements Algorithm<ScalePropertiesResult> {
         List<ScalarScaler> elementScalers;
 
         switch (nodeProperties.valueType()) {
-            case LONG:
-            case DOUBLE:
+            case LONG, DOUBLE -> {
                 return scalerVariant.create(
                     nodeProperties,
                     graph.nodeCount(),
@@ -187,7 +186,8 @@ public class ScaleProperties implements Algorithm<ScalePropertiesResult> {
                     progressTracker,
                     executor
                 );
-            case LONG_ARRAY:
+            }
+            case LONG_ARRAY -> {
                 elementScalers = IntStream.range(0, dimension)
                     .mapToObj(idx -> scalerVariant.create(
                         transformLongArrayEntryToDoubleProperty(propertyName, nodeProperties, dimension, idx),
@@ -197,7 +197,8 @@ public class ScaleProperties implements Algorithm<ScalePropertiesResult> {
                         executor
                     )).collect(Collectors.toList());
                 return new ArrayScaler(elementScalers, progressTracker);
-            case FLOAT_ARRAY:
+            }
+            case FLOAT_ARRAY, FLOAT_VECTOR -> {
                 elementScalers = IntStream.range(0, dimension)
                     .mapToObj(idx -> scalerVariant.create(
                         transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, dimension, idx),
@@ -207,7 +208,8 @@ public class ScaleProperties implements Algorithm<ScalePropertiesResult> {
                         executor
                     )).collect(Collectors.toList());
                 return new ArrayScaler(elementScalers, progressTracker);
-            case DOUBLE_ARRAY:
+            }
+            case DOUBLE_ARRAY, DOUBLE_VECTOR -> {
                 elementScalers = IntStream.range(0, dimension)
                     .mapToObj(idx -> scalerVariant.create(
                         transformDoubleArrayEntryToDoubleProperty(propertyName, nodeProperties, dimension, idx),
@@ -217,7 +219,9 @@ public class ScaleProperties implements Algorithm<ScalePropertiesResult> {
                         executor
                     )).collect(Collectors.toList());
                 return new ArrayScaler(elementScalers, progressTracker);
-            case UNKNOWN:
+            }
+            case UNKNOWN -> {
+            }
         }
 
         throw new UnsupportedOperationException(formatWithLocale(

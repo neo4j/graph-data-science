@@ -58,6 +58,16 @@ final class CsvImportParsingUtil {
         public CsvParsingFunction visitFloatArray() {
             return CsvImportParsingUtil::parseFloatArray;
         }
+
+        @Override
+        public CsvParsingFunction visitFloatVector() {
+            return CsvImportParsingUtil::parseFloatArray;
+        }
+
+        @Override
+        public CsvParsingFunction visitDoubleVector() {
+            return CsvImportParsingUtil::parseDoubleArray;
+        }
     };
 
     @FunctionalInterface

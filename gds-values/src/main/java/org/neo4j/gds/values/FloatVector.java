@@ -17,21 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.hdbscan;
+package org.neo4j.gds.values;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-
- final class KDNodeSupportFactory {
-
-     private KDNodeSupportFactory() {}
-
-     static KDNodeSupport create(NodePropertyValues nodePropertyValues, HugeLongArray ids, int dimension) {
-
-         return switch (nodePropertyValues.valueType()) {
-             case DOUBLE_ARRAY, DOUBLE_VECTOR -> new DoubleKDNodeSupport(nodePropertyValues, ids, dimension);
-             case FLOAT_ARRAY, FLOAT_VECTOR  -> new FloatKDNodeSupport(nodePropertyValues,ids,dimension);
-             default -> throw new IllegalArgumentException("Wrong property type");
-         };
-     }
- }
+public interface FloatVector extends Vector {
+    float floatValue(int idx);
+    float[] floatVectorValue();
+}

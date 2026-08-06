@@ -28,7 +28,8 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
 
     DoubleArrayPropertySimilarityComputer(NodePropertyValues nodePropertyValues, DoubleArraySimilarityMetric metric) {
         this.metric = metric;
-        if (nodePropertyValues.valueType() != ValueType.DOUBLE_ARRAY) {
+        if (nodePropertyValues.valueType() != ValueType.DOUBLE_ARRAY
+            && nodePropertyValues.valueType() != ValueType.DOUBLE_VECTOR) {
             throw new IllegalArgumentException("The property is not of type DOUBLE_ARRAY");
         }
         this.nodePropertyValues = nodePropertyValues;

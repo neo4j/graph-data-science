@@ -70,7 +70,10 @@ abstract class NodesBuilderContext {
     static NodesBuilderContext fixed(NodeSchema nodeSchema, Concurrency concurrency) {
         var propertyBuildersByPropertyKey = nodeSchema.properties().entrySet().stream().collect(toMap(
             Map.Entry::getKey,
-            e -> NodePropertiesFromStoreBuilder.of(e.getValue().defaultValue(), concurrency)
+            e -> NodePropertiesFromStoreBuilder.of(
+                e.getValue().defaultValue(),
+                concurrency
+            )
         ));
 
         return new Fixed(

@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity.knn.metrics;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.metrics.LongArrayPropertySimilarityComputer.SortedLongArrayPropertyValues;
@@ -69,36 +69,30 @@ public interface SimilarityComputer {
         NodePropertyValues properties,
         SimilarityMetric defaultSimilarityMetric
     ) {
-        switch (properties.valueType()) {
-            case LONG:
-                return ofLongProperty(properties);
-            case DOUBLE:
-                return ofDoubleProperty(properties);
-            case DOUBLE_ARRAY:
-                return ofDoubleArrayProperty(
-                    name,
-                    NullCheckingNodePropertyValues.create(properties, name, idMap),
-                    defaultSimilarityMetric
-                );
-            case FLOAT_ARRAY:
-                return ofFloatArrayProperty(
-                    name,
-                    NullCheckingNodePropertyValues.create(properties, name, idMap),
-                    defaultSimilarityMetric
-                );
-            case LONG_ARRAY:
-                return ofLongArrayProperty(
-                    name,
-                    new SortedLongArrayPropertyValues(NullCheckingNodePropertyValues.create(properties, name, idMap)),
-                    defaultSimilarityMetric
-                );
-            default:
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The property [%s] has an unsupported type [%s].",
-                    name,
-                    properties.valueType()
-                ));
-        }
+        return switch (properties.valueType()) {
+            case LONG -> ofLongProperty(properties);
+            case DOUBLE -> ofDoubleProperty(properties);
+            case DOUBLE_ARRAY, DOUBLE_VECTOR -> ofDoubleArrayProperty(
+                name,
+                NullCheckingNodePropertyValues.create(properties, name, idMap),
+                defaultSimilarityMetric
+            );
+            case FLOAT_ARRAY, FLOAT_VECTOR -> ofFloatArrayProperty(
+                name,
+                NullCheckingNodePropertyValues.create(properties, name, idMap),
+                defaultSimilarityMetric
+            );
+            case LONG_ARRAY -> ofLongArrayProperty(
+                name,
+                new SortedLongArrayPropertyValues(NullCheckingNodePropertyValues.create(properties, name, idMap)),
+                defaultSimilarityMetric
+            );
+            default -> throw new IllegalArgumentException(formatWithLocale(
+                "The property [%s] has an unsupported type [%s].",
+                name,
+                properties.valueType()
+            ));
+        };
     }
 
     static SimilarityComputer ofDoubleProperty(NodePropertyValues nodePropertyValues) {

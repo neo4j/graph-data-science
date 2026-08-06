@@ -22,6 +22,7 @@ package org.neo4j.gds.values;
 import org.neo4j.gds.api.properties.nodes.BinaryArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.VectorNodePropertyValues;
 
 public final class Neo4jNodePropertyValuesUtil {
 
@@ -35,6 +36,14 @@ public final class Neo4jNodePropertyValuesUtil {
             case FLOAT_ARRAY -> new Neo4jFloatArrayNodePropertyValues(internal);
             case DOUBLE_ARRAY -> new Neo4jDoubleArrayNodePropertyValues(internal);
             case LONG_ARRAY -> new Neo4jLongArrayNodePropertyValues(internal);
+            case FLOAT_VECTOR -> new Neo4jFloatVectorNodePropertyValues(
+                internal,
+                ((VectorNodePropertyValues) internal).vectorDimension()
+            );
+            case DOUBLE_VECTOR -> new Neo4jDoubleVectorNodePropertyValues(
+                internal,
+                ((VectorNodePropertyValues) internal).vectorDimension()
+            );
 //            case STRING -> null;
 //            case UNTYPED_ARRAY -> null;
 //            case UNKNOWN -> null;

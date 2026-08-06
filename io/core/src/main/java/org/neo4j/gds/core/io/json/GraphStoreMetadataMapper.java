@@ -152,6 +152,8 @@ public final class GraphStoreMetadataMapper {
             case FLOAT_ARRAY -> org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_ARRAY;
             case DOUBLE_ARRAY -> org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE_ARRAY;
             case LONG_ARRAY -> org.neo4j.gds.api.nodeproperties.ValueType.LONG_ARRAY;
+            case FLOAT_VECTOR -> org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_VECTOR;
+            case DOUBLE_VECTOR -> org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE_VECTOR;
         };
     }
 

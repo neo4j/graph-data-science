@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.values.GdsValue;
@@ -27,21 +28,35 @@ import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class GraphStoreNodeVisitor extends NodeVisitor {
 
     private final NodesBuilder nodesBuilder;
+    private final Map<String, Function<Object, GdsValue>> propertyCreators;
 
     public GraphStoreNodeVisitor(NodeSchema nodeSchema, NodesBuilder nodesBuilder) {
         super(nodeSchema);
         this.nodesBuilder = nodesBuilder;
+
+        propertyCreators = initPropertyCreators(nodeSchema);
+    }
+
+    private static Map<String, Function<Object, GdsValue>> initPropertyCreators(NodeSchema nodeSchema) {
+        Map<String, Function<Object, GdsValue>> propertyCreators = new HashMap<>();
+        for (var labelSchema : nodeSchema.entries().entrySet()) {
+            for (PropertySchema propertySchema : labelSchema.getValue()) {
+                propertyCreators.putIfAbsent(propertySchema.key(), PrimitiveValues.valueCreator(propertySchema.valueType()));
+            }
+        }
+        return propertyCreators;
     }
 
     @Override
     protected void exportElement() {
         Map<String, GdsValue> props = new HashMap<>();
         forEachProperty((key, value) -> {
-            props.put(key, PrimitiveValues.create(value));
+            props.put(key, propertyCreators.get(key).apply(value));
         });
         var nodeLabels = NodeLabelTokens.of(labels());
         nodesBuilder.addNode(id(), props, nodeLabels);

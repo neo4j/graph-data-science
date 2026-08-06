@@ -91,20 +91,17 @@ public class CosineFeatureStep implements LinkFeatureStep {
     private PartialL2WithNormsComputer createComputer(NodePropertyContainer graph, String propertyName) {
         var values = graph.nodeProperties(propertyName);
 
-        switch (values.valueType()) {
-            case DOUBLE_ARRAY:
-                return new DoubleArrayComputer(values);
-            case FLOAT_ARRAY:
-                return new FloatArrayComputer(values);
-            case LONG_ARRAY:
-                return new LongArrayComputer(values);
-            case LONG:
-                return new LongComputer(values);
-            case DOUBLE:
-                return new DoubleComputer(values);
-            default:
-                throw new IllegalStateException(formatWithLocale("Unsupported ValueType %s", values.valueType()));
-        }
+        return switch (values.valueType()) {
+            case DOUBLE_ARRAY, DOUBLE_VECTOR -> new DoubleArrayComputer(values);
+            case FLOAT_ARRAY, FLOAT_VECTOR -> new FloatArrayComputer(values);
+            case LONG_ARRAY -> new LongArrayComputer(values);
+            case LONG -> new LongComputer(values);
+            case DOUBLE -> new DoubleComputer(values);
+            default -> throw new IllegalStateException(formatWithLocale(
+                "Unsupported ValueType %s",
+                values.valueType()
+            ));
+        };
     }
 
     private static class CosineComputationResult {

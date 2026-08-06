@@ -154,7 +154,7 @@ public enum ValueType {
             return visitor.visitLongArray();
         }
     },
-    UNTYPED_ARRAY {
+    UNTYPED_ARRAY { // TODO snowflake usage only?
         @Override
         public String cypherName() {
             return "List of Any";
@@ -179,9 +179,76 @@ public enum ValueType {
         public boolean isCompatibleWith(ValueType other) {
             return other == UNTYPED_ARRAY
                 || other == LONG_ARRAY
-                || other == DOUBLE_ARRAY
-                || other == FLOAT_ARRAY;
+                || other == DOUBLE_ARRAY;
+            // TODO FLOAT_ARRAY also needed?
         }
+    },
+    /**
+     * A float array that is written back to Neo4j as a {@code Float32Vector} rather than a plain list, so
+     * it can back a vector index. A vector property has a single dimension shared by all nodes; since
+     * the property schema does not carry it, the graph-store formats encode it in the type token
+     * ({@code float_vector(128)}) rather than in {@link #csvName()}.
+     *
+     * <p>It holds exactly the values a {@link #FLOAT_ARRAY} holds, so consumers that do not care about
+     * write-back should accept both. {@link #cypherName()} reports the array name too, because a user
+     * cannot declare a vector type in a projection.
+     */
+    FLOAT_VECTOR {
+        @Override
+        public String cypherName() {
+            return "Vector of Float32";
+        }
+
+        @Override
+        public String csvName() {
+            return "float_vector";
+        }
+
+        @Override
+        public DefaultValue fallbackValue() {
+            return DefaultValue.forFloatArray();
+        }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            return visitor.visitFloatVector();
+        }
+
+        @Override
+        public boolean isVector() {
+            return true;
+        }
+
+    },
+    /**
+     * A double array written back to Neo4j as a {@code Float64Vector}. See {@link #FLOAT_VECTOR}.
+     */
+    DOUBLE_VECTOR {
+        @Override
+        public String cypherName() {
+            return "Vector of Float64";
+        }
+
+        @Override
+        public String csvName() {
+            return "double_vector";
+        }
+
+        @Override
+        public DefaultValue fallbackValue() {
+            return DefaultValue.forDoubleArray();
+        }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            return visitor.visitDoubleVector();
+        }
+
+        @Override
+        public boolean isVector() {
+            return true;
+        }
+
     },
     UNKNOWN {
         @Override
@@ -212,6 +279,10 @@ public enum ValueType {
     public abstract DefaultValue fallbackValue();
 
     public abstract <RESULT> RESULT accept(Visitor<RESULT> visitor);
+
+    public boolean isVector() {
+        return false;
+    }
 
     public boolean isCompatibleWith(ValueType other) {
         return this == other;
@@ -249,6 +320,10 @@ public enum ValueType {
         RESULT visitDoubleArray();
 
         RESULT visitFloatArray();
+
+        RESULT visitFloatVector();
+
+        RESULT visitDoubleVector();
 
         default @Nullable RESULT visitUnknown() {
             return null;

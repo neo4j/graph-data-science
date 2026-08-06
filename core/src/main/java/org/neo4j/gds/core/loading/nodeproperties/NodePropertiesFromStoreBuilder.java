@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.NodeIdMapper;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
@@ -112,22 +112,18 @@ public final class NodePropertiesFromStoreBuilder {
     }
 
     private InnerNodePropertiesBuilder newInnerBuilder(ValueType valueType) {
-        switch (valueType) {
-            case LONG:
-                return LongNodePropertiesBuilder.of(defaultValue, concurrency);
-            case DOUBLE:
-                return new DoubleNodePropertiesBuilder(defaultValue, concurrency);
-            case DOUBLE_ARRAY:
-                return new DoubleArrayNodePropertiesBuilder(defaultValue, concurrency);
-            case FLOAT_ARRAY:
-                return new FloatArrayNodePropertiesBuilder(defaultValue, concurrency);
-            case LONG_ARRAY:
-                return new LongArrayNodePropertiesBuilder(defaultValue, concurrency);
-            default:
-                throw new UnsupportedOperationException(formatWithLocale(
-                    "Loading of values of type %s is currently not supported",
-                    valueType
-                ));
-        }
+        return switch (valueType) {
+            case LONG -> LongNodePropertiesBuilder.of(defaultValue, concurrency);
+            case DOUBLE -> new DoubleNodePropertiesBuilder(defaultValue, concurrency);
+            case DOUBLE_ARRAY -> new DoubleArrayNodePropertiesBuilder(defaultValue, concurrency);
+            case DOUBLE_VECTOR -> new DoubleVectorNodePropertiesBuilder(defaultValue, concurrency);
+            case FLOAT_ARRAY -> new FloatArrayNodePropertiesBuilder(defaultValue, concurrency);
+            case FLOAT_VECTOR -> new FloatVectorNodePropertiesBuilder(defaultValue, concurrency);
+            case LONG_ARRAY -> new LongArrayNodePropertiesBuilder(defaultValue, concurrency);
+            default -> throw new UnsupportedOperationException(formatWithLocale(
+                "Loading of values of type %s is currently not supported",
+                valueType
+            ));
+        };
     }
 }

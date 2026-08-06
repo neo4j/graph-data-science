@@ -178,6 +178,8 @@ public final class GraphStoreMetadataFactory {
                 "String value type is not supported in graph store metadata");
             case UNTYPED_ARRAY -> throw new IllegalArgumentException(
                 "Untyped array value type is not supported in graph store metadata");
+            case FLOAT_VECTOR -> ValueType.FLOAT_VECTOR;
+            case DOUBLE_VECTOR -> ValueType.DOUBLE_VECTOR;
             case UNKNOWN -> throw new IllegalArgumentException(
                 "Unknown value type is not supported in graph store metadata");
         };

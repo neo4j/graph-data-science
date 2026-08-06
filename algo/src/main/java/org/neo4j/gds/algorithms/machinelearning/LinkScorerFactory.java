@@ -30,25 +30,29 @@ public final class LinkScorerFactory {
         NodePropertyValues embeddings,
         DoubleArrayList relationshipTypeEmbedding
     ) {
+        var valueType = embeddings.valueType();
+        var isFloat = valueType == ValueType.FLOAT_ARRAY || valueType == ValueType.FLOAT_VECTOR;
+        var isDouble = valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.DOUBLE_VECTOR;
         switch (scoreFunction) {
-            case TRANSE:
-                if (embeddings.valueType() == ValueType.FLOAT_ARRAY) {
+            case TRANSE -> {
+                if (isFloat) {
                     return new FloatEuclideanDistanceLinkScorer(embeddings, relationshipTypeEmbedding);
-                } else if (embeddings.valueType() == ValueType.DOUBLE_ARRAY) {
+                } else if (isDouble) {
                     return new DoubleEuclideanDistanceLinkScorer(embeddings, relationshipTypeEmbedding);
                 } else {
                     throw new IllegalArgumentException("Unsupported embeddings value type:" + embeddings.valueType());
                 }
-            case DISTMULT:
-                if (embeddings.valueType() == ValueType.FLOAT_ARRAY) {
+            }
+            case DISTMULT -> {
+                if (isFloat) {
                     return new FloatDistMultLinkScorer(embeddings, relationshipTypeEmbedding);
-                } else if (embeddings.valueType() == ValueType.DOUBLE_ARRAY) {
+                } else if (isDouble) {
                     return new DoubleDistMultLinkScorer(embeddings, relationshipTypeEmbedding);
                 } else {
                     throw new IllegalArgumentException("Unsupported embeddings value type:" + embeddings.valueType());
                 }
-            default:
-                throw new IllegalArgumentException("Unknown score function:" + scoreFunction);
+            }
+            default -> throw new IllegalArgumentException("Unknown score function:" + scoreFunction);
         }
     }
 

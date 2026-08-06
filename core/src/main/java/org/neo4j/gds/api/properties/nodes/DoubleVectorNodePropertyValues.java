@@ -17,21 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.hdbscan;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
- final class KDNodeSupportFactory {
+import java.util.Optional;
 
-     private KDNodeSupportFactory() {}
+/**
+ * A double array property  with a known dimension for all properties.
+ */
+public interface DoubleVectorNodePropertyValues extends VectorNodePropertyValues {
 
-     static KDNodeSupport create(NodePropertyValues nodePropertyValues, HugeLongArray ids, int dimension) {
+    @Override
+    double[] doubleArrayValue(long nodeId);
 
-         return switch (nodePropertyValues.valueType()) {
-             case DOUBLE_ARRAY, DOUBLE_VECTOR -> new DoubleKDNodeSupport(nodePropertyValues, ids, dimension);
-             case FLOAT_ARRAY, FLOAT_VECTOR  -> new FloatKDNodeSupport(nodePropertyValues,ids,dimension);
-             default -> throw new IllegalArgumentException("Wrong property type");
-         };
-     }
- }
+    @Override
+    default ValueType valueType() {
+        return ValueType.DOUBLE_VECTOR;
+    }
+
+    @Override
+    default Optional<Integer> dimension(long nodeId) {
+        return Optional.of(vectorDimension());
+    }
+
+    @Override
+    @Nullable
+    default Object getObject(long nodeId) {
+        return doubleArrayValue(nodeId);
+    };
+
+}

@@ -28,7 +28,8 @@ final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
 
     FloatArrayPropertySimilarityComputer(NodePropertyValues nodePropertyValues, FloatArraySimilarityMetric metric) {
         this.metric = metric;
-        if (nodePropertyValues.valueType() != ValueType.FLOAT_ARRAY) {
+        if (nodePropertyValues.valueType() != ValueType.FLOAT_ARRAY
+            && nodePropertyValues.valueType() != ValueType.FLOAT_VECTOR) {
             throw new IllegalArgumentException("The property is not of type FLOAT_ARRAY");
         }
         this.nodePropertyValues = nodePropertyValues;

@@ -30,6 +30,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.VectorNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -366,5 +367,48 @@ final class NodePropertiesFromStoreBuilderTest {
         );
         buildBlock.accept(builder);
         return builder.build(idMap(nodeCount));
+    }
+
+    @Test
+    void rebuildsAFloatVector() {
+        var properties = buildProperties(DefaultValue.forFloatArray(), builder -> {
+            builder.set(0, PrimitiveValues.floatVector(new float[]{1.0F, 2.0F, 3.0F}));
+            builder.set(1, PrimitiveValues.floatVector(new float[]{4.0F, 5.0F, 6.0F}));
+        });
+
+        assertThat(properties.valueType()).isEqualTo(ValueType.FLOAT_VECTOR);
+        assertThat(properties).isInstanceOf(VectorNodePropertyValues.class);
+        assertThat(((VectorNodePropertyValues) properties).vectorDimension()).isEqualTo(3);
+        assertThat(properties.floatArrayValue(0)).containsExactly(1.0F, 2.0F, 3.0F);
+        assertThat(properties.floatArrayValue(1)).containsExactly(4.0F, 5.0F, 6.0F);
+    }
+
+    @Test
+    void rebuildsADoubleVector() {
+        var properties = buildProperties(DefaultValue.forDoubleArray(), builder ->
+            builder.set(0, PrimitiveValues.doubleVector(new double[]{1.0D, 2.0D}))
+        );
+
+        assertThat(properties.valueType()).isEqualTo(ValueType.DOUBLE_VECTOR);
+        assertThat(((VectorNodePropertyValues) properties).vectorDimension()).isEqualTo(2);
+        assertThat(properties.doubleArrayValue(0)).containsExactly(1.0D, 2.0D);
+    }
+
+    @Test
+    void aVectorWithOnlyEmptyValuesStaysAVector() {
+        var properties = buildProperties(DefaultValue.forFloatArray(), builder ->
+            builder.set(0, PrimitiveValues.floatVector(new float[0]))
+        );
+
+        assertThat(properties.valueType()).isEqualTo(ValueType.FLOAT_VECTOR);
+    }
+
+    private static NodePropertyValues buildProperties(
+        DefaultValue defaultValue,
+        Consumer<NodePropertiesFromStoreBuilder> buildBlock
+    ) {
+        var builder = NodePropertiesFromStoreBuilder.of(defaultValue, new Concurrency(1));
+        buildBlock.accept(builder);
+        return builder.build(idMap(2));
     }
 }

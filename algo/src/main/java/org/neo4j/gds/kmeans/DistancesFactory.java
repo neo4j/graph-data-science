@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 final class DistancesFactory {
@@ -28,15 +27,12 @@ final class DistancesFactory {
     private DistancesFactory() {}
 
     static Distances create(NodePropertyValues values){
+        return switch (values.valueType()) {
+            case FLOAT_ARRAY, FLOAT_VECTOR -> new FloatArrayDistances(values);
+            case DOUBLE_ARRAY, DOUBLE_VECTOR -> new DoubleArrayDistances(values);
+            case DOUBLE -> new ScalarDistances(values);
+            case null, default -> throw new IllegalArgumentException("Incorrect data type");
+        };
 
-        if (values.valueType() == ValueType.FLOAT_ARRAY) {
-            return new FloatArrayDistances(values);
-        } else if (values.valueType() == ValueType.DOUBLE_ARRAY) {
-            return new DoubleArrayDistances(values);
-        }else if (values.valueType() == ValueType.DOUBLE){
-            return  new ScalarDistances(values);
-        }
-
-        throw new IllegalArgumentException("Incorrect data type");
     }
 }

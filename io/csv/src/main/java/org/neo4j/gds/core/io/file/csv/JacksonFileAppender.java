@@ -52,20 +52,12 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
         var csvSchemaBuilder = schemaEnricher.apply(CsvSchema.builder());
         for (PROPERTY_SCHEMA propertySchema : propertySchemas) {
             switch (propertySchema.valueType()) {
-                case LONG:
-                case DOUBLE:
-                    csvSchemaBuilder.addNumberColumn(propertySchema.key());
-                    break;
-                case DOUBLE_ARRAY:
-                case FLOAT_ARRAY:
-                case LONG_ARRAY:
+                case LONG, DOUBLE -> csvSchemaBuilder.addNumberColumn(propertySchema.key());
+                case DOUBLE_ARRAY, FLOAT_ARRAY, LONG_ARRAY, DOUBLE_VECTOR, FLOAT_VECTOR ->
                     csvSchemaBuilder.addArrayColumn(propertySchema.key(), ";");
-                    break;
-                case STRING:
-                    csvSchemaBuilder.addColumn(propertySchema.key());
-                    break;
-                case UNKNOWN:
-                    break;
+                case STRING -> csvSchemaBuilder.addColumn(propertySchema.key());
+                case UNKNOWN -> {
+                }
             }
         }
         var csvSchema = csvSchemaBuilder.build();

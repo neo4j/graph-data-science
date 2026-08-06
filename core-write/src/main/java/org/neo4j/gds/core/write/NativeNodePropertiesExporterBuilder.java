@@ -21,11 +21,18 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.transaction.TransactionContext;
 
+import java.util.function.BooleanSupplier;
+
 public class NativeNodePropertiesExporterBuilder extends NodePropertyExporterBuilder {
     protected final TransactionContext transactionContext;
+    private final BooleanSupplier supportsVectorProperties;
 
-    public NativeNodePropertiesExporterBuilder(TransactionContext transactionContext) {
+    public NativeNodePropertiesExporterBuilder(
+        TransactionContext transactionContext,
+        BooleanSupplier supportsVectorProperties
+    ) {
         this.transactionContext = transactionContext;
+        this.supportsVectorProperties = supportsVectorProperties;
     }
 
     @Override
@@ -41,7 +48,8 @@ public class NativeNodePropertiesExporterBuilder extends NodePropertyExporterBui
             terminationFlag,
             progressTracker,
             writeConcurrency,
-            executorService
+            executorService,
+            supportsVectorProperties
         );
     }
 }

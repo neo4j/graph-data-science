@@ -51,7 +51,7 @@ public class NodePropertyTypeRequirement implements AlgorithmGraphStoreRequireme
     void validatePropertyType(GraphStore graphStore) {
         var valueType = graphStore.nodeProperty(nodeProperty).valueType();
         for (var currentValueType : allowedValueTypes) {
-            if (valueType == currentValueType) {
+            if (valueType.isCompatibleWith(currentValueType)) {
                 return;
             }
         }

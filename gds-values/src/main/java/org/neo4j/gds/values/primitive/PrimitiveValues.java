@@ -20,9 +20,12 @@
 package org.neo4j.gds.values.primitive;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.values.Array;
 import org.neo4j.gds.values.DoubleArray;
+import org.neo4j.gds.values.DoubleVector;
 import org.neo4j.gds.values.FloatArray;
+import org.neo4j.gds.values.FloatVector;
 import org.neo4j.gds.values.FloatingPointValue;
 import org.neo4j.gds.values.GdsNoValue;
 import org.neo4j.gds.values.GdsValue;
@@ -31,11 +34,27 @@ import org.neo4j.gds.values.LongArray;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Function;
 
 public final class PrimitiveValues {
     private static final long[] EMPTY_LONGS = new long[0];
     public static final GdsNoValue NO_VALUE = GdsNoValue.NO_VALUE;
     public static final LongArray EMPTY_LONG_ARRAY = longArray(EMPTY_LONGS);
+
+    public static Function<Object, GdsValue> valueCreator(ValueType valueType) {
+        Function<Object, GdsValue> valueCreator = switch (valueType) {
+            case LONG -> l -> longValue((long) l);
+            case DOUBLE -> d -> floatingPointValue((double) d);
+            case DOUBLE_ARRAY -> da -> doubleArray((double[]) da);
+            case FLOAT_ARRAY -> fa -> floatArray((float[]) fa);
+            case LONG_ARRAY -> la -> longArray((long[]) la);
+            case FLOAT_VECTOR -> fv -> floatVector((float[]) fv);
+            case DOUBLE_VECTOR -> dv -> doubleVector((double[]) dv);
+            case STRING, UNKNOWN, UNTYPED_ARRAY -> PrimitiveValues::create;
+        };
+
+        return value ->  value != null ? valueCreator.apply(value) : null;
+    }
 
     public static GdsValue create(@Nullable Object value) {
         GdsValue of = of(value);
@@ -52,50 +71,30 @@ public final class PrimitiveValues {
     }
 
     private static @Nullable GdsValue of(Object value) {
-        if (value == null) return NO_VALUE;
-        if (value instanceof Number) {
-            return numberValue((Number) value);
-        }
-        if (value instanceof Object[]) {
-            return arrayValue((Object[]) value);
-        }
-        if (value instanceof byte[]) {
-            return byteArray((byte[]) value);
-        }
-        if (value instanceof short[]) {
-            return shortArray((short[]) value);
-        }
-        if (value instanceof int[]) {
-            return intArray((int[]) value);
-        }
-        if (value instanceof long[]) {
-            return longArray((long[]) value);
-        }
-        if (value instanceof float[]) {
-            return floatArray((float[]) value);
-        }
-        if (value instanceof double[]) {
-            return doubleArray((double[]) value);
-        }
-        return null;
+        return switch (value) {
+            case null -> NO_VALUE;
+            case Number number -> numberValue(number);
+            case Object[] objects -> arrayValue(objects);
+            case byte[] bytes -> byteArray(bytes);
+            case short[] shorts -> shortArray(shorts);
+            case int[] ints -> intArray(ints);
+            case long[] longs -> longArray(longs);
+            case float[] floats -> floatArray(floats);
+            case double[] doubles -> doubleArray(doubles);
+            default -> null;
+        };
     }
 
     private static GdsValue numberValue(Number number) {
-        if (number instanceof Long longNumber) {
-            return longValue(longNumber);
-        } else if (number instanceof Integer intNumber) {
-            return longValue(intNumber);
-        } else if (number instanceof Double doubleNumber) {
-            return floatingPointValue(doubleNumber);
-        } else if (number instanceof Byte byteNumber) {
-            return longValue(byteNumber);
-        } else if (number instanceof Float floatNumber) {
-            return floatingPointValue(floatNumber);
-        } else if (number instanceof Short shortNumber) {
-            return longValue(shortNumber);
-        } else {
-            throw new UnsupportedOperationException("Unsupported type of Number " + number);
-        }
+        return switch (number) {
+            case Long longNumber -> longValue(longNumber);
+            case Integer intNumber -> longValue(intNumber);
+            case Double doubleNumber -> floatingPointValue(doubleNumber);
+            case Byte byteNumber -> longValue(byteNumber);
+            case Float floatNumber -> floatingPointValue(floatNumber);
+            case Short shortNumber -> longValue(shortNumber);
+            case null, default -> throw new UnsupportedOperationException("Unsupported type of Number " + number);
+        };
     }
 
     private static @Nullable Array arrayValue(Object[] value) {
@@ -145,6 +144,12 @@ public final class PrimitiveValues {
     }
     public static LongArray byteArray(byte[] data) {
         return new ByteLongArrayImpl(data);
+    }
+    public static FloatVector floatVector(float[] data) {
+        return new FloatVectorImpl(data);
+    }
+    public static DoubleVector doubleVector(double[] data) {
+        return new DoubleVectorImpl(data);
     }
 
     private static <T> T copy(Object[] value, T target) {
