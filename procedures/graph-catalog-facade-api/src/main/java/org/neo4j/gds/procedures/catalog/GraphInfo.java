@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryUsage;
 
@@ -93,6 +94,17 @@ public class GraphInfo {
             graphStore,
             memoryUsage,
             sizeInBytes
+        );
+    }
+
+    public static GraphInfo withoutMemoryUsage(
+        GraphStoreCatalogEntry graphStoreCatalogEntry
+    ) {
+        return create(
+            graphStoreCatalogEntry.config(),
+            graphStoreCatalogEntry.graphStore(),
+            "",
+            -1L
         );
     }
 
