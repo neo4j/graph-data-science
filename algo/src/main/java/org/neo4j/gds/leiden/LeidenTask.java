@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tasks.Tasks;
@@ -29,20 +28,20 @@ import java.util.List;
 public final class LeidenTask {
     private LeidenTask() {}
 
-    public static Task create(IdMap idMap, LeidenParameters parameters) {
+    public static Task create(long nodeCount, LeidenParameters parameters) {
         var iterativeTasks = Tasks.iterativeDynamic(
             "Iteration",
             parameters.concurrency(), () ->
                 List.of(
                     Tasks.leaf("Local Move", parameters.concurrency(), 1),
-                    Tasks.leaf("Modularity Computation", parameters.concurrency(), idMap.nodeCount()),
-                    Tasks.leaf("Refinement", parameters.concurrency(), idMap.nodeCount()),
-                    Tasks.leaf("Aggregation", parameters.concurrency(), idMap.nodeCount())
+                    Tasks.leaf("Modularity Computation", parameters.concurrency(), nodeCount),
+                    Tasks.leaf("Refinement", parameters.concurrency(), nodeCount),
+                    Tasks.leaf("Aggregation", parameters.concurrency(), nodeCount)
                 ),
             parameters.maxLevels()
         );
 
-        var initializationTask = Tasks.leaf("Initialization", parameters.concurrency(), idMap.nodeCount());
+        var initializationTask = Tasks.leaf("Initialization", parameters.concurrency(), nodeCount);
 
         return Tasks.task(
             AlgorithmLabel.Leiden.asString(),

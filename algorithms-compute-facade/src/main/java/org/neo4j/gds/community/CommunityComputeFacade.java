@@ -42,7 +42,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.hdbscan.HDBScan;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.hdbscan.Labels;
@@ -72,6 +71,7 @@ import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccParameters;
@@ -353,7 +353,7 @@ public class CommunityComputeFacade {
         }
 
         var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.labelPropagation(graph, parameters),
+            CommunityAlgorithmTasks.labelPropagation(graph.relationshipCount(), parameters),
             jobId,
             parameters.concurrency(),
             logProgress

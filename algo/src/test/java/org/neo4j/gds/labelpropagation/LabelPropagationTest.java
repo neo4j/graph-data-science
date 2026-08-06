@@ -36,10 +36,10 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -251,7 +251,7 @@ class LabelPropagationTest {
 
             var parameters = new LabelPropagationParameters(new Concurrency(4), 10, null, null);
             var progressTrackerWithLog = TestProgressTrackerHelper.create(
-                CommunityAlgorithmTasks.labelPropagation(graph, parameters),
+                CommunityAlgorithmTasks.labelPropagation(graph.relationshipCount(), parameters),
                 new Concurrency(1)
             );
 

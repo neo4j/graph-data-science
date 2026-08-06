@@ -151,7 +151,7 @@ public class CommunityAlgorithmsBusinessFacade {
 
     LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
         var parameters = configuration.toParameters();
-        var task = CommunityAlgorithmTasks.labelPropagation(graph, parameters);
+        var task = CommunityAlgorithmTasks.labelPropagation(graph.relationshipCount(), parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return algorithmMachinery.getResultAndManageProgressTracker(

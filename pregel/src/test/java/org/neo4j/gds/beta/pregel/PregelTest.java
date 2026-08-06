@@ -49,11 +49,6 @@ import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
-import org.neo4j.gds.progress.registration.TaskRegistry;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.progress.tasks.Status;
-import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -61,6 +56,11 @@ import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
+import org.neo4j.gds.progress.registration.TaskRegistry;
+import org.neo4j.gds.progress.tasks.Status;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -160,7 +160,7 @@ class PregelTest {
 
         var computation = new TestPregelComputation();
 
-        var task = Pregel.progressTask(graph, config, MemoryRange.empty(), computation.getClass().getSimpleName());
+        var task = Pregel.progressTask(graph.nodeCount(), config, MemoryRange.empty(), computation.getClass().getSimpleName());
         var log = new GdsTestLog();
         var progressTracker = TestProgressTracker.create(
             log,
@@ -226,7 +226,7 @@ class PregelTest {
         var progressTracker = TaskProgressTracker.create(
             Log.noOpLog(),
             new LoggerForProgressTrackingAdapter(Log.noOpLog()),
-            Pregel.progressTask(graph, config, MemoryRange.empty(), computation.getClass().getSimpleName()),
+            Pregel.progressTask(graph.nodeCount(), config, MemoryRange.empty(), computation.getClass().getSimpleName()),
             config.concurrency(),
             PlainSimpleRequestCorrelationId.create(),
             new TaskRegistry(User.DEFAULT, taskStore, new JobId())
