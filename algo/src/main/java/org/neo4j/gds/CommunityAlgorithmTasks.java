@@ -26,8 +26,6 @@ import org.neo4j.gds.approxmaxkcut.ApproximateKCutTaskFactory;
 import org.neo4j.gds.cliqueCounting.CliqueCountingTaskFactory;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.progress.tasks.Task;
-import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.hdbscan.HDBScanProgressTrackerCreator;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
@@ -40,6 +38,8 @@ import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainProgressTrackerTaskCreator;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationProgressTrackerTaskCreator;
+import org.neo4j.gds.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
@@ -52,7 +52,7 @@ public final class CommunityAlgorithmTasks {
     private CommunityAlgorithmTasks() {}
 
     public static Task approximateMaximumKCut(Graph graph, ApproxMaxKCutParameters parameters) {
-        return ApproximateKCutTaskFactory.createTask(graph, parameters);
+        return ApproximateKCutTaskFactory.createTask(graph.nodeCount(), parameters);
     }
 
     public static Task cliqueCounting(Graph graph, CliqueCountingParameters parameters) {
@@ -93,15 +93,15 @@ public final class CommunityAlgorithmTasks {
         return KMeansTaskFactory.createTask(graph, parameters);
     }
 
-    public static Task labelPropagation(Graph graph, LabelPropagationParameters parameters) {
+    public static Task labelPropagation(long relationshipCount, LabelPropagationParameters parameters) {
         return Tasks.task(
             AlgorithmLabel.LabelPropagation.asString(),
             parameters.concurrency(),
-            Tasks.leaf("Initialization", parameters.concurrency(), graph.relationshipCount()),
+            Tasks.leaf("Initialization", parameters.concurrency(), relationshipCount),
             Tasks.iterativeDynamic(
                 "Assign labels",
                 parameters.concurrency(),
-                () -> List.of(Tasks.leaf("Iteration", parameters.concurrency(), graph.relationshipCount())),
+                () -> List.of(Tasks.leaf("Iteration", parameters.concurrency(), relationshipCount)),
                 parameters.maxIterations()
             )
         );
@@ -117,7 +117,7 @@ public final class CommunityAlgorithmTasks {
     }
 
     public static Task leiden(Graph graph, LeidenParameters parameters) {
-        return LeidenTask.create(graph, parameters);
+        return LeidenTask.create(graph.nodeCount(), parameters);
     }
 
     public static Task louvain(Graph graph, LouvainParameters parameters) {

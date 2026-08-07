@@ -24,12 +24,12 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.progress.tasks.Task;
-import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Tasks;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -123,12 +123,12 @@ public final class Pregel<CONFIG extends PregelConfig> {
         return estimationBuilder.build();
     }
 
-    public static <CONFIG extends PregelConfig> Task progressTask(Graph graph, CONFIG config, MemoryRange memoryEstimationInBytes, String taskName) {
+    public static <CONFIG extends PregelConfig> Task progressTask(long nodeCount, CONFIG config, MemoryRange memoryEstimationInBytes, String taskName) {
         return Tasks.iterativeDynamic(
             taskName,
             config.concurrency(), () -> List.of(
-                Tasks.leaf("Compute iteration", config.concurrency(), graph.nodeCount()),
-                Tasks.leaf("Master compute iteration", config.concurrency(), graph.nodeCount())
+                Tasks.leaf("Compute iteration", config.concurrency(), nodeCount),
+                Tasks.leaf("Master compute iteration", config.concurrency(), nodeCount)
             ),
             memoryEstimationInBytes,
             config.maxIterations()
@@ -141,7 +141,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             "(Mutate|Stream|Write|Stats)*Config",
             ""
         );
-        return progressTask(graph, config, memoryEstimationInBytes, taskName);
+        return progressTask(graph.nodeCount(), config, memoryEstimationInBytes, taskName);
     }
 
     private Pregel(

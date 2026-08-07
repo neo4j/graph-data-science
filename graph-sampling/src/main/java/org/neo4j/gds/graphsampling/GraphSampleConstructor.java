@@ -41,10 +41,10 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tasks.Tasks;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.StringFormatting;
 
@@ -239,6 +239,10 @@ public class GraphSampleConstructor {
     }
 
     public static Task progressTask(GraphStore graphStore, NodesSampler nodesSampler, Concurrency concurrency) {
+        var nodeCount = graphStore.nodeCount();
+        var relationshipCount = graphStore.relationshipCount();
+        var numRelTypes = graphStore.relationshipTypes().size();
+
         return Tasks.task(
             nodesSampler.progressTaskName(),
             concurrency,
@@ -246,13 +250,13 @@ public class GraphSampleConstructor {
             Tasks.task(
                 "Construct graph",
                 concurrency,
-                Tasks.leaf("Construct node id map", concurrency, graphStore.nodeCount()),
-                Tasks.leaf("Filter node properties", concurrency, graphStore.nodeCount()),
+                Tasks.leaf("Construct node id map", concurrency, nodeCount),
+                Tasks.leaf("Filter node properties", concurrency, nodeCount),
                 Tasks.iterativeFixed(
                     "Filter relationship properties",
                     concurrency,
-                    () -> List.of(Tasks.leaf("Relationship type", concurrency, graphStore.relationshipCount())),
-                    graphStore.relationshipTypes().size()
+                    () -> List.of(Tasks.leaf("Relationship type", concurrency, relationshipCount)),
+                    numRelTypes
                 )
             )
         );

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.progress.tasks.Task;
@@ -31,13 +30,13 @@ public final class ApproximateKCutTaskFactory {
 
     private ApproximateKCutTaskFactory() {}
 
-    public static Task createTask(Graph graph, ApproxMaxKCutParameters parameters) {
+    public static Task createTask(long nodeCount, ApproxMaxKCutParameters parameters) {
         return Tasks.iterativeFixed(
             AlgorithmLabel.ApproximateMaximumKCut.asString(),
             parameters.concurrency(),
             () -> List.of(
-                Tasks.leaf("place nodes randomly", parameters.concurrency(), graph.nodeCount()),
-                searchTask(parameters.concurrency(), graph.nodeCount(), parameters.vnsMaxNeighborhoodOrder())
+                Tasks.leaf("place nodes randomly", parameters.concurrency(), nodeCount),
+                searchTask(parameters.concurrency(), nodeCount, parameters.vnsMaxNeighborhoodOrder())
             ),
             parameters.iterations()
         );

@@ -29,8 +29,6 @@ import org.neo4j.gds.betweenness.BetweennessCentralityProgressTask;
 import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
 import org.neo4j.gds.closeness.ClosenessCentralityTask;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.progress.tasks.Task;
-import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityProgressTask;
 import org.neo4j.gds.harmonic.HarmonicCentralityProgressTask;
 import org.neo4j.gds.hits.HitsConfig;
@@ -43,6 +41,8 @@ import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
+import org.neo4j.gds.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Tasks;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
@@ -80,15 +80,15 @@ public final class CentralityAlgorithmTasks {
     }
 
     public static Task articleRank(Graph graph, ArticleRankConfig configuration) {
-        return Pregel.progressTask(graph, configuration, MemoryRange.empty(), ArticleRank.asString());
+        return Pregel.progressTask(graph.nodeCount(), configuration, MemoryRange.empty(), ArticleRank.asString());
     }
 
     public static Task eigenVector(Graph graph, EigenvectorConfig configuration) {
-        return Pregel.progressTask(graph, configuration, MemoryRange.empty(), EigenVector.asString());
+        return Pregel.progressTask(graph.nodeCount(), configuration, MemoryRange.empty(), EigenVector.asString());
     }
 
     public static Task pageRank(Graph graph, PageRankConfig configuration) {
-        return Pregel.progressTask(graph, configuration, MemoryRange.empty(), PageRank.asString());
+        return Pregel.progressTask(graph.nodeCount(), configuration, MemoryRange.empty(), PageRank.asString());
     }
 
     public static Task hits(Graph graph, HitsConfig configuration) {
@@ -115,7 +115,7 @@ public final class CentralityAlgorithmTasks {
         return Tasks.task(
             AlgorithmLabel.IndirectExposure.asString(),
             configuration.concurrency(), Tasks.leaf("TotalTransfers", configuration.concurrency(), graph.nodeCount()),
-            Pregel.progressTask(graph, configuration, MemoryRange.empty(), "ExposurePropagation")
+            Pregel.progressTask(graph.nodeCount(), configuration, MemoryRange.empty(), "ExposurePropagation")
         );
     }
 

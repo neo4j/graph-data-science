@@ -38,8 +38,11 @@ public class IterativeTask extends Task {
         FIXED
     }
 
-    private final Supplier<List<Task>> subTasksSupplier;
+    // Released once the task reaches a terminal state, so that a stored task
+    // does not retain whatever the supplier lambda captured (e.g. the graph).
+    private Supplier<List<Task>> subTasksSupplier;
     private final Mode mode;
+    private final int tasksPerIteration;
     private final int maxIterations;
 
     IterativeTask(
@@ -67,7 +70,8 @@ public class IterativeTask extends Task {
         super(description, concurrency, subTasks, memoryEstimationInBytes);
         this.subTasksSupplier = subTasksSupplier;
         this.mode = mode;
-        this.maxIterations = Math.toIntExact(subTasks().count() / subTasksSupplier.get().size());
+        this.tasksPerIteration = subTasksSupplier.get().size();
+        this.maxIterations = Math.toIntExact(subTasks().count() / tasksPerIteration);
     }
 
     @Override
@@ -108,12 +112,23 @@ public class IterativeTask extends Task {
     public void finish() {
         super.finish();
         subTasks().filter(t -> t.status() == Status.PENDING).forEach(Task::cancel);
+        this.subTasksSupplier = null;
+    }
+
+    @Override
+    public void cancel() {
+        super.cancel();
+        this.subTasksSupplier = null;
+    }
+
+    @Override
+    public void fail() {
+        super.fail();
+        this.subTasksSupplier = null;
     }
 
     public int currentIteration() {
-        return (int) subTasks().filter(t -> t.status() == Status.FINISHED).count() / subTasksSupplier
-            .get()
-            .size();
+        return (int) subTasks().filter(t -> t.status() == Status.FINISHED).count() / tasksPerIteration;
     }
 
     public Mode mode() {

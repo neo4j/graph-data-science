@@ -25,15 +25,15 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.progress.tracking.TaskProgressTracker;
-import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.progress.tasks.Tasks;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -64,10 +64,11 @@ public class WriteNodePropertiesApplication {
 
         var concurrency = configuration.writeConcurrency();
 
+        var subGraphNodeCount = subGraph.nodeCount();
         var task = Tasks.iterativeFixed(
             "Graph :: NodeProperties :: Write",
             concurrency,
-            () -> List.of(NodePropertyExporter.innerTask("Label", concurrency, subGraph.nodeCount())),
+            () -> List.of(NodePropertyExporter.innerTask("Label", concurrency, subGraphNodeCount)),
             validNodeLabels.size()
         );
 
