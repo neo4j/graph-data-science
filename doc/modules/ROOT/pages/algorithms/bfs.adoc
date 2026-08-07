@@ -233,7 +233,7 @@ RETURN path
 If we do not specify any of the options for early termination, the algorithm will traverse the entire graph.
 In the image below we can see the traversal order of the nodes, marked by relationship type `NEXT`:
 
-image::bfs-full-stream-path.svg[Visualization of Breadth First Search stream without early termination conditions ,align="center"]
+image::bfs-full-stream-path.svg[Visualization of Breadth First Search stream without early termination conditions,width=300,role=popup]
 
 
 [role=query-example, no-result=true]
@@ -255,7 +255,7 @@ RETURN path
 In the image below we can see the traversal order of the nodes, marked by relationship type `NEXT`.
 It is notable that the `D` node is not present in the picture, this is because the algorithm reached the target node `E` first and terminated the execution, leaving `D` unvisited.
 
-image::bfs-target-nodes-stream-path.svg[Visualization of Breadth First Search stream with target nodes ,align="center"]
+image::bfs-target-nodes-stream-path.svg[Visualization of Breadth First Search stream with target nodes,width=300,role=popup]
 
 
 [role=query-example, no-result=true]
@@ -276,7 +276,7 @@ RETURN path
 In the image below we can see the traversal order of the nodes, marked by relationship type `NEXT`.
 Nodes `D` and `E` were not visited since they are at distance 2 from node `A`.
 
-image::bfs-max-depth-stream-path.svg[Visualization of Breadth First Search stream with max depth ,align="center"]
+image::bfs-max-depth-stream-path.svg[Visualization of Breadth First Search stream with max depth,width=300,role=popup]
 
 
 === Mutate

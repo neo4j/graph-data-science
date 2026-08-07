@@ -180,7 +180,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 :algorithm-name: {algorithm}
 :graph-description: Bitcoin transactions
-:image-file: approx-max-k-cut-example.png
+:image-file: approx-max-k-cut-example.svg
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:

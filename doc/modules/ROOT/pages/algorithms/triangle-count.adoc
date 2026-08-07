@@ -257,7 +257,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 :algorithm-name: {algorithm}
 :graph-description: social network
-:image-file: triangle_count.png
+:image-file: triangle-count.svg
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:

@@ -209,7 +209,7 @@ include::partial$/algorithms/scc/specific-configuration.adoc[]
 [[algorithms-strongly-connected-components-example]]
 == Strongly Connected Components algorithm examples
 
-image::strongly_connected_components.png[]
+image::strongly-connected-components.svg[Example of strongly Connected Components algorithm,width=350,role=popup]
 
 
 .The following will create a sample graph:
