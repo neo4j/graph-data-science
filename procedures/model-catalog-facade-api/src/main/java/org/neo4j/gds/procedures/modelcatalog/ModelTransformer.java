@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.procedures.modelcatalog;
 
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.catalog.ModelMetadata;
 
 public final class ModelTransformer {
     private ModelTransformer() {}
 
-    public static ModelCatalogResult toModelCatalogResult(Model<?, ?, ?> model) {
+    public static ModelCatalogResult toModelCatalogResult(ModelMetadata metadata) {
         return new ModelCatalogResult(
-            model.name(),
-            model.algoType(),
-            model.customInfo().toMap(),
-            model.creationTime(),
-            model.trainConfig().toMap(),
-            model.graphSchema().toMapOld(),
-            model.loaded(),
-            model.stored(),
-            !model.sharedWith().isEmpty()
+            metadata.name(),
+            metadata.modelType(),
+            metadata.modelInfo(),
+            metadata.creationTime(),
+            metadata.trainConfig(),
+            metadata.graphSchema(),
+            metadata.loaded(),
+            metadata.stored(),
+            metadata.published()
         );
     }
 }

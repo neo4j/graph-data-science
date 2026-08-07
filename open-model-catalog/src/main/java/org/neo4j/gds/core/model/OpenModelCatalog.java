@@ -22,11 +22,10 @@ package org.neo4j.gds.core.model;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.model.Model.CustomInfo;
+import org.neo4j.gds.core.model.catalog.ModelMetadata;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -60,13 +59,15 @@ public final class OpenModelCatalog implements ModelCatalog {
 
     @Override
     public void set(Model<?, ?, ?> model) {
-        userCatalogs.compute(model.creator(), (user, userCatalog) -> {
-            if (userCatalog == null) {
-                userCatalog = new OpenUserCatalog();
+        userCatalogs.compute(
+            model.creator(), (user, userCatalog) -> {
+                if (userCatalog == null) {
+                    userCatalog = new OpenUserCatalog();
+                }
+                userCatalog.set(model);
+                return userCatalog;
             }
-            userCatalog.set(model);
-            return userCatalog;
-        });
+        );
 
         listeners.forEach(listener -> listener.onInsert(model));
     }
@@ -103,6 +104,10 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
+    public Stream<ModelMetadata> getAllMetadata() {
+        return getAllModels().map(ModelMetadata::of);
+    }
+
     public Stream<Model<?, ?, ?>> getAllModels() {
         return userCatalogs
             .entrySet()
@@ -131,16 +136,11 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public Collection<Model<?, ?, ?>> list(String username) {
-        return new ArrayList<>(getUserCatalog(username).list());
-    }
-
-    @Override
     public Model<?, ?, ?> publish(String username, String modelName) {
         throw new IllegalStateException(
             "Publishing models is not available in openGDS. " +
-            "Please consider licensing the Graph Data Science library. " +
-            "See documentation at https://neo4j.com/docs/graph-data-science/"
+                "Please consider licensing the Graph Data Science library. " +
+                "See documentation at https://neo4j.com/docs/graph-data-science/"
         );
     }
 
@@ -148,8 +148,8 @@ public final class OpenModelCatalog implements ModelCatalog {
     public Model<?, ?, ?> store(String username, String modelName, Path modelDir) {
         throw new IllegalStateException(
             "Storing models is not available in openGDS. " +
-            "Please consider licensing the Graph Data Science library. " +
-            "See documentation at https://neo4j.com/docs/graph-data-science/"
+                "Please consider licensing the Graph Data Science library. " +
+                "See documentation at https://neo4j.com/docs/graph-data-science/"
         );
     }
 

@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.modelcatalog;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.core.model.catalog.ModelMetadata;
 
 import java.util.stream.Stream;
 
@@ -35,12 +36,16 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
     }
 
     @Override
-    public Stream<ModelCatalogResult> drop(String modelNameAsString, @Nullable String sessionName, boolean failIfMissing) {
+    public Stream<ModelCatalogResult> drop(
+        String modelNameAsString,
+        @Nullable String sessionName,
+        boolean failIfMissing
+    ) {
         var modelName = modelNameValidationService.validate(modelNameAsString);
 
         var model = applicationsFacade.modelCatalog().drop(modelName, failIfMissing);
 
-        return Stream.ofNullable(model).map(ModelTransformer::toModelCatalogResult);
+        return Stream.ofNullable(model).map(ModelMetadata::of).map(ModelTransformer::toModelCatalogResult);
     }
 
     @Override
@@ -63,9 +68,7 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
     }
 
     private Stream<ModelCatalogResult> list() {
-        var models = applicationsFacade.modelCatalog().list();
-
-        return models.stream().map(ModelTransformer::toModelCatalogResult);
+        return applicationsFacade.modelCatalog().list().map(ModelTransformer::toModelCatalogResult);
     }
 
     private Stream<ModelCatalogResult> lookup(String modelNameAsString) {
@@ -75,7 +78,7 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
 
         if (model == null) return Stream.empty();
 
-        var result = ModelTransformer.toModelCatalogResult(model);
+        var result = ModelTransformer.toModelCatalogResult(ModelMetadata.of(model));
 
         return Stream.of(result);
     }

@@ -22,9 +22,10 @@ package org.neo4j.gds.applications.modelcatalog;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.catalog.ModelMetadata;
 
-import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class DefaultModelCatalogApplications implements ModelCatalogApplications {
     private final ModelCatalog modelCatalog;
@@ -52,8 +53,8 @@ public final class DefaultModelCatalogApplications implements ModelCatalogApplic
     }
 
     @Override
-    public Collection<Model<?, ?, ?>> list() {
-        return modelCatalog.list(user.getUsername());
+    public Stream<ModelMetadata> list() {
+        return modelCatalog.getAllMetadata();
     }
 
     @Override

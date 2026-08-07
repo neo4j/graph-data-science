@@ -21,10 +21,10 @@ package org.neo4j.gds.core.model;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.model.Model.CustomInfo;
+import org.neo4j.gds.core.model.catalog.ModelMetadata;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.stream.Stream;
 
 public interface ModelCatalog {
@@ -47,7 +47,7 @@ public interface ModelCatalog {
 
     @Nullable Model<?, ?, ?> getUntyped(String username, String modelName);
 
-    Stream<Model<?, ?, ?>> getAllModels();
+    Stream<ModelMetadata> getAllMetadata();
 
     long modelCount();
 
@@ -56,8 +56,6 @@ public interface ModelCatalog {
     Model<?, ?, ?> dropOrThrow(String username, String modelName);
 
     @Nullable Model<?, ?, ?> drop(String username, String modelName);
-
-    Collection<Model<?, ?, ?>> list(String username);
 
     Model<?, ?, ?> publish(String username, String modelName);
 
@@ -107,8 +105,8 @@ public interface ModelCatalog {
         }
 
         @Override
-        public Stream<Model<?, ?, ?>> getAllModels() {
-            return null;
+        public Stream<ModelMetadata> getAllMetadata() {
+            return Stream.empty();
         }
 
         @Override
@@ -132,17 +130,12 @@ public interface ModelCatalog {
         }
 
         @Override
-        public Collection<Model<?, ?, ?>> list(String username) {
-            return null;
-        }
-
-        @Override
         public Model<?, ?, ?> publish(String username, String modelName) {
             return null;
         }
 
         @Override
-        public Model<?, ?, ?> store(String username, String modelName, Path modelDir) { return null; }
+        public Model<?, ?, ?> store(String username, String modelName, Path modelDir) {return null;}
 
         @Override
         public boolean isEmpty() {

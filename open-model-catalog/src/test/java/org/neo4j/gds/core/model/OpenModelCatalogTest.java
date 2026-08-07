@@ -102,7 +102,13 @@ class OpenModelCatalogTest {
             TestTrainConfig.of(USERNAME, "testModel"),
             new TestCustomInfo()
         );
-        var model2 = Model.of("testAlgo2", GRAPH_SCHEMA, 1337L, TestTrainConfig.of(USERNAME, "testModel2"), new TestCustomInfo());
+        var model2 = Model.of(
+            "testAlgo2",
+            GRAPH_SCHEMA,
+            1337L,
+            TestTrainConfig.of(USERNAME, "testModel2"),
+            new TestCustomInfo()
+        );
 
         modelCatalog.set(model);
         modelCatalog.set(model2);
@@ -260,7 +266,7 @@ class OpenModelCatalogTest {
 
         assertEquals(
             "The model `testModel` has data with different types than expected. " +
-            "Expected data type: `java.lang.String`, invoked with model data type: `java.lang.Double`.",
+                "Expected data type: `java.lang.String`, invoked with model data type: `java.lang.Double`.",
             ex.getMessage()
         );
     }
@@ -282,8 +288,8 @@ class OpenModelCatalogTest {
 
         assertEquals(
             "The model `testModel` has a training config with different types than expected. " +
-            "Expected train config type: `org.neo4j.gds.model.catalog.TestTrainConfigImpl`, " +
-            "invoked with model config type: `org.neo4j.gds.core.model.OpenModelCatalogTest$ModelCatalogTestTrainConfig`.",
+                "Expected train config type: `org.neo4j.gds.model.catalog.TestTrainConfigImpl`, " +
+                "invoked with model config type: `org.neo4j.gds.core.model.OpenModelCatalogTest$ModelCatalogTestTrainConfig`.",
             ex.getMessage()
         );
     }
@@ -343,7 +349,7 @@ class OpenModelCatalogTest {
 
     @Test
     void shouldReturnEmptyList() {
-        assertEquals(0, modelCatalog.list(USERNAME).size());
+        assertEquals(0, modelCatalog.getAllMetadata().count());
     }
 
     @Configuration("ModelCatalogTestTrainConfigImpl")

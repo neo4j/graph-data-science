@@ -20,16 +20,17 @@
 package org.neo4j.gds.applications.modelcatalog;
 
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.catalog.ModelMetadata;
 
-import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface ModelCatalogApplications {
     Model<?, ?, ?> drop(ModelName modelName, boolean failIfMissing);
 
     Optional<Model<?, ?, ?>> exists(ModelName modelName);
 
-    Collection<Model<?, ?, ?>> list();
+    Stream<ModelMetadata> list();
 
     Model<?, ?, ?> lookup(ModelName modelName);
 }
