@@ -124,7 +124,7 @@ NOTE: Relationships are always written using a single thread.
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
-image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
+image::example-graphs/node-similarity.svg[Visualization of the example graph,400,role=popup]
 
 // FIXME adjust graph to above
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -211,7 +211,7 @@ By default, no relationship properties will be written, as it can be seen from t
 
 Here is an illustration of how the example graph looks in Neo4j after executing the example above.
 
-image::example-graphs/write_relationships_graph.svg[Visualization of the example graph after writing relationships back,align="center"]
+image::example-graphs/write-relationships-graph.svg[Visualization of the example graph after writing relationships back,400,role=popup]
 
 The `SIMILAR` relationships have been added to the underlying database and can be used in Cypher queries or for projecting to in-memory graph for running algorithms.
 The relationships in this example are undirected because we used xref:algorithms/node-similarity.adoc[Node Similarity] to mutate the in-memory graph and this algorithm creates undirected relationships, this may not be the case if we use different algorithms.
@@ -251,7 +251,7 @@ YIELD
 
 In order to demonstrate writing relationships with multiple properties back to Neo4j we will create a small graph in the database first.
 
-image::example-graphs/write-relationship-properties.svg[Visualization of the example graph,align="center"]
+image::example-graphs/write-relationship-properties.svg[Visualization of the example graph,400,role=popup]
 
 
 .The following Cypher statement will create the graph for this example in the Neo4j database:

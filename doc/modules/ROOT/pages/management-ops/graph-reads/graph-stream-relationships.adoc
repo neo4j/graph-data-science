@@ -160,7 +160,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
-image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
+image::example-graphs/node-similarity.svg[Visualization of the example graph,450,role=popup]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query, group=rels]

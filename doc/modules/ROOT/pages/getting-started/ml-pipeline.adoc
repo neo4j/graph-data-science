@@ -38,7 +38,7 @@ CREATE
 
 The graph looks as follows:
 
-image::lp-graph.svg["LP example data."]
+image::lp-graph.svg[Link prediction example graph showing how people are connected to each other via knows relationships,550,role=popup]
 
 The next query creates an in-memory graph called `friends` from the Neo4j graph.
 Since the Link Prediction model requires the graph to be undirected, the orientation of the `:KNOWS` relationship is discarded.

@@ -62,7 +62,7 @@ CREATE
 
 The graph looks as follows:
 
-image::example-graphs/knn-fastrp.png[Visualization of the example graph,align="center"]
+image::example-graphs/knn-fastrp.svg[Visualization of the example graph,600,role=popup]
 
 The next query creates an in-memory graph called `purchases` from the Neo4j graph.
 The only difference from the original data is that the orientation of the `:BUYS` relationships is discarded; this is because undirected relationships are the default choice when using the FastRP algorithm.

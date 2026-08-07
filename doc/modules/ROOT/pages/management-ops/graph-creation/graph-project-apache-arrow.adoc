@@ -27,7 +27,7 @@ The protocol describes the projection of a single in-memory graph into GDS.
 Each projection is represented as an import process on the server side.
 The protocol divides the import process into three phases.
 
-image::arrow/import-protocol.png[Client-server protocol for Arrow import in GDS,align="center"]
+image::arrow/import-protocol.svg[Client-server protocol for Arrow import in GDS,650,role=popup]
 
 1. Initialize the import process
 +

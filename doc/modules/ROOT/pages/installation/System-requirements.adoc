@@ -6,7 +6,7 @@
 The GDS library runs within a Neo4j instance and is therefore subject to the general https://neo4j.com/docs/operations-manual/current/performance/memory-configuration/[Neo4j memory configuration].
 
 .GDS heap memory usage
-image::memory-usage.png[width=600]
+image::memory-usage.svg[GDS heap memory usage,500,role=popup]
 
 
 [[heap-size]]

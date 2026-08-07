@@ -23,7 +23,7 @@ The typical workflow with GDS algorithms is as follows:
   * Use the `write` mode to write the output of the algorithm back to the Neo4j database.
 . (Optional) Choose and run more algorithms.
 
-image::algorithm-modes.svg["Algorithms workflow.", 400]
+image::algorithm-modes.svg[Basic workflow showing how graph data science works in Neo4j,450,role=popup]
 
 The xref:getting-started/basic-workflow.adoc[] and the xref:getting-started/fastrp-knn-example.adoc[] examples show this workflow with a single algorithm and a sequence of algorithms.
 
@@ -41,6 +41,6 @@ The typical workflow with a machine learning pipeline in GDS is as follows:
   * Use the `mutate` mode to update the in-memory graph with the predicted values.
   * Use the `write` mode to write the predicted values back to the Neo4j database.
 
-image::pipeline-model.svg["Workflow of pipelines and models.", 400]
+image::pipeline-model.svg[Basic workflow showing how machine learning works in Neo4j,450,role=popup]
 
 The xref:getting-started/ml-pipeline.adoc[] example shows how to configure and use a basic Link Prediction pipeline.

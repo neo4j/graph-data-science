@@ -53,7 +53,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 In order to demonstrate the GDS capabilities over scaling node properties, we are going to create a small graph.
 
-image::example-graphs/scale-properties.svg[Visualization of the example graph,align="center"]
+image::example-graphs/scale-properties.svg[Visualization of the example graph,350,role=popup]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]

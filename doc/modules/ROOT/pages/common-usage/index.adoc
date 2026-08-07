@@ -42,7 +42,7 @@ The sequence of operations would normally be one of:
 
 The below image illustrates an overview of standard operation of the GDS library:
 
-image::projected-graph-model.svg[]
+image::projected-graph-model.svg[Overview of standard operation of the GDS library,450,role=popup]
 
 In this image, machine learning pipelines are included in the Algorithms category.
 

@@ -103,7 +103,7 @@ include::partial$/common-usage/examples-empty-db-note.adoc[]
 In order to demonstrate the GDS Graph Project capabilities we are going to create a small social network graph in Neo4j.
 The example graph looks like this:
 
-image::example-graphs/graph-project-example.svg[Visualization of the example graph,align="center"]
+image::example-graphs/graph-project-example.svg[Visualization of the example graph,600,role=popup]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]

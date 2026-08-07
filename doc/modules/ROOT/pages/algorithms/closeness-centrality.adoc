@@ -258,7 +258,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 :algorithm-name: {algorithm}
 :graph-description: sample
-:image-file: closeness-centrality-graph.png
+:image-file: closeness-centrality-graph.svg
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 

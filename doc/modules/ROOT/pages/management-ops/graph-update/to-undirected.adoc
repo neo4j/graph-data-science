@@ -67,7 +67,7 @@ include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 In order to demonstrate converting directed relationships to undirected, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
-image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
+image::example-graphs/node-similarity.svg[Visualization of the example graph,450,role=popup]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
@@ -139,4 +139,4 @@ YIELD
 
 Here is an illustration of how the example graph looks in Neo4j after executing the example above.
 
-image::example-graphs/convert_relationships_graph.svg[Visualization of the example graph after converting the relationships to undirected,align="center"]
+image::example-graphs/convert-relationships-graph.svg[Visualization of the example graph after converting the relationships to undirected,450,role=popup]

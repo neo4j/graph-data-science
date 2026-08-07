@@ -6,7 +6,7 @@
 The graph algorithms library operates completely on the heap, which means we'll need to configure our Neo4j Server with a much larger heap size than we would for transactional workloads.
 The diagram belows shows how memory is used by the projected graph model:
 
-image::graph-model-memory.png[width=500]
+image::graph-model-memory.svg[Diagram showing how memory is used by the projected graph model,450,role=popup]
 
 The model contains three types of data:
 
