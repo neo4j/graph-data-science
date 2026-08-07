@@ -32,7 +32,7 @@ CREATE
   (e)-[:LINK {weight: -2}]->(f);
 ----
 
-image::example-graphs/aura-graph-analytics-serverless.png[]
+image::example-graphs/aura-graph-analytics-serverless.svg[]
 
 The next step is to project the data into a graph within a remote session.
 The following example shows how to run a projection and xref:aura-graph-analytics/index.adoc#implicit-sessions[create a session] at the same time.

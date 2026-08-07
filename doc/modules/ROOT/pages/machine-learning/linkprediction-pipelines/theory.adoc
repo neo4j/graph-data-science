@@ -31,7 +31,7 @@ We sort the examples in descending order of prediction strength.
 
 The curve will have a shape that looks something like this:
 
-image::misc/precision-recall-trapezoid.png[precision-recall curve with trapezoid,align="center"]
+image::misc/precision-recall-trapezoid.svg[precision-recall curve with trapezoid,align="center"]
 
 Note here the blue area which shows one trapezoid under the curve.
 

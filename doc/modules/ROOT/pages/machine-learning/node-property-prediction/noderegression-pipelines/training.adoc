@@ -150,7 +150,7 @@ We will do this on a small graph of a handful of nodes representing houses.
 In our example we want to predict the `price` of a house.
 The example graph looks like this:
 
-image::example-graphs/node_property_pipeline_graph.svg[align="center"]
+image::example-graphs/node-property-pipeline-graph.svg[align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query, group=nr]
