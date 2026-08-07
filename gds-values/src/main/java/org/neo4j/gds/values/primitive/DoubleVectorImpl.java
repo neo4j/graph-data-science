@@ -20,9 +20,9 @@
 package org.neo4j.gds.values.primitive;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.values.ArrayEquals;
 import org.neo4j.gds.values.DoubleVector;
-import org.neo4j.gds.values.GdsValue;
+import org.neo4j.gds.values.Sequence;
+import org.neo4j.gds.values.SequenceEquals;
 
 import java.util.Arrays;
 
@@ -55,44 +55,37 @@ public class DoubleVectorImpl implements DoubleVector {
     }
 
     @Override
-    public double[] asObject() {
-        return value;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o instanceof DoubleVector) {
-            return equals(((DoubleVector) o).doubleVectorValue());
-        } else if (o instanceof GdsValue) {
-            return ArrayEquals.doubleAndObject(value, ((GdsValue) o).asObject());
+        if (o instanceof Sequence other) {
+            return other.equals(value);
         }
         return false;
     }
 
     @Override
     public boolean equals(byte[] o) {
-        return ArrayEquals.byteAndDouble(o, value);
+        return SequenceEquals.byteAndDouble(o, value);
     }
 
     @Override
     public boolean equals(short[] o) {
-        return ArrayEquals.shortAndDouble(o, value);
+        return SequenceEquals.shortAndDouble(o, value);
     }
 
     @Override
     public boolean equals(int[] o) {
-        return ArrayEquals.intAndDouble(o, value);
+        return SequenceEquals.intAndDouble(o, value);
     }
 
     @Override
     public boolean equals(long[] other) {
-        return ArrayEquals.longAndDouble(other, value);
+        return SequenceEquals.longAndDouble(other, value);
     }
 
     @Override
     public boolean equals(float[] o) {
-        return ArrayEquals.floatAndDouble(o, value);
+        return SequenceEquals.floatAndDouble(o, value);
     }
 
     @Override

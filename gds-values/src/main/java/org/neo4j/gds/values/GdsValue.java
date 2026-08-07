@@ -23,5 +23,4 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 
 public interface GdsValue {
     ValueType type();
-    Object asObject();
 }

@@ -30,9 +30,4 @@ public class GdsNoValue implements GdsValue {
     public ValueType type() {
         return UNKNOWN;
     }
-
-    @Override
-    public Object asObject() {
-        return null;
-    }
 }

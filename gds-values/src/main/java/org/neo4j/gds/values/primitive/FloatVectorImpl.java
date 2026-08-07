@@ -20,9 +20,9 @@
 package org.neo4j.gds.values.primitive;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.values.ArrayEquals;
 import org.neo4j.gds.values.FloatVector;
-import org.neo4j.gds.values.GdsValue;
+import org.neo4j.gds.values.Sequence;
+import org.neo4j.gds.values.SequenceEquals;
 
 import java.util.Arrays;
 
@@ -37,11 +37,6 @@ public class FloatVectorImpl implements FloatVector {
     @Override
     public ValueType type() {
         return ValueType.FLOAT_VECTOR;
-    }
-
-    @Override
-    public float[] asObject() {
-        return value;
     }
 
     @Override
@@ -64,32 +59,30 @@ public class FloatVectorImpl implements FloatVector {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o instanceof FloatVector) {
-            return equals(((FloatVector) o).floatVectorValue());
-        } else if (o instanceof GdsValue) {
-            return ArrayEquals.floatAndObject(value, ((GdsValue) o).asObject());
+        if (o instanceof Sequence other) {
+            return other.equals(value);
         }
         return false;
     }
 
     @Override
     public boolean equals(byte[] o) {
-        return ArrayEquals.byteAndFloat(o, value);
+        return SequenceEquals.byteAndFloat(o, value);
     }
 
     @Override
     public boolean equals(short[] o) {
-        return ArrayEquals.shortAndFloat(o, value);
+        return SequenceEquals.shortAndFloat(o, value);
     }
 
     @Override
     public boolean equals(int[] o) {
-        return ArrayEquals.intAndFloat(o, value);
+        return SequenceEquals.intAndFloat(o, value);
     }
 
     @Override
     public boolean equals(long[] other) {
-        return ArrayEquals.longAndFloat(other, value);
+        return SequenceEquals.longAndFloat(other, value);
     }
 
     @Override
@@ -99,7 +92,7 @@ public class FloatVectorImpl implements FloatVector {
 
     @Override
     public boolean equals(double[] o) {
-        return ArrayEquals.floatAndDouble(value, o);
+        return SequenceEquals.floatAndDouble(value, o);
     }
 
     @Override

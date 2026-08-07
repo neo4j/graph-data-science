@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.values;
 
-public interface Vector extends GdsValue {
+/**
+ * Holds the same coordinates an {@link Array} holds, but is written back to Neo4j as a vector rather than a
+ * plain list. Unlike an array, its size is the same for every value of a property, which is why it is called
+ * a dimension.
+ */
+public interface Vector extends Sequence {
     int dimension();
-    boolean equals(byte[] other);
-    boolean equals(short[] other);
-    boolean equals(int[] other);
-    boolean equals(long[] other);
-    boolean equals(float[] other);
-    boolean equals(double[] other);
-    String toString();
 }

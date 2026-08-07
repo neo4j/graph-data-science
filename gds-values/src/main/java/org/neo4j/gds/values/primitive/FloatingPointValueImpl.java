@@ -42,11 +42,6 @@ public class FloatingPointValueImpl implements FloatingPointValue {
     }
 
     @Override
-    public Double asObject() {
-        return value;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o instanceof FloatingPointValue) {

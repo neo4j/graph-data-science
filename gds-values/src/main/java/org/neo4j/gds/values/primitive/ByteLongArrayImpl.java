@@ -20,9 +20,9 @@
 package org.neo4j.gds.values.primitive;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.values.ArrayEquals;
-import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.LongArray;
+import org.neo4j.gds.values.Sequence;
+import org.neo4j.gds.values.SequenceEquals;
 
 import java.util.Arrays;
 
@@ -59,18 +59,10 @@ public class ByteLongArrayImpl implements LongArray {
     }
 
     @Override
-    public byte[] asObject() {
-        return value;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o instanceof ByteLongArrayImpl) {
-            return equals(((ByteLongArrayImpl) o).value);
-        }
-        if (o instanceof GdsValue) {
-            return ArrayEquals.byteAndObject(value, ((GdsValue) o).asObject());
+        if (o instanceof Sequence other) {
+            return other.equals(value);
         }
         return false;
     }
@@ -82,27 +74,27 @@ public class ByteLongArrayImpl implements LongArray {
 
     @Override
     public boolean equals(short[] o) {
-        return ArrayEquals.byteAndShort(value, o);
+        return SequenceEquals.byteAndShort(value, o);
     }
 
     @Override
     public boolean equals(int[] o) {
-        return ArrayEquals.byteAndInt(value, o);
+        return SequenceEquals.byteAndInt(value, o);
     }
 
     @Override
     public boolean equals(long[] other) {
-        return ArrayEquals.byteAndLong(value, other);
+        return SequenceEquals.byteAndLong(value, other);
     }
 
     @Override
     public boolean equals(float[] o) {
-        return ArrayEquals.byteAndFloat(value, o);
+        return SequenceEquals.byteAndFloat(value, o);
     }
 
     @Override
     public boolean equals(double[] o) {
-        return ArrayEquals.byteAndDouble(value, o);
+        return SequenceEquals.byteAndDouble(value, o);
     }
 
     @Override

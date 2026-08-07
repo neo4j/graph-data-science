@@ -131,4 +131,44 @@ class PrimitiveValuesTest {
         assertThat(doubleArray)
             .isEqualTo(floatArray);
     }
+
+    @Test
+    void shouldCreateValuesFromFloatingPointVectors() {
+        var floatVector = PrimitiveValues.floatVector(new float[]{1, 2, 3});
+        assertThat(floatVector)
+            .satisfies(vec -> {
+                assertThat(vec.type()).isEqualTo(ValueType.FLOAT_VECTOR);
+                assertThat(vec.dimension()).isEqualTo(3);
+                assertThat(vec).isEqualTo(PrimitiveValues.floatArray(new float[]{1, 2, 3}));
+            });
+        var doubleVector = PrimitiveValues.doubleVector(new double[]{1, 2, 3});
+        assertThat(doubleVector)
+            .satisfies(vec -> {
+                assertThat(vec.type()).isEqualTo(ValueType.DOUBLE_VECTOR);
+                assertThat(vec.dimension()).isEqualTo(3);
+                assertThat(vec).isEqualTo(PrimitiveValues.doubleArray(new double[]{1, 2, 3}));
+            });
+        assertThat(doubleVector)
+            .isEqualTo(floatVector);
+    }
+
+    @Test
+    void shouldCreateVectorsThroughTheValueCreator() {
+        assertThat(PrimitiveValues.valueCreator(ValueType.FLOAT_VECTOR).apply(new float[]{1, 2, 3}))
+            .isEqualTo(PrimitiveValues.floatVector(new float[]{1, 2, 3}));
+        assertThat(PrimitiveValues.valueCreator(ValueType.DOUBLE_VECTOR).apply(new double[]{1, 2, 3}))
+            .isEqualTo(PrimitiveValues.doubleVector(new double[]{1, 2, 3}));
+    }
+
+    @Test
+    void shouldCreateNoVectorFromANullValue() {
+        assertThat(PrimitiveValues.valueCreator(ValueType.FLOAT_VECTOR).apply(null)).isNull();
+        assertThat(PrimitiveValues.valueCreator(ValueType.DOUBLE_VECTOR).apply(null)).isNull();
+    }
+
+    @Test
+    void shouldNotInferAVectorFromARawArray() {
+        assertThat(PrimitiveValues.create(new float[]{1, 2, 3}).type()).isEqualTo(ValueType.FLOAT_ARRAY);
+        assertThat(PrimitiveValues.create(new double[]{1, 2, 3}).type()).isEqualTo(ValueType.DOUBLE_ARRAY);
+    }
 }
