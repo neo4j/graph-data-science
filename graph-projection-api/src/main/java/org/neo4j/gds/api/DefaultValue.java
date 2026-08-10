@@ -68,23 +68,18 @@ public final class DefaultValue {
         if (defaultValue == null || defaultValue.toString().isBlank()) {
             return type.fallbackValue();
         }
-        switch (type) {
-            case LONG:
-                return DefaultValue.of(Long.parseLong(defaultValue.toString()), isUserDefined);
-            case DOUBLE:
-                return DefaultValue.of(Double.parseDouble(defaultValue.toString()), isUserDefined);
+        return switch (type) {
+            case LONG -> DefaultValue.of(Long.parseLong(defaultValue.toString()), isUserDefined);
+            case DOUBLE -> DefaultValue.of(Double.parseDouble(defaultValue.toString()), isUserDefined);
             // a vector's default value is a plain array of its coordinate type
-            case DOUBLE_ARRAY:
-            case DOUBLE_VECTOR:
-                return DefaultValue.of(parseDoubleArrayValue(defaultValue, type), isUserDefined);
-            case LONG_ARRAY:
-                return DefaultValue.of(parseLongArrayValue(defaultValue, type), isUserDefined);
-            case FLOAT_ARRAY:
-            case FLOAT_VECTOR:
-                return DefaultValue.of(parseFloatArrayValue(defaultValue, type), isUserDefined);
-            default:
-                return DefaultValue.of(defaultValue, isUserDefined);
-        }
+            case DOUBLE_ARRAY, DOUBLE_VECTOR -> DefaultValue.of(
+                parseDoubleArrayValue(defaultValue, type),
+                isUserDefined
+            );
+            case LONG_ARRAY -> DefaultValue.of(parseLongArrayValue(defaultValue, type), isUserDefined);
+            case FLOAT_ARRAY, FLOAT_VECTOR -> DefaultValue.of(parseFloatArrayValue(defaultValue, type), isUserDefined);
+            default -> DefaultValue.of(defaultValue, isUserDefined);
+        };
     }
 
     private static DefaultValue ofFallBackValue(@Nullable Object defaultValue) {
@@ -159,26 +154,28 @@ public final class DefaultValue {
     public float[] floatArrayValue() {
         float[] floatArray = null;
 
-        if (defaultValue == null) {
-            return null;
-        } else if (defaultValue instanceof float[]) {
-            return (float[]) defaultValue;
-        } else if (defaultValue instanceof double[]) {
-            var doubleArray = (double[]) defaultValue;
-            floatArray = new float[doubleArray.length];
-
-            for (int i = 0; i < doubleArray.length; i++) {
-                floatArray[i] = ValueConversion.notOverflowingDoubleToFloat(doubleArray[i]);
+        switch (defaultValue) {
+            case null -> {
+                return null;
             }
-        } else if (defaultValue instanceof long[]) {
-            var longArray = (long[]) defaultValue;
-            floatArray = new float[longArray.length];
-
-            for (int i = 0; i < longArray.length; i++) {
-                floatArray[i] = ValueConversion.exactLongToFloat(longArray[i]);
+            case float[] floats -> {
+                return floats;
             }
-        } else {
-            throw getInvalidTypeException(float[].class);
+            case double[] doubleArray -> {
+                floatArray = new float[doubleArray.length];
+
+                for (int i = 0; i < doubleArray.length; i++) {
+                    floatArray[i] = ValueConversion.notOverflowingDoubleToFloat(doubleArray[i]);
+                }
+            }
+            case long[] longArray -> {
+                floatArray = new float[longArray.length];
+
+                for (int i = 0; i < longArray.length; i++) {
+                    floatArray[i] = ValueConversion.exactLongToFloat(longArray[i]);
+                }
+            }
+            default -> throw getInvalidTypeException(float[].class);
         }
 
         return floatArray;
@@ -187,26 +184,28 @@ public final class DefaultValue {
     public double[] doubleArrayValue() {
         double[] doubleArray = null;
 
-        if (defaultValue == null) {
-            return null;
-        } else if (defaultValue instanceof double[]) {
-            return (double[]) defaultValue;
-        } else if (defaultValue instanceof float[]) {
-            var floatArray = (float[]) defaultValue;
-            doubleArray = new double[floatArray.length];
-
-            for (int i = 0; i < floatArray.length; i++) {
-                doubleArray[i] = floatArray[i];
+        switch (defaultValue) {
+            case null -> {
+                return null;
             }
-        } else if (defaultValue instanceof long[]) {
-            var longArray = (long[]) defaultValue;
-            doubleArray = new double[longArray.length];
-
-            for (int i = 0; i < longArray.length; i++) {
-                doubleArray[i] = ValueConversion.exactLongToDouble(longArray[i]);
+            case double[] doubles -> {
+                return doubles;
             }
-        } else {
-            throw getInvalidTypeException(double[].class);
+            case float[] floatArray -> {
+                doubleArray = new double[floatArray.length];
+
+                for (int i = 0; i < floatArray.length; i++) {
+                    doubleArray[i] = floatArray[i];
+                }
+            }
+            case long[] longArray -> {
+                doubleArray = new double[longArray.length];
+
+                for (int i = 0; i < longArray.length; i++) {
+                    doubleArray[i] = ValueConversion.exactLongToDouble(longArray[i]);
+                }
+            }
+            default -> throw getInvalidTypeException(double[].class);
         }
 
         return doubleArray;
@@ -215,26 +214,28 @@ public final class DefaultValue {
     public long[] longArrayValue() {
         long[] longArray = null;
 
-        if (defaultValue == null) {
-            return null;
-        } else if (defaultValue instanceof long[]) {
-            return (long[]) defaultValue;
-        } else if (defaultValue instanceof float[]) {
-            var floatArray = (float[]) defaultValue;
-            longArray = new long[floatArray.length];
-
-            for (int i = 0; i < floatArray.length; i++) {
-                longArray[i] = ValueConversion.exactDoubleToLong(floatArray[i]);
+        switch (defaultValue) {
+            case null -> {
+                return null;
             }
-        } else if (defaultValue instanceof double[]) {
-            var doubleArray = (double[]) defaultValue;
-            longArray = new long[doubleArray.length];
-
-            for (int i = 0; i < doubleArray.length; i++) {
-                longArray[i] = ValueConversion.exactDoubleToLong(doubleArray[i]);
+            case long[] longs -> {
+                return longs;
             }
-        } else {
-            throw getInvalidTypeException(long[].class);
+            case float[] floatArray -> {
+                longArray = new long[floatArray.length];
+
+                for (int i = 0; i < floatArray.length; i++) {
+                    longArray[i] = ValueConversion.exactDoubleToLong(floatArray[i]);
+                }
+            }
+            case double[] doubleArray -> {
+                longArray = new long[doubleArray.length];
+
+                for (int i = 0; i < doubleArray.length; i++) {
+                    longArray[i] = ValueConversion.exactDoubleToLong(doubleArray[i]);
+                }
+            }
+            default -> throw getInvalidTypeException(long[].class);
         }
 
         return longArray;

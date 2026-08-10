@@ -30,9 +30,7 @@ import java.util.Optional;
 public interface FloatVectorNodePropertyValues extends VectorNodePropertyValues {
 
     @Override
-    default float[] floatArrayValue(long nodeId) {
-        return VectorNodePropertyValues.super.floatArrayValue(nodeId);
-    }
+    float[] floatArrayValue(long nodeId);
 
     @Override
     default ValueType valueType() {
