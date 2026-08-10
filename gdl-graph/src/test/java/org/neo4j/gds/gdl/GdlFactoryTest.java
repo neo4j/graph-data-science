@@ -225,6 +225,15 @@ class GdlFactoryTest {
     }
 
     @Test
+    void testVectorProperties() {
+        var graph = fromGdl("({f1: vector([1.0D, 3.0D, 3.0D, 7.0D]), f2: vector([1.0F, 3.0F, 3.0F, 7.0F])})");
+        assertThat(graph.nodeProperties("f1").valueType()).isEqualTo(ValueType.DOUBLE_VECTOR);
+        assertThat(graph.nodeProperties("f1").doubleArrayValue(0)).isEqualTo(new double[]{1, 3, 3, 7});
+        assertThat(graph.nodeProperties("f2").valueType()).isEqualTo(ValueType.FLOAT_VECTOR);
+        assertThat(graph.nodeProperties("f2").floatArrayValue(0)).isEqualTo(new float[]{1, 3, 3, 7});
+    }
+
+    @Test
     void testForAllNodes() {
         var graph = fromGdl("({w:1}),({w:2}),({w:3})");
         List<Double> nodeProps = new ArrayList<>();
