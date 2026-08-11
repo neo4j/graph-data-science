@@ -21,6 +21,7 @@ package org.neo4j.gds.gdl;
 
 import org.immutables.builder.Builder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
@@ -29,9 +30,9 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
@@ -51,15 +52,18 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
 import org.s1ck.gdl.model.Vertex;
+import org.s1ck.gdl.model.values.DoubleVectorLiteral;
+import org.s1ck.gdl.model.values.FloatVectorLiteral;
+import org.s1ck.gdl.model.values.VectorLiteral;
 import org.s1ck.gdl.utils.ContinuousId;
 
 import java.lang.reflect.Array;
@@ -224,12 +228,9 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             }
 
             Map<String, GdsValue> propertyValues = new HashMap<>();
-            vertex.getProperties().forEach((propertyKey, propertyValue) -> {
-                if (propertyValue instanceof List) {
-                    propertyValue = convertListProperty((List<?>) propertyValue);
-                }
-                propertyValues.put(propertyKey, PrimitiveValues.create(propertyValue));
-            });
+            vertex.getProperties().forEach((propertyKey, propertyValue) ->
+                propertyValues.put(propertyKey, convertProperty(propertyValue))
+            );
 
             nodesBuilder.addNode(
                 vertex.getId(),
@@ -242,20 +243,24 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     @NotNull
-    private static Object convertListProperty(List<?> list) {
-        var firstType = list.get(0).getClass();
+    private static GdsValue convertProperty(@Nullable Object propertyValue) {
+        return switch (propertyValue) {
+            case VectorLiteral vectorLiteral -> convertVectorProperty(vectorLiteral);
+            case List<?> list -> convertListProperty(list);
+            case null, default -> PrimitiveValues.create(propertyValue);
+        };
+    }
+
+    @NotNull
+    private static GdsValue convertListProperty(List<?> list) {
+        var firstType = list.getFirst().getClass();
 
         var isLong = firstType.equals(Long.class);
         var isDouble = firstType.equals(Double.class);
         var isFloat = firstType.equals(Float.class);
 
         if (!isLong && !isDouble && !isFloat) {
-            throw new IllegalArgumentException(
-                formatWithLocale(
-                    "List property contains in-compatible type: %s.",
-                    firstType.getSimpleName()
-                )
-            );
+            throw incompatibleTypeException("List", firstType);
         }
 
         var sameType = list.stream().allMatch(firstType::isInstance);
@@ -275,6 +280,41 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var array = Array.newInstance(firstType, list.size());
         for (int i = 0; i < list.size(); i++) {
             Array.set(array, i, firstType.cast(list.get(i)));
+        }
+        return PrimitiveValues.create(array);
+    }
+
+    @NotNull
+    private static GdsValue convertVectorProperty(VectorLiteral vectorLiteral) {
+        return switch (vectorLiteral) {
+            case FloatVectorLiteral floatVector -> PrimitiveValues.floatVector(toFloatArray(floatVector.getValue()));
+            case DoubleVectorLiteral doubleVector -> PrimitiveValues.doubleVector(toDoubleArray(doubleVector.getValue()));
+            default -> throw incompatibleTypeException("Vector", vectorLiteral.getElementType());
+        };
+    }
+
+    private static IllegalArgumentException incompatibleTypeException(String propertyKind, Class<?> elementType) {
+        return new IllegalArgumentException(
+            formatWithLocale(
+                "%s property contains in-compatible type: %s.",
+                propertyKind,
+                elementType.getSimpleName()
+            )
+        );
+    }
+
+    private static float[] toFloatArray(List<Float> values) {
+        var array = new float[values.size()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = values.get(i);
+        }
+        return array;
+    }
+
+    private static double[] toDoubleArray(List<Double> values) {
+        var array = new double[values.size()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = values.get(i);
         }
         return array;
     }
@@ -387,14 +427,11 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     }
 
     private double gdsValue(Element element, String propertyKey, Object gdlValue) {
-        if (gdlValue == null) {
-            return DefaultValue.forDouble().doubleValue();
-        } else if (gdlValue instanceof Number) {
-            return ((Number) gdlValue).doubleValue();
-        } else if (gdlValue instanceof String && gdlValue.equals("NaN")) {
-            return Double.NaN;
-        } else {
-            throw new IllegalArgumentException(
+        return switch (gdlValue) {
+            case null -> DefaultValue.forDouble().doubleValue();
+            case Number number -> number.doubleValue();
+            case String s when gdlValue.equals("NaN") -> Double.NaN;
+            default -> throw new IllegalArgumentException(
                 String.format(
                     Locale.ENGLISH,
                     "%s property '%s' must be of type Number, but was %s for %s.",
@@ -404,7 +441,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                     element
                 )
             );
-        }
+        };
     }
 
     @Override
