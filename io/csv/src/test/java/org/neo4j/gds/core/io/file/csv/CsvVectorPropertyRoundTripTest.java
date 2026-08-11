@@ -103,26 +103,37 @@ class CsvVectorPropertyRoundTripTest {
         assertThat(imported.valueType()).isEqualTo(ValueType.DOUBLE_VECTOR);
         assertThat(((VectorNodePropertyValues) imported).vectorDimension()).isEqualTo(2);
         assertThat(imported.doubleArrayValue(0)).containsExactly(0.25D, 1.25D);
-        assertThat(headerLines()).anySatisfy(header ->
-            assertThat(header).contains("embedding:double_vector(2)")
-        );
     }
 
     @Test
-    void theHeaderCarriesTheDimensionInTheTypeToken() throws IOException {
+    void theDataFileHeaderCarriesTheBareTypeName() throws IOException {
         roundTrip(graphStoreWithFloatVector());
 
         assertThat(headerLines()).anySatisfy(header ->
-            assertThat(header).contains("embedding:float_vector(3)")
+            assertThat(header).contains("embedding:float_vector")
+        );
+        assertThat(headerLines()).noneSatisfy(header ->
+            assertThat(header).contains("float_vector(")
         );
     }
 
     @Test
-    void theSchemaFileRecordsTheVectorType() throws IOException {
+    void theSchemaFileRecordsTheVectorTypeAndItsDimension() throws IOException {
         roundTrip(graphStoreWithFloatVector());
 
         var nodeSchema = Files.readString(graphLocation.resolve("node-schema.csv"));
         assertThat(nodeSchema).contains("float_vector");
+        assertThat(nodeSchema).contains(CsvNodeSchemaVisitor.DIMENSION_COLUMN_NAME);
+        assertThat(nodeSchema).containsPattern("float_vector,[^\\n]*,3");
+    }
+
+    @Test
+    void aNonVectorPropertyRecordsNoDimension() throws IOException {
+        var graphStore = GdlFactory.of("CREATE (:A {score: 1.0})").build();
+
+        var imported = roundTrip(graphStore).nodeProperty("score");
+
+        assertThat(imported.propertySchema().dimension()).isEmpty();
     }
 
     private GraphStore graphStoreWithFloatVector() {

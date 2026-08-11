@@ -32,6 +32,7 @@ import org.neo4j.gds.core.loading.Capabilities;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 public final class GraphStoreMetadataMapper {
@@ -141,7 +142,10 @@ public final class GraphStoreMetadataMapper {
             schemaEntry.getKey(),
             toValueType(nodePropertySchema.valueType()),
             toDefaultValue(nodePropertySchema.defaultValue()),
-            toPropertyState(nodePropertySchema.propertyState())
+            toPropertyState(nodePropertySchema.propertyState()),
+            nodePropertySchema.dimension() == null
+                ? OptionalInt.empty()
+                : OptionalInt.of(nodePropertySchema.dimension())
         );
     }
 

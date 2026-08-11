@@ -24,12 +24,15 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
 
+import java.util.OptionalInt;
+
 public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter implements PropertySchema {
 
     private String key;
     private ValueType valueType;
     private DefaultValue defaultValue;
     private PropertyState state;
+    private OptionalInt dimension = OptionalInt.empty();
 
     protected abstract void export();
 
@@ -51,6 +54,11 @@ public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter im
     @Override
     public PropertyState state() {
         return state;
+    }
+
+    @Override
+    public OptionalInt dimension() {
+        return dimension;
     }
 
     @Override
@@ -78,6 +86,12 @@ public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter im
     }
 
     @Override
+    public boolean dimension(OptionalInt dimension) {
+        this.dimension = dimension;
+        return true;
+    }
+
+    @Override
     public void endOfEntity() {
         export();
         reset();
@@ -88,5 +102,6 @@ public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter im
         valueType(null);
         defaultValue(null);
         state(null);
+        dimension(OptionalInt.empty());
     }
 }

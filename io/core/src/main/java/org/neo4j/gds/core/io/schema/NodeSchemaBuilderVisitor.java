@@ -35,7 +35,11 @@ public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
         if (!hasProperty) {
             builder.addLabel(nodeLabel().name());
         } else {
-            builder.addProperty(nodeLabel().name(), key(), valueType(), defaultValue(), state());
+            dimension()
+                .ifPresentOrElse(
+                    dimension -> builder.addVectorProperty(nodeLabel().name(), key(), valueType(), defaultValue(), state(), dimension),
+                    () -> builder.addProperty(nodeLabel().name(), key(), valueType(), defaultValue(), state())
+                );
         }
     }
 

@@ -22,8 +22,6 @@ package org.neo4j.gds.core.io.file.csv;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.nodeproperties.ValueTypeToken;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.IdentifierMapper;
@@ -36,7 +34,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -139,7 +136,7 @@ public class CsvNodeVisitor extends NodeVisitor {
                 var propertyHeader = formatWithLocale(
                     "%s:%s",
                     key,
-                    ValueTypeToken.format(type, vectorDimension(type, value))
+                    type.csvName()
                 );
                 try {
                     headerAppender.append(propertyHeader);
@@ -152,23 +149,6 @@ public class CsvNodeVisitor extends NodeVisitor {
         } catch (IOException e) {
             throw new RuntimeException("Could not write header file", e);
         }
-    }
-
-    /**
-     * A vector property's dimension is not part of the property schema, so it is taken from a value.
-     * Every vector of a property shares one dimension, so any non-null value answers for all of them.
-     */
-    private static OptionalInt vectorDimension(ValueType type, Object value) {
-        if (!type.isVector()) {
-            return OptionalInt.empty();
-        }
-        if (value instanceof float[] floats) {
-            return OptionalInt.of(floats.length);
-        }
-        if (value instanceof double[] doubles) {
-            return OptionalInt.of(doubles.length);
-        }
-        return OptionalInt.empty();
     }
 
     @Override

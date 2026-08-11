@@ -34,10 +34,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class NodeSchemaTest {
@@ -86,7 +89,7 @@ class NodeSchemaTest {
     }
 
     @ParameterizedTest
-    @EnumSource
+    @EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"FLOAT_VECTOR", "DOUBLE_VECTOR"})
     void buildingWithAllValueTypes(ValueType valueType) {
         var label = "LabelA";
         var propertyKey = "Property" + valueType.name();
@@ -99,6 +102,31 @@ class NodeSchemaTest {
             SchemaEntry.of(label, propertyKey, valueType)
         );
         assertThat(result).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @EnumSource(mode = EnumSource.Mode.INCLUDE, names = {"FLOAT_VECTOR", "DOUBLE_VECTOR"})
+    void buildingWithVectorValueTypesRequiresADimension(ValueType valueType) {
+        var label = "LabelA";
+        var propertyKey = "Property" + valueType.name();
+
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> NodeSchema.builder().addProperty(label, propertyKey, valueType).build()
+        );
+
+        var result = NodeSchema.builder()
+            .addProperty(
+                label,
+                propertyKey,
+                valueType,
+                valueType.fallbackValue(),
+                PropertyState.PERSISTENT,
+                OptionalInt.of(42)
+            )
+            .build();
+
+        assertThat(result.propertiesForLabel(NodeLabel.of(label)).get(propertyKey).dimension()).hasValue(42);
     }
 
     @Test
@@ -299,9 +327,10 @@ class NodeSchemaTest {
 
     @Test
     void clientNotAllowedToMutateNodeSchemasEntries() {
-        assertThrows(UnsupportedOperationException.class, () ->
-            new NodeSchema(new HashMap<>()).entries()
-                .put(NodeLabel.of("LabelA"), List.of())
+        assertThrows(
+            UnsupportedOperationException.class, () ->
+                new NodeSchema(new HashMap<>()).entries()
+                    .put(NodeLabel.of("LabelA"), List.of())
         );
     }
 
@@ -312,10 +341,11 @@ class NodeSchemaTest {
         entries.put(label1, new ArrayList<>());
         var schema = new NodeSchema(entries);
 
-        assertThrows(UnsupportedOperationException.class, () ->
-            schema.entries()
-                .get(label1)
-                .add(PropertySchema.of("BAR", ValueType.DOUBLE))
+        assertThrows(
+            UnsupportedOperationException.class, () ->
+                schema.entries()
+                    .get(label1)
+                    .add(PropertySchema.of("BAR", ValueType.DOUBLE))
         );
     }
 
@@ -330,11 +360,12 @@ class NodeSchemaTest {
             .addProperty(label2, propertyKey, valueType)
             .build();
 
-        assertThrows(UnsupportedOperationException.class, () ->
-            schema.entries()
-                .get(NodeLabel.of(label1))
-                .add(PropertySchema.of("BAR", ValueType.DOUBLE))
-            );
+        assertThrows(
+            UnsupportedOperationException.class, () ->
+                schema.entries()
+                    .get(NodeLabel.of(label1))
+                    .add(PropertySchema.of("BAR", ValueType.DOUBLE))
+        );
     }
 
     @Test
@@ -406,7 +437,29 @@ class NodeSchemaTest {
         var schemaWithValueType1 = NodeSchema.builder().addProperty(label, propertyKey, ValueType.LONG).build();
         var schemaWithValueType2 = NodeSchema.builder().addProperty(label, propertyKey, ValueType.DOUBLE).build();
 
-        assertThrows(IllegalArgumentException.class, () -> schemaWithValueType1.union(schemaWithValueType2));
+        assertThatThrownBy(() -> schemaWithValueType1.union(schemaWithValueType2))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Combining schema entries with value type");
+    }
+
+    @Test
+    void unionBetweenSchemasWithSamePropertyButDifferentDimensionsIsInvalid() {
+        var label = "LabelA";
+        var propertyKey = "PropertyX";
+        var schemaWithValueType1 = NodeSchema.builder().addVectorProperty(label, propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, 4).build();
+        var schemaWithValueType2 = NodeSchema.builder().addVectorProperty(label, propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, 5).build();
+
+        assertThatThrownBy(() -> schemaWithValueType1.union(schemaWithValueType2))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Combining schema entries with different dimensions");
+    }
+
+    @Test
+    void unionBetweenSchemasWithDifferentPropertyAndDifferentDimensionsIsValid() {
+        var schemaWithValueType1 = NodeSchema.builder().addVectorProperty("labelA", "propertyX", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, 313).build();
+        var schemaWithValueType2 = NodeSchema.builder().addVectorProperty("labelB", "propertyY", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, 313).build();
+
+        assertThatNoException().isThrownBy(() -> schemaWithValueType1.union(schemaWithValueType2));
     }
 
     @Test

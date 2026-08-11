@@ -36,6 +36,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.OptionalInt;
 
 public class NodeSchemaLoader {
 
@@ -63,6 +64,7 @@ public class NodeSchemaLoader {
                     schemaBuilder.valueType(schemaLine.valueType);
                     schemaBuilder.defaultValue(DefaultValueIOHelper.deserialize(schemaLine.defaultValue, schemaLine.valueType, true));
                     schemaBuilder.state(schemaLine.state);
+                    schemaBuilder.dimension(parseDimension(schemaLine.dimension));
                 }
                 schemaBuilder.endOfEntity();
             }
@@ -71,6 +73,12 @@ public class NodeSchemaLoader {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static OptionalInt parseDimension(String dimension) {
+        return dimension == null || dimension.isBlank()
+            ? OptionalInt.empty()
+            : OptionalInt.of(Integer.parseInt(dimension.trim()));
     }
 
     public static class SchemaLine {
@@ -91,5 +99,8 @@ public class NodeSchemaLoader {
 
         @JsonProperty
         PropertyState state;
+
+        @JsonProperty
+        String dimension;
     }
 }

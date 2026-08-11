@@ -124,7 +124,10 @@ public final class GraphStoreMetadataFactory {
                         new NodePropertySchema(
                             toValueType(propertySchema.valueType()),
                             toDefaultValue(propertySchema.defaultValue()),
-                            toPropertyState(propertySchema.state())
+                            toPropertyState(propertySchema.state()),
+                            propertySchema.dimension().isPresent()
+                                ? propertySchema.dimension().getAsInt()
+                                : null
                         )
                     )
                 ));

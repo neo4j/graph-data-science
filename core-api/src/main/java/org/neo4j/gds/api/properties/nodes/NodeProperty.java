@@ -25,6 +25,8 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.Property;
 import org.neo4j.gds.api.schema.PropertySchema;
 
+import java.util.OptionalInt;
+
 @ValueClass
 @SuppressWarnings("immutables:from")
 public interface NodeProperty extends Property<NodePropertyValues> {
@@ -34,10 +36,7 @@ public interface NodeProperty extends Property<NodePropertyValues> {
         PropertyState origin,
         NodePropertyValues values
     ) {
-        return ImmutableNodeProperty.of(
-            values,
-            PropertySchema.of(key, values.valueType(), values.valueType().fallbackValue(), origin)
-        );
+        return of(key, origin, values, values.valueType().fallbackValue());
     }
 
     static NodeProperty of(
@@ -48,7 +47,18 @@ public interface NodeProperty extends Property<NodePropertyValues> {
     ) {
         return ImmutableNodeProperty.of(
             values,
-            PropertySchema.of(key, values.valueType(), defaultValue, origin)
+            PropertySchema.of(key, values.valueType(), defaultValue, origin, vectorDimension(values))
         );
+    }
+
+    /**
+     * Only a vector property carries a dimension in its schema; for every other type the dimension is a
+     * property of the values, not of the schema.
+     */
+    private static OptionalInt vectorDimension(NodePropertyValues values) {
+        if (!values.valueType().isVector()) {
+            return OptionalInt.empty();
+        }
+        return values.dimension().map(OptionalInt::of).orElseGet(OptionalInt::empty);
     }
 }

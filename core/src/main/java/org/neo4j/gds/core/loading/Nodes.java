@@ -24,10 +24,9 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.schema.ImmutablePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 
 import java.util.Map;
@@ -55,24 +54,15 @@ public record Nodes(NodeSchema schema, IdMap idMap, NodePropertyStore properties
                     var defaultValue = propertyMapping.defaultValue().isUserDefined()
                         ? propertyMapping.defaultValue()
                         : nodePropertyValues.valueType().fallbackValue();
-                    var propertySchema = ImmutablePropertySchema.builder()
-                        .key(propertyMapping.propertyKey())
-                        .valueType(nodePropertyValues.valueType())
-                        .defaultValue(defaultValue)
-                        .state(propertyState)
-                        .build();
+                    var nodeProperty = NodeProperty.of(
+                        propertyMapping.propertyKey(),
+                        propertyState,
+                        nodePropertyValues,
+                        defaultValue
+                    );
 
-                    nodeSchemaBuilder.addProperty(
-                        nodeLabel.name(),
-                        propertySchema.key(),
-                        propertySchema.valueType(),
-                        propertySchema.defaultValue(),
-                        propertySchema.state()
-                    );
-                    nodePropertyStoreBuilder.putProperty(
-                        propertySchema.key(),
-                        ImmutableNodeProperty.of(nodePropertyValues, propertySchema)
-                    );
+                    nodeSchemaBuilder.addProperty(nodeLabel.name(), nodeProperty.propertySchema());
+                    nodePropertyStoreBuilder.putProperty(nodeProperty.propertySchema().key(), nodeProperty);
                 }
             }
         }));

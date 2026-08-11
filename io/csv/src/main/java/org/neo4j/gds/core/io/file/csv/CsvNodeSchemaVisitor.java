@@ -34,6 +34,7 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
     public static final String VALUE_TYPE_COLUMN_NAME = "valueType";
     public static final String DEFAULT_VALUE_COLUMN_NAME = "defaultValue";
     public static final String STATE_COLUMN_NAME = "state";
+    public static final String DIMENSION_COLUMN_NAME = "dimension";
 
     public static final String NODE_SCHEMA_FILE_NAME = "node-schema.csv";
 
@@ -42,7 +43,8 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
         PROPERTY_KEY_COLUMN_NAME,
         VALUE_TYPE_COLUMN_NAME,
         DEFAULT_VALUE_COLUMN_NAME,
-        STATE_COLUMN_NAME
+        STATE_COLUMN_NAME,
+        DIMENSION_COLUMN_NAME
     };
 
     private final CsvWriter csvWriter;
@@ -66,6 +68,9 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
             row.add(valueType().csvName());
             row.add(DefaultValueIOHelper.serialize(defaultValue()));
             row.add(state().name());
+            if (dimension().isPresent()) {
+                row.add(Integer.toString(dimension().getAsInt()));
+            }
         }
         csvWriter.writeRecord(row);
     }

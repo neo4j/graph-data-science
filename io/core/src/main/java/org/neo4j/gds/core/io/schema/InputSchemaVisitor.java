@@ -24,6 +24,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.io.Closeable;
+import java.util.OptionalInt;
 
 public interface InputSchemaVisitor extends Closeable {
 
@@ -34,6 +35,8 @@ public interface InputSchemaVisitor extends Closeable {
     boolean defaultValue(DefaultValue defaultValue);
 
     boolean state(PropertyState state);
+
+    boolean dimension(OptionalInt dimension);
 
     void endOfEntity();
 
@@ -55,6 +58,11 @@ public interface InputSchemaVisitor extends Closeable {
 
         @Override
         public boolean state(PropertyState state) {
+            return true;
+        }
+
+        @Override
+        public boolean dimension(OptionalInt dimension) {
             return true;
         }
 

@@ -184,13 +184,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
             var newNodeSchema = schema.nodeSchema().allProperties().stream()
                 .collect(
                     NodeSchema::builder,
-                    (builder, propertySchema) -> builder.addProperty(
-                        nodeLabel.name(),
-                        propertySchema.key(),
-                        propertySchema.valueType(),
-                        propertySchema.defaultValue(),
-                        propertySchema.state()
-                    ),
+                    (builder, propertySchema) -> builder.addProperty(nodeLabel.name(), propertySchema),
                     NodeSchema.NodeSchemaBuilder::addBuilder
                 )
                 .addLabel(nodeLabel.name()) // In case no property exists
@@ -246,22 +240,18 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
                 );
             }
 
+            var nodeProperty = NodeProperty.of(propertyKey, PropertyState.TRANSIENT, propertyValues);
+
             graphStore.nodeProperties = NodePropertyStore
                 .builder()
                 .from(graphStore.nodeProperties)
-                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, PropertyState.TRANSIENT, propertyValues))
+                .putIfAbsent(propertyKey, nodeProperty)
                 .build();
 
             var nodeSchema = labels.stream()
                 .collect(
                     NodeSchema::builder,
-                    (builder, label) -> builder.addProperty(
-                        label.name(),
-                        propertyKey,
-                        propertyValues.valueType(),
-                        propertyValues.valueType().fallbackValue(),
-                        PropertyState.TRANSIENT
-                    ),
+                    (builder, label) -> builder.addProperty(label.name(), nodeProperty.propertySchema()),
                     NodeSchema.NodeSchemaBuilder::addBuilder
                 )
                 .addSchema(schema().nodeSchema())
@@ -289,13 +279,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
                         if (propertySchema.key().equals(propertyKey)) {
                             nodeSchemaBuilder.addLabel(nodeLabel.name());
                         } else {
-                            nodeSchemaBuilder.addProperty(
-                                nodeLabel.name(),
-                                propertySchema.key(),
-                                propertySchema.valueType(),
-                                propertySchema.defaultValue(),
-                                propertySchema.state()
-                            );
+                            nodeSchemaBuilder.addProperty(nodeLabel.name(), propertySchema);
                         }
                     }
                 }

@@ -21,27 +21,18 @@ package org.neo4j.gds.core.io.file;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.nodeproperties.ValueTypeToken;
-
-import java.util.OptionalInt;
 
 public record HeaderProperty(
     int position,
     String propertyKey,
-    ValueType valueType,
-    OptionalInt dimension
+    ValueType valueType
 ) {
-    public HeaderProperty(int position, String propertyKey, ValueType valueType) {
-        this(position, propertyKey, valueType, OptionalInt.empty());
-    }
-
     public static HeaderProperty parse(int position, String propertyString) {
         String[] propertyArgs = propertyString.split(":");
         if (propertyArgs.length != 2 || propertyArgs[0].isEmpty() || propertyArgs[1].isEmpty()) {
             throw wrongHeaderFormatException(propertyString);
         }
-        var token = ValueTypeToken.parse(propertyArgs[1]);
-        return new HeaderProperty(position, propertyArgs[0], token.valueType(), token.dimension());
+        return new HeaderProperty(position, propertyArgs[0], ValueType.fromCsvName(propertyArgs[1]));
     }
 
     @NotNull

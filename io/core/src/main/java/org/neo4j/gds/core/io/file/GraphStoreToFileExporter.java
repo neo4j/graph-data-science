@@ -251,6 +251,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
                        nodeSchemaVisitor.defaultValue(propertySchema.defaultValue());
                        nodeSchemaVisitor.valueType(propertySchema.valueType());
                        nodeSchemaVisitor.state(propertySchema.state());
+                       nodeSchemaVisitor.dimension(propertySchema.dimension());
                        nodeSchemaVisitor.endOfEntity();
                    }
                }

@@ -185,9 +185,8 @@ public enum ValueType {
     },
     /**
      * A float array that is written back to Neo4j as a {@code Float32Vector} rather than a plain list, so
-     * it can back a vector index. A vector property has a single dimension shared by all nodes; since
-     * the property schema does not carry it, the graph-store formats encode it in the type token
-     * ({@code float_vector(128)}) rather than in {@link #csvName()}.
+     * it can back a vector index. A vector property has a single dimension shared by all nodes, carried
+     * by its {@code PropertySchema} rather than by this type.
      *
      * <p>It holds exactly the values a {@link #FLOAT_ARRAY} holds, so consumers that do not care about
      * write-back should accept both. {@link #cypherName()} reports the array name too, because a user

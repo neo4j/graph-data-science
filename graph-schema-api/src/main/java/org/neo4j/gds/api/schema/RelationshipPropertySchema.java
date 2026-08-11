@@ -26,11 +26,18 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.Aggregation;
 
+import java.util.OptionalInt;
+
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface RelationshipPropertySchema extends PropertySchema {
 
     Aggregation aggregation();
+
+    @Override
+    default OptionalInt dimension() {
+        return OptionalInt.empty();
+    }
 
     static RelationshipPropertySchema of(String propertyKey, ValueType valueType) {
         return ImmutableRelationshipPropertySchema.of(

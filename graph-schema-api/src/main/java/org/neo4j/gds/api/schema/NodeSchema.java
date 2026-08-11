@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -171,7 +172,34 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
             DefaultValue defaultValue,
             PropertyState propertyState
         ) {
-            var propertySchema = PropertySchema.of(propertyKey, valueType, defaultValue, propertyState);
+            return addProperty(nodeLabel, propertyKey, valueType, defaultValue, propertyState, OptionalInt.empty());
+        }
+
+        public NodeSchemaBuilder addProperty(
+            String nodeLabel,
+            String propertyKey,
+            ValueType valueType,
+            DefaultValue defaultValue,
+            PropertyState propertyState,
+            OptionalInt dimension
+        ) {
+            var propertySchema = PropertySchema.of(propertyKey, valueType, defaultValue, propertyState, dimension);
+            rows.add(new SchemaRow(nodeLabel, Optional.of(propertySchema)));
+            return this;
+        }
+
+        public NodeSchemaBuilder addVectorProperty(
+            String nodeLabel,
+            String propertyKey,
+            ValueType valueType,
+            DefaultValue defaultValue,
+            PropertyState propertyState,
+            int dimension
+        ) {
+            return addProperty(nodeLabel, propertyKey, valueType, defaultValue, propertyState, OptionalInt.of(dimension));
+        }
+
+        public NodeSchemaBuilder addProperty(String nodeLabel, PropertySchema propertySchema) {
             rows.add(new SchemaRow(nodeLabel, Optional.of(propertySchema)));
             return this;
         }
@@ -196,13 +224,7 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
         }
 
         private void addProperty(NodeLabel nodeLabel, PropertySchema propertySchema) {
-            addProperty(
-                nodeLabel.name(),
-                propertySchema.key(),
-                propertySchema.valueType(),
-                propertySchema.defaultValue(),
-                propertySchema.state()
-            );
+            rows.add(new SchemaRow(nodeLabel.name(), Optional.of(propertySchema)));
         }
 
         public NodeSchema build() {
@@ -227,6 +249,14 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
             if (sameKey && !sameType) {
                 throw new IllegalArgumentException(StringFormatting.formatWithLocale(
                     "Combining schema entries with value type %s and %s is not supported.",
+                    left.toString(),
+                    right.toString()
+                ));
+            }
+            var sameDimension = left.dimension().equals(right.dimension());
+            if (sameKey && !sameDimension) {
+                throw new IllegalArgumentException(StringFormatting.formatWithLocale(
+                    "Combining schema entries with different dimensions %s and %s is not allowed.",
                     left.toString(),
                     right.toString()
                 ));

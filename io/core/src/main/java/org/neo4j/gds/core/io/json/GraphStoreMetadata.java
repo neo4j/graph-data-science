@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -65,11 +66,21 @@ record NodeSchema(
     Map<String, NodePropertySchema> propertySchemas
 ) {}
 
+/**
+ * {@code dimension} is written for vector properties only, where it is mandatory; it is absent for
+ * every other value type.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 record NodePropertySchema(
     ValueType valueType,
     DefaultValue defaultValue,
-    PropertyState propertyState
-) {}
+    PropertyState propertyState,
+    Integer dimension
+) {
+    NodePropertySchema(ValueType valueType, DefaultValue defaultValue, PropertyState propertyState) {
+        this(valueType, defaultValue, propertyState, null);
+    }
+}
 
 record RelationshipSchema(
     Direction direction,

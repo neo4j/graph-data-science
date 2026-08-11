@@ -22,11 +22,9 @@ package org.neo4j.gds.core.loading.construction;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.properties.nodes.ImmutableNodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.api.nodes.LabelInformation;
@@ -227,13 +225,7 @@ public final class NodesBuilder {
 
                     } else {
                         for (var propertySchema : propertySchemas) {
-                            builder.addProperty(
-                                nodeLabel.name(),
-                                propertySchema.key(),
-                                propertySchema.valueType(),
-                                propertySchema.defaultValue(),
-                                propertySchema.state()
-                            );
+                            builder.addProperty(nodeLabel.name(), propertySchema);
                         }
                     }
                 },
@@ -255,11 +247,7 @@ public final class NodesBuilder {
         IdMap idMap
     ) {
         var nodePropertyValues = entry.getValue().build(idMap);
-        var valueType = nodePropertyValues.valueType();
-        return ImmutableNodeProperty.builder()
-            .values(nodePropertyValues)
-            .propertySchema(PropertySchema.of(entry.getKey(), valueType, valueType.fallbackValue(), propertyState))
-            .build();
+        return NodeProperty.of(entry.getKey(), propertyState, nodePropertyValues);
     }
 
     public void close(RuntimeException exception) {

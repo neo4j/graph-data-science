@@ -55,9 +55,22 @@ public interface ElementSchemaEntry<SELF extends ElementSchemaEntry<SELF, ELEMEN
                                 .stream()
                                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType()))
                         ));
+                    } else if (conflictingDimensions(leftType, rightType)) {
+                        throw new IllegalArgumentException(format(Locale.ENGLISH,
+                            "Combining schema entries for property `%s` with vector dimension %d and %d is not supported.",
+                            leftType.key(),
+                            leftType.dimension().getAsInt(),
+                            rightType.dimension().getAsInt()
+                        ));
                     } else {
-                        return leftType;
+                        return leftType.dimension().isPresent() ? leftType : rightType;
                     }
                 }));
+    }
+
+    private static boolean conflictingDimensions(PropertySchema left, PropertySchema right) {
+        return left.dimension().isPresent()
+            && right.dimension().isPresent()
+            && left.dimension().getAsInt() != right.dimension().getAsInt();
     }
 }
