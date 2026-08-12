@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 /**
  * This guy gathers timings, builder-stylee.
  */
-class AlgorithmProcessingTimingsBuilder {
+public class AlgorithmProcessingTimingsBuilder {
     // This is a marker
     private static final int NOT_AVAILABLE = -1;
 
@@ -43,7 +43,7 @@ class AlgorithmProcessingTimingsBuilder {
         this.sideEffectMillis = sideEffectMillis;
     }
 
-    AlgorithmProcessingTimings build() {
+    public AlgorithmProcessingTimings build() {
         return new AlgorithmProcessingTimings(
             preProcessingMillis,
             computeMillis,

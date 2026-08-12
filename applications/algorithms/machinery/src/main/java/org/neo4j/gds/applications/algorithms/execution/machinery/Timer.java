@@ -17,15 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.machinery;
+package org.neo4j.gds.applications.algorithms.execution.machinery;
 
-import org.neo4j.gds.memory.tracking.MemoryGuardException;
+import org.neo4j.gds.api.Graph;
 
-public final class MemoryGuardExceptionTransformer {
-
-    private MemoryGuardExceptionTransformer() {}
-
-    public static void throwAsIllegalStateException(MemoryGuardException e) {
-        throw new IllegalStateException(e.getMessage(), e);
+/**
+ * At the base, we run the algorithm and record timing.
+ *
+ * @note this should be _the only_ place in our codebase where we call {@link org.neo4j.gds.Algorithm#compute()},
+ *     anything else would be duplication.
+ */
+class Timer {
+    <RESULT> RESULT runAlgorithmAndRecordTiming(
+        ComputationTimer computationTimer,
+        ConstructAndRun<RESULT> constructAndRun,
+        Graph graph
+    ) {
+        try (var ignored = computationTimer.start()) {
+            return constructAndRun.constructAndRun(graph);
+        }
     }
 }

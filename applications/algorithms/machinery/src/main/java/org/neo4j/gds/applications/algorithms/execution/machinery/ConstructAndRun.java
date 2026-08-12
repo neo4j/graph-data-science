@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.machinery;
+package org.neo4j.gds.applications.algorithms.execution.machinery;
 
-import org.neo4j.gds.memory.tracking.MemoryGuardException;
+import org.neo4j.gds.api.Graph;
 
-public final class MemoryGuardExceptionTransformer {
-
-    private MemoryGuardExceptionTransformer() {}
-
-    public static void throwAsIllegalStateException(MemoryGuardException e) {
-        throw new IllegalStateException(e.getMessage(), e);
-    }
+/**
+ * This is a placeholder for constructing an algorithm, including it's progress tracker, and running it,
+ * including managing the progress tracker.
+ * Obtuse name, but at least not misleading.
+ */
+public interface ConstructAndRun<RESULT> {
+    RESULT constructAndRun(Graph graph);
 }

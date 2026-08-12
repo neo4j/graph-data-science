@@ -29,7 +29,7 @@ import org.neo4j.gds.utils.StringFormatting;
  * Use this in a try-with-resources for that nice finalizer.
  */
 @SuppressWarnings("ClassCanBeRecord")
-final class RequestScopedLog implements AutoCloseable {
+public final class RequestScopedLog implements AutoCloseable {
     private final Log log;
     private final RequestCorrelationId requestCorrelationId;
 
@@ -38,25 +38,33 @@ final class RequestScopedLog implements AutoCloseable {
         this.requestCorrelationId = requestCorrelationId;
     }
 
-    static RequestScopedLog create(Log log, RequestCorrelationId requestCorrelationId) {
+    public static RequestScopedLog create(Log log, RequestCorrelationId requestCorrelationId) {
         log(log, "[%s] Algorithm processing commencing", requestCorrelationId);
 
         return new RequestScopedLog(log, requestCorrelationId);
     }
 
-    void onLoadingGraph() {
+    public void onLoadingGraph() {
         log(log, "[%s] Loading graph", requestCorrelationId);
     }
 
-    void onComputing() {
+    public void onEnqueueingWork() {
+        log(log, "[%s] Enqueueing work", requestCorrelationId);
+    }
+
+    public void onExecutingWork() {
+        log(log, "[%s] Executing work", requestCorrelationId);
+    }
+
+    public void onComputing() {
         log(log, "[%s] Computing algorithm", requestCorrelationId);
     }
 
-    void onProcessingResult() {
+    public void onProcessingResult() {
         log(log, "[%s] Processing algorithm result", requestCorrelationId);
     }
 
-    void onRenderingOutput() {
+    public void onRenderingOutput() {
         log(log, "[%s] Rendering output", requestCorrelationId);
     }
 
