@@ -23,9 +23,9 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.procedures.algorithms.configuration.AlgoConfigParser;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallableFinder;
+import org.neo4j.gds.procedures.algorithms.configuration.AlgoConfigParser;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_NODE_LABELS;
 import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_RELATIONSHIP_TYPES;
@@ -44,6 +45,10 @@ public final class NodePropertyStepFactory {
         AlgoBaseConfig.NODE_LABELS_KEY,
         AlgoBaseConfig.RELATIONSHIP_TYPES_KEY
     );
+
+    // Procedures that exist as standalone algorithms but are intentionally not supported as pipeline
+    // node-property steps. Rejected with a clear error rather than the generic "could not find a procedure".
+    private static final Set<String> UNSUPPORTED_AS_NODE_PROPERTY_STEP = Set.of("gds.fastpath.mutate");
 
     private NodePropertyStepFactory() {}
 
@@ -102,6 +107,14 @@ public final class NodePropertyStepFactory {
                 contextNodeLabels,
                 contextRelationshipTypes
             );
+        }
+
+        var canonicalName = normalizeName(taskName);
+        if (UNSUPPORTED_AS_NODE_PROPERTY_STEP.contains(canonicalName)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The procedure `%s` is not supported as a node property step in training pipelines.",
+                canonicalName
+            ));
         }
 
         var gdsCallableDefinition = getGdsCallableDefinition(taskName);

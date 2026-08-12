@@ -471,3 +471,13 @@ where +
 The figure below gives an overview of what influences event embeddings and how they flow to the embedding of a base node, based on the output time and elapsed times.
 
 image::fastpath-pics/base-event.svg[]
+
+[[algorithms-fastpath-pipelines]]
+== Pipelines
+
+[NOTE]
+====
+FastPath is *not* supported as a node property step in training pipelines (Node Classification,
+Node Regression, or Link Prediction). It can only be run as a standalone algorithm
+(`gds.fastPath.stream` / `mutate` / `write`).
+====
