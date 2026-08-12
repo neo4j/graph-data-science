@@ -1,0 +1,4 @@
+[NOTE]
+====
+This algorithm is only available in xref:aura-graph-analytics/index.adoc[Aura Graph Analytics].
+====

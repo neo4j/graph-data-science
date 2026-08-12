@@ -15,6 +15,9 @@ The Neo4j Graph Data Science library contains the following node embedding algor
 ** xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
 ** xref:machine-learning/node-embeddings/hashgnn.adoc[HashGNN]
 
+* Aura Graph Analytics
+** xref:machine-learning/node-embeddings/fastpath.adoc[FastPath]
+
 
 [[node-embeddings-using]]
 == Using node embeddings

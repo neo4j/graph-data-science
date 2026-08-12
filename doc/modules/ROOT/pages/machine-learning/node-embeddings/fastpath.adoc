@@ -1,0 +1,473 @@
+[[fastpath]]
+[.preview]
+= FastPath
+:description: This section describes the FastPath path embedding algorithm in Neo4j Graph Data Science, available in Aura Graph Analytics.
+:entity: node
+:result: embedding
+:algorithm: FastPath
+
+include::partial$/product-limitations/only-in-serverless.adoc[]
+
+:heterogeneous-nodes:
+:heterogeneous-rels:
+:node-properties:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-fastpath-intro]]
+== Introduction
+
+FastPath is a light-weight _path embedding_ algorithm operating on temporal graphs.
+It computes embeddings for _base nodes_ that are tied to event sequences.
+Events are associated to vectors depending on the event type and (continuously) on the elapsed time since the event occurred.
+These vectors are aggregated into embeddings that can be used in machine learning tasks, like customer journey analysis, and generalize across different time periods.
+
+FastPath is a path embedding algorithm.
+This means that the input graph is a temporal graph consisting of
+
+* _base nodes_ -- Nodes of interest that the algorithm aims to compute embeddings for
+* _event nodes_ -- Nodes marked with a time stamp and associated with base nodes
+
+There are two supported xref:#fastpath-considerations-graph-schema[graph schemas] that encode the event chains.
+
+The event nodes can hold information regarding what the event entails.
+This information can be in the form of feature vectors, categorical properties or relationships to context nodes.
+
+In summary, the input consists of a collection of base nodes, each of which have a time series of information carrying events.
+
+For each base node, an _output time_ is specified.
+The output time governs two concerns of the embedding.
+First, only events up to the output time are used to arrive at the embedding.
+Second, the algorithm uses _elapsed time_ rather than absolute time to compute the embeddings.
+When determining the contribution of an event on the embedding of a base node, the elapsed time is the amount of time between the event and the output time of the base node.
+
+Let's consider an example to make this more clear:
+One of the base nodes is a person called "Joe" and one of the events represents the fact that "Joe" consumed a dose of aspirin.
+The algorithm will store
+
+* the type of event -- here "taking of aspirin"
+* the elapsed time -- here 7 days
+
+Further, each pair of event type and elapsed time is associated with a "semi-random" vector.
+The vectors are constructed using both randomness, similar to the so called FastRP algorithm, and a time smoothing mechanism.
+This results in vectors for "taking of aspirin 7 days ago" being (relatively) similar to "taking of aspirin 8 days ago".
+
+The embedding for Joe will be a weighted sum of the vector of "taking of aspirin 7 days ago" and vectors of all other events that occurred for Joe.
+How the weighting works is described in more detail below.
+
+It may seem that the above only gives an intuition for discreet event information like categorical properties and relationships to context nodes.
+However, feature vectors on events can be thought of as a weighted sum of discreet events corresponding to the components of the vector.
+
+The output node embeddings can for example be used in downstream machine learning tasks for solving problems related to e.g., customer journey.
+Because of the reliance on relative time rather than absolute time, such models can generalize from embeddings of past graphs to current graphs.
+In addition, FastPath is equivariant over time; if all events for a base node are shifted by `T` time steps and the output time is also shifted by `T` time steps (in the same direction), the embedding of the base node stays the same.
+
+NOTE: FastPath requires the link:https://neo4j.com/docs/aura/graph-analytics/#aura-gds-serverless[feature] enabled for your Neo4j Aura project.
+
+[[algorithms-fastpath-considerations]]
+== Considerations
+
+
+[[fastpath-considerations-graph-schema]]
+=== Graph schema and relationship configuration
+
+The algorithm supports two different schemas for connecting base nodes to event nodes.
+
+1. To use the first schema configuration you provide a `firstRelationshipType` and a `nextRelationshipType`; `timeNodeProperty` is optional.
+With this configuration each base and event node is assumed to be part of a path of the pattern:
+`(:baseNodeLabel)-[:firstRelationshipType]-(:eventNodeLabel)-[:nextRelationshipType]-...-[:nextRelationshipType]->(:eventNodeLabel)`
+image:fastpath-pics/fastpath-schema.svg[]
+2. To use the second schema configuration, you provide only a `timeNodeProperty`.
+It is then assumed that each base node has outgoing relationships to each of its event nodes:
+`(:baseNodeLabel)-[:]->(:eventNodeLabel)`
+
+image::fastpath-pics/fastpath-schema-2.svg[width=400]
+
+Optionally, the schema can also contain a node label called `contextNodeLabel`, see xref:#fastpath-considerations-event-features[Event input features] below.
+
+
+[[fastpath-considerations-timestamps]]
+=== Defining event timestamps
+
+There are two ways of specifying timestamps for event nodes.
+The first way is to provide a `timeNodeProperty`, in which case each event node must hold a property of that name representing a timestamp.
+
+If however, a `nextRelationshipType` is provided, `timeNodeProperty` does not have to be provided.
+In that case, time stamps are generated in an intuitive way depicted in the picture below.
+
+image:fastpath-pics/fastpath-timestamps.svg[Timestamp generation]
+
+The length of the `nextRelationshipType` path to an event defines its timestamp.
+The first event node in a base node's event chain, which is connected via a `firstRelationshipType` relationship from the base node, will have timestamp 0.
+The next event node, accessed via a `nextRelationshipType` relationship from the first event node, will have timestamp 1, and so on.
+
+You can still provide a `timeNodeProperty` even if `nextRelationshipType` is used.
+In that case, `nextRelationshipType` is not used to infer timestamps, but rather to determine which base node an event node belongs to.
+
+
+[[fastpath-considerations-event-features]]
+=== Event input features
+
+An event's feature representation can be impacted by three different input sources.
+They are independent of each other and can be used both together and separately.
+The event feature vector is a sum over all input sources that are enabled.
+
+1. To enable the _Context nodes_ input source you provide a `contextNodeLabel`.
+In this case it is assumed that there may be outgoing relationships from event nodes to context nodes, i.e., the pattern: +
+`(:eventNodeLabel)-[:]->(:contextNodeLabel)`
+2. To enable the _Event feature vector properties_ input source you provide `eventFeatures`.
+This should be the name of a vector property present on all event nodes.
+3. To enable the _Categorical event properties_ input source you provide `categoricalEventProperties`.
+This should be the name of a property that holds integers representing categories or lists of such integers.
+The property must be present on all event nodes.
+
+
+[[fastpath-considerations-smoothing]]
+=== Time-smoothing
+
+If `smoothingRate` is large, a small amount of smoothing is applied and events that are even a small time apart (enough to be closest to different grid points) will generally have very different embeddings.
+
+If `smoothingWindow` is `0`, the effect is similar to having a large `smoothingRate`.
+On the other hand, if `smoothingWindow` is large in relation to `numElapsedTimes`, and simultaneously `smoothingRate` is small, identical events will have similar embeddings even when their timestamps differ a lot.
+
+
+== Tuning parameters
+
+In general, tuning parameters is very dependent on the specific dataset.
+
+
+=== Embedding dimension
+
+The `dimension` parameter controls the output dimension of the embeddings.
+A larger dimension captures more information but increases memory and computation time.
+A smaller dimension is faster but may encode the input features and event history insufficiently.
+
+
+=== Time grid
+
+`numElapsedTimes` defines the number of points in the time grid; the elapsed time from an event to the output time is rounded to this grid.
+If set to `1`, timestamps of events have no effect.
+`maxElapsedTime` is the maximum age of events, relative to the output time, that are considered for the embedding; older events are discarded.
+
+
+=== Smoothing
+
+`smoothingRate` controls how fast expected similarity of events decays as their time-distance increases.
+`smoothingWindow` widens the aggregation window to up to `2*smoothingWindow + 1` grid times.
+A large `smoothingWindow` combined with a small `smoothingRate` makes identical events similar even when their timestamps differ a lot.
+
+
+=== Decay
+
+`decayFactor` controls the speed of decay of the influence of older events on the base node embedding.
+A value of `0.0` means all relevant events contribute equally; larger values weigh more recent events more heavily.
+
+
+[[algorithms-fastpath-syntax]]
+== Syntax
+
+This section covers the syntax used to execute the {algorithm} algorithm.
+
+.FastPath syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run FastPath in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.fastPath.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  embedding: Vector of FLOAT32
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/machine-learning/node-embeddings/fastpath/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name      | Type                        | Description
+| nodeId    | Integer                     | The Neo4j node ID.
+| embedding | Vector of FLOAT32           | The computed FastPath node embedding
+|===
+======
+
+[.include-with-mutate]
+======
+.Run FastPath in mutate mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.fastPath.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/machine-learning/node-embeddings/fastpath/specific-configuration.adoc[]
+| mutateProperty | String | n/a     | no       | The node property in the in-memory graph to which the embedding is written.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| nodeCount             | Integer | The number of nodes processed.
+| nodePropertiesWritten | Integer | The number of node properties written.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| mutateMillis          | Integer | Milliseconds for writing result data back to the projected graph.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run FastPath in write mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.fastPath.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name              | Type    | Default                | Optional | Description
+include::partial$/machine-learning/node-embeddings/fastpath/specific-configuration.adoc[]
+| writeProperty     | String  | n/a                    | no       | The node property in the Neo4j database to which the embedding is written
+| concurrency       | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+| writeConcurrency  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result to Neo4j.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| nodeCount             | Integer | The number of nodes processed.
+| nodePropertiesWritten | Integer | The number of node properties written.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| writeMillis           | Integer | Milliseconds for writing result data back to Neo4j.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+======
+====
+
+
+[[algorithms-fastpath-examples]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: {algorithm}
+
+In this example we use a small graph of medical patient records.
+`Patient` nodes are the base nodes and carry an `output_time` property.
+`Encounter` nodes are the event nodes and carry an `emb` feature vector and a `days` time property.
+`HAS_ENCOUNTER` relationships connect each patient to their encounters.
+
+Because FastPath is only available in Aura Graph Analytics, the graph must be projected into a GDS Session.
+This is done by passing the `memory` parameter (and optionally `sessionId`) to xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[`gds.graph.project`], which creates a GDS Session for the projected graph.
+
+.Database setup
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (p0:Patient {output_time: 100}),
+  (p1:Patient {output_time: 200}),
+  (e0:Encounter {emb: [0.1, 0.2, 0.3], days: 10}),
+  (e1:Encounter {emb: [0.4, 0.5, 0.6], days: 50}),
+  (e2:Encounter {emb: [0.7, 0.8, 0.9], days: 80}),
+  (p0)-[:HAS_ENCOUNTER]->(e0),
+  (p0)-[:HAS_ENCOUNTER]->(e1),
+  (p1)-[:HAS_ENCOUNTER]->(e2)
+----
+
+.Graph projection into a GDS Session
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:Patient)
+OPTIONAL MATCH (source)-[r:HAS_ENCOUNTER]->(target:Encounter)
+RETURN gds.graph.project(
+  'patients',
+  source,
+  target,
+  {
+    sourceNodeLabels: ['Patient'],
+    sourceNodeProperties: source { .output_time },
+    targetNodeLabels: ['Encounter'],
+    targetNodeProperties: target { .emb, .days },
+    relationshipType: 'HAS_ENCOUNTER'
+  },
+  { memory: '2GB' }
+)
+----
+
+=== Stream mode
+
+.Stream node embeddings
+[source, cypher, role=query-example]
+----
+CALL gds.fastPath.stream('patients', {
+  baseNodeLabel: 'Patient',
+  eventNodeLabel: 'Encounter',
+  eventFeatures: 'emb',
+  outputTimeProperty: 'output_time',
+  timeNodeProperty: 'days',
+  dimension: 32, // in reality, a higher value is recommended
+  numElapsedTimes: 30,
+  maxElapsedTime: 3650,
+  smoothingRate: 0.9,
+  smoothingWindow: 2,
+  decayFactor: 0.0
+}) YIELD nodeId, embedding
+RETURN nodeId, embedding
+----
+
+The stream procedure returns one row per base node.
+
+=== Mutate mode
+
+.Mutate node embeddings into the in-memory graph
+[source, cypher, role=query-example]
+----
+CALL gds.fastPath.mutate('patients', {
+  baseNodeLabel: 'Patient',
+  eventNodeLabel: 'Encounter',
+  eventFeatures: 'emb',
+  outputTimeProperty: 'output_time',
+  timeNodeProperty: 'days',
+  dimension: 32, // in reality, a higher value is recommended
+  numElapsedTimes: 30,
+  maxElapsedTime: 3650,
+  mutateProperty: 'fastPathEmbedding'
+}) YIELD nodeCount, nodePropertiesWritten, preProcessingMillis, computeMillis, mutateMillis
+RETURN nodeCount, nodePropertiesWritten, preProcessingMillis, computeMillis, mutateMillis
+----
+
+=== Write mode
+
+.Write node embeddings back to Neo4j
+[source, cypher, role=query-example]
+----
+CALL gds.fastPath.write('patients', {
+  baseNodeLabel: 'Patient',
+  eventNodeLabel: 'Encounter',
+  eventFeatures: 'emb',
+  outputTimeProperty: 'output_time',
+  timeNodeProperty: 'days',
+  dimension: 32, // in reality, a higher value is recommended
+  numElapsedTimes: 30,
+  maxElapsedTime: 3650,
+  writeProperty: 'fastPathEmbedding'
+}) YIELD nodeCount, nodePropertiesWritten, preProcessingMillis, computeMillis, writeMillis
+RETURN nodeCount, nodePropertiesWritten, preProcessingMillis, computeMillis, writeMillis
+----
+
+The `fastPathEmbedding` property is written back to Neo4j as a native vector property and can be indexed with a vector index for downstream similarity search.
+
+
+[[algorithms-fastpath-theory]]
+== How the algorithm works
+
+The following sections provide more detailed information about FastPath for those interested in the inner workings of the algorithm.
+
+The breakdown of the algorithm into steps below is conceptual.
+It does not reflect the actual implementation details such as the order of loops, data structures and more.
+We describe how to compute the FastPath embedding for a base node `b` which has output time `t~o~`.
+The output time is computed according to one of the chosen parameters `outputTime` or `outputTimeProperty`.
+An arbitrary event which belongs to `b` is denoted by `e`, and its time stamp is assumed to be `t~e~`.
+At the time `t~o~`, at which we wish to compute the embedding of `b`, the _elapsed time_ of `e` is +
+`t~el~ = t~o~ - t~e~`,
+that is, the amount of time between the timestamp of the event and the output time of the corresponding base node.
+
+Note that events may belong to multiple base nodes which have different output times.
+This implies that some computations involving an event have to be recomputed for each of its associated base nodes, but these computations are independent of each other.
+
+. *Preprocess* +
+Pre-process the input into a graph with base nodes, event nodes and optionally context nodes.
+Base and event nodes are connected and so are events and context nodes.
+If time stamps are not given for events, time stamps are generated by traversing xref:#fastpath-considerations-graph-schema[event chains] per base node.
+. *Filter relevant events* +
+Out of the events that belong to the base node `b`, any event which has elapsed time exceeding `maxElapsedTime`, or any event which occurred at time `t~o~` or later, is removed.
+The remaining relevant events for `b` are called `E(b)`.
+. *Create grid* +
+Create a grid over time, subsequently referred to as the grid.
+. *Generate random vectors* +
+Sparse random vectors are generated independently per _input source_ below, if they are selected. +
+For each time in the grid and input source, generate vectors as follows:
+a. _Event feature vector properties_: a vector `r~i,t~` is generated for each dimension `i` of the input event feature vectors image:fastpath-pics/thegrid.svg[TheGrid,350,350,role=right,text-center]
+b. _Context nodes_: for each context node `c`, generate `r~c,t~`
+c. _Categorical event properties_: for each categorical node property `prop` and for each value `v` of that property, initialize a random vector `r~prop,v,t~`. +
+If the property value for any event is a list of categories `[v~1~, v~2~, ...]`, and `v` is any of these values, we initialize a random vector `r~prop,v`.
+. *Compute event node pre-embeddings* +
+The pre-embedding for an event `e` at time `t` is denoted by `x~e,t~` and initialized to all zeros.
+For all input sources below that apply, weighted sums of random vectors generated in step 4 are added to `x~e,t~`:
+a. _Event feature vector properties_: +
+`x~e,t~ += ∑~i~ r~i,t~ * inp~i~` +
+where `inp` is the input vector of `e` and `i` ranges over the dimensions of `inp`.
+b. _Context nodes_: +
+`x~e,t~ += ∑~c~ r~c,t~` +
+where `c` ranges over all neighbors of the event `e`.
+c. _Categorical event properties_: +
+`x~e,t~ += ∑~prop~ r~prop,e.prop,t~` +
+where `prop` ranges over all selected categorical event properties. +
+Or when `e.prop` is a list:
+`x~e,t~ = ∑~prop~ ∑~v{sp}in{sp}e.prop~ r~prop,v,t~`
+. *Compute event embeddings* +
+image:fastpath-pics/thegrid_computation.svg[Image2,450,450] +
+We compute an embedding for `e` using its earlier derived pre-embeddings at different times.
+We find the time `t~cl~` in the grid which is the closest to the elapsed time `t~el~ = t~o~ - t~e~`.
+Then adding up to `smoothingWindow` points in the grid on both sides of `t~cl~`, we obtain a window `W~e~` of relevant grid times for the event.
+In the picture, `smoothingWindow = 1` and `t~cl~=t~4~`, therefore `W~e~ = {t~3~,t~4~,t~5~}`.
+For each `t` in `W~e~` we set the weight of the grid point `t` to be, +
+`w(t) = exp(-|t - t~el~| * smoothingRate ) / Z~e~`, +
+where `Z~e~` is the constant that ensures `∑~t{sp}in{sp}W_e~ w(t) = 1`. +
+The embedding of the event at output time `t~o~` is then +
+`emb(e|t~o~) = ∑~t{sp}in{sp}W_e~ w(t) * x~e,t~`. +
+This constructs time-smoothed embeddings by taking an average of a grid of pre-embeddings, or basis vectors.
+The purpose of the time-smoothing mechanism is to ensure that embeddings change continuously with respect to changes in elapsed time, all other factors being equal.
+. *Compute base node embeddings* +
+The embedding for `b` is finally given by +
+`emb(_b_) = ∑~e{sp}in{sp}E(b)~ w~b,e~ * emb(e)` +
+where +
+`w~b,e~ = exp(-decayFactor * (t~o~ - t~e~))` and `E(b)` was defined in step 2.
+
+The figure below gives an overview of what influences event embeddings and how they flow to the embedding of a base node, based on the output time and elapsed times.
+
+image::fastpath-pics/base-event.svg[]

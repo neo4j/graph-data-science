@@ -1,0 +1,22 @@
+// FastPath shared configuration entries (FastPathBaseConfig + inherited randomSeed/jobId).
+// Sourced from org.neo4j.gds.pyruntime.fastpath.FastPathBaseConfig.
+| baseNodeLabel              | String         | n/a                  | no  | Node label for which output embeddings are desired.
+| eventNodeLabel             | String         | n/a                  | no  | Node label of events related to base nodes.
+| dimension                  | Integer        | n/a                  | no  | The output dimension of the embeddings. Must be at least 1.
+| numElapsedTimes            | Integer        | n/a                  | no  | The number of times in the time grid. Elapsed time from event to output time is rounded to this grid. If set to 1, timestamps of events have no effect. Must be at least 1.
+| maxElapsedTime             | Integer        | n/a                  | no  | The maximum age of events, relative to the output time, that are considered for the embedding. Must be at least 1.
+| outputTime                 | Float          | n/a                  | yes | The timestamp at which embeddings should be produced. Events at this timestamp or later are not processed. Exactly one of `outputTime` and `outputTimeProperty` must be specified.
+| outputTimeProperty         | String         | n/a                  | yes | Name of a node property on base nodes which holds a number indicating for which timestamp an output embedding should be produced. Exactly one of `outputTime` and `outputTimeProperty` must be specified.
+| timeNodeProperty           | String         | n/a                  | yes | Name of a node property representing time on the event nodes. May be int or float. Exactly one of `nextRelationshipType` and `timeNodeProperty` must be specified.
+| nextRelationshipType       | String         | n/a                  | yes | Name of a relationship type between event nodes, indicating the order of events. Must be specified together with `firstRelationshipType`.
+| firstRelationshipType      | String         | n/a                  | yes | Name of a relationship type from base nodes to event nodes, indicating the first event for each base node. Must be specified together with `nextRelationshipType`.
+| contextNodeLabel           | String         | n/a                  | yes | Node label of context nodes that describe events.
+| eventFeatures              | String         | n/a                  | yes | Name of a node property on event nodes which holds numerical features in vector form.
+| categoricalEventProperties | List of String | []                   | yes | Names of node properties on event nodes which hold categorical values or lists of categorical values.
+| ignoredEventCategory       | Integer        | -1                   | yes | A category value representing that a category is missing; ignored when constructing the event embedding.
+| relationshipTypes          | List of String | ['*']                | yes | The relationship types to include in the projection FastPath operates on. Defaults to all relationship types.
+| smoothingRate              | Float          | 0.0                  | yes | Controls how fast expected similarity of events decays as their time-distance increases.
+| smoothingWindow            | Integer        | 0                    | yes | Event embeddings are aggregated over a window containing up to `2*smoothingWindow + 1` grid times. Must be at least 0.
+| decayFactor                | Float          | 1.0                  | yes | Coefficient controlling the speed of decay of influence of older events.
+| randomSeed                 | Integer        | random               | yes | A random seed used for all randomness in computing the embeddings.
+| jobId                      | String         | generated internally | yes | An ID to more easily track the algorithm's progress.
