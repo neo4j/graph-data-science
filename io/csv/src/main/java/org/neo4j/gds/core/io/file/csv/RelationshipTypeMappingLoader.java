@@ -20,10 +20,10 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvReadFeature;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,10 +47,12 @@ public class RelationshipTypeMappingLoader {
     RelationshipTypeMappingLoader(Path csvDirectory) {
         this.mapping = new HashMap<>();
         this.typeMappingPath = csvDirectory.resolve(TYPE_MAPPING_FILE_NAME);
-        CsvMapper csvMapper = new CsvMapper();
-        csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        this.objectReader = csvMapper.readerFor(MappingLine.class).with(schema);
+        this.objectReader = CsvMapper.builder()
+            .enable(CsvReadFeature.TRIM_SPACES)
+            .build()
+            .readerFor(MappingLine.class)
+            .with(schema);
     }
 
     Optional<Map<String, String>> load() {

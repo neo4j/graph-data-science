@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.core.io.json;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import tools.jackson.databind.json.JsonMapper;
 
 final class Utils {
     private Utils() {}
@@ -33,17 +31,15 @@ final class Utils {
             .replace("\n", "");
     }
 
-    static String serialize(Object object) throws JsonProcessingException {
+    static String serialize(Object object) {
         return getJsonMapper().writeValueAsString(object);
     }
 
-    static <T> T deserialize(String jsonString, Class<T> clazz) throws JsonProcessingException {
+    static <T> T deserialize(String jsonString, Class<T> clazz) {
         return getJsonMapper().readValue(jsonString, clazz);
     }
 
     private static JsonMapper getJsonMapper() {
-        return JsonMapper.builder()
-            .addModule(new Jdk8Module())
-            .build();
+        return JsonMapper.builder().build();
     }
 }

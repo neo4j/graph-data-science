@@ -19,31 +19,21 @@
  */
 package org.neo4j.gds.core.io.json;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import org.neo4j.gds.RelationshipType;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-import java.io.IOException;
-
-public class RelationshipTypeSerializer extends JsonSerializer<RelationshipType> {
+public class RelationshipTypeSerializer extends ValueSerializer<RelationshipType> {
     @Override
-    public void serialize(
-        RelationshipType value,
-        JsonGenerator gen,
-        SerializerProvider serializers
-    ) throws IOException {
+    public void serialize(RelationshipType value, JsonGenerator gen, SerializationContext serializationContext) {
         gen.writeString(value.name());
     }
 
-    public static class KeySerializer extends JsonSerializer<RelationshipType> {
+    public static class KeySerializer extends ValueSerializer<RelationshipType> {
         @Override
-        public void serialize(
-            RelationshipType value,
-            JsonGenerator gen,
-            SerializerProvider serializers
-        ) throws IOException {
-            gen.writeFieldName(value.name());
+        public void serialize(RelationshipType value, JsonGenerator gen, SerializationContext serializationContext) {
+            gen.writeName(value.name());
         }
     }
 }

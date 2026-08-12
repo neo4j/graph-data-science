@@ -20,16 +20,16 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.io.schema.NodeSchemaBuilderVisitor;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvReadFeature;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -45,10 +45,12 @@ public class NodeSchemaLoader {
 
     public NodeSchemaLoader(Path csvDirectory) {
         this.nodeSchemaPath = csvDirectory.resolve(CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME);
-        CsvMapper csvMapper = new CsvMapper();
-        csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        objectReader = csvMapper.readerFor(SchemaLine.class).with(schema);
+        this.objectReader = CsvMapper.builder()
+            .enable(CsvReadFeature.TRIM_SPACES)
+            .build()
+            .readerFor(SchemaLine.class)
+            .with(schema);
     }
 
     public NodeSchema load() {

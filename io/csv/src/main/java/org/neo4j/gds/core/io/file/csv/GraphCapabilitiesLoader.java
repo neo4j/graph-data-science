@@ -19,15 +19,13 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.neo4j.gds.core.loading.Capabilities;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvReadFeature;
+import tools.jackson.dataformat.csv.CsvSchema;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -39,20 +37,23 @@ public class GraphCapabilitiesLoader {
     public GraphCapabilitiesLoader(Path csvDirectory, CsvMapper csvMapper) {
         this.capabilitiesPath = csvDirectory.resolve(CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME);
 
-        csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
-        csvMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        var mapper = csvMapper.rebuild()
+            .enable(CsvReadFeature.TRIM_SPACES)
+            .build();
         var schema = CsvSchema.emptySchema().withHeader().withStrictHeaders(false);
-        this.objectReader = csvMapper.readerFor(Capabilities.class).with(schema);
+        this.objectReader = mapper.readerFor(CapabilitiesLine.class).with(schema);
     }
 
     public Capabilities load() {
-        try {
-            if (!Files.exists(capabilitiesPath)) {
-                return new Capabilities();
-            }
-            return objectReader.<Capabilities>readValue(capabilitiesPath.toFile());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        if (!Files.exists(capabilitiesPath)) {
+            return new Capabilities();
         }
+        var line = objectReader.<CapabilitiesLine>readValue(capabilitiesPath.toFile());
+        return new Capabilities(line.writeMode);
+    }
+
+    private static class CapabilitiesLine {
+        @JsonProperty
+        Capabilities.WriteMode writeMode = Capabilities.WriteMode.LOCAL;
     }
 }

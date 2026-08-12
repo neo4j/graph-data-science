@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -40,7 +40,7 @@ final class DefaultValueIOHelper {
                 serializedValue = "NaN";
             }
             return formatWithLocale(DEFAULT_VALUE_TEMPLATE, serializedValue);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -71,7 +71,7 @@ final class DefaultValueIOHelper {
                     throw new IllegalArgumentException("Cannot deserialize type `" + valueType + "` to DefaultValue");
             };
             return DefaultValue.of(parseValue, valueType, isUserDefined);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }

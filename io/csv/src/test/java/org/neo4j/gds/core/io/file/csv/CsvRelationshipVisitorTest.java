@@ -41,7 +41,11 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitRelationshipsWithTypes() {
-        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, MutableRelationshipSchema.empty(), IdentifierMapper.biject(RelationshipType::name, RelationshipType::of));
+        var relationshipVisitor = new CsvRelationshipVisitor(
+            tempDir,
+            MutableRelationshipSchema.empty(),
+            IdentifierMapper.biject(RelationshipType::name, RelationshipType::of)
+        );
 
         relationshipVisitor.startId(0L);
         relationshipVisitor.endId(1L);

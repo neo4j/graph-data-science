@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectReader;
 import org.neo4j.gds.core.io.file.NodeFileHeader;
 import org.neo4j.gds.core.io.file.RelationshipFileHeader;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectReader;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -59,8 +59,6 @@ final class CsvImportFileUtil {
                     .map(label -> labelMapping.apply(label))
                     .toArray(String[]::new)
             );
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 
@@ -74,8 +72,6 @@ final class CsvImportFileUtil {
                 headerLine,
                 typeMapping.apply(inferRelationshipType(headerFile))
             );
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 

@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.metrics.telemetry;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.GdlGraphStoreBuilder;
 import org.neo4j.gds.annotation.Configuration;
@@ -28,6 +26,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.GdsTestLog;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TelemetryLoggerImplTest {
 
     @Test
-    void shouldLogSuccessfulAlgorithmTelemetry() throws JsonProcessingException {
+    void shouldLogSuccessfulAlgorithmTelemetry() throws JacksonException {
         var testLog = new GdsTestLog();
         var telemetryLogger = new TelemetryLoggerImpl(testLog);
         var testConfig = new TelemetryConfigImpl(CypherMapWrapper.empty());
@@ -58,7 +58,7 @@ class TelemetryLoggerImplTest {
     }
 
     @Test
-    void shouldLogAlgorithmTelemetryWithConfiguredParameters() throws JsonProcessingException {
+    void shouldLogAlgorithmTelemetryWithConfiguredParameters() throws JacksonException {
         var testLog = new GdsTestLog();
         var telemetryLogger = new TelemetryLoggerImpl(testLog);
 
@@ -83,7 +83,7 @@ class TelemetryLoggerImplTest {
     }
 
     @Test
-    void shouldLogPythonRuntimeAlgorithmTelemetryWithOnlyConfiguredParameters() throws JsonProcessingException {
+    void shouldLogPythonRuntimeAlgorithmTelemetryWithOnlyConfiguredParameters() throws JacksonException {
         var testLog = new GdsTestLog();
         var telemetryLogger = new TelemetryLoggerImpl(testLog);
 
@@ -108,7 +108,7 @@ class TelemetryLoggerImplTest {
     }
 
     @Test
-    void shouldLogGraphTelemetry() throws JsonProcessingException {
+    void shouldLogGraphTelemetry() throws JacksonException {
         var testLog = new GdsTestLog();
         var telemetryLogger = new TelemetryLoggerImpl(testLog);
 
@@ -136,7 +136,7 @@ class TelemetryLoggerImplTest {
         ));
     }
 
-    <T> T extractLog(GdsTestLog log, String prefix, Class<T> type) throws JsonProcessingException {
+    <T> T extractLog(GdsTestLog log, String prefix, Class<T> type) throws JacksonException {
         var messages = log.getMessages(GdsTestLog.INFO);
         assertThat(messages).hasSize(1);
 

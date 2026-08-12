@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.databind.util.StdConverter;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import tools.jackson.databind.util.StdConverter;
 
 class JacksonConverters {
 

@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.metrics.telemetry;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 

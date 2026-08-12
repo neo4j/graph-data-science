@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.schema.PropertySchema;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 import java.io.Flushable;
 import java.io.IOException;
@@ -39,7 +39,7 @@ import static org.neo4j.gds.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 
 final class JacksonFileAppender implements Flushable, AutoCloseable {
 
-    private final CsvGenerator csvEncoder;
+    private final JsonGenerator csvEncoder;
     private final CsvSchema csvSchema;
 
     private int currentColumnIndex = 0;
@@ -62,21 +62,20 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
         }
         var csvSchema = csvSchemaBuilder.build();
 
-        var mapper = CsvMapper.csvBuilder().build();
-        var factory = mapper.getFactory();
+        var mapper = CsvMapper.builder().build();
 
         try {
             var writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8);
-            var csvEncoder = factory.createGenerator(writer);
-            csvEncoder.setSchema(csvSchema);
-            return new JacksonFileAppender(csvEncoder, csvSchema);
+            var csvWriter = mapper.writer(csvSchema);
+            var csvGenerator = csvWriter.createGenerator(writer);
+            return new JacksonFileAppender(csvGenerator, csvSchema);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     private JacksonFileAppender(
-        CsvGenerator csvEncoder,
+        JsonGenerator csvEncoder,
         CsvSchema csvSchema
     ) {
         this.csvEncoder = csvEncoder;
@@ -172,6 +171,6 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
 
     private void setFieldName() throws IOException {
         var column = csvSchema.column(currentColumnIndex++);
-        csvEncoder.writeFieldName(column.getName());
+        csvEncoder.writeName(column.getName());
     }
 }

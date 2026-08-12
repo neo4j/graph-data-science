@@ -19,17 +19,14 @@
  */
 package org.neo4j.gds.core.io.json;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.neo4j.gds.RelationshipType;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
-
-public class RelationshipTypeDeserializer extends JsonDeserializer<RelationshipType> {
+public class RelationshipTypeDeserializer extends ValueDeserializer<RelationshipType> {
     @Override
-    public RelationshipType deserialize(JsonParser p, DeserializationContext ctxt) throws
-        IOException {
+    public RelationshipType deserialize(JsonParser p, DeserializationContext ctxt) {
         return RelationshipType.of(p.getValueAsString());
     }
 }

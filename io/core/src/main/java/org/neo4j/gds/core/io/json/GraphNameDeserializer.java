@@ -19,17 +19,15 @@
  */
 package org.neo4j.gds.core.io.json;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.neo4j.gds.api.GraphName;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
-
-public class GraphNameDeserializer extends JsonDeserializer<GraphName> {
+public class GraphNameDeserializer extends ValueDeserializer<GraphName> {
 
     @Override
-    public GraphName deserialize(JsonParser p, DeserializationContext ignore) throws IOException {
-        return GraphName.parse(p.getText());
+    public GraphName deserialize(JsonParser p, DeserializationContext ignore) {
+        return GraphName.parse(p.getString());
     }
 }

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.io.json;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
+import tools.jackson.databind.module.SimpleModule;
 
 public final class GdsModule extends SimpleModule {
 

@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.file.NodeVisitor;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 import java.io.IOException;
 import java.nio.file.Path;

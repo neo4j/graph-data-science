@@ -19,24 +19,22 @@
  */
 package org.neo4j.gds.core.io.json;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import org.neo4j.gds.NodeLabel;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-import java.io.IOException;
-
-public class NodeLabelSerializer extends JsonSerializer<NodeLabel> {
+public class NodeLabelSerializer extends ValueSerializer<NodeLabel> {
 
     @Override
-    public void serialize(NodeLabel value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(NodeLabel value, JsonGenerator gen, SerializationContext serializers) {
         gen.writeString(value.name());
     }
 
-    public static class KeySerializer extends JsonSerializer<NodeLabel> {
+    public static class KeySerializer extends ValueSerializer<NodeLabel> {
         @Override
-        public void serialize(NodeLabel value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            gen.writeFieldName(value.name());
+        public void serialize(NodeLabel value, JsonGenerator gen, SerializationContext serializers) {
+            gen.writeName(value.name());
         }
     }
 }

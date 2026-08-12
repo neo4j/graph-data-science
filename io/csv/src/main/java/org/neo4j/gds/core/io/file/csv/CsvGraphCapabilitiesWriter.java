@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.neo4j.gds.core.io.file.SimpleWriter;
 import org.neo4j.gds.core.loading.Capabilities;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.dataformat.csv.CsvMapper;
 
 import java.io.IOException;
 import java.nio.file.Path;

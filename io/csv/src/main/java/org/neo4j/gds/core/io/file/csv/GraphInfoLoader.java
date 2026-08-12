@@ -21,14 +21,6 @@ package org.neo4j.gds.core.io.file.csv;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -36,6 +28,15 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.io.file.GraphInfo;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvReadFeature;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -47,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class GraphInfoLoader {
     private final Path graphInfoPath;
@@ -55,10 +55,13 @@ public class GraphInfoLoader {
 
     public GraphInfoLoader(Path csvDirectory, CsvMapper csvMapper) {
         this.graphInfoPath = csvDirectory.resolve(CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME);
-
-        csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        objectReader = csvMapper.readerFor(GraphInfoLine.class).with(schema);
+        this.objectReader = csvMapper.rebuild()
+            .enable(CsvReadFeature.TRIM_SPACES)
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .build()
+            .readerFor(GraphInfoLine.class)
+            .with(schema);
     }
 
     public GraphInfo load() {
@@ -122,7 +125,7 @@ public class GraphInfoLoader {
     static class RelationshipTypesDeserializer extends StdDeserializer<Map<RelationshipType, Long>> {
 
         RelationshipTypesDeserializer() {
-            this(null);
+            this(Map.class);
         }
 
         RelationshipTypesDeserializer(Class<?> vc) {
@@ -130,11 +133,8 @@ public class GraphInfoLoader {
         }
 
         @Override
-        public Map<RelationshipType, Long> deserialize(
-            JsonParser parser,
-            DeserializationContext ctxt
-        ) throws IOException {
-            String mapString = parser.getText();
+        public Map<RelationshipType, Long> deserialize(JsonParser parser, DeserializationContext ctxt) {
+            String mapString = parser.getString();
             return CsvMapUtil.fromString(mapString, RelationshipType::of, Long::parseLong);
         }
     }
@@ -142,7 +142,7 @@ public class GraphInfoLoader {
     static class InverseIndexedRelTypesDeserializer extends StdDeserializer<List<RelationshipType>> {
 
         InverseIndexedRelTypesDeserializer() {
-            this(null);
+            this(List.class);
         }
 
         InverseIndexedRelTypesDeserializer(Class<?> vc) {
@@ -150,14 +150,11 @@ public class GraphInfoLoader {
         }
 
         @Override
-        public List<RelationshipType> deserialize(
-            JsonParser parser,
-            DeserializationContext ctxt
-        ) throws IOException {
-            return Arrays.stream(parser.getText().split(";"))
+        public List<RelationshipType> deserialize(JsonParser parser, DeserializationContext ctxt) {
+            return Arrays.stream(parser.getString().split(";"))
                 .filter(s -> !s.isEmpty())
                 .map(RelationshipType::of)
-                .collect(Collectors.toList());
+                .toList();
         }
     }
 }

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectReader;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectReader;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
@@ -106,7 +106,7 @@ final class CsvImportParsingUtil {
         String value,
         DefaultValue defaultValue,
         ObjectReader arrayReader
-    ) throws IOException {
+    ) {
         try (MappingIterator<String[]> objectMappingIterator = arrayReader.readValues(value)) {
             if (objectMappingIterator.hasNext()) {
                 var stringArray = objectMappingIterator.next();

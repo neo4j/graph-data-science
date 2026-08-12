@@ -19,11 +19,6 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.collections.impl.block.factory.Functions;
 import org.neo4j.batchimport.api.InputIterable;
@@ -43,6 +38,11 @@ import org.neo4j.gds.core.io.file.MappedListIterator;
 import org.neo4j.gds.core.io.file.NodeFileHeader;
 import org.neo4j.gds.core.io.file.RelationshipFileHeader;
 import org.neo4j.gds.core.loading.Capabilities;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvReadFeature;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -63,8 +63,8 @@ public final class CsvFileInput implements FileInput {
             .emptySchema()
             .withColumnSeparator(COLUMN_SEPARATOR)
         )
-        .with(CsvParser.Feature.WRAP_AS_ARRAY)
-        .with(CsvParser.Feature.SKIP_EMPTY_LINES);
+        .with(CsvReadFeature.WRAP_AS_ARRAY)
+        .with(CsvReadFeature.SKIP_EMPTY_LINES);
     private static final ObjectReader ARRAY_READER = CSV_MAPPER
         .readerForArrayOf(String.class)
         .with(CsvSchema
@@ -235,7 +235,7 @@ public final class CsvFileInput implements FileInput {
             this.schema = schema;
         }
 
-        void initialize(HEADER header, Path path) throws IOException {
+        void initialize(HEADER header, Path path) {
             this.header = header;
             this.propertySchemas = header.schemaForIdentifier(schema);
             this.lineIterator = LINE_READER.readValues(path.toFile());

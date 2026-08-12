@@ -19,17 +19,16 @@
  */
 package org.neo4j.gds.core.io.json;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.neo4j.gds.NodeLabel;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
-
-public class NodeLabelDeserializer extends JsonDeserializer<NodeLabel> {
+public class NodeLabelDeserializer extends ValueDeserializer<NodeLabel> {
 
     @Override
-    public NodeLabel deserialize(JsonParser p, DeserializationContext ignore) throws IOException {
+    public NodeLabel deserialize(JsonParser p, DeserializationContext ignore) throws JacksonException {
         return NodeLabel.of(p.getText());
     }
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,6 +27,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
+import tools.jackson.dataformat.csv.CsvMapper;
 
 import java.io.IOException;
 import java.nio.file.Path;

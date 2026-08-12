@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import tools.jackson.dataformat.csv.CsvMapper;
 
 import java.io.IOException;
 import java.util.stream.Stream;

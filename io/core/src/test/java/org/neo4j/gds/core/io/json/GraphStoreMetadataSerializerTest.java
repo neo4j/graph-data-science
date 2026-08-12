@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io.json;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +39,7 @@ import static org.neo4j.gds.core.io.json.Utils.serialize;
 class GraphStoreMetadataSerializerTest {
 
     @Test
-    void serializeDatabaseInfo() throws JsonProcessingException {
+    void serializeDatabaseInfo() {
         var databaseName = "neo";
         var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
         var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
@@ -60,7 +59,7 @@ class GraphStoreMetadataSerializerTest {
     }
 
     @Test
-    void serializeDatabaseInfoWithRemote() throws JsonProcessingException {
+    void serializeDatabaseInfoWithRemote() {
         var databaseName = "neo";
         var databaseLocation = DatabaseInfo.DatabaseLocation.REMOTE;
         var remoteDatabaseId = "foo";
@@ -81,7 +80,7 @@ class GraphStoreMetadataSerializerTest {
     }
 
     @Test
-    void roundTripDatabaseInfo() throws JsonProcessingException {
+    void roundTripDatabaseInfo() {
         var databaseName = "neo";
         var databaseLocation = DatabaseInfo.DatabaseLocation.LOCAL;
         var databaseInfo = new DatabaseInfo(databaseName, databaseLocation, Optional.empty());
@@ -92,7 +91,7 @@ class GraphStoreMetadataSerializerTest {
     }
 
     @Test
-    void serializeIdMapInfo() throws JsonProcessingException {
+    void serializeIdMapInfo() {
         var idMapType = ArrayIdMapBuilder.ID;
         long nodeCount = 1337L;
         long maxOriginalId = 1984L;
@@ -122,7 +121,7 @@ class GraphStoreMetadataSerializerTest {
     }
 
     @Test
-    void roundTripIdMapInfo() throws JsonProcessingException {
+    void roundTripIdMapInfo() {
         var idMapType = ArrayIdMapBuilder.ID;
         long nodeCount = 1337L;
         long maxOriginalId = 1984L;
@@ -177,7 +176,7 @@ class GraphStoreMetadataSerializerTest {
 
     @ParameterizedTest
     @MethodSource("defaultValues")
-    void serializeDefaultValue(org.neo4j.gds.api.DefaultValue defaultValue, String expected) throws JsonProcessingException {
+    void serializeDefaultValue(org.neo4j.gds.api.DefaultValue defaultValue, String expected) {
         var input = new DefaultValue(defaultValue.getObject(), defaultValue.isUserDefined());
 
         var result = serialize(input);
@@ -186,7 +185,7 @@ class GraphStoreMetadataSerializerTest {
     }
 
     @Test
-    void serializeGraphStoreMetadata() throws JsonProcessingException {
+    void serializeGraphStoreMetadata() {
         var graphStoreMetadata = getGraphStoreMetadata();
 
         var result = serialize(graphStoreMetadata);
@@ -254,7 +253,7 @@ class GraphStoreMetadataSerializerTest {
     }
 
     @Test
-    void roundTripGraphStoreMetadata() throws JsonProcessingException {
+    void roundTripGraphStoreMetadata() {
         var graphStoreMetadata = getGraphStoreMetadata();
 
         var result = deserialize(serialize(graphStoreMetadata), GraphStoreMetadata.class);
