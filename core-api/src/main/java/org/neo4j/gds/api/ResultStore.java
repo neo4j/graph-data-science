@@ -22,10 +22,9 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.core.JobId;
 
 /**
- * A store for write results that are not immediately persisted in the database.
+ * A store for ephemeral results.
  * This is mainly used for the session architecture, where algorithms results are first
- * written into this store and then streamed via arrow to persist them in a
- * remote database.
+ * written into this store and then streamed via arrow or mutated.
  */
 public interface ResultStore {
 
