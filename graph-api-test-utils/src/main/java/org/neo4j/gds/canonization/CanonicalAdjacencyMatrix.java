@@ -60,35 +60,29 @@ public final class CanonicalAdjacencyMatrix {
                 .map(propertyKey -> {
                     var nodeProperties = g.nodeProperties(propertyKey);
 
-                    switch (nodeProperties.valueType()) {
-                        case DOUBLE:
-                            return formatWithLocale("%s: %f", propertyKey, nodeProperties.doubleValue(nodeId));
-                        case LONG:
-                            return formatWithLocale("%s: %d", propertyKey, nodeProperties.longValue(nodeId));
-                        case DOUBLE_ARRAY:
-                            return formatWithLocale(
-                                "%s: %s",
-                                propertyKey,
-                                Arrays.toString(nodeProperties.doubleArrayValue(nodeId))
-                            );
-                        case LONG_ARRAY:
-                            return formatWithLocale(
-                                "%s: %s",
-                                propertyKey,
-                                Arrays.toString(nodeProperties.longArrayValue(nodeId))
-                            );
-                        case FLOAT_ARRAY:
-                            return formatWithLocale(
-                                "%s: %s",
-                                propertyKey,
-                                Arrays.toString(nodeProperties.floatArrayValue(nodeId))
-                            );
-                        default:
-                            throw new IllegalArgumentException(formatWithLocale(
-                                "Unsupported type: %s",
-                                nodeProperties.valueType()
-                            ));
-                    }
+                    return switch (nodeProperties.valueType()) {
+                        case DOUBLE -> formatWithLocale("%s: %f", propertyKey, nodeProperties.doubleValue(nodeId));
+                        case LONG -> formatWithLocale("%s: %d", propertyKey, nodeProperties.longValue(nodeId));
+                        case LONG_ARRAY -> formatWithLocale(
+                            "%s: %s",
+                            propertyKey,
+                            Arrays.toString(nodeProperties.longArrayValue(nodeId))
+                        );
+                        case DOUBLE_ARRAY, DOUBLE_VECTOR -> formatWithLocale(
+                            "%s: %s",
+                            propertyKey,
+                            Arrays.toString(nodeProperties.doubleArrayValue(nodeId))
+                        );
+                        case FLOAT_ARRAY, FLOAT_VECTOR -> formatWithLocale(
+                            "%s: %s",
+                            propertyKey,
+                            Arrays.toString(nodeProperties.floatArrayValue(nodeId))
+                        );
+                        default -> throw new IllegalArgumentException(formatWithLocale(
+                            "Unsupported type: %s",
+                            nodeProperties.valueType()
+                        ));
+                    };
                 })
                 .sorted()
                 .collect(Collectors.joining(", "));
