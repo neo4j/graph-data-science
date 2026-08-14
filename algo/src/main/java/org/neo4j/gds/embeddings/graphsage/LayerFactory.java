@@ -26,8 +26,6 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.Random;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 public final class LayerFactory {
     private LayerFactory() {}
 
@@ -49,14 +47,13 @@ public final class LayerFactory {
             randomSeed
         );
 
-        switch (layerParameters.aggregatorType()) {
-            case MEAN:
-                return new MeanAggregatingLayer(
-                    weights,
-                    layerParameters.sampleSize(),
-                    activationFunctionWrapper
-                );
-            case POOL:
+        return switch (layerParameters.aggregatorType()) {
+            case MEAN -> new MeanAggregatingLayer(
+               weights,
+               layerParameters.sampleSize(),
+               activationFunctionWrapper
+           );
+            case POOL -> {
                 Weights<Matrix> poolWeights = weights;
 
                 Weights<Matrix> selfWeights = generateWeights(
@@ -75,7 +72,7 @@ public final class LayerFactory {
 
                 Weights<Vector> bias = new Weights<>(Vector.create(0D, rows));
 
-                return new MaxPoolAggregatingLayer(
+                yield new MaxPoolAggregatingLayer(
                     layerParameters.sampleSize(),
                     poolWeights,
                     selfWeights,
@@ -83,12 +80,8 @@ public final class LayerFactory {
                     bias,
                     activationFunctionWrapper
                 );
-            default:
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Aggregator: %s is unknown",
-                    layerParameters.aggregatorType()
-                ));
-        }
+            }
+        };
     }
 
     public static Weights<Matrix> generateWeights(int rows, int cols, double weightBound, long randomSeed) {

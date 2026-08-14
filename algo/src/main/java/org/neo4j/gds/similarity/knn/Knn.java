@@ -82,16 +82,15 @@ public final class Knn implements Algorithm<KnnResult> {
         this.updateThreshold = k.updateThreshold();
 
         var splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
-        switch (initialSamplerType) {
-            case UNIFORM:
-                this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount(), splittableRandom);
-                break;
-            case RANDOMWALK:
-                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value(), splittableRandom);
-                break;
-            default:
-                throw new IllegalStateException("Invalid KnnSampler");
-        }
+        this.samplerFactory = switch (initialSamplerType) {
+            case UNIFORM -> new UniformKnnSampler.Factory(graph.nodeCount(), splittableRandom);
+            case RANDOMWALK -> new RandomWalkKnnSampler.Factory(
+                graph,
+                randomSeed,
+                k.value(),
+                splittableRandom
+            );
+        };
         this.generateRandomNeighborsFactory = new GenerateRandomNeighbors.Factory(
             similarityFunction,
             neighborConsumers,

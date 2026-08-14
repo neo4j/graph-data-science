@@ -153,27 +153,14 @@ class GdsCypherTest {
         GdsCypher.ModeBuildStage builder = GdsCypher
             .call("graph")
             .algo("algoName");
-        GdsCypher.ParametersBuildStage nextBuilder;
+        GdsCypher.ParametersBuildStage nextBuilder = switch (executionMode) {
+            case WRITE -> builder.writeMode();
+            case STATS -> builder.statsMode();
+            case STREAM -> builder.streamMode();
+            case MUTATE -> builder.mutateMode();
+            case TRAIN -> builder.trainMode();
+        };
 
-        switch (executionMode) {
-            case WRITE:
-                nextBuilder = builder.writeMode();
-                break;
-            case STATS:
-                nextBuilder = builder.statsMode();
-                break;
-            case STREAM:
-                nextBuilder = builder.streamMode();
-                break;
-            case MUTATE:
-                nextBuilder = builder.mutateMode();
-                break;
-            case TRAIN:
-                nextBuilder = builder.trainMode();
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
-        }
         String query = nextBuilder.yields();
 
         assertThat(query).isEqualTo(
@@ -203,27 +190,14 @@ class GdsCypherTest {
         GdsCypher.ModeBuildStage builder = GdsCypher
             .call("graph")
             .algo("algoName");
-        GdsCypher.ParametersBuildStage nextBuilder;
+        GdsCypher.ParametersBuildStage nextBuilder = switch (executionMode) {
+            case WRITE -> builder.writeEstimation();
+            case STATS -> builder.statsEstimation();
+            case STREAM -> builder.streamEstimation();
+            case MUTATE -> builder.mutateEstimation();
+            case TRAIN -> builder.trainEstimation();
+        };
 
-        switch (executionMode) {
-            case WRITE:
-                nextBuilder = builder.writeEstimation();
-                break;
-            case STATS:
-                nextBuilder = builder.statsEstimation();
-                break;
-            case STREAM:
-                nextBuilder = builder.streamEstimation();
-                break;
-            case MUTATE:
-                nextBuilder = builder.mutateEstimation();
-                break;
-            case TRAIN:
-                nextBuilder = builder.trainEstimation();
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
-        }
         String query = nextBuilder.yields();
 
         assertThat(query).isEqualTo(
@@ -393,20 +367,13 @@ class GdsCypherTest {
     }
 
     private static String executionModeName(GdsCypher.ExecutionModes executionMode) {
-        switch (executionMode) {
-            case WRITE:
-                return "write";
-            case STATS:
-                return "stats";
-            case STREAM:
-                return "stream";
-            case MUTATE:
-                return "mutate";
-            case TRAIN:
-                return "train";
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
-        }
+        return switch (executionMode) {
+            case WRITE -> "write";
+            case STATS -> "stats";
+            case STREAM -> "stream";
+            case MUTATE -> "mutate";
+            case TRAIN -> "train";
+        };
     }
 
     static Stream<Arguments> graphProjectBuilders() {

@@ -42,7 +42,6 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.models.automl.ParameterParser.parseConcreteParameters;
 import static org.neo4j.gds.ml.models.automl.ParameterParser.parseRangeParameters;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TunableTrainerConfig {
     static final double EPSILON = 1e-8;
@@ -173,13 +172,12 @@ public final class TunableTrainerConfig {
     }
 
     private static TrainerConfig createTrainerConfigFromMap(Map<String, Object> configMap, TrainingMethod method) {
-        switch (method)  {
-            case LogisticRegression: return LogisticRegressionTrainConfig.of(configMap);
-            case RandomForestClassification: return RandomForestClassifierTrainerConfig.of(configMap);
-            case MLPClassification: return MLPClassifierTrainConfig.of(configMap);
-            case LinearRegression: return LinearRegressionTrainConfig.of(configMap);
-            case RandomForestRegression: return RandomForestRegressorTrainerConfig.of(configMap);
-            default: throw new IllegalStateException(formatWithLocale("Method %s does not have a trainerConfig Implemented", method.name()));
-        }
+        return switch (method) {
+            case LogisticRegression -> LogisticRegressionTrainConfig.of(configMap);
+            case RandomForestClassification -> RandomForestClassifierTrainerConfig.of(configMap);
+            case MLPClassification -> MLPClassifierTrainConfig.of(configMap);
+            case LinearRegression -> LinearRegressionTrainConfig.of(configMap);
+            case RandomForestRegression -> RandomForestRegressorTrainerConfig.of(configMap);
+        };
     }
 }

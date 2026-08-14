@@ -108,16 +108,17 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
                 return validateDrainingIterator(e, elementType);
             case "of":
                 switch (e.getParameters().size()) {
-                    case 1:
+                    case 1 -> {
                         return validateFactoryMethod(e, elementType);
-                    case 2:
+                    }
+                    case 2 -> {
                         return validateFactoryWithInitialCapacityMethod(e, elementType);
-                    default:
-                        messager.printMessage(
-                            Diagnostic.Kind.ERROR,
-                            "method has wrong number of parameters, expected one of " + List.of(2, 3),
-                            e
-                        );
+                    }
+                    default -> messager.printMessage(
+                        Diagnostic.Kind.ERROR,
+                        "method has wrong number of parameters, expected one of " + List.of(2, 3),
+                        e
+                    );
                 }
                 break;
             default:

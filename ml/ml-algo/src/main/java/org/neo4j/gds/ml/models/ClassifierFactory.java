@@ -40,16 +40,12 @@ public final class ClassifierFactory {
     public static Classifier create(
         Classifier.ClassifierData classifierData
     ) {
-        switch (classifierData.trainerMethod()) {
-            case LogisticRegression:
-                return LogisticRegressionClassifier.from((LogisticRegressionData) classifierData);
-            case RandomForestClassification:
-                return new RandomForestClassifier((RandomForestClassifierData) classifierData);
-            case MLPClassification:
-                return new MLPClassifier((MLPClassifierData) classifierData);
-            default:
-                throw new IllegalStateException("No such classifier.");
-        }
+        return switch (classifierData.trainerMethod()) {
+            case LogisticRegression -> LogisticRegressionClassifier.from((LogisticRegressionData) classifierData);
+            case RandomForestClassification -> new RandomForestClassifier((RandomForestClassifierData) classifierData);
+            case MLPClassification -> new MLPClassifier((MLPClassifierData) classifierData);
+            case LinearRegression, RandomForestRegression -> throw new IllegalStateException("No such classifier.");
+        };
     }
 
     public static MemoryRange runtimeOverheadMemoryEstimation(
@@ -59,22 +55,17 @@ public final class ClassifierFactory {
         int featureDimension,
         boolean isReduced
     ) {
-        switch (method) {
-            case LogisticRegression:
-                return LogisticRegressionClassifier.runtimeOverheadMemoryEstimation(
-                    batchSize,
-                    featureDimension,
-                    numberOfClasses,
-                    isReduced
-                );
-            case RandomForestClassification:
-                return RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
-            case MLPClassification:
-                //TODO Implement MLP memory estimation
-                return MemoryRange.empty();
-            default:
-                throw new IllegalStateException("No such classifier.");
-        }
+        return switch (method) {
+            case LogisticRegression -> LogisticRegressionClassifier.runtimeOverheadMemoryEstimation(
+                batchSize,
+                featureDimension,
+                numberOfClasses,
+                isReduced
+            );
+            case RandomForestClassification -> RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
+            case MLPClassification -> MemoryRange.empty();
+            case RandomForestRegression, LinearRegression -> throw new IllegalStateException("No such classifier.");
+        };
     }
 
     public static MemoryEstimation dataMemoryEstimation(
@@ -84,19 +75,18 @@ public final class ClassifierFactory {
         int featureDimension,
         boolean isReduced
     ) {
-        switch (trainerConfig.method()) {
-            case LogisticRegression:
-                return LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, MemoryRange.of(featureDimension));
-            case RandomForestClassification:
-                return RandomForestClassifierData.memoryEstimation(
-                    numberOfTrainingSamples,
-                    (RandomForestTrainerConfig) trainerConfig
-                );
-            case MLPClassification:
-                //TODO Implement MLP memory estimation
-                return MemoryEstimations.empty();
-            default:
-                throw new IllegalStateException("No such classifier.");
-        }
+        return switch (trainerConfig.method()) {
+            case LogisticRegression -> LogisticRegressionData.memoryEstimation(
+                isReduced,
+                numberOfClasses,
+                MemoryRange.of(featureDimension)
+            );
+            case RandomForestClassification -> RandomForestClassifierData.memoryEstimation(
+                numberOfTrainingSamples,
+                (RandomForestTrainerConfig) trainerConfig
+            );
+            case MLPClassification -> MemoryEstimations.empty();
+            case LinearRegression, RandomForestRegression -> throw new IllegalStateException("No such classifier.");
+        };
     }
 }

@@ -182,14 +182,8 @@ public class SysInfoProc {
                 .capitalizeFully(pool.getName(), ' ', '\'', '-')
                 .replaceAll("[ '-]", "");
             switch (pool.getType()) {
-                case HEAP:
-                    onHeapInfo(name, usage, builder);
-                    break;
-                case NON_HEAP:
-                    offHeapInfo(name, usage, builder);
-                    break;
-                default:
-                    // do nothing
+                case HEAP -> onHeapInfo(name, usage, builder);
+                case NON_HEAP -> offHeapInfo(name, usage, builder);
             }
         }
     }

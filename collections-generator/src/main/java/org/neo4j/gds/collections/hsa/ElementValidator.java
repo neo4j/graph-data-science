@@ -82,58 +82,58 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
 
     @Override
     public Boolean visitExecutable(ExecutableElement e, TypeMirror elementType) {
-        switch (e.getSimpleName().toString()) {
-            case "capacity":
-                return validateCapacityMethod(e);
-            case "get":
-                return validateGetMethod(e, elementType);
-            case "contains":
-                return validateContainsMethod(e);
-            case "drainingIterator":
-                return validateDrainingIterator(e, elementType);
-            case "builder":
+        return switch (e.getSimpleName().toString()) {
+            case "capacity" -> validateCapacityMethod(e);
+            case "get" -> validateGetMethod(e, elementType);
+            case "contains" -> validateContainsMethod(e);
+            case "drainingIterator" -> validateDrainingIterator(e, elementType);
+            case "builder" -> {
                 switch (e.getParameters().size()) {
-                    case 1:
-                        return validateBuilderMethod(e, elementType);
-                    case 2:
-                        return validateBuilderWithInitialCapacityMethod(e, elementType);
-                    default:
+                    case 1 -> {
+                        yield validateBuilderMethod(e, elementType);
+                    }
+                    case 2 -> {
+                        yield validateBuilderWithInitialCapacityMethod(e, elementType);
+                    }
+                    default -> {
                         messager.printMessage(
                             Diagnostic.Kind.ERROR,
                             "method has wrong number of parameters, expected one of " + List.of(1, 2),
                             e
                         );
+                        yield false;
+                    }
                 }
-                break;
-            default:
+            }
+            default -> {
                 messager.printMessage(Diagnostic.Kind.ERROR, "unexpected method", e);
-        }
-
-        return false;
+                yield false;
+            }
+        };
     }
 
     private boolean validateCapacityMethod(ExecutableElement e) {
         return hasNoParameters(e, messager)
-               && mustReturn(e, TypeKind.LONG, messager)
-               && doesNotThrow(e, messager)
-               && isNotGeneric(e, messager)
-               && isAbstract(e, messager);
+            && mustReturn(e, TypeKind.LONG, messager)
+            && doesNotThrow(e, messager)
+            && isNotGeneric(e, messager)
+            && isAbstract(e, messager);
     }
 
     private boolean validateGetMethod(ExecutableElement e, TypeMirror elementType) {
         return mustReturn(e, elementType.getKind(), messager)
-               && hasSingleLongParameter(e, messager)
-               && doesNotThrow(e, messager)
-               && isNotGeneric(e, messager)
-               && isAbstract(e, messager);
+            && hasSingleLongParameter(e, messager)
+            && doesNotThrow(e, messager)
+            && isNotGeneric(e, messager)
+            && isAbstract(e, messager);
     }
 
     private boolean validateContainsMethod(ExecutableElement e) {
         return mustReturn(e, TypeKind.BOOLEAN, messager)
-               && hasSingleLongParameter(e, messager)
-               && doesNotThrow(e, messager)
-               && isNotGeneric(e, messager)
-               && isAbstract(e, messager);
+            && hasSingleLongParameter(e, messager)
+            && doesNotThrow(e, messager)
+            && isNotGeneric(e, messager)
+            && isAbstract(e, messager);
     }
 
     private boolean validateDrainingIterator(ExecutableElement e, TypeMirror elementType) {
@@ -142,24 +142,24 @@ final class ElementValidator extends SimpleElementVisitor9<Boolean, TypeMirror> 
         var expectedReturnType = typeUtils.getDeclaredType(element, arrayType);
 
         return hasNoParameters(e, messager)
-               && mustReturn(e, expectedReturnType, messager)
-               && doesNotThrow(e, messager)
-               && isNotGeneric(e, messager)
-               && isAbstract(e, messager);
+            && mustReturn(e, expectedReturnType, messager)
+            && doesNotThrow(e, messager)
+            && isNotGeneric(e, messager)
+            && isAbstract(e, messager);
     }
 
     private boolean validateBuilderMethod(ExecutableElement e, TypeMirror elementType) {
         return doesNotThrow(e, messager)
-               && isStatic(e, messager)
-               && hasParameterCount(e, 1, messager)
-               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager);
+            && isStatic(e, messager)
+            && hasParameterCount(e, 1, messager)
+            && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager);
     }
 
     private boolean validateBuilderWithInitialCapacityMethod(ExecutableElement e, TypeMirror elementType) {
         return doesNotThrow(e, messager)
-               && isStatic(e, messager)
-               && hasParameterCount(e, 2, messager)
-               && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
-               && hasTypeKindAtIndex(e, 1, TypeKind.LONG, messager);
+            && isStatic(e, messager)
+            && hasParameterCount(e, 2, messager)
+            && hasTypeKindAtIndex(e, 0, elementType.getKind(), messager)
+            && hasTypeKindAtIndex(e, 1, TypeKind.LONG, messager);
     }
 }

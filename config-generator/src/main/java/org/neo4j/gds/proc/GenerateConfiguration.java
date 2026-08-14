@@ -713,26 +713,14 @@ final class GenerateConfiguration {
             .methodPrefix("require");
 
         switch (targetType.getKind()) {
-            case BOOLEAN:
-                builder.methodName("Bool");
-                break;
-            case INT:
-                builder.methodName("Int");
-                break;
-            case LONG:
-                builder.methodName("Long");
-                break;
-            case DOUBLE:
-                builder.methodName("Double");
-                break;
-            case BYTE:
-            case SHORT:
-            case FLOAT:
-                builder
-                    .methodName("Number")
-                    .addConverter(c -> CodeBlock.of("$L.$LValue()", c, targetType));
-                break;
-            case DECLARED:
+            case BOOLEAN -> builder.methodName("Bool");
+            case INT -> builder.methodName("Int");
+            case LONG -> builder.methodName("Long");
+            case DOUBLE -> builder.methodName("Double");
+            case BYTE, SHORT, FLOAT -> builder
+                .methodName("Number")
+                .addConverter(c -> CodeBlock.of("$L.$LValue()", c, targetType));
+            case DECLARED -> {
                 if (isTypeOf(String.class, targetType)) {
                     builder.methodName("String");
                 } else if (isTypeOf(Number.class, targetType)) {
@@ -781,9 +769,10 @@ final class GenerateConfiguration {
                         .methodName("Checked")
                         .expectedTypeCodeBlock(CodeBlock.of("$T.class", ClassName.get(asTypeElement(targetType))));
                 }
-                break;
-            default:
+            }
+            default -> {
                 return error("Unsupported return type: " + targetType, member.method());
+            }
         }
 
         if (member.method().isDefault()) {

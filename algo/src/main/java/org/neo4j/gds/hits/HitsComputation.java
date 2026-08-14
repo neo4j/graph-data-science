@@ -75,23 +75,15 @@ public class HitsComputation implements BidirectionalPregelComputation<HitsConfi
     @Override
     public void compute(BidirectionalComputeContext<HitsConfig> context, Messages messages) {
         switch (state) {
-            case INIT:
+            case INIT -> {
                 var auth = (double) context.incomingDegree();
                 context.setNodeValue(context.config().authProperty(), auth);
                 updateGlobalNorm(auth);
-                break;
-            case CALCULATE_AUTHS:
-                calculateValue(context, messages, context.config().authProperty());
-                break;
-            case NORMALIZE_AUTHS:
-                normalizeAuthValue(context);
-                break;
-            case CALCULATE_HUBS:
-                calculateValue(context, messages, context.config().hubProperty());
-                break;
-            case NORMALIZE_HUBS:
-                normalizeHubValue(context);
-                break;
+            }
+            case CALCULATE_AUTHS -> calculateValue(context, messages, context.config().authProperty());
+            case NORMALIZE_AUTHS -> normalizeAuthValue(context);
+            case CALCULATE_HUBS -> calculateValue(context, messages, context.config().hubProperty());
+            case NORMALIZE_HUBS -> normalizeHubValue(context);
         }
     }
 

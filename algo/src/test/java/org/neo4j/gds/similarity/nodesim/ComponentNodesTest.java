@@ -87,13 +87,13 @@ class ComponentNodesTest {
         int previousUpperBound = -1;
         for (long key : componentPerIdxUpperBound.keySet().stream().sorted().toList()) {
             switch ((int) (key - previousUpperBound)) {
-                case 1: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(4);break;
-                case 2: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(5);break;
-                case 3: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(0);break;
-                case 4: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(2);break;
-                case 5: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(1);break;
-                case 6: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(3);break;
-                case 7: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(6);break;
+                case 1 -> assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(4);
+                case 2 -> assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(5);
+                case 3 -> assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(0);
+                case 4 -> assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(2);
+                case 5 -> assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(1);
+                case 6 -> assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(3);
+                case 7 -> assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(6);
             }
             previousUpperBound = (int) (key);
         }

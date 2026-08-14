@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -42,26 +42,24 @@ public final class RegressionTrainerFactory {
         Concurrency concurrency,
         Optional<Long> randomSeed
     ) {
-        switch (config.method()) {
-            case LinearRegression: {
-                return new LinearRegressionTrainer(
-                    log,
-                    concurrency,
-                    (LinearRegressionTrainConfig) config,
-                    terminationFlag
-                );
-            }
-            case RandomForestRegression: {
-                return new RandomForestRegressorTrainer(
-                    log,
-                    concurrency,
-                    (RandomForestRegressorTrainerConfig) config,
-                    randomSeed,
-                    terminationFlag
-                );
-            }
-            default:
-                throw new IllegalStateException(formatWithLocale("Method %s is not a regression method", config.method()));
-        }
+        return switch (config.method()) {
+            case LinearRegression -> new LinearRegressionTrainer(
+                log,
+                concurrency,
+                (LinearRegressionTrainConfig) config,
+                terminationFlag
+            );
+            case RandomForestRegression -> new RandomForestRegressorTrainer(
+                log,
+                concurrency,
+                (RandomForestRegressorTrainerConfig) config,
+                randomSeed,
+                terminationFlag
+            );
+            default -> throw new IllegalStateException(formatWithLocale(
+                "Method %s is not a regression method",
+                config.method()
+            ));
+        };
     }
 }

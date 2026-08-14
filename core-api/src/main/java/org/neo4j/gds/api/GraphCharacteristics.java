@@ -133,14 +133,10 @@ public final class GraphCharacteristics {
         }
 
         public Builder withDirection(Direction direction) {
-            switch (direction) {
-                case DIRECTED:
-                    return this.directed();
-                case UNDIRECTED:
-                    return this.undirected();
-                default:
-                    throw new UnsupportedOperationException("Unexpected direction: " + direction);
-            }
+            return switch (direction) {
+                case DIRECTED -> this.directed();
+                case UNDIRECTED -> this.undirected();
+            };
         }
 
         public GraphCharacteristics build() {

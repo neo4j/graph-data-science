@@ -80,18 +80,10 @@ class RelationshipSubscriber extends ErrorCachingQuerySubscriber {
         this.defaultValues = new double[fieldNames.length];
         for (int i = 0; i < fieldNames.length; i++) {
             switch (fieldNames[i]) {
-                case SOURCE_COLUMN:
-                    sourceOffset = i;
-                    break;
-                case TARGET_COLUMN:
-                    targetOffset = i;
-                    break;
-                case TYPE_COLUMN:
-                    typeOffset = i;
-                    break;
-                default:
-                    defaultValues[i] = propertyDefaultValueByName.get(fieldNames[i]);
-                    break;
+                case SOURCE_COLUMN -> sourceOffset = i;
+                case TARGET_COLUMN -> targetOffset = i;
+                case TYPE_COLUMN -> typeOffset = i;
+                default -> defaultValues[i] = propertyDefaultValueByName.get(fieldNames[i]);
             }
         }
         int propertyCount = fieldNames.length - 2;

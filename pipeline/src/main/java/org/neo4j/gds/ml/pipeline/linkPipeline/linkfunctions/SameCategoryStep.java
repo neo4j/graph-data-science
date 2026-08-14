@@ -84,13 +84,15 @@ public class SameCategoryStep implements LinkFeatureStep {
     private LongLongPredicate sameCategoryPredicate(NodePropertyContainer graph, String nodeProperty) {
         var propertyValues = graph.nodeProperties(nodeProperty);
 
-        switch (propertyValues.valueType()) {
-            case LONG:
-                return (source, target) -> propertyValues.longValue(source) == propertyValues.longValue(target);
-            case DOUBLE:
-                return (source, target) -> propertyValues.doubleValue(source) == propertyValues.doubleValue(target);
-            default:
-                throw new IllegalArgumentException(formatWithLocale("%s only supports combining numeric properties, but got node property `%s` of type %s.", name(), nodeProperty, propertyValues.valueType()));
-        }
+        return switch (propertyValues.valueType()) {
+            case LONG -> (source, target) -> propertyValues.longValue(source) == propertyValues.longValue(target);
+            case DOUBLE -> (source, target) -> propertyValues.doubleValue(source) == propertyValues.doubleValue(target);
+            default -> throw new IllegalArgumentException(formatWithLocale(
+                "%s only supports combining numeric properties, but got node property `%s` of type %s.",
+                name(),
+                nodeProperty,
+                propertyValues.valueType()
+            ));
+        };
     }
 }

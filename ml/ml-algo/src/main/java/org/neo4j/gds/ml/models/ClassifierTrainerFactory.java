@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
@@ -32,6 +31,7 @@ import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.function.LongUnaryOperator;
@@ -50,41 +50,34 @@ public final class ClassifierTrainerFactory {
         boolean reduceClassCount,
         ModelSpecificMetricsHandler metricsHandler
     ) {
-        switch (config.method()) {
-            case LogisticRegression: {
-                return new LogisticRegressionTrainer(
-                    log,
-                    concurrency,
-                    (LogisticRegressionTrainConfig) config,
-                    numberOfClasses,
-                    reduceClassCount,
-                    terminationFlag
-                );
-            }
-            case RandomForestClassification: {
-                return new RandomForestClassifierTrainer(
-                    log,
-                    concurrency,
-                    numberOfClasses,
-                    (RandomForestClassifierTrainerConfig) config,
-                    randomSeed,
-                    terminationFlag,
-                    metricsHandler
-                );
-            }
-            case MLPClassification: {
-                return new MLPClassifierTrainer(
-                    log,
-                    numberOfClasses,
-                    (MLPClassifierTrainConfig) config,
-                    randomSeed,
-                    terminationFlag,
-                    concurrency
-                );
-            }
-            default:
-                throw new IllegalStateException("No such training method.");
-        }
+        return switch (config.method()) {
+            case LogisticRegression -> new LogisticRegressionTrainer(
+                log,
+                concurrency,
+                (LogisticRegressionTrainConfig) config,
+                numberOfClasses,
+                reduceClassCount,
+                terminationFlag
+            );
+            case RandomForestClassification -> new RandomForestClassifierTrainer(
+                log,
+                concurrency,
+                numberOfClasses,
+                (RandomForestClassifierTrainerConfig) config,
+                randomSeed,
+                terminationFlag,
+                metricsHandler
+            );
+            case MLPClassification -> new MLPClassifierTrainer(
+                log,
+                numberOfClasses,
+                (MLPClassifierTrainConfig) config,
+                randomSeed,
+                terminationFlag,
+                concurrency
+            );
+            default -> throw new IllegalStateException("No such training method.");
+        };
     }
 
     public static MemoryEstimation memoryEstimation(
@@ -94,29 +87,22 @@ public final class ClassifierTrainerFactory {
         MemoryRange featureDimension,
         boolean isReduced
     ) {
-        switch (config.method()) {
-            case LogisticRegression:
-                return LogisticRegressionTrainer.memoryEstimation(
-                    isReduced,
-                    numberOfClasses,
-                    featureDimension,
-                    ((LogisticRegressionTrainConfig) config).batchSize(),
-                    numberOfTrainingExamples
-                );
-            case RandomForestClassification: {
-                return RandomForestClassifierTrainer.memoryEstimation(
-                    numberOfTrainingExamples,
-                    numberOfClasses,
-                    featureDimension,
-                   (RandomForestClassifierTrainerConfig) config
-                );
-            }
-            case MLPClassification: {
-                //TODO Implement MLP memory estimation
-                return MemoryEstimations.empty();
-            }
-            default:
-                throw new IllegalStateException("No such training method.");
-        }
+        return switch (config.method()) {
+            case LogisticRegression -> LogisticRegressionTrainer.memoryEstimation(
+                isReduced,
+                numberOfClasses,
+                featureDimension,
+                ((LogisticRegressionTrainConfig) config).batchSize(),
+                numberOfTrainingExamples
+            );
+            case RandomForestClassification -> RandomForestClassifierTrainer.memoryEstimation(
+                numberOfTrainingExamples,
+                numberOfClasses,
+                featureDimension,
+                (RandomForestClassifierTrainerConfig) config
+            );
+            case MLPClassification -> MemoryEstimations.empty();
+            default -> throw new IllegalStateException("No such training method.");
+        };
     }
 }

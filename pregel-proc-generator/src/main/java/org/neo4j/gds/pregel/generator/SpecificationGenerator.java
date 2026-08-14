@@ -31,9 +31,9 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.pregel.proc.PregelCompanion;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import javax.lang.model.element.Modifier;
 import java.util.Optional;
@@ -168,12 +168,11 @@ public class SpecificationGenerator {
     }
 
     private ExecutionMode executionMode(GDSMode mode) {
-        switch (mode) {
-            case STREAM: return ExecutionMode.STREAM;
-            case WRITE: return ExecutionMode.WRITE_NODE_PROPERTY;
-            case MUTATE: return ExecutionMode.MUTATE_NODE_PROPERTY;
-            case STATS: return ExecutionMode.STATS;
-            default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
-        }
+        return switch (mode) {
+            case STREAM -> ExecutionMode.STREAM;
+            case WRITE -> ExecutionMode.WRITE_NODE_PROPERTY;
+            case MUTATE -> ExecutionMode.MUTATE_NODE_PROPERTY;
+            case STATS -> ExecutionMode.STATS;
+        };
     }
 }

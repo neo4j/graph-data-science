@@ -109,25 +109,26 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
                 : (partition) -> createBidirectionalComputeSteps(graph.concurrentCopy(), voteBits, partition);
 
         switch (config.partitioning()) {
-            case RANGE:
+            case RANGE -> {
                 return PartitionUtils.rangePartition(
                     concurrency,
                     graph.nodeCount(),
                     partitionFunction,
                     Optional.empty()
                 );
-            case DEGREE:
+            }
+            case DEGREE -> {
                 return PartitionUtils.degreePartition(
                     graph,
                     concurrency,
                     partitionFunction::apply,
                     Optional.empty()
                 );
-            default:
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Unsupported partitioning `%s`",
-                    config.partitioning()
-                ));
+            }
+            default -> throw new IllegalArgumentException(formatWithLocale(
+                "Unsupported partitioning `%s`",
+                config.partitioning()
+            ));
         }
     }
 

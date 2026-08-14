@@ -145,15 +145,10 @@ class RelationshipPropertiesImportTest extends BaseTest {
     }
 
     private static String arrow(Orientation orientation) {
-        switch (orientation) {
-            case NATURAL:
-                return "->";
-            case REVERSE:
-                return "<-";
-            case UNDIRECTED:
-                return "<->";
-            default:
-                throw new IllegalArgumentException("Unknown orientation: " + orientation);
-        }
+        return switch (orientation) {
+            case NATURAL -> "->";
+            case REVERSE -> "<-";
+            case UNDIRECTED -> "<->";
+        };
     }
 }

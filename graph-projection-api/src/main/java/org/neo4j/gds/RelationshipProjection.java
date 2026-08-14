@@ -82,12 +82,8 @@ public abstract class RelationshipProjection extends ElementProjection {
 
         if (properties().isEmpty()) {
             switch (aggregation()) {
-                case COUNT:
-                case SUM:
-                case MIN:
-                case MAX:
-                    throw new IllegalArgumentException("Setting a global `" + aggregation() + "` aggregation requires at least one property mapping.");
-                default:
+                case DEFAULT, NONE, SINGLE -> {}
+                case COUNT, SUM, MIN, MAX -> throw new IllegalArgumentException("Setting a global `" + aggregation() + "` aggregation requires at least one property mapping.");
             }
         }
     }

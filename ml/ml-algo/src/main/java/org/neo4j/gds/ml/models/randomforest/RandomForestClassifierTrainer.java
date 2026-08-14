@@ -20,19 +20,18 @@
 package org.neo4j.gds.ml.models.randomforest;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.collections.ha.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
-import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -46,6 +45,7 @@ import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -190,14 +190,10 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     }
 
     private ImpurityCriterion initializeImpurityCriterion(HugeIntArray allLabels) {
-        switch (config.criterion()) {
-            case GINI:
-                return new GiniIndex(allLabels, numberOfClasses);
-            case ENTROPY:
-                return new Entropy(allLabels, numberOfClasses);
-            default:
-                throw new IllegalStateException("Invalid decision tree classifier impurity criterion.");
-        }
+        return switch (config.criterion()) {
+            case GINI -> new GiniIndex(allLabels, numberOfClasses);
+            case ENTROPY -> new Entropy(allLabels, numberOfClasses);
+        };
     }
 
     static class TrainDecisionTreeTask implements Runnable {

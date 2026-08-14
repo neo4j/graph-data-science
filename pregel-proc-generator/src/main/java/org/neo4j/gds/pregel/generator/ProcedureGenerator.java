@@ -27,6 +27,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -34,7 +35,6 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.pregel.proc.PregelCompanion;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -226,14 +226,9 @@ public class ProcedureGenerator {
     }
 
     private Mode neo4jProcedureMode(GDSMode mode) {
-        switch (mode) {
-            case STREAM:
-            case MUTATE:
-            case STATS:
-                return Mode.READ;
-            case WRITE:
-                return Mode.WRITE;
-            default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
-        }
+        return switch (mode) {
+            case STREAM, MUTATE, STATS -> Mode.READ;
+            case WRITE -> Mode.WRITE;
+        };
     }
 }

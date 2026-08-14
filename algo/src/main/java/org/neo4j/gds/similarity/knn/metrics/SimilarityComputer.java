@@ -104,16 +104,12 @@ public interface SimilarityComputer {
     }
 
     static SimilarityComputer ofFloatArrayProperty(String name, NodePropertyValues properties, SimilarityMetric metric) {
-        switch (metric) {
-            case COSINE:
-                return new FloatArrayPropertySimilarityComputer(properties, Cosine::floatMetric);
-            case EUCLIDEAN:
-                return new FloatArrayPropertySimilarityComputer(properties, Euclidean::floatMetric);
-            case PEARSON:
-                return new FloatArrayPropertySimilarityComputer(properties, Pearson::floatMetric);
-            default:
-                throw unsupportedSimilarityMetric(name, properties.valueType(), metric);
-        }
+        return switch (metric) {
+            case COSINE -> new FloatArrayPropertySimilarityComputer(properties, Cosine::floatMetric);
+            case EUCLIDEAN -> new FloatArrayPropertySimilarityComputer(properties, Euclidean::floatMetric);
+            case PEARSON -> new FloatArrayPropertySimilarityComputer(properties, Pearson::floatMetric);
+            default -> throw unsupportedSimilarityMetric(name, properties.valueType(), metric);
+        };
     }
 
     static SimilarityComputer ofDoubleArrayProperty(
@@ -121,27 +117,28 @@ public interface SimilarityComputer {
         NodePropertyValues nodePropertyValues,
         SimilarityMetric similarityMetric
     ) {
-        switch (similarityMetric) {
-            case COSINE:
-                return new DoubleArrayPropertySimilarityComputer(nodePropertyValues, Cosine::doubleMetric);
-            case EUCLIDEAN:
-                return new DoubleArrayPropertySimilarityComputer(nodePropertyValues, Euclidean::doubleMetric);
-            case PEARSON:
-                return new DoubleArrayPropertySimilarityComputer(nodePropertyValues, Pearson::doubleMetric);
-            default:
-                throw unsupportedSimilarityMetric(propertyName, nodePropertyValues.valueType(), similarityMetric);
-        }
+        return switch (similarityMetric) {
+            case COSINE -> new DoubleArrayPropertySimilarityComputer(nodePropertyValues, Cosine::doubleMetric);
+            case EUCLIDEAN -> new DoubleArrayPropertySimilarityComputer(nodePropertyValues, Euclidean::doubleMetric);
+            case PEARSON -> new DoubleArrayPropertySimilarityComputer(nodePropertyValues, Pearson::doubleMetric);
+            default -> throw unsupportedSimilarityMetric(
+                propertyName,
+                nodePropertyValues.valueType(),
+                similarityMetric
+            );
+        };
     }
 
     static SimilarityComputer ofLongArrayProperty(String propertyName, NodePropertyValues nodePropertyValues, SimilarityMetric similarityMetric) {
-        switch (similarityMetric) {
-            case JACCARD:
-                return new LongArrayPropertySimilarityComputer(nodePropertyValues, Jaccard::metric);
-            case OVERLAP:
-                return new LongArrayPropertySimilarityComputer(nodePropertyValues, Overlap::metric);
-            default:
-                throw unsupportedSimilarityMetric(propertyName, nodePropertyValues.valueType(), similarityMetric);
-        }
+        return switch (similarityMetric) {
+            case JACCARD -> new LongArrayPropertySimilarityComputer(nodePropertyValues, Jaccard::metric);
+            case OVERLAP -> new LongArrayPropertySimilarityComputer(nodePropertyValues, Overlap::metric);
+            default -> throw unsupportedSimilarityMetric(
+                propertyName,
+                nodePropertyValues.valueType(),
+                similarityMetric
+            );
+        };
     }
 
     static IllegalArgumentException unsupportedSimilarityMetric(

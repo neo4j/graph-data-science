@@ -82,10 +82,8 @@ final class GenerateConfigurationMethods {
             .toList();
 
         switch (configMembers.size()) {
-            case 0:
-                builder.addStatement("return $T.emptyMap()", Collections.class);
-                break;
-            case 1:
+            case 0 -> builder.addStatement("return $T.emptyMap()", Collections.class);
+            case 1 -> {
                 Spec.Member singleConfigMember = configMembers.get(0);
                 String parameter = singleConfigMember.lookupKey();
                 builder.addStatement(
@@ -94,8 +92,8 @@ final class GenerateConfigurationMethods {
                     parameter,
                     getMapValueCode(singleConfigMember)
                 );
-                break;
-            default:
+            }
+            default -> {
                 builder.addStatement("$T<$T, Object> map = new $T<>()", Map.class, String.class, LinkedHashMap.class);
                 configMembers.forEach(configMember -> {
                     if (isTypeOf(Optional.class, configMember.method().getReturnType())) {
@@ -109,7 +107,7 @@ final class GenerateConfigurationMethods {
                     }
                 });
                 builder.addStatement("return map");
-                break;
+            }
         }
     }
 

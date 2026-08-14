@@ -26,15 +26,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.classification.F1Weighted;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -70,17 +70,13 @@ class ClassificationMetricComputerTest {
 
             @Override
             public double[] predictProbabilities(double[] features) {
-                switch ((int) features[0]) {
-                    case 0:
-                        return new double[]{0.8, 0.1, 0.1};
-                    case 1:
-                        return new double[]{0.2, 0.6, 0.2};
-                    case 2:
-                        return new double[]{0.1, 0.1, 0.8};
-                    case 3:
-                        return new double[]{0.0, 1.0, 0.0};
-                }
-                throw new IllegalStateException("we only got 4 nodes");
+                return switch ((int) features[0]) {
+                    case 0 -> new double[]{0.8, 0.1, 0.1};
+                    case 1 -> new double[]{0.2, 0.6, 0.2};
+                    case 2 -> new double[]{0.1, 0.1, 0.8};
+                    case 3 -> new double[]{0.0, 1.0, 0.0};
+                    default -> throw new IllegalStateException("we only got 4 nodes");
+                };
             }
 
             @Override

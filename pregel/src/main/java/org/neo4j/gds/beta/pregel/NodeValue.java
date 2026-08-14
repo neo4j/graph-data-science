@@ -82,32 +82,27 @@ public abstract class NodeValue {
                 var entry = formatWithLocale("%s (%s)", propertyKey, propertyType);
 
                 switch (propertyType) {
-                    case LONG:
-                        builder.fixed(entry, HugeLongArray.memoryEstimation(dimensions.nodeCount()));
-                        break;
-                    case DOUBLE:
-                        builder.fixed(entry, HugeDoubleArray.memoryEstimation(dimensions.nodeCount()));
-                        break;
-                    case LONG_ARRAY:
-                        builder.add(entry, MemoryEstimations.builder()
+                    case LONG -> builder.fixed(entry, HugeLongArray.memoryEstimation(dimensions.nodeCount()));
+                    case DOUBLE -> builder.fixed(entry, HugeDoubleArray.memoryEstimation(dimensions.nodeCount()));
+                    case LONG_ARRAY -> builder.add(
+                        entry, MemoryEstimations.builder()
                             .fixed(
                                 HugeObjectArray.class.getSimpleName(),
                                 Estimate.sizeOfInstance(HugeObjectArray.class)
                             )
                             .perNode("long[10]", nodeCount -> nodeCount * Estimate.sizeOfLongArray(10))
-                            .build());
-                        break;
-                    case DOUBLE_ARRAY:
-                        builder.add(entry, MemoryEstimations.builder()
+                            .build()
+                    );
+                    case DOUBLE_ARRAY -> builder.add(
+                        entry, MemoryEstimations.builder()
                             .fixed(
                                 HugeObjectArray.class.getSimpleName(),
                                 Estimate.sizeOfInstance(HugeObjectArray.class)
                             )
                             .perNode("double[10]", nodeCount -> nodeCount * Estimate.sizeOfDoubleArray(10))
-                            .build());
-                        break;
-                    default:
-                        builder.add(entry, MemoryEstimations.empty());
+                            .build()
+                    );
+                    default -> builder.add(entry, MemoryEstimations.empty());
                 }
             });
 
@@ -188,7 +183,7 @@ public abstract class NodeValue {
 
     private static Object initArray(Element element, long nodeCount, Concurrency concurrency) {
         switch (element.propertyType()) {
-            case DOUBLE:
+            case DOUBLE -> {
                 var doubleNodeValues = HugeDoubleArray.newArray(nodeCount);
                 double doubleDefaultValue = element.defaultValue()
                     .map(v -> (FloatingPointValue) v)
@@ -201,7 +196,8 @@ public abstract class NodeValue {
                     nodeId -> doubleNodeValues.set(nodeId, doubleDefaultValue)
                 );
                 return doubleNodeValues;
-            case LONG:
+            }
+            case LONG -> {
                 var longNodeValues = HugeLongArray.newArray(nodeCount);
                 long longDefaultValue = element.defaultValue()
                     .map(v -> (IntegralValue) v)
@@ -214,21 +210,23 @@ public abstract class NodeValue {
                     nodeId -> longNodeValues.set(nodeId, longDefaultValue)
                 );
                 return longNodeValues;
-            case LONG_ARRAY:
+            }
+            case LONG_ARRAY -> {
                 if (element.defaultValue().isPresent()) {
                     throw new IllegalArgumentException("Default value is not supported for long array properties");
                 }
                 return HugeObjectArray.newArray(long[].class, nodeCount);
-            case DOUBLE_ARRAY:
+            }
+            case DOUBLE_ARRAY -> {
                 if (element.defaultValue().isPresent()) {
                     throw new IllegalArgumentException("Default value is not supported for double array properties");
                 }
                 return HugeObjectArray.newArray(double[].class, nodeCount);
-            default:
-                throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-                    "Unsupported value type: %s",
-                    element.propertyType()
-                ));
+            }
+            default -> throw new IllegalArgumentException(StringFormatting.formatWithLocale(
+                "Unsupported value type: %s",
+                element.propertyType()
+            ));
         }
     }
 

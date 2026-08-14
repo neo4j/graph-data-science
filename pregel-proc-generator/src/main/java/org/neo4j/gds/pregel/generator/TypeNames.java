@@ -91,22 +91,20 @@ public class TypeNames {
     }
 
     private Class<?> resultTypeForMode(GDSMode mode) {
-        switch (mode) {
-            case STATS: return PregelStatsResult.class;
-            case WRITE: return PregelWriteResult.class;
-            case MUTATE: return PregelMutateResult.class;
-            case STREAM: return PregelStreamResult.class;
-            default: throw new IllegalStateException("Unexpected value: " + mode);
-        }
+        return switch (mode) {
+            case STATS -> PregelStatsResult.class;
+            case WRITE -> PregelWriteResult.class;
+            case MUTATE -> PregelMutateResult.class;
+            case STREAM -> PregelStreamResult.class;
+        };
     }
 
     private Class<?> computationResultConsumerTypeForMode(GDSMode mode) {
-        switch (mode) {
-            case STATS: return PregelStatsComputationResultConsumer.class;
-            case WRITE: return PregelWriteComputationResultConsumer.class;
-            case MUTATE: return PregelMutateComputationResultConsumer.class;
-            case STREAM: return PregelStreamComputationResultConsumer.class;
-            default: throw new IllegalStateException("Unexpected value: " + mode);
-        }
+        return switch (mode) {
+            case STATS -> PregelStatsComputationResultConsumer.class;
+            case WRITE -> PregelWriteComputationResultConsumer.class;
+            case MUTATE -> PregelMutateComputationResultConsumer.class;
+            case STREAM -> PregelStreamComputationResultConsumer.class;
+        };
     }
 }

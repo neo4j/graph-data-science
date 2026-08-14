@@ -66,18 +66,15 @@ public class SubTaskCountingVisitor implements TaskVisitor {
     public void visitIterativeTask(IterativeTask iterativeTask) {
         incrementCounters(iterativeTask);
         switch (iterativeTask.mode()) {
-            case FIXED:
-            case DYNAMIC:
-                visitRecursively(iterativeTask);
-                break;
-            case OPEN:
+            case FIXED, DYNAMIC -> visitRecursively(iterativeTask);
+            case OPEN -> {
                 if (iterativeTask.status() == Status.FINISHED) {
                     incrementCounters(iterativeTask);
                     containsUnresolvedOpenTask = false;
                 } else {
                     containsUnresolvedOpenTask = true;
                 }
-                break;
+            }
         }
     }
 

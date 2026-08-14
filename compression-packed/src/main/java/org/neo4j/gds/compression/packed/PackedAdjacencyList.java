@@ -195,28 +195,27 @@ public class PackedAdjacencyList implements AdjacencyList {
         var adjacencyPackingStrategy = GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get();
 
         switch (adjacencyPackingStrategy) {
-            case VAR_LONG_TAIL:
+            case VAR_LONG_TAIL -> {
                 this.newCursor = PackedAdjacencyList::newCursorWithVarLongTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithVarLengthTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithVarLongTail;
-                break;
-            case PACKED_TAIL:
+            }
+            case PACKED_TAIL -> {
                 this.newCursor = PackedAdjacencyList::newCursorWithPackedTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithPackedTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithPackedTail;
-                break;
-            case BLOCK_ALIGNED_TAIL:
+            }
+            case BLOCK_ALIGNED_TAIL -> {
                 this.newCursor = PackedAdjacencyList::newCursorWithBlockAlignedTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithBlockAlignedTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithBlockAlignedTail;
-                break;
-            case INLINED_HEAD_PACKED_TAIL:
+            }
+            case INLINED_HEAD_PACKED_TAIL -> {
                 this.newCursor = PackedAdjacencyList::newCursorWithInlinedHeadPackedTail;
                 this.newReuseCursor = PackedAdjacencyList::newReuseCursorWithInlinedHeadPackedTail;
                 this.newRawCursor = PackedAdjacencyList::newRawCursorWithInlinedHeadPackedTail;
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported packing strategy: " + adjacencyPackingStrategy);
+            }
+            default -> throw new IllegalArgumentException("Unsupported packing strategy: " + adjacencyPackingStrategy);
         }
     }
 

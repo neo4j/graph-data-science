@@ -219,14 +219,9 @@ class ArticleRankProcTest extends BaseProcTest {
             .estimationMode(mode);
 
         switch (mode) {
-            case WRITE:
-                queryBuilder = queryBuilder.addParameter("writeProperty", "pr");
-                break;
-            case MUTATE:
-                queryBuilder = queryBuilder.addParameter("mutateProperty", "pr");
-                break;
-            default:
-                break;
+            case WRITE -> queryBuilder = queryBuilder.addParameter("writeProperty", "pr");
+            case MUTATE -> queryBuilder = queryBuilder.addParameter("mutateProperty", "pr");
+            case STATS, STREAM, TRAIN -> {}
         }
 
         assertCypherResult(

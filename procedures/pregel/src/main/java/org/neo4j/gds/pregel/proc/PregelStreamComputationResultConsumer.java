@@ -68,20 +68,18 @@ public class PregelStreamComputationResultConsumer<
                                     // to a value
                                     element -> {
                                         // retrieved based on the elements property type
-                                        switch (element.propertyType()) {
-                                            case LONG:
-                                                return nodeValues.longProperties(element.propertyKey()).get(nodeId);
-                                            case DOUBLE:
-                                                return nodeValues.doubleProperties(element.propertyKey()).get(nodeId);
-                                            case DOUBLE_ARRAY:
-                                                return nodeValues.doubleArrayProperties(element.propertyKey()).get(
+                                        return switch (element.propertyType()) {
+                                            case LONG -> nodeValues.longProperties(element.propertyKey()).get(nodeId);
+                                            case DOUBLE ->
+                                                nodeValues.doubleProperties(element.propertyKey()).get(nodeId);
+                                            case DOUBLE_ARRAY ->
+                                                nodeValues.doubleArrayProperties(element.propertyKey()).get(
                                                     nodeId);
-                                            case LONG_ARRAY:
-                                                return nodeValues.longArrayProperties(element.propertyKey())
-                                                    .get(nodeId);
-                                            default:
+                                            case LONG_ARRAY -> nodeValues.longArrayProperties(element.propertyKey())
+                                                .get(nodeId);
+                                            default ->
                                                 throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
-                                        }
+                                        };
                                     }
                                 ));
                             return new PregelStreamResult(computationResult.graph().toOriginalNodeId(nodeId), values);

@@ -86,9 +86,7 @@ public class Task {
 
     public void finish() {
         switch (this.status) {
-            case CANCELED:
-            case FAILED:
-            case PENDING: {
+            case CANCELED, FAILED, PENDING -> {
                 throw new UnsupportedOperationException(formatWithLocale(
                     "Task `%s` with state %s cannot be finished",
                     this.description,
