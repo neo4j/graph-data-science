@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import org.intellij.lang.annotations.Subst;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -48,6 +49,19 @@ class DefaultValueIOHelperTest {
     @MethodSource("defaultValuesAndSerializedFormat")
     void shouldSerializeDefaultValues(DefaultValue defaultValue, String expected, ValueType __) {
         assertThat(DefaultValueIOHelper.serialize(defaultValue)).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldConsistentlyHandleNan() {
+        var defaultNan = DefaultValue.forDouble();
+        assertThat(DefaultValueIOHelper.serialize(defaultNan)).isEqualTo("DefaultValue(NaN)");
+        assertThat(
+            DefaultValueIOHelper.deserialize("DefaultValue(NaN)", ValueType.DOUBLE, defaultNan.isUserDefined())
+        ).isEqualTo(defaultNan);
+        // We still support deserializing entries with quoted "NaN"
+        assertThat(
+            DefaultValueIOHelper.deserialize("DefaultValue(\"NaN\")", ValueType.DOUBLE, defaultNan.isUserDefined())
+        ).isEqualTo(defaultNan);
     }
 
     @ParameterizedTest

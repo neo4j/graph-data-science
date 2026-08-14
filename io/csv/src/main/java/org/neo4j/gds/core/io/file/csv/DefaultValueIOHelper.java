@@ -36,6 +36,9 @@ final class DefaultValueIOHelper {
     static String serialize(DefaultValue defaultValue) {
         try {
             var serializedValue = OBJECT_MAPPER.writeValueAsString(defaultValue.getObject());
+            if (serializedValue.equals("\"NaN\"")) {
+                serializedValue = "NaN";
+            }
             return formatWithLocale(DEFAULT_VALUE_TEMPLATE, serializedValue);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -49,6 +52,11 @@ final class DefaultValueIOHelper {
             }
 
             var value = serializedValue.replaceAll("DefaultValue\\(|null|NaN|\\)", "");
+            // We no longer accidentally write "DefaultValue("NaN")", but there
+            // are likely many CSV exports out there that still have such entries and we remain compatible
+            if (value.equals("\"\"")) {
+                value = "";
+            }
             if (value.isEmpty()) {
                 return valueType.fallbackValue();
             }
