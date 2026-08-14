@@ -36,7 +36,9 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.DoubleArrayNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.DoubleNodePropertiesBuilder;
+import org.neo4j.gds.core.loading.nodeproperties.DoubleVectorNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.FloatArrayNodePropertiesBuilder;
+import org.neo4j.gds.core.loading.nodeproperties.FloatVectorNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.InnerNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.LongNodePropertiesBuilder;
@@ -162,80 +164,114 @@ public final class NodesFilter {
         NodePropertyValues inputNodePropertyValues,
         Concurrency concurrency
     ) {
-        NodePropertiesBuilder<?> propertiesBuilder = null;
-
-        switch (inputNodePropertyValues.valueType()) {
-            case LONG:
+        NodePropertiesBuilder<?> propertiesBuilder = switch (inputNodePropertyValues.valueType()) {
+            case LONG -> {
                 var longNodePropertiesBuilder = LongNodePropertiesBuilder.of(
                     DefaultValue.forLong(),
                     concurrency
                 );
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longNodePropertiesBuilder) {
+                yield new NodePropertiesBuilder<>(inputNodePropertyValues, longNodePropertiesBuilder) {
                     @Override
                     public void accept(long inputNode, long filteredNode) {
 
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.longValue(inputNode));
                     }
                 };
-                break;
-
-            case DOUBLE:
+            }
+            case DOUBLE -> {
                 var doubleNodePropertiesBuilder = new DoubleNodePropertiesBuilder(
                     DefaultValue.forDouble(),
                     concurrency
                 );
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleNodePropertiesBuilder) {
+                yield new NodePropertiesBuilder<>(inputNodePropertyValues, doubleNodePropertiesBuilder) {
                     @Override
                     public void accept(long inputNode, long filteredNode) {
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.doubleValue(inputNode));
                     }
                 };
-                break;
-
-            case DOUBLE_ARRAY:
+            }
+            case DOUBLE_ARRAY -> {
                 var doubleArrayNodePropertiesBuilder = new DoubleArrayNodePropertiesBuilder(
                     DefaultValue.forDoubleArray(),
                     concurrency
                 );
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleArrayNodePropertiesBuilder) {
+                yield new NodePropertiesBuilder<>(inputNodePropertyValues, doubleArrayNodePropertiesBuilder) {
                     @Override
                     public void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.doubleArrayValue(inputNode));
+                        propertyBuilder.set(
+                            idMap.toOriginalNodeId(inputNode),
+                            inputProperties.doubleArrayValue(inputNode)
+                        );
                     }
                 };
-                break;
-
-            case FLOAT_ARRAY:
+            }
+            case FLOAT_ARRAY -> {
                 var floatArrayNodePropertiesBuilder = new FloatArrayNodePropertiesBuilder(
                     DefaultValue.forFloatArray(),
                     concurrency
                 );
 
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, floatArrayNodePropertiesBuilder) {
+                yield new NodePropertiesBuilder<>(inputNodePropertyValues, floatArrayNodePropertiesBuilder) {
                     @Override
                     public void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.floatArrayValue(inputNode));
+                        propertyBuilder.set(
+                            idMap.toOriginalNodeId(inputNode),
+                            inputProperties.floatArrayValue(inputNode)
+                        );
                     }
                 };
-                break;
-
-            case LONG_ARRAY:
+            }
+            case LONG_ARRAY -> {
                 var longArrayNodePropertiesBuilder = new LongArrayNodePropertiesBuilder(
                     DefaultValue.forFloatArray(),
                     concurrency
                 );
 
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longArrayNodePropertiesBuilder) {
+                yield new NodePropertiesBuilder<>(inputNodePropertyValues, longArrayNodePropertiesBuilder) {
                     @Override
                     public void accept(long inputNode, long filteredNode) {
-                        propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.longArrayValue(inputNode));
+                        propertyBuilder.set(
+                            idMap.toOriginalNodeId(inputNode),
+                            inputProperties.longArrayValue(inputNode)
+                        );
                     }
                 };
-                break;
+            }
+            case FLOAT_VECTOR -> {
+                var floatVectorNodePropertiesBuilder = new FloatVectorNodePropertiesBuilder(
+                    DefaultValue.forFloatArray(),
+                    concurrency
+                );
 
-            case UNKNOWN:
-                throw new UnsupportedOperationException("Cannot import properties of type UNKNOWN");
-        }
+                yield new NodePropertiesBuilder<>(inputNodePropertyValues, floatVectorNodePropertiesBuilder) {
+                    @Override
+                    public void accept(long inputNode, long filteredNode) {
+                        propertyBuilder.set(
+                            idMap.toOriginalNodeId(inputNode),
+                            inputProperties.floatArrayValue(inputNode)
+                        );
+                    }
+                };
+            }
+            case DOUBLE_VECTOR -> {
+                var doubleVectorNodePropertiesBuilder = new DoubleVectorNodePropertiesBuilder(
+                    DefaultValue.forDoubleArray(),
+                    concurrency
+                );
+
+                yield new NodePropertiesBuilder<>(inputNodePropertyValues, doubleVectorNodePropertiesBuilder) {
+                    @Override
+                    public void accept(long inputNode, long filteredNode) {
+                        propertyBuilder.set(
+                            idMap.toOriginalNodeId(inputNode),
+                            inputProperties.doubleArrayValue(inputNode)
+                        );
+                    }
+                };
+            }
+            case UNKNOWN, STRING, UNTYPED_ARRAY -> throw new UnsupportedOperationException("Cannot import properties of type UNKNOWN");
+        };
+
         return propertiesBuilder;
     }
 
