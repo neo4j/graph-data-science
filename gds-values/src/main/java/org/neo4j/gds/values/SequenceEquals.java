@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.values;
 
+import java.util.function.IntToDoubleFunction;
+import java.util.function.IntToLongFunction;
+
 /**
  * Compares the elements two {@link Sequence} values hold, for the {@code equals} overloads an {@link Array}
  * and a {@link Vector} implement alike. It takes the backing arrays rather than the values themselves,
@@ -26,216 +29,97 @@ package org.neo4j.gds.values;
  *
  * <p>Handles only {@code a[] == b[]} where {@code type(a) != type(b)}, i.e. {@code byte[] == int[]} and such.
  * Use {@code Arrays.equals()} when both sides have the same type.
+ *
+ * <p>Each comparison happens in the type of the wider argument, so comparing against a {@code float[]}
+ * narrows the other side to {@code float} first and two values that differ only beyond float precision
+ * compare equal. Comparison is by {@code !=} rather than {@code compare}, so {@code NaN} never equals
+ * {@code NaN} and {@code -0.0} equals {@code 0.0} — both the opposite of what {@code Arrays.equals} does
+ * for two arrays of the same type.
  */
 public final class SequenceEquals {
     private SequenceEquals() {}
 
     public static boolean byteAndShort(byte[] a, short[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if (a[i] != b[i]) {
-                    return false;
-                }
-            }
-            return true;
-        }
+        return sameLongs(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean byteAndInt(byte[] a, int[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if (a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameLongs(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean byteAndLong(byte[] a, long[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((long)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameLongs(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean byteAndFloat(byte[] a, float[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((float)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameDoubles(a.length, b.length, i -> (float) a[i], i -> b[i]);
     }
 
     public static boolean byteAndDouble(byte[] a, double[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((double)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameDoubles(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean shortAndInt(short[] a, int[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if (a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameLongs(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean shortAndLong(short[] a, long[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((long)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameLongs(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean shortAndFloat(short[] a, float[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((float)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameDoubles(a.length, b.length, i -> (float) a[i], i -> b[i]);
     }
 
     public static boolean shortAndDouble(short[] a, double[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((double)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameDoubles(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean intAndLong(int[] a, long[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((long)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameLongs(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean intAndFloat(int[] a, float[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((float)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameDoubles(a.length, b.length, i -> (float) a[i], i -> b[i]);
     }
 
     public static boolean intAndDouble(int[] a, double[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((double)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameDoubles(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean longAndFloat(long[] a, float[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((float)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameDoubles(a.length, b.length, i -> (float) a[i], i -> b[i]);
     }
 
     public static boolean longAndDouble(long[] a, double[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((double)a[i] != b[i]) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
+        return sameDoubles(a.length, b.length, i -> a[i], i -> b[i]);
     }
 
     public static boolean floatAndDouble(float[] a, double[] b) {
-        if (a.length != b.length) {
-            return false;
-        } else {
-            for(int i = 0; i < a.length; ++i) {
-                if ((double)a[i] != b[i]) {
-                    return false;
-                }
-            }
+        return sameDoubles(a.length, b.length, i -> a[i], i -> b[i]);
+    }
 
-            return true;
+    private static boolean sameLongs(int lengthA, int lengthB, IntToLongFunction a, IntToLongFunction b) {
+        if (lengthA != lengthB) {
+            return false;
         }
+        for (int i = 0; i < lengthA; i++) {
+            if (a.applyAsLong(i) != b.applyAsLong(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean sameDoubles(int lengthA, int lengthB, IntToDoubleFunction a, IntToDoubleFunction b) {
+        if (lengthA != lengthB) {
+            return false;
+        }
+        for (int i = 0; i < lengthA; i++) {
+            if (a.applyAsDouble(i) != b.applyAsDouble(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
