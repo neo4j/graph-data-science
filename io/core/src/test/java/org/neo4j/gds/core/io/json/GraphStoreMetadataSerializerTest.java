@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 import java.util.Optional;
@@ -32,9 +33,6 @@ import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.neo4j.gds.core.io.json.Utils.deserialize;
-import static org.neo4j.gds.core.io.json.Utils.formatWithoutWhitespace;
-import static org.neo4j.gds.core.io.json.Utils.serialize;
 
 class GraphStoreMetadataSerializerTest {
 
@@ -259,6 +257,20 @@ class GraphStoreMetadataSerializerTest {
         var result = deserialize(serialize(graphStoreMetadata), GraphStoreMetadata.class);
 
         assertThat(result).isEqualTo(graphStoreMetadata);
+    }
+
+    private static String serialize(Object object) {
+        return JsonMapper.builder().build().writeValueAsString(object);
+    }
+
+    private static <T> T deserialize(String jsonString, Class<T> clazz) {
+        return JsonMapper.builder().build().readValue(jsonString, clazz);
+    }
+
+    private static String formatWithoutWhitespace(String base, Object... args) {
+        return String.format(base, args)
+            .replace(" ", "")
+            .replace("\n", "");
     }
 
     private static @NonNull GraphStoreMetadata getGraphStoreMetadata() {
