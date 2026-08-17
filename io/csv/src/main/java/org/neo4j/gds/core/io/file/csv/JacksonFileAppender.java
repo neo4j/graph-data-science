@@ -82,7 +82,7 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
         this.csvSchema = csvSchema;
     }
 
-    void append(long value) throws IOException {
+    void append(long value) {
         if (value != LONG_DEFAULT_FALLBACK && value != INTEGER_DEFAULT_FALLBACK) {
             setFieldName();
             csvEncoder.writeNumber(value);
@@ -92,7 +92,7 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
 
     }
 
-    void append(double value) throws IOException {
+    void append(double value) {
         if (!Double.isNaN(value)) {
             setFieldName();
             csvEncoder.writeNumber(value);
@@ -101,22 +101,22 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
         }
     }
 
-    void append(String value) throws IOException {
+    void append(String value) {
         setFieldName();
         csvEncoder.writeString(value);
     }
 
-    void append(double[] value) throws IOException {
+    void append(double[] value) {
         setFieldName();
         csvEncoder.writeArray(value, 0, value.length);
     }
 
-    void append(long[] value) throws IOException {
+    void append(long[] value) {
         setFieldName();
         csvEncoder.writeArray(value, 0, value.length);
     }
 
-    void append(float[] value) throws IOException {
+    void append(float[] value) {
         setFieldName();
         csvEncoder.writeStartArray(value, value.length);
         for (float v : value) {
@@ -125,7 +125,7 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
         csvEncoder.writeEndArray();
     }
 
-    void appendAny(@Nullable Object value) throws IOException {
+    void appendAny(@Nullable Object value) {
         if (value instanceof Double v) {
             append(v);
         } else if (value instanceof Long v) {
@@ -145,31 +145,31 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
         }
     }
 
-    void startLine() throws IOException {
+    void startLine() {
         currentColumnIndex = 0;
         csvEncoder.writeStartObject();
     }
 
-    void endLine() throws IOException {
+    void endLine() {
         csvEncoder.writeEndObject();
     }
 
     @Override
-    public void flush() throws IOException {
+    public void flush() {
         csvEncoder.flush();
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         csvEncoder.close();
     }
 
-    private void appendEmptyField() throws IOException {
+    private void appendEmptyField() {
         setFieldName();
         csvEncoder.writeNull();
     }
 
-    private void setFieldName() throws IOException {
+    private void setFieldName() {
         var column = csvSchema.column(currentColumnIndex++);
         csvEncoder.writeName(column.getName());
     }

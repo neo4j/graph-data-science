@@ -45,6 +45,7 @@ import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.CsvSchema;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -173,7 +174,7 @@ public final class CsvFileInput implements FileInput {
         }
 
         @Override
-        public synchronized boolean next(InputChunk chunk) throws IOException {
+        public synchronized boolean next(InputChunk chunk) {
             if (entryIterator.hasNext()) {
                 Pair<HEADER, Path> entry = entryIterator.next();
 
@@ -242,7 +243,7 @@ public final class CsvFileInput implements FileInput {
         }
 
         @Override
-        public boolean next(InputEntityVisitor visitor) throws IOException {
+        public boolean next(InputEntityVisitor visitor) {
             if (lineIterator.hasNext()) {
                 String[] lineArray = lineIterator.next();
                 // Ignore empty lines
@@ -254,10 +255,10 @@ public final class CsvFileInput implements FileInput {
             return false;
         }
 
-        abstract void visitLine(String[] lineArray, HEADER header, InputEntityVisitor visitor) throws IOException;
+        abstract void visitLine(String[] lineArray, HEADER header, InputEntityVisitor visitor);
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             if (lineIterator != null) {
                 lineIterator.close();
             }
@@ -276,13 +277,17 @@ public final class CsvFileInput implements FileInput {
         }
 
         @Override
-        void visitLine(String[] lineArray, NodeFileHeader header, InputEntityVisitor visitor) throws IOException {
+        void visitLine(String[] lineArray, NodeFileHeader header, InputEntityVisitor visitor) {
             visitor.labels(header.nodeLabels());
             visitor.id(CsvImportParsingUtil.parseId(lineArray[0]));
 
             visitProperties(header, propertySchemas, visitor, lineArray);
 
-            visitor.endOfEntity();
+            try {
+                visitor.endOfEntity();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 
@@ -293,14 +298,18 @@ public final class CsvFileInput implements FileInput {
         }
 
         @Override
-        void visitLine(String[] lineArray, RelationshipFileHeader header, InputEntityVisitor visitor) throws IOException {
+        void visitLine(String[] lineArray, RelationshipFileHeader header, InputEntityVisitor visitor) {
             visitor.type(header.relationshipType());
             visitor.startId(CsvImportParsingUtil.parseId(lineArray[0]));
             visitor.endId(CsvImportParsingUtil.parseId(lineArray[1]));
 
             visitProperties(header, propertySchemas, visitor, lineArray);
 
-            visitor.endOfEntity();
+            try {
+                visitor.endOfEntity();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 
@@ -309,7 +318,7 @@ public final class CsvFileInput implements FileInput {
         Map<String, PROPERTY_SCHEMA> propertySchemas,
         InputEntityVisitor visitor,
         String[] parsedLine
-    ) throws IOException {
+    ) {
         for (HeaderProperty headerProperty : header.propertyMappings()) {
             var stringProperty = parsedLine[headerProperty.position()];
             var propertyKey = headerProperty.propertyKey();

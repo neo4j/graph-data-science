@@ -24,7 +24,6 @@ import org.neo4j.gds.core.loading.Capabilities;
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.dataformat.csv.CsvMapper;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class CsvGraphCapabilitiesWriter implements SimpleWriter<Capabilities> {
@@ -42,7 +41,7 @@ public class CsvGraphCapabilitiesWriter implements SimpleWriter<Capabilities> {
     }
 
     @Override
-    public void write(Capabilities capabilities) throws IOException {
+    public void write(Capabilities capabilities) {
         var resultFile = fileLocation.toFile();
         this.objectWriter.writeValue(resultFile, capabilities);
     }

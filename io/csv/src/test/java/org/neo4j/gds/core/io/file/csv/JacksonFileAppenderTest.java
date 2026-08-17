@@ -27,7 +27,6 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
 import tools.jackson.dataformat.csv.CsvSchema;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -41,7 +40,7 @@ class JacksonFileAppenderTest {
     Path tempDir;
 
     @Test
-    void shouldAppendDouble() throws IOException {
+    void shouldAppendDouble() {
         var doublePropertySchema = PropertySchema.of("doublePropertySchema", ValueType.DOUBLE);
         var doublePropertyFilePath = tempDir.resolve("double-property-test.csv");
         try (var appender = JacksonFileAppender.of(
@@ -60,7 +59,7 @@ class JacksonFileAppenderTest {
     }
 
     @Test
-    void shouldAppendEmptyForDoubleFallbackValue() throws IOException {
+    void shouldAppendEmptyForDoubleFallbackValue() {
         var doublePropertySchema = PropertySchema.of("doublePropertySchema", ValueType.DOUBLE);
         var doublePropertyFilePath = tempDir.resolve("double-property-test.csv");
         try (var appender = JacksonFileAppender.of(
@@ -83,7 +82,7 @@ class JacksonFileAppenderTest {
         LONG_DEFAULT_FALLBACK,
         INTEGER_DEFAULT_FALLBACK
     })
-    void shouldAppendEmptyForLongFallbackValues(long fallbackValue) throws IOException {
+    void shouldAppendEmptyForLongFallbackValues(long fallbackValue) {
         var longPropertySchema = PropertySchema.of("longPropertySchema", ValueType.LONG);
         var longPropertyFilePath = tempDir.resolve("long-property-test.csv");
         try (var appender = JacksonFileAppender.of(
@@ -102,7 +101,7 @@ class JacksonFileAppenderTest {
     }
 
     @Test
-    void shouldAppendDoubleArray() throws IOException {
+    void shouldAppendDoubleArray() {
         var doubleArrayPropertySchema = PropertySchema.of("doubleArrayPropertySchema", ValueType.DOUBLE_ARRAY);
         var doubleArrayPropertyFilePath = tempDir.resolve("double-array-property-test.csv");
         try (var appender = JacksonFileAppender.of(
@@ -121,7 +120,7 @@ class JacksonFileAppenderTest {
     }
 
     @Test
-    void shouldAppendEmptyForNullValue() throws IOException {
+    void shouldAppendEmptyForNullValue() {
         var nullPropertySchema = PropertySchema.of("nullPropertySchema", ValueType.LONG);
         var nullPropertyFilePath = tempDir.resolve("null-property-test.csv");
         try (var appender = JacksonFileAppender.of(
@@ -140,7 +139,7 @@ class JacksonFileAppenderTest {
     }
 
     @Test
-    void shouldAppendLong() throws IOException {
+    void shouldAppendLong() {
         var longPropertySchema = PropertySchema.of("longPropertySchema", ValueType.LONG);
         var longPropertyFilePath = tempDir.resolve("long-property-test.csv");
         try (var appender = JacksonFileAppender.of(
@@ -159,7 +158,7 @@ class JacksonFileAppenderTest {
     }
 
     @Test
-    void shouldAppendLongArray() throws IOException {
+    void shouldAppendLongArray() {
         var longArrayPropertySchema = PropertySchema.of("longArrayPropertySchema", ValueType.LONG_ARRAY);
         var longArrayPropertyFilePath = tempDir.resolve("long-array-property-test.csv");
         try (var appender = JacksonFileAppender.of(
@@ -178,7 +177,7 @@ class JacksonFileAppenderTest {
     }
 
     @Test
-    void shouldAppendFloatArray() throws IOException {
+    void shouldAppendFloatArray() {
         var floatArrayPropertySchema = PropertySchema.of("floatArrayPropertySchema", ValueType.FLOAT_ARRAY);
         var floatArrayPropertyFilePath = tempDir.resolve("float-array-property-test.csv");
         try (var appender = JacksonFileAppender.of(
@@ -197,7 +196,7 @@ class JacksonFileAppenderTest {
     }
 
     @Test
-    void shouldAppendMultipleProperties() throws IOException {
+    void shouldAppendMultipleProperties() {
         var doublePropertySchema = PropertySchema.of("doublePropertySchema", ValueType.DOUBLE);
         var nullPropertySchema = PropertySchema.of("earlyPropertySchema", ValueType.LONG);
         var longArrayPropertySchema = PropertySchema.of("longArrayPropertySchema", ValueType.LONG_ARRAY);

@@ -25,6 +25,7 @@ import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 final class ElementImportRunner<T extends InputEntityVisitor> implements Runnable {
     private final T visitor;
@@ -54,7 +55,7 @@ final class ElementImportRunner<T extends InputEntityVisitor> implements Runnabl
                 visitor.flush();
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }

@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import tools.jackson.dataformat.csv.CsvMapper;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +55,7 @@ class ValueTypeTest {
 
     @ParameterizedTest
     @MethodSource("formatValues")
-    void testParsingFromCsv(ValueType valueType, Object expected, String value) throws IOException {
+    void testParsingFromCsv(ValueType valueType, Object expected, String value) {
         var arrayReader = new CsvMapper().readerForArrayOf(String.class);
         assertThat(CsvImportParsingUtil.parseProperty(value, valueType, valueType.fallbackValue(), arrayReader)).isEqualTo(expected);
     }

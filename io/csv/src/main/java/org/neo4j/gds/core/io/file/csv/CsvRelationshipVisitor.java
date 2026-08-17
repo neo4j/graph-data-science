@@ -25,8 +25,8 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.file.RelationshipVisitor;
+import tools.jackson.core.JacksonException;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -71,39 +71,20 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
 
     @Override
     protected void exportElement() {
-        // do the import
         var fileAppender = getAppender();
-        try {
-            fileAppender.startLine();
-            // write start and end nodes
-            fileAppender.append(startNode());
-            fileAppender.append(endNode());
 
-            // write properties
-            forEachProperty((key, value) -> {
-                try {
-                    fileAppender.appendAny(value);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-            });
-
-            fileAppender.endLine();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        fileAppender.startLine();
+        fileAppender.append(startNode());
+        fileAppender.append(endNode());
+        forEachProperty((key, value) -> fileAppender.appendAny(value));
+        fileAppender.endLine();
     }
 
     @Override
     public void close() {
         csvAppenders.values().forEach(csvAppender -> {
-            try {
-                csvAppender.flush();
-                csvAppender.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            csvAppender.flush();
+            csvAppender.close();
         });
     }
 
@@ -133,21 +114,17 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
                     key,
                     type.csvName()
                 );
-                try {
-                    headerAppender.append(propertyHeader);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                headerAppender.append(propertyHeader);
             });
 
             headerAppender.endLine();
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Could not write header file", e);
         }
     }
 
     @Override
-    public void flush() throws IOException {
+    public void flush() {
         for (var csvAppender : csvAppenders.values()) {
             csvAppender.flush();
         }

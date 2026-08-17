@@ -24,8 +24,6 @@ import tools.jackson.databind.ObjectReader;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
-import java.io.IOException;
-
 final class CsvImportParsingUtil {
 
     private static final ValueType.Visitor<CsvParsingFunction> PARSING_VISITOR = new ValueType.Visitor<>() {
@@ -72,7 +70,7 @@ final class CsvImportParsingUtil {
 
     @FunctionalInterface
     interface CsvParsingFunction {
-        Object parse(String value, DefaultValue defaultValue, ObjectReader arrayReader) throws IOException;
+        Object parse(String value, DefaultValue defaultValue, ObjectReader arrayReader);
     }
 
     public static Object parseProperty(
@@ -80,7 +78,7 @@ final class CsvImportParsingUtil {
         ValueType valueType,
         DefaultValue defaultValue,
         ObjectReader arrayReader
-    ) throws IOException {
+    ) {
         return valueType.accept(PARSING_VISITOR).parse(value, defaultValue, arrayReader);
     }
 
@@ -121,11 +119,7 @@ final class CsvImportParsingUtil {
         return defaultValue.floatArrayValue();
     }
 
-    private static double[] parseDoubleArray(
-        String value,
-        DefaultValue defaultValue,
-        ObjectReader arrayReader
-    ) throws IOException {
+    private static double[] parseDoubleArray(String value, DefaultValue defaultValue, ObjectReader arrayReader) {
         try (MappingIterator<String[]> objectMappingIterator = arrayReader.readValues(value)) {
             if (objectMappingIterator.hasNext()) {
                 var stringArray = objectMappingIterator.next();
@@ -140,11 +134,7 @@ final class CsvImportParsingUtil {
         return defaultValue.doubleArrayValue();
     }
 
-    private static long[] parseLongArray(
-        String value,
-        DefaultValue defaultValue,
-        ObjectReader arrayReader
-    ) throws IOException {
+    private static long[] parseLongArray(String value, DefaultValue defaultValue, ObjectReader arrayReader) {
         try (MappingIterator<String[]> objectMappingIterator = arrayReader.readValues(value)) {
             if (objectMappingIterator.hasNext()) {
                 var stringArray = objectMappingIterator.next();
