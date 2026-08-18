@@ -54,6 +54,8 @@ shadowJar {
     }
     relocate('org.', 'org.neo4j.gds.shaded.org.') {
         exclude 'org/neo4j/**'
+        exclude 'org/w3c/**'
+        exclude 'org/xml/**'
     }
 
     relocate('android.annotation.', 'com.neo4j.gds.shaded.android.annotation.')
