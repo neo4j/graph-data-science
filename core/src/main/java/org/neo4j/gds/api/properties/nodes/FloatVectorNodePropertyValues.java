@@ -33,6 +33,11 @@ public interface FloatVectorNodePropertyValues extends VectorNodePropertyValues 
     float[] floatArrayValue(long nodeId);
 
     @Override
+    default double[] doubleArrayValue(long nodeId) {
+        return FloatArrayNodePropertyValues.widenToDoubleArray(floatArrayValue(nodeId));
+    }
+
+    @Override
     default ValueType valueType() {
         return ValueType.FLOAT_VECTOR;
     }

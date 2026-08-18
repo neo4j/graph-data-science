@@ -112,4 +112,34 @@ class VectorNodePropertyValuesTest {
         assertThat(vector.dimension(0)).hasValue(8);
     }
 
+
+    @Test
+    void aFloatVectorWidensToADoubleArrayLikeAFloatArrayDoes() {
+        var vector = floatVectorValues(new float[]{1.5F, 2.5F}, new float[]{3.5F, 4.5F});
+
+        assertThat(vector.doubleArrayValue(0)).containsExactly(1.5D, 2.5D);
+        assertThat(vector.doubleArrayValue(1)).containsExactly(3.5D, 4.5D);
+    }
+
+    @Test
+    void wideningAnAbsentFloatVectorStaysNull() {
+        var vector = new FloatVectorNodePropertyValues() {
+            @Override
+            public int vectorDimension() {
+                return 2;
+            }
+
+            @Override
+            public float[] floatArrayValue(long nodeId) {
+                return null;
+            }
+
+            @Override
+            public long nodeCount() {
+                return 1;
+            }
+        };
+
+        assertThat(vector.doubleArrayValue(0)).isNull();
+    }
 }
