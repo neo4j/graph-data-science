@@ -23,12 +23,14 @@ import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.logging.Log;
@@ -36,27 +38,44 @@ import org.neo4j.gds.logging.Log;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+/**
+ * One day the graph catalog won't be a static thing, it'll instead be a dependency you inject here. One day.
+ * <p>
+ * For now this service helps us engineer some other things.
+ * Calls are mostly 1-1, but we can do some handy and _simple_ adapting, to make calling code easier to test,
+ * without having to write separate tests for this class.
+ */
+public class GraphStoreCatalogService {
+    public boolean graphExists(User user, DatabaseId databaseId, GraphName graphName) {
+        return GraphStoreCatalog.exists(user.getUsername(), databaseId, graphName.value());
+    }
 
-public interface GraphStoreCatalogService {
-    boolean graphExists(User user, DatabaseId databaseId, GraphName graphName);
-
-    GraphStoreCatalogEntry removeGraph(
+    public GraphStoreCatalogEntry removeGraph(
         CatalogRequest request,
         GraphName graphName,
         boolean shouldFailIfMissing
-    );
+    ) {
+        var result = new AtomicReference<GraphStoreCatalogEntry>();
+        GraphStoreCatalog.remove(
+            request,
+            graphName.value(),
+            result::set,
+            shouldFailIfMissing
+        );
+        return result.get();
+    }
 
-    GraphStoreCatalogEntry getGraphStoreCatalogEntry(CatalogRequest catalogRequest, GraphName graphName);
+    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(CatalogRequest catalogRequest, GraphName graphName) {
+        return GraphStoreCatalog.get(catalogRequest, graphName.value());
+    }
 
 
-    /**
-     * Load GraphStore and graph, with copious validation.
-     */
-    GraphResources getGraphResources(
+    public GraphResources getGraphResources(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -65,9 +84,43 @@ public interface GraphStoreCatalogService {
         Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         User user,
         DatabaseId databaseId
-    );
+    ) {
+        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
+            graphName,
+            user,
+            graphParameters.usernameOverride(),
+            databaseId
+        );
 
-    GraphResources fetchGraphResources(
+        var graphStore = graphStoreCatalogEntry.graphStore();
+
+        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraphStore(graphStore, hooks));
+
+        var nodeLabels = GraphStoreCatalogService.resolveNodeLabels(graphStore, graphParameters.nodeLabelsFilter());
+        var relationshipTypes = GraphStoreCatalogService.resolveRelationshipTypes(graphStore, graphParameters.loadAllRelationshipTypes(), graphParameters.relationshipTypesFilter());
+
+        // Validate the graph store before going any further
+        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
+
+        postGraphStoreLoadETLHooks.ifPresent(postLoadETLHooks -> extractAndTransform(graphStore, postLoadETLHooks));
+
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
+
+        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraph(graph, hooks));
+
+        return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
+    }
+
+    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(
+        GraphName graphName,
+        User user,
+        Optional<String> usernameOverride,
+        DatabaseId databaseId
+    ){
+        return getGraphStoreCatalogEntry(CatalogRequest.of(user, databaseId, usernameOverride), graphName);
+    }
+
+    public GraphResources fetchGraphResources(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
@@ -75,52 +128,157 @@ public interface GraphStoreCatalogService {
         Optional<GraphValidation> graphValidation,
         User user,
         DatabaseId databaseId
-    );
+    ) {
+        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
+            graphName,
+            user, graphParameters.usernameOverride(), databaseId
+        );
 
-    GraphResources fetchGraphStoreOnlyResources(
+        var graphStore = graphStoreCatalogEntry.graphStore();
+
+        var nodeLabels = GraphStoreCatalogService.resolveNodeLabels(graphStore, graphParameters.nodeLabelsFilter());
+        var relationshipTypes = GraphStoreCatalogService.resolveRelationshipTypes(graphStore, graphParameters.loadAllRelationshipTypes(), graphParameters.relationshipTypesFilter());
+
+        // Validate the graph store before going any further
+        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
+
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
+        // Validate the graph if the caller requires it
+        graphValidation.ifPresent(gv -> gv.validate(graph));
+
+        return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
+    }
+
+    public GraphResources fetchGraphStoreOnlyResources(
         GraphName graphName,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
         User user,
         DatabaseId databaseId
-    );
+    ) {
+        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
+            graphName,
+            user, graphParameters.usernameOverride(), databaseId
+        );
 
-    Optional<Map<String, Object>> getDegreeDistribution(
+        var graphStore = graphStoreCatalogEntry.graphStore();
+
+        var nodeLabels = GraphStoreCatalogService.resolveNodeLabels(graphStore, graphParameters.nodeLabelsFilter());
+        var relationshipTypes = GraphStoreCatalogService.resolveRelationshipTypes(graphStore, graphParameters.loadAllRelationshipTypes(), graphParameters.relationshipTypesFilter());
+
+        // Validate the graph store before going any further
+        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
+
+        return new GraphResources(graphStore, null, graphStoreCatalogEntry.resultStore());
+    }
+
+    /**
+     * Some use cases need special validation. We do this right after loading.
+     *
+     * @throws IllegalArgumentException if the graph store did not conform to desired invariants
+     */
+    private void validateGraphStore(GraphStore graphStore, Iterable<PostLoadValidationHook> validationHooks) {
+        for (PostLoadValidationHook hook : validationHooks) {
+            hook.onGraphStoreLoaded(graphStore);
+        }
+    }
+
+    private void extractAndTransform(GraphStore graphStore, Iterable<PostLoadETLHook> etlHooks) {
+        for (PostLoadETLHook hook : etlHooks) {
+            hook.onGraphStoreLoaded(graphStore);
+        }
+    }
+
+    /**
+     * Some use cases need special validation. We do this right after loading.
+     *
+     * @throws IllegalArgumentException if the graph did not conform to desired invariants
+     */
+    private void validateGraph(Graph graph, Iterable<PostLoadValidationHook> validationHooks) {
+        for (PostLoadValidationHook hook : validationHooks) {
+            hook.onGraphLoaded(graph);
+        }
+    }
+
+    public Optional<Map<String, Object>> getDegreeDistribution(
         User user,
         DatabaseId databaseId,
         GraphName graphName
-    );
+    ) {
+        return GraphStoreCatalog.getDegreeDistribution(user.getUsername(), databaseId, graphName.value());
+    }
 
-     void setDegreeDistribution(
+    public void setDegreeDistribution(
         User user,
         DatabaseId databaseId,
         GraphName graphName,
         Map<String, Object> degreeDistribution
-    );
+    ) {
+        GraphStoreCatalog.setDegreeDistribution(
+            user.getUsername(),
+            databaseId,
+            graphName.value(),
+            degreeDistribution
+        );
+    }
 
-     Stream<GraphStoreCatalogEntry> getAllGraphStores();
+    public Stream<GraphStoreCatalogEntry> getAllGraphStores() {
+        return GraphStoreCatalog
+            .getAllGraphStores()
+            .map(GraphStoreCatalogEntryWithUsername::catalogEntry);
+    }
 
-     long graphStoreCount();
+    public long graphStoreCount() {
+        return GraphStoreCatalog.graphStoreCount();
+    }
 
-     Collection<GraphStoreCatalogEntry> getGraphStores(User user);
+    public Collection<GraphStoreCatalogEntry> getGraphStores(User user) {
+        return GraphStoreCatalog.getGraphStores(user.getUsername());
+    }
 
-    void set(GraphProjectConfig configuration, GraphStore graphStore);
+    public void set(GraphProjectConfig configuration, GraphStore graphStore) {
+        GraphStoreCatalog.set(configuration, graphStore);
+    }
 
-     void removeAllLoadedGraphs(DatabaseId databaseId);
+    public void removeAllLoadedGraphs(DatabaseId databaseId) {
+        GraphStoreCatalog.removeAllLoadedGraphs(databaseId);
+    }
 
-    void registerGraphStoreAddedListener(GraphStoreAddedEventListener graphStoreAddedEventListener);
+    public void registerGraphStoreAddedListener(GraphStoreAddedEventListener graphStoreAddedEventListener) {
+        GraphStoreCatalog.registerGraphStoreAddedListener(graphStoreAddedEventListener);
+    }
 
-    void registerGraphStoreRemovedListener(GraphStoreRemovedEventListener graphStoreRemovedEventListener);
+    public void registerGraphStoreRemovedListener(GraphStoreRemovedEventListener graphStoreRemovedEventListener) {
+        GraphStoreCatalog.registerGraphStoreRemovedListener(graphStoreRemovedEventListener);
+    }
 
-    void setLog(Log log);
+    public void setLog(Log log) {
+        GraphStoreCatalog.setLog(log);
+    }
+
+    public static Collection<NodeLabel> resolveNodeLabels(GraphStore graphStore, Collection<NodeLabel> nodeLabelsFilter) {
+        return  nodeLabelsFilter.isEmpty()
+            ? graphStore.nodeLabels()
+            : nodeLabelsFilter;
+    }
+    public static Collection<RelationshipType> resolveRelationshipTypes(
+        GraphStore graphStore,
+        boolean loadAllRelationshipTypes,
+        Collection<RelationshipType> relationshipTypesFilter
+    ) {
+
+        return loadAllRelationshipTypes
+            ? graphStore.relationshipTypes()
+            : relationshipTypesFilter;
+    }
 
     /**
      * Predicate around @graphExists
      *
      * @throws java.lang.IllegalArgumentException if graph already exists in graph catalog
      */
-    default void ensureGraphDoesNotExist(User user, DatabaseId databaseId, GraphName graphName) {
+    public void ensureGraphDoesNotExist(User user, DatabaseId databaseId, GraphName graphName) {
         if (graphExists(user, databaseId, graphName)) {
             throw new GraphAlreadyExistsException(new GraphStoreCatalog.UserCatalogKey(databaseId.databaseName(), graphName.value()));
         }
@@ -131,7 +289,7 @@ public interface GraphStoreCatalogService {
      *
      * @throws java.lang.IllegalArgumentException if graph does not exist in graph catalog
      */
-    default void ensureGraphExists(User user, DatabaseId databaseId, GraphName graphName) {
+    public void ensureGraphExists(User user, DatabaseId databaseId, GraphName graphName) {
         if (!graphExists(user, databaseId, graphName)) {
             String message = formatWithLocale(
                 "The graph '%s' does not exist.",
@@ -139,26 +297,5 @@ public interface GraphStoreCatalogService {
             );
             throw new IllegalArgumentException(message);
         }
-    }
-
-    default GraphStoreCatalogEntry getGraphStoreCatalogEntry(
-        GraphName graphName,
-        User user,
-        Optional<String> usernameOverride,
-        DatabaseId databaseId
-    ){
-        return getGraphStoreCatalogEntry(CatalogRequest.of(user, databaseId, usernameOverride), graphName);
-    }
-
-    static Collection<NodeLabel> resolveNodeLabels(GraphStore graphStore,Collection<NodeLabel>  nodeLabelsFilter) {
-        return  nodeLabelsFilter.isEmpty()
-            ? graphStore.nodeLabels()
-            : nodeLabelsFilter;
-    }
-    static Collection<RelationshipType> resolveRelationshipTypes(GraphStore graphStore, boolean loadAllRelationshipTypes, Collection<RelationshipType> relationshipTypesFilter) {
-
-        return loadAllRelationshipTypes
-            ? graphStore.relationshipTypes()
-            : relationshipTypesFilter;
     }
 }

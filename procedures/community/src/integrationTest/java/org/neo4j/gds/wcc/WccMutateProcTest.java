@@ -64,7 +64,7 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
@@ -636,7 +636,7 @@ class WccMutateProcTest extends BaseProcTest {
     private GraphDataScienceProcedures constructGraphDataScienceProcedures() {
         var logMock = mock(Log.class);
 
-        var graphStoreCatalogService = new LocalGraphStoreCatalogService();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .correlationId(PlainSimpleRequestCorrelationId.create())
             .databaseId(DatabaseId.of(db.databaseName()))

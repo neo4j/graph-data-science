@@ -29,7 +29,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -76,7 +76,7 @@ class NodeLabelMutatorApplicationTest {
 
     @Test
     void mutateNodeLabelMultiLabelProjection(SoftAssertions assertions) {
-        var graphStoreCatalogService = new LocalGraphStoreCatalogService();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
         var configuration = GraphProjectConfig.emptyWithName("user", "graph");
         graphStoreCatalogService.set(configuration, graphStore);
         var service = new NodeLabelMutatorApplication();
@@ -133,7 +133,7 @@ class NodeLabelMutatorApplicationTest {
 
     @Test
     void shouldWorkWithFloatProperties(SoftAssertions assertions) {
-        var graphStoreCatalogService = new LocalGraphStoreCatalogService();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
         var configuration = GraphProjectConfig.emptyWithName("user", "graph");
         graphStoreCatalogService.set(configuration, graphStore);
         var nodeLabelMutatorService = new NodeLabelMutatorApplication();
@@ -190,7 +190,7 @@ class NodeLabelMutatorApplicationTest {
 
     @Test
     void mutateNodeLabelStarProjection(SoftAssertions assertions) {
-        var graphStoreCatalogService = new LocalGraphStoreCatalogService();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
         var configuration = GraphProjectConfig.emptyWithName("user", "graph");
         graphStoreCatalogService.set(configuration, allGraphStore);
         var nodeLabelMutatorService = new NodeLabelMutatorApplication();

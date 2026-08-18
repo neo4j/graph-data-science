@@ -29,7 +29,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.CatalogRequest;
-import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.progress.registration.EmptyTaskStore;
 import org.neo4j.gds.progress.registration.PerDatabaseTaskStore;
 import org.neo4j.gds.progress.registration.TaskStore;
@@ -58,7 +58,7 @@ class ProductGraphAggregatorIT {
         var graphName = "graph";
         var databaseId = DatabaseId.random();
 
-        var graphStoreCatalogService = new LocalGraphStoreCatalogService();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
         try (
             var aggregator = new ProductGraphAggregator(
                 databaseId,
@@ -121,7 +121,7 @@ class ProductGraphAggregatorIT {
                 Capabilities.WriteMode.LOCAL,
                 QueryEstimator.empty(),
                 ExecutingQueryProvider.empty(),
-                new LocalGraphStoreCatalogService(),
+                new GraphStoreCatalogService(),
                 ProjectionMetricsService.DISABLED,
                 taskStore,
                 Log.noOpLog(),
@@ -160,7 +160,7 @@ class ProductGraphAggregatorIT {
             Capabilities.WriteMode.LOCAL,
             QueryEstimator.empty(),
             ExecutingQueryProvider.empty(),
-            new LocalGraphStoreCatalogService(),
+            new GraphStoreCatalogService(),
             ProjectionMetricsService.DISABLED,
             taskStore,
             Log.noOpLog(),
