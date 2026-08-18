@@ -31,6 +31,7 @@ antora:
   - require: "./extensions/custom-edit-url"
     repo: https://github.com/neo4j/graph-data-science
     start_path: doc
+  - "@neo4j-antora/roles-labels"
 
 asciidoc:
   extensions:
@@ -39,6 +40,8 @@ asciidoc:
   - "@neo4j-antora/antora-page-roles"
   - "@neo4j-antora/antora-table-footnotes"
   attributes:
+    page-tabs: genai@
+    page-tabs-index: 30
     page-theme: docs
     page-type: Docs
     page-search-type: Docs
