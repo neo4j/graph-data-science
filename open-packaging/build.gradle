@@ -69,6 +69,7 @@ shadowJar {
     relocate('net.bytebuddy', 'com.neo4j.gds.shaded.net.bytebuddy')
     relocate('pabeles', 'com.neo4j.gds.shaded.pabeles')
     relocate('stormpot', 'com.neo4j.gds.shaded.stormpot')
+    relocate('tools.jackson', 'com.neo4j.gds.shaded.tools.jackson')
 
 
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
