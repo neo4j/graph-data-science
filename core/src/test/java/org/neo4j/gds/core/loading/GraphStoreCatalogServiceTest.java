@@ -59,7 +59,7 @@ class GraphStoreCatalogServiceTest {
             )
         );
         GraphStoreCatalog.set(configuration, graphStore); // shorthand for project
-        var service = new LocalGraphStoreCatalogService();
+        var service = new GraphStoreCatalogService();
 
         assertTrue(
             service.graphExists(
@@ -88,7 +88,7 @@ class GraphStoreCatalogServiceTest {
 
     @Test
     void shouldRespectFailFlag() {
-        var service = new LocalGraphStoreCatalogService();
+        var service = new GraphStoreCatalogService();
 
         assertNull(
             service.removeGraph(
@@ -118,7 +118,7 @@ class GraphStoreCatalogServiceTest {
             )
         );
         GraphStoreCatalog.set(configuration, graphStore);
-        var service = new LocalGraphStoreCatalogService();
+        var service = new GraphStoreCatalogService();
 
         var user = new User("some user", false);
         var databaseId = DatabaseId.of("some database");
@@ -130,7 +130,7 @@ class GraphStoreCatalogServiceTest {
 
     @Test
     void shouldNotThrowIfGraphDoesNotExist() {
-        var service = new LocalGraphStoreCatalogService();
+        var service = new GraphStoreCatalogService();
 
         var user = new User("some user", false);
         var databaseId = DatabaseId.of("some database");

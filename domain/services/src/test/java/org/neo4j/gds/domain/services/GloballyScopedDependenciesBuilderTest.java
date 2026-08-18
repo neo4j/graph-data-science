@@ -20,14 +20,14 @@
 package org.neo4j.gds.domain.services;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 class GloballyScopedDependenciesBuilderTest {
     @Test
     void shouldBuild() {
-        var graphStoreCatalogService = new LocalGraphStoreCatalogService();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
 
         var globallyScopedDependencies = new GloballyScopedDependenciesBuilder()
             .with(graphStoreCatalogService)

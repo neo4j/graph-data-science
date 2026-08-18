@@ -39,7 +39,6 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.LazyIdMapBuilderBuilder;
-import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -71,7 +70,7 @@ class GraphImporterTest {
 
     @BeforeEach
     void setUp() {
-        graphStoreCatalogService = new LocalGraphStoreCatalogService();
+        graphStoreCatalogService = new GraphStoreCatalogService();
     }
 
     @AfterEach

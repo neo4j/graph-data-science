@@ -32,7 +32,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
 import org.neo4j.gds.extension.GdlExtension;
@@ -112,7 +112,7 @@ class GraphSamplingApplicationTest {
         var graphSamplingApplication = new GraphSamplingApplication(
             Log.noOpLog(),
             LoggerForProgressTracking.noOpLog(),
-            new LocalGraphStoreCatalogService()
+            new GraphStoreCatalogService()
         );
 
         var user = new User("user", false);
@@ -155,7 +155,7 @@ class GraphSamplingApplicationTest {
         var graphSamplingApplication = new GraphSamplingApplication(
             Log.noOpLog(),
             LoggerForProgressTracking.noOpLog(),
-            new LocalGraphStoreCatalogService()
+            new GraphStoreCatalogService()
         );
 
         var user = new User("user", false);
@@ -197,7 +197,7 @@ class GraphSamplingApplicationTest {
         var graphSamplingApplication = new GraphSamplingApplication(
             Log.noOpLog(),
             LoggerForProgressTracking.noOpLog(),
-            new LocalGraphStoreCatalogService()
+            new GraphStoreCatalogService()
         );
 
         var user = new User("user", false);
@@ -244,7 +244,7 @@ class GraphSamplingApplicationTest {
         var graphSamplingApplication = new GraphSamplingApplication(
             Log.noOpLog(),
             LoggerForProgressTracking.noOpLog(),
-            new LocalGraphStoreCatalogService()
+            new GraphStoreCatalogService()
         );
 
         var user = new User("user", false);

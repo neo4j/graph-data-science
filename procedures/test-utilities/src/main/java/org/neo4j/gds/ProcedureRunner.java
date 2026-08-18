@@ -30,7 +30,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.loading.LocalGraphStoreCatalogService;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.progress.registration.EmptyTaskStore;
@@ -160,7 +160,7 @@ public final class ProcedureRunner {
             .taskStore(EmptyTaskStore.INSTANCE)
             .user(new User(username.username(), false))
             .build();
-        var graphStoreCatalogService = new LocalGraphStoreCatalogService();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
 
         var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(gdsLog, null);
 
