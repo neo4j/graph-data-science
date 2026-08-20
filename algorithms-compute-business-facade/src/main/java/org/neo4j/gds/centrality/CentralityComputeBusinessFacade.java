@@ -93,17 +93,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PageRankResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(
                 new SourceNodesRequirement(config.sourceNodes().inputNodes())
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -123,17 +123,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<ArticulationPointsResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(
                 new UndirectedOnlyRequirement("Articulation Points")
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -154,17 +154,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<BetwennessCentralityResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(
                 new BetweennessCentralityRequirements()
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -184,17 +184,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<BridgeResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(
                 new UndirectedOnlyRequirement("Bridges")
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -214,17 +214,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<CELFResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(
                 new NoAlgorithmRequirements()
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -244,17 +244,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<ClosenessCentralityResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(
                 new NoAlgorithmRequirements()
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -275,17 +275,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<DegreeCentralityResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(
                 new NoAlgorithmRequirements()
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -306,17 +306,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PageRankResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(
                 new SourceNodesRequirement(config.sourceNodes().inputNodes())
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -336,17 +336,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<HarmonicResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(
                 new NoAlgorithmRequirements()
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -367,17 +367,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<IndirectExposureResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(
                 new UndirectedOnlyRequirement("Indirect exposure")
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -398,17 +398,17 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PageRankResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(
                 new SourceNodesRequirement(config.sourceNodes().inputNodes())
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -428,17 +428,18 @@ public class CentralityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<HitsResultWithGraph>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
-        var graphResources = graphStoreCatalogService.fetchGraphStoreOnlyResources(
+        var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new AlgorithmGraphStoreRequirementsBuilder()
                 .withAlgorithmRequirement(new PregelPropertiesRequirement(hitsConfig.writeProperty()))
                 .withAlgorithmRequirement(new DirectedOnlyRequirement("Hits"))
                 .build(),
-            user,
-            databaseId
+            false,
+            null
         );
         var graphStore = graphResources.graphStore();
         var relTypes = HitsCompanion.relationshipsWithoutIndices(

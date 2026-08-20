@@ -155,13 +155,14 @@ public class AlgorithmEstimationTemplate {
         GraphParameters graphParameters
     ) {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            requestScopedDependencies.databaseId(),
             graphName,
+            requestScopedDependencies.user(),
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new NoAlgorithmRequirements()),
-            Optional.empty(),
-            requestScopedDependencies.user(),
-            requestScopedDependencies.databaseId()
+            true,
+            Optional.empty()
         );
 
         return graphDimensionsFactory.graphDimensions(graphResources, graphParameters);
