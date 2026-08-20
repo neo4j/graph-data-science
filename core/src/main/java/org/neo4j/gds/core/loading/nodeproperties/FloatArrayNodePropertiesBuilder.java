@@ -21,18 +21,13 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.NodeIdMapper;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseFloatArrayArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.utils.GdsNeo4jValueConversion;
 import org.neo4j.gds.values.GdsValue;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class FloatArrayNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
@@ -76,39 +71,18 @@ public class FloatArrayNodePropertiesBuilder implements InnerNodePropertiesBuild
         NodeIdMapper toMappedNodeIdFn,
         long highestOriginalId
     ) {
-        var propertiesByNeoIds = builder.build();
-
         var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.builder(defaultValue);
 
-        var drainingIterator = propertiesByNeoIds.drainingIterator();
+        InnerNodePropertiesBuilder.remapToInternalIds(
+            builder.build().drainingIterator(),
+            (value, mappedId) -> propertiesByMappedIdsBuilder.set(mappedId, value),
+            value -> value == null || Arrays.equals(value, defaultValue),
+            toMappedNodeIdFn,
+            highestOriginalId,
+            concurrency
+        );
 
-        var tasks = IntStream.range(0, concurrency.value()).mapToObj(threadId -> (Runnable) () -> {
-            var batch = drainingIterator.drainingBatch();
-
-            while (drainingIterator.next(batch)) {
-                var page = batch.page;
-                var offset = batch.offset;
-                var end = Math.min(offset + page.length, highestOriginalId + 1) - offset;
-
-                for (int pageIndex = 0; pageIndex < end; pageIndex++) {
-                    var neoId = offset + pageIndex;
-                    var mappedId = toMappedNodeIdFn.map(neoId);
-                    if (mappedId == IdMap.NOT_FOUND) {
-                        continue;
-                    }
-                    var value = page[pageIndex];
-                    if (value == null || Arrays.equals(value, defaultValue)) {
-                        continue;
-                    }
-                    propertiesByMappedIdsBuilder.set(mappedId, value);
-                }
-            }
-        }).collect(Collectors.toList());
-
-        ParallelUtil.run(tasks, DefaultPool.INSTANCE);
-        var propertyValues = propertiesByMappedIdsBuilder.build();
-
-        return new FloatArrayStoreNodePropertyValues(propertyValues, size);
+        return new FloatArrayStoreNodePropertyValues(propertiesByMappedIdsBuilder.build(), size);
     }
 
     static class FloatArrayStoreNodePropertyValues implements FloatArrayNodePropertyValues {

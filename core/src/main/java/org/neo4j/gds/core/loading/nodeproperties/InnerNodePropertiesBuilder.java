@@ -20,8 +20,18 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.NodeIdMapper;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.DrainingIterator;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.values.GdsValue;
+
+import java.util.function.ObjLongConsumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public interface InnerNodePropertiesBuilder {
 
@@ -33,4 +43,43 @@ public interface InnerNodePropertiesBuilder {
      */
     NodePropertyValues build(long size, NodeIdMapper toMappedNodeIdFn, long highestOriginalId);
 
+    /**
+     * Drains values keyed by their original id into {@code sink} keyed by their mapped id, skipping
+     * values that are absent or equal to the property's default. Only usable where a page is an array
+     * of the value type ({@code T[]}), which excludes the scalar builders: their page is a primitive
+     * array, which no {@code T[]} can denote.
+     */
+    static <T> void remapToInternalIds(
+        DrainingIterator<T[]> valuesByOriginalId,
+        ObjLongConsumer<T> sink,
+        Predicate<T> skipValue,
+        NodeIdMapper toMappedNodeIdFn,
+        long highestOriginalId,
+        Concurrency concurrency
+    ) {
+        var tasks = IntStream.range(0, concurrency.value()).mapToObj(threadId -> (Runnable) () -> {
+            var batch = valuesByOriginalId.drainingBatch();
+
+            while (valuesByOriginalId.next(batch)) {
+                var page = batch.page;
+                var offset = batch.offset;
+                var end = Math.min(offset + page.length, highestOriginalId + 1) - offset;
+
+                for (int pageIndex = 0; pageIndex < end; pageIndex++) {
+                    var neoId = offset + pageIndex;
+                    var mappedId = toMappedNodeIdFn.map(neoId);
+                    if (mappedId == IdMap.NOT_FOUND) {
+                        continue;
+                    }
+                    var value = page[pageIndex];
+                    if (skipValue.test(value)) {
+                        continue;
+                    }
+                    sink.accept(value, mappedId);
+                }
+            }
+        }).collect(Collectors.toList());
+
+        ParallelUtil.run(tasks, DefaultPool.INSTANCE);
+    }
 }
