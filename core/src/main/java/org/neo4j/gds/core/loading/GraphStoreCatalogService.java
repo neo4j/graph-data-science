@@ -121,56 +121,40 @@ public class GraphStoreCatalogService {
     }
 
     public GraphResources fetchGraphResources(
+        DatabaseId databaseId,
         GraphName graphName,
+        User user,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
-        Optional<GraphValidation> graphValidation,
-        User user,
-        DatabaseId databaseId
+        boolean includeGraph,
+        Optional<GraphValidation> graphValidation
     ) {
         var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
             graphName,
-            user, graphParameters.usernameOverride(), databaseId
+            user,
+            graphParameters.usernameOverride(),
+            databaseId
         );
 
         var graphStore = graphStoreCatalogEntry.graphStore();
 
         var nodeLabels = GraphStoreCatalogService.resolveNodeLabels(graphStore, graphParameters.nodeLabelsFilter());
-        var relationshipTypes = GraphStoreCatalogService.resolveRelationshipTypes(graphStore, graphParameters.loadAllRelationshipTypes(), graphParameters.relationshipTypesFilter());
+        var relationshipTypes = GraphStoreCatalogService.resolveRelationshipTypes(
+            graphStore,
+            graphParameters.loadAllRelationshipTypes(),
+            graphParameters.relationshipTypesFilter()
+        );
 
-        // Validate the graph store before going any further
         graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
 
+        if (!includeGraph) return new GraphResources(graphStore, null, graphStoreCatalogEntry.resultStore());
+
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
-        // Validate the graph if the caller requires it
+
         graphValidation.ifPresent(gv -> gv.validate(graph));
 
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
-    }
-
-    public GraphResources fetchGraphStoreOnlyResources(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        GraphStoreValidation graphStoreValidation,
-        User user,
-        DatabaseId databaseId
-    ) {
-        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
-            graphName,
-            user, graphParameters.usernameOverride(), databaseId
-        );
-
-        var graphStore = graphStoreCatalogEntry.graphStore();
-
-        var nodeLabels = GraphStoreCatalogService.resolveNodeLabels(graphStore, graphParameters.nodeLabelsFilter());
-        var relationshipTypes = GraphStoreCatalogService.resolveRelationshipTypes(graphStore, graphParameters.loadAllRelationshipTypes(), graphParameters.relationshipTypesFilter());
-
-        // Validate the graph store before going any further
-        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
-
-        return new GraphResources(graphStore, null, graphStoreCatalogEntry.resultStore());
     }
 
     /**

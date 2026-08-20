@@ -110,15 +110,15 @@ public class PathFindingComputeBusinessFacade {
         JobId jobId,
         ResultTransformerBuilder<TimedAlgorithmResult<Stream<AllShortestPathsStreamResult>>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new NoAlgorithmRequirements()),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -138,15 +138,15 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<BellmanFordResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new NoAlgorithmRequirements()),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -166,18 +166,18 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
                 parameters.sourceNode(),
                 parameters.targetNodes()
             )),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -198,15 +198,15 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<DeltaSteppingResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new SourceNodeRequirement(parameters.sourceNode())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -226,18 +226,18 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
                 parameters.sourceNode(),
                 parameters.targetNodes()
             )),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -258,18 +258,18 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new AlgorithmGraphStoreRequirementsBuilder()
                 .withAlgorithmRequirement(new SourceNodeRequirement(parameters.sourceNode()))
                 .withAlgorithmRequirement(new UndirectedOnlyRequirement("K-Spanning Tree"))
                 .build(),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -290,15 +290,15 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new NoAlgorithmRequirements()),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -320,13 +320,14 @@ public class PathFindingComputeBusinessFacade {
         ResultTransformerBuilder<TimedAlgorithmResult<FlowResult>, TR> resultTransformerBuilder
     ) {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(FlowAlgorithmRequirements.create(parameters)),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -348,26 +349,27 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<CostFlowResult>, TR> resultTransformerBuilder
     ) {
-
         var capacityGraphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             capacityProperty,
             new GraphStoreValidation(FlowAlgorithmRequirements.create(parameters.maxFlowParameters())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
 
+        //the below validation just renames the outputed error variable name (because its not relationship weight property)
         var costGraphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             costProperty,
-            //the below validation just renames the outputed error variable name (because its not relationship weight property)
             new GraphStoreValidation(new RelationshipPropertyGraphStoreValidation(costProperty, "costProperty")),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
 
         var capacityGraph = capacityGraphResources.graph();
@@ -392,15 +394,15 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<Stream<long[]>>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new SourceNodesRequirement(parameters.sourceNodes())),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
+            true,
+            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService))
         );
         var graph = graphResources.graph();
 
@@ -421,15 +423,15 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<HugeAtomicLongArray>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new SourceNodesRequirement(parameters.sourceNodes())),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
+            true,
+            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService))
         );
         var graph = graphResources.graph();
 
@@ -450,9 +452,10 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PrizeSteinerTreeResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new AlgorithmGraphStoreRequirementsBuilder()
@@ -463,9 +466,8 @@ public class PathFindingComputeBusinessFacade {
                     List.of(ValueType.DOUBLE)
                 ))
                 .build(),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
 
         var graph = graphResources.graph();
@@ -487,18 +489,18 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new SourceNodeTargetNodeRequirement(
                 parameters.sourceNode(),
                 parameters.targetNode()
             )),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
+            true,
+            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService))
         );
         var graph = graphResources.graph();
 
@@ -519,18 +521,18 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
                 parameters.sourceNode(),
                 parameters.targetsList()
             )),
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService)),
-            user,
-            databaseId
+            true,
+            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService))
         );
         var graph = graphResources.graph();
 
@@ -551,18 +553,18 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new SourceNodeTargetNodeRequirement(
                 parameters.sourceNode(),
                 parameters.targetNode()
             )),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -583,15 +585,15 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new SourceNodeRequirement(parameters.sourceNode())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -612,18 +614,18 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new AlgorithmGraphStoreRequirementsBuilder()
                 .withAlgorithmRequirement(new SourceNodeRequirement(parameters.sourceNode()))
                 .withAlgorithmRequirement(new UndirectedOnlyRequirement("Spanning Tree"))
                 .build(),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -644,18 +646,18 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<SteinerTreeResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
                 parameters.sourceNode(),
                 parameters.targetNodes()
             )),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -675,15 +677,15 @@ public class PathFindingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<TopologicalSortResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new NoAlgorithmRequirements()),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 

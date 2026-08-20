@@ -77,13 +77,14 @@ public class NodeEmbeddingComputeBusinessFacade {
 
         // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new FeaturePropertiesMustExistOnAllNodeLabels(parameters.featureProperties())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
 
         return computeFacade.fastRP(
@@ -104,15 +105,15 @@ public class NodeEmbeddingComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<HashGNNResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new FeaturePropertiesMustExistOnAllNodeLabels(parameters.featureProperties())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
 
         return computeFacade.hashGnn(
@@ -136,18 +137,18 @@ public class NodeEmbeddingComputeBusinessFacade {
         DatabaseId databaseId,
         TerminationFlag terminationFlag
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new NoAlgorithmRequirements()),
+            true,
             Optional.of(new Node2VecGraphValidation(
                 parameters.samplingWalkParameters().walksPerNode(),
                 parameters.samplingWalkParameters().walkLength()
-            )),
-            user,
-            databaseId
+            ))
         );
 
         return computeFacade.node2Vec(

@@ -73,16 +73,15 @@ public class SimilarityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<KnnResult>, TR> resultTransformerBuilder
     ) {
-
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new KnnAlgorithmRequirements(parametersSansNodeCount.nodePropertiesNames())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var parameters = parametersSansNodeCount.finalize(graphResources.graph().nodeCount());
 
@@ -102,10 +101,10 @@ public class SimilarityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<FilteredKnnResult>, TR> resultTransformerBuilder
     ) {
-
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new AlgorithmGraphStoreRequirementsBuilder()
@@ -118,9 +117,8 @@ public class SimilarityComputeBusinessFacade {
                         parametersSansNodeCount.filteringParameters().targetFilter()
                     )
                 ).build(),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var parameters = parametersSansNodeCount.finalize(graphResources.graph().nodeCount());
 
@@ -141,21 +139,20 @@ public class SimilarityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<NodeSimilarityResult>, TR> resultTransformerBuilder
     ) {
-
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(
-                    new NodeSimilarityRequirement(
-                        parameters.useComponents(),
-                        parameters.componentProperty()
-                    )
+                new NodeSimilarityRequirement(
+                    parameters.useComponents(),
+                    parameters.componentProperty()
+                )
             ),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
 
         return computeFacade.nodeSimilarity(
@@ -175,10 +172,10 @@ public class SimilarityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<NodeSimilarityResult>, TR> resultTransformerBuilder
     ) {
-
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new AlgorithmGraphStoreRequirementsBuilder()
@@ -193,9 +190,8 @@ public class SimilarityComputeBusinessFacade {
                         parameters.nodeSimilarityParameters().componentProperty()
                     )
                 ).build(),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
 
         return computeFacade.filteredNodeSimilarity(

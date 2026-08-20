@@ -111,15 +111,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<ApproxMaxKCutResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new MinCommunitySizeSumRequirement(parameters.minCommunitySizes())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -140,15 +140,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<CliqueCountingResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new UndirectedOnlyRequirement("Clique Counting")),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -170,15 +170,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<ConductanceResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new NodePropertyMustExistOnAnyLabel(parameters.communityProperty())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -199,15 +199,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<Labels>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new NodePropertyMustExistOnAnyLabel("nodeProperty")),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -228,15 +228,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<K1ColoringResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new NoAlgorithmRequirements()),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -257,15 +257,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<KCoreDecompositionResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new UndirectedOnlyRequirement("K-Core-Decomposition")),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -286,18 +286,18 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<KmeansResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new NodePropertyTypeRequirement(
                 "nodeProperty",
                 List.of(ValueType.DOUBLE_ARRAY, ValueType.FLOAT_ARRAY, ValueType.DOUBLE)
             )),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -319,18 +319,18 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<LabelPropagationResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new AlgorithmGraphStoreRequirementsBuilder()
                 .withAlgorithmRequirement(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty())))
                 .withAlgorithmRequirement(new NodePropertyMustExistOnAllLabels(parameters.nodeWeightProperty()))
                 .build(),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -351,18 +351,18 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<LocalClusteringCoefficientResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new AlgorithmGraphStoreRequirementsBuilder()
                 .withAlgorithmRequirement(new UndirectedOnlyRequirement("LocalClusteringCoefficient"))
                 .withAlgorithmRequirement(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty())))
                 .build(),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -384,18 +384,18 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<LeidenResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new AlgorithmGraphStoreRequirementsBuilder()
                 .withAlgorithmRequirement(new UndirectedOnlyRequirement("Leiden"))
                 .withAlgorithmRequirement(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty())))
                 .build(),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -417,15 +417,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<LouvainResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty()))),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -446,15 +446,15 @@ public class CommunityComputeBusinessFacade {
         JobId jobId,
         ResultTransformerBuilder<TimedAlgorithmResult<ModularityResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(new NodePropertyMustExistOnAnyLabel(parameters.communityProperty())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -475,15 +475,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<ModularityOptimizationResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(OptionalNodePropertyGraphStoreRequirement.create(parameters.seedProperty())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -504,15 +504,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new NoAlgorithmRequirements()),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -533,15 +533,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<PregelResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(new PregelPropertiesRequirement(config.writeProperty())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -561,15 +561,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<TriangleCountResult>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(TriangleCountGraphStoreRequirements.create(parameters.labelFilter())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -590,15 +590,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<Stream<TriangleResult>>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             Optional.empty(),
             new GraphStoreValidation(TriangleCountGraphStoreRequirements.create(parameters.labelFilter())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
@@ -618,15 +618,15 @@ public class CommunityComputeBusinessFacade {
         boolean logProgress,
         ResultTransformerBuilder<TimedAlgorithmResult<DisjointSetStruct>, TR> resultTransformerBuilder
     ) {
-        // Fetch the Graph the algorithm will operate on
         var graphResources = graphStoreCatalogService.fetchGraphResources(
+            databaseId,
             graphName,
+            user,
             graphParameters,
             relationshipProperty,
             new GraphStoreValidation(OptionalNodePropertyGraphStoreRequirement.create(parameters.seedProperty())),
-            Optional.empty(),
-            user,
-            databaseId
+            true,
+            Optional.empty()
         );
         var graph = graphResources.graph();
 
