@@ -65,13 +65,7 @@ public final class GraphStoreMetadataMapper {
             } else {
                 propertySchemas.entrySet().stream()
                     .map(GraphStoreMetadataMapper::toPropertySchema)
-                    .forEach(propertySchema -> result.addProperty(
-                        entry.getKey(),
-                        propertySchema.key(),
-                        propertySchema.valueType(),
-                        propertySchema.defaultValue(),
-                        propertySchema.state()
-                    ));
+                    .forEach(propertySchema -> result.addProperty(entry.getKey(), propertySchema));
             }
         }
 

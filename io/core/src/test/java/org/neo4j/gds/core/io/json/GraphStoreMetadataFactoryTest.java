@@ -258,6 +258,49 @@ class GraphStoreMetadataFactoryTest {
                     )
                 )
             ),
+            // vector properties in node schema
+            Arguments.of(
+                GdlFactory.builder()
+                    .gdlGraph(
+                        "(:A { floatEmbedding: vector([1.0f, 3.0f, 3.0f]) })-->(:B { doubleEmbedding: vector([1.0d, 3.0d]) })")
+                    .build()
+                    .build(),
+                new GraphStoreMetadata(
+                    new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
+                    WriteMode.LOCAL,
+                    new IdMapInfo(
+                        ArrayIdMapBuilder.ID,
+                        2,
+                        1,
+                        Map.of("A", 1L, "B", 1L)
+                    ),
+                    Map.of(RelationshipType.ALL_RELATIONSHIPS.name(), new RelationshipInfo(1, false, 0)),
+                    Map.of(
+                        "A", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
+                            "floatEmbedding",
+                            new NodePropertySchema(
+                                ValueType.FLOAT_VECTOR,
+                                new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+                                PropertyState.TRANSIENT,
+                                3
+                            )
+                        )),
+                        "B", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
+                            "doubleEmbedding",
+                            new NodePropertySchema(
+                                ValueType.DOUBLE_VECTOR,
+                                new DefaultValue(org.neo4j.gds.api.DefaultValue.forDoubleArray().getObject(), false),
+                                PropertyState.TRANSIENT,
+                                2
+                            )
+                        ))
+                    ),
+                    Map.of(
+                        RelationshipType.ALL_RELATIONSHIPS.name(),
+                        new RelationshipSchema(Direction.DIRECTED, Map.of())
+                    )
+                )
+            ),
             // variation in relationship schema
             Arguments.of(
                 GdlFactory.builder()
@@ -546,6 +589,81 @@ class GraphStoreMetadataFactoryTest {
                             ValueType.LONG,
                             new DefaultValue(42L, true),
                             PropertyState.REMOTE
+                        )
+                    ))
+                )
+            ),
+            Arguments.of(
+                // vector properties carry their dimension
+                NodeSchema.builder()
+                    .addVectorProperty(
+                        "A",
+                        "floatEmbedding",
+                        org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_VECTOR,
+                        org.neo4j.gds.api.DefaultValue.forFloatArray(),
+                        org.neo4j.gds.api.PropertyState.PERSISTENT,
+                        3
+                    )
+                    .addVectorProperty(
+                        "B",
+                        "doubleEmbedding",
+                        org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE_VECTOR,
+                        org.neo4j.gds.api.DefaultValue.forDoubleArray(),
+                        org.neo4j.gds.api.PropertyState.TRANSIENT,
+                        256
+                    )
+                    .build(),
+                Map.of(
+                    "A",
+                    new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
+                        "floatEmbedding",
+                        new NodePropertySchema(
+                            ValueType.FLOAT_VECTOR,
+                            new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+                            PropertyState.PERSISTENT,
+                            3
+                        )
+                    )),
+                    "B",
+                    new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
+                        "doubleEmbedding",
+                        new NodePropertySchema(
+                            ValueType.DOUBLE_VECTOR,
+                            new DefaultValue(org.neo4j.gds.api.DefaultValue.forDoubleArray().getObject(), false),
+                            PropertyState.TRANSIENT,
+                            256
+                        )
+                    ))
+                )
+            ),
+            Arguments.of(
+                // a vector and a non-vector property of the same array type on one label
+                NodeSchema.builder()
+                    .addVectorProperty(
+                        "A",
+                        "embedding",
+                        org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_VECTOR,
+                        org.neo4j.gds.api.DefaultValue.forFloatArray(),
+                        org.neo4j.gds.api.PropertyState.PERSISTENT,
+                        3
+                    )
+                    .addProperty("A", "weights", org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_ARRAY)
+                    .build(),
+                Map.of(
+                    "A",
+                    new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
+                        "embedding",
+                        new NodePropertySchema(
+                            ValueType.FLOAT_VECTOR,
+                            new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+                            PropertyState.PERSISTENT,
+                            3
+                        ),
+                        "weights",
+                        new NodePropertySchema(
+                            ValueType.FLOAT_ARRAY,
+                            new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+                            PropertyState.PERSISTENT
                         )
                     ))
                 )
