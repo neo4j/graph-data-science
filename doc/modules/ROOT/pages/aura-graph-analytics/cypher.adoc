@@ -501,12 +501,6 @@ After the session is deleted, all trained models will be lost.
 The following Machine Learning procedures are not supported:
 
 * `gds.model.publish`
-* `gds.linkprediction.adamicAdar`
-* `gds.linkprediction.commonNeighbors`
-* `gds.linkprediction.preferentialAttachment`
-* `gds.linkprediction.resourceAllocation`
-* `gds.linkprediction.sameCommunity`
-* `gds.linkprediction.totalNeighbors`
 * `gds.splitRelationships`
 
 
