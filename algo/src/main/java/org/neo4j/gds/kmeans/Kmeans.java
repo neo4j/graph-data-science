@@ -149,11 +149,13 @@ public final class Kmeans implements Algorithm<KmeansResult> {
         if (parameters.numberOfRestarts() == 1) {
             kMeans(nodeCount, currentCommunities, currentDistanceFromCentroid, 0);
         } else {
+            progressTracker.beginSubTask(); // Restarts task
             for (int restartIteration = 0; restartIteration < parameters.numberOfRestarts(); ++restartIteration) {
                 progressTracker.beginSubTask(); // KMeans Iteration - start
                 kMeans(nodeCount, currentCommunities, currentDistanceFromCentroid, restartIteration);
                 progressTracker.endSubTask(); // KMeans Iteration - end
             }
+            progressTracker.endSubTask(); // Restarts task - end
         }
 
         if (parameters.computeSilhouette()) {

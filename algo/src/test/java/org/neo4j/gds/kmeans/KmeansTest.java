@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.TestGraph;
@@ -496,11 +497,11 @@ class KmeansTest {
         @Inject
         private Graph graph;
 
-        @Test
-        void progressTracking() {
+        @ParameterizedTest
+        @EnumSource(SamplerType.class)
+        void progressTracking(SamplerType samplerType) {
 
             var concurrency = new Concurrency(1);
-
             var parameters = new KmeansParameters(
                 2,
                 5,
@@ -509,7 +510,7 @@ class KmeansTest {
                 false,
                 new Concurrency(1),
                 "kmeans",
-                SamplerType.UNIFORM,
+                samplerType,
                 List.of(),
                 Optional.of(19L)
             );
@@ -553,8 +554,9 @@ class KmeansTest {
                 );
         }
 
-        @Test
-        void progressTrackingWithRestarts() {
+        @ParameterizedTest
+        @EnumSource(SamplerType.class)
+        void progressTrackingWithRestarts(SamplerType samplerType) {
             var concurrency = new Concurrency(1);
 
             var parameters = new KmeansParameters(
@@ -565,7 +567,7 @@ class KmeansTest {
                 false,
                 new Concurrency(1),
                 "kmeans",
-                SamplerType.UNIFORM,
+                samplerType,
                 List.of(),
                 Optional.of(19L)
             );
@@ -594,40 +596,43 @@ class KmeansTest {
                 .extracting(replaceTimings())
                 .containsExactly(
                     "K-Means :: Start",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Start",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization :: Start",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization 50%",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization 100%",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization :: Finished",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Start",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Start",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 100%",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Finished",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Start",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 100%",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Finished",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Finished",
-                    "K-Means :: KMeans Iteration 1 of 2 :: Finished",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Start",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization :: Start",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization 50%",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization 100%",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization :: Finished",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Start",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Start",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 100%",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Finished",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Start",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 100%",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Finished",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Finished",
-                    "K-Means :: KMeans Iteration 2 of 2 :: Finished",
+                    "K-Means :: K-Means Restarts :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Initialization :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Initialization 50%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Initialization 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Initialization :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Initialization :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Initialization 50%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Initialization 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Initialization :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Finished",
+                    "K-Means :: K-Means Restarts :: Finished",
                     "K-Means :: Finished"
                 );
         }
 
-        @Test
-        void progressTrackingWithSilhouette() {
+        @ParameterizedTest
+        @EnumSource(SamplerType.class)
+        void progressTrackingWithSilhouette(SamplerType samplerType) {
             var concurrency = new Concurrency(1);
             var parameters = new KmeansParameters(
                 2,
@@ -637,7 +642,7 @@ class KmeansTest {
                 true,
                 new Concurrency(1),
                 "kmeans",
-                SamplerType.UNIFORM,
+                samplerType,
                 List.of(),
                 Optional.of(19L)
             );
@@ -679,6 +684,89 @@ class KmeansTest {
                     "K-Means :: Main :: Iteration 2 of 5 100%",
                     "K-Means :: Main :: Iteration 2 of 5 :: Finished",
                     "K-Means :: Main :: Finished",
+                    "K-Means :: Silhouette :: Start",
+                    "K-Means :: Silhouette 25%",
+                    "K-Means :: Silhouette 50%",
+                    "K-Means :: Silhouette 75%",
+                    "K-Means :: Silhouette 100%",
+                    "K-Means :: Silhouette :: Finished",
+                    "K-Means :: Finished"
+                );
+        }
+
+
+        @ParameterizedTest
+        @EnumSource(SamplerType.class)
+        void progressTrackingWithSilhouetteAndRestarts(SamplerType samplerType) {
+            var concurrency = new Concurrency(1);
+            var parameters = new KmeansParameters(
+                2,
+                5,
+                0.05,
+                2,
+                true,
+                new Concurrency(1),
+                "kmeans",
+                samplerType,
+                List.of(),
+                Optional.of(19L)
+            );
+
+            var progressTrackerWithLog = TestProgressTrackerHelper.create(
+                CommunityAlgorithmTasks.kMeans(
+                    graph,
+                    parameters
+                ), concurrency
+            );
+
+            var progressTracker = progressTrackerWithLog.progressTracker();
+
+            var kmeans = Kmeans.createKmeans(
+                Log.noOpLog(),
+                graph,
+                parameters,
+                KmeansContext.progressTrackerWithDefaultExecutor(progressTracker),
+                TerminationFlag.RUNNING_TRUE
+            );
+
+            kmeans.compute();
+
+            var log = progressTrackerWithLog.log();
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "K-Means :: Start",
+                    "K-Means :: K-Means Restarts :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Initialization :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Initialization 50%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Initialization 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Initialization :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Main :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 1 of 2 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Initialization :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Initialization 50%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Initialization 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Initialization :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Main :: Finished",
+                    "K-Means :: K-Means Restarts :: K-Means Iteration 2 of 2 :: Finished",
+                    "K-Means :: K-Means Restarts :: Finished",
                     "K-Means :: Silhouette :: Start",
                     "K-Means :: Silhouette 25%",
                     "K-Means :: Silhouette 50%",

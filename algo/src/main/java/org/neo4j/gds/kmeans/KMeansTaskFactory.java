@@ -25,7 +25,9 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tasks.Tasks;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public final class KMeansTaskFactory {
     private KMeansTaskFactory() {}
@@ -34,56 +36,57 @@ public final class KMeansTaskFactory {
         var label = AlgorithmLabel.KMeans.asString();
 
         var iterations = parameters.numberOfRestarts();
+
         if (iterations == 1) {
-            return kMeansTask(graph, label, parameters);
+            return kMeansSolo(graph, label, parameters);
+        } else {
+            return kMeansWithRestarts(label,graph, parameters);
         }
 
-        return Tasks.iterativeFixed(
-            label,
+    }
+
+    private static Task silhouetteTask(IdMap graph, KmeansParameters parameters) {
+        return Tasks.leaf("Silhouette", parameters.concurrency(), graph.nodeCount());
+    }
+
+    private static Supplier<ArrayList<Task>> baseKmeansTaskList(KmeansParameters parameters) {
+        var tasksList = new ArrayList<Task>();
+        tasksList.add(Tasks.leaf("Initialization", parameters.concurrency(), parameters.k()));
+        tasksList.add(Tasks.iterativeDynamic(
+            "Main",
             parameters.concurrency(),
-            () -> List.of(kMeansTask(graph, "KMeans Iteration", parameters)),
-            iterations
+            () -> List.of(Tasks.leaf("Iteration", parameters.concurrency())),
+            parameters.maxIterations()
+        ));
+        return () -> tasksList;
+    }
+    private static Task kMeansSolo(IdMap idMap, String description, KmeansParameters parameters) {
+
+        var tasksList = baseKmeansTaskList(parameters).get();
+        if (parameters.computeSilhouette()) {
+            tasksList.add(silhouetteTask(idMap, parameters));
+        }
+        return Tasks.task(
+            description,
+            parameters.concurrency(),
+            tasksList
         );
     }
 
-    private static Task kMeansTask(IdMap idMap, String description, KmeansParameters parameters) {
-        if (parameters.computeSilhouette()) {
-            return Tasks.task(
-                description,
-                parameters.concurrency(),
-                List.of(
-                    Tasks.leaf(
-                        "Initialization",
-                        parameters.concurrency(),
-                        parameters.k()
-                    ),
-                    Tasks.iterativeDynamic(
-                        "Main",
-                        parameters.concurrency(),
-                        () -> List.of(Tasks.leaf("Iteration", parameters.concurrency())),
-                        parameters.maxIterations()
-                    ),
-                    Tasks.leaf("Silhouette", parameters.concurrency(), idMap.nodeCount())
-                )
-            );
-        } else {
-            return Tasks.task(
-                description,
-                parameters.concurrency(),
-                List.of(
-                    Tasks.leaf(
-                        "Initialization",
-                        parameters.concurrency(),
-                        parameters.k()
-                    ),
-                    Tasks.iterativeDynamic(
-                        "Main",
-                        parameters.concurrency(),
-                        () -> List.of(Tasks.leaf("Iteration", parameters.concurrency())),
-                        parameters.maxIterations()
-                    )
-                )
-            );
-        }
+    private static Task kMeansWithRestarts(String label,IdMap idMap, KmeansParameters parameters) {
+
+        var iterativeTask = Tasks.iterativeFixed(
+            "K-Means Restarts",
+            parameters.concurrency(),
+            () -> List.of(Tasks.task("K-Means Iteration", parameters.concurrency(), baseKmeansTaskList(parameters).get())),
+            parameters.numberOfRestarts()
+        );
+
+       return Tasks.task(
+            label,
+            parameters.concurrency(),
+            parameters.computeSilhouette() ? List.of(iterativeTask, silhouetteTask(idMap, parameters)) : List.of(iterativeTask)
+        );
     }
 }
+
