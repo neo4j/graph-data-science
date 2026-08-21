@@ -28,6 +28,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.extension.GdlExtension;
@@ -39,6 +40,7 @@ import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -596,21 +598,25 @@ class GraphStoreMetadataFactoryTest {
             Arguments.of(
                 // vector properties carry their dimension
                 NodeSchema.builder()
-                    .addVectorProperty(
+                    .addProperty(
                         "A",
-                        "floatEmbedding",
-                        org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_VECTOR,
-                        org.neo4j.gds.api.DefaultValue.forFloatArray(),
-                        org.neo4j.gds.api.PropertyState.PERSISTENT,
-                        3
+                        PropertySchema.of(
+                            "floatEmbedding",
+                            org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_VECTOR,
+                            org.neo4j.gds.api.DefaultValue.forFloatArray(),
+                            org.neo4j.gds.api.PropertyState.PERSISTENT,
+                            OptionalInt.of(3)
+                        )
                     )
-                    .addVectorProperty(
+                    .addProperty(
                         "B",
-                        "doubleEmbedding",
-                        org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE_VECTOR,
-                        org.neo4j.gds.api.DefaultValue.forDoubleArray(),
-                        org.neo4j.gds.api.PropertyState.TRANSIENT,
-                        256
+                        PropertySchema.of(
+                            "doubleEmbedding",
+                            org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE_VECTOR,
+                            org.neo4j.gds.api.DefaultValue.forDoubleArray(),
+                            org.neo4j.gds.api.PropertyState.TRANSIENT,
+                            OptionalInt.of(256)
+                        )
                     )
                     .build(),
                 Map.of(
@@ -639,13 +645,15 @@ class GraphStoreMetadataFactoryTest {
             Arguments.of(
                 // a vector and a non-vector property of the same array type on one label
                 NodeSchema.builder()
-                    .addVectorProperty(
+                    .addProperty(
                         "A",
-                        "embedding",
-                        org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_VECTOR,
-                        org.neo4j.gds.api.DefaultValue.forFloatArray(),
-                        org.neo4j.gds.api.PropertyState.PERSISTENT,
-                        3
+                        PropertySchema.of(
+                            "embedding",
+                            org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_VECTOR,
+                            org.neo4j.gds.api.DefaultValue.forFloatArray(),
+                            org.neo4j.gds.api.PropertyState.PERSISTENT,
+                            OptionalInt.of(3)
+                        )
                     )
                     .addProperty("A", "weights", org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_ARRAY)
                     .build(),

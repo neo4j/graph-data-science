@@ -118,11 +118,13 @@ class NodeSchemaTest {
         var result = NodeSchema.builder()
             .addProperty(
                 label,
-                propertyKey,
-                valueType,
-                valueType.fallbackValue(),
-                PropertyState.PERSISTENT,
-                OptionalInt.of(42)
+                PropertySchema.of(
+                    propertyKey,
+                    valueType,
+                    valueType.fallbackValue(),
+                    PropertyState.PERSISTENT,
+                    OptionalInt.of(42)
+                )
             )
             .build();
 
@@ -446,8 +448,8 @@ class NodeSchemaTest {
     void unionBetweenSchemasWithSamePropertyButDifferentDimensionsIsInvalid() {
         var label = "LabelA";
         var propertyKey = "PropertyX";
-        var schemaWithValueType1 = NodeSchema.builder().addVectorProperty(label, propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, 4).build();
-        var schemaWithValueType2 = NodeSchema.builder().addVectorProperty(label, propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, 5).build();
+        var schemaWithValueType1 = NodeSchema.builder().addProperty(label, PropertySchema.of(propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(4))).build();
+        var schemaWithValueType2 = NodeSchema.builder().addProperty(label, PropertySchema.of(propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(5))).build();
 
         assertThatThrownBy(() -> schemaWithValueType1.union(schemaWithValueType2))
             .isInstanceOf(IllegalArgumentException.class)
@@ -456,8 +458,8 @@ class NodeSchemaTest {
 
     @Test
     void unionBetweenSchemasWithDifferentPropertyAndDifferentDimensionsIsValid() {
-        var schemaWithValueType1 = NodeSchema.builder().addVectorProperty("labelA", "propertyX", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, 313).build();
-        var schemaWithValueType2 = NodeSchema.builder().addVectorProperty("labelB", "propertyY", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, 313).build();
+        var schemaWithValueType1 = NodeSchema.builder().addProperty("labelA", PropertySchema.of("propertyX", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(313))).build();
+        var schemaWithValueType2 = NodeSchema.builder().addProperty("labelB", PropertySchema.of("propertyY", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(313))).build();
 
         assertThatNoException().isThrownBy(() -> schemaWithValueType1.union(schemaWithValueType2));
     }
