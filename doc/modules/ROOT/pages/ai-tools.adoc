@@ -1,0 +1,10 @@
+= Using AI tools with GDS
+
+link:https://neo4j.com/labs/[Neo4j Labs] include additional AI tools for graph data science.
+
+The main entry point for GDS is the link:https://github.com/neo4j-contrib/gds-agent[GDS Agent], which includes an MCP server and a GDS-specific agent skill.
+
+Other tools are available within the link:https://neo4j.com/labs/genai-ecosystem/agent-skills/neo4j-skills/#_graph_data_science[Neo4j Labs GenAI Ecosystem]:
+
+* The link:https://github.com/neo4j-contrib/neo4j-skills/tree/main/neo4j-gds-skill[GDS skill] to interact with the GDS plugin (_not_ for Aura Graph Analytics).
+* The link:https://github.com/neo4j-contrib/neo4j-skills/tree/main/neo4j-aura-graph-analytics-skill[AGA skill] to create and manage sessions within Aura Graph Analytics (requires the GDS skill).

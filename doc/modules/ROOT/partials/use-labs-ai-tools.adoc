@@ -1,0 +1,5 @@
+[NOTE]
+====
+link:https://neo4j.com/labs/[Neo4j Labs] include additional AI tools for graph data science.
+See xref:ai-tools.adoc[] for more information.
+====

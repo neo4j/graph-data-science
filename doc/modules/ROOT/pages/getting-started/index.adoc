@@ -10,6 +10,8 @@ After xref:installation/index.adoc[installation], you can start using the GDS li
 
 You can run all GDS Cypher procedures in the Neo4j Browser or via a link:https://neo4j.com/docs/create-applications/#_language_libraries[Neo4j driver].
 
+include::partial$use-labs-ai-tools.adoc[]
+
 
 == Algorithms
 
