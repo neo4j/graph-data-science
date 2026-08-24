@@ -30,18 +30,18 @@ public interface FloatArrayNodePropertyValues extends NodePropertyValues {
 
     @Override
     default double[] doubleArrayValue(long nodeId) {
-        float[] floatArray = floatArrayValue(nodeId);
+        return widenToDoubleArray(floatArrayValue(nodeId));
+    }
 
+    static double[] widenToDoubleArray(float[] floatArray) {
         if (floatArray == null) {
             return null;
-        } else {
-
-            double[] doubleArray = new double[floatArray.length];
-            for (int i = 0; i < floatArray.length; i++) {
-                doubleArray[i] = floatArray[i];
-            }
-            return doubleArray;
         }
+        double[] doubleArray = new double[floatArray.length];
+        for (int i = 0; i < floatArray.length; i++) {
+            doubleArray[i] = floatArray[i];
+        }
+        return doubleArray;
     }
 
     @Override
