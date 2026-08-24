@@ -145,6 +145,35 @@ class GraphStoreMetadataMapperTest {
     }
 
     @Test
+    void toNodeSchemaWithVectorProperties() {
+        var graphStore = GdlFactory.builder()
+            .gdlGraph(
+                "(a:A {floatEmbedding: vector([1.0f, 3.0f, 3.0f])})-[]->(b:B {doubleEmbedding: vector([1.0d, 3.0d])})")
+            .build()
+            .build();
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+
+        var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
+
+        var expected = graphStore.schema().nodeSchema();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void toNodeSchemaWithVectorAndArrayPropertiesOnSameLabel() {
+        var graphStore = GdlFactory.builder()
+            .gdlGraph("(a:A {embedding: vector([1.0f, 3.0f, 3.0f]), weights: [1.0f, 3.0f]})-[]->(b:B)")
+            .build()
+            .build();
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+
+        var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
+
+        var expected = graphStore.schema().nodeSchema();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
     void toRelationshipSchema() {
         var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore);
 

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.schema;
 
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 
 public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
 
@@ -35,11 +36,10 @@ public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
         if (!hasProperty) {
             builder.addLabel(nodeLabel().name());
         } else {
-            dimension()
-                .ifPresentOrElse(
-                    dimension -> builder.addVectorProperty(nodeLabel().name(), key(), valueType(), defaultValue(), state(), dimension),
-                    () -> builder.addProperty(nodeLabel().name(), key(), valueType(), defaultValue(), state())
-                );
+            builder.addProperty(
+                nodeLabel().name(),
+                PropertySchema.of(key(), valueType(), defaultValue(), state(), dimension())
+            );
         }
     }
 

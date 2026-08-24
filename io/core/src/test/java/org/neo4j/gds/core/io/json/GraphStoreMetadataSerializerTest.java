@@ -168,6 +168,37 @@ class GraphStoreMetadataSerializerTest {
                       "isUserDefined": false
                     }
                     """
+            ),
+            Arguments.of(
+                org.neo4j.gds.api.DefaultValue.of(new float[] {1.0f, 3.0f, 3.0f}, true),
+                """
+                    {
+                      "value": {
+                        "float_array": [1.0, 3.0, 3.0]
+                      },
+                      "isUserDefined": true
+                    }
+                    """
+            ),
+            Arguments.of(
+                org.neo4j.gds.api.DefaultValue.of(new double[] {1.0, 3.0}, true),
+                """
+                    {
+                      "value": {
+                        "double_array": [1.0, 3.0]
+                      },
+                      "isUserDefined": true
+                    }
+                    """
+            ),
+            Arguments.of(
+                org.neo4j.gds.api.DefaultValue.forFloatArray(),
+                """
+                    {
+                      "value": null,
+                      "isUserDefined": false
+                    }
+                    """
             )
         );
     }
@@ -271,6 +302,113 @@ class GraphStoreMetadataSerializerTest {
         return String.format(base, args)
             .replace(" ", "")
             .replace("\n", "");
+    }
+
+    @Test
+    void serializeGraphStoreMetadataWithVectorProperties() {
+        var graphStoreMetadata = getGraphStoreMetadataWithVectorProperties();
+
+        var result = serialize(graphStoreMetadata);
+
+        var expected = formatWithoutWhitespace(
+            """
+                {
+                  "databaseInfo": {
+                    "databaseName": "neo",
+                    "databaseLocation": "LOCAL",
+                    "remoteDatabaseId": null
+                  },
+                  "writeMode": "LOCAL",
+                  "idMapInfo": {
+                    "idMapType": "array",
+                    "nodeCount": 42,
+                    "maxOriginalId": 42,
+                    "nodeLabelCounts": {
+                      "A": 42
+                    }
+                  },
+                  "relationshipInfo": {},
+                  "nodeSchema": {
+                    "A": {
+                      "propertySchemas": {
+                        "doubleEmbedding": {
+                          "valueType": "DOUBLE_VECTOR",
+                          "defaultValue": {
+                            "value": null,
+                            "isUserDefined": false
+                          },
+                          "propertyState": "PERSISTENT",
+                          "dimension": 256
+                        },
+                        "floatEmbedding": {
+                          "valueType": "FLOAT_VECTOR",
+                          "defaultValue": {
+                            "value": null,
+                            "isUserDefined": false
+                          },
+                          "propertyState": "PERSISTENT",
+                          "dimension": 3
+                        },
+                        "weights": {
+                          "valueType": "FLOAT_ARRAY",
+                          "defaultValue": {
+                            "value": null,
+                            "isUserDefined": false
+                          },
+                          "propertyState": "PERSISTENT"
+                        }
+                      }
+                    }
+                  },
+                  "relationshipSchema": {}
+                }
+                """
+        );
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void roundTripGraphStoreMetadataWithVectorProperties() {
+        var graphStoreMetadata = getGraphStoreMetadataWithVectorProperties();
+
+        var result = deserialize(serialize(graphStoreMetadata), GraphStoreMetadata.class);
+
+        assertThat(result).isEqualTo(graphStoreMetadata);
+    }
+
+    private static @NonNull GraphStoreMetadata getGraphStoreMetadataWithVectorProperties() {
+        var nodeSchema = Map.of(
+            "A", new NodeSchema(new TreeMap<>(Map.of(
+                "floatEmbedding",
+                new NodePropertySchema(
+                    ValueType.FLOAT_VECTOR,
+                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+                    PropertyState.PERSISTENT,
+                    3
+                ),
+                "doubleEmbedding",
+                new NodePropertySchema(
+                    ValueType.DOUBLE_VECTOR,
+                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forDoubleArray().getObject(), false),
+                    PropertyState.PERSISTENT,
+                    256
+                ),
+                "weights",
+                new NodePropertySchema(
+                    ValueType.FLOAT_ARRAY,
+                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+                    PropertyState.PERSISTENT
+                )
+            )))
+        );
+        return new GraphStoreMetadata(
+            new DatabaseInfo("neo", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
+            WriteMode.LOCAL,
+            new IdMapInfo(ArrayIdMapBuilder.ID, 42, 42, Map.of("A", 42L)),
+            Map.of(),
+            nodeSchema,
+            Map.of()
+        );
     }
 
     private static @NonNull GraphStoreMetadata getGraphStoreMetadata() {
