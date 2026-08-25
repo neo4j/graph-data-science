@@ -25,6 +25,7 @@ import stormpot.Pool;
 import stormpot.Poolable;
 import stormpot.Timeout;
 
+import java.lang.invoke.VarHandle;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -129,7 +130,12 @@ abstract class LocalNodesBuilderProvider {
         @Override
         LocalNodesBuilderSlot acquire() {
             try {
-                return pool.claim(timeout);
+                var slot = pool.claim(timeout);
+                // Pairs with the releaseFence in Slot#release(); see
+                // LocalRelationshipsBuilderProvider.PooledProvider#acquire()
+                // for why these fences are required./ (setRelease), both fences can be removed.
+                VarHandle.acquireFence();
+                return slot;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -151,6 +157,10 @@ abstract class LocalNodesBuilderProvider {
 
             @Override
             public void release() {
+                // Orders our builder writes before the setOpaque state store
+                // inside stormpot's release; pairs with the acquireFence in
+                // PooledProvider#acquire().
+                VarHandle.releaseFence();
                 slot.release(this);
             }
         }

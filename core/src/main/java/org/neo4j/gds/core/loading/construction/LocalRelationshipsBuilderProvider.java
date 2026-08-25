@@ -25,6 +25,7 @@ import stormpot.Pool;
 import stormpot.Poolable;
 import stormpot.Timeout;
 
+import java.lang.invoke.VarHandle;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -107,7 +108,30 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
         @Override
         LocalRelationshipsBuilderSlot acquire() {
             try {
-                return pool.claim(timeout);
+                var slot = pool.claim(timeout);
+                // This fence pairs with the releaseFence in Slot#release().
+                // Together they restore the "release happens-before subsequent
+                // claim" guarantee that stormpot documents but does not deliver:
+                // Stormpot uses a fast-path for acquiring a slot: every thread
+                // stores a reference to the last slot it used, i.e., the same
+                // slot can be referenced by multiple threads. That fast-path
+                // re-claims the slot via a CAS on the slot state, whose value
+                // stormpot's release sets using setOpaque. Under the Java
+                // Memory Model, an opaque write observed by an acquire-CAS
+                // establishes no happens-before. This means that thread B can
+                // see the state flipped to LIVING before A's writes to the
+                // pooled builder are visible. On weakly-ordered CPUs like the
+                // M-series, this leads to problems, while on x86 we have a
+                // stronger memory model where this case cannot happen.
+                //
+                // For our specific case, this means that B can read a buffer
+                // length before A has finished writing and therefore we lose
+                // elements during import (PFORM-429).
+                //
+                // If stormpot ever publishes the state with release semantics
+                // (setRelease), both fences can be removed.
+                VarHandle.acquireFence();
+                return slot;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -126,6 +150,10 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
 
             @Override
             public void release() {
+                // Orders our builder writes before the setOpaque state store
+                // inside stormpot's release; pairs with the acquireFence in
+                // PooledProvider#acquire(), see there for details.
+                VarHandle.releaseFence();
                 slot.release(this);
             }
         }
