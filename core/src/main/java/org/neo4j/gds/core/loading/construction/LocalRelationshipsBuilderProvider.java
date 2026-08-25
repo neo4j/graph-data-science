@@ -29,6 +29,13 @@ import java.lang.invoke.VarHandle;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+/**
+ * Provides access to thread-exclusive {@link LocalRelationshipsBuilder} instances,
+ * either via thread-locals (fast, one builder per accessing thread) or via a
+ * fixed-size pool (bounded builder count, for callers whose threads we do not
+ * control). See {@link LocalNodesBuilderProvider} for a discussion of when to
+ * use which strategy; the same criteria apply here.
+ **/
 abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
 
     static LocalRelationshipsBuilderProvider threadLocal(Supplier<LocalRelationshipsBuilder> builderSupplier) {
