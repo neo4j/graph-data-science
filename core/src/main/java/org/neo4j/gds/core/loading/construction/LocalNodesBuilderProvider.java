@@ -30,25 +30,42 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
- We offer two ways to access thread local NodesBuilder instances:
- - ThreadLocalProvider: This uses a ThreadLocal to store the NodesBuilder instance.
- - PooledProvider: This provider uses an object to store the NodesBuilder instances
-
- The thread provider is the default one. It is the fastest variant and should be used if there is a known fixed amount of threads accessing the NodesBuilder.
- The pooled provider is useful if the there is a large and varying amount of threads accessing the NodesBuilder. The access is slower than the thread provider.
-
- The access pattern is the same for both providers:
-
- <pre>
- LocalNodesBuilderProvider provider = ...
- var slot = provider.acquire();
- try {
- var builder = slot.get();
- // use the builder
- } finally {
- slot.release();
- }
- </pre>
+ * Provides access to thread-exclusive {@link LocalNodesBuilder} instances.
+ * The builders are not thread-safe; a builder acquired from a provider is
+ * owned by the calling thread until it is released.
+ * <p>
+ * Two strategies are offered:
+ * <ul>
+ *     <li>{@code ThreadLocalProvider} (default): one builder per accessing
+ *     thread, stored in a thread-local. Acquire and release are plain
+ *     thread-local lookups, making this the fastest variant. The number of
+ *     builder instances is unbounded (one per thread that ever calls
+ *     {@code acquire()}), so use it only when the accessing threads are
+ *     under our control and match the import concurrency, e.g. tasks
+ *     running on a GDS executor with {@code concurrency} threads.</li>
+ *     <li>{@code PooledProvider}: a fixed pool of {@code concurrency}
+ *     builders shared by all accessing threads; acquire claims from the
+ *     pool and may block until a builder is available. Use it when the
+ *     accessing threads are not under our control, i.e. potentially many,
+ *     varying, or short-lived, e.g. Neo4j parallel runtime workers driving
+ *     a Cypher projection, or Arrow request handler threads. This bounds
+ *     the number of builder instances, and with it the memory footprint
+ *     and the amount of buffered-but-unflushed data, at the cost of slower
+ *     access (pool claim/release per acquire).</li>
+ * </ul>
+ *
+ * The access pattern is the same for both providers:
+ *
+ * <pre>
+ * LocalNodesBuilderProvider provider = ...
+ * var slot = provider.acquire();
+ * try {
+ *     var builder = slot.get();
+ *     // use the builder
+ * } finally {
+ *     slot.release();
+ * }
+ * </pre>
  **/
 abstract class LocalNodesBuilderProvider {
 
@@ -133,7 +150,7 @@ abstract class LocalNodesBuilderProvider {
                 var slot = pool.claim(timeout);
                 // Pairs with the releaseFence in Slot#release(); see
                 // LocalRelationshipsBuilderProvider.PooledProvider#acquire()
-                // for why these fences are required./ (setRelease), both fences can be removed.
+                // for why these fences are required and when they can be removed.
                 VarHandle.acquireFence();
                 return slot;
             } catch (InterruptedException e) {
