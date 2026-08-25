@@ -43,7 +43,7 @@ public interface FastPathBaseConfig extends RandomSeedConfig, JobIdConfig {
 
     Optional<String> contextNodeLabel();
 
-    Optional<String> timeNodeProperty();
+    Optional<String> eventNodeTimeProperty();
 
     Optional<String> nextRelationshipType();
 
@@ -54,29 +54,29 @@ public interface FastPathBaseConfig extends RandomSeedConfig, JobIdConfig {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
     }
 
-    default List<String> categoricalEventProperties() {
+    default List<String> eventNodeCategoricalProperties() {
         return List.of();
     }
 
-    Optional<String> eventFeatures();
+    Optional<String> eventNodeFeatureVectorProperty();
 
     // default inlined from data_science_python_runtime FastPathConfig.ignored_event_category
-    default int ignoredEventCategory() {
+    default int eventNodeIgnoredCategory() {
         return -1;
     }
 
     @Configuration.IntegerRange(min = 1)
-    int dimension();
+    int embeddingDimension();
 
     @Configuration.IntegerRange(min = 1)
-    int numElapsedTimes();
+    int numTimeAnchors();
 
-    Optional<Double> outputTime();
+    Optional<Double> observationTime();
 
-    Optional<String> outputTimeProperty();
+    Optional<String> baseNodeObservationTimeProperty();
 
     @Configuration.IntegerRange(min = 1)
-    int maxElapsedTime();
+    int lookbackHorizon();
 
     // default inlined from data_science_python_runtime FastPathConfig.smoothing_rate
     default double smoothingRate() {
@@ -84,7 +84,7 @@ public interface FastPathBaseConfig extends RandomSeedConfig, JobIdConfig {
     }
 
     // default inlined from data_science_python_runtime FastPathConfig.decay_factor
-    default double decayFactor() {
+    default double decayRate() {
         return 1.0;
     }
 
@@ -96,19 +96,19 @@ public interface FastPathBaseConfig extends RandomSeedConfig, JobIdConfig {
 
     @Configuration.Check
     default void validateOutput() {
-        if (outputTime().isPresent() && outputTimeProperty().isPresent()) {
-            throw new IllegalArgumentException("Cannot specify both outputTime and outputTimeProperty");
+        if (observationTime().isPresent() && baseNodeObservationTimeProperty().isPresent()) {
+            throw new IllegalArgumentException("Cannot specify both observationTime and baseNodeObservationTimeProperty");
         }
 
-        if (outputTime().isEmpty() && outputTimeProperty().isEmpty()) {
-            throw new IllegalArgumentException("Must specify either outputTime or outputTimeProperty");
+        if (observationTime().isEmpty() && baseNodeObservationTimeProperty().isEmpty()) {
+            throw new IllegalArgumentException("Must specify either observationTime or baseNodeObservationTimeProperty");
         }
     }
 
     @Configuration.Check
     default void validateNextOrTimeProp() {
-        if (nextRelationshipType().isEmpty() && timeNodeProperty().isEmpty()) {
-            throw new IllegalArgumentException("Must specify either nextRelationshipType or timeNodeProperty");
+        if (nextRelationshipType().isEmpty() && eventNodeTimeProperty().isEmpty()) {
+            throw new IllegalArgumentException("Must specify either nextRelationshipType or eventNodeTimeProperty");
         }
     }
 
