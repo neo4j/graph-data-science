@@ -26,7 +26,6 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
@@ -143,7 +142,7 @@ public class NodeEmbeddingComputeBusinessFacade {
             user,
             graphParameters,
             relationshipProperty,
-            new GraphStoreValidation(new NoAlgorithmRequirements()),
+            GraphStoreValidation.DISABLED,
             true,
             Optional.of(new Node2VecGraphValidation(
                 parameters.samplingWalkParameters().walksPerNode(),

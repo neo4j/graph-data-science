@@ -37,7 +37,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
@@ -220,9 +219,7 @@ public class CentralityComputeBusinessFacade {
             user,
             graphParameters,
             Optional.empty(),
-            new GraphStoreValidation(
-                new NoAlgorithmRequirements()
-            ),
+            GraphStoreValidation.DISABLED,
             true,
             Optional.empty()
         );
@@ -250,9 +247,7 @@ public class CentralityComputeBusinessFacade {
             user,
             graphParameters,
             Optional.empty(),
-            new GraphStoreValidation(
-                new NoAlgorithmRequirements()
-            ),
+            GraphStoreValidation.DISABLED,
             true,
             Optional.empty()
         );
@@ -281,9 +276,7 @@ public class CentralityComputeBusinessFacade {
             user,
             graphParameters,
             relationshipProperty,
-            new GraphStoreValidation(
-                new NoAlgorithmRequirements()
-            ),
+            GraphStoreValidation.DISABLED,
             true,
             Optional.empty()
         );
@@ -342,9 +335,7 @@ public class CentralityComputeBusinessFacade {
             user,
             graphParameters,
             Optional.empty(),
-            new GraphStoreValidation(
-                new NoAlgorithmRequirements()
-            ),
+            GraphStoreValidation.DISABLED,
             true,
             Optional.empty()
         );

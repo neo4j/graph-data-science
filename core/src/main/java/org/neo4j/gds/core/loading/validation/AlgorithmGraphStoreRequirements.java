@@ -26,11 +26,11 @@ import org.neo4j.gds.api.GraphStore;
 import java.util.Collection;
 
 public interface AlgorithmGraphStoreRequirements {
+    AlgorithmGraphStoreRequirements EMPTY = (__, ___, ____) -> {};
 
     void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     );
-
 }

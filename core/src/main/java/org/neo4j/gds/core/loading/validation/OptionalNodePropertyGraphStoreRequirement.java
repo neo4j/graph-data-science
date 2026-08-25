@@ -36,7 +36,7 @@ public final class OptionalNodePropertyGraphStoreRequirement implements Algorith
         return seedProperty
             .map(NodePropertyMustExistOnAllLabels::new)
             .map(OptionalNodePropertyGraphStoreRequirement::new)
-            .orElseGet(() -> new OptionalNodePropertyGraphStoreRequirement(new NoAlgorithmRequirements()));
+            .orElseGet(() -> new OptionalNodePropertyGraphStoreRequirement(AlgorithmGraphStoreRequirements.EMPTY));
     }
 
     @Override

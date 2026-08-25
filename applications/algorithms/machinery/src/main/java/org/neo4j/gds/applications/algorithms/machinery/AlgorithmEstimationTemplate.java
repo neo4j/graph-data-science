@@ -27,7 +27,6 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
@@ -160,7 +159,7 @@ public class AlgorithmEstimationTemplate {
             requestScopedDependencies.user(),
             graphParameters,
             Optional.empty(),
-            new GraphStoreValidation(new NoAlgorithmRequirements()),
+            GraphStoreValidation.DISABLED,
             true,
             Optional.empty()
         );
