@@ -23,6 +23,7 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.LicenseDetails;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProcessingFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
@@ -71,6 +72,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedures {
@@ -152,6 +154,17 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             requestScopedDependencies
         );
 
+        // in normal mode, we let rip and have no bound on concurrent work (other than algorithm concurrency)
+        var executorService = Executors.newVirtualThreadPerTaskExecutor();
+
+        var algorithmProcessingFacade = AlgorithmProcessingFacade.create(
+            loggers.log(),
+            globallyScopedDependencies.graphStoreCatalogService(),
+            executorService,
+            memoryGuard,
+            metrics.algorithmMetrics(),
+            telemetryLogger
+        );
         var algorithmProcessingTemplate = createAlgorithmProcessingTemplate(
             loggers.log(),
             telemetryLogger,
@@ -184,6 +197,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             procedureTransaction,
             progressTrackerCreator,
             algorithmEstimationTemplate,
+            algorithmProcessingFacade,
             algorithmProcessingTemplate
         );
 

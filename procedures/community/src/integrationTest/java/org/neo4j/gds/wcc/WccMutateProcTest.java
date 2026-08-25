@@ -49,6 +49,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProcessingFacade;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -96,6 +97,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -645,6 +647,14 @@ class WccMutateProcTest extends BaseProcTest {
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .user(new User(getUsername(), false))
             .build();
+        var algorithmProcessingFacade = AlgorithmProcessingFacade.create(
+            logMock,
+            graphStoreCatalogService,
+            Executors.newVirtualThreadPerTaskExecutor(),
+            MemoryGuard.DISABLED,
+            AlgorithmMetricsService.DISABLED,
+            TelemetryLogger.DISABLED
+        );
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             logMock,
             AlgorithmMetricsService.DISABLED,
@@ -674,6 +684,7 @@ class WccMutateProcTest extends BaseProcTest {
                 requestScopedDependencies
             ),
             null,
+            algorithmProcessingFacade,
             algorithmProcessingTemplate
         );
 

@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.AlgorithmProcessingFacadeConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
@@ -61,17 +62,20 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CentralityBusinessAlgorithms centralityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
+    private final AlgorithmProcessingFacadeConvenience algorithmProcessingFacadeConvenience;
     private final HitsHookGenerator hitsHookGenerator;
 
     CentralityAlgorithmsStreamModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityBusinessAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
+        AlgorithmProcessingFacadeConvenience algorithmProcessingFacadeConvenience,
         HitsHookGenerator hitsHookGenerator
     ) {
         this.estimationFacade = estimationFacade;
         this.centralityAlgorithms = centralityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
+        this.algorithmProcessingFacadeConvenience = algorithmProcessingFacadeConvenience;
         this.hitsHookGenerator = hitsHookGenerator;
     }
 
@@ -203,12 +207,12 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         HarmonicCentralityStreamConfig configuration,
         StreamResultBuilder<HarmonicResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return algorithmProcessingFacadeConvenience.runAlgorithm(
             graphName,
             configuration,
-            HarmonicCentrality,
+            graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
-            (graph, __) -> centralityAlgorithms.harmonicCentrality(graph, configuration),
+            HarmonicCentrality,
             streamResultBuilder
         );
     }

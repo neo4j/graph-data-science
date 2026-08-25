@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import org.neo4j.gds.applications.algorithms.execution.AlgorithmProcessingFacadeConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
@@ -53,6 +54,7 @@ public final class CentralityApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate estimationTemplate,
+        AlgorithmProcessingFacadeConvenience algorithmProcessingFacadeConvenience,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodePropertyService
@@ -86,6 +88,7 @@ public final class CentralityApplications {
             estimation,
             business,
             algorithmProcessingTemplateConvenience,
+            algorithmProcessingFacadeConvenience,
             hitsHookGenerator
         );
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(

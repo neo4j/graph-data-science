@@ -49,6 +49,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProcessingFacade;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -94,6 +95,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
@@ -541,6 +543,14 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         ), requestScopedDependencies.user());
 
         var genericStub = new GenericStub(configurationParser, null);
+        var algorithmProcessingFacade = AlgorithmProcessingFacade.create(
+            logMock,
+            graphStoreCatalogService,
+            Executors.newVirtualThreadPerTaskExecutor(),
+            MemoryGuard.DISABLED,
+            AlgorithmMetricsService.DISABLED,
+            TelemetryLogger.DISABLED
+        );
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             logMock,
             AlgorithmMetricsService.DISABLED,
@@ -570,6 +580,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 requestScopedDependencies
             ),
             null,
+            algorithmProcessingFacade,
             algorithmProcessingTemplate
         );
         var communityProcedureFacade = LocalCommunityProcedureFacade.create(
