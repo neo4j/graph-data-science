@@ -22,9 +22,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 
-import java.util.function.Supplier;
-
-public class AlgorithmMachinery {
+public class ProgressTrackerManager {
     /**
      * Runs algorithm.
      * Optionally releases progress tracker.
@@ -32,28 +30,13 @@ public class AlgorithmMachinery {
      *
      * @return algorithm result, or an error in the form of an exception
      */
-    public <RESULT> RESULT runAlgorithmsAndManageProgressTracker(
+    public <RESULT> RESULT runAlgorithmAndManageProgressTracker(
         Algorithm<RESULT> algorithm,
         ProgressTracker progressTracker,
         boolean shouldReleaseProgressTracker
     ) {
         try {
             return algorithm.compute();
-        } catch (Exception e) {
-            progressTracker.endSubTaskWithFailure();
-            throw e;
-        } finally {
-            if (shouldReleaseProgressTracker) progressTracker.release();
-        }
-    }
-
-    public <RESULT> RESULT getResultAndManageProgressTracker(
-        Supplier<RESULT> resultSupplier,
-        ProgressTracker progressTracker,
-        boolean shouldReleaseProgressTracker
-    ) {
-        try {
-            return resultSupplier.get();
         } catch (Exception e) {
             progressTracker.endSubTaskWithFailure();
             throw e;

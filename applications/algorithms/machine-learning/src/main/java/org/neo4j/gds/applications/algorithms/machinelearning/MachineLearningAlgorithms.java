@@ -27,7 +27,7 @@ import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Tasks;
@@ -37,7 +37,7 @@ import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public class MachineLearningAlgorithms {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+    private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
@@ -90,7 +90,7 @@ public class MachineLearningAlgorithms {
             parameters.concurrency()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             algorithm,
             progressTracker,
             true

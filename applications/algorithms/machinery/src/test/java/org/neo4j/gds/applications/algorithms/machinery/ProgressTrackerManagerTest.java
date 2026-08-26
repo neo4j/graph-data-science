@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,10 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 
-import java.util.function.Supplier;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatException;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -39,19 +35,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AlgorithmMachineryTest {
+class ProgressTrackerManagerTest {
     @Mock
     private Algorithm<String> algo;
 
     @Test
     void shouldGetResult() {
-        var algorithmMachinery = new AlgorithmMachinery();
+        var progressTrackerManager = new ProgressTrackerManager();
 
         var progressTracker = mock(ProgressTracker.class);
 
         when(algo.compute()).thenReturn("Hello, world!");
 
-        var result = algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+        var result = progressTrackerManager.runAlgorithmAndManageProgressTracker(
             algo,
             progressTracker,
             false
@@ -64,13 +60,13 @@ class AlgorithmMachineryTest {
 
     @Test
     void shouldReleaseProgressTrackerWhenAsked() {
-        var algorithmMachinery = new AlgorithmMachinery();
+        var progressTrackerManager = new ProgressTrackerManager();
 
         var progressTracker = mock(ProgressTracker.class);
 
         when(algo.compute()).thenReturn("Dodgers win world series!");
 
-        var result = algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+        var result = progressTrackerManager.runAlgorithmAndManageProgressTracker(
             algo,
             progressTracker,
             true
@@ -84,7 +80,7 @@ class AlgorithmMachineryTest {
 
     @Test
     void shouldMarkProgressTracker() {
-        var algorithmMachinery = new AlgorithmMachinery();
+        var progressTrackerManager = new ProgressTrackerManager();
 
         var progressTracker = mock(ProgressTracker.class);
         var exception = new RuntimeException("Whoops!");
@@ -92,7 +88,7 @@ class AlgorithmMachineryTest {
         when(algo.compute()).thenThrow(exception);
 
         try {
-            algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            progressTrackerManager.runAlgorithmAndManageProgressTracker(
                 algo,
                 progressTracker,
                 false
@@ -108,7 +104,7 @@ class AlgorithmMachineryTest {
 
     @Test
     void shouldMarkProgressTrackerAndReleaseIt() {
-        var algorithmMachinery = new AlgorithmMachinery();
+        var progressTrackerManager = new ProgressTrackerManager();
 
         var progressTracker = mock(ProgressTracker.class);
         var exception = new RuntimeException("Yeah, no...");
@@ -116,7 +112,7 @@ class AlgorithmMachineryTest {
         when(algo.compute()).thenThrow(exception);
 
         try {
-            algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            progressTrackerManager.runAlgorithmAndManageProgressTracker(
                 algo,
                 progressTracker,
                 true
@@ -129,78 +125,5 @@ class AlgorithmMachineryTest {
         verify(progressTracker, times(1)).endSubTaskWithFailure();
         verify(progressTracker, times(1)).release();
         verifyNoMoreInteractions(progressTracker);
-    }
-
-    @Nested
-    class SupplierMethodsTest {
-        @Mock
-        private Supplier<String> resultSupplier;
-
-        @Test
-        void shouldRunAlgorithm() {
-            var algorithmMachinery = new AlgorithmMachinery();
-
-            var progressTracker = mock(ProgressTracker.class);
-
-            when(resultSupplier.get()).thenReturn("Hello, world!");
-
-            var result = algorithmMachinery.getResultAndManageProgressTracker(resultSupplier, progressTracker, false);
-
-            assertThat(result).isEqualTo("Hello, world!");
-
-            verifyNoMoreInteractions(progressTracker);
-        }
-
-        @Test
-        void shouldReleaseProgressTrackerWhenAsked() {
-            var algorithmMachinery = new AlgorithmMachinery();
-
-            var progressTracker = mock(ProgressTracker.class);
-
-            when(resultSupplier.get()).thenReturn("Dodgers win world series!");
-
-            var result = algorithmMachinery.getResultAndManageProgressTracker(resultSupplier, progressTracker, true);
-
-            assertThat(result).isEqualTo("Dodgers win world series!");
-
-            verify(progressTracker, times(1)).release();
-            verifyNoMoreInteractions(progressTracker);
-        }
-
-        @Test
-        void shouldMarkProgressTracker() {
-            var algorithmMachinery = new AlgorithmMachinery();
-
-            var progressTracker = mock(ProgressTracker.class);
-            var exception = new RuntimeException("Whoops!");
-
-            when(resultSupplier.get()).thenThrow(exception);
-
-            assertThatException().isThrownBy(
-                () -> algorithmMachinery.getResultAndManageProgressTracker(resultSupplier, progressTracker, false)
-            ).withMessage("Whoops!");
-
-            verify(progressTracker, times(1)).endSubTaskWithFailure();
-            verifyNoMoreInteractions(progressTracker);
-        }
-
-        @Test
-        void shouldMarkProgressTrackerAndReleaseIt() {
-            var algorithmMachinery = new AlgorithmMachinery();
-
-            var progressTracker = mock(ProgressTracker.class);
-            var exception = new RuntimeException("Yeah, no...");
-
-            when(resultSupplier.get()).thenThrow(exception);
-
-            assertThatException().isThrownBy(
-                () -> algorithmMachinery.getResultAndManageProgressTracker(resultSupplier, progressTracker, true)
-            ).withMessage("Yeah, no...");
-
-            verify(progressTracker, times(1)).endSubTaskWithFailure();
-            verify(progressTracker, times(1)).release();
-            verifyNoMoreInteractions(progressTracker);
-        }
-
     }
 }

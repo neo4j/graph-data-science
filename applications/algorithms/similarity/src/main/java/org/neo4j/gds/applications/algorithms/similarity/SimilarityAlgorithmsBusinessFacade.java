@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
@@ -32,7 +32,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 public class SimilarityAlgorithmsBusinessFacade {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+    private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final SimilarityAlgorithms similarityAlgorithms;
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -50,7 +50,7 @@ public class SimilarityAlgorithmsBusinessFacade {
         var task = SimilarityAlgorithmTasks.filteredKnn(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> similarityAlgorithms.filteredKnn(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -60,7 +60,7 @@ public class SimilarityAlgorithmsBusinessFacade {
         var task = SimilarityAlgorithmTasks.filteredNodeSimilarity(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> similarityAlgorithms.filteredNodeSimilarity(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -70,7 +70,7 @@ public class SimilarityAlgorithmsBusinessFacade {
         var task = SimilarityAlgorithmTasks.knn(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> similarityAlgorithms.knn(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -80,7 +80,7 @@ public class SimilarityAlgorithmsBusinessFacade {
         var task = SimilarityAlgorithmTasks.nodeSimilarity(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> similarityAlgorithms.nodeSimilarity(graph, parameters, progressTracker),
             progressTracker, true);
     }

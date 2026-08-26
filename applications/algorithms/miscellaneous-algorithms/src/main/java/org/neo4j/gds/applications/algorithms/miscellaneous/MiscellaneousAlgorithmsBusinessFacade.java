@@ -24,7 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
@@ -38,7 +38,7 @@ import org.neo4j.gds.walking.CollapsePathParamsTransformer;
 import java.util.Map;
 
 public class MiscellaneousAlgorithmsBusinessFacade {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+    private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final ProgressTrackerCreator progressTrackerCreator;
     private final MiscellaneousAlgorithms miscellaneousAlgorithms;
@@ -66,7 +66,7 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         var task = MiscellaneousAlgorithmsTasks.inverseIndex(idMap.nodeCount(), params);
 
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> miscellaneousAlgorithms.indexInverse(graphStore, params, progressTracker),
             progressTracker, true);
     }
@@ -76,7 +76,7 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         var task = MiscellaneousAlgorithmsTasks.scaleProperties(graph, params);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> miscellaneousAlgorithms.scaleProperties(graph, params, progressTracker),
             progressTracker, true);
 
@@ -87,7 +87,7 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         var task = MiscellaneousAlgorithmsTasks.toUndirected(graphStore, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> miscellaneousAlgorithms.toUndirected(graphStore, params, progressTracker),
             progressTracker, true);
     }

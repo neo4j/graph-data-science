@@ -24,7 +24,7 @@ import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -62,7 +62,7 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import java.util.stream.Stream;
 
 public class PathFindingAlgorithmsBusinessFacade {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+    private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final PathFindingAlgorithms algorithms;
 
@@ -82,7 +82,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     Stream<AllShortestPathsStreamResult> allShortestPaths(Graph graph, AllShortestPathsConfig configuration) {
         var progressTracker = ProgressTracker.NULL_TRACKER;
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.allShortestPaths(
                 graph,
                 configuration.toParameters(),
@@ -97,7 +97,7 @@ public class PathFindingAlgorithmsBusinessFacade {
         var progressTracker = createProgressTracker(task, configuration);
 
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.bellmanFord(
                 graph,
                 configuration.toParameters(),
@@ -116,7 +116,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
         var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.bfs(configuration.concurrency()), configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.breadthFirstSearch(
                 graph,
                 configuration.toParameters(),
@@ -128,7 +128,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     public PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
         var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.deltaStepping(configuration.concurrency()), configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.deltaStepping(
                 graph,
                 configuration.toParameters(),
@@ -146,7 +146,7 @@ public class PathFindingAlgorithmsBusinessFacade {
     HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {
         var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.dfs(configuration.concurrency()), configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.depthFirstSearch(
                 graph,
                 configuration.toParameters(),
@@ -161,7 +161,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.kSpanningTree(
                 graph,
                 configuration.toKSpanningTreeParameters(),
@@ -176,7 +176,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.longestPath(
                 graph,
                 configuration.toParameters(),
@@ -191,7 +191,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.maxFlow(
                 graph,
                 configuration.toMaxFlowParameters(),
@@ -206,7 +206,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.mcmf(
                 graphStore,
                 configuration.relationshipWeightProperty(),
@@ -223,7 +223,7 @@ public class PathFindingAlgorithmsBusinessFacade {
         var task = PathFindingAlgorithmTasks.randomWalk(graph, configuration.concurrency());
         var progressTracker = createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.randomWalk(
                 graph,
                 configuration.toParameters(),
@@ -239,7 +239,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.randomWalkCountingNodeVisits(
                 graph,
                 configuration.toParameters(),
@@ -256,7 +256,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.pcst(
                 graph,
                 configuration.toParameters(),
@@ -271,7 +271,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.singlePairShortestPathAStar(
                 graph,
                 configuration.toParameters(),
@@ -286,7 +286,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.singlePairShortestPathDijkstra(
                 graph,
                 configuration.toParameters(),
@@ -303,7 +303,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.singlePairShortestPathYens(
                 graph,
                 configuration.toParameters(),
@@ -318,7 +318,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.singleSourceShortestPathDijkstra(
                 graph,
                 configuration.sourceNode(),
@@ -332,7 +332,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             PathFindingAlgorithmTasks.spanningTree(graph, configuration.concurrency()),
             configuration
         );
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.spanningTree(
                 graph,
                 configuration.toParameters(),
@@ -349,7 +349,7 @@ public class PathFindingAlgorithmsBusinessFacade {
             configuration
         );
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.steinerTree(
                 graph,
                 configuration.toParameters(),
@@ -363,7 +363,7 @@ public class PathFindingAlgorithmsBusinessFacade {
         var task = PathFindingAlgorithmTasks.topologicalSort(graph, configuration.concurrency());
         var progressTracker = createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.topologicalSort(
                 graph,
                 configuration.toParameters(),

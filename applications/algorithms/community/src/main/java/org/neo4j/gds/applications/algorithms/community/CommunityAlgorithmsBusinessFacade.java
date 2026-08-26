@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
@@ -64,7 +64,7 @@ import org.neo4j.gds.wcc.WccBaseConfig;
 import java.util.stream.Stream;
 
 public class CommunityAlgorithmsBusinessFacade {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+    private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final Log log;
     private final CommunityAlgorithms algorithms;
@@ -85,7 +85,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.approximateMaximumKCut(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.approximateMaximumKCut(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -95,7 +95,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.cliqueCounting(graph, params);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.cliqueCounting(graph, params, progressTracker),
             progressTracker, true);
     }
@@ -104,7 +104,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.conductance(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = ConductanceConfigTransformer.toParameters(configuration);
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.conductance(graph, params, progressTracker),
             progressTracker, true);
     }
@@ -114,7 +114,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.hdbscan(graph, params, progressTracker),
             progressTracker, true);
     }
@@ -125,7 +125,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.k1Coloring(graph, params);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.k1Coloring(graph, params, progressTracker),
             progressTracker, true);
     }
@@ -134,7 +134,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.kCore(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.kCore(graph, params, progressTracker),
             progressTracker, true);
     }
@@ -144,7 +144,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.kMeans(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.kMeans(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -154,7 +154,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.labelPropagation(graph.relationshipCount(), parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.labelPropagation(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -164,7 +164,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.lcc(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.lcc(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -174,7 +174,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.leiden(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.leiden(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -184,7 +184,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.louvain(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.louvain(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -198,7 +198,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.modularityOptimization(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.modularityOptimization(graph, parameters, progressTracker),
             progressTracker, true);
     }
@@ -206,7 +206,7 @@ public class CommunityAlgorithmsBusinessFacade {
     HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {
         var task = CommunityAlgorithmTasks.scc(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.scc(graph, progressTracker),
             progressTracker, true);
     }
@@ -216,7 +216,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         var params = configuration.toParameters();
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.triangleCount(graph, params, progressTracker),
             progressTracker, true);
     }
@@ -233,7 +233,7 @@ public class CommunityAlgorithmsBusinessFacade {
             log.warn("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
         }
         var params = configuration.toParameters();
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.wcc(graph, params, progressTracker),
             progressTracker, true);
     }
@@ -242,7 +242,7 @@ public class CommunityAlgorithmsBusinessFacade {
         var task = CommunityAlgorithmTasks.speakerListenerLPA(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
-        return algorithmMachinery.getResultAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.speakerListenerLPA(graph, configuration, progressTracker),
             progressTracker, true);
     }

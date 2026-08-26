@@ -25,7 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.RequestCorrelationId;
@@ -48,7 +48,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
 final class NodeClassificationTrainComputation implements Computation<NodeClassificationModelResult> {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+    private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final Log log;
     private final GloballyScopedDependencies globallyScopedDependencies;
@@ -210,7 +210,7 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
             configuration
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             algorithm,
             progressTracker,
             true
