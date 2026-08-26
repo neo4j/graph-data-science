@@ -17,21 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading.validation;
+package org.neo4j.gds.applications.algorithms.execution.machinery;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.Graph;
 
-import java.util.Collection;
-
-public class NoAlgorithmRequirements implements AlgorithmGraphStoreRequirements {
-    @Override
-    public void validate(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        // NOOP
+/**
+ * Encapsulate the convention of how we identify a graph
+ */
+record GraphId(int value) {
+    static GraphId from(Graph graph) {
+        return new GraphId(System.identityHashCode(graph));
     }
 }

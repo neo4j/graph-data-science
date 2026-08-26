@@ -17,20 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading.validation;
+package org.neo4j.gds.applications.algorithms.execution.machinery;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.Graph;
 
-import java.util.Collection;
-
-public interface AlgorithmGraphStoreRequirements {
-    AlgorithmGraphStoreRequirements EMPTY = (__, ___, ____) -> {};
-
-    void validate(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    );
+/**
+ * This is a placeholder for constructing an algorithm, including it's progress tracker, and running it,
+ * including managing the progress tracker.
+ * Obtuse name, but at least not misleading.
+ */
+public interface ConstructAndRun<RESULT> {
+    RESULT constructAndRun(Graph graph);
 }

@@ -38,7 +38,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.NoAlgorithmRequirements;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
@@ -234,7 +233,7 @@ public class CommunityComputeBusinessFacade {
             user,
             graphParameters,
             Optional.empty(),
-            new GraphStoreValidation(new NoAlgorithmRequirements()),
+            GraphStoreValidation.DISABLED,
             true,
             Optional.empty()
         );
@@ -510,7 +509,7 @@ public class CommunityComputeBusinessFacade {
             user,
             graphParameters,
             Optional.empty(),
-            new GraphStoreValidation(new NoAlgorithmRequirements()),
+            GraphStoreValidation.DISABLED,
             true,
             Optional.empty()
         );

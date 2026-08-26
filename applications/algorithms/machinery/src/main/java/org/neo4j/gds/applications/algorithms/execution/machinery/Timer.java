@@ -17,20 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading.validation;
+package org.neo4j.gds.applications.algorithms.execution.machinery;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.Graph;
 
-import java.util.Collection;
-
-public interface AlgorithmGraphStoreRequirements {
-    AlgorithmGraphStoreRequirements EMPTY = (__, ___, ____) -> {};
-
-    void validate(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    );
+/**
+ * At the base, we run the algorithm and record timing.
+ *
+ * @note this should be _the only_ place in our codebase where we call {@link org.neo4j.gds.Algorithm#compute()},
+ *     anything else would be duplication.
+ */
+class Timer {
+    <RESULT> RESULT runAlgorithmAndRecordTiming(
+        ComputationTimer computationTimer,
+        ConstructAndRun<RESULT> constructAndRun,
+        Graph graph
+    ) {
+        try (var ignored = computationTimer.start()) {
+            return constructAndRun.constructAndRun(graph);
+        }
+    }
 }

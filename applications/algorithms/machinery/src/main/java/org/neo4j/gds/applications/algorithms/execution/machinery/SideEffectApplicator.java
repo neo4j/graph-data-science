@@ -17,29 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.machinery;
+package org.neo4j.gds.applications.algorithms.execution.machinery;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimingsBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.core.loading.GraphResources;
+import org.neo4j.gds.core.utils.ProgressTimer;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
-public class StreamResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> implements ResultRenderer<RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> {
-    private final StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder;
-
-    public StreamResultRenderer(StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder) {this.resultBuilder = resultBuilder;}
-
-    @Override
-    public Stream<RESULT_TO_CALLER> render(
+class SideEffectApplicator {
+    <RESULT, METADATA> Optional<METADATA> applySideEffect(
+        AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphResources graphResources,
-        Optional<RESULT_FROM_ALGORITHM> result,
-        AlgorithmProcessingTimings unused1,
-        Optional<Void> unused2
+        Optional<RESULT> result,
+        Optional<SideEffect<RESULT, METADATA>> sideEffect
     ) {
-        return resultBuilder.build(
-            graphResources.graph(),
-            graphResources.graphStore(),
-            result
-        );
+        if (sideEffect.isEmpty()) return Optional.empty();
+
+        try (var ignored = ProgressTimer.start(timingsBuilder::withSideEffectMillis)) { // rename
+            return sideEffect.get().process(graphResources, result);
+        }
     }
 }

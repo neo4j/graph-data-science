@@ -22,6 +22,8 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
 import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
+import org.neo4j.gds.applications.algorithms.execution.AlgorithmProcessingFacadeConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProcessingFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningApplications;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
@@ -114,8 +116,14 @@ public final class ApplicationsFacade {
         Transaction procedureTransaction,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        AlgorithmProcessingFacade algorithmProcessingFacade,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
+        var algorithmProcessingFacadeConvenience = new AlgorithmProcessingFacadeConvenience(
+            loggers.log(),
+            algorithmProcessingFacade,
+            requestScopedDependencies
+        );
         var algorithmProcessingTemplateConvenience = new AlgorithmProcessingTemplateConvenience(algorithmProcessingTemplate);
 
         var mutateNodeProperty = new MutateNodePropertyService(loggers.log());
@@ -126,6 +134,7 @@ public final class ApplicationsFacade {
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
+            algorithmProcessingFacadeConvenience,
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty

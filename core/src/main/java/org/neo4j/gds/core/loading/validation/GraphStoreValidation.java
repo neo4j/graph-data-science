@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class GraphStoreValidation {
+    public static final GraphStoreValidation DISABLED = new GraphStoreValidation(AlgorithmGraphStoreRequirements.EMPTY);
 
     private final AlgorithmGraphStoreRequirements algorithmRequirements;
 

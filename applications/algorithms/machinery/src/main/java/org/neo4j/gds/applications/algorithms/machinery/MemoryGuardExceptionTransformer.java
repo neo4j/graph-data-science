@@ -25,7 +25,7 @@ public final class MemoryGuardExceptionTransformer {
 
     private MemoryGuardExceptionTransformer() {}
 
-    static void throwAsIllegalStateException(MemoryGuardException e) {
+    public static void throwAsIllegalStateException(MemoryGuardException e) {
         throw new IllegalStateException(e.getMessage(), e);
     }
 }
