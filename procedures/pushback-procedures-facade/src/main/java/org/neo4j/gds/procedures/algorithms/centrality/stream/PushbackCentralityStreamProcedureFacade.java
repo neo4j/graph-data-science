@@ -21,6 +21,10 @@ package org.neo4j.gds.procedures.algorithms.centrality.stream;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityBusinessAlgorithms;
+import org.neo4j.gds.applications.algorithms.execution.AlgorithmProcessingFacadeConvenience;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsToParameters;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
@@ -40,6 +44,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointStreamRes
 import org.neo4j.gds.procedures.algorithms.centrality.BridgesStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CELFStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
+import org.neo4j.gds.procedures.algorithms.centrality.HarmonicCentralityResultBuilderForStreamMode;
 import org.neo4j.gds.procedures.algorithms.centrality.HitsStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -47,20 +52,27 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class PushbackCentralityStreamProcedureFacade {
-
     private final CentralityComputeBusinessFacade businessFacade;
     private final UserSpecificConfigurationParser configurationParser;
     private final ProcedureReturnColumns procedureReturnColumns;
-
+    private final AlgorithmProcessingFacadeConvenience algorithmProcessingFacadeConvenience;
+    private final CentralityBusinessAlgorithms centralityBusinessAlgorithms;
+    private final CentralityAlgorithmsEstimationModeBusinessFacade centralityAlgorithmsEstimationModeBusinessFacade;
 
     public PushbackCentralityStreamProcedureFacade(
         CentralityComputeBusinessFacade businessFacade,
         UserSpecificConfigurationParser configurationParser,
-        ProcedureReturnColumns procedureReturnColumns
+        ProcedureReturnColumns procedureReturnColumns,
+        AlgorithmProcessingFacadeConvenience algorithmProcessingFacadeConvenience,
+        CentralityBusinessAlgorithms centralityBusinessAlgorithms,
+        CentralityAlgorithmsEstimationModeBusinessFacade centralityAlgorithmsEstimationModeBusinessFacade
     ) {
         this.businessFacade = businessFacade;
         this.configurationParser = configurationParser;
         this.procedureReturnColumns = procedureReturnColumns;
+        this.algorithmProcessingFacadeConvenience = algorithmProcessingFacadeConvenience;
+        this.centralityBusinessAlgorithms = centralityBusinessAlgorithms;
+        this.centralityAlgorithmsEstimationModeBusinessFacade = centralityAlgorithmsEstimationModeBusinessFacade;
     }
 
     public Stream<AlphaHarmonicStreamResult> alphaHarmonic(String graphName, Map<String, Object> configuration) {
@@ -200,18 +212,17 @@ public class PushbackCentralityStreamProcedureFacade {
         ).join();
     }
 
-    public Stream<CentralityStreamResult> harmonic(String graphName, Map<String, Object> configuration) {
-        var config = configurationParser.parseConfiguration(configuration, HarmonicCentralityStreamConfig::of);
+    public Stream<CentralityStreamResult> harmonic(String graphName, Map<String, Object> rawConfiguration) {
+        var configuration = configurationParser.parseConfiguration(rawConfiguration, HarmonicCentralityStreamConfig::of);
 
-        var parameters = config.toParameters();
-        return businessFacade.harmonic(
+        return algorithmProcessingFacadeConvenience.runAlgorithm(
             GraphName.parse(graphName),
-            config.toGraphParameters(),
-            parameters,
-            config.jobId(),
-            config.logProgress(),
-            graphResources -> new GenericCentralityResultStreamTransformer<>(graphResources.graph())
-        ).join();
+            configuration,
+            graph -> centralityBusinessAlgorithms.harmonicCentrality(graph, configuration),
+            centralityAlgorithmsEstimationModeBusinessFacade::harmonicCentrality,
+            AlgorithmLabel.HarmonicCentrality,
+            new HarmonicCentralityResultBuilderForStreamMode()
+        );
     }
 
     public Stream<HitsStreamResult> hits(String graphName, Map<String, Object> configuration) {

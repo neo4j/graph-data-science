@@ -27,7 +27,7 @@ import org.neo4j.gds.harmonic.HarmonicResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class HarmonicCentralityResultBuilderForStreamMode implements StreamResultBuilder<HarmonicResult, CentralityStreamResult> {
+public class HarmonicCentralityResultBuilderForStreamMode implements StreamResultBuilder<HarmonicResult, CentralityStreamResult> {
     private final CentralityAlgorithmResultTransformer transformer = new CentralityAlgorithmResultTransformer();
 
     @Override

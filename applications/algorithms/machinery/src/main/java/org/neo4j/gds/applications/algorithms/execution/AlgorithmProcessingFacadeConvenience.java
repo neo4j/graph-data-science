@@ -57,10 +57,10 @@ public class AlgorithmProcessingFacadeConvenience {
     }
 
     /**
-     * This is currently specific convenience for a streaming mode algorithm, that is _regular_.
-     * That means no relationship override, no graph store validation, no graph validation, no dimension transformer.
-     * We have enough of those to warrant this shortcut.
-     * There will be other overrides.
+     * This is currently specific convenience for a synchronous streaming mode algorithm, that is _regular_.
+     * That means no relationship override, no graph store validation, no graph validation, no dimension transformer,
+     * no side effect. We have enough of those to warrant this shortcut.
+     * There will be other convenience methods.
      *
      * @throws java.lang.RuntimeException if your work was interrupted, or if something went wrong. that's work as in, could be any stage that got interrupted, there might even have been side effects completed
      */

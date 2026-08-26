@@ -23,10 +23,12 @@ dependencies {
 
     implementation project(':algorithms-compute-business-facade')
     implementation project(':algorithms-facade-common')
+    implementation project(':algorithms-procedure-facade')
 
     // this is needed because of `AlgorithmProcessingTimings`
     implementation project(':algorithms-machinery')
 
+    implementation project(':centrality-algorithms')
     implementation project(':centrality-facade-api')
     implementation project(':centrality-mutate-steps')
     implementation project(':centrality-write-steps')

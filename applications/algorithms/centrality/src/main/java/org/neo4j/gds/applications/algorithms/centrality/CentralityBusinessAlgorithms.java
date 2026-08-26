@@ -160,7 +160,12 @@ public class CentralityBusinessAlgorithms {
 
     }
 
-    HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
+    /**
+     * Any execution of harmonic centrality must use this method.
+     * This is where we create its progress tracker, which is intrinsic.
+     * If ever we did _not_ singularly use this method, it would be duplication.
+     */
+    public HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
         var params = configuration.toParameters();
         var task = CentralityAlgorithmTasks.harmonicCentrality(configuration.concurrency());
 
