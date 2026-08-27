@@ -32,6 +32,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public class HitsMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<HitsResultWithGraph>, Stream<HitsMutateResult>> {
 
     private final GraphStore graphStore;

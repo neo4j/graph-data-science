@@ -35,6 +35,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public class GenericCentralityMutateResultTransformer<R extends CentralityAlgorithmResult> implements ResultTransformer<TimedAlgorithmResult<R>, Stream<CentralityMutateResult>> {
 
     private final Graph graph;

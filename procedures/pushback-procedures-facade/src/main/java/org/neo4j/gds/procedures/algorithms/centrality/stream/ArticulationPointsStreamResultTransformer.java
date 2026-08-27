@@ -31,6 +31,10 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public class ArticulationPointsStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<ArticulationPointsResult>, Stream<ArticulationPointStreamResult>> {
     private final Graph graph;
 

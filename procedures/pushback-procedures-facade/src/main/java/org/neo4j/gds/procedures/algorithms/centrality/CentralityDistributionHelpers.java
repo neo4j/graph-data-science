@@ -27,6 +27,10 @@ import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.function.LongToDoubleFunction;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public final class CentralityDistributionHelpers {
 
     private CentralityDistributionHelpers() {}

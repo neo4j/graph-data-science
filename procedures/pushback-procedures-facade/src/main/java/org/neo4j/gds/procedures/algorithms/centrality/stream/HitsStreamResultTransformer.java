@@ -30,6 +30,10 @@ import java.util.Map;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public class HitsStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<HitsResultWithGraph>, Stream<HitsStreamResult>> {
 
     private String authProperty;

@@ -33,6 +33,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public class ArticulationPointsMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<ArticulationPointsResult>, Stream<ArticulationPointsMutateResult>> {
     private final Graph graph;
     private final GraphStore graphStore;

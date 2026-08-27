@@ -33,6 +33,10 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public class ArticulationPointsWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<ArticulationPointsResult>, Stream<ArticulationPointsWriteResult>> {
 
     private final Graph graph;

@@ -32,7 +32,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-    public class BetaClosenessCentralityMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<ClosenessCentralityResult>, Stream<BetaClosenessCentralityMutateResult>> {
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
+public class BetaClosenessCentralityMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<ClosenessCentralityResult>, Stream<BetaClosenessCentralityMutateResult>> {
 
     private final  GenericCentralityMutateResultTransformer<ClosenessCentralityResult> genericCentralityMutateResultTransformer;
     private final String mutateProperty;

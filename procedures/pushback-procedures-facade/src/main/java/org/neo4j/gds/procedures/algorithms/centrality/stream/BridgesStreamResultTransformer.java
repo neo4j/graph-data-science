@@ -28,6 +28,10 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public class BridgesStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<BridgeResult>, Stream<BridgesStreamResult>> {
     private final Graph graph;
     private final boolean shouldComputeComponents;

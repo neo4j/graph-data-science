@@ -27,6 +27,10 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public class CelfStatsResultTransformer implements ResultTransformer<TimedAlgorithmResult<CELFResult>, Stream<CELFStatsResult>> {
 
     private final long nodeCount;

@@ -44,6 +44,10 @@ import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurati
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated not used, delete
+ */
+@Deprecated
 public class PushbackCentralityStatsProcedureFacade {
 
     private final CentralityComputeBusinessFacade businessFacade;
