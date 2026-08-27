@@ -27,14 +27,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
 import org.neo4j.gds.embeddings.node2vec.Node2VecParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.termination.TerminationFlag;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -69,45 +65,12 @@ class NodeEmbeddingComputeFacadeEmptyGraphTest {
     }
 
     @Test
-    void fastRP() {
-        var future = facade.fastRP(
-            graph,
-            mock(FastRPParameters.class),
-            jobIdMock,
-            true
-        );
-        var result = future.join();
-        assertThat(result.result().embeddings().size()).isZero();
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void hashGnn() {
-        var future = facade.hashGnn(
-            graph,
-            mock(HashGNNParameters.class),
-            List.of("R"),
-            jobIdMock,
-            true
-        );
-        var result = future.join();
-        var algorithmResult = result.result();
-        assertThat(algorithmResult.embeddings().nodeCount()).isZero();
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
     void node2Vec() {
         var future = facade.node2Vec(
             graph,
             mock(Node2VecParameters.class),
             jobIdMock,
-            true,
-            TerminationFlag.RUNNING_TRUE
+            true
         );
         var result = future.join();
         var algorithmResult = result.result();
@@ -117,5 +80,4 @@ class NodeEmbeddingComputeFacadeEmptyGraphTest {
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }
-
 }

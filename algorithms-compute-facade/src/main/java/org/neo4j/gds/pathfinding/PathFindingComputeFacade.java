@@ -26,10 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.pathfinding.MSBFSASPAlgorithmFactory;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
@@ -37,8 +34,6 @@ import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.kspanningtree.KSpanningTree;
-import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlow;
@@ -46,40 +41,16 @@ import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFParameters;
 import org.neo4j.gds.mcmf.MinCostMaxFlow;
-import org.neo4j.gds.paths.astar.AStar;
-import org.neo4j.gds.paths.astar.AStarParameters;
-import org.neo4j.gds.paths.bellmanford.BellmanFord;
-import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
-import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.delta.DeltaStepping;
-import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
-import org.neo4j.gds.paths.delta.DeltaSteppingResult;
-import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
-import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
-import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.ExitAndAggregation;
 import org.neo4j.gds.paths.traverse.bfs.BFS;
 import org.neo4j.gds.paths.traverse.dfs.DFS;
-import org.neo4j.gds.paths.yens.YensFactory;
-import org.neo4j.gds.paths.yens.YensParameters;
-import org.neo4j.gds.pcst.PCSTParameters;
-import org.neo4j.gds.pricesteiner.PCSTFast;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
-import org.neo4j.gds.spanningtree.Prim;
-import org.neo4j.gds.spanningtree.SpanningTree;
-import org.neo4j.gds.spanningtree.SpanningTreeParameters;
-import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
-import org.neo4j.gds.steiner.SteinerTreeParameters;
-import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalk;
-import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.TraversalParameters;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
@@ -142,44 +113,6 @@ public class PathFindingComputeFacade {
 
     }
 
-    public CompletableFuture<TimedAlgorithmResult<BellmanFordResult>> bellmanFord(
-        Graph graph,
-        BellmanFordParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(BellmanFordResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.bellmanFord(parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var bellmanFord = new BellmanFord(
-            graph,
-            progressTracker,
-            graph.toMappedNodeId(parameters.sourceNode()),
-            parameters.trackNegativeCycles(),
-            parameters.trackPaths(),
-            parameters.concurrency(),
-            executorService,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            bellmanFord::compute,
-            jobId
-        );
-    }
-
     public CompletableFuture<TimedAlgorithmResult<HugeLongArray>> breadthFirstSearch(
         Graph graph,
         TraversalParameters parameters,
@@ -222,36 +155,6 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<TimedAlgorithmResult<DeltaSteppingResult>> deltaStepping(
-        Graph graph,
-        DeltaSteppingParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(DeltaSteppingResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.deltaStepping(parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var deltaStepping = DeltaStepping.of(graph, parameters, executorService, progressTracker, terminationFlag);
-
-        // Submit the algorithm for async computation
-
-        return algorithmCaller.run(
-            deltaStepping::compute,
-            jobId
-        );
-    }
-
     public CompletableFuture<TimedAlgorithmResult<HugeLongArray>> depthFirstSearch(
         Graph graph,
         TraversalParameters parameters,
@@ -288,42 +191,6 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             dfs::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<SpanningTree>> kSpanningTree(
-        Graph graph,
-        KSpanningTreeParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SpanningTree.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.kSpanningTree(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var kSpanningTree = new KSpanningTree(
-            graph,
-            parameters.objective(),
-            graph.toMappedNodeId(parameters.sourceNode()),
-            parameters.k(),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            kSpanningTree::compute,
             jobId
         );
     }
@@ -467,303 +334,6 @@ public class PathFindingComputeFacade {
         );
     }
 
-    public CompletableFuture<TimedAlgorithmResult<HugeAtomicLongArray>> randomWalkCountingNodeVisits(
-        Graph graph,
-        RandomWalkParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(
-                HugeAtomicLongArray.of(
-                    0,
-                    ParalleLongPageCreator.passThrough(parameters.concurrency())
-                )
-            ));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.randomWalkCountingVisits(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var randomWalkCountingNodeVisits = RandomWalkCountingNodeVisits.create(
-            graph,
-            parameters,
-            progressTracker,
-            executorService,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            randomWalkCountingNodeVisits::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<PrizeSteinerTreeResult>> pcst(
-        Graph graph,
-        PCSTParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PrizeSteinerTreeResult.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.pcst(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var prizeProperty = graph.nodeProperties(parameters.prizeProperty());
-        var pcstFast = new PCSTFast(
-            graph,
-            (v) -> Math.max(prizeProperty.doubleValue(v), 0),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            pcstFast::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singlePairShortestPathAStar(
-        Graph graph,
-        AStarParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.aStar(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var aStar = AStar.sourceTarget(
-            graph,
-            parameters,
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            aStar::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singlePairShortestPathDijkstra(
-        Graph graph,
-        DijkstraSourceTargetParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.dijkstra(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var dijkstra = DijkstraFactory.sourceTarget(
-            graph,
-            parameters.sourceNode(),
-            parameters.targetsList(),
-            false,
-            Optional.empty(),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            dijkstra::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singlePairShortestPathYens(
-        Graph graph,
-        YensParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.yens(graph, parameters.concurrency(), parameters.k()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var yens = YensFactory.create(
-            graph,
-            parameters,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            yens::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singleSourceShortestPathDijkstra(
-        Graph graph,
-        DijkstraSingleSourceParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.singleSourceDijkstra(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var dijkstra = DijkstraFactory.singleSource(
-            graph,
-            parameters.sourceNode(),
-            false,
-            Optional.empty(),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            dijkstra::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<SpanningTree>> spanningTree(
-        Graph graph,
-        SpanningTreeParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SpanningTree.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.spanningTree(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var prim = new Prim(
-            graph,
-            parameters.objective(),
-            graph.toMappedNodeId(parameters.sourceNode()),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            prim::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<SteinerTreeResult>> steinerTree(
-        Graph graph,
-        SteinerTreeParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SteinerTreeResult.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.steinerTree(parameters, graph),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var mappedSourceNodeId = graph.toMappedNodeId(parameters.sourceNode());
-        var mappedTargetNodeIds = parameters.targetNodes()
-            .stream()
-            .map(graph::safeToMappedNodeId)
-            .toList();
-
-        var steinerTree = new ShortestPathsSteinerAlgorithm(
-            graph,
-            mappedSourceNodeId,
-            mappedTargetNodeIds,
-            parameters.delta(),
-            parameters.concurrency(),
-            parameters.applyRerouting(),
-            executorService,
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            steinerTree::compute,
-            jobId
-        );
-    }
-
     public CompletableFuture<TimedAlgorithmResult<TopologicalSortResult>> topologicalSort(
         Graph graph,
         TopologicalSortParameters parameters,
@@ -798,5 +368,4 @@ public class PathFindingComputeFacade {
             jobId
         );
     }
-
 }
