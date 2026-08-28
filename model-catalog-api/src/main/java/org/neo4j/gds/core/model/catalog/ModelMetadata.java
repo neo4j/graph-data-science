@@ -21,6 +21,8 @@ package org.neo4j.gds.core.model.catalog;
 
 import org.neo4j.gds.core.model.Model;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
@@ -41,6 +43,18 @@ public record ModelMetadata(
     boolean stored,
     boolean published
 ) {
+
+    public ModelMetadata {
+        // ZoneOffset.UTC ("Z") serializes without a zone-name bracket; the Python client
+        // expects [UTC] in the bracket (its %Z matches timezone names, not bare Z).
+        // Normalize to ZoneId.of("UTC") (a ZoneRegion) so the serialized form includes [UTC].
+        // Instant and wall-clock time are unchanged. Only model endpoints need this —
+        // graph and pipeline endpoints use Pydantic's default datetime parser which
+        // cannot handle the bracket.
+        if (creationTime != null && creationTime.getZone().equals(ZoneOffset.UTC)) {
+            creationTime = creationTime.withZoneSameLocal(ZoneId.of("UTC"));
+        }
+    }
 
     public static ModelMetadata of(Model<?, ?, ?> model) {
         return new ModelMetadata(
