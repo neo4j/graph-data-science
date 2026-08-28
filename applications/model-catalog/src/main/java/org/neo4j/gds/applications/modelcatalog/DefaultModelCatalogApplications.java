@@ -54,7 +54,7 @@ public final class DefaultModelCatalogApplications implements ModelCatalogApplic
 
     @Override
     public Stream<ModelMetadata> list() {
-        return modelCatalog.getAllMetadata();
+        return modelCatalog.getAllMetadata(user.getUsername());
     }
 
     @Override

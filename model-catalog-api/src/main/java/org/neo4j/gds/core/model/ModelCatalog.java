@@ -49,6 +49,10 @@ public interface ModelCatalog {
 
     Stream<ModelMetadata> getAllMetadata();
 
+    default Stream<ModelMetadata> getAllMetadata(String username) {
+        return getAllMetadata().filter(modelMetadata -> modelMetadata.creator().equals(username));
+    }
+
     long modelCount();
 
     boolean exists(String username, String modelName);
