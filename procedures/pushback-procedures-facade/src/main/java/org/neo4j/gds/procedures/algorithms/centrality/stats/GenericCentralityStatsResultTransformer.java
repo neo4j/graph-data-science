@@ -30,10 +30,6 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class GenericCentralityStatsResultTransformer<R extends CentralityAlgorithmResult> implements ResultTransformer<TimedAlgorithmResult<R>, Stream<CentralityStatsResult>> {
 
     private final Graph graph;

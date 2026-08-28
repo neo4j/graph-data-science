@@ -32,10 +32,6 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class HitsWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<HitsResultWithGraph>, Stream<HitsWriteResult>> {
 
     private final GraphStore graphStore;

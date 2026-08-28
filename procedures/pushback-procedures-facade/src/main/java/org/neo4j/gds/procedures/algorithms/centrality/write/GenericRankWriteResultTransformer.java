@@ -36,10 +36,6 @@ import org.neo4j.gds.scaling.ScalerFactory;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class GenericRankWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<PageRankResult>, Stream<PageRankWriteResult>> {
     private final Graph graph;
     private final GraphStore graphStore;

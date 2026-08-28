@@ -33,10 +33,6 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class BetaClosenessCentralityWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<ClosenessCentralityResult>, Stream<BetaClosenessCentralityWriteResult>>  {
 
     private final GenericCentralityWriteResultTransformer<ClosenessCentralityResult> genericCentralityWriteResultTransformer;

@@ -29,10 +29,6 @@ import org.neo4j.gds.procedures.algorithms.centrality.write.PushbackCentralityWr
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class PushbackCentralityProcedureFacade implements CentralityProcedureFacade{
 
     private final PushbackCentralityStreamProcedureFacade streamProcedureFacade;

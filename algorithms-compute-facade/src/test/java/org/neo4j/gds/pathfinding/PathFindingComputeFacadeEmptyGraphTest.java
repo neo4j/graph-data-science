@@ -33,8 +33,21 @@ import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.paths.astar.AStarParameters;
+import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
+import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
+import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.yens.YensParameters;
+import org.neo4j.gds.pcst.PCSTParameters;
+import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.spanningtree.SpanningTree;
+import org.neo4j.gds.spanningtree.SpanningTreeParameters;
+import org.neo4j.gds.steiner.SteinerTreeParameters;
+import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.TraversalParameters;
@@ -88,6 +101,32 @@ class PathFindingComputeFacadeEmptyGraphTest {
     }
 
     @Test
+    void bellmanFord() {
+        var future = facade.bellmanFord(
+            graph,
+            mock(BellmanFordParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result).isNotNull();
+        assertThat(result.result().shortestPaths())
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
+        assertThat(result.result().negativeCycles())
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
+        assertThat(result.result().containsNegativeCycle()).isFalse();
+        assertThat(result.computeMillis()).isZero();
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
     void breadthFirstSearch() {
         var future = facade.breadthFirstSearch(
             graph,
@@ -105,6 +144,26 @@ class PathFindingComputeFacadeEmptyGraphTest {
     }
 
     @Test
+    void deltaStepping() {
+        var future = facade.deltaStepping(
+            graph,
+            mock(DeltaSteppingParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result.result())
+            .isNotNull()
+            .extracting((deltaSteppingResult -> deltaSteppingResult.pathFindingResult().pathSet()))
+            .asInstanceOf(SET)
+            .isEmpty();
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
     void depthFirstSearch() {
         var future = facade.depthFirstSearch(
             graph,
@@ -116,6 +175,22 @@ class PathFindingComputeFacadeEmptyGraphTest {
 
         assertThat(result).isNotNull();
         assertThat(result.result().size()).isZero();
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void kSpanningTree() {
+        var future = facade.kSpanningTree(
+            graph,
+            mock(KSpanningTreeParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result.result()).isNotNull().isEqualTo(SpanningTree.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -156,6 +231,151 @@ class PathFindingComputeFacadeEmptyGraphTest {
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
 
+    }
+
+    @Test
+    void randomWalkCountingNodeVisits() {
+        var future = facade.randomWalkCountingNodeVisits(
+            graph,
+            mock(RandomWalkParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result).isNotNull();
+        assertThat(result.result().size()).isZero();
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void pcst() {
+        var future = facade.pcst(
+            graph,
+            mock(PCSTParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result.result()).isNotNull().isEqualTo(PrizeSteinerTreeResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void singlePairShortestPathAStar() {
+        var future = facade.singlePairShortestPathAStar(
+            graph,
+            mock(AStarParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result.result())
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void singlePairShortestPathDijkstra() {
+        var future = facade.singlePairShortestPathDijkstra(
+            graph,
+            mock(DijkstraSourceTargetParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result.result())
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void singlePairShortestPathYens() {
+        var future = facade.singlePairShortestPathYens(
+            graph,
+            mock(YensParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result.result())
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void singleSourceShortestPathDijkstra() {
+        var future = facade.singleSourceShortestPathDijkstra(
+            graph,
+            mock(DijkstraSingleSourceParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result.result())
+            .isNotNull()
+            .extracting(PathFindingResult::pathSet)
+            .asInstanceOf(SET)
+            .isEmpty();
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void spanningTree() {
+        var future = facade.spanningTree(
+            graph,
+            mock(SpanningTreeParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result.result()).isNotNull().isEqualTo(SpanningTree.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void steinerTree() {
+        var future = facade.steinerTree(
+            graph,
+            mock(SteinerTreeParameters.class),
+            jobIdMock,
+            false
+        );
+        var result = future.join();
+
+        assertThat(result.result()).isNotNull().isEqualTo(SteinerTreeResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

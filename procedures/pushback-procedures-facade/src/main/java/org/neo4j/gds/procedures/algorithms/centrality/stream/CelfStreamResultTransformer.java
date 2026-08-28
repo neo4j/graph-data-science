@@ -28,10 +28,6 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class CelfStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<CELFResult>, Stream<CELFStreamResult>> {
 
     private final Graph graph;

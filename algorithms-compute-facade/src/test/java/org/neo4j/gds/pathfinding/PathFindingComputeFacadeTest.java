@@ -31,6 +31,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
+import org.neo4j.gds.progress.tasks.IterativeTask;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
@@ -38,7 +39,18 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.paths.astar.AStarParameters;
+import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
+import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
+import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
+import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
+import org.neo4j.gds.paths.yens.YensParameters;
+import org.neo4j.gds.pcst.PCSTParameters;
+import org.neo4j.gds.spanningtree.PrimOperators;
+import org.neo4j.gds.spanningtree.SpanningTreeParameters;
+import org.neo4j.gds.steiner.SteinerTreeParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.TraversalParameters;
@@ -51,6 +63,11 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -114,6 +131,29 @@ class PathFindingComputeFacadeTest {
     }
 
     @Test
+    void bellmanFord() {
+        var future = facade.bellmanFord(
+            graph,
+            new BellmanFordParameters(
+                idFunction.of("a"),
+                false,
+                true,
+                new Concurrency(4)
+            ),
+            jobIdMock,
+            false
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isNotNull();
+
+        verify(progressTrackerFactoryMock, times(1))
+            .create(isA(IterativeTask.class), eq(jobIdMock), eq(new Concurrency(4)), eq(false));
+        verifyNoMoreInteractions(progressTrackerFactoryMock);
+    }
+
+
+    @Test
     void breadthFirstSearch() {
         var future = facade.breadthFirstSearch(
             graph,
@@ -130,6 +170,20 @@ class PathFindingComputeFacadeTest {
     }
 
     @Test
+    void deltaStepping() {
+        var future = facade.deltaStepping(
+            graph,
+            DeltaSteppingParameters.withDefaultDelta(
+                idFunction.of("a"),
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            false
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
     void depthFirstSearch() {
         var future = facade.depthFirstSearch(
             graph,
@@ -137,6 +191,22 @@ class PathFindingComputeFacadeTest {
                 idFunction.of("a"),
                 List.of(idFunction.of("c")),
                 3L,
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            false
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void kSpanningTree() {
+        var future = facade.kSpanningTree(
+            graph,
+            new KSpanningTreeParameters(
+                PrimOperators.MIN_OPERATOR,
+                idFunction.of("a"),
+                2L,
                 new Concurrency(2)
             ),
             jobIdMock,
@@ -168,6 +238,127 @@ class PathFindingComputeFacadeTest {
                 1000,
                 Optional.of(19L),
                 new Concurrency(2)
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void randomWalkCountingNodeVisits() {
+        var future = facade.randomWalkCountingNodeVisits(
+            graph,
+            new RandomWalkParameters(
+                List.of(idFunction.of("a")),
+                WalkParameters.DEFAULTS,
+                1000,
+                Optional.of(19L),
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void pcst() {
+        var future = facade.pcst(
+            graph,
+            new PCSTParameters(
+                "prize",
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void singlePairShortestPathAStar() {
+        var future = facade.singlePairShortestPathAStar(
+            graph,
+            new AStarParameters(
+                "prize",
+                "prize",
+                idFunction.of("a"),
+                idFunction.of("c"),
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void singlePairShortestPathDijkstra() {
+        var future = facade.singlePairShortestPathDijkstra(
+            graph,
+            new DijkstraSourceTargetParameters(
+                idFunction.of("a"),
+                List.of(idFunction.of("c")),
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void singlePairShortestPathYens() {
+        var future = facade.singlePairShortestPathYens(
+            graph,
+            new YensParameters(
+                idFunction.of("a"),
+                idFunction.of("c"),
+                1,
+                new Concurrency(2)
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void singleSourceShortestPathDijkstra() {
+        var future = facade.singleSourceShortestPathDijkstra(
+            graph,
+            new DijkstraSingleSourceParameters(idFunction.of("a")),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void spanningTree() {
+        var future = facade.spanningTree(
+            graph,
+            new SpanningTreeParameters(
+                PrimOperators.MIN_OPERATOR,
+                idFunction.of("a")
+            ),
+            jobIdMock,
+            true
+        );
+        assertThat(future.join()).isNotNull();
+    }
+
+    @Test
+    void steinerTree() {
+        var future = facade.steinerTree(
+            graph,
+            new SteinerTreeParameters(
+                new Concurrency(4),
+                idFunction.of("a"),
+                List.of(idFunction.of("c")),
+                2.0,
+                false
             ),
             jobIdMock,
             true

@@ -29,18 +29,30 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
+import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.bridges.BridgesParameters;
+import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
+import org.neo4j.gds.hits.HitsConfigImpl;
+import org.neo4j.gds.indirectExposure.IndirectExposureConfigImpl;
+import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.pagerank.ArticleRankConfigImpl;
+import org.neo4j.gds.pagerank.EigenvectorConfigImpl;
+import org.neo4j.gds.pagerank.PageRankConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -100,6 +112,23 @@ class CentralityComputeFacadeTest {
     }
 
     @Test
+    void articleRank() {
+
+        var config = ArticleRankConfigImpl.builder().maxIterations(3).build();
+        var future = facade.articleRank(
+            graph,
+            config,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().iterations()).isBetween(1, 3);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
     void articulationPoints() {
 
         var params = new ArticulationPointsParameters(new Concurrency(1), false);
@@ -117,6 +146,23 @@ class CentralityComputeFacadeTest {
     }
 
     @Test
+    void betweennessCentrality() {
+
+        var params = new BetweennessCentralityParameters(new Concurrency(1), Optional.empty(), false);
+        var future = facade.betweennessCentrality(
+            graph,
+            params,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().centralities().size()).isEqualTo(6L);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
     void bridges() {
 
         var params = new BridgesParameters(new Concurrency(1), false);
@@ -130,6 +176,150 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().bridges()).hasSize(2); //d-e, e-f are bridges
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void celf() {
+
+        var params = new CELFParameters(2, 0.1, 10, new Concurrency(1), 10, 10);
+        var future = facade.celf(
+            graph,
+            params,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().totalSpread()).isGreaterThan(0);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void closenessCentrality() {
+
+        var params = new ClosenessCentralityParameters(new Concurrency(1), false);
+        var future = facade.closeness(
+            graph,
+            params,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().centralities().size()).isEqualTo(6L);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void degree() {
+
+        var params = new DegreeCentralityParameters(new Concurrency(1), Orientation.NATURAL, false, 10);
+        var future = facade.degree(
+            graph,
+            params,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().nodeCount()).isEqualTo(6L);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void eigenVector() {
+
+        var config = EigenvectorConfigImpl.builder().maxIterations(3).build();
+        var future = facade.eigenVector(
+            graph,
+            config,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().iterations()).isBetween(1, 3);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void harmonic() {
+
+        var params = new HarmonicCentralityParameters(new Concurrency(1));
+        var future = facade.harmonic(
+            graph,
+            params,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().centralities().size()).isEqualTo(6L);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void hits() {
+
+        var config = HitsConfigImpl.builder().concurrency(4).build();
+
+        var future = facade.hits(
+            inverseGraphStore,
+            config,
+            Set.of(),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().pregelResult().ranIterations()).isGreaterThan(0);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void indirectExposure() {
+
+        var config = IndirectExposureConfigImpl.builder()
+            .sanctionedProperty("prop")
+            .relationshipWeightProperty("w")
+            .maxIterations(3)
+            .concurrency(4)
+            .build();
+
+        var future = facade.indirectExposure(
+            inverseGraph,
+            config,
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().iterations()).isBetween(1,3);
+        assertThat(results.computeMillis()).isNotNegative();
+    }
+
+    @Test
+    void pageRank() {
+
+        var config = PageRankConfigImpl.builder().maxIterations(3).build();
+        var future = facade.pageRank(
+            graph,
+            config,
+            jobIdMock,
+            true
+        );
+
+        var results = future.join();
+
+        assertThat(results.result().iterations()).isBetween(1, 3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 }

@@ -31,10 +31,6 @@ import java.util.function.LongToDoubleFunction;
 
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class RankDistributionHelpers {
 
     private static final String HISTOGRAM_ERROR_KEY = "Error";

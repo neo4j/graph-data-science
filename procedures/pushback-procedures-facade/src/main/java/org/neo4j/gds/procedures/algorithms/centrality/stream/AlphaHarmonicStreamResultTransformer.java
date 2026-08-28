@@ -29,10 +29,6 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class AlphaHarmonicStreamResultTransformer implements ResultTransformer<TimedAlgorithmResult<HarmonicResult>, Stream<AlphaHarmonicStreamResult>> {
 
     private final Graph graph;

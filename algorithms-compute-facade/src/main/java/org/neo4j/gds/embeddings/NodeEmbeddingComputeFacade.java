@@ -23,14 +23,22 @@ import org.neo4j.gds.NodeEmbeddingsAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.embeddings.fastrp.FastRP;
+import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
+import org.neo4j.gds.embeddings.fastrp.FastRPResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNN;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecParameters;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class NodeEmbeddingComputeFacade {
@@ -57,11 +65,78 @@ public class NodeEmbeddingComputeFacade {
         this.terminationFlag = terminationFlag;
     }
 
+    public CompletableFuture<TimedAlgorithmResult<FastRPResult>> fastRP(
+        Graph graph,
+        FastRPParameters parameters,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(FastRPResult.empty()));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            NodeEmbeddingsAlgorithmTasks.fastRP(graph, parameters),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, parameters.featureProperties());
+
+        var fastRP = new FastRP(
+            graph,
+            parameters,
+            10_000,
+            featureExtractors,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            fastRP::compute,
+            jobId
+        );
+    }
+
+    public CompletableFuture<TimedAlgorithmResult<HashGNNResult>> hashGnn(
+        Graph graph,
+        HashGNNParameters parameters,
+        List<String> relationshipTypes,
+        JobId jobId,
+        boolean logProgress
+    ) {
+        if (graph.isEmpty()) {
+            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(HashGNNResult.empty()));
+        }
+
+        var progressTracker = progressTrackerFactory.create(
+            NodeEmbeddingsAlgorithmTasks.hashGNN(graph, parameters, relationshipTypes),
+            jobId,
+            parameters.concurrency(),
+            logProgress
+        );
+
+        var hashGNN = new HashGNN(
+            log,
+            graph,
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmCaller.run(
+            hashGNN::compute,
+            jobId
+        );
+    }
+
     public CompletableFuture<TimedAlgorithmResult<Node2VecResult>> node2Vec(
         Graph graph,
         Node2VecParameters parameters,
         JobId jobId,
-        boolean logProgress
+        boolean logProgress,
+        TerminationFlag terminationFlag
     ) {
         if (graph.isEmpty()) {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Node2VecResult.empty()));

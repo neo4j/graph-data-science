@@ -29,10 +29,6 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class GenericCentralityResultStreamTransformer<R extends CentralityAlgorithmResult> implements ResultTransformer<TimedAlgorithmResult<R>,Stream<CentralityStreamResult>> {
     private final Graph graph;
 

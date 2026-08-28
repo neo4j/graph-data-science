@@ -21,11 +21,7 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
-public class CentralityDistributionInstructions {
+ public class CentralityDistributionInstructions {
 
     private final ProcedureReturnColumns procedureReturnColumns;
 

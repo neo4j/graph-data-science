@@ -33,10 +33,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class CelfMutateResultTransformer implements ResultTransformer<TimedAlgorithmResult<CELFResult>, Stream<CELFMutateResult>> {
     private final Graph graph;
     private final GraphStore graphStore;

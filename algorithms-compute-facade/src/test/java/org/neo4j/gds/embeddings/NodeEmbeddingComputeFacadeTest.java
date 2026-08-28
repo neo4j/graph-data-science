@@ -29,6 +29,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
+import org.neo4j.gds.embeddings.hashgnn.BinarizeParameters;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
 import org.neo4j.gds.embeddings.node2vec.EmbeddingInitializer;
 import org.neo4j.gds.embeddings.node2vec.Node2VecParameters;
 import org.neo4j.gds.embeddings.node2vec.SamplingWalkParameters;
@@ -80,6 +83,95 @@ class NodeEmbeddingComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
+    }
+
+    @Nested
+    @GdlExtension
+    class FastRPTest {
+
+        @GdlGraph(graphNamePrefix = "fastRp")
+        private static final String FAST_RP =
+            "CREATE" +
+                "  (a:Node1 {f: [0.4, 1.3, 1.4]})" +
+                ", (b:Node1 {f: [2.1, 0.5, 1.8]})" +
+                ", (c:Node2 {f: [-0.3, 0.8, 2.8]})" +
+                ", (d:Isolated {f: [2.5, 8.1, 1.3]})" +
+                ", (e:Isolated {f: [0.6, 0.5, 5.2]})" +
+                ", (a)-[:REL {weight: 2.0}]->(b)" +
+                ", (b)-[:REL {weight: 1.0}]->(a)" +
+                ", (a)-[:REL {weight: 1.0}]->(c)" +
+                ", (c)-[:REL {weight: 1.0}]->(a)" +
+                ", (b)-[:REL {weight: 1.0}]->(c)" +
+                ", (c)-[:REL {weight: 1.0}]->(b)";
+
+
+        @Inject
+        private Graph fastRpGraph;
+
+        private static final int DEFAULT_EMBEDDING_DIMENSION = 128;
+
+        @Test
+        void fastRP() {
+
+            var parameters = new FastRPParameters(
+                List.of("f"),
+                List.of(1.0D),
+                DEFAULT_EMBEDDING_DIMENSION,
+                0.0,
+                Optional.empty(),
+                0.0F,
+                0,
+                new Concurrency(4),
+                Optional.of(42L)
+            );
+
+            var timedAlgorithmResult = facade.fastRP(fastRpGraph, parameters, jobIdMock, true).join();
+
+            assertThat(timedAlgorithmResult.computeMillis()).isNotNegative();
+
+            assertThat(timedAlgorithmResult.result().embeddings().size()).isEqualTo(fastRpGraph.nodeCount());
+        }
+    }
+
+    @Nested
+    @GdlExtension
+    class HashGnnTest {
+
+        @GdlGraph(graphNamePrefix = "hashGnn")
+        private static final String HASH_GNN =
+            "CREATE" +
+                "  (a:N {f1: 1.1, f2: [1.3, 2.0]})" +
+                ", (b:N {f1: 1.5, f2: [-3.1, 1.6]})" +
+                ", (c:N {f1: -0.6, f2: [0.0, -1.0]})" +
+                ", (b)-[:R]->(a)" +
+                ", (b)-[:R]->(c)";
+
+        @Inject
+        private Graph hashGnnGraph;
+
+        @Test
+        void hashGnn() {
+            int embeddingDensity = 100;
+            int binarizationDimension = 8;
+
+            var parameters = new HashGNNParameters(
+                new Concurrency(4),
+                1,
+                embeddingDensity,
+                0.0,
+                List.of("f1", "f2"),
+                false,
+                Optional.empty(),
+                Optional.of(new BinarizeParameters(binarizationDimension, 0.0d)),
+                Optional.empty(),
+                Optional.of(42L)
+            );
+
+            var timedAlgorithmResult = facade.hashGnn(hashGnnGraph, parameters, List.of("R"), jobIdMock, true).join();
+
+            assertThat(timedAlgorithmResult.computeMillis()).isNotNegative();
+            assertThat(timedAlgorithmResult.result().embeddings().nodeCount()).isEqualTo(hashGnnGraph.nodeCount());
+        }
     }
 
     @Nested
@@ -143,7 +235,8 @@ class NodeEmbeddingComputeFacadeTest {
                 node2VecGraph,
                 parameters,
                 jobIdMock,
-                true
+                true,
+                TerminationFlag.RUNNING_TRUE
             ).join();
 
             assertThat(timedAlgorithmResult.computeMillis()).isNotNegative();
@@ -157,4 +250,5 @@ class NodeEmbeddingComputeFacadeTest {
                 .allSatisfy(data -> assertThat(data).hasSize(embeddingDimension));
         }
     }
+
 }

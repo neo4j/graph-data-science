@@ -28,10 +28,24 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
+import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesParameters;
+import org.neo4j.gds.closeness.ClosenessCentralityParameters;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
+import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
+import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureResult;
+import org.neo4j.gds.influenceMaximization.CELFParameters;
+import org.neo4j.gds.influenceMaximization.CELFResult;
+import org.neo4j.gds.pagerank.ArticleRankConfigImpl;
+import org.neo4j.gds.pagerank.EigenvectorConfigImpl;
+import org.neo4j.gds.pagerank.PageRankConfigImpl;
+import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,6 +80,24 @@ class CentralityComputeFacadeEmptyGraphTest {
     }
 
     @Test
+    void articleRank() {
+        var config =  ArticleRankConfigImpl.builder().maxIterations(3).build();
+
+        var future = facade.articleRank(
+            graph,
+            config,
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(PageRankResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
     void articulationPoints() {
 
         var future = facade.articulationPoints(
@@ -77,6 +109,23 @@ class CentralityComputeFacadeEmptyGraphTest {
 
         var result = future.join();
         assertThat(result.result()).isEqualTo(ArticulationPointsResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void betweennessCentrality() {
+
+        var future = facade.betweennessCentrality(
+            graph,
+            mock(BetweennessCentralityParameters.class),
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(BetwennessCentralityResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
@@ -98,4 +147,110 @@ class CentralityComputeFacadeEmptyGraphTest {
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }
+
+    @Test
+    void celf() {
+
+        var future = facade.celf(
+            graph,
+            mock(CELFParameters.class),
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(CELFResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void closenessCentrality() {
+
+        var future = facade.closeness(
+            graph,
+            mock(ClosenessCentralityParameters.class),
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(ClosenessCentralityResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void eigenVector() {
+        var config =  EigenvectorConfigImpl.builder().maxIterations(3).build();
+
+        var future = facade.eigenVector(
+            graph,
+            config,
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(PageRankResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void harmonic() {
+
+        var future = facade.harmonic(
+            graph,
+            mock(HarmonicCentralityParameters.class),
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(HarmonicResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+
+    @Test
+    void indirectExposure(){
+
+        var future = facade.indirectExposure(
+            graph,
+            mock(IndirectExposureConfig.class),
+            jobIdMock,
+            false
+        );
+
+        var results = future.join();
+
+        assertThat(results.result()).isEqualTo(IndirectExposureResult.EMPTY);
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
+    @Test
+    void pageRank() {
+        var config =  PageRankConfigImpl.builder().maxIterations(3).build();
+
+        var future = facade.pageRank(
+            graph,
+            config,
+            jobIdMock,
+            true
+        );
+
+        var result = future.join();
+        assertThat(result.result()).isEqualTo(PageRankResult.EMPTY);
+
+        verifyNoInteractions(progressTrackerFactoryMock);
+        verifyNoInteractions(algorithmCallerMock);
+    }
+
 }

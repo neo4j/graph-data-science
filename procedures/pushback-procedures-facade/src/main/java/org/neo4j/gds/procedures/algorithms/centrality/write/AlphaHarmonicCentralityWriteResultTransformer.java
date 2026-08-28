@@ -33,10 +33,6 @@ import org.neo4j.gds.results.ResultTransformer;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/**
- * @deprecated not used, delete
- */
-@Deprecated
 public class AlphaHarmonicCentralityWriteResultTransformer implements ResultTransformer<TimedAlgorithmResult<HarmonicResult>, Stream<AlphaHarmonicWriteResult>>  {
 
     private final GenericCentralityWriteResultTransformer<HarmonicResult> genericCentralityWriteResultTransformer;
