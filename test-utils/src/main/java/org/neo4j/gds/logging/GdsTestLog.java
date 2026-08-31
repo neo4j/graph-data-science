@@ -40,6 +40,10 @@ public class GdsTestLog implements Log {
         messages = new ConcurrentHashMap<>(3);
     }
 
+    public void clear() {
+        messages.clear();
+    }
+
     public void assertContainsMessage(String level, String fragment) {
         if (!containsMessage(level, fragment)) {
             throw new RuntimeException(
