@@ -79,10 +79,7 @@ public class GraphInfo {
         this.configuration = configuration;
     }
 
-    public static GraphInfo withMemoryUsage(
-        GraphProjectConfig graphProjectConfig,
-        GraphStore graphStore
-    ) {
+    public static GraphInfo withMemoryUsage(GraphProjectConfig graphProjectConfig, GraphStore graphStore) {
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
 
         var memoryUsage = sizeInBytes >= 0
@@ -97,9 +94,7 @@ public class GraphInfo {
         );
     }
 
-    public static GraphInfo withoutMemoryUsage(
-        GraphStoreCatalogEntry graphStoreCatalogEntry
-    ) {
+    public static GraphInfo withoutMemoryUsage(GraphStoreCatalogEntry graphStoreCatalogEntry) {
         return create(
             graphStoreCatalogEntry.config(),
             graphStoreCatalogEntry.graphStore(),
@@ -108,10 +103,7 @@ public class GraphInfo {
         );
     }
 
-    public static GraphInfo withoutMemoryUsage(
-        GraphProjectConfig graphProjectConfig,
-        GraphStore graphStore
-    ) {
+    public static GraphInfo withoutMemoryUsage(GraphProjectConfig graphProjectConfig, GraphStore graphStore) {
         return create(
             graphProjectConfig,
             graphStore,

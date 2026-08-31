@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.Property;
@@ -27,11 +26,9 @@ import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.OptionalInt;
 
-@ValueClass
-@SuppressWarnings("immutables:from")
-public interface NodeProperty extends Property<NodePropertyValues> {
+public record NodeProperty(NodePropertyValues values, PropertySchema propertySchema) implements Property<NodePropertyValues> {
 
-    static NodeProperty of(
+    public static NodeProperty of(
         String key,
         PropertyState origin,
         NodePropertyValues values
@@ -39,13 +36,13 @@ public interface NodeProperty extends Property<NodePropertyValues> {
         return of(key, origin, values, values.valueType().fallbackValue());
     }
 
-    static NodeProperty of(
+    public static NodeProperty of(
         String key,
         PropertyState origin,
         NodePropertyValues values,
         DefaultValue defaultValue
     ) {
-        return ImmutableNodeProperty.of(
+        return new NodeProperty(
             values,
             PropertySchema.of(key, values.valueType(), defaultValue, origin, vectorDimension(values))
         );
