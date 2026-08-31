@@ -31,20 +31,8 @@ public record RelationshipProperty(Properties values, RelationshipPropertySchema
         return propertySchema().key();
     }
 
-    public ValueType valueType() {
-        return propertySchema().valueType();
-    }
-
     public DefaultValue defaultValue() {
         return propertySchema().defaultValue();
-    }
-
-    public PropertyState propertyState() {
-        return propertySchema().state();
-    }
-
-    public Aggregation aggregation() {
-        return propertySchema().aggregation();
     }
 
     public static RelationshipProperty of(

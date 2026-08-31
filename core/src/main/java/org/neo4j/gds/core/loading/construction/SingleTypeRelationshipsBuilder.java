@@ -31,7 +31,6 @@ import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.compression.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -171,12 +170,7 @@ abstract class SingleTypeRelationshipsBuilder {
             .relationshipProperties()
             .forEach((propertyKey, relationshipProperty) -> entry.addProperty(
                 propertyKey,
-                RelationshipPropertySchema.of(propertyKey,
-                    relationshipProperty.valueType(),
-                    relationshipProperty.defaultValue(),
-                    relationshipProperty.propertyState(),
-                    relationshipProperty.aggregation()
-                )
+                relationshipProperty.propertySchema()
             ))
         );
 
