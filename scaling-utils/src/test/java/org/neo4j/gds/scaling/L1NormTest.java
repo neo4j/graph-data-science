@@ -66,9 +66,9 @@ class L1NormTest {
             DefaultPool.INSTANCE
         );
 
-        var scaler = ScalerFactory.L1NormScaler(properties, computed);
-
         assertThat(computed.sum()).isEqualTo(l1norm);
+
+        var scaler = ScalerFactory.L1NormScaler(properties, computed);
 
         double[] actual = IntStream.range(0, nodeCount).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);

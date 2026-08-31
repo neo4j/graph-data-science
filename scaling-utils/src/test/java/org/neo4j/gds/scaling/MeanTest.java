@@ -59,10 +59,12 @@ class MeanTest {
             new Concurrency(1),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE);
-        var scaler = ScalerFactory.meanScaler(properties, computed);
 
         assertThat(computed.average()).isEqualTo(avg);
         assertThat(computed.max() - computed.min()).isEqualTo(max - min);
+
+        var scaler = ScalerFactory.meanScaler(properties, computed);
+
         assertThat(scaler.statistics()).containsExactlyInAnyOrderEntriesOf(Map.of(
             "max", List.of(max),
             "avg", List.of(avg),

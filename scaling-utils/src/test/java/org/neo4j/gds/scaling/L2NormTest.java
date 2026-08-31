@@ -57,9 +57,9 @@ class L2NormTest {
             DefaultPool.INSTANCE
         );
 
-        var scaler = ScalerFactory.L2NormScaler(properties, computed);
-
         assertThat(computed.length()).isEqualTo(euclideanLength);
+
+        var scaler = ScalerFactory.L2NormScaler(properties, computed);
 
         double[] actual = IntStream.range(0, 10).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);

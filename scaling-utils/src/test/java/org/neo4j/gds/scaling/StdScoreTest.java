@@ -60,10 +60,11 @@ class StdScoreTest {
             DefaultPool.INSTANCE
         );
 
-        var scaler = ScalerFactory.StdScaler(properties, computed);
-
         assertThat(computed.average()).isEqualTo(avg);
         assertThat(computed.std()).isEqualTo(std);
+
+        var scaler = ScalerFactory.StdScaler(properties, computed);
+
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
             "avg", List.of(avg),
             "std", List.of(std)

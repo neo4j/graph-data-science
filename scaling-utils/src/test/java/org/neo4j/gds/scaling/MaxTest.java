@@ -74,9 +74,9 @@ class MaxTest {
             DefaultPool.INSTANCE
         );
 
-        var scaler = ScalerFactory.maxScaler(properties, computed);
-
         assertThat(Math.max(Math.abs(computed.min()), Math.abs(computed.max()))).isEqualTo(absMax);
+
+        var scaler = ScalerFactory.maxScaler(properties, computed);
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of("absMax", List.of(absMax)));
 
         double[] actual = IntStream.range(0, nodeCount).mapToDouble(scaler::scaleProperty).toArray();

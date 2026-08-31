@@ -57,10 +57,11 @@ class MinMaxTest {
             DefaultPool.INSTANCE
         );
 
-        var scaler = ScalerFactory.minMaxScaler(properties, computed);
-
         assertThat(computed.min()).isEqualTo(min);
         assertThat(computed.max() - computed.min()).isEqualTo(max - min);
+
+        var scaler = ScalerFactory.minMaxScaler(properties, computed);
+
         assertThat(scaler.statistics()).containsExactlyEntriesOf(Map.of(
             "max", List.of(max),
             "min", List.of(min)
