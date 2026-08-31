@@ -62,7 +62,7 @@ class HugeSimilarityGraphTest {
             new SimilarityResult(1, 3, 9)
         );
         var rels = similarityGraph.relationships("foo", "bar");
-        AdjacencyCursor adjacencyCursor = rels.topology().adjacencyList().adjacencyCursor(1);
+        AdjacencyCursor adjacencyCursor = rels.adjacencyList().adjacencyCursor(1);
         assertThat(adjacencyCursor.nextVLong()).isEqualTo(2L);
         assertThat(adjacencyCursor.nextVLong()).isEqualTo(3L);
 

@@ -22,12 +22,14 @@ package org.neo4j.gds.similarity;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
+import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 import java.util.Map;
-import java.util.Optional;
 
 public class HugeSimilarityGraph extends SimilarityGraph{
 
@@ -45,13 +47,13 @@ public class HugeSimilarityGraph extends SimilarityGraph{
         }
         HugeGraph similarityGraph = (HugeGraph) graph;
 
-        return SingleTypeRelationships.of(
-            RelationshipType.of(relationshipType),
-            similarityGraph.relationshipTopology(),
-            similarityGraph.schema().direction(),
-            similarityGraph.relationshipProperties(),
-            Optional.of(RelationshipPropertySchema.of(similarityPropertyName, ValueType.DOUBLE))
-        );
+        var properties = similarityGraph.relationshipProperties().orElseThrow(IllegalStateException::new);
+        var propertySchema = RelationshipPropertySchema.of(similarityPropertyName, ValueType.DOUBLE);
+        var relationshipProperty = new RelationshipProperty(properties, propertySchema);
+        var schemaEntry = new MutableRelationshipSchemaEntry(RelationshipType.of(relationshipType), similarityGraph.schema().direction())
+            .addProperty(similarityPropertyName, propertySchema);
+        var relationshipPropertyStore = new RelationshipPropertyStore(similarityPropertyName, relationshipProperty);
+        return new SingleTypeRelationships(similarityGraph.relationshipTopology(), schemaEntry, relationshipPropertyStore);
     }
 
     @Override

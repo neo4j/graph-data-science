@@ -39,6 +39,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.huge.UnionGraph;
@@ -166,15 +167,8 @@ class GraphStoreTest extends BaseTest {
         // add relationships
         Thread.sleep(42);
         RelationshipType bar = RelationshipType.of("BAR");
-        graphStore.addRelationshipType(
-            SingleTypeRelationships.of(
-                bar,
-                Topology.EMPTY,
-                Direction.DIRECTED,
-                Optional.empty(),
-                Optional.empty()
-            )
-        );
+        var schemaEntry = new MutableRelationshipSchemaEntry(bar, Direction.DIRECTED);
+        graphStore.addRelationshipType(new SingleTypeRelationships(Topology.EMPTY, schemaEntry));
         ZonedDateTime relationshipTime = graphStore.modificationTime();
 
         assertTrue(initialTime.isBefore(nodePropertyTime), "Node property update did not change modificationTime");

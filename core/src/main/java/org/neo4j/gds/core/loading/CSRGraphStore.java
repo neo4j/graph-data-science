@@ -307,7 +307,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
     public long relationshipCount() {
         long sum = 0L;
         for (var relationship : relationships.values()) {
-            long elementCount = relationship.topology().elementCount();
+            long elementCount = relationship.count();
             sum += elementCount;
         }
         return sum;
@@ -315,7 +315,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
 
     @Override
     public long relationshipCount(RelationshipType relationshipType) {
-        return relationships.get(relationshipType).topology().elementCount();
+        return relationships.get(relationshipType).count();
     }
 
     @Override
@@ -390,9 +390,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         Topology topology,
         Optional<RelationshipPropertyStore> properties
     ) {
-        var newRelationships = SingleTypeRelationships
-            .builder()
-            .from(relationships.get(relationshipType))
+        var newRelationships = SingleTypeRelationshipsBuilder.builder(relationships.get(relationshipType))
             .inverseTopology(topology)
             .inverseProperties(properties)
             .build();
@@ -407,7 +405,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
             if (graphStore.relationships.containsKey(relationshipType)) {
                 var removed = graphStore.relationships.remove(relationshipType);
                 schema.relationshipSchema().remove(relationshipType);
-                var deletedRelationships = removed.topology().elementCount();
+                var deletedRelationships = removed.count();
                 var deletedProperties = removed.properties().stream().map(RelationshipPropertyStore::relationshipProperties)
                     .flatMap((m) -> m.values().stream())
                     .collect(Collectors.toMap(RelationshipProperty::key, p -> p.values().elementCount()));
@@ -499,7 +497,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         }
 
         var relationship = relationships.get(relationshipType);
-        var adjacencyList = relationship.topology().adjacencyList();
+        var adjacencyList = relationship.adjacencyList();
         var inverseAdjacencyList = relationship
             .inverseTopology()
             .map(Topology::adjacencyList);

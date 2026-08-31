@@ -80,7 +80,7 @@ public final class RelationshipsFilter {
             );
 
             // Drop relationship types that have been completely filtered out.
-            if (outputRelationships.topology().elementCount() == 0) {
+            if (outputRelationships.count() == 0) {
                 progressTracker.endSubTask();
                 continue;
             }

@@ -46,8 +46,8 @@ class SplitRelationshipsMutateStep implements MutateStep<EdgeSplitter.SplitResul
         mutateRelationshipService.mutate(graphStore,remainingRelationships);
         mutateRelationshipService.mutate(graphStore,selectedRelationships);
 
-        var holdoutWritten = selectedRelationships.topology().elementCount();
-        var remainingWritten = remainingRelationships.topology().elementCount();
+        var holdoutWritten = selectedRelationships.count();
+        var remainingWritten = remainingRelationships.count();
 
         return new RelationshipsWritten(holdoutWritten + remainingWritten);
     }

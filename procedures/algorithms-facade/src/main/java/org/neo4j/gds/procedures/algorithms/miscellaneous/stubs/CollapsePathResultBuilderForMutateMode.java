@@ -45,7 +45,7 @@ class CollapsePathResultBuilderForMutateMode implements ResultBuilder<CollapsePa
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.sideEffectMillis,
-            singleTypeRelationships.topology().elementCount(),
+            singleTypeRelationships.count(),
             configuration.toMap()
         );
     }

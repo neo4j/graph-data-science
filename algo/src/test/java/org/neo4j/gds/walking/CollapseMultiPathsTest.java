@@ -22,8 +22,6 @@ package org.neo4j.gds.walking;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -114,7 +112,6 @@ class CollapseMultiPathsTest {
             RelationshipType.of("REL"),
             new Concurrency(2),
             DefaultPool.INSTANCE
-
         ).compute();
 
         // Planes, Trains and Automobiles
@@ -128,8 +125,7 @@ class CollapseMultiPathsTest {
         long losangeles = mappedId.of("losangeles");
         long chicago = mappedId.of("chicago");
 
-        AdjacencyList adjacencyList = path.topology().adjacencyList();
-        AdjacencyCursor adjacencyCursor = adjacencyList.adjacencyCursor(manhattan);
+        var adjacencyCursor = path.adjacencyList().adjacencyCursor(manhattan);
 
         assertTrue(adjacencyCursor.hasNextVLong());
         long targetOfCollapsedPathFromManhattan1 = adjacencyCursor.nextVLong();
@@ -145,7 +141,7 @@ class CollapseMultiPathsTest {
 
         // notice how this is a collapsed relationship per route
         // Silver Streak route and Airplane! route
-        adjacencyCursor = adjacencyList.adjacencyCursor(losangeles);
+        adjacencyCursor = path.adjacencyList().adjacencyCursor(losangeles);
 
         assertTrue(adjacencyCursor.hasNextVLong());
         long targetOfCollapsedPathFromLosAngeles1 = adjacencyCursor.nextVLong();
@@ -183,9 +179,7 @@ class CollapseMultiPathsTest {
         long washington = mappedId.of("washington");
         long newyork = mappedId.of("newyork");
 
-        AdjacencyList adjacencyList = path.topology().adjacencyList();
-
-        AdjacencyCursor adjacencyCursor = adjacencyList.adjacencyCursor(washington);
+        var adjacencyCursor = path.adjacencyList().adjacencyCursor(washington);
 
         assertTrue(adjacencyCursor.hasNextVLong());
         long targetOfCollapsedPathFromWashington1 = adjacencyCursor.nextVLong();

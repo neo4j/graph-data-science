@@ -75,7 +75,7 @@ public interface RelationshipImportResult {
      * @return a wrapper type ready to be consumed by a {@link org.neo4j.gds.api.GraphStore}
      */
     static RelationshipImportResult of(Collection<SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext> importContexts) {
-        var builders = new HashMap<RelationshipType, ImmutableSingleTypeRelationships.Builder>(importContexts.size());
+        var builders = new HashMap<RelationshipType, SingleTypeRelationshipsBuilder>(importContexts.size());
 
         importContexts.forEach((importContext) -> {
             var adjacencyListsWithProperties = importContext.singleTypeRelationshipImporter().build();
@@ -108,7 +108,7 @@ public interface RelationshipImportResult {
 
             var importResultBuilder = builders.computeIfAbsent(
                 importContext.relationshipType(),
-                relationshipType -> SingleTypeRelationships
+                relationshipType -> SingleTypeRelationshipsBuilder
                     .builder()
                     .relationshipSchemaEntry(schemaEntry)
             );

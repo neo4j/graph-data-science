@@ -142,9 +142,9 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(skewedGraph, 1.0, Optional.of("foo"));
 
         assertThat(result.selectedRelCount()).isEqualTo(5);
-        assertThat(result.selectedRels().build().topology().elementCount()).isEqualTo(5);
+        assertThat(result.selectedRels().build().count()).isEqualTo(5);
         assertThat(result.remainingRelCount()).isEqualTo(0);
-        assertThat(result.remainingRels().build().topology().elementCount()).isEqualTo(0);
+        assertThat(result.remainingRels().build().count()).isEqualTo(0);
     }
 
     @Test
@@ -161,10 +161,10 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(multiGraph, 0.5, Optional.empty());
 
-        assertThat(result.selectedRels().build().topology())
+        assertThat(result.selectedRels().build())
             // we always aggregate the result at the moment
-            .matches(topology -> !topology.isMultiGraph())
-            .matches(topology -> topology.elementCount() == 1);
+            .matches(rels -> !rels.topology().isMultiGraph())
+            .matches(rels -> rels.count() == 1);
     }
 
 

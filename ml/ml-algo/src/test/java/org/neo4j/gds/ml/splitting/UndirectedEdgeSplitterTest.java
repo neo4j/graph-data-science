@@ -109,7 +109,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var remainingRelationships = result.remainingRels().build();
         // 1 positive selected reduces remaining
-        assertEquals(8L, remainingRelationships.topology().elementCount());
+        assertEquals(8L, remainingRelationships.count());
         assertEquals(Direction.UNDIRECTED, remainingRelationships.relationshipSchemaEntry().direction());
         assertFalse(remainingRelationships.topology().isMultiGraph());
         assertThat(remainingRelationships.properties()).isNotEmpty();
@@ -137,10 +137,10 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(multiGraph, 0.5, Optional.empty());
 
-        assertThat(result.selectedRels().build().topology())
+        assertThat(result.selectedRels().build())
             // we always aggregate the result at the moment
-            .matches(topology -> !topology.isMultiGraph())
-            .matches(topology -> topology.elementCount() == 2);
+            .matches(rels -> !rels.topology().isMultiGraph())
+            .matches(rels -> rels.count() == 2);
     }
 
     @Test
@@ -319,7 +319,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var remainingRelationships = result.remainingRels().build();
         // 1 positive selected reduces remaining & 4 invalid relationships
-        assertEquals(4L, remainingRelationships.topology().elementCount());
+        assertEquals(4L, remainingRelationships.count());
         assertEquals(Direction.UNDIRECTED, remainingRelationships.relationshipSchemaEntry().direction());
         assertFalse(remainingRelationships.topology().isMultiGraph());
         assertThat(remainingRelationships.properties()).isNotEmpty();
@@ -443,7 +443,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     private boolean relationshipsAreEqual(IdMap mapping, SingleTypeRelationships r1, SingleTypeRelationships r2) {
         var fallbackValue = -0.66;
-        if (r1.topology().elementCount() != r2.topology().elementCount()) {
+        if (r1.count() != r2.count()) {
             return false;
         }
 

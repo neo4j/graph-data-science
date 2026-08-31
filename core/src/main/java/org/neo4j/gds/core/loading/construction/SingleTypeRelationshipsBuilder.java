@@ -267,18 +267,17 @@ abstract class SingleTypeRelationshipsBuilder {
                 .elementCount(relationshipCount)
                 .build();
 
-            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationships.builder().topology(topology);
+            var builder = org.neo4j.gds.core.loading.SingleTypeRelationshipsBuilder.builder().topology(topology);
 
             RelationshipPropertyStore properties = null;
             if (loadRelationshipProperty) {
                 properties = relationshipPropertyStore(adjacencyListsWithProperties);
-                singleRelationshipTypeImportResultBuilder.properties(properties);
+                builder.properties(properties);
             }
 
-            singleRelationshipTypeImportResultBuilder
-                .relationshipSchemaEntry(relationshipSchemaEntry(Optional.ofNullable(properties)));
+            builder.relationshipSchemaEntry(relationshipSchemaEntry(Optional.ofNullable(properties)));
 
-            return singleRelationshipTypeImportResultBuilder.build();
+            return builder.build();
         }
     }
 
@@ -353,7 +352,7 @@ abstract class SingleTypeRelationshipsBuilder {
                 .adjacencyList(inverseAdjacencyList)
                 .build();
 
-            var singleRelationshipTypeImportResultBuilder = SingleTypeRelationships.builder()
+            var builder = org.neo4j.gds.core.loading.SingleTypeRelationshipsBuilder.builder()
                 .topology(forwardTopology)
                 .inverseTopology(inverseTopology);
 
@@ -361,13 +360,11 @@ abstract class SingleTypeRelationshipsBuilder {
             if (loadRelationshipProperty) {
                 forwardProperties = relationshipPropertyStore(forwardListWithProperties);
                 var inverseProperties = relationshipPropertyStore(inverseListWithProperties);
-                singleRelationshipTypeImportResultBuilder.properties(forwardProperties).inverseProperties(inverseProperties);
+                builder.properties(forwardProperties).inverseProperties(inverseProperties);
             }
 
-            singleRelationshipTypeImportResultBuilder
-                .relationshipSchemaEntry(relationshipSchemaEntry(Optional.ofNullable(forwardProperties)));
-
-            return singleRelationshipTypeImportResultBuilder.build();
+            builder.relationshipSchemaEntry(relationshipSchemaEntry(Optional.ofNullable(forwardProperties)));
+            return builder.build();
         }
     }
 }

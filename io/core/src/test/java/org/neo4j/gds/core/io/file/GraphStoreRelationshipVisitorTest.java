@@ -33,6 +33,7 @@ import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
@@ -161,7 +162,7 @@ class GraphStoreRelationshipVisitorTest {
             .importResults()
             .values()
             .stream()
-            .mapToLong(r -> r.topology().elementCount())
+            .mapToLong(SingleTypeRelationships::count)
             .sum();
 
         assertThat(actualRelationshipCount).isEqualTo(expectedImportedRelationshipsCount);

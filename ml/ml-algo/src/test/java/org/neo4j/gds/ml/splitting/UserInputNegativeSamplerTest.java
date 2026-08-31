@@ -88,8 +88,8 @@ class UserInputNegativeSamplerTest {
         var testSet = testBuilder.build();
         var trainSet = trainBuilder.build();
 
-        assertThat(testSet.topology().elementCount()).isEqualTo(2);
-        assertThat(trainSet.topology().elementCount()).isEqualTo(4);
+        assertThat(testSet.count()).isEqualTo(2);
+        assertThat(trainSet.count()).isEqualTo(4);
 
         assertThat(testSet.properties()).isNotEmpty();
         var testSetProperties = testSet.properties().get().values().iterator().next().values().propertiesList();

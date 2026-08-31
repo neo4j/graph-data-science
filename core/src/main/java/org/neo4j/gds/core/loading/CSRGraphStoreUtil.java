@@ -145,11 +145,11 @@ public final class CSRGraphStoreUtil {
             graph.relationshipProperties()
         );
 
-       return SingleTypeRelationships.builder()
-                    .relationshipSchemaEntry(relationshipSchema.get(relationshipType))
-                    .topology(graph.relationshipTopology())
-                    .properties(relationshipProperties)
-                    .build();
+        return SingleTypeRelationshipsBuilder.builder()
+            .relationshipSchemaEntry(relationshipSchema.get(relationshipType))
+            .topology(graph.relationshipTopology())
+            .properties(relationshipProperties)
+            .build();
     }
 
     private static NodePropertyStore constructNodePropertiesFromSchemaAndProperties(

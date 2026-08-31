@@ -109,7 +109,7 @@ class LinkPredictionPipelineMutateStep implements MutateStep<LinkPredictionResul
         graphStore.addRelationshipType(relationships);
 
         // report metadata
-        var relationshipsWritten = new RelationshipsWritten(relationships.topology().elementCount());
+        var relationshipsWritten = new RelationshipsWritten(relationships.count());
         var probabilityDistribution = histogram.finalise();
         return new LinkPredictionMutateMetadata(relationshipsWritten, probabilityDistribution);
     }

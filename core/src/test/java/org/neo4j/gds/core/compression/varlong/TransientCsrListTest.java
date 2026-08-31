@@ -411,7 +411,7 @@ class TransientCsrListTest {
 
         Arrays.stream(targets).forEach(target -> relationshipsBuilder.add(sourceNodeId, target));
 
-        return relationshipsBuilder.build().topology().adjacencyList();
+        return relationshipsBuilder.build().adjacencyList();
     }
 
     private static IdMap idMap(long[] targets) {

@@ -82,8 +82,8 @@ class RandomNegativeSamplerTest {
         var testSet = testBuilder.build();
         var trainSet = trainBuilder.build();
 
-        assertThat(testSet.topology().elementCount()).isEqualTo(testSampleCount);
-        assertThat(trainSet.topology().elementCount()).isEqualTo(trainSampleCount);
+        assertThat(testSet.count()).isEqualTo(testSampleCount);
+        assertThat(trainSet.count()).isEqualTo(trainSampleCount);
 
         assertThat(testSet.properties()).isNotEmpty();
         var testSetProperties = testSet.properties().get().values().iterator().next().values().propertiesList();
