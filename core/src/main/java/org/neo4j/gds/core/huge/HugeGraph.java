@@ -37,7 +37,6 @@ import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.properties.relationships.ImmutableProperties;
 import org.neo4j.gds.api.properties.relationships.Properties;
 import org.neo4j.gds.api.properties.relationships.PropertyCursor;
 import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
@@ -555,13 +554,13 @@ public class HugeGraph implements CSRGraph {
     public Optional<Properties> relationshipProperties() {
         return Optional
             .ofNullable(properties)
-            .map(properties -> ImmutableProperties.of(properties, relationshipCount, defaultPropertyValue));
+            .map(properties -> new Properties(properties, relationshipCount, defaultPropertyValue));
     }
 
     public Optional<Properties> inverseRelationshipProperties() {
         return Optional
             .ofNullable(inverseProperties)
-            .map(properties -> ImmutableProperties.of(properties, relationshipCount, defaultPropertyValue));
+            .map(properties -> new Properties(properties, relationshipCount, defaultPropertyValue));
     }
 
     private void consumeAdjacentNodes(

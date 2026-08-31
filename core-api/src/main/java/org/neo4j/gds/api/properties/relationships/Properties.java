@@ -19,14 +19,8 @@
  */
 package org.neo4j.gds.api.properties.relationships;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.api.AdjacencyProperties;
 
-@ValueClass
-public interface Properties {
-    AdjacencyProperties propertiesList();
-
-    long elementCount();
-
-    double defaultPropertyValue();
-}
+@GenerateBuilder
+public record Properties(AdjacencyProperties propertiesList, long elementCount, double defaultPropertyValue) {}

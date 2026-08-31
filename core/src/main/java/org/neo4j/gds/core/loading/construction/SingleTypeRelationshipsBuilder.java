@@ -24,16 +24,16 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.TopologyBuilder;
-import org.neo4j.gds.compression.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.relationships.ImmutableProperties;
 import org.neo4j.gds.api.properties.relationships.ImmutableRelationshipProperty;
+import org.neo4j.gds.api.properties.relationships.PropertiesBuilder;
 import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
+import org.neo4j.gds.compression.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
@@ -192,7 +192,7 @@ abstract class SingleTypeRelationshipsBuilder {
         for (int propertyKeyId = 0; propertyKeyId < this.propertyConfigs.size(); propertyKeyId++) {
             var propertyConfig = this.propertyConfigs.get(propertyKeyId);
 
-            var propertyValues = ImmutableProperties.builder()
+            var propertyValues = PropertiesBuilder.builder()
                 .propertiesList(properties.get(propertyKeyId))
                 .defaultPropertyValue(DefaultValue.DOUBLE_DEFAULT_FALLBACK)
                 .elementCount(relationshipCount)

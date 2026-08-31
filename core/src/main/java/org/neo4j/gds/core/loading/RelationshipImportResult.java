@@ -28,7 +28,7 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.TopologyBuilder;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.relationships.ImmutableProperties;
+import org.neo4j.gds.api.properties.relationships.Properties;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
 import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.Direction;
@@ -147,7 +147,7 @@ public interface RelationshipImportResult {
                     propertyMapping.propertyKey(),
                     ValueType.DOUBLE,
                     PropertyState.PERSISTENT,
-                    ImmutableProperties.of(
+                    new Properties(
                         propertiesList,
                         relationshipCount,
                         // This is fine because relationships currently only support doubles
