@@ -25,8 +25,8 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.TopologyBuilder;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.relationships.ImmutableRelationshipProperty;
 import org.neo4j.gds.api.properties.relationships.PropertiesBuilder;
+import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
 import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
@@ -206,10 +206,10 @@ abstract class SingleTypeRelationshipsBuilder {
                 .state(propertyConfig.propertyState())
                 .build();
 
-            var relationshipProperty = ImmutableRelationshipProperty.builder()
-                .values(propertyValues)
-                .propertySchema(relationshipPropertySchema)
-                .build();
+            var relationshipProperty = new RelationshipProperty(
+                propertyValues,
+                relationshipPropertySchema
+            );
 
             propertyStoreBuilder.putRelationshipProperty(propertyConfig.propertyKey(), relationshipProperty);
         }

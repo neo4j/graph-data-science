@@ -23,8 +23,8 @@ import org.immutables.value.Value;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Topology;
-import org.neo4j.gds.api.properties.relationships.ImmutableRelationshipProperty;
 import org.neo4j.gds.api.properties.relationships.Properties;
+import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
 import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
@@ -111,10 +111,10 @@ public interface SingleTypeRelationships {
             .relationshipSchemaEntry(schemaEntry)
             .properties(
                 propertySchema.map(schema -> {
-                    var relationshipProperty = ImmutableRelationshipProperty.builder()
-                        .values(properties.orElseThrow(IllegalStateException::new))
-                        .propertySchema(schema)
-                        .build();
+                    var relationshipProperty = new RelationshipProperty(
+                        properties.orElseThrow(IllegalStateException::new),
+                        schema
+                    );
                     return RelationshipPropertyStore
                         .builder()
                         .putRelationshipProperty(schema.key(), relationshipProperty)

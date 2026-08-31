@@ -19,41 +19,35 @@
  */
 package org.neo4j.gds.api.properties.relationships;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.Aggregation;
 
-@ValueClass
-public interface RelationshipProperty {
+public record RelationshipProperty(Properties values, RelationshipPropertySchema propertySchema) {
 
-    Properties values();
-
-    RelationshipPropertySchema propertySchema();
-
-    default String key() {
+    public String key() {
         return propertySchema().key();
     }
 
-    default ValueType valueType() {
+    public ValueType valueType() {
         return propertySchema().valueType();
     }
 
-    default DefaultValue defaultValue() {
+    public DefaultValue defaultValue() {
         return propertySchema().defaultValue();
     }
 
-    default PropertyState propertyState() {
+    public PropertyState propertyState() {
         return propertySchema().state();
     }
 
-    default Aggregation aggregation() {
+    public Aggregation aggregation() {
         return propertySchema().aggregation();
     }
 
-    static RelationshipProperty of(
+    public static RelationshipProperty of(
         String key,
         ValueType type,
         PropertyState state,
@@ -61,7 +55,7 @@ public interface RelationshipProperty {
         DefaultValue defaultValue,
         Aggregation aggregation
     ) {
-        return ImmutableRelationshipProperty.of(
+        return new RelationshipProperty(
             values,
             RelationshipPropertySchema.of(key, type, defaultValue, state, aggregation)
         );
