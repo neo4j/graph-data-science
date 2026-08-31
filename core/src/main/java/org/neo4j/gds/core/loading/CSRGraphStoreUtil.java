@@ -24,8 +24,8 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -207,23 +207,17 @@ public final class CSRGraphStoreUtil {
 
         String propertyKey = relationshipPropertyKey.get();
 
-        return Optional.of(
-            RelationshipPropertyStore.builder()
-                .putIfAbsent(
-                    propertyKey,
-                    RelationshipProperty.of(
-                        propertyKey,
-                        ValueType.DOUBLE,
-                        relationshipPropertySchema.state(),
-                        relationshipProperties.orElseThrow(),
-                        relationshipPropertySchema.defaultValue().isUserDefined()
-                            ? relationshipPropertySchema.defaultValue()
-                            : ValueType.DOUBLE.fallbackValue(),
-                        relationshipPropertySchema.aggregation()
-                    )
-                )
-                .build()
+        var schema = RelationshipPropertySchema.of(
+            propertyKey,
+            ValueType.DOUBLE,
+            relationshipPropertySchema.defaultValue().isUserDefined()
+                ? relationshipPropertySchema.defaultValue()
+                : ValueType.DOUBLE.fallbackValue(),
+            relationshipPropertySchema.state(),
+            relationshipPropertySchema.aggregation()
         );
-
+        var relationshipProperty = new RelationshipProperty(relationshipProperties.orElseThrow(), schema);
+        var relationshipPropertyStore = new RelationshipPropertyStore(propertyKey, relationshipProperty);
+        return Optional.of(relationshipPropertyStore);
     }
 }

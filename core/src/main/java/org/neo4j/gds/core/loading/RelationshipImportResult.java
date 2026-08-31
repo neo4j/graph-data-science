@@ -20,8 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AdjacencyProperties;
@@ -34,9 +33,11 @@ import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -91,7 +92,7 @@ public interface RelationshipImportResult {
             var properties = (importContext.relationshipProjection().properties().isEmpty())
                 ? Optional.<RelationshipPropertyStore>empty()
                 : Optional.of(constructRelationshipPropertyStore(
-                    importContext.relationshipProjection(),
+                    importContext.relationshipProjection().properties().mappings(),
                     adjacencyListsWithProperties.properties(),
                     adjacencyListsWithProperties.relationshipCount()
                 ));
@@ -131,35 +132,31 @@ public interface RelationshipImportResult {
     }
 
     private static RelationshipPropertyStore constructRelationshipPropertyStore(
-        RelationshipProjection projection,
-        Iterable<AdjacencyProperties> properties,
+        List<PropertyMapping> propertyMappings,
+        List<AdjacencyProperties> adjacencyProperties,
         long relationshipCount
     ) {
-        PropertyMappings propertyMappings = projection.properties();
-        RelationshipPropertyStore.Builder propertyStoreBuilder = RelationshipPropertyStore.builder();
+        var propertyStoreBuilder = RelationshipPropertyStore.builder();
 
-        var propertiesIter = properties.iterator();
-        propertyMappings.mappings().forEach(propertyMapping -> {
-            var propertiesList = propertiesIter.next();
-            propertyStoreBuilder.putIfAbsent(
-                propertyMapping.propertyKey(),
-                RelationshipProperty.of(
-                    propertyMapping.propertyKey(),
-                    ValueType.DOUBLE,
-                    PropertyState.PERSISTENT,
-                    new Properties(
-                        propertiesList,
-                        relationshipCount,
-                        // This is fine because relationships currently only support doubles
-                        propertyMapping.defaultValue().doubleValue()
-                    ),
-                    propertyMapping.defaultValue().isUserDefined()
-                        ? propertyMapping.defaultValue()
-                        : ValueType.DOUBLE.fallbackValue(),
-                    propertyMapping.aggregation()
-                )
+        for (int i = 0; i < propertyMappings.size(); i++) {
+            var propertyMapping = propertyMappings.get(i);
+            var properties = new Properties(
+                adjacencyProperties.get(i),
+                relationshipCount,
+                propertyMapping.defaultValue().doubleValue()
             );
-        });
+            var schema = RelationshipPropertySchema.of(
+                propertyMapping.propertyKey(),
+                ValueType.DOUBLE,
+                propertyMapping.defaultValue().isUserDefined()
+                    ? propertyMapping.defaultValue()
+                    : ValueType.DOUBLE.fallbackValue(),
+                PropertyState.PERSISTENT,
+                propertyMapping.aggregation()
+            );
+            var relationshipProperty = new RelationshipProperty(properties, schema);
+            propertyStoreBuilder.putIfAbsent(propertyMapping.propertyKey(), relationshipProperty);
+        }
 
         return propertyStoreBuilder.build();
     }

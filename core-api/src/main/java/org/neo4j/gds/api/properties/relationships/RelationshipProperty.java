@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.api.properties.relationships;
 
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 
 public record RelationshipProperty(Properties values, RelationshipPropertySchema propertySchema) {
@@ -33,19 +30,5 @@ public record RelationshipProperty(Properties values, RelationshipPropertySchema
 
     public DefaultValue defaultValue() {
         return propertySchema().defaultValue();
-    }
-
-    public static RelationshipProperty of(
-        String key,
-        ValueType type,
-        PropertyState state,
-        Properties values,
-        DefaultValue defaultValue,
-        Aggregation aggregation
-    ) {
-        return new RelationshipProperty(
-            values,
-            RelationshipPropertySchema.of(key, type, defaultValue, state, aggregation)
-        );
     }
 }

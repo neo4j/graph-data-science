@@ -115,10 +115,7 @@ public interface SingleTypeRelationships {
                         properties.orElseThrow(IllegalStateException::new),
                         schema
                     );
-                    return RelationshipPropertyStore
-                        .builder()
-                        .putRelationshipProperty(schema.key(), relationshipProperty)
-                        .build();
+                    return new RelationshipPropertyStore(schema.key(), relationshipProperty);
                 })).build();
     }
 }

@@ -19,54 +19,65 @@
  */
 package org.neo4j.gds.api.properties.relationships;
 
-import org.neo4j.gds.annotation.ValueClass;
-
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-@ValueClass
-public interface RelationshipPropertyStore {
+public record RelationshipPropertyStore(Map<String, RelationshipProperty> relationshipProperties) {
 
-    Map<String, RelationshipProperty> relationshipProperties();
+    public RelationshipPropertyStore(String key, RelationshipProperty relationshipProperty) {
+        this(Collections.singletonMap(key, relationshipProperty));
+    }
 
-    default boolean isEmpty() {
+    public boolean isEmpty() {
         return relationshipProperties().isEmpty();
     }
 
-    default RelationshipProperty get(String propertyKey) {
+    public RelationshipProperty get(String propertyKey) {
         return relationshipProperties().get(propertyKey);
     }
 
-    default RelationshipPropertyStore filter(String propertyKey) {
-        return RelationshipPropertyStore.builder().putRelationshipProperty(propertyKey, this.get(propertyKey)).build();
+    public RelationshipPropertyStore filter(String propertyKey) {
+        return new RelationshipPropertyStore(propertyKey, get(propertyKey));
     }
 
-    default Set<String> keySet() {
+    public Set<String> keySet() {
         return relationshipProperties().keySet();
     }
 
-    default Collection<RelationshipProperty> values() {
+    public Collection<RelationshipProperty> values() {
         return relationshipProperties().values();
     }
 
-    default boolean containsKey(String propertyKey) {
+    public boolean containsKey(String propertyKey) {
         return relationshipProperties().containsKey(propertyKey);
     }
 
-    static Builder builder() {
-        // need to initialize with empty map due to `deferCollectionAllocation = true`
-        return new Builder().relationshipProperties(Collections.emptyMap());
+    public static Builder builder() {
+        return new Builder();
     }
 
-    @org.immutables.builder.Builder.AccessibleFields
-    final class Builder extends ImmutableRelationshipPropertyStore.Builder {
+    public static final class Builder {
+        Map<String, RelationshipProperty> builderRelationshipProperties;
+
+        public Builder() {
+            this.builderRelationshipProperties = new LinkedHashMap<>();
+        }
 
         public Builder putIfAbsent(String propertyKey, RelationshipProperty relationshipProperty) {
-            relationshipProperties.putIfAbsent(propertyKey, relationshipProperty);
+            this.builderRelationshipProperties.putIfAbsent(propertyKey, relationshipProperty);
             return this;
         }
-    }
 
+        public Builder putRelationshipProperty(String propertyKey, RelationshipProperty relationshipProperty) {
+            this.builderRelationshipProperties.put(propertyKey, relationshipProperty);
+            return this;
+        }
+
+        public RelationshipPropertyStore build() {
+            return new RelationshipPropertyStore(this.builderRelationshipProperties);
+        }
+    }
 }
