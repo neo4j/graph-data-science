@@ -126,7 +126,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     public GraphDataScienceProcedures apply(Context context) throws ProcedureException {
         var dependencyResolver = context.dependencyResolver();
         var graphDatabaseService = context.graphDatabaseAPI();
-        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+        var exporterContext = ExporterContext.procedureContextWrapper(context);
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
         var procedureCallContext = context.procedureCallContext();
         var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);

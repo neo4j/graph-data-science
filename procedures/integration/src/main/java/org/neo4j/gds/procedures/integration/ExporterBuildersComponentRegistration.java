@@ -39,7 +39,7 @@ public class ExporterBuildersComponentRegistration {
         globalProcedures.registerComponent(
             NodePropertyExporterBuilder.class,
             (ctx) -> exportBuildersProvider.nodePropertyExporterBuilder(
-                new ExporterContext.ProcedureContextWrapper(ctx)
+                ExporterContext.procedureContextWrapper(ctx)
             ),
             true
         );
@@ -47,7 +47,7 @@ public class ExporterBuildersComponentRegistration {
         globalProcedures.registerComponent(
             RelationshipStreamExporterBuilder.class,
             (ctx) -> exportBuildersProvider.relationshipStreamExporterBuilder(
-                new ExporterContext.ProcedureContextWrapper(ctx)
+                ExporterContext.procedureContextWrapper(ctx)
             ),
             true
         );
@@ -55,7 +55,7 @@ public class ExporterBuildersComponentRegistration {
         globalProcedures.registerComponent(
             RelationshipExporterBuilder.class,
             (ctx) -> exportBuildersProvider.relationshipExporterBuilder(
-                new ExporterContext.ProcedureContextWrapper(ctx)
+                ExporterContext.procedureContextWrapper(ctx)
             ),
             true
         );
@@ -63,7 +63,7 @@ public class ExporterBuildersComponentRegistration {
         globalProcedures.registerComponent(
             RelationshipPropertiesExporterBuilder.class,
             (ctx) -> exportBuildersProvider.relationshipPropertiesExporterBuilder(
-                new ExporterContext.ProcedureContextWrapper(ctx)
+                ExporterContext.procedureContextWrapper(ctx)
             ),
             true
         );
@@ -71,7 +71,7 @@ public class ExporterBuildersComponentRegistration {
         globalProcedures.registerComponent(
             NodeLabelExporterBuilder.class,
             (ctx) -> exportBuildersProvider.nodeLabelExporterBuilder(
-                new ExporterContext.ProcedureContextWrapper(ctx)
+                ExporterContext.procedureContextWrapper(ctx)
             ),
             true
         );

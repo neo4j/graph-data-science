@@ -20,49 +20,25 @@
 package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-@ValueClass
-public interface ExporterContext {
+public record ExporterContext(
+    GraphDatabaseService graphDatabaseAPI,
+    @Nullable InternalTransaction internalTransaction,
+    SecurityContext securityContext,
+    String databaseName
+) {
 
-    GraphDatabaseService graphDatabaseAPI();
-
-    @Nullable
-    InternalTransaction internalTransaction();
-
-    SecurityContext securityContext();
-
-    String databaseName();
-
-    final class ProcedureContextWrapper implements ExporterContext {
-        private final Context procedureContext;
-
-        public ProcedureContextWrapper(Context procedureContext) { this.procedureContext = procedureContext; }
-
-        @Override
-        public GraphDatabaseAPI graphDatabaseAPI() {
-            return procedureContext.graphDatabaseAPI();
-        }
-
-        @Override
-        public @Nullable InternalTransaction internalTransaction() {
-            return procedureContext.internalTransactionOrNull();
-        }
-
-        @Override
-        public SecurityContext securityContext() {
-            return procedureContext.securityContext();
-        }
-
-        @Override
-        public String databaseName() {
-            return DatabaseIdSupplier.create().databaseName(procedureContext);
-        }
+    public static ExporterContext procedureContextWrapper(Context procedureContext) {
+        return new ExporterContext(
+            procedureContext.graphDatabaseAPI(),
+            procedureContext.internalTransactionOrNull(),
+            procedureContext.securityContext(),
+            DatabaseIdSupplier.create().databaseName(procedureContext)
+        );
     }
 }
