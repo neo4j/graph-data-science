@@ -22,8 +22,8 @@ package org.neo4j.gds.core.loading.construction;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.TopologyBuilder;
 import org.neo4j.gds.compression.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.ImmutableProperties;
@@ -267,7 +267,7 @@ abstract class SingleTypeRelationshipsBuilder {
             var adjacencyList = adjacencyListsWithProperties.adjacency();
             var relationshipCount = adjacencyListsWithProperties.relationshipCount();
 
-            var topology = ImmutableTopology.builder()
+            var topology = TopologyBuilder.builder()
                 .isMultiGraph(isMultiGraph)
                 .adjacencyList(adjacencyList)
                 .elementCount(relationshipCount)
@@ -349,14 +349,13 @@ abstract class SingleTypeRelationshipsBuilder {
 
             var relationshipCount = forwardListWithProperties.relationshipCount();
 
-            var forwardTopology = ImmutableTopology.builder()
+            var forwardTopology = TopologyBuilder.builder()
                 .isMultiGraph(isMultiGraph)
                 .adjacencyList(forwardAdjacencyList)
                 .elementCount(relationshipCount)
                 .build();
 
-            var inverseTopology = ImmutableTopology.builder()
-                .from(forwardTopology)
+            var inverseTopology = TopologyBuilder.builder(forwardTopology)
                 .adjacencyList(inverseAdjacencyList)
                 .build();
 

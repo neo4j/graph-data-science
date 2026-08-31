@@ -19,30 +19,10 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 
-@ValueClass
-public interface Topology {
-    AdjacencyList adjacencyList();
+@GenerateBuilder
+public record Topology(AdjacencyList adjacencyList, long elementCount, boolean isMultiGraph) {
 
-    long elementCount();
-
-    boolean isMultiGraph();
-
-    Topology EMPTY = new Topology() {
-        @Override
-        public AdjacencyList adjacencyList() {
-            return AdjacencyList.EMPTY;
-        }
-
-        @Override
-        public long elementCount() {
-            return 0;
-        }
-
-        @Override
-        public boolean isMultiGraph() {
-            return false;
-        }
-    };
+    public static final Topology EMPTY = new Topology(AdjacencyList.EMPTY, 0, false);
 }

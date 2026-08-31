@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
@@ -36,15 +37,13 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ImmutableTopology;
+import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.compression.varlong.CompressedAdjacencyList;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
@@ -170,7 +169,7 @@ class GraphStoreTest extends BaseTest {
         graphStore.addRelationshipType(
             SingleTypeRelationships.of(
                 bar,
-                ImmutableTopology.of(CompressedAdjacencyList.EMPTY, 0, false),
+                Topology.EMPTY,
                 Direction.DIRECTED,
                 Optional.empty(),
                 Optional.empty()

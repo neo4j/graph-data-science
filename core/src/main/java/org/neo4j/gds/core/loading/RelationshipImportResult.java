@@ -25,8 +25,8 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.TopologyBuilder;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.ImmutableProperties;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
@@ -82,7 +82,7 @@ public interface RelationshipImportResult {
 
             var direction = Direction.fromOrientation(importContext.relationshipProjection().orientation());
 
-            var topology = ImmutableTopology.builder()
+            var topology = TopologyBuilder.builder()
                 .adjacencyList(adjacencyListsWithProperties.adjacency())
                 .elementCount(adjacencyListsWithProperties.relationshipCount())
                 .isMultiGraph(importContext.relationshipProjection().isMultiGraph())

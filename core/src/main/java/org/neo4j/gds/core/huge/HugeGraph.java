@@ -32,7 +32,6 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
-import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
@@ -538,7 +537,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     public Topology relationshipTopology() {
-        return ImmutableTopology.of(
+        return new Topology(
             adjacency,
             relationshipCount,
             isMultiGraph()
@@ -546,7 +545,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     public Optional<Topology> inverseRelationshipTopology() {
-        return Optional.ofNullable(inverseAdjacency).map(adjacencyList -> ImmutableTopology.of(
+        return Optional.ofNullable(inverseAdjacency).map(adjacencyList -> new Topology(
             adjacency,
             relationshipCount,
             isMultiGraph()

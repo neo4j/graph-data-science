@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
-import org.neo4j.gds.api.ImmutableTopology;
+import org.neo4j.gds.api.TopologyBuilder;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -47,8 +47,7 @@ class HugeGraphCursorReuseTest {
 
         var adjacencyList = new TestAdjacencyList();
 
-        var mockTopology = ImmutableTopology
-            .builder()
+        var mockTopology = TopologyBuilder.builder()
             .adjacencyList(adjacencyList)
             .elementCount(baseGraph.relationshipTopology().elementCount())
             .isMultiGraph(false)
