@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-class ProductGraphAggregatorIT {
+class CypherAggregationReducerIT {
 
     @Test
     void shouldImportHighNodeIds() throws Exception {
@@ -59,25 +59,32 @@ class ProductGraphAggregatorIT {
         var databaseId = DatabaseId.random();
 
         var graphStoreCatalogService = new GraphStoreCatalogService();
+        var extractNodeId = new ExtractNodeId();
         try (
-            var aggregator = new ProductGraphAggregator(
-                databaseId,
-                userName,
-                Capabilities.WriteMode.LOCAL,
+            var updater = new CypherAggregationUpdater(
                 QueryEstimator.empty(),
                 ExecutingQueryProvider.empty(),
+                Capabilities.WriteMode.LOCAL,
+                userName,
+                databaseId,
+                extractNodeId,
                 graphStoreCatalogService,
-                ProjectionMetricsService.DISABLED,
+                PlainSimpleRequestCorrelationId.create(),
                 EmptyTaskStore.INSTANCE,
-                Log.noOpLog(),
-                PlainSimpleRequestCorrelationId.create()
+                Log.noOpLog()
+            );
+            var reducer = new CypherAggregationReducer(
+                updater,
+                ProjectionMetricsService.DISABLED,
+                databaseId,
+                extractNodeId
             )
         ) {
 
             long source = 1L << 50;
             long target = (1L << 50) + 1;
 
-            aggregator.projectNextRelationship(
+            updater.projectNextRelationship(
                 Values.stringValue(graphName),
                 Values.longValue(source),
                 Values.longValue(target),
@@ -86,7 +93,7 @@ class ProductGraphAggregatorIT {
                 NoValue.NO_VALUE
             );
 
-            var result = aggregator.buildGraph();
+            var result = reducer.buildGraph();
 
             assertThat(result)
                 .isNotNull()
@@ -115,21 +122,21 @@ class ProductGraphAggregatorIT {
     void shouldFailOnEmptyGraphName(String emptyGraphName, String description) throws Exception {
         var taskStore = mock(TaskStore.class);
         try (
-            var aggregator = new ProductGraphAggregator(
-                DatabaseId.random(),
-                "neo4j",
-                Capabilities.WriteMode.LOCAL,
+            var updater = new CypherAggregationUpdater(
                 QueryEstimator.empty(),
                 ExecutingQueryProvider.empty(),
+                Capabilities.WriteMode.LOCAL,
+                "neo4j",
+                DatabaseId.random(),
+                new ExtractNodeId(),
                 new GraphStoreCatalogService(),
-                ProjectionMetricsService.DISABLED,
+                PlainSimpleRequestCorrelationId.create(),
                 taskStore,
-                Log.noOpLog(),
-                PlainSimpleRequestCorrelationId.create()
+                Log.noOpLog()
             )
         ) {
             assertThatIllegalArgumentException().isThrownBy(() ->
-                aggregator.projectNextRelationship(
+                updater.projectNextRelationship(
                     Values.stringValue(emptyGraphName),
                     Values.longValue(1L),
                     Values.longValue(2L),
@@ -154,21 +161,29 @@ class ProductGraphAggregatorIT {
     @Test
     void shouldFailTaskOnFailure() throws Exception {
         var taskStore = PerDatabaseTaskStore.create(Duration.ofMinutes(5));
-        var aggregator = new ProductGraphAggregator(
-            DatabaseId.random(),
-            "neo4j",
-            Capabilities.WriteMode.LOCAL,
+        var databaseId = DatabaseId.random();
+        var extractNodeId = new ExtractNodeId();
+        var updater = new CypherAggregationUpdater(
             QueryEstimator.empty(),
             ExecutingQueryProvider.empty(),
+            Capabilities.WriteMode.LOCAL,
+            "neo4j",
+            databaseId,
+            extractNodeId,
             new GraphStoreCatalogService(),
-            ProjectionMetricsService.DISABLED,
+            PlainSimpleRequestCorrelationId.create(),
             taskStore,
-            Log.noOpLog(),
-            PlainSimpleRequestCorrelationId.create()
+            Log.noOpLog()
+        );
+        var reducer = new CypherAggregationReducer(
+            updater,
+            ProjectionMetricsService.DISABLED,
+            databaseId,
+            extractNodeId
         );
 
         assertThatThrownBy(() ->
-            aggregator.update(new AnyValue[] {
+            updater.update(new AnyValue[] {
                 Values.stringValue("my-graph"),
                 Values.longValue(1L),
                 Values.stringValue("invalidID"),
@@ -180,7 +195,7 @@ class ProductGraphAggregatorIT {
             .hasMessageContaining("The node has to be either a NODE or an INTEGER, but got String");
 
         // assuming this gets called by Neo4j
-        aggregator.close();
+        reducer.close();
 
         assertThat(taskStore.query())
             .map(i -> i.task().status())

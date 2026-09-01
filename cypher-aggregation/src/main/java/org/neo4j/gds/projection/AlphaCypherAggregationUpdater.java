@@ -23,40 +23,36 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.progress.registration.EmptyTaskStore;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
+import org.neo4j.gds.progress.registration.EmptyTaskStore;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.virtual.MapValue;
 
-// public is required for the Cypher runtime
-@SuppressWarnings("WeakerAccess")
-public class AlphaGraphAggregator extends GraphAggregator {
+public class AlphaCypherAggregationUpdater extends CypherAggregationUpdater {
 
-    AlphaGraphAggregator(
-        DatabaseId databaseId,
-        String username,
-        Capabilities.WriteMode writeMode,
+    public AlphaCypherAggregationUpdater(
         ExecutingQueryProvider queryProvider,
-        QueryEstimator queryEstimator,
+        Capabilities.WriteMode writeMode,
+        String username,
+        DatabaseId databaseID,
+        ExtractNodeId extractNodeId,
         GraphStoreCatalogService graphStoreCatalogService,
-        ProjectionMetricsService projectionMetricsService,
         RequestCorrelationId requestCorrelationId
     ) {
         super(
-            Log.noOpLog(),
-            databaseId,
-            username,
-            writeMode,
-            queryEstimator,
+            QueryEstimator.empty(),
             queryProvider,
+            writeMode,
+            username,
+            databaseID,
+            extractNodeId,
             graphStoreCatalogService,
-            projectionMetricsService,
+            requestCorrelationId,
             EmptyTaskStore.INSTANCE,
-            requestCorrelationId
+            Log.noOpLog()
         );
     }
 
@@ -133,5 +129,10 @@ public class AlphaGraphAggregator extends GraphAggregator {
             return left;
         }
         return ((MapValue) left).updatedWith((MapValue) right);
+    }
+
+    @Override
+    public void applyUpdates() throws ProcedureException {
+
     }
 }
