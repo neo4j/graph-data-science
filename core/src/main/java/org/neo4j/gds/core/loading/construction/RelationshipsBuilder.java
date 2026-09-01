@@ -33,7 +33,7 @@ import java.util.function.LongConsumer;
 
 import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
 
-public class RelationshipsBuilder {
+public class RelationshipsBuilder implements RelationshipsBuilderApi {
 
     static final int NO_PROPERTY_REF = -1;
 
@@ -61,6 +61,7 @@ public class RelationshipsBuilder {
         return singleTypeRelationshipsBuilder.relationshipType();
     }
 
+    @Override
     public void add(long originalSourceId, long originalTargetId) {
         if (!addFromInternal(
             idMap.toMappedNodeId(originalSourceId),
@@ -70,6 +71,7 @@ public class RelationshipsBuilder {
         }
     }
 
+    @Override
     public void add(long source, long target, double relationshipPropertyValue) {
         if (!addFromInternal(
             idMap.toMappedNodeId(source),
@@ -80,6 +82,7 @@ public class RelationshipsBuilder {
         }
     }
 
+    @Override
     public void add(long source, long target, double[] relationshipPropertyValues) {
         if (!addFromInternal(
             idMap.toMappedNodeId(source),
@@ -90,6 +93,7 @@ public class RelationshipsBuilder {
         }
     }
 
+    @Override
     public boolean addFromInternal(long mappedSourceId, long mappedTargetId) {
         if (validateRelationships(mappedSourceId, mappedTargetId)) {
             LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot threadLocalBuilder = null;
@@ -107,6 +111,7 @@ public class RelationshipsBuilder {
         return false;
     }
 
+    @Override
     public boolean addFromInternal(long mappedSourceId, long mappedTargetId, double relationshipPropertyValue) {
         if (validateRelationships(mappedSourceId, mappedTargetId)) {
             LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot threadLocalBuilder = null;
@@ -123,6 +128,7 @@ public class RelationshipsBuilder {
         return false;
     }
 
+    @Override
     public boolean addFromInternal(long source, long target, double[] relationshipPropertyValues) {
         if (validateRelationships(source, target)) {
             LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot threadLocalBuilder = null;
@@ -139,7 +145,11 @@ public class RelationshipsBuilder {
         return false;
     }
 
-    private boolean validateRelationships(long source, long target) {
+    public Batch newBatch() {
+        return new Batch(localBuilderProvider.acquire());
+    }
+
+    private static boolean validateRelationships(long source, long target) {
         return source != NOT_FOUND && target != NOT_FOUND;
     }
 
@@ -192,5 +202,80 @@ public class RelationshipsBuilder {
         long targetNodeId();
 
         double property();
+    }
+
+    public class Batch implements RelationshipsBuilderApi, AutoCloseable {
+
+        private final LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot slot;
+        private final LocalRelationshipsBuilder builder;
+
+        Batch(LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot slot) {
+            this.slot = slot;
+            this.builder = slot.get();
+        }
+
+        @Override
+        public void add(long originalSourceId, long originalTargetId) {
+            if (!addFromInternal(
+                idMap.toMappedNodeId(originalSourceId),
+                idMap.toMappedNodeId(originalTargetId)
+            ) && !skipDanglingRelationships) {
+                throwUnmappedNodeIds(originalSourceId, originalTargetId, idMap);
+            }
+        }
+
+        @Override
+        public void add(long source, long target, double relationshipPropertyValue) {
+            if (!addFromInternal(
+                idMap.toMappedNodeId(source),
+                idMap.toMappedNodeId(target),
+                relationshipPropertyValue
+            ) && !skipDanglingRelationships) {
+                throwUnmappedNodeIds(source, target, idMap);
+            }
+        }
+
+        @Override
+        public void add(long source, long target, double[] relationshipPropertyValues) {
+            if (!addFromInternal(
+                idMap.toMappedNodeId(source),
+                idMap.toMappedNodeId(target),
+                relationshipPropertyValues
+            ) && !skipDanglingRelationships) {
+                throwUnmappedNodeIds(source, target, idMap);
+            }
+        }
+
+        @Override
+        public boolean addFromInternal(long mappedSourceId, long mappedTargetId) {
+            if (validateRelationships(mappedSourceId, mappedTargetId)) {
+                builder.addRelationship(mappedSourceId, mappedTargetId);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean addFromInternal(long mappedSourceId, long mappedTargetId, double relationshipPropertyValue) {
+            if (validateRelationships(mappedSourceId, mappedTargetId)) {
+                builder.addRelationship(mappedSourceId, mappedTargetId, relationshipPropertyValue);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean addFromInternal(long source, long target, double[] relationshipPropertyValues) {
+            if (validateRelationships(source, target)) {
+                builder.addRelationship(source, target, relationshipPropertyValues);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void close() {
+            slot.release();
+        }
     }
 }
