@@ -13,6 +13,7 @@ dependencies {
     integrationTestImplementation project(':algo')
     integrationTestImplementation project(':algo-common')
     integrationTestImplementation project(':algorithms-machinery')
+    integrationTestImplementation project(':algorithms-procedure-facade')
     integrationTestImplementation project(':annotations')
     integrationTestImplementation project(':config-api')
     integrationTestImplementation project(':executor')
