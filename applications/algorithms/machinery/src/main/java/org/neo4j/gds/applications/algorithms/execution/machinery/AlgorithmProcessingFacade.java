@@ -44,8 +44,8 @@ import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 /**
@@ -98,7 +98,7 @@ public final class AlgorithmProcessingFacade {
      * The important bit here is: keep this lifetime scoped, not request scoped;
      * use parameterisation, not constructor injection.
      */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, TRANSFORMED_RESULT> Future<TRANSFORMED_RESULT> loadGraphThenRunAlgorithm(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, TRANSFORMED_RESULT> CompletableFuture<TRANSFORMED_RESULT> loadGraphThenRunAlgorithm(
         DatabaseId databaseId,
         GraphName graphName,
         RequestCorrelationId requestCorrelationId,

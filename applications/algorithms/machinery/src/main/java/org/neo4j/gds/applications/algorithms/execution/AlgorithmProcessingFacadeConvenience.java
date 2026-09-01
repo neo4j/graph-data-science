@@ -33,7 +33,8 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletionException;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -61,8 +62,13 @@ public class AlgorithmProcessingFacadeConvenience {
      * That means no relationship override, no graph store validation, no graph validation, no dimension transformer,
      * no side effect. We have enough of those to warrant this shortcut.
      * There will be other convenience methods.
+     * _Work_ is handled asynchronously and is thus subject to cancellation.
+     * Plus, stuff could go wrong while executing your work.
+     * That's work as in, it could at any stage get interrupted, and there might even have been side effects completed.
+     * Handling those cases is an application concern.
      *
-     * @throws java.lang.RuntimeException if your work was interrupted, or if something went wrong. that's work as in, could be any stage that got interrupted, there might even have been side effects completed
+     * @throws java.util.concurrent.CancellationException if your work was cancelled
+     * @throws java.util.concurrent.CompletionException   if something went wrong executing your work
      */
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, RENDERING> Stream<RENDERING> runAlgorithm(
         GraphName graphName,
@@ -72,7 +78,7 @@ public class AlgorithmProcessingFacadeConvenience {
         Label label,
         StreamResultBuilder<RESULT, RENDERING> streamResultBuilder
     ) {
-        var future = algorithmProcessingFacade.loadGraphThenRunAlgorithm(
+        var completableFuture = algorithmProcessingFacade.loadGraphThenRunAlgorithm(
             requestScopedDependencies.databaseId(),
             graphName,
             requestScopedDependencies.correlationId(),
@@ -92,14 +98,15 @@ public class AlgorithmProcessingFacadeConvenience {
             new StreamResultRenderer<>(streamResultBuilder)
         );
 
+        // because we are leaving this layer, let's log a final time
         try {
-            return future.get();
-        } catch (InterruptedException e) {
-            log.error("interruption error, your work could not be completed", e);
-            throw new RuntimeException("interruption error", e);
-        } catch (ExecutionException e) {
+            return completableFuture.join();
+        } catch (CancellationException e) {
+            log.error("your work was cancelled", e);
+            throw e;
+        } catch (CompletionException e) {
             log.error("execution error, something went wrong while executing your work", e);
-            throw new RuntimeException("execution error", e);
+            throw e;
         }
     }
 }

@@ -32,10 +32,16 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
+/**
+ * This is where we take your work and line it up for execution asynchronously,
+ * in an {@link java.util.concurrent.ExecutorService}.
+ * Choosing that executor service is where we distinguish running modes,
+ * be it free for all, or something bounded.
+ */
 class ComputationQueue {
     private final ExecutorService executorService;
     private final ComputationFacade computationFacade;
@@ -45,7 +51,14 @@ class ComputationQueue {
         this.computationFacade = computationFacade;
     }
 
-    <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, TRANSFORMED_RESULT> Future<TRANSFORMED_RESULT> enqueueComputation(
+    /**
+     * We return {@link java.util.concurrent.CompletableFuture} because those are nicer to work with for callers,
+     * compared to working with basic old {@link java.util.concurrent.Future}s directly.
+     * Especially the {@link java.util.concurrent.CompletableFuture#whenComplete(java.util.function.BiConsumer)} hook is handy.
+     *
+     * @return a {@link java.util.concurrent.CompletableFuture} representing your work, dispatched onto (an)other thread(s)
+     */
+    <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, TRANSFORMED_RESULT> CompletableFuture<TRANSFORMED_RESULT> enqueueComputation(
         RequestScopedLog requestScopedLog,
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphResources graphResources,
@@ -60,23 +73,25 @@ class ComputationQueue {
         ResultRenderer<RESULT, TRANSFORMED_RESULT, METADATA> resultRenderer
     ) {
         requestScopedLog.onEnqueueingWork();
-        return executorService.submit(() -> {
-            requestScopedLog.onExecutingWork();
+        return CompletableFuture.supplyAsync(
+            () -> {
+                requestScopedLog.onExecutingWork();
 
-            return computationFacade.runAlgorithmApplySideEffectTransformResult(
-                requestScopedLog,
-                timingsBuilder,
-                graphResources,
-                user,
-                constructAndRun,
-                configuration,
-                terminationFlag,
-                dimensionTransformer,
-                estimationSupplier,
-                label,
-                sideEffect,
-                resultRenderer
-            );
-        });
+                return computationFacade.runAlgorithmApplySideEffectTransformResult(
+                    requestScopedLog,
+                    timingsBuilder,
+                    graphResources,
+                    user,
+                    constructAndRun,
+                    configuration,
+                    terminationFlag,
+                    dimensionTransformer,
+                    estimationSupplier,
+                    label,
+                    sideEffect,
+                    resultRenderer
+                );
+            }, executorService
+        );
     }
 }
