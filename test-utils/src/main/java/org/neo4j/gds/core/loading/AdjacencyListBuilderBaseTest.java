@@ -20,18 +20,19 @@
 package org.neo4j.gds.core.loading;
 
 import org.assertj.core.data.Offset;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.compression.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
+import org.neo4j.gds.compression.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.Aggregation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -260,7 +261,7 @@ public abstract class AdjacencyListBuilderBaseTest {
         List<AdjacencyProperties> propertyLists = adjacencyListsWithProperties.properties();
         assertThat(propertyLists).hasSize(propertyAggregations.length);
 
-        var builder = ImmutableGraphStructures.builder()
+        var builder = GraphStructuresBuilder.builder()
             .nodeCount(nodeCount)
             .toOriginalMapper(toOriginal)
             .adjacencyList(adjacencyList)
@@ -280,32 +281,26 @@ public abstract class AdjacencyListBuilderBaseTest {
                 .expectedProperties(expectedProperties)
                 .build();
 
-            builder.addProperty(properties);
+            builder.addProperties(properties);
         }
 
         return builder.build();
     }
 
-    @ValueClass
-    interface GraphStructures {
-
-        AdjacencyList adjacencyList();
-
-        long nodeCount();
-
-        AdjacencyCompressor.ValueMapper toOriginalMapper();
-
-        Map<Long, Long> sourceNodeToTargetNode();
-
-        Map<Long, Integer> sourceNodeToRelationshipId();
-
-        List<GraphPropertyStructures> properties();
-
-        default long toOriginal(long nodeId) {
+    @GenerateBuilder
+    record GraphStructures(
+        AdjacencyList adjacencyList,
+        long nodeCount,
+        AdjacencyCompressor.ValueMapper toOriginalMapper,
+        Map<Long, Long> sourceNodeToTargetNode,
+        Map<Long, Integer> sourceNodeToRelationshipId,
+        List<GraphPropertyStructures> properties
+    ) {
+        public long toOriginal(long nodeId) {
             return toOriginalMapper().map(nodeId);
         }
 
-        default GraphStructureAssertions assertions() {
+        public GraphStructureAssertions assertions() {
             return new GraphStructureAssertions(
                 sourceNodeToTargetNode(),
                 sourceNodeToRelationshipId()
