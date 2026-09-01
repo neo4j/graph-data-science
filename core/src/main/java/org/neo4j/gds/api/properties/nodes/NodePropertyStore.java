@@ -19,40 +19,86 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.properties.PropertyStore;
-
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-@ValueClass
-@SuppressWarnings("immutables:from")
-public interface NodePropertyStore extends PropertyStore<NodePropertyValues, NodeProperty> {
+public record NodePropertyStore(Map<String, NodeProperty> properties) {
 
-    static NodePropertyStore empty() {
-        return ImmutableNodePropertyStore.of(Collections.emptyMap());
+    public NodePropertyStore {
+        // Ensure stored map is immutable
+        properties = Collections.unmodifiableMap(properties);
     }
 
-    static Builder builder() {
-        // need to initialize with empty map due to `deferCollectionAllocation = true`
-        return new Builder().properties(Collections.emptyMap());
+    public static NodePropertyStore empty() {
+        return new NodePropertyStore(Collections.emptyMap());
     }
 
-    @org.immutables.builder.Builder.AccessibleFields
-    final class Builder extends ImmutableNodePropertyStore.Builder {
+    public NodePropertyStore copyAndAdd(NodeProperty nodeProperty) {
+        var copiedProperties = new LinkedHashMap<>(properties);
+        copiedProperties.put(nodeProperty.key(), nodeProperty);
+        return new NodePropertyStore(copiedProperties);
+    }
 
-        public Builder putIfAbsent(String propertyKey, NodeProperty nodeProperty) {
-            properties.putIfAbsent(propertyKey, nodeProperty);
+    public NodePropertyStore copyAndRemove(String nodePropertyKey) {
+        var copiedProperties = new LinkedHashMap<>(properties);
+        copiedProperties.remove(nodePropertyKey);
+        return new NodePropertyStore(copiedProperties);
+    }
+
+    public boolean containsKey(String propertyKey) {
+        return properties().containsKey(propertyKey);
+    }
+
+    public Set<String> keySet() {
+        return Collections.unmodifiableSet(properties().keySet());
+    }
+
+    public Map<String, NodePropertyValues> propertyValues() {
+        return properties()
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().values()));
+    }
+
+    public NodeProperty get(String propertyKey) {
+        return properties().get(propertyKey);
+    }
+
+    public boolean isEmpty() {
+        return properties().isEmpty();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        Map<String, NodeProperty> builderNodeProperties;
+
+        private Builder() {
+            this.builderNodeProperties = new LinkedHashMap<>();
+        }
+
+        public Builder putProperty(String propertyKey, NodeProperty nodeProperty) {
+            this.builderNodeProperties.put(propertyKey, nodeProperty);
             return this;
         }
 
-        public Builder removeProperty(String propertyKey) {
-            properties.remove(propertyKey);
+        public Builder putIfAbsent(String propertyKey, NodeProperty nodeProperty) {
+            builderNodeProperties.putIfAbsent(propertyKey, nodeProperty);
             return this;
         }
 
         public Builder addAll(Builder other) {
-            properties.putAll(other.properties);
+            builderNodeProperties.putAll(other.builderNodeProperties);
             return this;
+        }
+
+        public NodePropertyStore build() {
+            return new NodePropertyStore(builderNodeProperties);
         }
     }
 }
