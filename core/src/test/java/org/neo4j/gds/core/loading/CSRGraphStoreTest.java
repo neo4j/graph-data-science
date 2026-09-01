@@ -32,7 +32,7 @@ import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.gdl.GraphProjectFromGdlConfigImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ class CSRGraphStoreTest {
     @Test
     void addRelationshipTypeUndirected() {
         var gdlFactory = GdlFactory.builder().graphProjectConfig(
-            ImmutableGraphProjectFromGdlConfig.builder()
+            GraphProjectFromGdlConfigImpl.builder()
                 .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
                 .graphName("test")
                 .orientation(Orientation.UNDIRECTED)
@@ -79,7 +79,7 @@ class CSRGraphStoreTest {
     @Test
     void addRelationshipTypeDirected() {
         var gdlFactory = GdlFactory.builder().graphProjectConfig(
-            ImmutableGraphProjectFromGdlConfig.builder()
+            GraphProjectFromGdlConfigImpl.builder()
                 .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
                 .graphName("test")
                 .orientation(Orientation.NATURAL)
@@ -115,7 +115,7 @@ class CSRGraphStoreTest {
     @MethodSource("characteristics")
     void shouldCreateCorrectCharacteristics(boolean indexInverse, Orientation orientation) {
         var gdlFactory = GdlFactory.builder().graphProjectConfig(
-            ImmutableGraphProjectFromGdlConfig.builder()
+            GraphProjectFromGdlConfigImpl.builder()
                 .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
                 .graphName("test")
                 .indexInverse(indexInverse)
@@ -151,7 +151,7 @@ class CSRGraphStoreTest {
     @MethodSource("mixedOrientation")
     void addRelationshipTypeMixed(Orientation baseOrientation, int baseRelCount, Orientation addedOrientation, int totalRelCount) {
         var gdlFactory = GdlFactory.builder().graphProjectConfig(
-            ImmutableGraphProjectFromGdlConfig.builder()
+            GraphProjectFromGdlConfigImpl.builder()
                 .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
                 .graphName("test")
                 .orientation(baseOrientation)

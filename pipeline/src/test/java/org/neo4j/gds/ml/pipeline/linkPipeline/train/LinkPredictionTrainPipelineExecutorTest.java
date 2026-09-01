@@ -51,7 +51,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.gdl.GraphProjectFromGdlConfigImpl;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -665,7 +665,7 @@ class LinkPredictionTrainPipelineExecutorTest {
 
         @BeforeEach
         void setUp() {
-            var graphConfig = ImmutableGraphProjectFromGdlConfig
+            var graphConfig = GraphProjectFromGdlConfigImpl
                 .builder()
                 .gdlGraph(G_BI)
                 .graphName("first")

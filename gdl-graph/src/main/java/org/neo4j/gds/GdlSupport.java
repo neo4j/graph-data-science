@@ -28,7 +28,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.gdl.GraphProjectFromGdlConfigImpl;
 
 import java.util.List;
 import java.util.Objects;
@@ -169,7 +169,7 @@ public final class GdlSupport {
     ) {
         Objects.requireNonNull(gdl);
 
-        var config = ImmutableGraphProjectFromGdlConfig.builder()
+        var config = GraphProjectFromGdlConfigImpl.builder()
             .gdlGraph(gdl)
             .graphName(graphName)
             .orientation(orientation.orElse(Orientation.NATURAL))

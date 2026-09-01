@@ -38,7 +38,7 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.gdl.GraphProjectFromGdlConfigImpl;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -118,7 +118,7 @@ public abstract class BaseGdlSupportExtension {
         String graphNamePrefix = gdlGraphSetup.graphNamePrefix();
         String graphName = graphNamePrefix.isBlank() ? "graph" : graphNamePrefix + "Graph";
 
-        var graphProjectConfig = ImmutableGraphProjectFromGdlConfig.builder()
+        var graphProjectConfig = GraphProjectFromGdlConfigImpl.builder()
             .username(gdlGraphSetup.username())
             .graphName(graphName)
             .gdlGraph(gdlGraphSetup.gdlGraph())
