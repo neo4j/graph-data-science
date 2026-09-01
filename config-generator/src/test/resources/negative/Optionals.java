@@ -19,7 +19,6 @@
  */
 package negative;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
 import java.util.Optional;
