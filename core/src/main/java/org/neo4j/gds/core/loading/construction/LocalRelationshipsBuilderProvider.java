@@ -21,11 +21,13 @@ package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import stormpot.Pool;
 import stormpot.Poolable;
 import stormpot.Timeout;
 
 import java.lang.invoke.VarHandle;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -94,7 +96,13 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
 
     private static final class PooledProvider extends LocalRelationshipsBuilderProvider {
         private final Pool<Slot> pool;
-        private final Timeout timeout = new Timeout(1, TimeUnit.HOURS);
+        // The timeout is captured at provider construction; tests that lower
+        // GdsFeatureToggles.POOLED_BUILDER_TIMEOUT_SECONDS must do so before
+        // creating the builder.
+        private final Timeout timeout = new Timeout(
+            GdsFeatureToggles.POOLED_BUILDER_TIMEOUT_SECONDS.get(),
+            TimeUnit.SECONDS
+        );
 
         static LocalRelationshipsBuilderProvider create(
             Supplier<LocalRelationshipsBuilder> builderSupplier,
@@ -138,6 +146,14 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
                 // If stormpot ever publishes the state with release semantics
                 // (setRelease), both fences can be removed.
                 VarHandle.acquireFence();
+                if (slot == null) {
+                    throw new IllegalStateException(String.format(
+                        Locale.US,
+                        "Timed out after %d seconds waiting for a pooled relationships builder slot. " +
+                            "This usually means a concurrent importer died while holding a slot.",
+                        GdsFeatureToggles.POOLED_BUILDER_TIMEOUT_SECONDS.get()
+                    ));
+                }
                 return slot;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -146,7 +162,12 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
 
         @Override
         public void close() throws Exception {
-            pool.shutdown().await(timeout);
+            if (!pool.shutdown().await(timeout)) {
+                throw new IllegalStateException(
+                    "Timed out waiting for pooled relationships builder slots to be released. " +
+                        "An importer likely died while holding a slot."
+                );
+            }
         }
 
         private record Slot(stormpot.Slot slot, LocalRelationshipsBuilder builder) implements Poolable, LocalRelationshipsBuilderSlot {

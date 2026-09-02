@@ -25,15 +25,14 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.EmptyTaskStore;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.virtual.MapValue;
 
-public class AlphaCypherAggregationUpdater extends CypherAggregationUpdater {
+class AlphaCypherAggregationUpdater extends CypherAggregationUpdater {
 
-    public AlphaCypherAggregationUpdater(
+    AlphaCypherAggregationUpdater(
         ExecutingQueryProvider queryProvider,
         Capabilities.WriteMode writeMode,
         String username,
@@ -57,28 +56,21 @@ public class AlphaCypherAggregationUpdater extends CypherAggregationUpdater {
     }
 
     @Override
-    public void update(AnyValue[] input) throws ProcedureException {
-        try {
-            var nodesConfig = nodeConfigMap(input[3]);
-            var relationshipsConfig = relationshipConfigMap(input[4]);
-            AnyValue dataConfig = NoValue.NO_VALUE;
-            dataConfig = mergeMaps(dataConfig, nodesConfig);
-            dataConfig = mergeMaps(dataConfig, relationshipsConfig);
-            super.projectNextRelationship(
-                (TextValue) input[0],
-                input[1],
-                input[2],
-                dataConfig,
-                input[5],
-                NoValue.NO_VALUE
-            );
-        } catch (Exception e) {
-            throw ProcedureException.invocationFailed(
-                "function",
-                CypherAggregation.FUNCTION_NAME.name(),
-                e
-            );
-        }
+    void updateRow(GraphAggregationUpdater updater, AnyValue[] input) {
+        var nodesConfig = nodeConfigMap(input[3]);
+        var relationshipsConfig = relationshipConfigMap(input[4]);
+        AnyValue dataConfig = NoValue.NO_VALUE;
+        dataConfig = mergeMaps(dataConfig, nodesConfig);
+        dataConfig = mergeMaps(dataConfig, relationshipsConfig);
+        super.projectNextRelationship(
+            updater,
+            (TextValue) input[0],
+            input[1],
+            input[2],
+            dataConfig,
+            input[5],
+            NoValue.NO_VALUE
+        );
     }
 
     private static AnyValue nodeConfigMap(AnyValue nodeConfig) {
@@ -129,10 +121,5 @@ public class AlphaCypherAggregationUpdater extends CypherAggregationUpdater {
             return left;
         }
         return ((MapValue) left).updatedWith((MapValue) right);
-    }
-
-    @Override
-    public void applyUpdates() throws ProcedureException {
-
     }
 }

@@ -67,7 +67,7 @@ public class CypherAggregationReducer implements UserAggregationReducer, AutoClo
 
     @Override
     public UserAggregationUpdater newUpdater() throws ProcedureException {
-        return updater;
+        return updater.newAggregationUpdater();
     }
 
     @Override

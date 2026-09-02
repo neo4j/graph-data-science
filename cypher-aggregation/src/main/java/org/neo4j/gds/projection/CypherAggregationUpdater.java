@@ -45,8 +45,6 @@ import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.progress.tracking.BatchingTaskProgressTrackerFactory;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
@@ -54,17 +52,17 @@ import org.neo4j.values.virtual.MapValue;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.gds.projection.CypherAggregation.FUNCTION_NAME;
 import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class CypherAggregationUpdater implements UserAggregationUpdater, AutoCloseable {
+public class CypherAggregationUpdater implements AutoCloseable {
 
     private static final String RELATIONSHIP_TYPE = "relationshipType";
 
@@ -94,6 +92,8 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
 
     private volatile @Nullable GraphImporter importer;
 
+    private final Set<GraphAggregationUpdater> aggregationUpdaters;
+
     private ProgressTracker progressTracker;
 
     public CypherAggregationUpdater(
@@ -120,34 +120,25 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
         this.log = log;
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
+        this.aggregationUpdaters = ConcurrentHashMap.newKeySet();
     }
 
-    @Override
-    public void update(AnyValue[] input) throws ProcedureException {
-        try {
-            projectNextRelationship(
-                (TextValue) input[0],
-                input[1],
-                input[2],
-                input[3],
-                input[4],
-                input[5]
-            );
-        } catch (Throwable T) {
-            throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
-        }
+    GraphAggregationUpdater newAggregationUpdater() {
+        var updater = new GraphAggregationUpdater(this);
+        aggregationUpdaters.add(updater);
+        return updater;
     }
 
-    @Override
-    public void applyUpdates() throws ProcedureException {
-
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (progressTracker != null) {
-            progressTracker.endSubTaskWithFailure();
-        }
+    void updateRow(GraphAggregationUpdater updater, AnyValue[] input) {
+        projectNextRelationship(
+            updater,
+            (TextValue) input[0],
+            input[1],
+            input[2],
+            input[3],
+            input[4],
+            input[5]
+        );
     }
 
     public GraphImporter importer() {
@@ -155,6 +146,7 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
     }
 
     void projectNextRelationship(
+        GraphAggregationUpdater updater,
         TextValue graphName,
         AnyValue sourceNode,
         AnyValue targetNode,
@@ -190,6 +182,7 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
         }
 
         data.update(
+            updater.sessionFor(data),
             extractNodeId(sourceNode),
             targetNode == NoValue.NO_VALUE ? NO_TARGET_NODE : extractNodeId(targetNode),
             sourceNodePropertyValues,
@@ -199,6 +192,19 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
             relationshipType,
             relationshipProperties
         );
+    }
+
+    @Override
+    public void close() throws Exception {
+        forceCloseUpdaters();
+        if (progressTracker != null) {
+            progressTracker.endSubTaskWithFailure();
+        }
+    }
+
+    private void forceCloseUpdaters() {
+        aggregationUpdaters.forEach(GraphAggregationUpdater::forceClose);
+        aggregationUpdaters.clear();
     }
 
     private GraphImporter initGraphData(TextValue graphName, AnyValue config) {
@@ -267,7 +273,7 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
     }
 
     @Nullable
-    static PropertyValues propertiesConfig(String key, @NotNull MapValue container) {
+    private static PropertyValues propertiesConfig(String key, @NotNull MapValue container) {
         var properties = container.get(key);
         if (properties instanceof MapValue mapProperties) {
             if (mapProperties.isEmpty()) return null;

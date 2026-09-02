@@ -20,9 +20,11 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.annotation.CustomProcedure;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.UserFunctionSignatureBuilder;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
@@ -111,7 +113,7 @@ public class CypherAggregation implements CallableUserAggregationFunction {
             var extractNodeId = new ExtractNodeId();
             var databaseId = DatabaseIdSupplier.create().databaseId(ctx);
             var aggregationReducer = new CypherAggregationReducer(
-                new CypherAggregationUpdater(
+                createAggregator(
                     queryEstimator,
                     queryProvider,
                     writeMode,
@@ -132,5 +134,31 @@ public class CypherAggregation implements CallableUserAggregationFunction {
         } catch (Throwable T) {
             throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
         }
+    }
+
+    protected CypherAggregationUpdater createAggregator(
+        QueryEstimator queryEstimator,
+        ExecutingQueryProvider queryProvider,
+        Capabilities.WriteMode writeMode,
+        String username,
+        DatabaseId databaseId,
+        ExtractNodeId extractNodeId,
+        GraphStoreCatalogService graphStoreCatalogService,
+        RequestCorrelationId requestCorrelationId,
+        TaskStore taskStore,
+        org.neo4j.gds.logging.Log log
+    ) {
+        return new CypherAggregationUpdater(
+            queryEstimator,
+            queryProvider,
+            writeMode,
+            username,
+            databaseId,
+            extractNodeId,
+            graphStoreCatalogService,
+            requestCorrelationId,
+            taskStore,
+            log
+        );
     }
 }

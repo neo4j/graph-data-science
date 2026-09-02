@@ -98,6 +98,17 @@ public enum GdsFeatureToggles {
     );
     public static final AtomicInteger PAGES_PER_THREAD = new AtomicInteger(PAGES_PER_THREAD_FLAG);
 
+    // Stormpot claim/shutdown timeout (seconds) for pooled local builder providers.
+    // Default is effectively "wait forever"; tests and support can lower it to
+    // surface slot leaks quickly.
+    public static final int POOLED_BUILDER_TIMEOUT_SECONDS_DEFAULT_SETTING = 3600;
+    public static final AtomicInteger POOLED_BUILDER_TIMEOUT_SECONDS = new AtomicInteger(
+        Integer.getInteger(
+            name(GdsFeatureToggles.class, "pooledBuilderTimeoutSeconds"),
+            POOLED_BUILDER_TIMEOUT_SECONDS_DEFAULT_SETTING
+        )
+    );
+
 
     // Determines the packing strategy when adjacency packing is used.
     public enum AdjacencyPackingStrategy {

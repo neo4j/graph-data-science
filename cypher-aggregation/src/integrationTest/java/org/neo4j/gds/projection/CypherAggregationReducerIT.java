@@ -85,6 +85,7 @@ class CypherAggregationReducerIT {
             long target = (1L << 50) + 1;
 
             updater.projectNextRelationship(
+                updater.newAggregationUpdater(),
                 Values.stringValue(graphName),
                 Values.longValue(source),
                 Values.longValue(target),
@@ -137,6 +138,7 @@ class CypherAggregationReducerIT {
         ) {
             assertThatIllegalArgumentException().isThrownBy(() ->
                 updater.projectNextRelationship(
+                    updater.newAggregationUpdater(),
                     Values.stringValue(emptyGraphName),
                     Values.longValue(1L),
                     Values.longValue(2L),
@@ -183,7 +185,7 @@ class CypherAggregationReducerIT {
         );
 
         assertThatThrownBy(() ->
-            updater.update(new AnyValue[] {
+            updater.newAggregationUpdater().update(new AnyValue[] {
                 Values.stringValue("my-graph"),
                 Values.longValue(1L),
                 Values.stringValue("invalidID"),
