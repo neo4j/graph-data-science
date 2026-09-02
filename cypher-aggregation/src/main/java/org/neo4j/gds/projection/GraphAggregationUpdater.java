@@ -71,7 +71,7 @@ public class GraphAggregationUpdater implements UserAggregationUpdater {
     GraphImporter.ThreadLocalBatches sessionFor(GraphImporter importer) {
         var session = this.threadLocalBatches;
         if (session == null) {
-            session = this.threadLocalBatches = importer.newSession();
+            session = this.threadLocalBatches = importer.newThreadLocalBatches();
         }
         return session;
     }

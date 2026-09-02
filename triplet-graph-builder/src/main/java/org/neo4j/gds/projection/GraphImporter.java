@@ -126,7 +126,7 @@ public final class GraphImporter {
         progressTracker.beginSubTask(/*Update aggregation*/);
     }
 
-    public ThreadLocalBatches newSession() {
+    public ThreadLocalBatches newThreadLocalBatches() {
         var threadLocalBatches = new ThreadLocalBatches();
         this.threadLocalBatches.add(threadLocalBatches);
         return threadLocalBatches;
@@ -166,7 +166,7 @@ public final class GraphImporter {
         if (session == null) {
             synchronized (this) {
                 if (this.defaultSession == null) {
-                    this.defaultSession = newSession();
+                    this.defaultSession = newThreadLocalBatches();
                 }
                 session = this.defaultSession;
             }
@@ -175,7 +175,7 @@ public final class GraphImporter {
     }
 
     public void update(
-        ThreadLocalBatches session,
+        ThreadLocalBatches threadLocalBatches,
         long sourceNode,
         long targetNode,
         @Nullable PropertyValues sourceNodePropertyValues,
@@ -202,7 +202,7 @@ public final class GraphImporter {
 
             var intermediateTargetId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
 
-            var batch = session.batchBuilderFor(relationshipType, relImporter);
+            var batch = threadLocalBatches.batchBuilderFor(relationshipType, relImporter);
             if (relationshipProperties != null) {
                 var propertyCount = relationshipProperties.size();
                 validateRelationshipProperties(relationshipProperties, propertyCount, relImporter);

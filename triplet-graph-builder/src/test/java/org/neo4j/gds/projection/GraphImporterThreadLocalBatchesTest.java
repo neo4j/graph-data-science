@@ -132,7 +132,7 @@ class GraphImporterThreadLocalBatchesTest {
     @Test
     void shouldSupportMorselCycles() {
         var importer = newImporter("g");
-        var session = importer.newSession();
+        var session = importer.newThreadLocalBatches();
 
         // one batch per morsel: rows, release, rows, release, rows
         update(importer, session, 0, 1, RelationshipType.ALL_RELATIONSHIPS);
@@ -153,7 +153,7 @@ class GraphImporterThreadLocalBatchesTest {
     @Test
     void shouldTrackBatchesPerRelationshipType() {
         var importer = newImporter("g");
-        var session = importer.newSession();
+        var session = importer.newThreadLocalBatches();
 
         var typeA = RelationshipType.of("A");
         var typeB = RelationshipType.of("B");
@@ -185,8 +185,8 @@ class GraphImporterThreadLocalBatchesTest {
         // pool size 1 per type: a second session can only make progress if the
         // first session released its claim
         var importer = newImporter("g");
-        var sessionA = importer.newSession();
-        var sessionB = importer.newSession();
+        var sessionA = importer.newThreadLocalBatches();
+        var sessionB = importer.newThreadLocalBatches();
 
         update(importer, sessionA, 0, 1, RelationshipType.ALL_RELATIONSHIPS);
         sessionA.releaseBatches();
@@ -206,7 +206,7 @@ class GraphImporterThreadLocalBatchesTest {
     void shouldMakeResultTerminalForSessions() {
         var importer = newImporter("g");
         // tracked, but never claims anything before result()
-        var session = importer.newSession();
+        var session = importer.newThreadLocalBatches();
 
         // legacy overload uses the importer-owned default session
         update(importer, 0, 1, RelationshipType.ALL_RELATIONSHIPS);

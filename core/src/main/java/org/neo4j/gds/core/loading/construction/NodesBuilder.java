@@ -99,7 +99,7 @@ public final class NodesBuilder implements NodesBuilderApi {
             nodesBuilderContext.threadLocalContext()
         );
         this.localNodesBuilderProvider = usePooledBuilderProvider
-            ? LocalNodesBuilderProvider.pooled(nodesBuilderSupplier,concurrency)
+            ? LocalNodesBuilderProvider.pooled(nodesBuilderSupplier, concurrency)
             : LocalNodesBuilderProvider.threadLocal(nodesBuilderSupplier);
     }
 
