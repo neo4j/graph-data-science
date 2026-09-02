@@ -21,12 +21,12 @@ package org.neo4j.gds.compression.common;
 
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.compression.api.AdjacencyCompressorFactory;
-import org.neo4j.gds.compression.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
+import org.neo4j.gds.compression.api.AdjacencyCompressorFactory;
 import org.neo4j.gds.compression.api.AdjacencyListBuilder;
 
 import java.util.ArrayList;

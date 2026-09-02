@@ -11,11 +11,13 @@ dependencies {
     annotationProcessor project(':config-generator')
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
+    annotationProcessor openGds.recordBuilder
     annotationProcessor neo4j.annotations
 
     compileOnly openGds.immutables.builder
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
+    compileOnly openGds.recordBuilder
     compileOnly project(':progress-tracking')
 
     implementation project(':annotations')

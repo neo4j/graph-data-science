@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compression.api;
 
+import org.neo4j.gds.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 

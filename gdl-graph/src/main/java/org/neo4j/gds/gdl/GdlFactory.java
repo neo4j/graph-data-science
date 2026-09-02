@@ -48,6 +48,7 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
+import org.neo4j.gds.core.loading.RelationshipImportResultBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
@@ -325,12 +326,11 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         importRelationships(propertyKeysByRelType, relationshipBuilders);
 
-        var resultBuilder = RelationshipImportResult.builder();
-        relationshipBuilders.forEach((relationshipType, relationshipsBuilder) -> {
-            resultBuilder.putImportResult(relationshipType, relationshipsBuilder.build());
-        });
+        var builder = RelationshipImportResultBuilder.builder();
+        relationshipBuilders.forEach((relationshipType, relationshipsBuilder) ->
+            builder.addImportResults(relationshipType, relationshipsBuilder.build()));
 
-        return resultBuilder.build();
+        return builder.build();
     }
 
     @NotNull

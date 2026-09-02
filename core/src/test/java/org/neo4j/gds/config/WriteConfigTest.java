@@ -39,7 +39,6 @@ import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -76,7 +75,7 @@ class WriteConfigTest {
             .capabilities(new Capabilities(writeMode))
             .schema(GraphSchema.mutable())
             .nodes(nodes)
-            .relationshipImportResult(RelationshipImportResult.of(Map.of()))
+            .relationshipImportResult(RelationshipImportResult.empty())
             .concurrency(new Concurrency(1))
             .build();
 
@@ -113,7 +112,7 @@ class WriteConfigTest {
             .capabilities(new Capabilities(writeMode))
             .schema(GraphSchema.mutable())
             .nodes(nodes)
-            .relationshipImportResult(RelationshipImportResult.of(Map.of()))
+            .relationshipImportResult(RelationshipImportResult.empty())
             .concurrency(new Concurrency(1))
             .build();
 

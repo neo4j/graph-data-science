@@ -30,6 +30,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
+import org.neo4j.gds.core.loading.RelationshipImportResultBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
@@ -120,11 +121,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
 
     @Override
     RelationshipImportResult result() {
-        var relationshipsByType = loaderContext.relationshipBuildersByType.entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> entry.getValue().build()
-        ));
-        return RelationshipImportResult.of(relationshipsByType);
+        var builder = RelationshipImportResultBuilder.builder();
+        loaderContext.relationshipBuildersByType.forEach(((relationshipType, relationshipsBuilder) ->
+            builder.addImportResults(relationshipType, relationshipsBuilder.build())));
+        return builder.build();
     }
 
     @Override

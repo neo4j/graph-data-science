@@ -36,10 +36,10 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
-import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.Nodes;
-import org.neo4j.gds.core.loading.RelationshipImportResult;
+import org.neo4j.gds.core.loading.RelationshipImportResultBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
@@ -379,19 +379,16 @@ public final class GraphImporter {
         GraphStoreBuilder graphStoreBuilder,
         AdjacencyCompressor.ValueMapper valueMapper
     ) {
-        var relationshipImportResultBuilder = RelationshipImportResult.builder();
+        var builder = RelationshipImportResultBuilder.builder();
 
         var relationshipSchema = MutableRelationshipSchema.empty();
         this.relImporters.forEach((relationshipType, relImporter) -> {
-            var relationships = relImporter.build(
-                Optional.of(valueMapper),
-                Optional.empty()
-            );
+            var relationships = relImporter.build(Optional.of(valueMapper), Optional.empty());
             relationshipSchema.set(relationships.relationshipSchemaEntry());
-            relationshipImportResultBuilder.putImportResult(relationshipType, relationships);
+            builder.addImportResults(relationshipType, relationships);
         });
 
-        graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
+        graphStoreBuilder.relationshipImportResult(builder.build());
         this.graphSchemaBuilder.relationshipSchema(relationshipSchema);
 
         // release all references to the builders

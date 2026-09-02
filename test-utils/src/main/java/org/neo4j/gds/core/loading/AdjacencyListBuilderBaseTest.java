@@ -28,10 +28,10 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AdjacencyList;
+import org.neo4j.gds.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
-import org.neo4j.gds.compression.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.ArrayList;

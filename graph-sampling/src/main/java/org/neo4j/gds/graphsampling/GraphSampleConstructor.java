@@ -131,7 +131,7 @@ public class GraphSampleConstructor {
             filteredRelationships.keySet()
         );
 
-        var relationshipImportResult = RelationshipImportResult.of(filteredRelationships);
+        var relationshipImportResult = new RelationshipImportResult(filteredRelationships);
 
         var outputGraphStore = new GraphStoreBuilder()
             .databaseInfo(inputGraphStore.databaseInfo())

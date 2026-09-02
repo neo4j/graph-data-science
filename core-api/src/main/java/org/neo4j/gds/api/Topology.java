@@ -23,6 +23,9 @@ import org.neo4j.gds.annotation.GenerateBuilder;
 
 @GenerateBuilder
 public record Topology(AdjacencyList adjacencyList, long elementCount, boolean isMultiGraph) {
+    public Topology(AdjacencyListsWithProperties adjacencyListsWithProperties, boolean isMultiGraph) {
+        this(adjacencyListsWithProperties.adjacency(), adjacencyListsWithProperties.relationshipCount(), isMultiGraph);
+    }
 
     public static final Topology EMPTY = new Topology(AdjacencyList.EMPTY, 0, false);
 }

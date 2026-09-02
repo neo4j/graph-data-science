@@ -19,13 +19,12 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.TopologyBuilder;
+import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.Properties;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
@@ -39,29 +38,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-@ValueClass
-public interface RelationshipImportResult {
+@GenerateBuilder
+public record RelationshipImportResult(Map<RelationshipType, SingleTypeRelationships> importResults) {
 
-    Map<RelationshipType, SingleTypeRelationships> importResults();
+    public static RelationshipImportResult empty() {
+        return new RelationshipImportResult(Map.of());
+    }
 
-    @Value.Lazy
-    default MutableRelationshipSchema relationshipSchema() {
+    public MutableRelationshipSchema relationshipSchema() {
         var relationshipSchema = MutableRelationshipSchema.empty();
-
         importResults().forEach((__, relationships) -> relationshipSchema.set(relationships.relationshipSchemaEntry()));
-
         return relationshipSchema;
-    }
-
-    static ImmutableRelationshipImportResult.Builder builder() {
-        return ImmutableRelationshipImportResult.builder();
-    }
-
-    static RelationshipImportResult of(Map<RelationshipType, SingleTypeRelationships> relationshipsByType) {
-        return ImmutableRelationshipImportResult.builder().importResults(relationshipsByType).build();
     }
 
     /**
@@ -74,45 +62,39 @@ public interface RelationshipImportResult {
      * @param importContexts each import context maps to a relationship type being created
      * @return a wrapper type ready to be consumed by a {@link org.neo4j.gds.api.GraphStore}
      */
-    static RelationshipImportResult of(Collection<SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext> importContexts) {
-        var builders = new HashMap<RelationshipType, SingleTypeRelationshipsBuilder>(importContexts.size());
+    public static RelationshipImportResult of(Collection<SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext> importContexts) {
+        var buildersPerType = new HashMap<RelationshipType, SingleTypeRelationshipsBuilder>(importContexts.size());
 
         importContexts.forEach((importContext) -> {
             var adjacencyListsWithProperties = importContext.singleTypeRelationshipImporter().build();
             var isInverseRelationship = importContext.inverseOfRelationshipType().isPresent();
 
             var direction = Direction.fromOrientation(importContext.relationshipProjection().orientation());
+            var topology = new Topology(
+                adjacencyListsWithProperties.adjacency(),
+                adjacencyListsWithProperties.relationshipCount(),
+                importContext.relationshipProjection().isMultiGraph()
+            );
 
-            var topology = TopologyBuilder.builder()
-                .adjacencyList(adjacencyListsWithProperties.adjacency())
-                .elementCount(adjacencyListsWithProperties.relationshipCount())
-                .isMultiGraph(importContext.relationshipProjection().isMultiGraph())
-                .build();
-
-            var properties = (importContext.relationshipProjection().properties().isEmpty())
-                ? Optional.<RelationshipPropertyStore>empty()
-                : Optional.of(constructRelationshipPropertyStore(
+            var schemaEntry = new MutableRelationshipSchemaEntry(importContext.relationshipType(), direction);
+            RelationshipPropertyStore properties = null;
+            if (!importContext.relationshipProjection().properties().isEmpty()) {
+                properties = constructRelationshipPropertyStore(
                     importContext.relationshipProjection().properties().mappings(),
                     adjacencyListsWithProperties.properties(),
                     adjacencyListsWithProperties.relationshipCount()
-                ));
+                );
+                properties.relationshipProperties().forEach((key, prop) -> schemaEntry.addProperty(key, prop.propertySchema()));
+            }
 
-            var schemaEntry = new MutableRelationshipSchemaEntry(
-                importContext.relationshipType(),
-                direction
+            // With inverse relationships, we may see two import contexts for the same type.
+            // These are to be combined in one RelationshipImportResult.
+            // That is why we 1) use builders 2) use computeIfAbsent, so that we look up the same builder the second
+            // time we see a type, and continue building the same result.
+            var importResultBuilder = buildersPerType.computeIfAbsent(
+                importContext.relationshipType(), __ -> SingleTypeRelationshipsBuilder.builder()
             );
-
-            properties.ifPresent(props -> props
-                .relationshipProperties()
-                .forEach((key, prop) -> schemaEntry.addProperty(key, prop.propertySchema())));
-
-            var importResultBuilder = builders.computeIfAbsent(
-                importContext.relationshipType(),
-                relationshipType -> SingleTypeRelationshipsBuilder
-                    .builder()
-                    .relationshipSchemaEntry(schemaEntry)
-            );
-
+            importResultBuilder.relationshipSchemaEntry(schemaEntry);
             if (isInverseRelationship) {
                 importResultBuilder.inverseTopology(topology).inverseProperties(properties);
             } else {
@@ -120,15 +102,10 @@ public interface RelationshipImportResult {
             }
         });
 
-        var importResults = builders.entrySet().stream().collect(
-            Collectors.toMap(
-                Map.Entry::getKey,
-                e -> e.getValue().build()
-            ));
-
-        return ImmutableRelationshipImportResult.builder()
-            .importResults(importResults)
-            .build();
+        var relationshipImportResultBuilder = RelationshipImportResultBuilder.builder();
+        buildersPerType.forEach((type, builderForType)
+            -> relationshipImportResultBuilder.addImportResults(type, builderForType.build()));
+        return relationshipImportResultBuilder.build();
     }
 
     private static RelationshipPropertyStore constructRelationshipPropertyStore(

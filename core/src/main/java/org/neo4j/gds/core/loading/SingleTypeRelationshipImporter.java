@@ -20,13 +20,13 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.compression.api.AdjacencyCompressorFactory;
-import org.neo4j.gds.compression.api.AdjacencyListsWithProperties;
-import org.neo4j.gds.Aggregation;
 
 import java.util.Collection;
 import java.util.Map;

@@ -34,16 +34,17 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
+import org.neo4j.gds.core.loading.RelationshipImportResultBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.progress.tasks.Task;
-import org.neo4j.gds.progress.tracking.TaskProgressTracker;
-import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.tasks.Task;
+import org.neo4j.gds.progress.tasks.Tasks;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public abstract class FileToGraphStoreImporter {
 
@@ -118,16 +118,10 @@ public abstract class FileToGraphStoreImporter {
     public static RelationshipImportResult relationshipImportResult(
         Map<String, RelationshipsBuilder> relationshipBuildersByType
     ) {
-        var relationshipsByType = relationshipBuildersByType.entrySet()
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    e -> RelationshipType.of(e.getKey()),
-                    e -> e.getValue().build()
-                )
-            );
-
-        return RelationshipImportResult.builder().importResults(relationshipsByType).build();
+        var builder = RelationshipImportResultBuilder.builder();
+        relationshipBuildersByType.forEach((type, relationshipBuilder) ->
+            builder.addImportResults(RelationshipType.of(type), relationshipBuilder.build()));
+        return builder.build();
     }
 
     private void importGraphStore(FileInput fileInput) {

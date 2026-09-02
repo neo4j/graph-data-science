@@ -58,13 +58,9 @@ public final class CSRGraphStoreUtil {
         Concurrency concurrency
     ) {
         relationshipPropertyKey.ifPresent(property -> {
-
             if (!graph.hasRelationshipProperty()) {
                 throw new IllegalArgumentException(
-                    formatWithLocale(
-                        "Expected relationship property '%s', but graph has none.",
-                        property
-                    )
+                    formatWithLocale("Expected relationship property '%s', but graph has none.", property)
                 );
             }
         });
@@ -89,7 +85,6 @@ public final class CSRGraphStoreUtil {
             (relType)-> singleTypeRelationshipsFromGraph(graph,relationshipSchema,relType,relationshipPropertyKey),
             concurrency
         );
-
     }
 
     public static  CSRGraphStore createFromSchema(
@@ -100,23 +95,14 @@ public final class CSRGraphStoreUtil {
         Function<RelationshipType,SingleTypeRelationships> singleTypeRelationshipsSupplier,
         Concurrency concurrency
     ) {
-
         var nodeSchema = mutableGraphSchema.nodeSchema();
-        var nodeProperties = constructNodePropertiesFromSchemaAndProperties(
-            nodeSchema,
-            valuesFunction
-        );
+        var nodeProperties = constructNodePropertiesFromSchemaAndProperties(nodeSchema, valuesFunction);
         var relationshipSchema = mutableGraphSchema.relationshipSchema();
 
-        RelationshipImportResult relationshipImportResult;
-        if (relationshipSchema.availableTypes().isEmpty()) {
-            relationshipImportResult = RelationshipImportResult.builder().build();
-        } else {
+        var builder = RelationshipImportResultBuilder.builder();
+        if (!relationshipSchema.availableTypes().isEmpty()) {
             var relationshipType = relationshipSchema.availableTypes().iterator().next();
-
-            relationshipImportResult = RelationshipImportResult.builder()
-                .putImportResult(relationshipType, singleTypeRelationshipsSupplier.apply(relationshipType))
-                .build();
+            builder.addImportResults(relationshipType, singleTypeRelationshipsSupplier.apply(relationshipType));
         }
 
         var databaseInfo = DatabaseInfo.create(databaseId, DatabaseInfo.DatabaseLocation.LOCAL);
@@ -125,11 +111,9 @@ public final class CSRGraphStoreUtil {
             .capabilities(new Capabilities(Capabilities.WriteMode.NONE))
             .schema(mutableGraphSchema)
             .nodes(new Nodes(nodeSchema, idMap, nodeProperties))
-            .relationshipImportResult(relationshipImportResult)
+            .relationshipImportResult(builder.build())
             .concurrency(concurrency)
             .build();
-
-
     }
 
     private static SingleTypeRelationships singleTypeRelationshipsFromGraph(
@@ -169,8 +153,7 @@ public final class CSRGraphStoreUtil {
                     )
                 ),
                 NodePropertyStore.Builder::addAll
-            )
-            .build();
+            ).build();
     }
 
     @NotNull

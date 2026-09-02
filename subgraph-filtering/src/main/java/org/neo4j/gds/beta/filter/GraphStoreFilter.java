@@ -172,7 +172,7 @@ public final class GraphStoreFilter {
                 .capabilities(graphStore.capabilities())
                 .schema(filteredSchema)
                 .nodes(new Nodes(filteredSchema.nodeSchema(), filteredNodes.idMap(), filteredNodes.propertyStores()))
-                .relationshipImportResult(RelationshipImportResult.of(filteredRelationships))
+                .relationshipImportResult(new RelationshipImportResult(filteredRelationships))
                 .concurrency(config.readConcurrency())
                 .build();
 
