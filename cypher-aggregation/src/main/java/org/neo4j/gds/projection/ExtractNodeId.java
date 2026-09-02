@@ -27,7 +27,7 @@ import org.neo4j.values.virtual.VirtualNodeValue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-final class ExtractNodeId implements PartialValueMapper<Long> {
+public final class ExtractNodeId implements PartialValueMapper<Long> {
     private final AtomicBoolean hasSeenArbitraryIds = new AtomicBoolean(false);
 
     @Override

@@ -24,8 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.DatabaseInfo;
-import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.ConfigKeyValidation;
@@ -34,31 +32,25 @@ import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.LazyIdMapBuilderBuilder;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.tracking.BatchingTaskProgressTrackerFactory;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.progress.registration.TaskStore;
+import org.neo4j.gds.progress.tracking.BatchingTaskProgressTrackerFactory;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
 import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
-import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
-import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
-import org.neo4j.values.virtual.MapValueBuilder;
 
 import java.util.Collection;
 import java.util.Set;
@@ -72,7 +64,8 @@ import static org.neo4j.gds.projection.CypherAggregation.FUNCTION_NAME;
 import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-abstract class GraphAggregator implements UserAggregationReducer, UserAggregationUpdater, AutoCloseable {
+public class CypherAggregationUpdater implements UserAggregationUpdater, AutoCloseable {
+
     private static final String RELATIONSHIP_TYPE = "relationshipType";
 
     static final String SOURCE_NODE_PROPERTIES = "sourceNodeProperties";
@@ -82,53 +75,82 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     static final String ALPHA_RELATIONSHIP_PROPERTIES = "properties";
     static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
 
-    private final ConfigValidator configValidator = new ConfigValidator();
-    private final ProgressTimer progressTimer = ProgressTimer.start();
 
-    // Used for initializing the data and rel importers
-    private final Lock lock = new ReentrantLock();
-    private final ExtractNodeId extractNodeId = new ExtractNodeId();
-    private final AtomicBoolean completedSuccessfully = new AtomicBoolean(false);
-
-    private final Log log;
-    private final DatabaseId databaseId;
-    private final String username;
-    private final Capabilities.WriteMode writeMode;
     private final QueryEstimator queryEstimator;
     private final ExecutingQueryProvider queryProvider;
+    private final Capabilities.WriteMode writeMode;
+
+    private final String username;
+    private final DatabaseId databaseId;
+
+    private final Lock lock;
+    private final ExtractNodeId extractNodeId;
+    private final ConfigValidator configValidator;
+
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final ProjectionMetricsService projectionMetricsService;
-    private final TaskStore taskStore;
     private final RequestCorrelationId requestCorrelationId;
+    private final TaskStore taskStore;
+    private final Log log;
 
     private volatile @Nullable GraphImporter importer;
 
-    // #result() may be called twice, we cache the result of the first call to return it again in the second invocation
-    private @Nullable ProjectionResult result;
     private ProgressTracker progressTracker;
 
-    GraphAggregator(
-        Log log,
-        DatabaseId databaseId,
-        String username,
-        Capabilities.WriteMode writeMode,
+    public CypherAggregationUpdater(
         QueryEstimator queryEstimator,
-        ExecutingQueryProvider queryProvider,
+        ExecutingQueryProvider queryProvider, Capabilities.WriteMode writeMode,
+        String username,
+        DatabaseId databaseId,
+        ExtractNodeId extractNodeId,
         GraphStoreCatalogService graphStoreCatalogService,
-        ProjectionMetricsService projectionMetricsService,
+        RequestCorrelationId requestCorrelationId,
         TaskStore taskStore,
-        RequestCorrelationId requestCorrelationId
+        Log log
     ) {
-        this.log = log;
-        this.databaseId = databaseId;
-        this.username = username;
-        this.writeMode = writeMode;
         this.queryEstimator = queryEstimator;
         this.queryProvider = queryProvider;
+        this.writeMode = writeMode;
+        this.username = username;
+        this.databaseId = databaseId;
+        this.extractNodeId = extractNodeId;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.projectionMetricsService = projectionMetricsService;
-        this.taskStore = taskStore;
         this.requestCorrelationId = requestCorrelationId;
+        this.taskStore = taskStore;
+        this.log = log;
+        this.lock = new ReentrantLock();
+        this.configValidator = new ConfigValidator();
+    }
+
+    @Override
+    public void update(AnyValue[] input) throws ProcedureException {
+        try {
+            projectNextRelationship(
+                (TextValue) input[0],
+                input[1],
+                input[2],
+                input[3],
+                input[4],
+                input[5]
+            );
+        } catch (Throwable T) {
+            throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
+        }
+    }
+
+    @Override
+    public void applyUpdates() throws ProcedureException {
+
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (progressTracker != null) {
+            progressTracker.endSubTaskWithFailure();
+        }
+    }
+
+    public GraphImporter importer() {
+        return importer;
     }
 
     void projectNextRelationship(
@@ -236,11 +258,37 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             config.undirectedRelationshipTypes(),
             config.inverseIndexedRelationshipTypes(),
             idMapBuilder,
-            this.writeMode,
+            writeMode,
             query,
             graphStoreCatalogService,
             progressTracker
         );
+    }
+
+    @Nullable
+    static PropertyValues propertiesConfig(String key, @NotNull MapValue container) {
+        var properties = container.get(key);
+        if (properties instanceof MapValue mapProperties) {
+            if (mapProperties.isEmpty()) return null;
+
+            return new CypherPropertyValues(mapProperties);
+        }
+
+        if (properties == NoValue.NO_VALUE) {
+            return null;
+        }
+
+        throw new IllegalArgumentException(
+            formatWithLocale(
+                "The value of `%s` must be a `Map of Property Values`, but was `%s`.",
+                key,
+                properties.getTypeName()
+            )
+        );
+    }
+
+    private long extractNodeId(@NotNull AnyValue node) {
+        return node.map(this.extractNodeId);
     }
 
     private static LazyIdMapBuilder idMapBuilder(Concurrency readConcurrency) {
@@ -251,6 +299,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             .propertyState(PropertyState.PERSISTENT)
             .build();
     }
+
 
     private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
         CypherMapAccess.failOnBlank("graphName", graphName);
@@ -280,102 +329,6 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         return nodeLabelToken;
     }
 
-    @Override
-    public GraphAggregator newUpdater() {
-        return this;
-    }
-
-    @Override
-    public void applyUpdates() {
-
-    }
-
-    @Override
-    public AnyValue result() throws ProcedureException {
-        try {
-            var projectionMetric = projectionMetricsService.createCypherV2();
-            ProjectionResult result;
-            try (projectionMetric) {
-                projectionMetric.start();
-                result = buildGraph();
-            } catch (Exception e) {
-                projectionMetric.failed(e);
-                throw e;
-            }
-
-            if (result == null) {
-                return Values.NO_VALUE;
-            }
-
-            var builder = new MapValueBuilder(6);
-            builder.add("graphName", Values.stringValue(result.graphName()));
-            builder.add("nodeCount", Values.longValue(result.nodeCount()));
-            builder.add("relationshipCount", Values.longValue(result.relationshipCount()));
-            builder.add("projectMillis", Values.longValue(result.projectMillis()));
-            builder.add("configuration", ValueUtils.asAnyValue(result.configuration()));
-            builder.add("query", ValueUtils.asAnyValue(result.query()));
-            MapValue projectResult = builder.build();
-
-            this.completedSuccessfully.set(true);
-
-            return projectResult;
-        } catch (Throwable T) {
-            throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
-        }
-    }
-
-    public @Nullable ProjectionResult buildGraph() {
-        var importer = this.importer;
-        if (importer == null) {
-            // Nothing aggregated
-            return null;
-        }
-
-        // Older cypher runtimes call the result method multiple times, we cache the result of the first call
-        if (this.result != null) {
-            return this.result;
-        }
-
-        var databaseInfo = DatabaseInfo.create(
-            this.databaseId,
-            DatabaseLocation.LOCAL
-        );
-
-        this.result = importer.result(
-            databaseInfo,
-            this.progressTimer,
-            extractNodeId.hasSeenArbitraryIds()
-        );
-
-        return this.result;
-    }
-
-    private long extractNodeId(@NotNull AnyValue node) {
-        return node.map(this.extractNodeId);
-    }
-
-    @Nullable
-    static PropertyValues propertiesConfig(String key, @NotNull MapValue container) {
-        var properties = container.get(key);
-        if (properties instanceof MapValue mapProperties) {
-            if (mapProperties.isEmpty()) return null;
-
-            return new CypherPropertyValues(mapProperties);
-        }
-
-        if (properties == NoValue.NO_VALUE) {
-            return null;
-        }
-
-        throw new IllegalArgumentException(
-            formatWithLocale(
-                "The value of `%s` must be a `Map of Property Values`, but was `%s`.",
-                key,
-                properties.getTypeName()
-            )
-        );
-    }
-
     private static RelationshipType typeConfig(
         @SuppressWarnings("SameParameterValue") String relationshipTypeKey,
         @NotNull MapValue relationshipConfig
@@ -397,14 +350,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         );
     }
 
-    @Override
-    public void close() throws Exception {
-        if (!completedSuccessfully.get() && progressTracker != null) {
-            this.progressTracker.endSubTaskWithFailure();
-        }
-    }
-
-    public static final class ConfigValidator {
+    static final class ConfigValidator {
         private static final Set<String> DATA_CONFIG_KEYS = Set.of(
             SOURCE_NODE_PROPERTIES,
             SOURCE_NODE_LABELS,
@@ -420,7 +366,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
 
         private final AtomicBoolean validate = new AtomicBoolean(true);
 
-        public void validateConfig(AnyValue dataConfig, AnyValue projectionConfig, AnyValue migrationConfig) {
+        void validateConfig(AnyValue dataConfig, AnyValue projectionConfig, AnyValue migrationConfig) {
             if (dataConfig instanceof MapValue || projectionConfig instanceof MapValue) {
                 if (this.validate.get()) {
                     if (this.validate.getAndSet(false)) {

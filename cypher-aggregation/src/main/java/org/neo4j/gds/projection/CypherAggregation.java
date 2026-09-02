@@ -25,10 +25,10 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.UserFunctionSignatureBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.Metrics;
+import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -105,26 +105,30 @@ public class CypherAggregation implements CallableUserAggregationFunction {
                 transaction
             ));
 
-
             var transactionSequenceNumber = ctx.kernelTransaction().getTransactionSequenceNumber();
             var requestCorrelationId = Neo4jPoweredRequestCorrelationId.create(transactionSequenceNumber);
 
-            ProductGraphAggregator productGraphAggregator = new ProductGraphAggregator(
-                DatabaseIdSupplier.create().databaseId(ctx),
-                username,
-                writeMode,
-                queryEstimator,
-                queryProvider,
-                graphStoreCatalogService,
+            var extractNodeId = new ExtractNodeId();
+            var databaseId = DatabaseIdSupplier.create().databaseId(ctx);
+            var aggregationReducer = new CypherAggregationReducer(
+                new CypherAggregationUpdater(
+                    queryEstimator,
+                    queryProvider,
+                    writeMode,
+                    username,
+                    databaseId,
+                    extractNodeId,
+                    graphStoreCatalogService,
+                    requestCorrelationId,
+                    taskStore,
+                    new LogAdapter(log)
+                ),
                 metrics.projectionMetrics(),
-                taskStore,
-                new LogAdapter(log),
-                requestCorrelationId
+                databaseId,
+                extractNodeId
             );
-
-            ctx.internalTransaction().registerCloseableResource(productGraphAggregator);
-
-            return productGraphAggregator;
+            ctx.internalTransaction().registerCloseableResource(aggregationReducer);
+            return aggregationReducer;
         } catch (Throwable T) {
             throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
         }
