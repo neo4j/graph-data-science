@@ -23,10 +23,10 @@ import org.neo4j.gds.core.loading.GraphResources;
 
 import java.util.Optional;
 
-class StatsResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> implements ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, Void> {
+public class StatsResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> implements ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, Void> {
     private final StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> statsResultBuilder;
 
-    StatsResultRenderer(StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> statsResultBuilder) {
+    public StatsResultRenderer(StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> statsResultBuilder) {
         this.statsResultBuilder = statsResultBuilder;
     }
 

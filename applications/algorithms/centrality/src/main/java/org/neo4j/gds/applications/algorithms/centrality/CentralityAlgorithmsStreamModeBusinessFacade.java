@@ -21,16 +21,20 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.execution.AlgorithmProcessingFacadeConvenience;
+import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
+import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
+import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
-import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
+import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
@@ -47,7 +51,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bridges;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
@@ -55,28 +58,33 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Clo
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HITS;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
-public class CentralityAlgorithmsStreamModeBusinessFacade {
+public final class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CentralityBusinessAlgorithms centralityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final AlgorithmProcessingFacadeConvenience algorithmProcessingFacadeConvenience;
+    private final LaunchConvenience launchConvenience;
     private final HitsHookGenerator hitsHookGenerator;
+    private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
+    private final CompletionConvenience completionConvenience;
 
     CentralityAlgorithmsStreamModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityBusinessAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        AlgorithmProcessingFacadeConvenience algorithmProcessingFacadeConvenience,
-        HitsHookGenerator hitsHookGenerator
+        LaunchConvenience launchConvenience,
+        HitsHookGenerator hitsHookGenerator,
+        CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
+        CompletionConvenience completionConvenience
     ) {
         this.estimationFacade = estimationFacade;
         this.centralityAlgorithms = centralityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.algorithmProcessingFacadeConvenience = algorithmProcessingFacadeConvenience;
+        this.launchConvenience = launchConvenience;
         this.hitsHookGenerator = hitsHookGenerator;
+        this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
+        this.completionConvenience = completionConvenience;
     }
 
     public <RESULT> Stream<RESULT> articleRank(
@@ -109,20 +117,25 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         );
     }
 
+    /**
+     * Stream mode means using certain result handling, and appearing in synchronous mode/ terminating asynchronous mode
+     *
+     * @deprecated the result builder probably goes here, it is a business concern. caller is just integration
+     */
     public <RESULT> Stream<RESULT> articulationPoints(
         GraphName graphName,
-        ArticulationPointsStreamConfig configuration,
-        StreamResultBuilder<ArticulationPointsResult, RESULT> streamResultBuilder,
+        ArticulationPointsBaseConfig configuration,
+        StreamResultBuilder<ArticulationPointsResult, RESULT> resultBuilder,
         boolean shouldComputeComponents
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        var future = centralityAlgorithmsBusinessFacade.articulationPoints(
             graphName,
             configuration,
-            ArticulationPoints,
-            ()-> estimationFacade.articulationPoints(shouldComputeComponents),
-            (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration, shouldComputeComponents),
-            streamResultBuilder
+            new StreamResultRenderer<>(resultBuilder), // this is the value add for this layer
+            shouldComputeComponents
         );
+
+        return completionConvenience.completeWork(future); // and this
     }
 
     public <RESULT> Stream<RESULT> bridges(
@@ -207,13 +220,14 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         HarmonicCentralityStreamConfig configuration,
         StreamResultBuilder<HarmonicResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingFacadeConvenience.runAlgorithm(
+        return launchConvenience._runAlgorithm(
             graphName,
             configuration,
+            AlgorithmGraphStoreRequirements.EMPTY,
             graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
-            HarmonicCentrality,
-            streamResultBuilder
+            AlgorithmLabel.HarmonicCentrality,
+            new StreamResultRenderer<>(streamResultBuilder)
         );
     }
 

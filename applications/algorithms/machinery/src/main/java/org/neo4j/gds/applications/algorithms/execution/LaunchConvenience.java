@@ -25,29 +25,29 @@ import org.neo4j.gds.applications.algorithms.execution.machinery.ConstructAndRun
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * Some parameter embellishment, to reduce parameter lists sizes.
  * This object is request scoped, so that it can carry all the implicit parameters relating to the request.
  */
-public class AlgorithmProcessingFacadeConvenience {
+public class LaunchConvenience {
     private final Log log;
     private final AlgorithmProcessingFacade algorithmProcessingFacade;
     private final RequestScopedDependencies requestScopedDependencies;
 
-    public AlgorithmProcessingFacadeConvenience(
+    public LaunchConvenience(
         Log log,
         AlgorithmProcessingFacade algorithmProcessingFacade,
         RequestScopedDependencies requestScopedDependencies
@@ -58,34 +58,67 @@ public class AlgorithmProcessingFacadeConvenience {
     }
 
     /**
-     * This is currently specific convenience for a synchronous streaming mode algorithm, that is _regular_.
-     * That means no relationship override, no graph store validation, no graph validation, no dimension transformer,
-     * no side effect. We have enough of those to warrant this shortcut.
-     * There will be other convenience methods.
-     * _Work_ is handled asynchronously and is thus subject to cancellation.
-     * Plus, stuff could go wrong while executing your work.
-     * That's work as in, it could at any stage get interrupted, and there might even have been side effects completed.
-     * Handling those cases is an application concern.
-     *
-     * @throws java.util.concurrent.CancellationException if your work was cancelled
-     * @throws java.util.concurrent.CompletionException   if something went wrong executing your work
+     * @deprecated this enables duplication
      */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT, RENDERING> Stream<RENDERING> runAlgorithm(
+    @Deprecated
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> RENDERING _runAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
+        AlgorithmGraphStoreRequirements validationRequirements,
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,
-        StreamResultBuilder<RESULT, RENDERING> streamResultBuilder
+        ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
     ) {
-        var completableFuture = algorithmProcessingFacade.loadGraphThenRunAlgorithm(
+        var launchedAlgorithm = launchAlgorithm(
+            graphName,
+            configuration,
+            validationRequirements,
+            constructAndRun,
+            memoryEstimationSupplier,
+            label,
+            resultRenderer
+        );
+
+        // callers here want to algorithm completed - back to synchronous mode
+        // because we are leaving this layer, let's log a final time
+        try {
+            return launchedAlgorithm.join();
+        } catch (CancellationException e) {
+            log.error("your work was cancelled", e);
+            throw e;
+        } catch (CompletionException e) {
+            log.error("execution error, something went wrong while executing your work", e.getCause());
+            throw e;
+        }
+    }
+
+    /**
+     * This is currently the most specific convenience needed thus far.
+     * It does no relationship override, no graph validation, no dimension transformer,
+     * no side effect. It does do graph store validation, howver :shrug:
+     * There will be other convenience methods, and we can manage them over time to be overloads of this one,
+     * to avoid duplication.
+     * <p>
+     * _Work_ is launched asynchronously, caller deals with completing work and handling errors.
+     */
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        AlgorithmGraphStoreRequirements validationRequirements,
+        ConstructAndRun<RESULT> constructAndRun,
+        Supplier<MemoryEstimation> memoryEstimationSupplier,
+        Label label,
+        ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
+    ) {
+        return algorithmProcessingFacade.loadGraphThenRunAlgorithm(
             requestScopedDependencies.databaseId(),
             graphName,
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.user(),
             configuration.toGraphParameters(),
             Optional.empty(), // simple basic convenience here
-            GraphStoreValidation.DISABLED, // make this an optional...
+            new GraphStoreValidation(validationRequirements),
             true, // simple basic convenience here
             Optional.empty(), // or make this a DISABLED
             constructAndRun,
@@ -94,19 +127,8 @@ public class AlgorithmProcessingFacadeConvenience {
             DimensionTransformer.DISABLED, // simple basic convenience here
             memoryEstimationSupplier,
             label,
-            Optional.empty(), // no side effects in stream mode
-            new StreamResultRenderer<>(streamResultBuilder)
+            Optional.empty(), // no side effects in this mode
+            resultRenderer
         );
-
-        // because we are leaving this layer, let's log a final time
-        try {
-            return completableFuture.join();
-        } catch (CancellationException e) {
-            log.error("your work was cancelled", e);
-            throw e;
-        } catch (CompletionException e) {
-            log.error("execution error, something went wrong while executing your work", e);
-            throw e;
-        }
     }
 }

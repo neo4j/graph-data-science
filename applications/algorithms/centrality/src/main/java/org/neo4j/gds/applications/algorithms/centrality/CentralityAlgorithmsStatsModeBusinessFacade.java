@@ -21,10 +21,12 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultRenderer;
+import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
-import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
@@ -42,7 +44,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
@@ -52,23 +53,28 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HIT
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
-public class CentralityAlgorithmsStatsModeBusinessFacade {
+public final class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CentralityBusinessAlgorithms centralityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final HitsHookGenerator hitsHookGenerator;
-
+    private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
+    private final CompletionConvenience completionConvenience;
 
     CentralityAlgorithmsStatsModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityBusinessAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        HitsHookGenerator hitsHookGenerator
+        HitsHookGenerator hitsHookGenerator,
+        CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
+        CompletionConvenience completionConvenience
     ) {
         this.estimationFacade = estimationFacade;
         this.centralityAlgorithms = centralityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.hitsHookGenerator = hitsHookGenerator;
+        this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
+        this.completionConvenience = completionConvenience;
     }
 
     public <RESULT> RESULT articleRank(
@@ -88,17 +94,17 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT articulationPoints(
         GraphName graphName,
-        ArticulationPointsStatsConfig configuration,
+        ArticulationPointsBaseConfig configuration,
         StatsResultBuilder<ArticulationPointsResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        var future = centralityAlgorithmsBusinessFacade.articulationPoints(
             graphName,
             configuration,
-            ArticulationPoints,
-            ()-> estimationFacade.articulationPoints(false),
-            (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration,false),
-            resultBuilder
+            new StatsResultRenderer<>(resultBuilder),
+            false
         );
+
+        return completionConvenience.completeWork(future);
     }
 
     public <RESULT> RESULT betweennessCentrality(

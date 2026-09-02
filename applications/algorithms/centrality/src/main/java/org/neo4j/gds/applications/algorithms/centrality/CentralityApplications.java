@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import org.neo4j.gds.applications.algorithms.execution.AlgorithmProcessingFacadeConvenience;
+import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
+import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
@@ -31,6 +32,7 @@ import org.neo4j.gds.logging.Log;
 public final class CentralityApplications {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CentralityAlgorithmsMutateModeBusinessFacade mutation;
+    private final CentralityAlgorithmsBusinessFacade raw;
     private final CentralityAlgorithmsStatsModeBusinessFacade stats;
     private final CentralityAlgorithmsStreamModeBusinessFacade streaming;
     private final CentralityAlgorithmsWriteModeBusinessFacade writing;
@@ -38,12 +40,14 @@ public final class CentralityApplications {
     private CentralityApplications(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
         CentralityAlgorithmsMutateModeBusinessFacade mutation,
+        CentralityAlgorithmsBusinessFacade raw,
         CentralityAlgorithmsStatsModeBusinessFacade stats,
         CentralityAlgorithmsStreamModeBusinessFacade streaming,
         CentralityAlgorithmsWriteModeBusinessFacade writing
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
+        this.raw = raw;
         this.stats = stats;
         this.streaming = streaming;
         this.writing = writing;
@@ -54,7 +58,7 @@ public final class CentralityApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate estimationTemplate,
-        AlgorithmProcessingFacadeConvenience algorithmProcessingFacadeConvenience,
+        LaunchConvenience launchConvenience,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodePropertyService
@@ -78,18 +82,31 @@ public final class CentralityApplications {
             mutateNodePropertyService,
             hitsHookGenerator
         );
+
+        var raw = new CentralityAlgorithmsBusinessFacade(
+            business,
+            estimation,
+            launchConvenience
+        );
+
+        var completionConvenience = new CompletionConvenience(log);
+
         var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
             estimation,
             business,
             algorithmProcessingTemplateConvenience,
-            hitsHookGenerator
+            hitsHookGenerator,
+            raw,
+            completionConvenience
         );
         var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
             estimation,
             business,
             algorithmProcessingTemplateConvenience,
-            algorithmProcessingFacadeConvenience,
-            hitsHookGenerator
+            launchConvenience,
+            hitsHookGenerator,
+            raw,
+            completionConvenience
         );
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
             log,
@@ -101,7 +118,7 @@ public final class CentralityApplications {
             hitsHookGenerator
         );
 
-        return new CentralityApplications(estimation, mutation, stats, streaming, writing);
+        return new CentralityApplications(estimation, mutation, raw, stats, streaming, writing);
     }
 
     public CentralityAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -110,6 +127,13 @@ public final class CentralityApplications {
 
     public CentralityAlgorithmsMutateModeBusinessFacade mutate() {
         return mutation;
+    }
+
+    /**
+     * Raw as in, no mode applied, just access to the asynchronous machinery
+     */
+    public CentralityAlgorithmsBusinessFacade raw() {
+        return raw;
     }
 
     public CentralityAlgorithmsStatsModeBusinessFacade stats() {
