@@ -27,6 +27,8 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
+import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -65,6 +67,24 @@ public class CentralityAlgorithmsBusinessFacade {
             new UndirectedOnlyRequirement("Articulation Points"),
             graph -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
+            AlgorithmLabel.ArticulationPoints,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> harmonicCentrality(
+        GraphName graphName,
+        HarmonicCentralityBaseConfig configuration,
+        Optional<SideEffect<HarmonicResult, METADATA>> sideEffect,
+        ResultRenderer<HarmonicResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            new UndirectedOnlyRequirement("Articulation Points"),
+            graph -> algorithms.harmonicCentrality(graph, configuration),
+            estimationFacade::harmonicCentrality,
             AlgorithmLabel.ArticulationPoints,
             sideEffect,
             resultRenderer

@@ -120,7 +120,6 @@ public final class ApplicationsFacade {
         AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
         var launchConvenience = new LaunchConvenience(
-            loggers.log(),
             algorithmProcessingFacade,
             requestScopedDependencies
         );

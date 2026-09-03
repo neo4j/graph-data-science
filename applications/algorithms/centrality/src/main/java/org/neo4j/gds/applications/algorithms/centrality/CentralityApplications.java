@@ -97,7 +97,6 @@ public final class CentralityApplications {
             estimation,
             instrumentedAlgorithms,
             algorithmProcessingTemplateConvenience,
-            launchConvenience,
             hitsHookGenerator,
             raw,
             completionConvenience

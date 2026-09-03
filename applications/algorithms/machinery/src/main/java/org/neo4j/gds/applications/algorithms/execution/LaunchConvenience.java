@@ -30,13 +30,10 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.function.Supplier;
 
 /**
@@ -44,55 +41,15 @@ import java.util.function.Supplier;
  * This object is request scoped, so that it can carry all the implicit parameters relating to the request.
  */
 public class LaunchConvenience {
-    private final Log log;
     private final AlgorithmProcessingFacade algorithmProcessingFacade;
     private final RequestScopedDependencies requestScopedDependencies;
 
     public LaunchConvenience(
-        Log log,
         AlgorithmProcessingFacade algorithmProcessingFacade,
         RequestScopedDependencies requestScopedDependencies
     ) {
-        this.log = log;
         this.algorithmProcessingFacade = algorithmProcessingFacade;
         this.requestScopedDependencies = requestScopedDependencies;
-    }
-
-    /**
-     * @deprecated this enables duplication
-     */
-    @Deprecated
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> RENDERING _runAlgorithm(
-        GraphName graphName,
-        CONFIGURATION configuration,
-        AlgorithmGraphStoreRequirements validationRequirements,
-        ConstructAndRun<RESULT> constructAndRun,
-        Supplier<MemoryEstimation> memoryEstimationSupplier,
-        Label label,
-        ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
-    ) {
-        var launchedAlgorithm = launchAlgorithm(
-            graphName,
-            configuration,
-            validationRequirements,
-            constructAndRun,
-            memoryEstimationSupplier,
-            label,
-            Optional.empty(),
-            resultRenderer
-        );
-
-        // callers here want to algorithm completed - back to synchronous mode
-        // because we are leaving this layer, let's log a final time
-        try {
-            return launchedAlgorithm.join();
-        } catch (CancellationException e) {
-            log.error("your work was cancelled", e);
-            throw e;
-        } catch (CompletionException e) {
-            log.error("execution error, something went wrong while executing your work", e.getCause());
-            throw e;
-        }
     }
 
     /**
