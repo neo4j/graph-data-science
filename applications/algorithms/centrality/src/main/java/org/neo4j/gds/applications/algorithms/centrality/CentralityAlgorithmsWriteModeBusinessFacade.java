@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
@@ -71,7 +70,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CentralityBusinessAlgorithms centralityAlgorithms;
+    private final InstrumentedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteNodePropertyService writeNodePropertyService;
     private final HitsHookGenerator hitsHookGenerator;
@@ -80,7 +79,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
 
     private CentralityAlgorithmsWriteModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CentralityBusinessAlgorithms centralityAlgorithms,
+        InstrumentedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteNodePropertyService writeNodePropertyService,
         HitsHookGenerator hitsHookGenerator,
@@ -88,7 +87,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         CompletionConvenience completionConvenience
     ) {
         this.estimationFacade = estimationFacade;
-        this.centralityAlgorithms = centralityAlgorithms;
+        this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeNodePropertyService = writeNodePropertyService;
         this.hitsHookGenerator = hitsHookGenerator;
@@ -101,7 +100,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CentralityBusinessAlgorithms centralityAlgorithms,
+        InstrumentedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
@@ -111,7 +110,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
 
         return new CentralityAlgorithmsWriteModeBusinessFacade(
             estimationFacade,
-            centralityAlgorithms,
+            algorithms,
             algorithmProcessingTemplateConvenience,
             writeToDatabase,
             hitsHookGenerator,
@@ -138,7 +137,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             ArticleRank,
             estimationFacade::pageRank,
-            (graph, __) -> centralityAlgorithms.articleRank(graph, configuration),
+            (graph, __) -> algorithms.articleRank(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -156,7 +155,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
-            (graph, __) -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            (graph, __) -> algorithms.betweennessCentrality(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -203,7 +202,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             CELF,
             () -> estimationFacade.celf(configuration),
-            (graph, __) -> centralityAlgorithms.celf(graph, configuration),
+            (graph, __) -> algorithms.celf(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -226,7 +225,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             ClosenessCentrality,
             estimationFacade::closenessCentrality,
-            (graph, __) -> centralityAlgorithms.closenessCentrality(graph, configuration),
+            (graph, __) -> algorithms.closenessCentrality(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -244,7 +243,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
-            (graph, __) -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            (graph, __) -> algorithms.degreeCentrality(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -268,7 +267,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             EigenVector,
             estimationFacade::pageRank,
-            (graph, __) -> centralityAlgorithms.eigenVector(graph, configuration),
+            (graph, __) -> algorithms.eigenVector(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -286,7 +285,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
-            (graph, __) -> centralityAlgorithms.harmonicCentrality(graph, configuration),
+            (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -310,7 +309,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             PageRank,
             estimationFacade::pageRank,
-            (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
+            (graph, __) -> algorithms.pageRank(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -337,7 +336,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             HITS,
             estimationFacade::hits,
-            (graph, __) -> centralityAlgorithms.hits(graph, configuration),
+            (graph, __) -> algorithms.hits(graph, configuration),
             writeStep,
             resultBuilder,
             Optional.empty(),

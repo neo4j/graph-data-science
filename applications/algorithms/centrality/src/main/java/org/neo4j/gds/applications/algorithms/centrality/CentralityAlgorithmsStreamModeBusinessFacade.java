@@ -62,7 +62,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 
 public final class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CentralityBusinessAlgorithms centralityAlgorithms;
+    private final InstrumentedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final LaunchConvenience launchConvenience;
     private final HitsHookGenerator hitsHookGenerator;
@@ -71,7 +71,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
 
     CentralityAlgorithmsStreamModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CentralityBusinessAlgorithms centralityAlgorithms,
+        InstrumentedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         LaunchConvenience launchConvenience,
         HitsHookGenerator hitsHookGenerator,
@@ -79,7 +79,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         CompletionConvenience completionConvenience
     ) {
         this.estimationFacade = estimationFacade;
-        this.centralityAlgorithms = centralityAlgorithms;
+        this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.launchConvenience = launchConvenience;
         this.hitsHookGenerator = hitsHookGenerator;
@@ -97,7 +97,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             configuration,
             ArticleRank,
             estimationFacade::pageRank,
-            (graph, __) -> centralityAlgorithms.articleRank(graph, configuration),
+            (graph, __) -> algorithms.articleRank(graph, configuration),
             streamResultBuilder
         );
     }
@@ -112,7 +112,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             configuration,
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
-            (graph, __) -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            (graph, __) -> algorithms.betweennessCentrality(graph, configuration),
             streamResultBuilder
         );
     }
@@ -151,7 +151,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             configuration,
             Bridges,
             ()-> estimationFacade.bridges(shouldComputeComponents),
-            (graph, __) -> centralityAlgorithms.bridges(graph, configuration,shouldComputeComponents),
+            (graph, __) -> algorithms.bridges(graph, configuration,shouldComputeComponents),
             streamResultBuilder
         );
     }
@@ -166,7 +166,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             configuration,
             CELF,
             () -> estimationFacade.celf(configuration),
-            (graph, __) -> centralityAlgorithms.celf(graph, configuration),
+            (graph, __) -> algorithms.celf(graph, configuration),
             streamResultBuilder
         );
     }
@@ -181,7 +181,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             configuration,
             ClosenessCentrality,
             estimationFacade::closenessCentrality,
-            (graph, __) -> centralityAlgorithms.closenessCentrality(graph, configuration),
+            (graph, __) -> algorithms.closenessCentrality(graph, configuration),
             streamResultBuilder
         );
     }
@@ -196,7 +196,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             configuration,
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
-            (graph, __) -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            (graph, __) -> algorithms.degreeCentrality(graph, configuration),
             streamResultBuilder
         );
     }
@@ -211,7 +211,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             configuration,
             EigenVector,
             estimationFacade::pageRank,
-            (graph, __) -> centralityAlgorithms.eigenVector(graph, configuration),
+            (graph, __) -> algorithms.eigenVector(graph, configuration),
             streamResultBuilder
         );
     }
@@ -232,7 +232,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             AlgorithmGraphStoreRequirements.EMPTY,
-            graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
+            graph -> algorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
             AlgorithmLabel.HarmonicCentrality,
             new StreamResultRenderer<>(streamResultBuilder)
@@ -249,7 +249,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             configuration,
             PageRank,
             estimationFacade::pageRank,
-            (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
+            (graph, __) -> algorithms.pageRank(graph, configuration),
             streamResultBuilder
         );
     }
@@ -267,7 +267,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
             configuration,
             HITS,
             estimationFacade::hits,
-            (graph, __) -> centralityAlgorithms.hits(graph, configuration),
+            (graph, __) -> algorithms.hits(graph, configuration),
             streamResultBuilder,
             Optional.empty(),
             Optional.of(List.of(hitsETLHook)),

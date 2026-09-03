@@ -55,7 +55,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 
 public final class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CentralityBusinessAlgorithms centralityAlgorithms;
+    private final InstrumentedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final HitsHookGenerator hitsHookGenerator;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
@@ -63,14 +63,14 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
 
     CentralityAlgorithmsStatsModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CentralityBusinessAlgorithms centralityAlgorithms,
+        InstrumentedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
         CompletionConvenience completionConvenience
     ) {
         this.estimationFacade = estimationFacade;
-        this.centralityAlgorithms = centralityAlgorithms;
+        this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.hitsHookGenerator = hitsHookGenerator;
         this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
@@ -87,7 +87,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             ArticleRank,
             estimationFacade::pageRank,
-            (graph, __) -> centralityAlgorithms.articleRank(graph, configuration),
+            (graph, __) -> algorithms.articleRank(graph, configuration),
             resultBuilder
         );
     }
@@ -118,7 +118,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
-            (graph, __) -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            (graph, __) -> algorithms.betweennessCentrality(graph, configuration),
             resultBuilder
         );
     }
@@ -133,7 +133,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             CELF,
             () -> estimationFacade.celf(configuration),
-            (graph, __) -> centralityAlgorithms.celf(graph, configuration),
+            (graph, __) -> algorithms.celf(graph, configuration),
             resultBuilder
         );
     }
@@ -148,7 +148,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             ClosenessCentrality,
             estimationFacade::closenessCentrality,
-            (graph, __) -> centralityAlgorithms.closenessCentrality(graph, configuration),
+            (graph, __) -> algorithms.closenessCentrality(graph, configuration),
             resultBuilder
         );
     }
@@ -163,7 +163,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
-            (graph, __) -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            (graph, __) -> algorithms.degreeCentrality(graph, configuration),
             resultBuilder
         );
     }
@@ -178,7 +178,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             EigenVector,
             estimationFacade::pageRank,
-            (graph, __) -> centralityAlgorithms.eigenVector(graph, configuration),
+            (graph, __) -> algorithms.eigenVector(graph, configuration),
             resultBuilder
         );
     }
@@ -193,7 +193,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
-            (graph, __) -> centralityAlgorithms.harmonicCentrality(graph, configuration),
+            (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
             resultBuilder
         );
     }
@@ -208,7 +208,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             PageRank,
             estimationFacade::pageRank,
-            (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
+            (graph, __) -> algorithms.pageRank(graph, configuration),
             resultBuilder
         );
     }
@@ -225,7 +225,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             HITS,
             estimationFacade::hits,
-            (graph, __) -> centralityAlgorithms.hits(graph, configuration),
+            (graph, __) -> algorithms.hits(graph, configuration),
             resultBuilder,
             Optional.empty(),
             Optional.of(List.of(hitsETLHook)),

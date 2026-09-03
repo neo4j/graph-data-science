@@ -38,16 +38,16 @@ import java.util.concurrent.CompletableFuture;
  * Side effects and result rendering behaviours get injected as parameters.
  */
 public class CentralityAlgorithmsBusinessFacade {
-    private final CentralityBusinessAlgorithms centralityAlgorithms;
+    private final InstrumentedCentralityAlgorithms algorithms;
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
 
     public CentralityAlgorithmsBusinessFacade(
-        CentralityBusinessAlgorithms centralityAlgorithms,
+        InstrumentedCentralityAlgorithms algorithms,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience
     ) {
-        this.centralityAlgorithms = centralityAlgorithms;
+        this.algorithms = algorithms;
         this.estimationFacade = estimationFacade;
         this.launchConvenience = launchConvenience;
     }
@@ -63,7 +63,7 @@ public class CentralityAlgorithmsBusinessFacade {
             graphName,
             configuration,
             new UndirectedOnlyRequirement("Articulation Points"),
-            graph -> centralityAlgorithms.articulationPoints(graph, configuration, shouldComputeComponents),
+            graph -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
             AlgorithmLabel.ArticulationPoints,
             sideEffect,

@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
@@ -74,7 +73,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
-    private final CentralityBusinessAlgorithms algorithms;
+    private final InstrumentedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final HitsHookGenerator hitsHookGenerator;
@@ -83,7 +82,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
 
     public CentralityAlgorithmsMutateModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
-        CentralityBusinessAlgorithms algorithms,
+        InstrumentedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodePropertyService,
         HitsHookGenerator hitsHookGenerator,

@@ -63,29 +63,20 @@ public final class CentralityApplications {
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodePropertyService
     ) {
+        var algorithms = new CentralityAlgorithms(requestScopedDependencies.terminationFlag());
+        var instrumentedAlgorithms = new InstrumentedCentralityAlgorithms(algorithms, progressTrackerCreator);
         var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
-        var algorithms = new CentralityAlgorithms(
-            requestScopedDependencies.terminationFlag()
-        );
-
-        var business =new CentralityBusinessAlgorithms(
-            algorithms,
-            progressTrackerCreator
-        );
-
-        var hitsHookGenerator =new HitsHookGenerator(progressTrackerCreator,requestScopedDependencies.terminationFlag());
-
+        var hitsHookGenerator = new HitsHookGenerator(progressTrackerCreator,requestScopedDependencies.terminationFlag());
         var raw = new CentralityAlgorithmsBusinessFacade(
-            business,
+            instrumentedAlgorithms,
             estimation,
             launchConvenience
         );
-
         var completionConvenience = new CompletionConvenience(log);
 
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,
-            business,
+            instrumentedAlgorithms,
             algorithmProcessingTemplateConvenience,
             mutateNodePropertyService,
             hitsHookGenerator,
@@ -95,27 +86,29 @@ public final class CentralityApplications {
 
         var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
             estimation,
-            business,
+            instrumentedAlgorithms,
             algorithmProcessingTemplateConvenience,
             hitsHookGenerator,
             raw,
             completionConvenience
         );
+
         var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
             estimation,
-            business,
+            instrumentedAlgorithms,
             algorithmProcessingTemplateConvenience,
             launchConvenience,
             hitsHookGenerator,
             raw,
             completionConvenience
         );
+
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
             log,
             requestScopedDependencies,
             writeContext,
             estimation,
-            business,
+            instrumentedAlgorithms,
             algorithmProcessingTemplateConvenience,
             hitsHookGenerator,
             raw,
