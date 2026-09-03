@@ -42,7 +42,7 @@ public class CentralityAlgorithmsBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
 
-    CentralityAlgorithmsBusinessFacade(
+    public CentralityAlgorithmsBusinessFacade(
         CentralityBusinessAlgorithms centralityAlgorithms,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience

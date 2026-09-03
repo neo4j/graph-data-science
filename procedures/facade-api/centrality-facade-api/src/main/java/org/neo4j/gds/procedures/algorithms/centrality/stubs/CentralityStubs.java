@@ -25,15 +25,15 @@ import org.neo4j.gds.pagerank.PageRankMutateConfig;
 
 public record CentralityStubs(
     PageRankMutateStub<ArticleRankMutateConfig> articleRank,
-    BetaClosenessCentralityMutateStub betaCloseness,
-    BetweennessCentralityMutateStub betweeness,
     ArticulationPointsMutateStub articulationPoints,
+    BetaClosenessCentralityMutateStub betaCloseness,
+    BetweennessCentralityMutateStub betweenness,
     CelfMutateStub celf,
-    HitsMutateStub hits,
     ClosenessCentralityMutateStub closeness,
     DegreeCentralityMutateStub degree,
     PageRankMutateStub<EigenvectorMutateConfig> eigenvector,
     HarmonicCentralityMutateStub harmonic,
+    HitsMutateStub hits,
     PageRankMutateStub<PageRankMutateConfig> pageRank
 ) {
 

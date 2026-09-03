@@ -27,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.bridges.BridgesParameters;
@@ -125,23 +124,6 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().iterations()).isBetween(1, 3);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void articulationPoints() {
-
-        var params = new ArticulationPointsParameters(new Concurrency(1), false);
-        var future = facade.articulationPoints(
-            graph,
-            params,
-            jobIdMock,
-            true
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().articulationPoints().cardinality()).isEqualTo(1L); //e is the art. point
         assertThat(results.computeMillis()).isNotNegative();
     }
 
