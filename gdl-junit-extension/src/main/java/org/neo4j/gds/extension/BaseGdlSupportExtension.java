@@ -19,13 +19,12 @@
  */
 package org.neo4j.gds.extension;
 
-import org.immutables.value.Value;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.OffsetIdSupplier;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.EphemeralResultStore;
@@ -99,7 +98,7 @@ public abstract class BaseGdlSupportExtension {
             : stream(field.getAnnotation(GdlGraphs.class).value());
 
         return annotations
-            .map(annotation -> ImmutableGdlGraphSetup.builder()
+            .map(annotation -> GdlGraphSetupBuilder.builder()
                 .graphNamePrefix(annotation.graphNamePrefix())
                 .gdlGraph(gdl)
                 .username(annotation.username())
@@ -165,40 +164,17 @@ public abstract class BaseGdlSupportExtension {
         });
     }
 
-    @ValueClass
-    interface GdlGraphSetup {
-        String graphNamePrefix();
-
-        @Value.Auxiliary
-        String gdlGraph();
-
-        @Value.Auxiliary
-        String username();
-
-        @Value.Auxiliary
-        Orientation orientation();
-
-        @Value.Auxiliary
-        Aggregation aggregation();
-
-        @Value.Auxiliary
-        PropertyState propertyState();
-
-        @Value.Auxiliary
-        boolean indexInverse();
-
-        @Value.Auxiliary
-        long idOffset();
-
-        @Value.Auxiliary
-        @Value.Default
-        default boolean addToCatalog() {
-            return false;
-        }
-
-        @Value.Auxiliary
-        DatabaseId databaseId();
-    }
-
-
+    @GenerateBuilder
+    record GdlGraphSetup(
+        String graphNamePrefix,
+        String gdlGraph,
+        String username,
+        Orientation orientation,
+        Aggregation aggregation,
+        PropertyState propertyState,
+        boolean indexInverse,
+        long idOffset,
+        boolean addToCatalog,
+        DatabaseId databaseId
+    ) {}
 }
