@@ -75,14 +75,6 @@ public final class CentralityApplications {
 
         var hitsHookGenerator =new HitsHookGenerator(progressTrackerCreator,requestScopedDependencies.terminationFlag());
 
-        var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
-            estimation,
-            business,
-            algorithmProcessingTemplateConvenience,
-            mutateNodePropertyService,
-            hitsHookGenerator
-        );
-
         var raw = new CentralityAlgorithmsBusinessFacade(
             business,
             estimation,
@@ -90,6 +82,16 @@ public final class CentralityApplications {
         );
 
         var completionConvenience = new CompletionConvenience(log);
+
+        var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
+            estimation,
+            business,
+            algorithmProcessingTemplateConvenience,
+            mutateNodePropertyService,
+            hitsHookGenerator,
+            raw,
+            completionConvenience
+        );
 
         var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
             estimation,

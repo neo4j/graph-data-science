@@ -23,12 +23,12 @@ import org.neo4j.gds.core.loading.GraphResources;
 
 import java.util.Optional;
 
-class MutateSideEffect<RESULT_FROM_ALGORITHM, MUTATE_METADATA> implements SideEffect<RESULT_FROM_ALGORITHM, MUTATE_METADATA> {
+public class MutateSideEffect<RESULT_FROM_ALGORITHM, MUTATE_METADATA> implements SideEffect<RESULT_FROM_ALGORITHM, MUTATE_METADATA> {
     private final SideEffectExecutor sideEffectExecutor = new SideEffectExecutor();
 
     private final MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep;
 
-    MutateSideEffect(MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep) {this.mutateStep = mutateStep;}
+    public MutateSideEffect(MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep) {this.mutateStep = mutateStep;}
 
     @Override
     public Optional<MUTATE_METADATA> process(
