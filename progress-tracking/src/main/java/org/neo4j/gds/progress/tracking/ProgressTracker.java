@@ -58,6 +58,10 @@ public interface ProgressTracker {
 
     void endSubTask();
 
+    /**
+     * Marks running tasks as failed and releases resources.
+     * If no task is currently active, it only runs the cleanup.
+     */
     void endSubTaskWithFailure();
 
     void release();

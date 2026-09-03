@@ -19,59 +19,36 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.progress.registration.EmptyTaskStore;
+import org.neo4j.gds.projection.CypherAggregationUpdater.InputValuesMapper;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
-import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.virtual.MapValue;
 
-class AlphaCypherAggregationUpdater extends CypherAggregationUpdater {
+import static org.neo4j.gds.projection.CypherAggregationUpdater.ALPHA_RELATIONSHIP_PROPERTIES;
+import static org.neo4j.gds.projection.CypherAggregationUpdater.RELATIONSHIP_PROPERTIES;
+import static org.neo4j.gds.projection.CypherAggregationUpdater.SOURCE_NODE_LABELS;
+import static org.neo4j.gds.projection.CypherAggregationUpdater.SOURCE_NODE_PROPERTIES;
+import static org.neo4j.gds.projection.CypherAggregationUpdater.TARGET_NODE_LABELS;
+import static org.neo4j.gds.projection.CypherAggregationUpdater.TARGET_NODE_PROPERTIES;
 
-    AlphaCypherAggregationUpdater(
-        ExecutingQueryProvider queryProvider,
-        Capabilities.WriteMode writeMode,
-        String username,
-        DatabaseId databaseID,
-        ExtractNodeId extractNodeId,
-        GraphStoreCatalogService graphStoreCatalogService,
-        RequestCorrelationId requestCorrelationId
-    ) {
-        super(
-            QueryEstimator.empty(),
-            queryProvider,
-            writeMode,
-            username,
-            databaseID,
-            extractNodeId,
-            graphStoreCatalogService,
-            requestCorrelationId,
-            EmptyTaskStore.INSTANCE,
-            Log.noOpLog()
-        );
-    }
-
+public class AlphaCypherAggregationInputMapper implements InputValuesMapper {
     @Override
-    void updateRow(GraphAggregationUpdater updater, AnyValue[] input) {
+    public AnyValue[] map(AnyValue[] input) {
         var nodesConfig = nodeConfigMap(input[3]);
         var relationshipsConfig = relationshipConfigMap(input[4]);
         AnyValue dataConfig = NoValue.NO_VALUE;
         dataConfig = mergeMaps(dataConfig, nodesConfig);
         dataConfig = mergeMaps(dataConfig, relationshipsConfig);
-        super.projectNextRelationship(
-            updater,
-            (TextValue) input[0],
+        return new AnyValue[]{
+            input[0],
             input[1],
             input[2],
             dataConfig,
             input[5],
             NoValue.NO_VALUE
-        );
+        };
     }
+
 
     private static AnyValue nodeConfigMap(AnyValue nodeConfig) {
         if (nodeConfig == NoValue.NO_VALUE) {

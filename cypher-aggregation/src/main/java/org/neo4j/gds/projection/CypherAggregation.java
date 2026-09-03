@@ -31,6 +31,7 @@ import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.progress.registration.TaskStore;
+import org.neo4j.gds.projection.CypherAggregationUpdater.InputValuesMapper;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -113,13 +114,12 @@ public class CypherAggregation implements CallableUserAggregationFunction {
             var extractNodeId = new ExtractNodeId();
             var databaseId = DatabaseIdSupplier.create().databaseId(ctx);
             var aggregationReducer = new CypherAggregationReducer(
-                createAggregator(
-                    queryEstimator,
-                    queryProvider,
-                    writeMode,
+                new LazyGraphImporter(
                     username,
                     databaseId,
-                    extractNodeId,
+                    queryProvider,
+                    queryEstimator,
+                    writeMode,
                     graphStoreCatalogService,
                     requestCorrelationId,
                     taskStore,
@@ -127,38 +127,13 @@ public class CypherAggregation implements CallableUserAggregationFunction {
                 ),
                 metrics.projectionMetrics(),
                 databaseId,
-                extractNodeId
+                extractNodeId,
+                InputValuesMapper.identity()
             );
             ctx.internalTransaction().registerCloseableResource(aggregationReducer);
             return aggregationReducer;
         } catch (Throwable T) {
             throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
         }
-    }
-
-    protected CypherAggregationUpdater createAggregator(
-        QueryEstimator queryEstimator,
-        ExecutingQueryProvider queryProvider,
-        Capabilities.WriteMode writeMode,
-        String username,
-        DatabaseId databaseId,
-        ExtractNodeId extractNodeId,
-        GraphStoreCatalogService graphStoreCatalogService,
-        RequestCorrelationId requestCorrelationId,
-        TaskStore taskStore,
-        org.neo4j.gds.logging.Log log
-    ) {
-        return new CypherAggregationUpdater(
-            queryEstimator,
-            queryProvider,
-            writeMode,
-            username,
-            databaseId,
-            extractNodeId,
-            graphStoreCatalogService,
-            requestCorrelationId,
-            taskStore,
-            log
-        );
     }
 }
