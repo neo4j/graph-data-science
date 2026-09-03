@@ -24,12 +24,12 @@ import org.neo4j.gds.core.loading.GraphResources;
 
 import java.util.Optional;
 
-class WriteResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA, CONFIGURATION extends AlgoBaseConfig> implements
+public class WriteResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA, CONFIGURATION extends AlgoBaseConfig> implements
     ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> {
     private final CONFIGURATION configuration;
     private final ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder;
 
-    WriteResultRenderer(
+    public WriteResultRenderer(
         CONFIGURATION configuration,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder
     ) {

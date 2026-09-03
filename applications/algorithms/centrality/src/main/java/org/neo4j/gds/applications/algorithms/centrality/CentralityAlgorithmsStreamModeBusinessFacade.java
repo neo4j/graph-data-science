@@ -131,7 +131,8 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         var future = centralityAlgorithmsBusinessFacade.articulationPoints(
             graphName,
             configuration,
-            new StreamResultRenderer<>(resultBuilder), // this is the value add for this layer
+            Optional.empty(), // this is the value add for this layer
+            new StreamResultRenderer<>(resultBuilder), // and this
             shouldComputeComponents
         );
 

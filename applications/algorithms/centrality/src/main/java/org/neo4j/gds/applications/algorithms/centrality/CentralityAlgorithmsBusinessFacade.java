@@ -23,10 +23,12 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -50,14 +52,11 @@ public class CentralityAlgorithmsBusinessFacade {
         this.launchConvenience = launchConvenience;
     }
 
-    /**
-     * @deprecated that Void in the result renderer will change once we tunnel mutate and write through here.
-     */
-    @Deprecated
-    public <RESULT> CompletableFuture<RESULT> articulationPoints(
+    public <RESULT, METADATA> CompletableFuture<RESULT> articulationPoints(
         GraphName graphName,
         ArticulationPointsBaseConfig configuration,
-        ResultRenderer<ArticulationPointsResult, RESULT, Void> resultRenderer,
+        Optional<SideEffect<ArticulationPointsResult, METADATA>> sideEffect,
+        ResultRenderer<ArticulationPointsResult, RESULT, METADATA> resultRenderer,
         boolean shouldComputeComponents
     ) {
         return launchConvenience.launchAlgorithm(
@@ -67,6 +66,7 @@ public class CentralityAlgorithmsBusinessFacade {
             graph -> centralityAlgorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
             AlgorithmLabel.ArticulationPoints,
+            sideEffect,
             resultRenderer
         );
     }

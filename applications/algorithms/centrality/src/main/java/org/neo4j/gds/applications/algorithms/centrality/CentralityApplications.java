@@ -115,7 +115,9 @@ public final class CentralityApplications {
             estimation,
             business,
             algorithmProcessingTemplateConvenience,
-            hitsHookGenerator
+            hitsHookGenerator,
+            raw,
+            completionConvenience
         );
 
         return new CentralityApplications(estimation, mutation, raw, stats, streaming, writing);

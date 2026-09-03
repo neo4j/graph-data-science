@@ -100,6 +100,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
         var future = centralityAlgorithmsBusinessFacade.articulationPoints(
             graphName,
             configuration,
+            Optional.empty(),
             new StatsResultRenderer<>(resultBuilder),
             false
         );

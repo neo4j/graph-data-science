@@ -25,13 +25,13 @@ import org.neo4j.gds.core.JobId;
 import java.util.Optional;
 import java.util.function.Function;
 
-class WriteSideEffect<RESULT_FROM_ALGORITHM, WRITE_METADATA> implements SideEffect<RESULT_FROM_ALGORITHM, WRITE_METADATA> {
+public class WriteSideEffect<RESULT_FROM_ALGORITHM, WRITE_METADATA> implements SideEffect<RESULT_FROM_ALGORITHM, WRITE_METADATA> {
     private final SideEffectExecutor sideEffectExecutor = new SideEffectExecutor();
 
     private final JobId jobId;
     private final WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep;
 
-    WriteSideEffect(JobId jobId, WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep) {
+    public WriteSideEffect(JobId jobId, WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep) {
         this.jobId = jobId;
         this.writeStep = writeStep;
     }

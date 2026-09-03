@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
@@ -77,6 +78,7 @@ public class LaunchConvenience {
             constructAndRun,
             memoryEstimationSupplier,
             label,
+            Optional.empty(),
             resultRenderer
         );
 
@@ -95,8 +97,8 @@ public class LaunchConvenience {
 
     /**
      * This is currently the most specific convenience needed thus far.
-     * It does no relationship override, no graph validation, no dimension transformer,
-     * no side effect. It does do graph store validation, howver :shrug:
+     * It does no relationship override, no graph validation, no dimension transformer.
+     * It does do graph store validation and side effects, however.
      * There will be other convenience methods, and we can manage them over time to be overloads of this one,
      * to avoid duplication.
      * <p>
@@ -109,6 +111,7 @@ public class LaunchConvenience {
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,
+        Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
     ) {
         return algorithmProcessingFacade.loadGraphThenRunAlgorithm(
@@ -127,7 +130,7 @@ public class LaunchConvenience {
             DimensionTransformer.DISABLED, // simple basic convenience here
             memoryEstimationSupplier,
             label,
-            Optional.empty(), // no side effects in this mode
+            sideEffect,
             resultRenderer
         );
     }
