@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.neo4j.gds.RelationshipType;
+
 public final class SplitRelationshipConfigTransformer {
 
     private SplitRelationshipConfigTransformer() {}
@@ -26,7 +28,7 @@ public final class SplitRelationshipConfigTransformer {
     public static SplitRelationshipsEstimateParameters toMemoryEstimateParameters(SplitRelationshipsBaseConfig config) {
         return new SplitRelationshipsEstimateParameters(
             config.hasRelationshipWeightProperty(),
-            config.relationshipTypes(),
+            config.relationshipTypes().stream().map(RelationshipType::of).toList(),
             config.negativeSamplingRatio(),
             config.holdoutFraction()
         );

@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.neo4j.gds.RelationshipType;
+
 import java.util.List;
 
 public class SplitRelationshipsEstimateParameters {
     final boolean hasRelationshipWeightProperty;
-    final List<String> relationshipTypes;
+    final List<RelationshipType> relationshipTypes;
     final double negativeSamplingRatio;
     final double holdoutFraction;
 
-    public SplitRelationshipsEstimateParameters(boolean hasRelationshipWeightProperty, List<String> relationshipTypes,
+    public SplitRelationshipsEstimateParameters(boolean hasRelationshipWeightProperty, List<RelationshipType> relationshipTypes,
         double negativeSamplingRatio,
         double holdoutFraction
     ) {

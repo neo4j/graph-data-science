@@ -65,7 +65,6 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     private final Collection<String> nodeProperties;
     private final Collection<String> relationshipProperties;
 
-    @Builder.Factory
     static GraphDimensionsReader graphDimensionsReader(
         GraphLoaderContext graphLoaderContext,
         GraphProjectFromStoreConfig graphProjectConfig,
@@ -175,37 +174,28 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     }
 
     private TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
-        var labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<NodeLabel>(
-            ANY_LABEL);
-        nodeLabelMappings
-            .forEach((nodeLabel, neoLabel) -> {
-                var labelToken = neoLabel.equals(PROJECT_ALL) ? ANY_LABEL : getNodeLabelToken(tokenRead, neoLabel);
-                labelTokenNodeLabelMappings.put(labelToken, nodeLabel);
-            });
+        var labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<NodeLabel>(ANY_LABEL);
+        nodeLabelMappings.forEach((nodeLabel, neoLabel) -> {
+            var labelToken = neoLabel.equals(PROJECT_ALL) ? ANY_LABEL : getNodeLabelToken(tokenRead, neoLabel);
+            labelTokenNodeLabelMappings.put(labelToken, nodeLabel);
+        });
         return labelTokenNodeLabelMappings;
     }
 
     private TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
-        var typeTokenRelTypeMappings = new TokenElementIdentifierMappings<RelationshipType>(
-            ANY_RELATIONSHIP_TYPE);
-
-        relationshipTypeMappings
-            .forEach((relType, neoRelType) -> {
-                var typeToken = neoRelType.equals(PROJECT_ALL) ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(
-                    tokenRead,
-                    neoRelType
-                );
-                typeTokenRelTypeMappings.put(typeToken, relType);
-            });
+        var typeTokenRelTypeMappings = new TokenElementIdentifierMappings<RelationshipType>(ANY_RELATIONSHIP_TYPE);
+        relationshipTypeMappings.forEach((relType, neoRelType) -> {
+            var typeToken = neoRelType.equals(PROJECT_ALL) ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(
+                tokenRead,
+                neoRelType
+            );
+            typeTokenRelTypeMappings.put(typeToken, relType);
+        });
         return typeTokenRelTypeMappings;
     }
 
-    private Map<String, Integer> loadPropertyTokens(
-        Collection<String> properties,
-        TokenRead tokenRead
-    ) {
-        return properties
-            .stream()
+    private Map<String, Integer> loadPropertyTokens(Collection<String> properties, TokenRead tokenRead) {
+        return properties.stream()
             .collect(Collectors.toMap(
                 Function.identity(),
                 property -> property != null ? tokenRead.propertyKey(property) : StatementConstants.NO_SUCH_PROPERTY_KEY,

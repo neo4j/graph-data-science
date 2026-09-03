@@ -160,11 +160,7 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         GraphLoaderContext graphLoaderContext,
         DependencyResolver dependencyResolver
     ) {
-        return new GraphDimensionsReaderBuilder()
-            .graphProjectConfig(graphProjectConfig)
-            .graphLoaderContext(graphLoaderContext)
-            .dependencyResolver(dependencyResolver)
-            .build()
+        return GraphDimensionsReader.graphDimensionsReader(graphLoaderContext, graphProjectConfig, dependencyResolver)
             .call();
     }
 }

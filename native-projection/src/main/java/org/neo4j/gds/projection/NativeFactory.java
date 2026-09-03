@@ -54,13 +54,11 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         Optional<GraphDimensions> graphDimensions,
         DependencyResolver dependencyResolver
     ) {
-        var dimensions = graphDimensions.orElseGet(() -> new GraphDimensionsReaderBuilder()
-            .graphLoaderContext(loadingContext)
-            .graphProjectConfig(graphProjectFromStoreConfig)
-            .dependencyResolver(dependencyResolver)
-            .build()
-            .call()
-        );
+        var dimensions = graphDimensions.orElseGet(() -> GraphDimensionsReader.graphDimensionsReader(
+            loadingContext,
+            graphProjectFromStoreConfig,
+            dependencyResolver
+        ).call());
 
         return new NativeFactory(
             graphProjectFromStoreConfig,
