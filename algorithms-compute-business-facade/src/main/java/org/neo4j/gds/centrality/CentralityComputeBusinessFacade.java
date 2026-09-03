@@ -23,8 +23,6 @@ import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
-import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
@@ -109,36 +107,6 @@ public class CentralityComputeBusinessFacade {
         return computeFacade.articleRank(
             graph,
             config,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> articulationPoints(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        ArticulationPointsParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<ArticulationPointsResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidation(
-                new UndirectedOnlyRequirement("Articulation Points")
-            ),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.articulationPoints(
-            graph,
-            parameters,
             jobId,
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));

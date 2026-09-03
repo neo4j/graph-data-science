@@ -215,6 +215,13 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         );
     }
 
+    /**
+     * Doing it this way results in duplication,
+     * move to {@link org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsBusinessFacade} instead.
+     *
+     * @deprecated remove duplication
+     */
+    @Deprecated
     public <RESULT> Stream<RESULT> harmonicCentrality(
         GraphName graphName,
         HarmonicCentralityStreamConfig configuration,

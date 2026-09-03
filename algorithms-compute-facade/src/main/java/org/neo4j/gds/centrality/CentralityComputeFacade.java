@@ -24,9 +24,6 @@ import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.articulationPoints.ArticulationPointsParameters;
-import org.neo4j.gds.articulationpoints.ArticulationPoints;
-import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
@@ -159,30 +156,6 @@ public class CentralityComputeFacade {
             probabilityProvider,
             degreeFunction,
             avgDegree
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<ArticulationPointsResult>> articulationPoints(
-        Graph graph,
-        ArticulationPointsParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ArticulationPointsResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.articulationPoints(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-        var articulationPoints = ArticulationPoints.create(graph, parameters, progressTracker, terminationFlag);
-
-        return algorithmCaller.run(
-            articulationPoints::compute,
-            jobId
         );
     }
 
