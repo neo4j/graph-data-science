@@ -23,8 +23,8 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.ImportSizing;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.math.BigDecimal;
@@ -47,14 +47,13 @@ abstract class ScanningRecordsImporter<Record, T> {
     protected final Concurrency concurrency;
 
     ScanningRecordsImporter(
-        Log log,
         StoreScanner.Factory<Record> storeScannerFactory,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         Concurrency concurrency
     ) {
-        this.log = log;
+        this.log = loadingContext.log();
         this.storeScannerFactory = storeScannerFactory;
         this.transaction = loadingContext.transactionContext();
         this.dimensions = dimensions;

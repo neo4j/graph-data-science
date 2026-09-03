@@ -23,8 +23,6 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.immutables.builder.Builder;
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
@@ -68,7 +66,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     static GraphDimensionsReader graphDimensionsReader(
         GraphLoaderContext graphLoaderContext,
         GraphProjectFromStoreConfig graphProjectConfig,
-        DependencyResolver dependencyResolver
+        IdGeneratorFactory idGeneratorFactory
     ) {
         var nodeLabelMappings = graphProjectConfig.nodeProjections().projections().entrySet().stream()
             .collect(Collectors.toMap(
@@ -105,7 +103,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
         return new GraphDimensionsReader(
             graphLoaderContext.transactionContext(),
-            dependencyResolver.resolveDependency(IdGeneratorFactory.class),
+            idGeneratorFactory,
             nodeLabelMappings,
             relationshipTypeMappings,
             nodeProperties,

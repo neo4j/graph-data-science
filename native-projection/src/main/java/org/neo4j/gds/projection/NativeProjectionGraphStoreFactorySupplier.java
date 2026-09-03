@@ -25,6 +25,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.internal.id.IdGeneratorFactory;
 
 public final class NativeProjectionGraphStoreFactorySupplier implements GraphStoreFactorySupplier {
     private final GraphProjectFromStoreConfig graphProjectFromStoreConfig;
@@ -48,12 +49,12 @@ public final class NativeProjectionGraphStoreFactorySupplier implements GraphSto
         DependencyResolver dependencyResolver,
         RequestCorrelationId requestCorrelationId
     ) {
-        return new NativeFactoryBuilder()
-            .graphProjectFromStoreConfig(graphProjectFromStoreConfig)
-            .loadingContext(loaderContext)
-            .dependencyResolver(dependencyResolver)
-            .requestCorrelationId(requestCorrelationId)
-            .build();
+        return NativeFactory.nativeFactory(
+            graphProjectFromStoreConfig,
+            loaderContext,
+            requestCorrelationId,
+            dependencyResolver.resolveDependency(IdGeneratorFactory.class)
+        );
     }
 
     @Override
@@ -63,12 +64,11 @@ public final class NativeProjectionGraphStoreFactorySupplier implements GraphSto
         DependencyResolver dependencyResolver,
         RequestCorrelationId requestCorrelationId
     ) {
-        return new NativeFactoryBuilder()
-            .graphProjectFromStoreConfig(graphProjectFromStoreConfig)
-            .loadingContext(loaderContext)
-            .graphDimensions(graphDimensions)
-            .dependencyResolver(dependencyResolver)
-            .requestCorrelationId(requestCorrelationId)
-            .build();
+        return NativeFactory.nativeFactory(
+            graphProjectFromStoreConfig,
+            loaderContext,
+            requestCorrelationId,
+            graphDimensions
+        );
     }
 }

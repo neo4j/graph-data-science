@@ -39,14 +39,15 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.AdjacencyTestUtils;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
+import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.function.LongToIntFunction;
 
@@ -87,15 +88,14 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(db);
         var graphLoaderContext = graphLoaderContext();
         var graphDimensions = graphDimensions(graphProjectConfig, graphLoaderContext, dependencyResolver);
-        var importer = new ScanningRelationshipsImporterBuilder()
-            .log(Log.noOpLog())
-            .idMap(new DirectIdMap(graphDimensions.nodeCount()))
-            .loadingContext(graphLoaderContext)
-            .progressTracker(ProgressTracker.NULL_TRACKER)
-            .dimensions(graphDimensions)
-            .concurrency(new Concurrency(1))
-            .graphProjectConfig(graphProjectConfig)
-            .build();
+        var importer = ScanningRelationshipsImporter.scanningRelationshipsImporter(
+            graphProjectConfig,
+            graphLoaderContext,
+            graphDimensions,
+            ProgressTracker.NULL_TRACKER,
+            new DirectIdMap(graphDimensions.nodeCount()),
+            new Concurrency(1)
+        );
 
         var relationshipsAndProperties = importer.call();
 
@@ -160,7 +160,10 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         GraphLoaderContext graphLoaderContext,
         DependencyResolver dependencyResolver
     ) {
-        return GraphDimensionsReader.graphDimensionsReader(graphLoaderContext, graphProjectConfig, dependencyResolver)
-            .call();
+        return GraphDimensionsReader.graphDimensionsReader(
+            graphLoaderContext,
+            graphProjectConfig,
+            dependencyResolver.resolveDependency(IdGeneratorFactory.class)
+        ).call();
     }
 }

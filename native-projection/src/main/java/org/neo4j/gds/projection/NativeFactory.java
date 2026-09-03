@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.projection;
 
-import org.immutables.builder.Builder;
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
@@ -34,38 +32,44 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskTreeProgressTracker;
-import org.neo4j.gds.progress.tasks.Tasks;
-import org.neo4j.gds.mem.MemoryEstimation;
-
-import java.util.Optional;
+import org.neo4j.internal.id.IdGeneratorFactory;
 
 public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConfig> {
     private final GraphProjectFromStoreConfig storeConfig;
     private final ProgressTracker progressTracker;
 
-    @Builder.Factory
     static NativeFactory nativeFactory(
         GraphProjectFromStoreConfig graphProjectFromStoreConfig,
         GraphLoaderContext loadingContext,
         RequestCorrelationId requestCorrelationId,
-        Optional<GraphDimensions> graphDimensions,
-        DependencyResolver dependencyResolver
+        IdGeneratorFactory idGeneratorFactory
     ) {
-        var dimensions = graphDimensions.orElseGet(() -> GraphDimensionsReader.graphDimensionsReader(
+        var graphDimensions = GraphDimensionsReader.graphDimensionsReader(
             loadingContext,
             graphProjectFromStoreConfig,
-            dependencyResolver
-        ).call());
+            idGeneratorFactory
+        ).call();
 
+        return nativeFactory(graphProjectFromStoreConfig, loadingContext, requestCorrelationId, graphDimensions);
+    }
+
+        static NativeFactory nativeFactory(
+        GraphProjectFromStoreConfig graphProjectFromStoreConfig,
+        GraphLoaderContext loadingContext,
+        RequestCorrelationId requestCorrelationId,
+        GraphDimensions graphDimensions
+    ) {
         return new NativeFactory(
             graphProjectFromStoreConfig,
             loadingContext,
             requestCorrelationId,
-            dimensions,
-            initProgressTracker(graphProjectFromStoreConfig, loadingContext, dimensions)
+            graphDimensions,
+            initProgressTracker(graphProjectFromStoreConfig, loadingContext, graphDimensions)
         );
     }
 
@@ -178,14 +182,13 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     }
 
     private Nodes loadNodes(Concurrency concurrency) {
-        var scanningNodesImporter = new ScanningNodesImporterBuilder()
-            .log(loadingContext.log())
-            .concurrency(concurrency)
-            .graphProjectConfig(graphProjectConfig)
-            .dimensions(dimensions)
-            .loadingContext(loadingContext)
-            .progressTracker(progressTracker)
-            .build();
+        var scanningNodesImporter = ScanningNodesImporter.scanningNodesImporter(
+            graphProjectConfig,
+            loadingContext,
+            dimensions,
+            progressTracker,
+            concurrency
+        );
 
         try {
             progressTracker.beginSubTask();
@@ -200,15 +203,14 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     }
 
     private RelationshipImportResult loadRelationships(IdMap idMap, Concurrency concurrency) {
-        var scanningRelationshipsImporter = new ScanningRelationshipsImporterBuilder()
-            .log(loadingContext.log())
-            .idMap(idMap)
-            .graphProjectConfig(graphProjectConfig)
-            .loadingContext(loadingContext)
-            .dimensions(dimensions)
-            .progressTracker(progressTracker)
-            .concurrency(concurrency)
-            .build();
+        var scanningRelationshipsImporter = ScanningRelationshipsImporter.scanningRelationshipsImporter(
+            graphProjectConfig,
+            loadingContext,
+            dimensions,
+            progressTracker,
+            idMap,
+            concurrency
+        );
 
         try {
             progressTracker.beginSubTask();
