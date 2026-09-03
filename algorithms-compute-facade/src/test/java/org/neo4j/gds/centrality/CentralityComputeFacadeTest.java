@@ -40,7 +40,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
 import org.neo4j.gds.hits.HitsConfigImpl;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfigImpl;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
@@ -226,23 +225,6 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().iterations()).isBetween(1, 3);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void harmonic() {
-
-        var params = new HarmonicCentralityParameters(new Concurrency(1));
-        var future = facade.harmonic(
-            graph,
-            params,
-            jobIdMock,
-            true
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().centralities().size()).isEqualTo(6L);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

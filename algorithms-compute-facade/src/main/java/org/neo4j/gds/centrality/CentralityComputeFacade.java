@@ -41,9 +41,6 @@ import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.degree.DegreeCentralityResult;
-import org.neo4j.gds.harmonic.HarmonicCentrality;
-import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
-import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.Hits;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.hits.HitsResultWithGraph;
@@ -366,37 +363,6 @@ public class CentralityComputeFacade {
             configuration,
             mappedSourceNodes,
             degreeFunction
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<HarmonicResult>> harmonic(
-        Graph graph,
-        HarmonicCentralityParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(HarmonicResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.harmonicCentrality(parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var harmonic = new HarmonicCentrality(
-            graph,
-            parameters.concurrency(),
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            harmonic::compute,
-            jobId
         );
     }
 

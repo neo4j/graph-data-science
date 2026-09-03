@@ -34,8 +34,6 @@ import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
-import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
@@ -180,24 +178,6 @@ class CentralityComputeFacadeEmptyGraphTest {
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }
-
-    @Test
-    void harmonic() {
-
-        var future = facade.harmonic(
-            graph,
-            mock(HarmonicCentralityParameters.class),
-            jobIdMock,
-            true
-        );
-
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(HarmonicResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
 
     @Test
     void indirectExposure(){

@@ -40,8 +40,6 @@ import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.degree.DegreeCentralityResult;
-import org.neo4j.gds.harmonic.HarmonicCentralityParameters;
-import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsCompanion;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.hits.HitsResultWithGraph;
@@ -289,13 +287,13 @@ public class CentralityComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
-    public <TR> CompletableFuture<TR> harmonic(
+    public <TR> CompletableFuture<TR> hits(
         GraphName graphName,
         GraphParameters graphParameters,
-        HarmonicCentralityParameters parameters,
+        HitsConfig hitsConfig,
         JobId jobId,
         boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<HarmonicResult>, TR> resultTransformerBuilder
+        ResultTransformerBuilder<TimedAlgorithmResult<HitsResultWithGraph>, TR> resultTransformerBuilder
     ) {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
             databaseId,
@@ -303,15 +301,23 @@ public class CentralityComputeBusinessFacade {
             user,
             graphParameters,
             Optional.empty(),
-            GraphStoreValidation.DISABLED,
-            true,
-            Optional.empty()
+            new AlgorithmGraphStoreRequirementsBuilder()
+                .withAlgorithmRequirement(new PregelPropertiesRequirement(hitsConfig.writeProperty()))
+                .withAlgorithmRequirement(new DirectedOnlyRequirement("Hits"))
+                .build(),
+            false,
+            null
         );
-        var graph = graphResources.graph();
+        var graphStore = graphResources.graphStore();
+        var relTypes = HitsCompanion.relationshipsWithoutIndices(
+            graphStore,
+            hitsConfig.internalRelationshipTypes(graphStore)
+        );
 
-        return computeFacade.harmonic(
-            graph,
-            parameters,
+        return computeFacade.hits(
+            graphStore,
+            hitsConfig,
+            relTypes,
             jobId,
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));
@@ -378,43 +384,4 @@ public class CentralityComputeBusinessFacade {
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
-
-    public <TR> CompletableFuture<TR> hits(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        HitsConfig hitsConfig,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<HitsResultWithGraph>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new AlgorithmGraphStoreRequirementsBuilder()
-                .withAlgorithmRequirement(new PregelPropertiesRequirement(hitsConfig.writeProperty()))
-                .withAlgorithmRequirement(new DirectedOnlyRequirement("Hits"))
-                .build(),
-            false,
-            null
-        );
-        var graphStore = graphResources.graphStore();
-        var relTypes = HitsCompanion.relationshipsWithoutIndices(
-            graphStore,
-            hitsConfig.internalRelationshipTypes(graphStore)
-        );
-
-        return computeFacade.hits(
-            graphStore,
-            hitsConfig,
-            relTypes,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-
-
 }
