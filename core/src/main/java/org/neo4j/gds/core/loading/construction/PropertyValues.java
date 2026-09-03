@@ -24,19 +24,27 @@ import org.neo4j.gds.values.GdsValue;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-public abstract class PropertyValues {
+public interface PropertyValues {
 
-    public abstract void forEach(BiConsumer<String, GdsValue> consumer);
+    void forEach(BiConsumer<String, GdsValue> consumer);
 
-    public abstract boolean isEmpty();
+    boolean isEmpty();
 
-    public abstract int size();
+    int size();
 
-    public abstract Iterable<String> propertyKeys();
+    Iterable<String> propertyKeys();
 
-    public abstract GdsValue get(String key);
+    GdsValue get(String key);
 
-    public static PropertyValues of(Map<String, GdsValue> map) {
+    /**
+     * Returns the value of the single present property.
+     * <p>
+     * It is only valid to call this when {@link #size()} is exactly one; callers must
+     * check the size beforehand.
+     */
+    GdsValue getSingle();
+
+    static PropertyValues of(Map<String, GdsValue> map) {
         return new NativePropertyValues(map);
     }
 }

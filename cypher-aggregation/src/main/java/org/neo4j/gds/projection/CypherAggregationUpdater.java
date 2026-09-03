@@ -98,7 +98,8 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
 
     public CypherAggregationUpdater(
         QueryEstimator queryEstimator,
-        ExecutingQueryProvider queryProvider, Capabilities.WriteMode writeMode,
+        ExecutingQueryProvider queryProvider,
+        Capabilities.WriteMode writeMode,
         String username,
         DatabaseId databaseId,
         ExtractNodeId extractNodeId,

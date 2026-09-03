@@ -26,7 +26,7 @@ import org.neo4j.values.virtual.MapValue;
 
 import java.util.function.BiConsumer;
 
-public final class CypherPropertyValues extends PropertyValues {
+public final class CypherPropertyValues implements PropertyValues {
     private final MapValue properties;
 
     public CypherPropertyValues(MapValue properties) {
@@ -55,6 +55,12 @@ public final class CypherPropertyValues extends PropertyValues {
 
     @Override
     public GdsValue get(String key) {
+        return GdsNeo4jValueConverter.toValue(properties.get(key));
+    }
+
+    @Override
+    public GdsValue getSingle() {
+        var key = this.properties.keySet().iterator().next();
         return GdsNeo4jValueConverter.toValue(properties.get(key));
     }
 }
