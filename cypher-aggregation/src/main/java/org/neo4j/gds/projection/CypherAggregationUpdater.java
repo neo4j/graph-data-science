@@ -32,6 +32,7 @@ import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.virtual.MapValue;
 
+import static org.neo4j.gds.projection.CypherAggregation.FUNCTION_NAME;
 import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -75,15 +76,19 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
 
     @Override
     public void update(AnyValue[] input) throws ProcedureException {
-        var mappedInput = inputValuesMapper.map(input);
-        projectNextRelationship(
-            (TextValue) mappedInput[0],
-            mappedInput[1],
-            mappedInput[2],
-            mappedInput[3],
-            mappedInput[4],
-            mappedInput[5]
-        );
+        try {
+            var mappedInput = inputValuesMapper.map(input);
+            projectNextRelationship(
+                (TextValue) mappedInput[0],
+                mappedInput[1],
+                mappedInput[2],
+                mappedInput[3],
+                mappedInput[4],
+                mappedInput[5]
+            );
+        } catch (Throwable t) {
+            throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), t);
+        }
     }
 
     @Override

@@ -4,7 +4,7 @@
  *
  * This file is part of Neo4j.
  *
- * Neo4j is free software; you can redistribute it and/or modify
+ * Neo4j is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -28,6 +28,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.progress.registration.EmptyTaskStore;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Values;
@@ -44,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
-class GraphAggregationUpdaterTest {
+class CypherAggregationUpdaterTest {
 
     private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
 
@@ -55,14 +56,13 @@ class GraphAggregationUpdaterTest {
         graphStoreCatalogService.removeAllLoadedGraphs(databaseId);
     }
 
-    private CypherAggregationUpdater newAggregator() {
-        return new CypherAggregationUpdater(
-            QueryEstimator.empty(),
-            ExecutingQueryProvider.empty(),
-            Capabilities.WriteMode.LOCAL,
+    private LazyGraphImporter newLazyGraphImporter() {
+        return new LazyGraphImporter(
             "neo4j",
             databaseId,
-            new ExtractNodeId(),
+            ExecutingQueryProvider.empty(),
+            QueryEstimator.empty(),
+            Capabilities.WriteMode.LOCAL,
             graphStoreCatalogService,
             PlainSimpleRequestCorrelationId.create(),
             EmptyTaskStore.INSTANCE,
@@ -70,8 +70,18 @@ class GraphAggregationUpdaterTest {
         );
     }
 
+    private CypherAggregationReducer newReducer(LazyGraphImporter lazyGraphImporter, ExtractNodeId extractNodeId) {
+        return new CypherAggregationReducer(
+            lazyGraphImporter,
+            ProjectionMetricsService.DISABLED,
+            databaseId,
+            extractNodeId,
+            CypherAggregationUpdater.InputValuesMapper.identity()
+        );
+    }
+
     private static AnyValue[] row(String graphName, long sourceNode, long targetNode) {
-        return new AnyValue[] {
+        return new AnyValue[]{
             Values.stringValue(graphName),
             Values.longValue(sourceNode),
             Values.longValue(targetNode),
@@ -82,7 +92,7 @@ class GraphAggregationUpdaterTest {
     }
 
     private static AnyValue[] row(String graphName, long sourceNode, AnyValue invalidTargetNode) {
-        return new AnyValue[] {
+        return new AnyValue[]{
             Values.stringValue(graphName),
             Values.longValue(sourceNode),
             invalidTargetNode,
@@ -95,7 +105,7 @@ class GraphAggregationUpdaterTest {
     private static AnyValue[] rowWithReadConcurrencyOne(String graphName, long sourceNode, long targetNode) {
         var configBuilder = new MapValueBuilder(1);
         configBuilder.add("readConcurrency", Values.longValue(1));
-        return new AnyValue[] {
+        return new AnyValue[]{
             Values.stringValue(graphName),
             Values.longValue(sourceNode),
             Values.longValue(targetNode),
@@ -108,23 +118,18 @@ class GraphAggregationUpdaterTest {
     @Test
     void shouldAggregateAcrossMorselCycles() throws Exception {
         try (
-            var aggregator = newAggregator();
-            var reducer = new CypherAggregationReducer(
-                aggregator,
-                ProjectionMetricsService.DISABLED,
-                databaseId,
-                new ExtractNodeId()
-            )
+            var lazyGraphImporter = newLazyGraphImporter();
+            var reducer = newReducer(lazyGraphImporter, new ExtractNodeId())
         ) {
             // one updater, as under the interpreted and pipelined-serial runtimes
-            var updater = aggregator.newAggregationUpdater();
+            var updater = reducer.newUpdater();
 
             // morsel 1
             updater.update(row("g", 0, 1));
             updater.update(row("g", 1, 2));
             updater.applyUpdates();
 
-            // morsel 2 (session must re-acquire its claims)
+            // morsel 2 (the thread-local batches must re-acquire their claims)
             updater.update(row("g", 2, 3));
             updater.applyUpdates();
 
@@ -141,17 +146,13 @@ class GraphAggregationUpdaterTest {
 
     @Test
     void shouldAggregateFromConcurrentUpdaters() throws Exception {
-        try (var aggregator = newAggregator()) {
-            var reducer = new CypherAggregationReducer(
-                aggregator,
-                ProjectionMetricsService.DISABLED,
-                databaseId,
-                new ExtractNodeId()
-            );
-
+        try (
+            var lazyGraphImporter = newLazyGraphImporter();
+            var reducer = newReducer(lazyGraphImporter, new ExtractNodeId())
+        ) {
             // one updater per worker, as under the parallel runtime
-            var updaterA = aggregator.newAggregationUpdater();
-            var updaterB = aggregator.newAggregationUpdater();
+            var updaterA = reducer.newUpdater();
+            var updaterB = reducer.newUpdater();
 
             assertTimeoutPreemptively(java.time.Duration.ofSeconds(60), () -> {
                 ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -192,19 +193,16 @@ class GraphAggregationUpdaterTest {
     void shouldReleaseLeakedSessionsOnClose() throws Exception {
         // readConcurrency 1 -> a single pooled slot; a leaked claim would block
         // any further update until the claim timeout
-        try (var aggregator = newAggregator()) {
-            var reducer = new CypherAggregationReducer(
-                aggregator,
-                ProjectionMetricsService.DISABLED,
-                databaseId,
-                new ExtractNodeId()
-            );
-
-            var updater = aggregator.newAggregationUpdater();
+        try (
+            var lazyGraphImporter = newLazyGraphImporter();
+            var reducer = newReducer(lazyGraphImporter, new ExtractNodeId())
+        ) {
+            var updater = reducer.newUpdater();
             updater.update(rowWithReadConcurrencyOne("g", 0, 1));
 
             // the worker fails mid-morsel; the kernel never calls applyUpdates
             assertThatThrownBy(() -> updater.update(row("g", 1, Values.stringValue("invalidID"))))
+                .isInstanceOf(ProcedureException.class)
                 .hasMessageContaining("The node has to be either a NODE or an INTEGER, but got String");
 
             // assuming this gets called by Neo4j on the error path
@@ -213,7 +211,7 @@ class GraphAggregationUpdaterTest {
             // the failed updater's session was force-closed, so its slot is
             // available to a new updater
             assertTimeoutPreemptively(java.time.Duration.ofSeconds(10), () -> {
-                var nextUpdater = aggregator.newAggregationUpdater();
+                var nextUpdater = reducer.newUpdater();
                 nextUpdater.update(rowWithReadConcurrencyOne("g", 1, 2));
             });
         }
@@ -222,21 +220,28 @@ class GraphAggregationUpdaterTest {
     @Test
     void shouldReturnCachedResultOnRepeatedBuilds() throws Exception {
         try (
-            var aggregator = newAggregator();
-            var reducer = new CypherAggregationReducer(
-                aggregator,
-                ProjectionMetricsService.DISABLED,
-                databaseId,
-                new ExtractNodeId()
-            )
+            var lazyGraphImporter = newLazyGraphImporter();
+            var reducer = newReducer(lazyGraphImporter, new ExtractNodeId())
         ) {
-            var updater = aggregator.newAggregationUpdater();
+            var updater = reducer.newUpdater();
             updater.update(row("g", 0, 1));
 
             var firstResult = reducer.buildGraph();
             var secondResult = reducer.buildGraph();
 
             assertThat(secondResult).isSameAs(firstResult);
+        }
+    }
+
+    @Test
+    void shouldReturnNoValueWhenNothingWasAggregated() throws Exception {
+        try (
+            var lazyGraphImporter = newLazyGraphImporter();
+            var reducer = newReducer(lazyGraphImporter, new ExtractNodeId())
+        ) {
+            // the kernel may call result() even when no row reached any updater
+            assertThat(reducer.buildGraph()).isNull();
+            assertThat(reducer.result()).isEqualTo(NoValue.NO_VALUE);
         }
     }
 }

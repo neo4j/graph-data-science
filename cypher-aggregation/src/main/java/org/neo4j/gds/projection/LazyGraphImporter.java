@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.User;
@@ -42,6 +43,7 @@ import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.virtual.MapValue;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -62,8 +64,12 @@ public class LazyGraphImporter implements AutoCloseable {
     private final Log log;
     private final ConfigValidator configValidator;
 
-    private GraphImporter importer;
-    private ProgressTracker progressTracker;
+    // volatile: the fast path in initializeImporter is double-checked locking,
+    // and getImporter() may be read from the thread calling result()
+    private volatile @Nullable GraphImporter importer;
+    private volatile @Nullable ProgressTracker progressTracker;
+
+    private final AtomicBoolean closed;
 
     LazyGraphImporter(
         String username,
@@ -87,6 +93,7 @@ public class LazyGraphImporter implements AutoCloseable {
         this.log = log;
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
+        this.closed = new AtomicBoolean(false);
     }
 
     GraphImporter initializeImporter(TextValue graphName, AnyValue config, AnyValue dataConfig, AnyValue migrationConfig) {
@@ -108,17 +115,27 @@ public class LazyGraphImporter implements AutoCloseable {
         }
     }
 
-    GraphImporter getImporter() {
-        if (importer == null) {
-            throw new IllegalStateException("Importer not initialized");
-        }
+    /**
+     * The importer, or {@code null} if no row has been aggregated yet.
+     * The caller of result() reads this from its own thread; the volatile
+     * field guarantees it observes a fully-published importer.
+     */
+    @Nullable GraphImporter getImporter() {
         return importer;
     }
 
+    /**
+     * Failure cleanup: marks the progress task as failed and releases it.
+     * Called once per aggregation updater on the error path; the guard makes
+     * sure the tracker's failure handling runs only once.
+     */
     @Override
     public void close() {
-        if (progressTracker != null) {
-            progressTracker.endSubTaskWithFailure();
+        if (closed.compareAndSet(false, true)) {
+            var tracker = this.progressTracker;
+            if (tracker != null) {
+                tracker.endSubTaskWithFailure();
+            }
         }
     }
 

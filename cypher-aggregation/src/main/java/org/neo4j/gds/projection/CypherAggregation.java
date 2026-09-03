@@ -24,12 +24,12 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.DatabaseIdSupplier;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.UserFunctionSignatureBuilder;
-import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.Metrics;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.progress.registration.TaskStore;
 import org.neo4j.gds.projection.CypherAggregationUpdater.InputValuesMapper;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
@@ -113,7 +113,7 @@ public class CypherAggregation implements CallableUserAggregationFunction {
 
             var extractNodeId = new ExtractNodeId();
             var databaseId = DatabaseIdSupplier.create().databaseId(ctx);
-            var aggregationReducer = new CypherAggregationReducer(
+            var aggregationReducer = newReducer(
                 new LazyGraphImporter(
                     username,
                     databaseId,
@@ -127,13 +127,27 @@ public class CypherAggregation implements CallableUserAggregationFunction {
                 ),
                 metrics.projectionMetrics(),
                 databaseId,
-                extractNodeId,
-                InputValuesMapper.identity()
+                extractNodeId
             );
             ctx.internalTransaction().registerCloseableResource(aggregationReducer);
             return aggregationReducer;
         } catch (Throwable T) {
             throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
         }
+    }
+
+    protected CypherAggregationReducer newReducer(
+        LazyGraphImporter lazyGraphImporter,
+        ProjectionMetricsService projectionMetricsService,
+        DatabaseId databaseId,
+        ExtractNodeId extractNodeId
+    ) {
+        return new CypherAggregationReducer(
+            lazyGraphImporter,
+            projectionMetricsService,
+            databaseId,
+            extractNodeId,
+            InputValuesMapper.identity()
+        );
     }
 }
