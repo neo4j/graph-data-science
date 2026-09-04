@@ -20,7 +20,6 @@
 package org.neo4j.gds.legacycypherprojection;
 
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
-import org.immutables.value.Value;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.Orientation;
@@ -42,7 +41,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Value.Enclosing
 class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResult> {
 
     private final IdMap idMap;

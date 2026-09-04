@@ -48,7 +48,7 @@ class CypherQueryEstimatorTest extends BaseTest {
                 "MATCH (n) RETURN id(n) AS id, labels(n) AS labels, n.property AS score");
 
             // EXPLAIN seems to overestimate the nodeCount here
-            assertThat(estimation).isEqualTo(ImmutableEstimationResult.of(10, 1));
+            assertThat(estimation).isEqualTo(new CypherQueryEstimator.EstimationResult(10, 1));
         });
     }
 
@@ -60,7 +60,7 @@ class CypherQueryEstimatorTest extends BaseTest {
             var estimation = estimator.getRelationshipEstimation(
                 "MATCH (n)-[r]-(m) RETURN id(n) AS source, m AS target, r.property1 AS score, type(r) AS type");
 
-            assertThat(estimation).isEqualTo(ImmutableEstimationResult.of(6, 1));
+            assertThat(estimation).isEqualTo(new CypherQueryEstimator.EstimationResult(6, 1));
         });
     }
 

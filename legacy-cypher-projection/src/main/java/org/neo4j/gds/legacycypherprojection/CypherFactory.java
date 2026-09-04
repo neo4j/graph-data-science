@@ -110,8 +110,8 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         EstimationResult relationEstimation;
 
         if (graphProjectConfig.isFictitiousLoading()) {
-            nodeEstimation = ImmutableEstimationResult.of(graphProjectConfig.nodeCount(), 0);
-            relationEstimation = ImmutableEstimationResult.of(graphProjectConfig.relationshipCount(), 0);
+            nodeEstimation = new EstimationResult(graphProjectConfig.nodeCount(), 0);
+            relationEstimation = new EstimationResult(graphProjectConfig.relationshipCount(), 0);
         } else {
             var estimator = new CypherQueryEstimator(loadingContext.transactionContext().withRestrictedAccess(READ));
             nodeEstimation = estimator.getNodeEstimation(graphProjectConfig.nodeQuery());

@@ -20,7 +20,6 @@
 package org.neo4j.gds.legacycypherprojection;
 
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.ArrayList;
@@ -57,16 +56,14 @@ public class CypherQueryEstimator {
 
                 propertyColumns.forEach(PropertyMapping::validatePropertyKey);
 
-                return ImmutableEstimationResult.of(estimatedRows.longValue(), propertyColumns.size());
+                return EstimationResult.of(estimatedRows, propertyColumns);
             }
         });
     }
 
-    @ValueClass
-    public
-    interface EstimationResult {
-        long estimatedRows();
-
-        long propertyCount();
+    public record EstimationResult(long estimatedRows, long propertyCount) {
+        static EstimationResult of(Number fromEstimatedRows, ArrayList<String> fromPropertyColumns) {
+            return new EstimationResult(fromEstimatedRows.longValue(), fromPropertyColumns.size());
+        }
     }
 }

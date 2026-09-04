@@ -8,11 +8,8 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
-    annotationProcessor openGds.immutables.builder
-    annotationProcessor openGds.immutables.value
     annotationProcessor neo4j.annotations
 
-    compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
     compileOnly project(':logging')
 
@@ -42,8 +39,6 @@ dependencies {
     // Test dependencies
     testAnnotationProcessor project(':annotations')
 
-    testCompileOnly openGds.immutables.value.annotations
-    testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':gdl-graph')

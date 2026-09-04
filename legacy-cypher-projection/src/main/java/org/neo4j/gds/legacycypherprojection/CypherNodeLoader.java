@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
-import org.immutables.value.Value;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.loading.Nodes;
@@ -30,7 +29,6 @@ import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Set;
 
-@Value.Enclosing
 class CypherNodeLoader extends CypherRecordLoader<Nodes> {
 
     private final long nodeCount;
