@@ -30,8 +30,6 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -41,8 +39,11 @@ import org.neo4j.gds.core.loading.AdjacencyTestUtils;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.function.LongToIntFunction;
@@ -82,16 +83,18 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             .build();
 
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(db);
-        var graphLoaderContext = graphLoaderContext();
-        var graphDimensions = graphDimensions(graphProjectConfig, graphLoaderContext, dependencyResolver);
+        var transactionContext = DatabaseTransactionContext.of(db, db.beginTx());
+        var graphDimensions = graphDimensions(graphProjectConfig, transactionContext, dependencyResolver);
         var importer = ScanningRelationshipsImporter.scanningRelationshipsImporter(
             graphProjectConfig,
-            graphLoaderContext,
+            Log.noOpLog(),
+            transactionContext,
+            TerminationFlag.RUNNING_TRUE,
             graphDimensions,
             ProgressTracker.NULL_TRACKER,
-            new DirectIdMap(graphDimensions.nodeCount()),
             DefaultPool.INSTANCE,
-            new Concurrency(1)
+            new Concurrency(1),
+            new DirectIdMap(graphDimensions.nodeCount())
         );
 
         var relationshipsAndProperties = importer.call();
@@ -141,20 +144,13 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         return AdjacencyTestUtils.properties(idFunction.of(nodeVariable), adjacencyProperties, degreeFn);
     }
 
-    private GraphLoaderContext graphLoaderContext() {
-        return new GraphLoaderContext(
-            DatabaseTransactionContext.of(db, db.beginTx()),
-            DatabaseId.of(db.databaseName())
-        );
-    }
-
     private GraphDimensions graphDimensions(
         GraphProjectFromStoreConfig graphProjectConfig,
-        GraphLoaderContext graphLoaderContext,
+        TransactionContext transactionContext,
         DependencyResolver dependencyResolver
     ) {
         return GraphDimensionsReader.graphDimensionsReader(
-            graphLoaderContext,
+            transactionContext,
             graphProjectConfig,
             dependencyResolver.resolveDependency(IdGeneratorFactory.class)
         ).call();

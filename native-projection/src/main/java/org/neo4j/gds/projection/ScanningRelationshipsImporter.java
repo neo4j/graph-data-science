@@ -22,7 +22,6 @@ package org.neo4j.gds.projection;
 import org.neo4j.gds.ImmutableRelationshipProjection;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -31,7 +30,10 @@ import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,39 +44,43 @@ import java.util.stream.Collectors;
 final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, RelationshipImportResult> {
 
     private final GraphProjectFromStoreConfig graphProjectConfig;
-    private final GraphLoaderContext loadingContext;
-
     private final IdMap idMap;
     private List<SingleTypeRelationshipImportContext> importContexts;
 
     static ScanningRelationshipsImporter scanningRelationshipsImporter(
         GraphProjectFromStoreConfig graphProjectConfig,
-        GraphLoaderContext loadingContext,
+        Log log,
+        TransactionContext transactionContext,
+        TerminationFlag terminationFlag,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        IdMap idMap,
         ExecutorService executorService,
-        Concurrency concurrency
+        Concurrency concurrency,
+        IdMap idMap
     ) {
         return new ScanningRelationshipsImporter(
             graphProjectConfig,
-            loadingContext,
+            log,
+            transactionContext,
+            terminationFlag,
             dimensions,
             progressTracker,
-            idMap,
             executorService,
-            concurrency
+            concurrency,
+            idMap
         );
     }
 
     private ScanningRelationshipsImporter(
         GraphProjectFromStoreConfig graphProjectConfig,
-        GraphLoaderContext loadingContext,
+        Log log,
+        TransactionContext transactionContext,
+        TerminationFlag terminationFlag,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        IdMap idMap,
         ExecutorService executorService,
-        Concurrency concurrency
+        Concurrency concurrency,
+        IdMap idMap
     ) {
         super(
             RelationshipScanCursorBasedScanner.factory(Math.max(dimensions.relationshipCounts()
@@ -82,14 +88,15 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                 .stream()
                 .mapToLong(Long::longValue)
                 .sum(), dimensions.relCountUpperBound())),
-            loadingContext,
+            log,
+            transactionContext,
+            terminationFlag,
             dimensions,
             progressTracker,
             executorService,
             concurrency
         );
         this.graphProjectConfig = graphProjectConfig;
-        this.loadingContext = loadingContext;
         this.idMap = idMap;
     }
 
@@ -139,14 +146,15 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             ).collect(Collectors.toList());
 
         return RelationshipsScannerTask.factory(
-            loadingContext,
+            transactionContext,
             progressTracker,
             idMap,
             storeScanner,
             this.importContexts
                 .stream()
                 .map(SingleTypeRelationshipImportContext::singleTypeRelationshipImporter)
-                .collect(Collectors.toList())
+                .collect(Collectors.toList()),
+            terminationFlag
         );
     }
 

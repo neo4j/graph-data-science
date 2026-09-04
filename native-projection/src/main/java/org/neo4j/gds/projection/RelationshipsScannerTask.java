@@ -21,7 +21,6 @@ package org.neo4j.gds.projection;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.PropertyReader;
@@ -43,19 +42,20 @@ import java.util.stream.Collectors;
 final class RelationshipsScannerTask extends StatementAction implements RecordScannerTask {
 
     public static RecordScannerTaskRunner.RecordScannerTaskFactory factory(
-        GraphLoaderContext loadingContext,
+        TransactionContext transactionContext,
         ProgressTracker progressTracker,
         IdMap idMap,
         StoreScanner<RelationshipReference> scanner,
-        Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters
+        Collection<SingleTypeRelationshipImporter> singleTypeRelationshipImporters,
+        TerminationFlag terminationFlag
     ) {
         return new Factory(
-            loadingContext.transactionContext(),
+            transactionContext,
             progressTracker,
             idMap,
             scanner,
             singleTypeRelationshipImporters,
-            loadingContext.terminationFlag()
+            terminationFlag
         );
     }
 

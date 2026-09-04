@@ -27,7 +27,6 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.InternalReadOps;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -64,7 +63,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     private final Collection<String> relationshipProperties;
 
     static GraphDimensionsReader graphDimensionsReader(
-        GraphLoaderContext graphLoaderContext,
+        TransactionContext transactionContext,
         GraphProjectFromStoreConfig graphProjectConfig,
         IdGeneratorFactory idGeneratorFactory
     ) {
@@ -102,7 +101,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
 
         return new GraphDimensionsReader(
-            graphLoaderContext.transactionContext(),
+            transactionContext,
             idGeneratorFactory,
             nodeLabelMappings,
             relationshipTypeMappings,

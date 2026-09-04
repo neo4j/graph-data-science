@@ -33,35 +33,10 @@ public record GraphLoaderContext(
     TaskRegistryFactory taskRegistryFactory
 ) {
 
-    public GraphLoaderContext(
-        TransactionContext transactionContext,
-        DatabaseId databaseId,
-        Log log,
-        TerminationFlag terminationFlag
-    ) {
-        this(
-            transactionContext,
-            databaseId,
-            log,
-            terminationFlag,
-            TaskRegistryFactory.empty()
-        );
-    }
-
     public GraphLoaderContext(TransactionContext transactionContext, DatabaseId databaseId) {
         this(
             transactionContext,
             databaseId,
-            Log.noOpLog(),
-            TerminationFlag.RUNNING_TRUE,
-            TaskRegistryFactory.empty()
-        );
-    }
-
-    public GraphLoaderContext(TransactionContext transactionContext) {
-        this(
-            transactionContext,
-            DatabaseId.EMPTY,
             Log.noOpLog(),
             TerminationFlag.RUNNING_TRUE,
             TaskRegistryFactory.empty()
@@ -75,14 +50,4 @@ public record GraphLoaderContext(
         TerminationFlag.RUNNING_TRUE,
         EmptyTaskRegistryFactory.INSTANCE
     );
-
-    public static GraphLoaderContext emptyWithTransactionContext(TransactionContext transactionContext) {
-        return new GraphLoaderContext(
-            transactionContext,
-            DatabaseId.EMPTY,
-            Log.noOpLog(),
-            TerminationFlag.RUNNING_TRUE,
-            TaskRegistryFactory.empty()
-        );
-    }
 }

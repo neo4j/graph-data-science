@@ -30,6 +30,7 @@ dependencies {
     implementation project(':neo4j-settings')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
+    implementation project(':transaction')
 
     implementation(
         openGds.gdl,

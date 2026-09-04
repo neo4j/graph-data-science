@@ -29,7 +29,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.nodes.IdMap;
@@ -57,6 +56,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.transaction.EmptyTransactionContext;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 import org.s1ck.gdl.GDLHandler;
@@ -163,7 +163,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         super(
             graphProjectConfig,
             capabilities,
-            GraphLoaderContext.NULL_CONTEXT,
+            EmptyTransactionContext.INSTANCE,
+            DatabaseId.EMPTY,
             graphDimensions,
             log,
             requestCorrelationId

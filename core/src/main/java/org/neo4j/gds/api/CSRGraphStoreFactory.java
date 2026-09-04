@@ -48,33 +48,37 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> extends GraphStoreFactory<CSRGraphStore, CONFIG> {
-    private final Log log;
     private final RequestCorrelationId requestCorrelationId;
+    protected final Log log;
+    private final DatabaseId databaseId;
 
     public CSRGraphStoreFactory(
         CONFIG graphProjectConfig,
         Capabilities capabilities,
-        GraphLoaderContext loadingContext,
+        TransactionContext transactionContext,
+        DatabaseId databaseId,
         GraphDimensions dimensions,
         Log log,
         RequestCorrelationId requestCorrelationId
     ) {
-        super(graphProjectConfig, capabilities, loadingContext, dimensions);
+        super(graphProjectConfig, capabilities, dimensions, transactionContext);
         this.log = log;
         this.requestCorrelationId = requestCorrelationId;
+        this.databaseId = databaseId;
     }
 
     protected CSRGraphStore createGraphStore(Nodes nodes, RelationshipImportResult relationshipImportResult) {
         var schema = MutableGraphSchema.of(nodes.schema(), relationshipImportResult.relationshipSchema());
 
         var databaseInfo = DatabaseInfo.create(
-            loadingContext.databaseId(),
+            databaseId,
             DatabaseLocation.LOCAL
         );
 
