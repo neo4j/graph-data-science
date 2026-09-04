@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.LicenseDetails;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -49,6 +50,7 @@ import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -143,12 +145,16 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         var taskStore = taskStoreService.getOrCreateTaskStore(databaseId);
         taskStore.addListener(memoryTracker);
 
-        var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
-            context,
+        var transactionContext = DatabaseTransactionContext.of(
+            context.graphDatabaseAPI(),
+            context.internalTransaction()
+        );
+        var graphLoaderContext = new GraphLoaderContext(
+            transactionContext,
             databaseId,
-            taskRegistryFactory,
+            loggers.log(),
             terminationFlag,
-            loggers.log()
+            taskRegistryFactory
         );
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
