@@ -229,6 +229,10 @@ public class GraphStoreCatalogService {
         GraphStoreCatalog.removeAllLoadedGraphs(databaseId);
     }
 
+    public void removeAllLoadedGraphs() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
     public void registerGraphStoreAddedListener(GraphStoreAddedEventListener graphStoreAddedEventListener) {
         GraphStoreCatalog.registerGraphStoreAddedListener(graphStoreAddedEventListener);
     }
