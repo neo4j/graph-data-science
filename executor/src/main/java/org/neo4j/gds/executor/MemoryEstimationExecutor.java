@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromDatabaseLoader;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
@@ -119,7 +120,8 @@ public class MemoryEstimationExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_
                     graphStoreFactorySupplier.get(
                         graphLoaderContext,
                         dependencyResolver,
-                        executionContext.requestCorrelationId()
+                        executionContext.requestCorrelationId(),
+                        DefaultPool.INSTANCE
                     )
                 );
 

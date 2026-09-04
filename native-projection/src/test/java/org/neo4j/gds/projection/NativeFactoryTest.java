@@ -36,6 +36,7 @@ import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryTree;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -162,7 +163,8 @@ class NativeFactoryTest {
             mock(GraphLoaderContext.class),
             PlainSimpleRequestCorrelationId.create(),
             mock(GraphDimensions.class),
-            progressTrackerMock
+            progressTrackerMock,
+            mock(ExecutorService.class)
         ));
 
         doThrow(new IllegalArgumentException("Intentionally failing validation")).when(nativeFactorySpy).validate();

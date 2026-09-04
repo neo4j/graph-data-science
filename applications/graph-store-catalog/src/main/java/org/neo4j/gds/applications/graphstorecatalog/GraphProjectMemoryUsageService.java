@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.memory.tracking.MemoryTracker;
@@ -77,7 +78,8 @@ public class GraphProjectMemoryUsageService {
         var graphStoreFactory = graphStoreFactorySupplier.get(
             graphLoaderContext,
             dependencyResolver,
-            requestScopedDependencies.correlationId()
+            requestScopedDependencies.correlationId(),
+            DefaultPool.INSTANCE
         );
 
         var graphStoreCreator = new GraphStoreFromDatabaseLoader(configuration, graphStoreFactory);

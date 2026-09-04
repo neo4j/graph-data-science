@@ -35,6 +35,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.AdjacencyTestUtils;
 import org.neo4j.gds.extension.IdFunction;
@@ -89,6 +90,7 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             graphDimensions,
             ProgressTracker.NULL_TRACKER,
             new DirectIdMap(graphDimensions.nodeCount()),
+            DefaultPool.INSTANCE,
             new Concurrency(1)
         );
 

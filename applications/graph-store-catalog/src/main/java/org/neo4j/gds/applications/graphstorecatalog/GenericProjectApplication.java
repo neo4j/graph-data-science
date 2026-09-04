@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
@@ -127,7 +128,8 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
             var graphStoreFactory = graphStoreFactorySupplier.get(
                 graphLoaderContext,
                 dependencyResolver,
-                requestScopedDependencies.correlationId()
+                requestScopedDependencies.correlationId(),
+                DefaultPool.INSTANCE
             );
             var graphStoreCreator = new GraphStoreFromDatabaseLoader(
                 configuration,

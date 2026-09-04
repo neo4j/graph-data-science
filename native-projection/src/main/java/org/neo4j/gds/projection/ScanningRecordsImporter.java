@@ -51,13 +51,14 @@ abstract class ScanningRecordsImporter<Record, T> {
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
+        ExecutorService executorService,
         Concurrency concurrency
     ) {
         this.log = loadingContext.log();
         this.storeScannerFactory = storeScannerFactory;
         this.transaction = loadingContext.transactionContext();
         this.dimensions = dimensions;
-        this.executorService = loadingContext.executor();
+        this.executorService = executorService;
         this.progressTracker = progressTracker;
         this.concurrency = concurrency;
     }

@@ -63,6 +63,7 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
@@ -509,7 +510,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         var graphStoreFactory = graphStoreFactorySupplier.get(
             graphLoaderContext,
             dependencyResolver,
-            PlainSimpleRequestCorrelationId.create()
+            PlainSimpleRequestCorrelationId.create(),
+            DefaultPool.INSTANCE
         );
         return new GraphLoader(graphProjectConfig, graphStoreFactory);
     }

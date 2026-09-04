@@ -36,6 +36,7 @@ import org.neo4j.gds.progress.tracking.ProgressTracker;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, RelationshipImportResult> {
@@ -52,6 +53,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         IdMap idMap,
+        ExecutorService executorService,
         Concurrency concurrency
     ) {
         return new ScanningRelationshipsImporter(
@@ -60,6 +62,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             dimensions,
             progressTracker,
             idMap,
+            executorService,
             concurrency
         );
     }
@@ -70,6 +73,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         IdMap idMap,
+        ExecutorService executorService,
         Concurrency concurrency
     ) {
         super(
@@ -81,6 +85,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             loadingContext,
             dimensions,
             progressTracker,
+            executorService,
             concurrency
         );
         this.graphProjectConfig = graphProjectConfig;

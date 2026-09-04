@@ -25,19 +25,24 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 
+import java.util.concurrent.ExecutorService;
+
 public class DatabaseGraphStoreEstimationService {
     private final GraphLoaderContext graphLoaderContext;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final DependencyResolver dependencyResolver;
+    private final ExecutorService executorService;
 
     public DatabaseGraphStoreEstimationService(
         GraphLoaderContext graphLoaderContext,
         GraphStoreFactorySuppliers graphStoreFactorySuppliers,
-        DependencyResolver dependencyResolver
+        DependencyResolver dependencyResolver,
+        ExecutorService executorService
     ) {
         this.graphLoaderContext = graphLoaderContext;
         this.graphStoreFactorySuppliers = graphStoreFactorySuppliers;
         this.dependencyResolver = dependencyResolver;
+        this.executorService = executorService;
     }
 
     public GraphMemoryEstimation estimate(
@@ -47,7 +52,8 @@ public class DatabaseGraphStoreEstimationService {
         var graphStoreFactory = graphStoreFactorySuppliers.find(graphProjectConfig).get(
             graphLoaderContext,
             dependencyResolver,
-            requestCorrelationId
+            requestCorrelationId,
+            executorService
         );
 
         return new GraphMemoryEstimation(

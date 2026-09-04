@@ -27,19 +27,23 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.RequestCorrelationId;
 
+import java.util.concurrent.ExecutorService;
+
 public interface GraphStoreFactorySupplier {
     GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(
         GraphLoaderContext loaderContext,
         DependencyResolver dependencyResolver,
-        RequestCorrelationId requestCorrelationId
+        RequestCorrelationId requestCorrelationId,
+        ExecutorService executorService
     );
 
     default GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
         GraphLoaderContext loaderContext,
-        GraphDimensions graphDimensions,
         DependencyResolver dependencyResolver,
-        RequestCorrelationId requestCorrelationId
+        RequestCorrelationId requestCorrelationId,
+        ExecutorService executorService,
+        GraphDimensions graphDimensions
     ) {
-        return get(loaderContext, dependencyResolver, requestCorrelationId);
+        return get(loaderContext, dependencyResolver, requestCorrelationId, executorService);
     }
 }

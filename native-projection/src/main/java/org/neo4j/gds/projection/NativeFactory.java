@@ -39,15 +39,19 @@ import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskTreeProgressTracker;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
+import java.util.concurrent.ExecutorService;
+
 public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConfig> {
     private final GraphProjectFromStoreConfig storeConfig;
     private final ProgressTracker progressTracker;
+    private final ExecutorService executorService;
 
     static NativeFactory nativeFactory(
         GraphProjectFromStoreConfig graphProjectFromStoreConfig,
         GraphLoaderContext loadingContext,
         RequestCorrelationId requestCorrelationId,
-        IdGeneratorFactory idGeneratorFactory
+        IdGeneratorFactory idGeneratorFactory,
+        ExecutorService executorService
     ) {
         var graphDimensions = GraphDimensionsReader.graphDimensionsReader(
             loadingContext,
@@ -55,21 +59,23 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             idGeneratorFactory
         ).call();
 
-        return nativeFactory(graphProjectFromStoreConfig, loadingContext, requestCorrelationId, graphDimensions);
+        return nativeFactory(graphProjectFromStoreConfig, loadingContext, requestCorrelationId, graphDimensions, executorService);
     }
 
-        static NativeFactory nativeFactory(
+    static NativeFactory nativeFactory(
         GraphProjectFromStoreConfig graphProjectFromStoreConfig,
         GraphLoaderContext loadingContext,
         RequestCorrelationId requestCorrelationId,
-        GraphDimensions graphDimensions
+        GraphDimensions graphDimensions,
+        ExecutorService executorService
     ) {
         return new NativeFactory(
             graphProjectFromStoreConfig,
             loadingContext,
             requestCorrelationId,
             graphDimensions,
-            initProgressTracker(graphProjectFromStoreConfig, loadingContext, graphDimensions)
+            initProgressTracker(graphProjectFromStoreConfig, loadingContext, graphDimensions),
+            executorService
         );
     }
 
@@ -79,7 +85,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         GraphLoaderContext loadingContext,
         RequestCorrelationId requestCorrelationId,
         GraphDimensions graphDimensions,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        ExecutorService executorService
     ) {
         super(
             graphProjectConfig,
@@ -91,6 +98,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         );
         this.storeConfig = graphProjectConfig;
         this.progressTracker = progressTracker;
+        this.executorService = executorService;
     }
 
     @Override
@@ -187,6 +195,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             loadingContext,
             dimensions,
             progressTracker,
+            executorService,
             concurrency
         );
 
@@ -209,6 +218,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             dimensions,
             progressTracker,
             idMap,
+            executorService,
             concurrency
         );
 

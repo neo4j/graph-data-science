@@ -27,6 +27,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySupplier;
@@ -80,9 +81,10 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
     public MemoryEstimation estimateMemoryUsageDuringLoading() {
         return graphStoreFactorySupplier.getWithDimension(
             GraphLoaderContext.NULL_CONTEXT,
-            graphDimensions(),
             new StandInDependencyResolver(),
-            requestCorrelationId
+            requestCorrelationId,
+            DefaultPool.INSTANCE,
+            graphDimensions()
         ).estimateMemoryUsageDuringLoading();
     }
 
@@ -90,9 +92,10 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
     public MemoryEstimation estimateMemoryUsageAfterLoading() {
         return graphStoreFactorySupplier.getWithDimension(
             GraphLoaderContext.NULL_CONTEXT,
-            graphDimensions(),
             new StandInDependencyResolver(),
-            requestCorrelationId
+            requestCorrelationId,
+            DefaultPool.INSTANCE,
+            graphDimensions()
         ).estimateMemoryUsageAfterLoading();
     }
 

@@ -210,7 +210,8 @@ public final class GraphLoaderBuilders {
         var graphStoreFactory = graphStoreFactorySupplier.get(
             graphLoaderContext,
             dependencyResolver,
-            requestCorrelationId.orElse(PlainSimpleRequestCorrelationId.create())
+            requestCorrelationId.orElse(PlainSimpleRequestCorrelationId.create()),
+            executorService.orElse(DefaultPool.INSTANCE)
         );
         return new GraphLoader(
             graphProjectConfig,

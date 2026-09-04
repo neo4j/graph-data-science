@@ -39,6 +39,7 @@ import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
@@ -147,7 +148,8 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
             requestScopedDependencies.graphLoaderContext(),
             graphStoreFactorySuppliers,
-            dependencyResolver
+            dependencyResolver,
+            DefaultPool.INSTANCE
         );
 
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(

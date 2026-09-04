@@ -43,6 +43,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, Nodes> {
     private final Map<NodeLabel, PropertyMappings> propertyMappingsByLabel;
@@ -56,6 +57,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
+        ExecutorService executorService,
         Concurrency concurrency
     ) {
         var expectedCapacity = dimensions.highestPossibleNodeCount();
@@ -96,6 +98,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             dimensions,
             progressTracker,
             concurrency,
+            executorService,
             loadablePropertyMappings,
             nodePropertyImporter,
             idMapBuilder,
@@ -109,6 +112,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         Concurrency concurrency,
+        ExecutorService executorService,
         LoadablePropertyMappings loadablePropertyMappings,
         NativeNodePropertyImporter nodePropertyImporter,
         IdMapBuilder idMapBuilder,
@@ -119,6 +123,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             loadingContext,
             dimensions,
             progressTracker,
+            executorService,
             concurrency
         );
 
