@@ -202,7 +202,6 @@ public final class GraphLoaderBuilders {
             transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)),
             DatabaseId.of(databaseService.databaseName()),
             log.orElseGet(Log::noOpLog),
-            executorService.orElse(DefaultPool.INSTANCE),
             terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
             EmptyTaskRegistryFactory.INSTANCE
         );

@@ -19,39 +19,19 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 
-import java.util.concurrent.ExecutorService;
-
 public record GraphLoaderContext(
     TransactionContext transactionContext,
     DatabaseId databaseId,
     Log log,
-    ExecutorService executor,
     TerminationFlag terminationFlag,
     TaskRegistryFactory taskRegistryFactory
 ) {
-    public GraphLoaderContext(
-        TransactionContext transactionContext,
-        DatabaseId databaseId,
-        Log log,
-        TerminationFlag terminationFlag,
-        TaskRegistryFactory taskRegistryFactory
-    ) {
-        this(
-            transactionContext,
-            databaseId,
-            log,
-            DefaultPool.INSTANCE,
-            terminationFlag,
-            taskRegistryFactory
-        );
-    }
 
     public GraphLoaderContext(
         TransactionContext transactionContext,
@@ -63,7 +43,6 @@ public record GraphLoaderContext(
             transactionContext,
             databaseId,
             log,
-            DefaultPool.INSTANCE,
             terminationFlag,
             TaskRegistryFactory.empty()
         );
@@ -74,7 +53,6 @@ public record GraphLoaderContext(
             transactionContext,
             databaseId,
             Log.noOpLog(),
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             TaskRegistryFactory.empty()
         );
@@ -85,7 +63,6 @@ public record GraphLoaderContext(
             transactionContext,
             DatabaseId.EMPTY,
             Log.noOpLog(),
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             TaskRegistryFactory.empty()
         );
@@ -95,7 +72,6 @@ public record GraphLoaderContext(
         null,
         null,
         Log.noOpLog(),
-        DefaultPool.INSTANCE,
         TerminationFlag.RUNNING_TRUE,
         EmptyTaskRegistryFactory.INSTANCE
     );
@@ -105,7 +81,6 @@ public record GraphLoaderContext(
             transactionContext,
             DatabaseId.EMPTY,
             Log.noOpLog(),
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             TaskRegistryFactory.empty()
         );
