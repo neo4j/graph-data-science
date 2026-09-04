@@ -19,56 +19,95 @@
  */
 package org.neo4j.gds.api;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.concurrent.ExecutorService;
 
-@ValueClass
-public interface GraphLoaderContext {
-    TransactionContext transactionContext();
-
-    DatabaseId databaseId();
-
-    Log log();
-
-    @Value.Default
-    default ExecutorService executor() {
-        return DefaultPool.INSTANCE;
+public record GraphLoaderContext(
+    TransactionContext transactionContext,
+    DatabaseId databaseId,
+    Log log,
+    ExecutorService executor,
+    TerminationFlag terminationFlag,
+    TaskRegistryFactory taskRegistryFactory
+) {
+    public GraphLoaderContext(
+        TransactionContext transactionContext,
+        DatabaseId databaseId,
+        Log log,
+        TerminationFlag terminationFlag,
+        TaskRegistryFactory taskRegistryFactory
+    ) {
+        this(
+            transactionContext,
+            databaseId,
+            log,
+            DefaultPool.INSTANCE,
+            terminationFlag,
+            taskRegistryFactory
+        );
     }
 
-    @Value.Default
-    default TerminationFlag terminationFlag() {
-        return TerminationFlag.RUNNING_TRUE;
+    public GraphLoaderContext(
+        TransactionContext transactionContext,
+        DatabaseId databaseId,
+        Log log,
+        TerminationFlag terminationFlag
+    ) {
+        this(
+            transactionContext,
+            databaseId,
+            log,
+            DefaultPool.INSTANCE,
+            terminationFlag,
+            TaskRegistryFactory.empty()
+        );
     }
 
-    TaskRegistryFactory taskRegistryFactory();
+    public GraphLoaderContext(TransactionContext transactionContext, DatabaseId databaseId) {
+        this(
+            transactionContext,
+            databaseId,
+            Log.noOpLog(),
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            TaskRegistryFactory.empty()
+        );
+    }
 
-    GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext() {
-        @Override
-        public TransactionContext transactionContext() {
-            return null;
-        }
+    public GraphLoaderContext(TransactionContext transactionContext) {
+        this(
+            transactionContext,
+            DatabaseId.EMPTY,
+            Log.noOpLog(),
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            TaskRegistryFactory.empty()
+        );
+    }
 
-        @Override
-        public DatabaseId databaseId() {
-            return null;
-        }
+    public static final GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext(
+        null,
+        null,
+        Log.noOpLog(),
+        DefaultPool.INSTANCE,
+        TerminationFlag.RUNNING_TRUE,
+        EmptyTaskRegistryFactory.INSTANCE
+    );
 
-        @Override
-        public Log log() {
-            return Log.noOpLog();
-        }
-
-        @Override
-        public TaskRegistryFactory taskRegistryFactory() {
-            return EmptyTaskRegistryFactory.INSTANCE;
-        }
-    };
+    public static GraphLoaderContext emptyWithTransactionContext(TransactionContext transactionContext) {
+        return new GraphLoaderContext(
+            transactionContext,
+            DatabaseId.EMPTY,
+            Log.noOpLog(),
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE,
+            TaskRegistryFactory.empty()
+        );
+    }
 }

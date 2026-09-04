@@ -23,18 +23,18 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -198,14 +198,14 @@ public final class GraphLoaderBuilders {
     ) {
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(databaseService);
 
-        var graphLoaderContext = ImmutableGraphLoaderContext.builder()
-            .databaseId(DatabaseId.of(databaseService.databaseName()))
-            .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)))
-            .executor(executorService.orElse(DefaultPool.INSTANCE))
-            .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .log(log.orElseGet(Log::noOpLog))
-            .build();
+        var graphLoaderContext = new GraphLoaderContext(
+            transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)),
+            DatabaseId.of(databaseService.databaseName()),
+            log.orElseGet(Log::noOpLog),
+            executorService.orElse(DefaultPool.INSTANCE),
+            terminationFlag.orElse(TerminationFlag.RUNNING_TRUE),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
         var graphStoreFactorySupplier = graphStoreFactorySuppliers.find(graphProjectConfig);
         var graphStoreFactory = graphStoreFactorySupplier.get(
             graphLoaderContext,

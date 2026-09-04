@@ -43,7 +43,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -68,8 +67,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
@@ -84,6 +81,7 @@ import org.neo4j.gds.procedures.algorithms.community.WccMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
@@ -609,12 +607,10 @@ class WccMutateProcTest extends BaseProcTest {
     private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(db);
 
-        var graphLoaderContext = ImmutableGraphLoaderContext.builder()
-            .databaseId(DatabaseId.of(db.databaseName()))
-            .transactionContext(TestSupport.fullAccessTransaction(db))
-            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-            .log(Log.noOpLog())
-            .build();
+        var graphLoaderContext = new GraphLoaderContext(
+            TestSupport.fullAccessTransaction(db),
+            DatabaseId.of(db.databaseName())
+        );
 
         var graphStoreFactorySuppliers = new GraphStoreFactorySuppliers(
             Log.noOpLog(),

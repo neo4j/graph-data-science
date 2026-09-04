@@ -22,7 +22,6 @@ package org.neo4j.gds.executor;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -94,13 +93,13 @@ public class MemoryEstimationExecutor<ALGO extends Algorithm<ALGO_RESULT>, ALGO_
 
             var graphLoaderContext = transactionContext == EmptyTransactionContext.INSTANCE
                 ? GraphLoaderContext.NULL_CONTEXT
-                : ImmutableGraphLoaderContext
-                    .builder()
-                    .databaseId(executionContext.databaseId())
-                    .log(executionContext.log())
-                    .taskRegistryFactory(executionContext.taskRegistryFactory())
-                    .terminationFlag(TerminationFlag.wrap(TerminationMonitor.EMPTY))
-                    .transactionContext(transactionContext).build();
+                : new GraphLoaderContext(
+                    transactionContext,
+                    executionContext.databaseId(),
+                    executionContext.log(),
+                    TerminationFlag.wrap(TerminationMonitor.EMPTY),
+                    executionContext.taskRegistryFactory()
+                );
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.user().getUsername());
             var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphConfig);

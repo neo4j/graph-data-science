@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -113,13 +112,13 @@ public class GraphProjectMemoryUsageService {
         RequestScopedDependencies requestScopedDependencies,
         TransactionContext transactionContext
     ) {
-        return ImmutableGraphLoaderContext.builder()
-            .databaseId(requestScopedDependencies.databaseId())
-            .log(log)
-            .taskRegistryFactory(requestScopedDependencies.taskRegistryFactory())
-            .terminationFlag(requestScopedDependencies.terminationFlag())
-            .transactionContext(transactionContext)
-            .build();
+        return new GraphLoaderContext(
+            transactionContext,
+            requestScopedDependencies.databaseId(),
+            log,
+            requestScopedDependencies.terminationFlag(),
+            requestScopedDependencies.taskRegistryFactory()
+        );
     }
 
     private static MemoryTreeWithDimensions computeEstimate(

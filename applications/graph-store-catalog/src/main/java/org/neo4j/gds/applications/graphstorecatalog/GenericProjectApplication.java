@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -163,12 +162,12 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         RequestScopedDependencies requestScopedDependencies,
         TransactionContext transactionContext
     ) {
-        return ImmutableGraphLoaderContext.builder()
-            .databaseId(requestScopedDependencies.databaseId())
-            .log(log)
-            .taskRegistryFactory(requestScopedDependencies.taskRegistryFactory())
-            .terminationFlag(requestScopedDependencies.terminationFlag())
-            .transactionContext(transactionContext)
-            .build();
+        return new GraphLoaderContext(
+            transactionContext,
+            requestScopedDependencies.databaseId(),
+            log,
+            requestScopedDependencies.terminationFlag(),
+            requestScopedDependencies.taskRegistryFactory()
+        );
     }
 }

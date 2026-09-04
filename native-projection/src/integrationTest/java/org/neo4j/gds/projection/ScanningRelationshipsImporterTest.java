@@ -32,20 +32,15 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.AdjacencyTestUtils;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
@@ -145,14 +140,10 @@ class ScanningRelationshipsImporterTest extends BaseTest {
     }
 
     private GraphLoaderContext graphLoaderContext() {
-        return ImmutableGraphLoaderContext.builder()
-            .executor(DefaultPool.INSTANCE)
-            .log(Log.noOpLog())
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .transactionContext(DatabaseTransactionContext.of(db, db.beginTx()))
-            .taskRegistryFactory(TaskRegistryFactory.empty())
-            .databaseId(DatabaseId.of(db.databaseName()))
-            .build();
+        return new GraphLoaderContext(
+            DatabaseTransactionContext.of(db, db.beginTx()),
+            DatabaseId.of(db.databaseName())
+        );
     }
 
     private GraphDimensions graphDimensions(
