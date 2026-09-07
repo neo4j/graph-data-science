@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.immutables.builder.Builder;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.DefaultValue;
@@ -59,48 +58,6 @@ abstract class SingleTypeRelationshipsBuilder {
 
     private final ExecutorService executorService;
     private final Concurrency concurrency;
-
-    @Builder.Factory
-    static SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder(
-        PartialIdMap idMap,
-        SingleTypeRelationshipImporter importer,
-        Optional<SingleTypeRelationshipImporter> inverseImporter,
-        int bufferSize,
-        RelationshipType relationshipType,
-        List<GraphFactory.PropertyConfig> propertyConfigs,
-        boolean isMultiGraph,
-        boolean loadRelationshipProperty,
-        Direction direction,
-        ExecutorService executorService,
-        Concurrency concurrency
-    ) {
-        return inverseImporter.isPresent()
-            ? new Indexed(
-                idMap,
-                importer,
-                inverseImporter.get(),
-                bufferSize,
-                relationshipType,
-                propertyConfigs,
-                isMultiGraph,
-                loadRelationshipProperty,
-                direction,
-                executorService,
-                concurrency
-            )
-            : new NonIndexed(
-                idMap,
-                importer,
-                bufferSize,
-                relationshipType,
-                propertyConfigs,
-                isMultiGraph,
-                loadRelationshipProperty,
-                direction,
-                executorService,
-                concurrency
-            );
-    }
 
     SingleTypeRelationshipsBuilder(
         PartialIdMap idMap,

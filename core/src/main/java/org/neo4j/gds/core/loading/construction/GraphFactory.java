@@ -273,18 +273,7 @@ public final class GraphFactory {
             .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .build();
 
-        var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()
-            .idMap(nodes)
-            .importer(singleTypeRelationshipImporter)
-            .bufferSize(bufferSize)
-            .relationshipType(relationshipType)
-            .propertyConfigs(propertyConfigs)
-            .isMultiGraph(isMultiGraph)
-            .loadRelationshipProperty(loadRelationshipProperties)
-            .direction(Direction.fromOrientation(actualOrientation))
-            .executorService(executorService.orElse(DefaultPool.INSTANCE))
-            .concurrency(finalConcurrency);
-
+        SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
         if (indexInverse.orElse(false)) {
             var inverseProjection = ImmutableRelationshipProjection
                 .builder()
@@ -307,10 +296,33 @@ public final class GraphFactory {
                 .importSizing(importSizing)
                 .build();
 
-            singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
+            singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilder.Indexed(
+                nodes,
+                singleTypeRelationshipImporter,
+                inverseImporter,
+                bufferSize,
+                relationshipType,
+                propertyConfigs,
+                isMultiGraph,
+                loadRelationshipProperties,
+                Direction.fromOrientation(actualOrientation),
+                executorService.orElse(DefaultPool.INSTANCE),
+                finalConcurrency
+            );
+        } else {
+            singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilder.NonIndexed(
+                nodes,
+                singleTypeRelationshipImporter,
+                bufferSize,
+                relationshipType,
+                propertyConfigs,
+                isMultiGraph,
+                loadRelationshipProperties,
+                Direction.fromOrientation(actualOrientation),
+                executorService.orElse(DefaultPool.INSTANCE),
+                finalConcurrency
+            );
         }
-
-        var singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilderBuilder.build();
 
         var localBuilderProvider = usePooledBuilderProvider.orElse(false)
             ? LocalRelationshipsBuilderProvider
