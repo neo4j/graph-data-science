@@ -25,8 +25,8 @@ import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
 
-public interface AlgorithmGraphStoreRequirements {
-    AlgorithmGraphStoreRequirements EMPTY = (__, ___, ____) -> {};
+public interface ValidationRule {
+    ValidationRule EMPTY = (__, ___, ____) -> {};
 
     void validate(
         GraphStore graphStore,

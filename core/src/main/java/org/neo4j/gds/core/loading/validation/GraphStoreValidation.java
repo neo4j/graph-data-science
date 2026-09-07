@@ -29,12 +29,12 @@ import java.util.Optional;
 import java.util.Set;
 
 public class GraphStoreValidation {
-    public static final GraphStoreValidation DISABLED = new GraphStoreValidation(AlgorithmGraphStoreRequirements.EMPTY);
+    public static final GraphStoreValidation DISABLED = new GraphStoreValidation(ValidationRule.EMPTY);
 
-    private final AlgorithmGraphStoreRequirements algorithmRequirements;
+    private final ValidationRule validationRule;
 
-    public GraphStoreValidation(AlgorithmGraphStoreRequirements algorithmRequirements) {
-        this.algorithmRequirements = algorithmRequirements;
+    public GraphStoreValidation(ValidationRule validationRule) {
+        this.validationRule = validationRule;
     }
 
     public void validate(
@@ -80,7 +80,7 @@ public class GraphStoreValidation {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        algorithmRequirements.validate(graphStore, selectedLabels, selectedRelationshipTypes);
+        validationRule.validate(graphStore, selectedLabels, selectedRelationshipTypes);
     }
 
 }

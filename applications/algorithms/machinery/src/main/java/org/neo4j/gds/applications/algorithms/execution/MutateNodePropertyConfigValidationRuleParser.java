@@ -21,14 +21,14 @@ package org.neo4j.gds.applications.algorithms.execution;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustNotExistOnAnyLabels;
 
 import java.util.Optional;
 
 class MutateNodePropertyConfigValidationRuleParser implements ValidationRuleParser {
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig> Optional<AlgorithmGraphStoreRequirements> parse(CONFIGURATION configuration) {
+    public <CONFIGURATION extends AlgoBaseConfig> Optional<ValidationRule> parse(CONFIGURATION configuration) {
         if (configuration instanceof MutateNodePropertyConfig mutateNodePropertyConfig) {
             return Optional.of(new NodePropertyMustNotExistOnAnyLabels(mutateNodePropertyConfig.mutateProperty()));
         }

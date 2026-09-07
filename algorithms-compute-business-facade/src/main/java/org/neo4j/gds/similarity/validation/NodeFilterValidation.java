@@ -22,12 +22,12 @@ package org.neo4j.gds.similarity.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.similarity.NodeFilterSpec;
 
 import java.util.Collection;
 
-public class NodeFilterValidation implements AlgorithmGraphStoreRequirements {
+public class NodeFilterValidation implements ValidationRule {
 
     private final NodeFilterSpec sourceFilter;
     private final NodeFilterSpec targetFilter;

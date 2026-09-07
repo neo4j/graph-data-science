@@ -22,23 +22,22 @@ package org.neo4j.gds.pathfinding.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
-import org.neo4j.gds.core.loading.validation.CompoundAlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.CompoundValidationRule;
 import org.neo4j.gds.core.loading.validation.OptionalNodePropertyGraphStoreRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.TargetNodesRequirement;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
 
 import java.util.Collection;
 import java.util.List;
 
-public class FlowAlgorithmRequirements implements AlgorithmGraphStoreRequirements {
-
+public class FlowAlgorithmRequirements implements ValidationRule {
     private final SourceNodesRequirement sourceNodes;
     private final TargetNodesRequirement targetNodes;
     private final OptionalNodePropertyGraphStoreRequirement nodeCapacityProperty;
 
-     FlowAlgorithmRequirements(
+    FlowAlgorithmRequirements(
         SourceNodesRequirement sourceNodes,
         TargetNodesRequirement targetNodes,
         OptionalNodePropertyGraphStoreRequirement nodeCapacityProperty
@@ -48,8 +47,7 @@ public class FlowAlgorithmRequirements implements AlgorithmGraphStoreRequirement
         this.nodeCapacityProperty = nodeCapacityProperty;
     }
 
-
-    public static FlowAlgorithmRequirements create(MaxFlowParameters parameters){
+    public static FlowAlgorithmRequirements create(MaxFlowParameters parameters) {
         return new FlowAlgorithmRequirements(
             new SourceNodesRequirement(parameters.sourceNodes().inputNodes()),
             new TargetNodesRequirement(parameters.targetNodes().inputNodes()),
@@ -57,18 +55,20 @@ public class FlowAlgorithmRequirements implements AlgorithmGraphStoreRequirement
         );
     }
 
-
     @Override
     public void validate(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        //TODO: merge the refactoring that replaces the `AlgorithmRequirementsBuilder`
-        new CompoundAlgorithmGraphStoreRequirements(List.of(sourceNodes,targetNodes,nodeCapacityProperty))
-            .validate(graphStore,selectedLabels,selectedRelationshipTypes);
+        var validationRule = new CompoundValidationRule(
+            List.of(
+                sourceNodes,
+                targetNodes,
+                nodeCapacityProperty
+            )
+        );
+
+        validationRule.validate(graphStore, selectedLabels, selectedRelationshipTypes);
     }
-
-
-
 }

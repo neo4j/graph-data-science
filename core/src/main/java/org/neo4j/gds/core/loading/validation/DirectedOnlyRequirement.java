@@ -27,7 +27,7 @@ import java.util.Collection;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class DirectedOnlyRequirement implements AlgorithmGraphStoreRequirements {
+public final class DirectedOnlyRequirement implements ValidationRule {
 
     private final String algorithm;
 

@@ -22,13 +22,13 @@ package org.neo4j.gds.community.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 
 import java.util.Collection;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class MinCommunitySizeSumRequirement implements AlgorithmGraphStoreRequirements {
+public class MinCommunitySizeSumRequirement implements ValidationRule {
     private final Collection<Long> minCommunitySizes;
 
     public MinCommunitySizeSumRequirement(Collection<Long> minCommunitySizes) {this.minCommunitySizes = minCommunitySizes;}

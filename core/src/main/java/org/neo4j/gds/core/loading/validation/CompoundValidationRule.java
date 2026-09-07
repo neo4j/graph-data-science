@@ -25,12 +25,11 @@ import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
 
-public final class CompoundAlgorithmGraphStoreRequirements implements AlgorithmGraphStoreRequirements {
+public final class CompoundValidationRule implements ValidationRule {
+    private final Collection<ValidationRule> validationRules;
 
-    private final Collection<AlgorithmGraphStoreRequirements> graphStoreValidationList;
-
-    public CompoundAlgorithmGraphStoreRequirements(Collection<AlgorithmGraphStoreRequirements> graphStoreValidationList) {
-        this.graphStoreValidationList = graphStoreValidationList;
+    public CompoundValidationRule(Collection<ValidationRule> validationRules) {
+        this.validationRules = validationRules;
     }
 
     @Override
@@ -39,9 +38,8 @@ public final class CompoundAlgorithmGraphStoreRequirements implements AlgorithmG
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        for (var validation : graphStoreValidationList) {
-            validation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
+        for (var validationRule : validationRules) {
+            validationRule.validate(graphStore, selectedLabels, selectedRelationshipTypes);
         }
     }
-
 }

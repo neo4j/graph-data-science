@@ -22,7 +22,7 @@ package org.neo4j.gds.community.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 
 import java.util.Collection;
@@ -30,7 +30,7 @@ import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class TriangleCountGraphStoreRequirements implements AlgorithmGraphStoreRequirements {
+public final class TriangleCountGraphStoreRequirements implements ValidationRule {
 
     private final UndirectedOnlyRequirement undirectedOnlyGraphStoreValidation;
     private final List<String> labelFilter;

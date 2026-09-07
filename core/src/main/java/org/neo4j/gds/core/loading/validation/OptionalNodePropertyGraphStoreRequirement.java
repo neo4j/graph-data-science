@@ -26,17 +26,17 @@ import org.neo4j.gds.api.GraphStore;
 import java.util.Collection;
 import java.util.Optional;
 
-public final class OptionalNodePropertyGraphStoreRequirement implements AlgorithmGraphStoreRequirements {
+public final class OptionalNodePropertyGraphStoreRequirement implements ValidationRule {
 
-    private final AlgorithmGraphStoreRequirements validation;
+    private final ValidationRule validation;
 
-    private OptionalNodePropertyGraphStoreRequirement(AlgorithmGraphStoreRequirements validation) {this.validation = validation;}
+    private OptionalNodePropertyGraphStoreRequirement(ValidationRule validation) {this.validation = validation;}
 
     public static OptionalNodePropertyGraphStoreRequirement create(Optional<String> seedProperty) {
         return seedProperty
             .map(NodePropertyMustExistOnAllLabels::new)
             .map(OptionalNodePropertyGraphStoreRequirement::new)
-            .orElseGet(() -> new OptionalNodePropertyGraphStoreRequirement(AlgorithmGraphStoreRequirements.EMPTY));
+            .orElseGet(() -> new OptionalNodePropertyGraphStoreRequirement(ValidationRule.EMPTY));
     }
 
     @Override

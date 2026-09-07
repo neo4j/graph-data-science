@@ -32,7 +32,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
@@ -301,9 +301,9 @@ public class CentralityComputeBusinessFacade {
             user,
             graphParameters,
             Optional.empty(),
-            new AlgorithmGraphStoreRequirementsBuilder()
-                .withAlgorithmRequirement(new PregelPropertiesRequirement(hitsConfig.writeProperty()))
-                .withAlgorithmRequirement(new DirectedOnlyRequirement("Hits"))
+            new GraphStoreValidationBuilder()
+                .withValidationRule(new PregelPropertiesRequirement(hitsConfig.writeProperty()))
+                .withValidationRule(new DirectedOnlyRequirement("Hits"))
                 .build(),
             false,
             null

@@ -27,7 +27,7 @@ import java.util.Collection;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodePropertyMustNotExistOnAnyLabels implements AlgorithmGraphStoreRequirements {
+public class NodePropertyMustNotExistOnAnyLabels implements ValidationRule {
     private final String nodeProperty;
 
     public NodePropertyMustNotExistOnAnyLabels(String nodeProperty) {

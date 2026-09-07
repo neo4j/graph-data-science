@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class FeaturePropertiesMustExistOnAllNodeLabels implements AlgorithmGraphStoreRequirements {
+public class FeaturePropertiesMustExistOnAllNodeLabels implements ValidationRule {
 
     private final List<String> featureProperties;
 

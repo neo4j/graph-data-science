@@ -22,12 +22,12 @@ package org.neo4j.gds.similarity.validation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 
 import java.util.Collection;
 
-public class KnnAlgorithmRequirements implements AlgorithmGraphStoreRequirements{
+public class KnnAlgorithmRequirements implements ValidationRule {
 
     private final Collection<String> nodeProperties;
 

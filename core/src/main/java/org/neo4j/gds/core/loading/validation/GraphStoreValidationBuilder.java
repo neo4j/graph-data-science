@@ -22,12 +22,11 @@ package org.neo4j.gds.core.loading.validation;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class AlgorithmGraphStoreRequirementsBuilder {
+public class GraphStoreValidationBuilder {
+    private final Collection<ValidationRule> validationRules = new HashSet<>();
 
-    private final Collection<AlgorithmGraphStoreRequirements> requirements = new HashSet<>();
-
-    public AlgorithmGraphStoreRequirementsBuilder withAlgorithmRequirement(AlgorithmGraphStoreRequirements graphStoreValidation) {
-        requirements.add(graphStoreValidation);
+    public GraphStoreValidationBuilder withValidationRule(ValidationRule validationRule) {
+        validationRules.add(validationRule);
         return this;
     }
 
@@ -35,8 +34,8 @@ public class AlgorithmGraphStoreRequirementsBuilder {
      * @return {@link org.neo4j.gds.core.loading.validation.GraphStoreValidation#DISABLED} if there were no requirements
      */
     public GraphStoreValidation build() {
-        if (requirements.isEmpty()) return GraphStoreValidation.DISABLED;
+        if (validationRules.isEmpty()) return GraphStoreValidation.DISABLED;
 
-        return new GraphStoreValidation(new CompoundAlgorithmGraphStoreRequirements(requirements));
+        return new GraphStoreValidation(new CompoundValidationRule(validationRules));
     }
 }

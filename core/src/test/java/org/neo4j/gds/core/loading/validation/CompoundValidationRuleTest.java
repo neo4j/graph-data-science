@@ -31,24 +31,20 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-class CompoundAlgorithmGraphStoreRequirementsTest {
-
+class CompoundValidationRuleTest {
     @Test
     void shouldWorkWithMultipleValidations() {
-        var goodValidation1 = mock(AlgorithmGraphStoreRequirements.class);
-        var badValidation = mock(AlgorithmGraphStoreRequirements.class);
-        var goodValidation2 = mock(AlgorithmGraphStoreRequirements.class);
+        var goodValidation1 = mock(ValidationRule.class);
+        var badValidation = mock(ValidationRule.class);
+        var goodValidation2 = mock(ValidationRule.class);
 
         doThrow(new RuntimeException("OOPS")).when(badValidation).validate(any(GraphStore.class), anySet(), anySet());
-        var validations = new CompoundAlgorithmGraphStoreRequirements(List.of(
+        var validations = new CompoundValidationRule(List.of(
             goodValidation1,
             badValidation,
             goodValidation2
         ));
 
-        assertThatThrownBy(() -> validations.validate(mock(GraphStore.class), Set.of(), Set.of()))
-            .hasMessageContaining("OOPS");
-
+        assertThatThrownBy(() -> validations.validate(mock(GraphStore.class), Set.of(), Set.of())).hasMessageContaining("OOPS");
     }
-
 }

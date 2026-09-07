@@ -20,10 +20,10 @@
 package org.neo4j.gds.applications.algorithms.execution;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 
 import java.util.Optional;
 
 interface ValidationRuleParser {
-    <CONFIGURATION extends AlgoBaseConfig> Optional<AlgorithmGraphStoreRequirements> parse(CONFIGURATION configuration);
+    <CONFIGURATION extends AlgoBaseConfig> Optional<ValidationRule> parse(CONFIGURATION configuration);
 }

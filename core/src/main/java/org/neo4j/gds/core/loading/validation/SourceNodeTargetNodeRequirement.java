@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
 
-public class SourceNodeTargetNodeRequirement implements AlgorithmGraphStoreRequirements {
+public class SourceNodeTargetNodeRequirement implements ValidationRule {
 
     private final SourceNodeRequirement sourceNodeValidation;
     private final TargetNodeRequirement targetNodeValidation;

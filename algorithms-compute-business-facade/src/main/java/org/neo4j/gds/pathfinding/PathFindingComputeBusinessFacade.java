@@ -30,7 +30,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
@@ -263,9 +263,9 @@ public class PathFindingComputeBusinessFacade {
             user,
             graphParameters,
             relationshipProperty,
-            new AlgorithmGraphStoreRequirementsBuilder()
-                .withAlgorithmRequirement(new SourceNodeRequirement(parameters.sourceNode()))
-                .withAlgorithmRequirement(new UndirectedOnlyRequirement("K-Spanning Tree"))
+            new GraphStoreValidationBuilder()
+                .withValidationRule(new SourceNodeRequirement(parameters.sourceNode()))
+                .withValidationRule(new UndirectedOnlyRequirement("K-Spanning Tree"))
                 .build(),
             true,
             Optional.empty()
@@ -457,10 +457,10 @@ public class PathFindingComputeBusinessFacade {
             user,
             graphParameters,
             Optional.empty(),
-            new AlgorithmGraphStoreRequirementsBuilder()
-                .withAlgorithmRequirement(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
-                .withAlgorithmRequirement(new NodePropertyMustExistOnAllLabels(parameters.prizeProperty()))
-                .withAlgorithmRequirement(new NodePropertyTypeRequirement(
+            new GraphStoreValidationBuilder()
+                .withValidationRule(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
+                .withValidationRule(new NodePropertyMustExistOnAllLabels(parameters.prizeProperty()))
+                .withValidationRule(new NodePropertyTypeRequirement(
                     parameters.prizeProperty(),
                     List.of(ValueType.DOUBLE)
                 ))
@@ -619,9 +619,9 @@ public class PathFindingComputeBusinessFacade {
             user,
             graphParameters,
             relationshipProperty,
-            new AlgorithmGraphStoreRequirementsBuilder()
-                .withAlgorithmRequirement(new SourceNodeRequirement(parameters.sourceNode()))
-                .withAlgorithmRequirement(new UndirectedOnlyRequirement("Spanning Tree"))
+            new GraphStoreValidationBuilder()
+                .withValidationRule(new SourceNodeRequirement(parameters.sourceNode()))
+                .withValidationRule(new UndirectedOnlyRequirement("Spanning Tree"))
                 .build(),
             true,
             Optional.empty()

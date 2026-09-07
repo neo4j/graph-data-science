@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.execution;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
 
 import java.util.Set;
 
@@ -43,24 +43,24 @@ class ValidationRuleFromConfigurationParser {
         );
     }
 
-    <CONFIGURATION extends AlgoBaseConfig> AlgorithmGraphStoreRequirementsBuilder parse(
+    <CONFIGURATION extends AlgoBaseConfig> GraphStoreValidationBuilder parse(
         CONFIGURATION configuration
     ) {
-        var algorithmGraphStoreRequirementsBuilder = new AlgorithmGraphStoreRequirementsBuilder();
+        var builder = new GraphStoreValidationBuilder();
 
-        parse(configuration, algorithmGraphStoreRequirementsBuilder);
+        parse(configuration, builder);
 
-        return algorithmGraphStoreRequirementsBuilder;
+        return builder;
     }
 
     <CONFIGURATION extends AlgoBaseConfig> void parse(
         CONFIGURATION configuration,
-        AlgorithmGraphStoreRequirementsBuilder builder
+        GraphStoreValidationBuilder builder
     ) {
-        for (var validationRuleParser : validationRuleParsers) {
-            var validationRule = validationRuleParser.parse(configuration);
+        for (var parser : validationRuleParsers) {
+            var rule = parser.parse(configuration);
 
-            validationRule.ifPresent(builder::withAlgorithmRequirement);
+            rule.ifPresent(builder::withValidationRule);
         }
     }
 }

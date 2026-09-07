@@ -29,7 +29,7 @@ import java.util.Set;
 
 import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
-public class TargetNodeRequirement implements AlgorithmGraphStoreRequirements {
+public class TargetNodeRequirement implements ValidationRule {
 
     private static final String TARGET_NODE_KEY = "targetNode";
 

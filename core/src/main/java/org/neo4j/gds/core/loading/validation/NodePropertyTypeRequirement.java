@@ -29,7 +29,7 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.Collection;
 import java.util.List;
 
-public class NodePropertyTypeRequirement implements AlgorithmGraphStoreRequirements {
+public class NodePropertyTypeRequirement implements ValidationRule {
     private final String nodeProperty;
     private final List<ValueType> allowedValueTypes;
 

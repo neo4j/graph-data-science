@@ -28,7 +28,7 @@ import java.util.Collection;
 
 import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
-public class SourceNodesRequirement implements AlgorithmGraphStoreRequirements {
+public class SourceNodesRequirement implements ValidationRule {
 
     private static final String SOURCE_NODES_KEY = "sourceNodes";
 

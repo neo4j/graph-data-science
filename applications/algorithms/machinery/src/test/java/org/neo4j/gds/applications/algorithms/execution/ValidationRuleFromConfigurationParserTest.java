@@ -26,8 +26,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 
 import java.util.Collection;
@@ -52,7 +52,7 @@ class ValidationRuleFromConfigurationParserTest {
         parsers.add(parser3);
         var ruleParser = new ValidationRuleFromConfigurationParser(parsers);
 
-        var builder = mock(AlgorithmGraphStoreRequirementsBuilder.class);
+        var builder = mock(GraphStoreValidationBuilder.class);
         var configuration = new AlgoBaseConfig() {
             @Override
             public Optional<String> usernameOverride() {
@@ -60,7 +60,7 @@ class ValidationRuleFromConfigurationParserTest {
             }
         };
         when(parser1.parse(configuration)).thenReturn(Optional.empty());
-        var validationRule = new AlgorithmGraphStoreRequirements() {
+        var validationRule = new ValidationRule() {
             @Override
             public void validate(
                 GraphStore graphStore,
@@ -74,7 +74,7 @@ class ValidationRuleFromConfigurationParserTest {
         when(parser3.parse(configuration)).thenReturn(Optional.empty());
         ruleParser.parse(configuration, builder);
 
-        verify(builder).withAlgorithmRequirement(validationRule);
+        verify(builder).withValidationRule(validationRule);
     }
 
     @Test

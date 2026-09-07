@@ -21,14 +21,14 @@ package org.neo4j.gds.applications.algorithms.execution;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.core.loading.validation.RelationshipTypeMustNotExist;
 
 import java.util.Optional;
 
 class MutateRelationshipConfigValidationRuleParser implements ValidationRuleParser {
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig> Optional<AlgorithmGraphStoreRequirements> parse(CONFIGURATION configuration) {
+    public <CONFIGURATION extends AlgoBaseConfig> Optional<ValidationRule> parse(CONFIGURATION configuration) {
         if (configuration instanceof MutateRelationshipConfig mutateRelationshipConfig) {
             return Optional.of(new RelationshipTypeMustNotExist(mutateRelationshipConfig.mutateRelationshipType()));
         }

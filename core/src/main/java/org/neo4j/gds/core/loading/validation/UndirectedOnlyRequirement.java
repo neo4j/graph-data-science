@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class UndirectedOnlyRequirement implements AlgorithmGraphStoreRequirements {
+public final class UndirectedOnlyRequirement implements ValidationRule {
 
     private final String algorithm;
 

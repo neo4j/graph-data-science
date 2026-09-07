@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
 
-public class PregelPropertiesRequirement implements AlgorithmGraphStoreRequirements {
+public class PregelPropertiesRequirement implements ValidationRule {
    private final String writeProperty;
 
     public PregelPropertiesRequirement(String writeProperty) {

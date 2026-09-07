@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirementsBuilder;
+import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
@@ -107,11 +107,11 @@ public class SimilarityComputeBusinessFacade {
             user,
             graphParameters,
             Optional.empty(),
-            new AlgorithmGraphStoreRequirementsBuilder()
-                .withAlgorithmRequirement(
+            new GraphStoreValidationBuilder()
+                .withValidationRule(
                     new KnnAlgorithmRequirements(parametersSansNodeCount.knnParametersSansNodeCount().nodePropertiesNames())
                 )
-                .withAlgorithmRequirement(
+                .withValidationRule(
                     new NodeFilterValidation(
                         parametersSansNodeCount.filteringParameters().sourceFilter(),
                         parametersSansNodeCount.filteringParameters().targetFilter()
@@ -178,13 +178,13 @@ public class SimilarityComputeBusinessFacade {
             user,
             graphParameters,
             relationshipProperty,
-            new AlgorithmGraphStoreRequirementsBuilder()
-                .withAlgorithmRequirement(
+            new GraphStoreValidationBuilder()
+                .withValidationRule(
                     new NodeFilterValidation(
                         parameters.filteringParameters().sourceFilter(),
                         parameters.filteringParameters().targetFilter()
                     )
-                ).withAlgorithmRequirement(
+                ).withValidationRule(
                     new NodeSimilarityRequirement(
                         parameters.nodeSimilarityParameters().useComponents(),
                         parameters.nodeSimilarityParameters().componentProperty()

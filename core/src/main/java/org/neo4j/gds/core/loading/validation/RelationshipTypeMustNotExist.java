@@ -27,7 +27,7 @@ import java.util.Collection;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class RelationshipTypeMustNotExist implements AlgorithmGraphStoreRequirements {
+public class RelationshipTypeMustNotExist implements ValidationRule {
     private final String relationshipType;
 
     public RelationshipTypeMustNotExist(String relationshipType) {

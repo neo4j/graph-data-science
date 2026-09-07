@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class RelationshipPropertyGraphStoreValidation implements AlgorithmGraphStoreRequirements{
+public class RelationshipPropertyGraphStoreValidation implements ValidationRule {
 
     private final Optional<String> propertyName;
     private final String parameterName;

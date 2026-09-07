@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodePropertyMustExistOnAllLabels implements AlgorithmGraphStoreRequirements {
+public class NodePropertyMustExistOnAllLabels implements ValidationRule {
 
     private final String nodeProperty;
 

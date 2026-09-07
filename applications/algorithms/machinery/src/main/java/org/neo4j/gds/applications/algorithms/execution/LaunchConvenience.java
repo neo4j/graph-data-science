@@ -28,7 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
@@ -65,15 +65,16 @@ public class LaunchConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
-        AlgorithmGraphStoreRequirements algorithmSpecificRequirements, // for now, we have seen only one, but might be multiple
+        ValidationRule algorithmSpecificValidationRule, // for now, we have seen only one, but might be multiple
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
     ) {
+        // wow, this code _speaks_ to me
         var graphStoreValidation = validationRuleFromConfigurationParser.parse(configuration)
-            .withAlgorithmRequirement(algorithmSpecificRequirements)
+            .withValidationRule(algorithmSpecificValidationRule)
             .build();
 
         return algorithmProcessingFacade.loadGraphThenRunAlgorithm(
