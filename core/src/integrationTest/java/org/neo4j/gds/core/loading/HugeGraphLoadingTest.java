@@ -197,15 +197,15 @@ final class HugeGraphLoadingTest extends BaseTest {
         GraphStore graphStore = createStoreLoaderBuilder()
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NATURAL",
-                RelationshipProjection.of("TYPE", Orientation.NATURAL)
+                new RelationshipProjection("TYPE", Orientation.NATURAL)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_REVERSE",
-                RelationshipProjection.of("TYPE", Orientation.REVERSE)
+                new RelationshipProjection("TYPE", Orientation.REVERSE)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_UNDIRECTED",
-                RelationshipProjection.of("TYPE", Orientation.UNDIRECTED)
+                new RelationshipProjection("TYPE", Orientation.UNDIRECTED)
             )
             .addNodeProperty(PropertyMapping.of("id", 42.0))
             .build()
@@ -237,31 +237,27 @@ final class HugeGraphLoadingTest extends BaseTest {
         GraphStore graphStore = createStoreLoaderBuilder()
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NONE",
-                RelationshipProjection.of("TYPE", Aggregation.NONE)
+                new RelationshipProjection("TYPE", Aggregation.NONE)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_PROP_NONE",
-                RelationshipProjection.builder()
-                    .type("TYPE")
-                    .properties(PropertyMappings.builder()
-                        .addMapping(PropertyMapping.of("t", Aggregation.NONE))
-                        .build())
-                    .build()
+                new RelationshipProjection(
+                    "TYPE",
+                    PropertyMappings.of(PropertyMapping.of("t", Aggregation.NONE))
+                )
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_SINGLE",
-                RelationshipProjection.of("TYPE", Aggregation.SINGLE)
+                new RelationshipProjection("TYPE", Aggregation.SINGLE)
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_PROP_SINGLE",
-                RelationshipProjection.builder()
-                    .type("TYPE")
-                    .properties(PropertyMappings.builder()
-                        .addMapping(PropertyMapping.of("t", Aggregation.SINGLE))
-                        .build())
-                    .build()
+                new RelationshipProjection(
+                    "TYPE",
+                    PropertyMappings.of(PropertyMapping.of("t", Aggregation.SINGLE))
+                )
             )
-            .addRelationshipProjection(RelationshipProjection.of("TYPE2", Aggregation.SINGLE))
+            .addRelationshipProjection(new RelationshipProjection("TYPE2", Aggregation.SINGLE))
             .build()
             .graphStore();
 
@@ -456,9 +452,19 @@ final class HugeGraphLoadingTest extends BaseTest {
         });
 
         var graph = createStoreLoaderBuilder()
-            .addNodeProjection(NodeProjection.builder().label("A").addProperty(PropertyMapping.of("prop1")).build())
-            .addNodeProjection(NodeProjection.builder().label("B").addProperty(PropertyMapping.of("prop2")).build())
-            .build()
+            .addNodeProjection(
+                new NodeProjection(
+                    "A",
+                    PropertyMappings.of(PropertyMapping.of("prop1"))
+                )
+            ).addNodeProjection(
+                new NodeProjection(
+                    "B",
+                    PropertyMappings.of(
+                        PropertyMapping.of("prop2")
+                    )
+                )
+            ).build()
             .graph();
 
         long idA = graph.toMappedNodeId(ids[0]);

@@ -74,7 +74,7 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
             ))
             .putRelationshipProjectionsWithIdentifier(
                 "PAID",
-                RelationshipProjection.of("PAYS", Orientation.NATURAL)
+                new RelationshipProjection("PAYS", Orientation.NATURAL)
             )
             .addRelationshipProperty("totalAmount", "amount", DefaultValue.of(0), Aggregation.SUM)
             .addRelationshipProperty("numberOfPayments", "amount", DefaultValue.of(0), Aggregation.COUNT)

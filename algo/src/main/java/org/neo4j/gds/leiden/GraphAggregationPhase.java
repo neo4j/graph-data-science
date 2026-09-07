@@ -23,6 +23,8 @@ import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
@@ -39,10 +41,10 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
@@ -76,12 +78,14 @@ class GraphAggregationPhase {
                 var relationshipProjections = ImmutableRelationshipProjections.builder()
                     .putProjection(
                         RelationshipType.of("AGGREGATE"),
-                        RelationshipProjection.builder()
-                            .type("AGGREGATE")
-                            .orientation(Orientation.UNDIRECTED)
-                            .aggregation(Aggregation.SUM)
-                            .addProperty("prop", "prop", DefaultValue.of(1.0))
-                            .build()
+                        new RelationshipProjection(
+                            "AGGREGATE",
+                            Orientation.UNDIRECTED,
+                            Aggregation.SUM,
+                            PropertyMappings.of(
+                                PropertyMapping.of("prop", "prop", DefaultValue.of(1.0))
+                            )
+                        )
                     )
                     .build();
 

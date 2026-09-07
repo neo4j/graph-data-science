@@ -25,6 +25,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
@@ -48,7 +49,7 @@ import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskTreeProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -305,11 +306,10 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     }
 
     private NodeProjections buildEstimateNodeProjections() {
-        var nodeProjection = NodeProjection
-            .builder()
-            .label(ElementProjection.PROJECT_ALL)
-            .addAllProperties(propertyMappings(numberOfNodeProperties))
-            .build();
+        var nodeProjection = new NodeProjection(
+            ElementProjection.PROJECT_ALL,
+            PropertyMappings.of(propertyMappings(numberOfNodeProperties))
+        );
 
         return NodeProjections.single(
             NodeLabel.ALL_NODES,
@@ -318,11 +318,10 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     }
 
     private RelationshipProjections buildEstimateRelationshipProjections() {
-        var relationshipProjection = RelationshipProjection
-            .builder()
-            .type(ElementProjection.PROJECT_ALL)
-            .addAllProperties(propertyMappings(numberOfRelationshipProperties))
-            .build();
+        var relationshipProjection = new RelationshipProjection(
+            ElementProjection.PROJECT_ALL,
+            PropertyMappings.of(propertyMappings(numberOfRelationshipProperties))
+        );
 
         return RelationshipProjections.single(
             RelationshipType.ALL_RELATIONSHIPS,
@@ -330,7 +329,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         );
     }
 
-    private static Collection<PropertyMapping> propertyMappings(long propertyCount) {
+    private static List<PropertyMapping> propertyMappings(long propertyCount) {
         return LongStream
             .range(0, propertyCount)
             .mapToObj(property -> PropertyMapping.of(Long.toString(property), DefaultValue.DEFAULT))

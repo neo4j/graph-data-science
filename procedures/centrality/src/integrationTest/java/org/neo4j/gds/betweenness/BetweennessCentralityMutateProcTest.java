@@ -64,7 +64,7 @@ class BetweennessCentralityMutateProcTest extends BaseProcTest {
             .withNodeLabel("Node")
             .withRelationshipType(
                 "REL",
-                RelationshipProjection.of(
+                new RelationshipProjection(
                     "REL",
                     Orientation.UNDIRECTED,
                     Aggregation.DEFAULT

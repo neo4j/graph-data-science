@@ -51,7 +51,7 @@ class NodeProjectionsTest {
 
         NodeProjections expected = NodeProjections.single(
             NodeLabel.of("A"),
-            NodeProjection.builder().label("A").properties(PropertyMappings.of()).build()
+            new NodeProjection("A")
         );
 
         assertThat(
@@ -74,14 +74,13 @@ class NodeProjectionsTest {
 
         NodeProjections expected = NodeProjections.single(
             NodeLabel.of("MY_LABEL"),
-            NodeProjection
-                .builder()
-                .label("A")
-                .addProperties(
+            new NodeProjection(
+                "A",
+                PropertyMappings.of(
                     PropertyMapping.of("prop1", DefaultValue.DEFAULT),
                     PropertyMapping.of("prop2", DefaultValue.DEFAULT)
                 )
-                .build()
+            )
         );
 
         assertThat(
@@ -96,8 +95,8 @@ class NodeProjectionsTest {
         NodeProjections actual = NodeProjections.fromObject(Arrays.asList("A", "B"));
 
         NodeProjections expected = NodeProjections.create(Map.of(
-            NodeLabel.of("A"), NodeProjection.builder().label("A").build(),
-            NodeLabel.of("B"), NodeProjection.builder().label("B").build()
+            NodeLabel.of("A"), new NodeProjection("A"),
+            NodeLabel.of("B"), new NodeProjection("B")
         ));
 
         assertThat(actual, equalTo(expected));
@@ -108,14 +107,7 @@ class NodeProjectionsTest {
     void shouldSupportStar() {
         NodeProjections actual = NodeProjections.fromObject("*");
 
-        NodeProjections expected = NodeProjections.single(
-            ALL_NODES,
-            NodeProjection
-                .builder()
-                .label("*")
-                .properties(PropertyMappings.of())
-                .build()
-        );
+        NodeProjections expected = NodeProjections.single(ALL_NODES, new NodeProjection("*"));
 
         assertThat(
             actual,
@@ -134,11 +126,8 @@ class NodeProjectionsTest {
 
     @Test
     void shouldFailOnDuplicatePropertyKeys() {
-        assertThatThrownBy(() -> NodeProjection
-            .builder()
-            .label("Foo")
-            .addAllProperties(PropertyMappings.fromObject(List.of("prop", "prop")))
-            .build()
+        assertThatThrownBy(() ->
+            new NodeProjection("Foo", PropertyMappings.fromObject(List.of("prop", "prop")))
         )
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Duplicate property key `prop`");
@@ -187,20 +176,14 @@ class NodeProjectionsTest {
         PropertyMapping second,
         String... messages
     ) {
-        var builder = ImmutableNodeProjections.builder().projections(Map.of(
-            NodeLabel.of("A"),
-            NodeProjection
-                .builder()
-                .label("A")
-                .addProperty(first)
-                .build(),
-            NodeLabel.of("B"),
-            NodeProjection
-                .builder()
-                .label("B")
-                .addProperty(second)
-                .build()
-        ));
+        var builder = ImmutableNodeProjections.builder().projections(
+            Map.of(
+                NodeLabel.of("A"),
+                new NodeProjection("A", PropertyMappings.of(first)),
+                NodeLabel.of("B"),
+                new NodeProjection("B", PropertyMappings.of(second))
+            )
+        );
 
         var throwableAssert = assertThatThrownBy(builder::build)
             .isInstanceOf(IllegalArgumentException.class);
@@ -222,14 +205,13 @@ class NodeProjectionsTest {
 
         NodeProjections expected = NodeProjections.single(
             NodeLabel.of("MY_LABEL"),
-            NodeProjection
-                .builder()
-                .label("A")
-                .addProperties(
+            new NodeProjection(
+                "A",
+                PropertyMappings.of(
                     PropertyMapping.of("prop1", DefaultValue.DEFAULT),
                     PropertyMapping.of("prop2", DefaultValue.DEFAULT)
                 )
-                .build()
+            )
         );
 
         assertThat(

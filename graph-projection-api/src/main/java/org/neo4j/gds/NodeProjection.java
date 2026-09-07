@@ -19,39 +19,24 @@
  */
 package org.neo4j.gds;
 
-import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.utils.StringFormatting;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-@ValueClass
-public abstract class NodeProjection extends ElementProjection {
+import static java.util.Collections.emptyMap;
 
-    private static final NodeProjection ALL = fromString(PROJECT_ALL);
-
-    public abstract String label();
-
-    @Value.Default
-    @Override
-    public PropertyMappings properties() {
-        return super.properties();
+public record NodeProjection(String label, PropertyMappings properties) implements ElementProjection {
+    public NodeProjection(String label) {
+        this(label, PropertyMappings.of());
     }
 
-    @Override
-    public boolean projectAll() {
-        return label().equals(PROJECT_ALL);
-    }
+    private static final NodeProjection ALL = new NodeProjection(PROJECT_ALL);
 
     public static final String LABEL_KEY = "label";
-
-    public static NodeProjection of(String label) {
-        return ImmutableNodeProjection.of(label, PropertyMappings.of());
-    }
 
     public static NodeProjection all() {
         return ALL;
@@ -59,7 +44,7 @@ public abstract class NodeProjection extends ElementProjection {
 
     public static NodeProjection fromObject(Object object, NodeLabel nodeLabel) {
         if (object instanceof String) {
-            return NodeProjection.fromString((String) object);
+            return new NodeProjection((String) object);
         }
         if (object instanceof Map) {
             var caseInsensitiveMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -73,71 +58,35 @@ public abstract class NodeProjection extends ElementProjection {
         }
 
         throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-            "Cannot construct a node filter out of a %s",
+            "Cannot construct a node projection out of a %s",
             object.getClass().getName()
         ));
     }
 
-    public static NodeProjection fromString(@Nullable String label) {
-        return NodeProjection.builder().label(label).build();
-    }
-
     public static NodeProjection fromMap(Map<String, Object> map, NodeLabel nodeLabel) {
         validateConfigKeys(map);
-        String label = String.valueOf(map.getOrDefault(LABEL_KEY, nodeLabel.name));
-        return create(map, properties -> ImmutableNodeProjection.of(label, properties));
+        var label = String.valueOf(map.getOrDefault(LABEL_KEY, nodeLabel.name));
+        var inputProperties = map.getOrDefault(PROPERTIES_KEY, emptyMap());
+        var properties = PropertyMappings.fromObject(inputProperties);
+        return new NodeProjection(label, properties);
     }
 
-    @Override
-    boolean includeAggregation() {
-        return false;
+    public Map<String, Object> toObject() {
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put(LABEL_KEY, label);
+        value.put(PROPERTIES_KEY, properties().toObject(false));
+        return value;
     }
 
-    @Override
-    void writeToObject(Map<String, Object> value) {
-        value.put(LABEL_KEY, label());
-    }
-
-    @Override
-    public NodeProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
-        PropertyMappings newMappings = properties().mergeWith(mappings);
-        if (newMappings == properties()) {
+    NodeProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
+        PropertyMappings newMappings = properties.mergeWith(mappings);
+        if (newMappings == properties) {
             return this;
         }
-        return ((ImmutableNodeProjection) this).withProperties(newMappings);
-    }
-
-    public static Builder builder() {
-        return new Builder();
+        return new NodeProjection(label, newMappings);
     }
 
     private static void validateConfigKeys(Map<String, Object> map) {
         ConfigKeyValidation.requireOnlyKeysFrom(List.of(LABEL_KEY, PROPERTIES_KEY), map.keySet());
-    }
-
-    @org.immutables.builder.Builder.AccessibleFields
-    public static final class Builder extends ImmutableNodeProjection.Builder implements InlineProperties<Builder> {
-
-        private InlinePropertiesBuilder propertiesBuilder;
-
-        Builder() {
-        }
-
-        @Override
-        public NodeProjection build() {
-            buildProperties();
-            return super.build();
-        }
-
-        @Override
-        public InlinePropertiesBuilder inlineBuilder() {
-            if (propertiesBuilder == null) {
-                propertiesBuilder = new InlinePropertiesBuilder(
-                    () -> this.properties,
-                    newProperties -> this.properties = newProperties
-                );
-            }
-            return propertiesBuilder;
-        }
     }
 }

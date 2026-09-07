@@ -24,11 +24,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GraphFactoryTestSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
@@ -37,7 +39,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
@@ -96,11 +97,21 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     void nodeProjectionsWithExclusiveProperties() {
         GraphStore graphStore = initialiseStoreLoaderBuilder()
             .putNodeProjectionsWithIdentifier("N1",
-                NodeProjection.builder().label("Node1").addProperty(PropertyMapping.of("prop1", 0.0D)).build()
+                new NodeProjection(
+                    "Node1",
+                    PropertyMappings.of(
+                        PropertyMapping.of("prop1", 0.0D)
+                    )
+                )
             )
-            .putNodeProjectionsWithIdentifier("N2", NodeProjection.of("Node1"))
+            .putNodeProjectionsWithIdentifier("N2", new NodeProjection("Node1"))
             .putNodeProjectionsWithIdentifier("N3",
-                NodeProjection.builder().label("Node2").addProperty(PropertyMapping.of("prop2", 1.0D)).build()
+                new NodeProjection(
+                    "Node2",
+                    PropertyMappings.of(
+                        PropertyMapping.of("prop2", 1.0D)
+                    )
+                )
             )
             .graphName("myGraph")
             .build()
@@ -128,14 +139,21 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         GraphStore graphStore = initialiseStoreLoaderBuilder()
             .putNodeProjectionsWithIdentifier(
                 allIdentifier.name(),
-                NodeProjection
-                    .builder()
-                    .label("*")
-                    .addProperties(PropertyMapping.of("prop1", 42.0D), PropertyMapping.of("prop2", 8.0D))
-                    .build()
+                new NodeProjection(
+                    "*",
+                    PropertyMappings.of(
+                        PropertyMapping.of("prop1", 42.0D),
+                        PropertyMapping.of("prop2", 8.0D)
+                    )
+                )
             ).putNodeProjectionsWithIdentifier(
                 node2Identifier.name(),
-                NodeProjection.builder().label("Node2").addProperty(PropertyMapping.of("prop2", 8.0D)).build()
+                new NodeProjection(
+                    "Node2",
+                    PropertyMappings.of(
+                        PropertyMapping.of("prop2", 8.0D)
+                    )
+                )
             ).graphName("myGraph")
             .build()
             .graphStore();
@@ -313,16 +331,18 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
         var graphStore = initialiseStoreLoaderBuilder()
             .addRelationshipProjections(
-                RelationshipProjection
-                    .builder()
-                    .type(rel1.name)
-                    .addProperty(prop1, prop1, DefaultValue.of(Double.NaN))
-                    .build(),
-                RelationshipProjection
-                    .builder()
-                    .type(rel2.name)
-                    .addProperty(prop2, prop2, DefaultValue.of(Double.NaN))
-                    .build()
+                new RelationshipProjection(
+                    rel1.name,
+                    PropertyMappings.of(
+                        PropertyMapping.of(prop1, prop1, DefaultValue.of(Double.NaN))
+                    )
+                ),
+                new RelationshipProjection(
+                    rel2.name,
+                    PropertyMappings.of(
+                        PropertyMapping.of(prop2, prop2, DefaultValue.of(Double.NaN))
+                    )
+                )
             ).build().graphStore();
 
         assertEquals(2, graphStore.relationshipTypes().size());

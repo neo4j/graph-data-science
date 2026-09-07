@@ -227,25 +227,23 @@ class DegreesTest extends BaseTest {
             .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_OUT",
-                RelationshipProjection
-                    .builder()
-                    .type("TYPE")
-                    .orientation(Orientation.NATURAL)
-                    .indexInverse(indexInverse)
-                    .build()
+                new RelationshipProjection(
+                    "TYPE",
+                    Orientation.NATURAL,
+                    indexInverse
+                )
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_IN",
-                RelationshipProjection
-                    .builder()
-                    .type("TYPE")
-                    .orientation(Orientation.REVERSE)
-                    .indexInverse(indexInverse)
-                    .build()
+                new RelationshipProjection(
+                    "TYPE",
+                    Orientation.REVERSE,
+                    indexInverse
+                )
             )
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_UNDIRECTED",
-                RelationshipProjection.builder().type("TYPE").orientation(Orientation.UNDIRECTED).build()
+                new RelationshipProjection("TYPE", Orientation.UNDIRECTED)
             )
             .build()
             .graphStore();

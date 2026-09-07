@@ -86,11 +86,10 @@ class NativeFactoryTest {
             .builder()
             .putProjection(
                 RelationshipType.of("TYPE1"),
-                RelationshipProjection
-                    .builder()
-                    .type("TYPE1")
-                    .orientation(Orientation.NATURAL)
-                    .build()
+                new RelationshipProjection(
+                    "TYPE1",
+                    Orientation.NATURAL
+                )
             )
             .build();
 
@@ -114,12 +113,11 @@ class NativeFactoryTest {
             .builder()
             .putProjection(
                 RelationshipType.of("TYPE1"),
-                RelationshipProjection
-                    .builder()
-                    .type("TYPE1")
-                    .orientation(Orientation.NATURAL)
-                    .indexInverse(true)
-                    .build()
+                new RelationshipProjection(
+                    "TYPE1",
+                    Orientation.NATURAL,
+                    true
+                )
             )
             .build();
 
@@ -142,8 +140,8 @@ class NativeFactoryTest {
         NodeProjections nodeProjections = NodeProjections.all();
         RelationshipProjections relationshipProjections = ImmutableRelationshipProjections
             .builder()
-            .putProjection(RelationshipType.of("TYPE1"), RelationshipProjection.of("TYPE1", Orientation.NATURAL))
-            .putProjection(RelationshipType.of("TYPE2"), RelationshipProjection.of("TYPE2", Orientation.NATURAL))
+            .putProjection(RelationshipType.of("TYPE1"), new RelationshipProjection("TYPE1", Orientation.NATURAL))
+            .putProjection(RelationshipType.of("TYPE2"), new RelationshipProjection("TYPE2", Orientation.NATURAL))
             .build();
 
         MemoryTree estimate = CSRGraphStoreFactory

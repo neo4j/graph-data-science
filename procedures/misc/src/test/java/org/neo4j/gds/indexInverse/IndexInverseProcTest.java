@@ -55,7 +55,7 @@ class IndexInverseProcTest extends BaseProcTest {
             .withAnyLabel()
             .withRelationshipType("REL")
             .withRelationshipType("REL2")
-            .withRelationshipType("INDEXED_REL", RelationshipProjection.builder().type("REL").indexInverse(true).build())
+            .withRelationshipType("INDEXED_REL", new RelationshipProjection("REL", true))
             .withRelationshipProperty("prop1")
             .yields()
         );

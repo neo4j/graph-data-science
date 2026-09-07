@@ -28,6 +28,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -192,18 +193,20 @@ class GraphSageTrainProcTest extends BaseProcTest {
             .graphProject()
             .withNodeLabel(
                 "A",
-                NodeProjection
-                    .builder()
-                    .label("A")
-                    .addProperties(PropertyMapping.of("a1"), PropertyMapping.of("a2"))
-                    .build()
+                new NodeProjection(
+                    "A",
+                    PropertyMappings.of(
+                        PropertyMapping.of("a1"), PropertyMapping.of("a2")
+                    )
+                )
             ).withNodeLabel(
                 "B",
-                NodeProjection
-                    .builder()
-                    .label("B")
-                    .addProperties(PropertyMapping.of("b1"), PropertyMapping.of("b2"))
-                    .build()
+                new NodeProjection(
+                    "B",
+                    PropertyMappings.of(
+                        PropertyMapping.of("b1"), PropertyMapping.of("b2")
+                    )
+                )
             )
             .withAnyRelationshipType()
             .yields();

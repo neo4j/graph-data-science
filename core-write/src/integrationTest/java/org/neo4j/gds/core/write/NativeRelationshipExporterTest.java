@@ -120,7 +120,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         GraphStore graphStore = createStoreLoaderBuilder()
             .putRelationshipProjectionsWithIdentifier(
                 "NEW_REL",
-                RelationshipProjection.of("BARFOO", Orientation.NATURAL)
+                new RelationshipProjection("BARFOO", Orientation.NATURAL)
             )
             .addRelationshipProperty("newWeight", "weight2", DefaultValue.of(0), Aggregation.NONE)
             .build()

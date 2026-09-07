@@ -134,11 +134,13 @@ class ModularityOptimizationStatsProcTest  extends BaseProcTest {
             .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed1", "seed2")))
             .relationshipProjections(RelationshipProjections.single(
                     ALL_RELATIONSHIPS,
-                    RelationshipProjection.builder()
-                        .type("TYPE")
-                        .orientation(Orientation.UNDIRECTED)
-                        .addProperty(PropertyMapping.of("weight", 1D))
-                        .build()
+                    new RelationshipProjection(
+                        "TYPE",
+                        Orientation.UNDIRECTED,
+                        PropertyMappings.of(
+                            PropertyMapping.of("weight", 1D)
+                        )
+                    )
                 )
             ).build();
 

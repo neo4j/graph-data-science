@@ -70,7 +70,7 @@ public final class GraphProjectConfigBuilders {
     ) {
         // Node projections
         Map<String, NodeProjection> tempNP = new LinkedHashMap<>();
-        nodeLabels.forEach(label -> tempNP.put(label, NodeProjection.of(label)));
+        nodeLabels.forEach(label -> tempNP.put(label, new NodeProjection(label)));
         nodeProjections.forEach(np -> tempNP.put(np.label(), np));
         nodeProjectionsWithIdentifier.forEach(tempNP::put);
 
@@ -86,24 +86,23 @@ public final class GraphProjectConfigBuilders {
 
         relationshipTypes.forEach(relType -> tempRP.put(
             relType,
-            RelationshipProjection
-                .builder()
-                .type(relType)
-                .orientation(orientation)
-                .aggregation(aggregation)
-                .indexInverse(indexInverse)
-                .build()
+            new RelationshipProjection(
+                relType,
+                orientation,
+                aggregation,
+                indexInverse
+            )
         ));
         relationshipProjections.forEach(rp -> tempRP.put(rp.type(), rp));
         relationshipProjectionsWithIdentifier.forEach(tempRP::put);
 
         if (tempRP.isEmpty()) {
-            tempRP.put(ALL_RELATIONSHIPS.name, RelationshipProjection.builder()
-                .type("*")
-                .orientation(orientation)
-                .aggregation(aggregation)
-                .indexInverse(indexInverse)
-                .build());
+            tempRP.put(ALL_RELATIONSHIPS.name, new RelationshipProjection(
+                "*",
+                orientation,
+                aggregation,
+                indexInverse
+            ));
         }
 
         PropertyMappings relationshipPropertyMappings = PropertyMappings.builder()

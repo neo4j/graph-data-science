@@ -99,7 +99,7 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
         return ImmutableNodeProjections.builder()
             .putProjection(
                 NodeLabel.of(nodeCount() + "_Nodes"),
-                NodeProjection.of(nodeCount() + "_Nodes")
+                new NodeProjection(nodeCount() + "_Nodes")
             )
             .build();
     }
@@ -115,7 +115,7 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
         return ImmutableRelationshipProjections.builder()
             .putProjection(
                 relationshipType(),
-                RelationshipProjection.of(relationshipType().name, orientation(), aggregation())
+                new RelationshipProjection(relationshipType().name, orientation(), aggregation())
             )
             .build();
     }

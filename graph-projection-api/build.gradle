@@ -10,10 +10,12 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
+    annotationProcessor openGds.recordBuilder
 
     compileOnly         openGds.immutables.builder
     compileOnly         openGds.immutables.value.annotations
     compileOnly         openGds.jetbrains.annotations
+    compileOnly         openGds.recordBuilder
 
     implementation(
             project(':annotations'),

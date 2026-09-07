@@ -71,7 +71,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
             .withNodeProperty("seed")
             .withRelationshipType(
                 "LINK",
-                RelationshipProjection.of(
+                new RelationshipProjection(
                     "LINK",
                     Orientation.UNDIRECTED,
                     Aggregation.NONE

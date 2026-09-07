@@ -80,7 +80,7 @@ public abstract class NodeProjections extends AbstractProjections<NodeLabel, Nod
         }
 
         NodeLabel nodeLabel = new NodeLabel(labelString);
-        NodeProjection projection = NodeProjection.fromString(labelString);
+        NodeProjection projection = new NodeProjection(labelString);
         return create(singletonMap(nodeLabel, projection));
     }
 

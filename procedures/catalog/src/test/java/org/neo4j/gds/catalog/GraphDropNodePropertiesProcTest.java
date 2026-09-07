@@ -26,6 +26,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
@@ -66,19 +67,19 @@ class GraphDropNodePropertiesProcTest extends BaseProcTest {
 
         runQuery(GdsCypher.call(TEST_GRAPH_DIFFERENT_PROPERTIES)
             .graphProject()
-            .withNodeLabel("A", NodeProjection.builder()
-                .label("A")
-                .addProperties(
+            .withNodeLabel("A", new NodeProjection(
+                "A",
+                PropertyMappings.of(
                     PropertyMapping.of("nodeProp1", 1337),
                     PropertyMapping.of("nodeProp2", 1337)
-                ).build()
-            )
-            .withNodeLabel("B", NodeProjection.builder()
-                .label("B")
-                .addProperty(
+                )
+            ))
+            .withNodeLabel("B", new NodeProjection(
+                "B",
+                PropertyMappings.of(
                     PropertyMapping.of("nodeProp1", 1337)
-                ).build()
-            )
+                )
+            ))
             .withAnyRelationshipType()
             .yields()
         );

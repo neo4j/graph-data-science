@@ -63,16 +63,14 @@ class CatalogConfigurationServiceTest {
         assertThat(configuration.graphName()).isEqualTo("some graph");
         assertThat(configuration.nodeCount()).isEqualTo(-1);
         assertThat(configuration.nodeProjections().projections()).containsExactlyInAnyOrderEntriesOf(Map.of(
-            NodeLabel.of("some label"), NodeProjection.of("some label")
+            NodeLabel.of("some label"), new NodeProjection("some label")
         ));
         assertThat(configuration.logProgress()).isEqualTo(true);
         assertThat(configuration.readConcurrency()).isEqualTo(new Concurrency(4));
         assertThat(configuration.relationshipCount()).isEqualTo(-1);
         assertThat(configuration.relationshipProjections().projections()).containsExactlyInAnyOrderEntriesOf(Map.of(
             RelationshipType.of("some relationship type"),
-            RelationshipProjection.of(
-                "some relationship type", Orientation.NATURAL, Aggregation.DEFAULT
-            )
+            new RelationshipProjection("some relationship type", Orientation.NATURAL, Aggregation.DEFAULT)
         ));
         assertThat(configuration.username()).isEqualTo("some user");
     }

@@ -22,9 +22,10 @@ package org.neo4j.gds.core.loading.construction;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.ImmutableRelationshipProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
@@ -221,22 +222,19 @@ public final class GraphFactory {
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
 
         var actualOrientation = orientation.orElse(Orientation.NATURAL);
-        var projectionBuilder = RelationshipProjection
-            .builder()
-            .type(relationshipType.name())
-            .orientation(actualOrientation)
-            .indexInverse(indexInverse.orElse(false));
-
-        propertyConfigs.forEach(
-            propertyConfig -> projectionBuilder.addProperty(
+        var propertyMappings = propertyConfigs.stream()
+            .map(propertyConfig -> PropertyMapping.of(
                 propertyConfig.propertyKey(),
                 propertyConfig.propertyKey(),
                 DefaultValue.of(propertyConfig.defaultValue()),
                 propertyConfig.aggregation()
-            )
+            )).toList();
+        var projection = new RelationshipProjection(
+            relationshipType.name(),
+            actualOrientation,
+            indexInverse.orElse(false),
+            PropertyMappings.of(propertyMappings)
         );
-
-        var projection = projectionBuilder.build();
 
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
@@ -275,11 +273,7 @@ public final class GraphFactory {
 
         SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
         if (indexInverse.orElse(false)) {
-            var inverseProjection = ImmutableRelationshipProjection
-                .builder()
-                .from(projection)
-                .orientation(projection.orientation().inverse())
-                .build();
+            var inverseProjection = projection.inverse();
 
             var inverseImportMetaData = new SingleTypeRelationshipImporter.ImportMetaData(
                 inverseProjection,

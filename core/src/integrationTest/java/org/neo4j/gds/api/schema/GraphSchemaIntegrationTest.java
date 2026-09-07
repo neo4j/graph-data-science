@@ -28,6 +28,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
@@ -70,12 +71,8 @@ class GraphSchemaIntegrationTest extends BaseTest {
     void computesCorrectNodeSchema(PropertySchema expectedSchema, PropertyMapping propertyMapping) {
         Graph graph = createStoreLoaderBuilder()
             .addNodeProjection(
-                NodeProjection.builder()
-                    .label("Node")
-                    .addProperty(propertyMapping)
-                    .build()
-            )
-            .build()
+                new NodeProjection("Node", PropertyMappings.of(propertyMapping))
+            ).build()
             .graph();
 
         assertEquals(expectedSchema, graph.schema().nodeSchema().propertiesForLabel(NodeLabel.of("Node")).get("prop"));
@@ -86,10 +83,10 @@ class GraphSchemaIntegrationTest extends BaseTest {
     void computesCorrectRelationshipSchema(RelationshipPropertySchema expectedSchema, PropertyMapping propertyMapping) {
         Graph graph = createStoreLoaderBuilder()
             .addRelationshipProjection(
-                RelationshipProjection.builder()
-                    .type("REL")
-                    .addProperties(propertyMapping)
-                    .build()
+                new RelationshipProjection(
+                    "REL",
+                    PropertyMappings.of(propertyMapping)
+                )
             )
             .build()
             .graph();

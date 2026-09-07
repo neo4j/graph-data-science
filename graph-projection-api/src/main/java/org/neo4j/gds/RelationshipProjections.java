@@ -40,7 +40,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public abstract class RelationshipProjections extends AbstractProjections<RelationshipType, RelationshipProjection> {
 
     public static final RelationshipProjections ALL = create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL));
-    public static final RelationshipProjections ALL_UNDIRECTED = create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL_UNDIRECTED));
 
     public abstract Map<RelationshipType, RelationshipProjection> projections();
 
@@ -79,7 +78,7 @@ public abstract class RelationshipProjections extends AbstractProjections<Relati
         }
 
         RelationshipType relationshipType = RelationshipType.of(typeString);
-        RelationshipProjection filter = RelationshipProjection.fromString(typeString);
+        RelationshipProjection filter = new RelationshipProjection(typeString);
         return create(singletonMap(relationshipType, filter));
     }
 

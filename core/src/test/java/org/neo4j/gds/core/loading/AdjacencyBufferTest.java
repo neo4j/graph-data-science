@@ -45,7 +45,7 @@ class AdjacencyBufferTest {
     void skipsNodeIdsThatShouldntBeThereWhenBuildingAdjacencyLists() {
         var nodeCount = 7L;
         var metadata = SingleTypeRelationshipImporter.ImportMetaData.of(
-            RelationshipProjection.of(
+            new RelationshipProjection(
                 "T",
                 Orientation.NATURAL
             ), 1, Map.of(), false

@@ -149,9 +149,7 @@ public abstract class AdjacencyListBuilderBaseTest {
             .toArray(PropertyMapping[]::new));
         var defaultValues = DoubleStream.generate(() -> defaultValue).limit(propertyCount).toArray();
 
-        var relationshipProjection = RelationshipProjection
-            .of("", Orientation.NATURAL, Aggregation.NONE)
-            .withAdditionalPropertyMappings(propertyMappings);
+        var relationshipProjection = new RelationshipProjection("", Orientation.NATURAL, Aggregation.NONE, propertyMappings);
 
         var importAggregations = propertyAggregations.length == 0
             ? new Aggregation[]{Aggregation.NONE}

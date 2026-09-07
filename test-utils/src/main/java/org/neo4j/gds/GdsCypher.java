@@ -362,7 +362,7 @@ public abstract class GdsCypher {
                 .withNodeLabel(ALL_NODES.name, NodeProjection.all())
                 .withRelationshipType(
                     ALL_RELATIONSHIPS.name(),
-                    RelationshipProjection.builder().from(RelationshipProjection.ALL).orientation(orientation).build()
+                    RelationshipProjection.ALL.withOrientation(orientation)
                 );
         }
 
@@ -381,7 +381,7 @@ public abstract class GdsCypher {
         public GraphProjectBuilder withNodeLabels(String... labels) {
             return withNodeLabels(Arrays.stream(labels).collect(Collectors.toMap(
                 Function.identity(),
-                label -> NodeProjection.builder().label(label).build()
+                NodeProjection::new
             )));
         }
 
@@ -398,24 +398,18 @@ public abstract class GdsCypher {
         }
 
         public GraphProjectBuilder withRelationshipType(String type) {
-            return withRelationshipType(type, RelationshipProjection.builder().type(type).build());
+            return withRelationshipType(type, new RelationshipProjection(type));
         }
 
         public GraphProjectBuilder withRelationshipType(String type, Orientation orientation) {
-            return withRelationshipType(
-                type,
-                RelationshipProjection.builder().type(type).orientation(orientation).build()
-            );
+            return withRelationshipType(type, new RelationshipProjection(type, orientation));
         }
 
         public GraphProjectBuilder withRelationshipType(String type, String neoType) {
-            return withRelationshipType(type, RelationshipProjection.builder().type(neoType).build());
+            return withRelationshipType(type, new RelationshipProjection(neoType));
         }
 
-        public GraphProjectBuilder withRelationshipType(
-            String type,
-            RelationshipProjection relationshipProjection
-        ) {
+        public GraphProjectBuilder withRelationshipType(String type, RelationshipProjection relationshipProjection) {
             graphProjectConfigBuilder.putRelProjection(RelationshipType.of(type), relationshipProjection);
             return this;
         }
