@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.huge;
 
-import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -123,8 +122,17 @@ public class HugeGraph implements CSRGraph {
     protected final boolean hasRelationshipProperty;
     protected final boolean isMultiGraph;
 
-    @Builder.Factory
-    static HugeGraph create(
+    public static HugeGraph create(
+        IdMap nodes,
+        GraphSchema schema,
+        GraphCharacteristics characteristics,
+        Map<String, NodePropertyValues> nodeProperties,
+        Topology topology
+    ) {
+        return create(nodes, schema, characteristics, nodeProperties, topology, Optional.empty(), Optional.empty(), Optional.empty());
+    }
+
+    public static HugeGraph create(
         IdMap nodes,
         GraphSchema schema,
         GraphCharacteristics characteristics,

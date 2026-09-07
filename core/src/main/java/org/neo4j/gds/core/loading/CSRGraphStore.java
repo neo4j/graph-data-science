@@ -31,10 +31,10 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStoreWithTopology;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -48,7 +48,7 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
-import org.neo4j.gds.core.huge.HugeGraphBuilder;
+import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
@@ -583,13 +583,13 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
 
         var graphSchema = MutableGraphSchema.of(nodeSchema, MutableRelationshipSchema.empty());
 
-        var initialGraph = new HugeGraphBuilder()
-            .nodes(nodes)
-            .schema(graphSchema)
-            .characteristics(GraphCharacteristics.NONE)
-            .nodeProperties(filteredNodeProperties)
-            .topology(Topology.EMPTY)
-            .build();
+        var initialGraph = HugeGraph.create(
+            nodes,
+            graphSchema,
+            GraphCharacteristics.NONE,
+            filteredNodeProperties,
+            Topology.EMPTY
+        );
 
         return filteredNodes.isPresent() ? new NodeFilteredGraph(initialGraph, filteredNodes.get()) : initialGraph;
     }
@@ -635,16 +635,16 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         var characteristicsBuilder = GraphCharacteristics.builder().withDirection(schema.direction());
         relationship.inverseTopology().ifPresent(__ -> characteristicsBuilder.inverseIndexed());
 
-        var initialGraph = new HugeGraphBuilder()
-            .nodes(nodes)
-            .schema(graphSchema)
-            .characteristics(characteristicsBuilder.build())
-            .nodeProperties(filteredNodeProperties)
-            .topology(relationship.topology())
-            .relationshipProperties(properties)
-            .inverseTopology(relationship.inverseTopology())
-            .inverseRelationshipProperties(inverseProperties)
-            .build();
+        var initialGraph = HugeGraph.create(
+            nodes,
+            graphSchema,
+            characteristicsBuilder.build(),
+            filteredNodeProperties,
+            relationship.topology(),
+            properties,
+            relationship.inverseTopology(),
+            inverseProperties
+        );
 
         return filteredNodes.isPresent() ? new NodeFilteredGraph(initialGraph, filteredNodes.get()) : initialGraph;
     }

@@ -28,7 +28,7 @@ import org.neo4j.gds.api.properties.relationships.Properties;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.core.huge.HugeGraphBuilder;
+import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 import java.util.Collection;
@@ -69,14 +69,16 @@ abstract class EdgeSplitterBaseTest {
             .map(i -> i.get(propName))
             .map(RelationshipProperty::values));
 
-        return new HugeGraphBuilder().characteristics(graphCharacteristicsBuilder.build())
-            .nodes(graphStore.nodes())
-            .schema(schema)
-            .topology(relationships.topology())
-            .inverseTopology(relationships.inverseTopology())
-            .relationshipProperties(property)
-            .inverseRelationshipProperties(inverseProperty)
-            .build();
+        return HugeGraph.create(
+            graphStore.nodes(),
+            schema,
+            graphCharacteristicsBuilder.build(),
+            Map.of(),
+            relationships.topology(),
+            property,
+            relationships.inverseTopology(),
+            inverseProperty
+        );
     }
 
     void assertRelSamplingProperties(Graph resultGraph, Graph inputGraph) {

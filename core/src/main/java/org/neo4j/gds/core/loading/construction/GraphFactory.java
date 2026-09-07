@@ -29,9 +29,9 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphCharacteristics;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -42,12 +42,11 @@ import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.loading.ShardedIdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.ShardedIdMapBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -378,15 +377,15 @@ public final class GraphFactory {
         var characteristicsBuilder = GraphCharacteristics.builder().withDirection(graphSchema.direction());
         relationships.inverseTopology().ifPresent(__ -> characteristicsBuilder.inverseIndexed());
 
-        return new HugeGraphBuilder()
-            .nodes(idMap)
-            .schema(graphSchema)
-            .characteristics(characteristicsBuilder.build())
-            .nodeProperties(nodeProperties)
-            .topology(topology)
-            .inverseTopology(inverseTopology)
-            .relationshipProperties(properties)
-            .inverseRelationshipProperties(inverseProperties)
-            .build();
+        return HugeGraph.create(
+            idMap,
+            graphSchema,
+            characteristicsBuilder.build(),
+            nodeProperties,
+            topology,
+            properties,
+            inverseTopology,
+            inverseProperties
+        );
     }
 }
