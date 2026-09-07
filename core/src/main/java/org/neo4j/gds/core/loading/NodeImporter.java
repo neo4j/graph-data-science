@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.IntObjectMap;
-import org.immutables.builder.Builder;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.core.utils.RawValues;
@@ -54,8 +53,7 @@ public class NodeImporter {
     private final Optional<IntObjectMap<List<NodeLabel>>> labelTokenNodeLabelMapping;
     private final boolean importProperties;
 
-    @Builder.Constructor
-    NodeImporter(
+    public NodeImporter(
         IdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder,
         Optional<IntObjectMap<List<NodeLabel>>> labelTokenNodeLabelMapping,
@@ -65,6 +63,14 @@ public class NodeImporter {
         this.labelInformationBuilder = labelInformationBuilder;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.importProperties = importProperties;
+    }
+
+    public NodeImporter(
+        IdMapBuilder idMapBuilder,
+        LabelInformation.Builder labelInformationBuilder,
+        boolean importProperties
+    ) {
+        this(idMapBuilder, labelInformationBuilder, Optional.empty(), importProperties);
     }
 
     public <PROPERTY_REF> long importNodes(NodesBatchBuffer<PROPERTY_REF> buffer, PropertyReader<PROPERTY_REF> reader) {

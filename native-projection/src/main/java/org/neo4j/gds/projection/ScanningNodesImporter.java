@@ -32,7 +32,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
-import org.neo4j.gds.core.loading.NodeImporterBuilder;
+import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
@@ -158,12 +158,12 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         ImportSizing sizing,
         StoreScanner<NodeReference> storeScanner
     ) {
-        var nodeImporter = new NodeImporterBuilder()
-            .idMapBuilder(idMapBuilder)
-            .labelInformationBuilder(labelInformationBuilder)
-            .labelTokenNodeLabelMapping(dimensions.tokenNodeLabelMapping())
-            .importProperties(nodePropertyImporter != null)
-            .build();
+        var nodeImporter = new NodeImporter(
+            idMapBuilder,
+            labelInformationBuilder,
+            Optional.of(dimensions.tokenNodeLabelMapping()),
+            nodePropertyImporter != null
+        );
 
         return NodesScannerTask.factory(
             transactionContext,
