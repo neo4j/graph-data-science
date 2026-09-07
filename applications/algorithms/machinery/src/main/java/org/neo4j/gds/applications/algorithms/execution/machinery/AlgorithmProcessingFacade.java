@@ -122,7 +122,8 @@ public final class AlgorithmProcessingFacade {
 
             requestScopedLog.onLoadingGraph();
             var graphResources = loadGraph(
-                timingsBuilder, databaseId,
+                timingsBuilder,
+                databaseId,
                 graphName,
                 user,
                 graphParameters,

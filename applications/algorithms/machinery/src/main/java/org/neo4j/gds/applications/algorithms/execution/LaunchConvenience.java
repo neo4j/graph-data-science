@@ -29,7 +29,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.validation.AlgorithmGraphStoreRequirements;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
@@ -41,6 +40,8 @@ import java.util.function.Supplier;
  * This object is request scoped, so that it can carry all the implicit parameters relating to the request.
  */
 public class LaunchConvenience {
+    private final ValidationRuleFromConfigurationParser validationRuleFromConfigurationParser = ValidationRuleFromConfigurationParser.create();
+
     private final AlgorithmProcessingFacade algorithmProcessingFacade;
     private final RequestScopedDependencies requestScopedDependencies;
 
@@ -64,13 +65,17 @@ public class LaunchConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
-        AlgorithmGraphStoreRequirements validationRequirements,
+        AlgorithmGraphStoreRequirements algorithmSpecificRequirements, // for now, we have seen only one, but might be multiple
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
     ) {
+        var graphStoreValidation = validationRuleFromConfigurationParser.parse(configuration)
+            .withAlgorithmRequirement(algorithmSpecificRequirements)
+            .build();
+
         return algorithmProcessingFacade.loadGraphThenRunAlgorithm(
             requestScopedDependencies.databaseId(),
             graphName,
@@ -78,7 +83,7 @@ public class LaunchConvenience {
             requestScopedDependencies.user(),
             configuration.toGraphParameters(),
             Optional.empty(), // simple basic convenience here
-            new GraphStoreValidation(validationRequirements),
+            graphStoreValidation,
             true, // simple basic convenience here
             Optional.empty(), // or make this a DISABLED
             constructAndRun,

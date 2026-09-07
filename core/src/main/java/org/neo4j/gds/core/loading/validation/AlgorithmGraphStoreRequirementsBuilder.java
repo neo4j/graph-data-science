@@ -31,7 +31,12 @@ public class AlgorithmGraphStoreRequirementsBuilder {
         return this;
     }
 
+    /**
+     * @return {@link org.neo4j.gds.core.loading.validation.GraphStoreValidation#DISABLED} if there were no requirements
+     */
     public GraphStoreValidation build() {
+        if (requirements.isEmpty()) return GraphStoreValidation.DISABLED;
+
         return new GraphStoreValidation(new CompoundAlgorithmGraphStoreRequirements(requirements));
     }
 }
