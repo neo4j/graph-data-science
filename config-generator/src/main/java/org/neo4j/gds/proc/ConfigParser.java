@@ -167,7 +167,7 @@ final class ConfigParser {
                     String.format(
                         Locale.ENGLISH,
                         "Method `%1$s` was previously annotated with `%2$s` but cannot be overridden without explicit clarification by using the `%2$s`, `%3$s` or `%4$s` annotation.",
-                        method.getSimpleName(),
+                        method.getEnclosingElement(),
                         Ignore.class.getSimpleName(),
                         Parameter.class.getSimpleName(),
                         Key.class.getSimpleName()

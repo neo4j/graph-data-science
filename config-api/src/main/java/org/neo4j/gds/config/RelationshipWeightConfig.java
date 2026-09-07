@@ -36,6 +36,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface RelationshipWeightConfig {
     String RELATIONSHIP_WEIGHT_PROPERTY = "relationshipWeightProperty";
 
+    @Configuration.Key(RELATIONSHIP_WEIGHT_PROPERTY)
     Optional<String> relationshipWeightProperty();
 
     @Configuration.Ignore

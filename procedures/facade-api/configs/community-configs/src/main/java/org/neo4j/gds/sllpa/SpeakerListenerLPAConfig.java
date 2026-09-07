@@ -23,6 +23,8 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Optional;
+
 @Configuration("SpeakerListenerLPAConfigImpl")
 public interface SpeakerListenerLPAConfig extends PregelProcedureConfig {
 
@@ -44,4 +46,10 @@ public interface SpeakerListenerLPAConfig extends PregelProcedureConfig {
         default int propagationSteps() {
             return maxIterations() - 1;
         }
-    }
+
+        @Override
+        @Configuration.Ignore
+        default Optional<String> relationshipWeightProperty() {
+            return Optional.empty();
+        }
+}
