@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.LicenseState;
+import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProcessingFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
@@ -52,6 +53,7 @@ public class OpenGraphDataScienceSpecifics {
     private final ModelRepository modelRepository;
     private final PoolSizes poolSizes;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
+    private final Optional<Function<AlgorithmProcessingFacade, AlgorithmProcessingFacade>> algorithmProcessingFacadeDecorator;
     private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
     private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
 
@@ -66,6 +68,7 @@ public class OpenGraphDataScienceSpecifics {
         ModelRepository modelRepository,
         PoolSizes poolSizes,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        Optional<Function<AlgorithmProcessingFacade, AlgorithmProcessingFacade>> algorithmProcessingFacadeDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
@@ -79,12 +82,17 @@ public class OpenGraphDataScienceSpecifics {
         this.modelRepository = modelRepository;
         this.poolSizes = poolSizes;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
+        this.algorithmProcessingFacadeDecorator = algorithmProcessingFacadeDecorator;
         this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
         this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
     }
 
     Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator() {
         return algorithmProcessingTemplateDecorator;
+    }
+
+    Optional<Function<AlgorithmProcessingFacade, AlgorithmProcessingFacade>> algorithmProcessingFacadeDecorator() {
+        return algorithmProcessingFacadeDecorator;
     }
 
     ConcurrencyValidator concurrencyValidator() {

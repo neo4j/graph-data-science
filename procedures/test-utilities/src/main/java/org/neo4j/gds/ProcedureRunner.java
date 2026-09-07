@@ -197,6 +197,7 @@ public final class ProcedureRunner {
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             MemoryTracker.DISABLED
         );
     }

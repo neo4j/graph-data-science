@@ -23,29 +23,19 @@ import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimingsBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedLog;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.loading.GraphResources;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.GraphValidation;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
 /**
@@ -55,38 +45,7 @@ import java.util.function.Supplier;
  * Algorithms running from Cypher in the plugin immediately block and wait, turning the asynchronous job synchronous.
  * Other calling contexts can let the computation run in the background and come back for results later.
  */
-public final class AlgorithmProcessingFacade {
-    private final Log log;
-    private final GraphStoreCatalogService graphStoreCatalogService;
-    private final ComputationQueue computationQueue;
-
-    private AlgorithmProcessingFacade(
-        Log log,
-        GraphStoreCatalogService graphStoreCatalogService,
-        ComputationQueue computationQueue
-    ) {
-        this.log = log;
-        this.graphStoreCatalogService = graphStoreCatalogService;
-        this.computationQueue = computationQueue;
-    }
-
-    public static AlgorithmProcessingFacade create(
-        Log log,
-        GraphStoreCatalogService graphStoreCatalogService,
-        ExecutorService executorService,
-        MemoryGuard memoryGuard,
-        AlgorithmMetricsService algorithmMetricsService,
-        TelemetryLogger telemetryLogger
-    ) {
-        var telemetry = Telemetry.create(telemetryLogger);
-        var metricsRecorder = new MetricsRecorder(log, algorithmMetricsService, telemetry);
-        var memoryChecker = new MemoryChecker(memoryGuard, metricsRecorder);
-        var computationFacade = ComputationFacade.create(memoryChecker);
-        var computationQueue = new ComputationQueue(executorService, computationFacade);
-
-        return new AlgorithmProcessingFacade(log, graphStoreCatalogService, computationQueue);
-    }
-
+public interface AlgorithmProcessingFacade {
     /**
      * This is a very long parameter list.
      * It is _on purpose_ a very long parameter list.
@@ -97,8 +56,11 @@ public final class AlgorithmProcessingFacade {
      * It is a lot. Should we apply <a href="https://refactoring.com/catalog/introduceParameterObject.html">Parameter Object</a>?
      * The important bit here is: keep this lifetime scoped, not request scoped;
      * use parameterisation, not constructor injection.
+     * </p>
+     * And in the interest of practicality: since this is an interface for the purpose of decorating, let's have only this one method - less work decorating innit.
+     * Convenience and overrides can live above.
      */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, TRANSFORMED_RESULT> CompletableFuture<TRANSFORMED_RESULT> loadGraphThenRunAlgorithm(
+    <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, TRANSFORMED_RESULT> CompletableFuture<TRANSFORMED_RESULT> loadGraphThenRunAlgorithm(
         DatabaseId databaseId,
         GraphName graphName,
         RequestCorrelationId requestCorrelationId,
@@ -116,62 +78,5 @@ public final class AlgorithmProcessingFacade {
         Label label,
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, TRANSFORMED_RESULT, METADATA> resultRenderer
-    ) {
-        try (var requestScopedLog = RequestScopedLog.create(log, requestCorrelationId)) {
-            var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
-
-            requestScopedLog.onLoadingGraph();
-            var graphResources = loadGraph(
-                timingsBuilder,
-                databaseId,
-                graphName,
-                user,
-                graphParameters,
-                relationshipProperty,
-                graphStoreValidation,
-                includeGraph,
-                graphValidation
-            );
-
-            return computationQueue.enqueueComputation(
-                requestScopedLog,
-                timingsBuilder,
-                graphResources,
-                user,
-                constructAndRun,
-                configuration,
-                terminationFlag,
-                dimensionTransformer,
-                estimationSupplier,
-                label,
-                sideEffect,
-                resultRenderer
-            );
-        }
-    }
-
-    private GraphResources loadGraph(
-        AlgorithmProcessingTimingsBuilder timingsBuilder,
-        DatabaseId databaseId,
-        GraphName graphName,
-        User user,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        GraphStoreValidation graphStoreValidation,
-        boolean includeGraph,
-        Optional<GraphValidation> graphValidation
-    ) {
-        try (var ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
-            return graphStoreCatalogService.fetchGraphResources(
-                databaseId,
-                graphName,
-                user,
-                graphParameters,
-                relationshipProperty,
-                graphStoreValidation,
-                includeGraph,
-                graphValidation
-            );
-        }
-    }
+    );
 }

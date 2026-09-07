@@ -24,6 +24,7 @@ import org.neo4j.gds.LicenseDetails;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProcessingFacade;
+import org.neo4j.gds.applications.algorithms.execution.machinery.DefaultAlgorithmProcessingFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
@@ -72,6 +73,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
@@ -135,6 +137,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         Transaction procedureTransaction,
         WriteContext writeContext,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        Optional<Function<AlgorithmProcessingFacade, AlgorithmProcessingFacade>> algorithmProcessingFacadeDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         MemoryTracker memoryTracker
@@ -157,13 +160,14 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         // in normal mode, we let rip and have no bound on concurrent work (other than algorithm concurrency)
         var executorService = Executors.newVirtualThreadPerTaskExecutor();
 
-        var algorithmProcessingFacade = AlgorithmProcessingFacade.create(
-            loggers.log(),
-            globallyScopedDependencies.graphStoreCatalogService(),
-            executorService,
+        var algorithmProcessingFacade = createAlgorithmProcessingFacade(
+            algorithmProcessingFacadeDecorator,
+            loggers,
+            globallyScopedDependencies,
+            telemetryLogger,
             memoryGuard,
-            metrics.algorithmMetrics(),
-            telemetryLogger
+            metrics,
+            executorService
         );
         var algorithmProcessingTemplate = createAlgorithmProcessingTemplate(
             loggers.log(),
@@ -318,5 +322,28 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         if (algorithmProcessingTemplateDecorator.isEmpty()) return algorithmProcessingTemplate;
 
         return algorithmProcessingTemplateDecorator.get().apply(algorithmProcessingTemplate);
+    }
+
+    private static AlgorithmProcessingFacade createAlgorithmProcessingFacade(
+        Optional<Function<AlgorithmProcessingFacade, AlgorithmProcessingFacade>> decorator,
+        GdsLoggers loggers,
+        GloballyScopedDependencies globallyScopedDependencies,
+        TelemetryLogger telemetryLogger,
+        MemoryGuard memoryGuard,
+        Metrics metrics,
+        ExecutorService executorService
+    ) {
+        var facade = DefaultAlgorithmProcessingFacade.create(
+            loggers.log(),
+            globallyScopedDependencies.graphStoreCatalogService(),
+            executorService,
+            memoryGuard,
+            metrics.algorithmMetrics(),
+            telemetryLogger
+        );
+
+        if (decorator.isEmpty()) return facade;
+
+        return decorator.get().apply(facade);
     }
 }

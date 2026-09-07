@@ -49,7 +49,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProcessingFacade;
+import org.neo4j.gds.applications.algorithms.execution.machinery.DefaultAlgorithmProcessingFacade;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -647,7 +647,7 @@ class WccMutateProcTest extends BaseProcTest {
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .user(new User(getUsername(), false))
             .build();
-        var algorithmProcessingFacade = AlgorithmProcessingFacade.create(
+        var algorithmProcessingFacade = DefaultAlgorithmProcessingFacade.create(
             logMock,
             graphStoreCatalogService,
             Executors.newVirtualThreadPerTaskExecutor(),

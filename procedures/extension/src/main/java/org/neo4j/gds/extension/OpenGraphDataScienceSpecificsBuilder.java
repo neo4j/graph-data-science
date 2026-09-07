@@ -77,6 +77,7 @@ class OpenGraphDataScienceSpecificsBuilder {
             poolSizes,
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
+            Optional.empty(), // no extra checks in OpenGDS
             Optional.empty() // no extra checks in OpenGDS
         );
     }
