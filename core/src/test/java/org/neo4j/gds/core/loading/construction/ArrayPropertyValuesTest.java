@@ -25,6 +25,7 @@ import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,7 +44,7 @@ class ArrayPropertyValuesTest {
         var propertyValues = new ArrayPropertyValues(keys, values);
 
         assertThat(propertyValues.isEmpty()).isFalse();
-        assertThat(propertyValues.size()).isEqualTo(3);
+        assertThat(propertyValues.size()).isEqualTo(2);
         assertThat(propertyValues.propertyKeys()).containsExactly("foo", "baz");
         assertThat(propertyValues.get("foo")).isEqualTo(PrimitiveValues.longValue(42L));
         assertThat(propertyValues.get("bar")).isNull();
@@ -64,6 +65,18 @@ class ArrayPropertyValuesTest {
     }
 
     @Test
+    void shouldTreatAllNullValuesAsEmpty() {
+        var propertyValues = new ArrayPropertyValues(
+            new String[]{"foo", "bar"},
+            new GdsValue[]{null, null}
+        );
+
+        assertThat(propertyValues.isEmpty()).isTrue();
+        assertThat(propertyValues.size()).isZero();
+        assertThat(propertyValues.propertyKeys()).isEmpty();
+    }
+
+    @Test
     void shouldReturnSingleValue() {
         var propertyValues = new ArrayPropertyValues(
             new String[]{"bar"},
@@ -72,5 +85,26 @@ class ArrayPropertyValuesTest {
 
         assertThat(propertyValues.size()).isEqualTo(1);
         assertThat(propertyValues.getSingle()).isEqualTo(PrimitiveValues.longValue(42L));
+    }
+
+    @Test
+    void shouldReturnSinglePresentValueAmongAbsentSlots() {
+        var propertyValues = new ArrayPropertyValues(
+            new String[]{"foo", "bar"},
+            new GdsValue[]{null, PrimitiveValues.longValue(42L)}
+        );
+
+        assertThat(propertyValues.size()).isEqualTo(1);
+        assertThat(propertyValues.getSingle()).isEqualTo(PrimitiveValues.longValue(42L));
+    }
+
+    @Test
+    void shouldFailToReturnSingleValueWhenNoneIsPresent() {
+        var propertyValues = new ArrayPropertyValues(
+            new String[]{"foo", "bar"},
+            new GdsValue[]{null, null}
+        );
+
+        assertThatThrownBy(propertyValues::getSingle).isInstanceOf(NoSuchElementException.class);
     }
 }

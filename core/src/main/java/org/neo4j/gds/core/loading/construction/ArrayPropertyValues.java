@@ -65,7 +65,13 @@ public final class ArrayPropertyValues implements PropertyValues {
 
     @Override
     public int size() {
-        return values.length;
+        int presentValues = 0;
+        for (GdsValue value : values) {
+            if (value != null) {
+                presentValues++;
+            }
+        }
+        return presentValues;
     }
 
     @Override
@@ -109,6 +115,14 @@ public final class ArrayPropertyValues implements PropertyValues {
 
     @Override
     public GdsValue getSingle() {
-        return values[0];
+        if (keys.length == 1) {
+            return values[0];
+        }
+        for (GdsValue value : values) {
+            if (value != null) {
+                return value;
+            }
+        }
+        throw new NoSuchElementException("There is no property value present.");
     }
 }
