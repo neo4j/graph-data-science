@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
+import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 
@@ -82,10 +83,10 @@ public class CentralityAlgorithmsBusinessFacade {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            new UndirectedOnlyRequirement("Articulation Points"),
+            ValidationRule.EMPTY,
             graph -> algorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
-            AlgorithmLabel.ArticulationPoints,
+            AlgorithmLabel.HarmonicCentrality,
             sideEffect,
             resultRenderer
         );
