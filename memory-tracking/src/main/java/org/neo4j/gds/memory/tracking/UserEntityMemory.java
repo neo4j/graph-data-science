@@ -22,12 +22,16 @@ package org.neo4j.gds.memory.tracking;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 
-public record UserEntityMemory(User user, String name, String entity, long memoryInBytes) {
+/**
+ * This gets sent to Neo4j for processing in Cypher at some point.
+ * As such, we are only allowed certain types - no User for example (guess how I found this out :facepalm:)
+ */
+public record UserEntityMemory(String user, String name, String entity, long memoryInBytes) {
     static UserEntityMemory createGraph(User user, String name, long memoryInBytes) {
-        return new UserEntityMemory(user, name, "graph", memoryInBytes);
+        return new UserEntityMemory(user.getUsername(), name, "graph", memoryInBytes);
     }
 
     static UserEntityMemory createTask(User user, String name, JobId jobId, long memoryInBytes) {
-        return new UserEntityMemory(user, name, jobId.asString(), memoryInBytes);
+        return new UserEntityMemory(user.getUsername(), name, jobId.asString(), memoryInBytes);
     }
 }
