@@ -89,7 +89,7 @@ public final class MemoryTracker implements TaskStoreListener, GraphStoreAddedEv
 
     public UserMemorySummary memorySummary(User user) {
         return new UserMemorySummary(
-            user,
+            user.getUsername(),
             graphStoreMemoryContainer.memoryOfGraphs(user),
             taskMemoryContainer.memoryOfTasks(user)
         );
@@ -101,7 +101,7 @@ public final class MemoryTracker implements TaskStoreListener, GraphStoreAddedEv
 
         return users.stream()
             .map(user -> new UserMemorySummary(
-                user,
+                user.getUsername(),
                 graphStoreMemoryContainer.memoryOfGraphs(user),
                 taskMemoryContainer.memoryOfTasks(user)
             ));

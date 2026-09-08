@@ -35,8 +35,8 @@ class MemoryFacadeTest {
     @Test
     void shouldListAsAdmin() {
         var memTrackerMock = mock(MemoryTracker.class);
-        var entityOfa = new UserEntityMemory(new User("a", true), "graph1", "graph", 10);
-        var entityOfb = new UserEntityMemory(new User("b", true), "graph2", "graph", 20);
+        var entityOfa = new UserEntityMemory("a", "graph1", "graph", 10);
+        var entityOfb = new UserEntityMemory("b", "graph2", "graph", 20);
         when(memTrackerMock.listAll())
             .thenReturn(Stream.of(
                 entityOfa,
@@ -55,8 +55,8 @@ class MemoryFacadeTest {
     @Test
     void shouldSummarizeAsAdmin() {
         var memTrackerMock = mock(MemoryTracker.class);
-        var summaryOfa = new UserMemorySummary(new User("a", true), 1, 1);
-        var summaryOfb = new UserMemorySummary(new User("b", true), 2, 2);
+        var summaryOfa = new UserMemorySummary("a", 1, 1);
+        var summaryOfb = new UserMemorySummary("b", 2, 2);
         when(memTrackerMock.memorySummary())
             .thenReturn(Stream.of(
                 summaryOfa,
