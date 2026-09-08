@@ -63,7 +63,7 @@ class MemoryChecker {
                 estimationSupplier,
                 label,
                 dimensionTransformer,
-                user.getUsername(),
+                user,
                 configuration.jobId(),
                 configuration.sudo()
             );

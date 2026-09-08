@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.memory.tracking;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
@@ -52,14 +53,14 @@ public final class MemoryTracker implements TaskStoreListener, GraphStoreAddedEv
         return new MemoryTracker(log, initialMemory);
     }
 
-    public synchronized void track(String username, String taskName, JobId jobId, long memoryEstimate) {
+    public synchronized void track(User user, String taskName, JobId jobId, long memoryEstimate) {
         log.debug("Tracking %s:  %s bytes", jobId.asString(), memoryEstimate);
-        taskMemoryContainer.reserve(username, taskName, jobId, memoryEstimate);
+        taskMemoryContainer.reserve(user, taskName, jobId, memoryEstimate);
         log.debug("Available memory after tracking task: %s bytes", availableMemory());
     }
 
     public synchronized void tryToTrack(
-        String username,
+        User user,
         String taskName,
         JobId jobId,
         long memoryEstimate
@@ -71,14 +72,14 @@ public final class MemoryTracker implements TaskStoreListener, GraphStoreAddedEv
         if (memoryEstimate > availableMemory) {
             throw new AvailableMemoryReservationExceededException(taskName, memoryEstimate, availableMemory);
         }
-        track(username, taskName, jobId, memoryEstimate);
+        track(user, taskName, jobId, memoryEstimate);
     }
 
     public synchronized long availableMemory() {
         return initialMemory - graphStoreMemoryContainer.graphStoreReservedMemory() - taskMemoryContainer.taskReservedMemory();
     }
 
-    public Stream<UserEntityMemory> listUser(String user) {
+    public Stream<UserEntityMemory> listUser(User user) {
         return Stream.concat(taskMemoryContainer.listTasks(user), graphStoreMemoryContainer.listGraphs(user));
     }
 
@@ -86,7 +87,7 @@ public final class MemoryTracker implements TaskStoreListener, GraphStoreAddedEv
         return Stream.concat(taskMemoryContainer.listTasks(), graphStoreMemoryContainer.listGraphs());
     }
 
-    public UserMemorySummary memorySummary(String user) {
+    public UserMemorySummary memorySummary(User user) {
         return new UserMemorySummary(
             user,
             graphStoreMemoryContainer.memoryOfGraphs(user),

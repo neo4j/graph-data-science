@@ -20,67 +20,71 @@
 package org.neo4j.gds.memory.tracking;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.registration.StoredTask;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 class TaskMemoryContainer {
-    private static final ConcurrentHashMap<JobId,Pair<String,Long>> EMPTY_HASH_MAP = new ConcurrentHashMap<>();
-
-    private final ConcurrentHashMap<String,ConcurrentHashMap<JobId, Pair<String,Long>>> memoryInUse = new ConcurrentHashMap<>();
+    private final Map<User, ConcurrentHashMap<JobId, Pair<String, Long>>> memoryInUse = new ConcurrentHashMap<>();
     private final AtomicLong allocatedMemory = new AtomicLong();
 
-    void reserve(String username, String taskName, JobId jobId,long memoryAmount){
-        memoryInUse.putIfAbsent(username, new ConcurrentHashMap<>());
-        memoryInUse.get(username).put(jobId,Pair.of(taskName,memoryAmount));
+    void reserve(User user, String taskName, JobId jobId,long memoryAmount){
+        memoryInUse.putIfAbsent(user, new ConcurrentHashMap<>());
+        memoryInUse.get(user).put(jobId,Pair.of(taskName,memoryAmount));
 
         allocatedMemory.addAndGet(memoryAmount);
     }
 
-    long removeTask(StoredTask storedTask){
-            var memPair=  memoryInUse.getOrDefault(storedTask.user().getUsername(), EMPTY_HASH_MAP).remove(storedTask.jobId());
-            if (memPair !=null){
-                var mem = memPair.getRight();
-                 allocatedMemory.addAndGet(-mem);
-                return mem;
-            }
-            return allocatedMemory.get();
+    long removeTask(StoredTask storedTask) {
+        var memPair = memoryInUse.getOrDefault(storedTask.user(), new ConcurrentHashMap<>()).remove(storedTask.jobId());
+        if (memPair != null) {
+            var mem = memPair.getRight();
+            allocatedMemory.addAndGet(-mem);
+            return mem;
+        }
+        return allocatedMemory.get();
     }
 
-    long taskReservedMemory(){
-        return  allocatedMemory.get();
+    long taskReservedMemory() {
+        return allocatedMemory.get();
     }
 
-    Stream<UserEntityMemory> listTasks(String user){
-        return  memoryInUse
-            .getOrDefault(user, EMPTY_HASH_MAP)
+    Stream<UserEntityMemory> listTasks(User user) {
+        return memoryInUse
+            .getOrDefault(user, new ConcurrentHashMap<>())
             .entrySet()
             .stream()
             .map(
                 jobIdPairEntry
-                ->  UserEntityMemory.createTask(user, jobIdPairEntry.getValue().getLeft(), jobIdPairEntry.getKey(),jobIdPairEntry.getValue().getRight()));
+                    -> UserEntityMemory.createTask(
+                    user,
+                    jobIdPairEntry.getValue().getLeft(),
+                    jobIdPairEntry.getKey(),
+                    jobIdPairEntry.getValue().getRight()
+                ));
     }
 
-    Stream<UserEntityMemory> listTasks(){
-        return  memoryInUse.keySet().stream().flatMap(this::listTasks);
+    Stream<UserEntityMemory> listTasks() {
+        return memoryInUse.keySet().stream().flatMap(this::listTasks);
     }
 
-    long memoryOfTasks(String user){
-        return  memoryInUse
-            .getOrDefault(user, EMPTY_HASH_MAP)
+    long memoryOfTasks(User user) {
+        return memoryInUse
+            .getOrDefault(user, new ConcurrentHashMap<>())
             .values()
             .stream()
             .map(Pair::getRight)
             .reduce(0L, Long::sum);
-
     }
 
-    Set<String> taskUsers(Set<String> inputUsers) {
+    Set<User> taskUsers(Set<User> inputUsers) {
         var users = new HashSet<>(inputUsers);
         users.addAll(memoryInUse.keySet());
         return users;

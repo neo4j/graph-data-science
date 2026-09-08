@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
@@ -56,11 +57,12 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = MemoryTree.empty();
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator("foo", mock(MemoryTracker.class),
-            false,
-            Log.noOpLog()
-        )
-            .tryValidateMemoryUsage(
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(
+            Log.noOpLog(),
+            new User("foo", false),
+            mock(MemoryTracker.class),
+            false
+        ).tryValidateMemoryUsage(
                 "task",
                 TestConfig.empty(),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions)
@@ -74,11 +76,12 @@ class MemoryUsageValidatorTest extends BaseTest {
         var memoryTracker = mock(MemoryTracker.class);
 
         when(memoryTracker.availableMemory()).thenReturn(21L);
-        assertThatThrownBy(() -> new MemoryUsageValidator("foo", memoryTracker,
-            false,
-            Log.noOpLog()
-        )
-            .tryValidateMemoryUsage(
+        assertThatThrownBy(() -> new MemoryUsageValidator(
+            Log.noOpLog(),
+            new User("foo", false),
+            memoryTracker,
+            false
+        ).tryValidateMemoryUsage(
                 "task",
                 TestConfig.empty(),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions)
@@ -92,11 +95,12 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator("foo", mock(MemoryTracker.class),
-            false,
-            Log.noOpLog()
-        )
-            .tryValidateMemoryUsage(
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(
+            Log.noOpLog(),
+            new User("foo", false),
+            mock(MemoryTracker.class),
+            false
+        ).tryValidateMemoryUsage(
                 "task",
                 TestConfig.of(CypherMapWrapper.empty().withBoolean("sudo", true)),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions)
@@ -109,12 +113,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
         var memoryTracker = mock(MemoryTracker.class);
-        var memoryUsageValidator = new MemoryUsageValidator(
-            "foo",
-            memoryTracker,
-            false,
-            log
-        );
+        var memoryUsageValidator = new MemoryUsageValidator(log, new User("foo", false), memoryTracker, false);
 
         when(memoryTracker.availableMemory()).thenReturn(21L);
         assertThatIllegalStateException().isThrownBy(
@@ -152,19 +151,19 @@ class MemoryUsageValidatorTest extends BaseTest {
     void doesNotThrow(MemoryEstimation estimation, boolean useMaxMemoryUsage) {
         var memoryTrackerMock = mock(MemoryTracker.class);
         var memoryUsageValidator = new MemoryUsageValidator(
-            "foo",
+            Log.noOpLog(),
+            new User("foo", false),
             memoryTrackerMock,
-            false,
-            Log.noOpLog()
+            useMaxMemoryUsage
         );
             var memoryTree = estimation.estimate(TEST_DIMENSIONS, new Concurrency(1));
         var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
 
         assertDoesNotThrow(() -> memoryUsageValidator.validateMemoryUsage(
             "task",
-            memoryTreeWithDimensions.memoryTree.memoryUsage(), 10_000,
-            useMaxMemoryUsage,
-            new JobId("foo"), Log.noOpLog()
+            10_000,
+            memoryTreeWithDimensions.memoryTree.memoryUsage(),
+            new JobId("foo")
         ));
     }
 
@@ -172,10 +171,10 @@ class MemoryUsageValidatorTest extends BaseTest {
     @MethodSource("input")
     void throwsOnMinUsageExceeded(MemoryEstimation estimation, boolean ignored) {
         var memoryUsageValidator = new MemoryUsageValidator(
-            "foo",
+            Log.noOpLog(),
+            new User("foo", false),
             null,
-            false,
-            Log.noOpLog()
+            false
         );
 
         var memoryTree = estimation.estimate(TEST_DIMENSIONS, new Concurrency(1));
@@ -183,9 +182,9 @@ class MemoryUsageValidatorTest extends BaseTest {
 
         assertThatThrownBy(() -> memoryUsageValidator.validateMemoryUsage(
             "task",
-            memoryTreeWithDimensions.memoryTree.memoryUsage(), 1,
-            false,
-            new JobId("foo"), Log.noOpLog()
+            1,
+            memoryTreeWithDimensions.memoryTree.memoryUsage(),
+            new JobId("foo")
         ))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Procedure was blocked since minimum estimated memory");
@@ -195,10 +194,10 @@ class MemoryUsageValidatorTest extends BaseTest {
     @MethodSource("input")
     void throwsOnMaxUsageExceeded(MemoryEstimation estimation, boolean ignored) {
         var memoryUsageValidator = new MemoryUsageValidator(
-            "foo",
+            Log.noOpLog(),
+            new User("foo", false),
             null,
-            false,
-            Log.noOpLog()
+            true
         );
 
         var memoryTree = estimation.estimate(TEST_DIMENSIONS, new Concurrency(1));
@@ -206,10 +205,9 @@ class MemoryUsageValidatorTest extends BaseTest {
 
         assertThatThrownBy(() -> memoryUsageValidator.validateMemoryUsage(
             "task",
-            memoryTreeWithDimensions.memoryTree.memoryUsage(),
             1,
-            true,
-            new JobId("foo"), Log.noOpLog()
+            memoryTreeWithDimensions.memoryTree.memoryUsage(),
+            new JobId("foo")
         ))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Procedure was blocked since maximum estimated memory")

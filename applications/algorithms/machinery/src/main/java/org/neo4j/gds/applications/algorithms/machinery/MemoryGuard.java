@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -46,7 +47,7 @@ public interface MemoryGuard {
             Supplier<MemoryEstimation> estimationFactory,
             Label label,
             DimensionTransformer dimensionTransformer,
-            String username,
+            User user,
             JobId jobId,
             boolean bypassMemoryEstimation
         ) {
@@ -66,7 +67,7 @@ public interface MemoryGuard {
         Supplier<MemoryEstimation> estimationFactory,
         Label label,
         DimensionTransformer dimensionTransformer,
-        String username,
+        User user,
         JobId jobId,
         boolean bypassMemoryEstimation
     ) throws MemoryGuardException;

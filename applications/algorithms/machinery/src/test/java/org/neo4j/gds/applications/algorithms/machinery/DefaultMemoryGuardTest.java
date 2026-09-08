@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -84,7 +85,7 @@ class DefaultMemoryGuardTest {
 
     @BeforeEach
     void setUp() {
-        when(graphDimensionFactoryMock.graphDimensions(any(GraphStore.class), any(Graph.class),anyCollection()))
+        when(graphDimensionFactoryMock.graphDimensions(any(GraphStore.class), any(Graph.class), anyCollection()))
             .thenReturn(GraphDimensions.of(23L, 87L));
         when(memoryEstimation.estimate(any(GraphDimensions.class), any(Concurrency.class)))
             .thenReturn(memoryTree);
@@ -102,7 +103,7 @@ class DefaultMemoryGuardTest {
             memoryTracker
         );
 
-        doNothing().when(memoryTracker).tryToTrack("Mark", "labels everywhere", jobIdMock, 13L);
+        doNothing().when(memoryTracker).tryToTrack(new User("Mark", false), "labels everywhere", jobIdMock, 13L);
         memoryGuard.assertAlgorithmCanRun(
             graphMock,
             graphStoreMock,
@@ -111,7 +112,7 @@ class DefaultMemoryGuardTest {
             () -> memoryEstimation,
             new StandardLabel("labels everywhere"),
             DimensionTransformer.DISABLED,
-            "Mark",
+            new User("Mark", false),
             jobIdMock,
             false
         );
@@ -132,25 +133,25 @@ class DefaultMemoryGuardTest {
 
         var memoryGuardException = new TotalMemoryReservationExceededException("foo", 7, 5);
         doThrow(memoryGuardException).when(memoryTracker).tryToTrack(
-            "Alice",
+            new User("Alice", false),
             "some other label",
             jobIdMock,
             117L
         );
         assertThatThrownBy(
             () -> memoryGuard.assertAlgorithmCanRun(
-                    graphMock,
-                    graphStoreMock,
-                    Set.of(),
-                    CONCURRENCY,
-                    () -> memoryEstimation,
-                    new StandardLabel("some other label"),
-                    DimensionTransformer.DISABLED,
-                    "Alice",
-                    jobIdMock,
-                    false
-                )
+                graphMock,
+                graphStoreMock,
+                Set.of(),
+                CONCURRENCY,
+                () -> memoryEstimation,
+                new StandardLabel("some other label"),
+                DimensionTransformer.DISABLED,
+                new User("Alice", false),
+                jobIdMock,
+                false
             )
+        )
             .isSameAs(memoryGuardException);
     }
 
@@ -169,25 +170,25 @@ class DefaultMemoryGuardTest {
 
         var memoryGuardException = new AvailableMemoryReservationExceededException("bar", 19, 15);
         doThrow(memoryGuardException).when(memoryTracker).tryToTrack(
-            "Bob",
+            new User("Bob", false),
             "yet another label",
             jobIdMock,
             243L
         );
         assertThatThrownBy(
-            ()  -> memoryGuard.assertAlgorithmCanRun(
-                    graphMock,
-                    graphStoreMock,
-                    Set.of(),
-                    CONCURRENCY,
-                    () -> memoryEstimation,
-                    new StandardLabel("yet another label"),
-                    DimensionTransformer.DISABLED,
-                    "Bob",
-                    jobIdMock,
-                    false
-                )
+            () -> memoryGuard.assertAlgorithmCanRun(
+                graphMock,
+                graphStoreMock,
+                Set.of(),
+                CONCURRENCY,
+                () -> memoryEstimation,
+                new StandardLabel("yet another label"),
+                DimensionTransformer.DISABLED,
+                new User("Bob", false),
+                jobIdMock,
+                false
             )
+        )
             .isSameAs(memoryGuardException);
     }
 
@@ -212,11 +213,11 @@ class DefaultMemoryGuardTest {
             () -> memoryEstimation,
             new StandardLabel("labels galore"),
             DimensionTransformer.DISABLED,
-            "Eve",
+            new User("Eve", false),
             jobIdMock,
             true
         ));
 
-        verify(memoryTracker).track("Eve", "labels galore", jobIdMock, 43L);
+        verify(memoryTracker).track(new User("Eve", false), "labels galore", jobIdMock, 43L);
     }
 }

@@ -106,7 +106,7 @@ public class GraphProjectMemoryUsageService {
             .resolveDependency(Config.class);
         var useMaxMemoryEstimation = neo4jConfig.get(GdsSettings.validateUsingMaxMemoryEstimation());
 
-        return new MemoryUsageValidator(user.getUsername(), memoryTracker, useMaxMemoryEstimation, log);
+        return new MemoryUsageValidator(log, user, memoryTracker, useMaxMemoryEstimation);
     }
 
     private GraphLoaderContext graphLoaderContext(

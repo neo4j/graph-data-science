@@ -67,7 +67,12 @@ public class ProcedureExecutorSpec<
                 graphName,
                 config
             ),
-            new MemoryUsageValidator(executionContext.user().getUsername(), MemoryTracker.create(executionContext.log(), Long.MAX_VALUE), useMaxMemoryEstimation, executionContext.log())
+            new MemoryUsageValidator(
+                executionContext.log(),
+                executionContext.user(),
+                MemoryTracker.create(executionContext.log(), Long.MAX_VALUE),
+                useMaxMemoryEstimation
+            )
         );
     }
 }

@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.memory.tracking;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 
-public record UserEntityMemory(String user, String name, String entity, long memoryInBytes) {
-    static UserEntityMemory createGraph(String user, String name, long memoryInBytes){
-        return  new UserEntityMemory(user,name,"graph",memoryInBytes);
+public record UserEntityMemory(User user, String name, String entity, long memoryInBytes) {
+    static UserEntityMemory createGraph(User user, String name, long memoryInBytes) {
+        return new UserEntityMemory(user, name, "graph", memoryInBytes);
     }
 
-    static UserEntityMemory createTask(String user, String name,  JobId jobId, long memoryInBytes){
-        return  new UserEntityMemory(user, name, jobId.asString(), memoryInBytes);
+    static UserEntityMemory createTask(User user, String name, JobId jobId, long memoryInBytes) {
+        return new UserEntityMemory(user, name, jobId.asString(), memoryInBytes);
     }
 }

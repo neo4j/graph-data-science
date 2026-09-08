@@ -54,8 +54,8 @@ class MemoryTrackerTest {
     void shouldHaveAvailableMemoryWithoutTheTrackedMemory() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
 
-        memoryTracker.track("a", "b", new JobId("foo"), 9);
-        memoryTracker.track("a", "b", new JobId("bar"), 3);
+        memoryTracker.track(new User("a", false), "b", new JobId("foo"), 9);
+        memoryTracker.track(new User("a", false), "b", new JobId("bar"), 3);
 
         assertThat(memoryTracker.availableMemory())
             .isEqualTo(memoryTracker.availableMemory())
@@ -63,47 +63,74 @@ class MemoryTrackerTest {
     }
 
     @Test
-    void shouldListForUser(){
+    void shouldListForUser() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
-        memoryTracker.track("alice","task1",new JobId("job1"), 9);
-        memoryTracker.track("alice","task2",new JobId("job2"), 3);
-        memoryTracker.track("bob","task3",new JobId("job3"), 5);
-        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice","neo4j","graph1",11));
-        var  aliceList = memoryTracker.listUser("alice").toList();
-        assertThat(aliceList.stream().map(UserEntityMemory::name).toList()).containsExactlyInAnyOrder("task1","task2","graph1");
-        assertThat(aliceList.stream().map(UserEntityMemory::entity).toList()).containsExactlyInAnyOrder("job1","job2","graph");
+        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 9);
+        memoryTracker.track(new User("alice", false), "task2", new JobId("job2"), 3);
+        memoryTracker.track(new User("bob", false), "task3", new JobId("job3"), 5);
+        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
+        var aliceList = memoryTracker.listUser(new User("alice", false)).toList();
+        assertThat(aliceList.stream().map(UserEntityMemory::name).toList()).containsExactlyInAnyOrder(
+            "task1",
+            "task2",
+            "graph1"
+        );
+        assertThat(aliceList.stream().map(UserEntityMemory::entity).toList()).containsExactlyInAnyOrder(
+            "job1",
+            "job2",
+            "graph"
+        );
 
-        assertThat(aliceList.stream().map(UserEntityMemory::memoryInBytes).toList()).containsExactlyInAnyOrder(9L,3L,11L);
+        assertThat(aliceList.stream().map(UserEntityMemory::memoryInBytes).toList()).containsExactlyInAnyOrder(
+            9L,
+            3L,
+            11L
+        );
     }
 
     @Test
     void shouldListForAll() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
-        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
-        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
-        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
+        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 9);
+        memoryTracker.track(new User("alice", false), "task2", new JobId("job2"), 3);
+        memoryTracker.track(new User("bob", false), "task3", new JobId("job3"), 5);
         memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
 
         var list = memoryTracker.listAll().toList();
-        assertThat(list.stream().map(UserEntityMemory::name).toList()).containsExactlyInAnyOrder("task1","task2","task3","graph1");
-        assertThat(list.stream().map(UserEntityMemory::entity).toList()).containsExactlyInAnyOrder("job1","job2","job3","graph");
+        assertThat(list.stream().map(UserEntityMemory::name).toList()).containsExactlyInAnyOrder(
+            "task1",
+            "task2",
+            "task3",
+            "graph1"
+        );
+        assertThat(list.stream().map(UserEntityMemory::entity).toList()).containsExactlyInAnyOrder(
+            "job1",
+            "job2",
+            "job3",
+            "graph"
+        );
 
-        assertThat(list.stream().map(UserEntityMemory::memoryInBytes).toList()).containsExactlyInAnyOrder(9L,3L,5L,11L);
+        assertThat(list.stream().map(UserEntityMemory::memoryInBytes).toList()).containsExactlyInAnyOrder(
+            9L,
+            3L,
+            5L,
+            11L
+        );
     }
 
     @Test
     void shouldReturnMemoryForUser() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
-        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
-        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
-        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
+        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 9);
+        memoryTracker.track(new User("alice", false), "task2", new JobId("job2"), 3);
+        memoryTracker.track(new User("bob", false), "task3", new JobId("job3"), 5);
         memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
 
-        var aliceMemory = memoryTracker.memorySummary("alice");
+        var aliceMemory = memoryTracker.memorySummary(new User("alice", false));
         assertThat(aliceMemory.totalGraphsMemory()).isEqualTo(11L);
         assertThat(aliceMemory.totalTasksMemory()).isEqualTo(12L);
 
-        var bobMemory = memoryTracker.memorySummary("bob");
+        var bobMemory = memoryTracker.memorySummary(new User("bob", false));
         assertThat(bobMemory.totalGraphsMemory()).isEqualTo(0L);
         assertThat(bobMemory.totalTasksMemory()).isEqualTo(5L);
 
@@ -112,9 +139,9 @@ class MemoryTrackerTest {
     @Test
     void shouldReturnMemoryForAll() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
-        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
-        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
-        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
+        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 9);
+        memoryTracker.track(new User("alice", false), "task2", new JobId("job2"), 3);
+        memoryTracker.track(new User("bob", false), "task3", new JobId("job3"), 5);
         memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
 
         var list = memoryTracker.memorySummary().toList();
@@ -128,8 +155,8 @@ class MemoryTrackerTest {
     void shouldFreeMemoryOnTaskCompleted() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
 
-        memoryTracker.track("a", "b", new JobId("foo"), 9);
-        memoryTracker.track("a", "b", new JobId("bar"), 3);
+        memoryTracker.track(new User("a", false), "b", new JobId("foo"), 9);
+        memoryTracker.track(new User("a", false), "b", new JobId("bar"), 3);
 
         var userTaskMock = mock(StoredTask.class, Answers.RETURNS_MOCKS);
         when(userTaskMock.jobId()).thenReturn(new JobId("foo"));
@@ -146,7 +173,7 @@ class MemoryTrackerTest {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
 
         // Should not throw exception
-        memoryTracker.tryToTrack("alice", "task1", new JobId("job1"), 50L);
+        memoryTracker.tryToTrack(new User("alice", false), "task1", new JobId("job1"), 50L);
 
         assertThat(memoryTracker.availableMemory()).isEqualTo(50L);
     }
@@ -156,8 +183,8 @@ class MemoryTrackerTest {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
 
         assertThatThrownBy(() ->
-                memoryTracker.tryToTrack("alice", "task1", new JobId("job1"), 150L)
-            ).isInstanceOf(TotalMemoryReservationExceededException.class)
+            memoryTracker.tryToTrack(new User("alice", false), "task1", new JobId("job1"), 150L)
+        ).isInstanceOf(TotalMemoryReservationExceededException.class)
             .hasFieldOrPropertyWithValue("bytesRequired", 150L)
             .hasFieldOrPropertyWithValue("bytesAvailable", 100L);
     }
@@ -165,11 +192,11 @@ class MemoryTrackerTest {
     @Test
     void tryToTrackShouldFailWhenExceedingAvailableMemory() throws MemoryGuardException {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
-        memoryTracker.track("alice", "task1", new JobId("job1"), 80L);
+        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 80L);
 
         assertThatThrownBy(() ->
-                memoryTracker.tryToTrack("bob", "task2", new JobId("job2"), 30L)
-            ).isInstanceOf(AvailableMemoryReservationExceededException.class)
+            memoryTracker.tryToTrack(new User("bob", false), "task2", new JobId("job2"), 30L)
+        ).isInstanceOf(AvailableMemoryReservationExceededException.class)
             .hasFieldOrPropertyWithValue("bytesRequired", 30L)
             .hasFieldOrPropertyWithValue("bytesAvailable", 20L);
     }

@@ -32,8 +32,8 @@ class TaskMemoryContainerTest {
     @Test
     void shouldReserve(){
         TaskMemoryContainer taskMemoryContainer=new TaskMemoryContainer();
-        taskMemoryContainer.reserve("alice", "foo", new JobId("JobId"), 10);
-        taskMemoryContainer.reserve("alice", "foo2", new JobId("JobId2"), 20);
+        taskMemoryContainer.reserve(new User("alice", false), "foo", new JobId("JobId"), 10);
+        taskMemoryContainer.reserve(new User("alice", false), "foo2", new JobId("JobId2"), 20);
         assertThat(taskMemoryContainer.taskReservedMemory()).isEqualTo(30L);
 
     }
@@ -42,8 +42,8 @@ class TaskMemoryContainerTest {
     void shouldRemove(){
         TaskMemoryContainer taskMemoryContainer=new TaskMemoryContainer();
         JobId jobId = new JobId("JobId");
-        taskMemoryContainer.reserve("alice", "foo", jobId, 10);
-        taskMemoryContainer.reserve("alice", "foo2", new JobId("JobId2"), 20);
+        taskMemoryContainer.reserve(new User("alice", false), "foo", jobId, 10);
+        taskMemoryContainer.reserve(new User("alice", false), "foo2", new JobId("JobId2"), 20);
         assertThat(taskMemoryContainer.taskReservedMemory()).isEqualTo(30L);
         taskMemoryContainer.removeTask(new StoredTask(new User("alice", false),jobId,null));
         assertThat(taskMemoryContainer.taskReservedMemory()).isEqualTo(20L);
@@ -53,11 +53,11 @@ class TaskMemoryContainerTest {
     @Test
     void shouldListForUser(){
         TaskMemoryContainer taskMemoryContainer=new TaskMemoryContainer();
-        taskMemoryContainer.reserve("alice", "foo", new JobId("JobId1"), 10);
-        taskMemoryContainer.reserve("alice", "foo2", new JobId("JobId2"), 15);
-        taskMemoryContainer.reserve("bob", "foo3", new JobId("JobId3"), 30);
+        taskMemoryContainer.reserve(new User("alice", false), "foo", new JobId("JobId1"), 10);
+        taskMemoryContainer.reserve(new User("alice", false), "foo2", new JobId("JobId2"), 15);
+        taskMemoryContainer.reserve(new User("bob", false), "foo3", new JobId("JobId3"), 30);
 
-        var aliceList = taskMemoryContainer.listTasks("alice").toList();
+        var aliceList = taskMemoryContainer.listTasks(new User("alice", false)).toList();
         assertThat(aliceList).hasSize(2);
         assertThat(aliceList.stream().map(UserEntityMemory::entity).toList()).containsExactlyInAnyOrder("JobId1","JobId2");
         assertThat(aliceList.stream().map(UserEntityMemory::memoryInBytes).toList()).containsExactlyInAnyOrder(10L,15L);
@@ -67,9 +67,9 @@ class TaskMemoryContainerTest {
     @Test
     void shouldListAll(){
         TaskMemoryContainer taskMemoryContainer=new TaskMemoryContainer();
-        taskMemoryContainer.reserve("alice", "foo", new JobId("JobId1"), 10);
-        taskMemoryContainer.reserve("alice", "foo2", new JobId("JobId2"), 15);
-        taskMemoryContainer.reserve("bob", "foo3", new JobId("JobId3"), 20);
+        taskMemoryContainer.reserve(new User("alice", false), "foo", new JobId("JobId1"), 10);
+        taskMemoryContainer.reserve(new User("alice", false), "foo2", new JobId("JobId2"), 15);
+        taskMemoryContainer.reserve(new User("bob", false), "foo3", new JobId("JobId3"), 20);
         var taskList =taskMemoryContainer.listTasks().toList();
         assertThat(taskList).hasSize(3);
         assertThat(taskList.stream().map(UserEntityMemory::entity).toList()).containsExactlyInAnyOrder("JobId1","JobId2","JobId3");
@@ -80,11 +80,11 @@ class TaskMemoryContainerTest {
     @Test
     void shouldReturnMemoryForUser(){
         TaskMemoryContainer taskMemoryContainer=new TaskMemoryContainer();
-        taskMemoryContainer.reserve("alice", "foo", new JobId("JobId1"), 10);
-        taskMemoryContainer.reserve("alice", "foo2", new JobId("JobId2"), 15);
-        taskMemoryContainer.reserve("bob", "foo3", new JobId("JobId3"), 30);
+        taskMemoryContainer.reserve(new User("alice", false), "foo", new JobId("JobId1"), 10);
+        taskMemoryContainer.reserve(new User("alice", false), "foo2", new JobId("JobId2"), 15);
+        taskMemoryContainer.reserve(new User("bob", false), "foo3", new JobId("JobId3"), 30);
 
-        assertThat(taskMemoryContainer.memoryOfTasks("alice")).isEqualTo(25L);
+        assertThat(taskMemoryContainer.memoryOfTasks(new User("alice", false))).isEqualTo(25L);
     }
 
 }

@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.JobIdConfig;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.Estimate;
@@ -36,25 +37,24 @@ import java.util.function.Function;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryUsageValidator {
-
     private final Log log;
-    private final boolean useMaxMemoryEstimation;
     private final MemoryTracker memoryTracker;
-    private final String username;
+    private final User user;
+    private final boolean useMaxMemoryEstimation;
 
     public MemoryUsageValidator(
-        String username,
+        Log log,
+        User user,
         MemoryTracker memoryTracker,
-        boolean useMaxMemoryEstimation,
-        Log log
+        boolean useMaxMemoryEstimation
     ) {
         this.log = log;
-        this.useMaxMemoryEstimation = useMaxMemoryEstimation;
+        this.user = user;
         this.memoryTracker = memoryTracker;
-        this.username = username;
+        this.useMaxMemoryEstimation = useMaxMemoryEstimation;
     }
 
-    public synchronized  <C extends BaseConfig & JobIdConfig> MemoryRange tryValidateMemoryUsage(
+    public synchronized <C extends BaseConfig & JobIdConfig> MemoryRange tryValidateMemoryUsage(
         String taskName,
         C config,
         Function<C, MemoryTreeWithDimensions> runEstimation
@@ -66,19 +66,17 @@ public class MemoryUsageValidator {
             if (config.sudo()) {
                 log.debug("Sudo mode: Won't check for available memory.");
                 memoryTracker.track(
-                    username,
+                    user,
                     taskName,
                     config.jobId(),
                     useMaxMemoryEstimation ? estimatedMemoryRange.max : estimatedMemoryRange.min
                 );
             } else {
                 validateMemoryUsage(
-                    username,
-                    estimatedMemoryRange,
+                    taskName,
                     memoryTracker.availableMemory(),
-                    useMaxMemoryEstimation,
-                    config.jobId(),
-                    log
+                    estimatedMemoryRange,
+                    config.jobId()
                 );
             }
 
@@ -90,41 +88,39 @@ public class MemoryUsageValidator {
 
     void validateMemoryUsage(
         String taskName,
-        MemoryRange estimatedMemoryRange,
         long availableBytes,
-        boolean useMaxMemoryEstimation,
-        JobId jobId,
-        Log log
+        MemoryRange estimatedMemoryRange,
+        JobId jobId
     ) {
         if (useMaxMemoryEstimation) {
-            validateMemoryUsage(
+            _validateMemoryUsage(
                 taskName,
                 availableBytes,
                 estimatedMemoryRange.max,
                 "maximum",
-                log, jobId,
+                jobId,
                 "Consider resizing your Aura instance via console.neo4j.io.",
                 "Alternatively, use 'sudo: true' to override the memory validation.",
                 "Overriding the validation is at your own risk.",
                 "The database can run out of memory and data can be lost."
             );
         } else {
-            validateMemoryUsage(
+            _validateMemoryUsage(
                 taskName,
                 availableBytes,
                 estimatedMemoryRange.min,
                 "minimum",
-                log, jobId
+                jobId
             );
         }
     }
 
-    private void validateMemoryUsage(
+    private void _validateMemoryUsage(
         String taskName,
         long availableBytes,
         long requiredBytes,
         String memoryString,
-        Log log, JobId jobId,
+        JobId jobId,
         String... messages
     ) {
         if (requiredBytes > availableBytes) {
@@ -152,6 +148,6 @@ public class MemoryUsageValidator {
             log.info(message);
             throw new IllegalStateException(message);
         }
-        memoryTracker.track(username,taskName,jobId, requiredBytes);
+        memoryTracker.track(user, taskName, jobId, requiredBytes);
     }
 }

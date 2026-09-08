@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -70,7 +71,7 @@ public final class DefaultMemoryGuard implements MemoryGuard {
         Supplier<MemoryEstimation> estimationFactory,
         Label label,
         DimensionTransformer dimensionTransformer,
-        String username,
+        User user,
         JobId jobId,
         boolean bypassMemoryEstimation
     ) throws MemoryGuardException {
@@ -86,11 +87,11 @@ public final class DefaultMemoryGuard implements MemoryGuard {
 
             var bytesToReserve = memoryRequirement.requiredMemory();
             if (bypassMemoryEstimation) {
-                memoryTracker.track(username,label.asString(), jobId, bytesToReserve);
+                memoryTracker.track(user,label.asString(), jobId, bytesToReserve);
                 return;
             }
 
-            memoryTracker.tryToTrack(username, label.asString(), jobId, bytesToReserve);
+            memoryTracker.tryToTrack(user, label.asString(), jobId, bytesToReserve);
 
         } catch (MemoryEstimationNotImplementedException e) {
             log.info("Memory usage estimate not available for " + label + ", skipping guard");

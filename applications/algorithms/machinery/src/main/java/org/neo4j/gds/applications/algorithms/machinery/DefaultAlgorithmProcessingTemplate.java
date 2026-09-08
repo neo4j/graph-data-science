@@ -65,11 +65,11 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         RequestScopedDependencies requestScopedDependencies
     ) {
         var algorithmComputer = new ComputationService(
-            requestScopedDependencies.user().getUsername(),
             log,
-            memoryGuard,
             algorithmMetricsService,
-            telemetryLogger
+            memoryGuard,
+            telemetryLogger,
+            requestScopedDependencies.user()
         );
 
         return new DefaultAlgorithmProcessingTemplate(

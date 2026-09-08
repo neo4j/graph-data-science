@@ -19,4 +19,6 @@
  */
 package org.neo4j.gds.memory.tracking;
 
-public record UserMemorySummary(String user, long totalGraphsMemory, long totalTasksMemory) {}
+import org.neo4j.gds.api.User;
+
+public record UserMemorySummary(User user, long totalGraphsMemory, long totalTasksMemory) {}

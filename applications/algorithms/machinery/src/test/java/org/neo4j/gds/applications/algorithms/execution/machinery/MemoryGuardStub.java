@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.execution.machinery;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
@@ -55,7 +56,7 @@ class MemoryGuardStub implements MemoryGuard {
         Supplier<MemoryEstimation> estimationFactory,
         Label label,
         DimensionTransformer dimensionTransformer,
-        String username,
+        User user,
         JobId jobId,
         boolean bypassMemoryEstimation
     ) throws MemoryGuardException {

@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.logging.Log;
@@ -30,7 +31,6 @@ import org.neo4j.gds.memory.tracking.MemoryGuardException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -52,18 +52,12 @@ class ComputationServiceTest {
             any(),
             any(),
             any(),
-            anyString(),
+            any(),
             any(),
             anyBoolean()
         );
 
-        var computationService = new ComputationService(
-            "foo",
-            Log.noOpLog(),
-            guard,
-            null,
-            null
-        );
+        var computationService = new ComputationService(Log.noOpLog(), null, guard, null, new User("foo", false));
 
         var config = mock(AlgoBaseConfig.class);
         var graphResources = mock(GraphResources.class);

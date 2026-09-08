@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -35,22 +36,23 @@ import java.util.function.Supplier;
  */
 class ComputationService {
     private final Log log;
-    private final MemoryGuard memoryGuard;
     private final AlgorithmMetricsService algorithmMetricsService;
+    private final MemoryGuard memoryGuard;
     private final TelemetryLogger telemetryLogger;
-    private final String username;
+    private final User user;
 
     ComputationService(
-        String username,
         Log log,
+        AlgorithmMetricsService algorithmMetricsService,
         MemoryGuard memoryGuard,
-        AlgorithmMetricsService algorithmMetricsService, TelemetryLogger telemetryLogger
+        TelemetryLogger telemetryLogger,
+        User user
     ) {
         this.log = log;
-        this.memoryGuard = memoryGuard;
         this.algorithmMetricsService = algorithmMetricsService;
-        this.username = username;
+        this.memoryGuard = memoryGuard;
         this.telemetryLogger = telemetryLogger;
+        this.user = user;
     }
 
     <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeAlgorithm(
@@ -70,7 +72,7 @@ class ComputationService {
                 estimationSupplier,
                 label,
                 dimensionTransformer,
-                username,
+                user,
                 configuration.jobId(),
                 configuration.sudo()
             );

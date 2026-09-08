@@ -19,63 +19,65 @@
  */
 package org.neo4j.gds.memory.tracking;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 class GraphStoreMemoryContainer {
+    private final Map<User, ConcurrentHashMap<String /* graph name */, Long>> graphStoresMemory = new ConcurrentHashMap<>();
+    private final AtomicLong graphStoreReservedMemory = new AtomicLong();
 
-    private final ConcurrentHashMap<String, ConcurrentHashMap<String,Long>> graphStoresMemory = new ConcurrentHashMap<>();
-    private  final AtomicLong graphStoreReservedMemory = new AtomicLong();
-    private static final ConcurrentHashMap<String,Long> EMPTY_HASH_MAP   = new ConcurrentHashMap<>();
-
-    long addGraph(GraphStoreAddedEvent graphStoreAddedEvent){
+    long addGraph(GraphStoreAddedEvent graphStoreAddedEvent) {
         var addedGraphMemory = graphStoreAddedEvent.memoryInBytes();
         var graphsMemory = graphStoreReservedMemory.addAndGet(addedGraphMemory);
-        graphStoresMemory.putIfAbsent(graphStoreAddedEvent.user(), new ConcurrentHashMap<>());
-        graphStoresMemory.get(graphStoreAddedEvent.user()).put(graphStoreAddedEvent.graphName(),graphStoreAddedEvent.memoryInBytes());
-        return  graphsMemory;
+        graphStoresMemory.putIfAbsent(new User(graphStoreAddedEvent.user(), false), new ConcurrentHashMap<>());
+        graphStoresMemory.get(new User(graphStoreAddedEvent.user(), false)).put(
+            graphStoreAddedEvent.graphName(),
+            graphStoreAddedEvent.memoryInBytes()
+        );
+        return graphsMemory;
     }
 
-    long removeGraph(GraphStoreRemovedEvent graphStoreRemovedEvent){
-      //TODO: for more effective progress tracking
-        //var graphMemoryToRemove = graphStoreRemovedEvent.memoryInBytes();
-        var graphMemoryToRemove=  graphStoresMemory.get(graphStoreRemovedEvent.user()).remove(graphStoreRemovedEvent.graphName());
-        if (graphMemoryToRemove==null) {
+    long removeGraph(GraphStoreRemovedEvent graphStoreRemovedEvent) {
+        var user = new User(graphStoreRemovedEvent.user(), false);
+        var graphMemoryToRemove = graphStoresMemory.get(user).remove(graphStoreRemovedEvent.graphName());
+        if (graphMemoryToRemove == null) {
             return graphStoreReservedMemory.get();
         }
-        return  graphStoreReservedMemory.addAndGet(-graphMemoryToRemove);
+        return graphStoreReservedMemory.addAndGet(-graphMemoryToRemove);
     }
 
-    long graphStoreReservedMemory(){
-        return  graphStoreReservedMemory.get();
+    long graphStoreReservedMemory() {
+        return graphStoreReservedMemory.get();
     }
 
-    Stream<UserEntityMemory> listGraphs(String user){
-        return  graphStoresMemory
-            .getOrDefault(user, EMPTY_HASH_MAP)
+    Stream<UserEntityMemory> listGraphs(User user) {
+        return graphStoresMemory
+            .getOrDefault(user, new ConcurrentHashMap<>())
             .entrySet()
             .stream()
-            .map( entry ->  UserEntityMemory.createGraph(user, entry.getKey(), entry.getValue()));
+            .map(entry -> UserEntityMemory.createGraph(user, entry.getKey(), entry.getValue()));
     }
 
-    Stream<UserEntityMemory> listGraphs(){
-       return   graphStoresMemory.keySet().stream().flatMap(this::listGraphs);
+    Stream<UserEntityMemory> listGraphs() {
+        return graphStoresMemory.keySet().stream().flatMap(this::listGraphs);
     }
 
-    long memoryOfGraphs(String user){
-        return   graphStoresMemory
-            .getOrDefault(user, EMPTY_HASH_MAP)
+    long memoryOfGraphs(User user) {
+        return graphStoresMemory
+            .getOrDefault(user, new ConcurrentHashMap<>())
             .values()
             .stream()
             .reduce(0L, Long::sum);
     }
 
-    Set<String> graphUsers(){
+    Set<User> graphUsers() {
         return graphStoresMemory.keySet();
     }
 }
