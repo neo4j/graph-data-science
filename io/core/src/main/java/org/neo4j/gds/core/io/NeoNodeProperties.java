@@ -48,7 +48,7 @@ public record NeoNodeProperties(Map<String, LongFunction<Object>> neoNodePropert
         var neoNodeProperties = propertyMappings
             .stream()
             .collect(Collectors.toMap(
-                    PropertyMapping::neoPropertyKey,
+                PropertyMapping::externalPropertyKey,
                     propertyMapping -> NeoProperties.of(
                         transactionContext,
                         graphStore.nodes(),
@@ -96,7 +96,7 @@ public record NeoNodeProperties(Map<String, LongFunction<Object>> neoNodePropert
                 try {
                     var node = tx.getNodeById(neo4jNodeId);
                     return node.getProperty(
-                        propertyMapping.neoPropertyKey(),
+                        propertyMapping.externalPropertyKey(),
                         propertyMapping.defaultValue().getObject()
                     );
                 } catch (NotFoundException e) {
@@ -112,7 +112,7 @@ public record NeoNodeProperties(Map<String, LongFunction<Object>> neoNodePropert
                         StringFormatting.formatWithLocale(
                             "Could not find the node with the id '%d' - using the default value for the property '%s' (%s).",
                             neo4jNodeId,
-                            propertyMapping.neoPropertyKey(),
+                            propertyMapping.externalPropertyKey(),
                             defaultValue
                         )
                     );

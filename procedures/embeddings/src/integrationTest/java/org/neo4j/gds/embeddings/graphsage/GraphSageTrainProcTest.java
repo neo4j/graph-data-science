@@ -28,6 +28,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -196,7 +197,7 @@ class GraphSageTrainProcTest extends BaseProcTest {
                 new NodeProjection(
                     "A",
                     PropertyMappings.of(
-                        PropertyMapping.of("a1"), PropertyMapping.of("a2")
+                        PropertyMapping.of(Key.simple("a1")), PropertyMapping.of(Key.simple("a2"))
                     )
                 )
             ).withNodeLabel(
@@ -204,7 +205,7 @@ class GraphSageTrainProcTest extends BaseProcTest {
                 new NodeProjection(
                     "B",
                     PropertyMappings.of(
-                        PropertyMapping.of("b1"), PropertyMapping.of("b2")
+                        PropertyMapping.of(Key.simple("b1")), PropertyMapping.of(Key.simple("b2"))
                     )
                 )
             )

@@ -20,7 +20,7 @@
 package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappingHelper;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -74,7 +74,7 @@ final class GraphLoaderNegativeTest extends RandomGraphTestCase {
         assertThrows(
             IllegalArgumentException.class,
             () -> loader
-                .addNodeProperty(PropertyMapping.of("foo", 0.0))
+                .addNodeProperty(PropertyMappingHelper.of("foo", 0.0))
                 .build().graph(),
             "Node properties not found: 'foo'"
         );

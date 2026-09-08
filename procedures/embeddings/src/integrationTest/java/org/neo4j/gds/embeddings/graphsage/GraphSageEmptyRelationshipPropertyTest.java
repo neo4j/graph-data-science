@@ -28,6 +28,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -101,7 +102,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
         String graphQuery = GdsCypher.call(graphName)
             .graphProject()
             .withNodeLabel("King")
-            .withNodeProperty(PropertyMapping.of("age", 1.0))
+            .withNodeProperty(PropertyMapping.of(Key.simple("age"), DefaultValue.of(1.0)))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipProperty(relationshipWeightProperty)
             .yields();
@@ -124,7 +125,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
         String graphQuery = GdsCypher.call(graphName)
             .graphProject()
             .withNodeLabel("King")
-            .withNodeProperty(PropertyMapping.of("age", 1.0))
+            .withNodeProperty(PropertyMapping.of(Key.simple("age"), DefaultValue.of(1.0)))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipProperty(relationshipWeightProperty, DefaultValue.of(1.5, true))
             .yields();
@@ -160,7 +161,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
         String graphQuery = GdsCypher.call(graphName)
             .graphProject()
             .withNodeLabel("King")
-            .withNodeProperty(PropertyMapping.of("age", 1.0))
+            .withNodeProperty(PropertyMapping.of(Key.simple("age"), DefaultValue.of(1.0)))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipProperty(relationshipWeightProperty, DefaultValue.of(1.5, true))
             .yields();
@@ -180,7 +181,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
         String graphCreateForStream = GdsCypher.call("inductiveGraph")
             .graphProject()
             .withNodeLabel("King")
-            .withNodeProperty(PropertyMapping.of("age", 1.0))
+            .withNodeProperty(PropertyMapping.of(Key.simple("age"), DefaultValue.of(1.0)))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipProperty(relationshipWeightProperty)
             .yields();

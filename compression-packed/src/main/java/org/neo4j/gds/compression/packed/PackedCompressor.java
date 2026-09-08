@@ -51,8 +51,8 @@ public final class PackedCompressor implements AdjacencyCompressor {
         boolean noAggregation,
         MemoryTracker memoryTracker
     ) {
-        AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings
-            .numberOfMappings()];
+        AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders =
+            new AdjacencyListBuilder[propertyMappings.count()];
         Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder(memoryTracker));
 
         return new Factory(

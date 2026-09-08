@@ -32,8 +32,8 @@ class PropertyMappingTest {
     @Test
     void testFromObjectWithShorthandPropertyMapping() {
         PropertyMapping propertyMapping = PropertyMapping.fromObject("foo", "bar");
-        assertEquals(propertyMapping.propertyKey(), "foo");
-        assertEquals(propertyMapping.neoPropertyKey(), "bar");
+        assertEquals(propertyMapping.internalPropertyKey(), "foo");
+        assertEquals(propertyMapping.externalPropertyKey(), "bar");
         assertEquals(propertyMapping.aggregation(), Aggregation.DEFAULT);
     }
 
@@ -46,8 +46,8 @@ class PropertyMappingTest {
                 "aggregation", "MIN",
                 "defaultValue", 42.0
             ));
-        assertEquals(propertyMapping.propertyKey(), "transaction_count");
-        assertEquals(propertyMapping.neoPropertyKey(), "usd");
+        assertEquals(propertyMapping.internalPropertyKey(), "transaction_count");
+        assertEquals(propertyMapping.externalPropertyKey(), "usd");
         assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
         assertEquals(propertyMapping.defaultValue(), DefaultValue.of(42.0));
     }
@@ -61,8 +61,8 @@ class PropertyMappingTest {
                 "defaultValue", 42.0
             )
         );
-        assertEquals(propertyMapping.propertyKey(), "transaction_count");
-        assertEquals(propertyMapping.neoPropertyKey(), "transaction_count");
+        assertEquals(propertyMapping.internalPropertyKey(), "transaction_count");
+        assertEquals(propertyMapping.externalPropertyKey(), "transaction_count");
         assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
         assertEquals(propertyMapping.defaultValue(), DefaultValue.of(42.0));
     }
@@ -77,8 +77,8 @@ class PropertyMappingTest {
                 "DEFAULTValue", 42.0
             )
         );
-        assertEquals(propertyMapping.propertyKey(), "transaction_count");
-        assertEquals(propertyMapping.neoPropertyKey(), "usd");
+        assertEquals(propertyMapping.internalPropertyKey(), "transaction_count");
+        assertEquals(propertyMapping.externalPropertyKey(), "usd");
         assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
         assertEquals(propertyMapping.defaultValue(), DefaultValue.of(42.0));
     }

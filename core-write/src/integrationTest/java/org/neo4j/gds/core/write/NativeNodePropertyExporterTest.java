@@ -25,6 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
@@ -90,7 +92,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
     @Test
     void exportSingleNodeProperty() {
         Graph graph = createStoreLoaderBuilder()
-            .addNodeProperty("newProp1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
+            .addNodeProperty(PropertyMapping.of(Key.of("newProp1", "prop1"), DefaultValue.of(42.0), Aggregation.NONE))
             .build()
             .graph();
 
@@ -102,8 +104,8 @@ class NativeNodePropertyExporterTest extends BaseTest {
         exporter.write("newProp1",  new LongTestPropertyValues(nodeId -> intData[(int) nodeId]));
 
         Graph updatedGraph = createStoreLoaderBuilder()
-            .addNodeProperty("prop1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
-            .addNodeProperty("newProp1", "newProp1", DefaultValue.of(42), Aggregation.NONE)
+            .addNodeProperty(PropertyMapping.of(Key.simple("prop1"), DefaultValue.of(42.0), Aggregation.NONE))
+            .addNodeProperty(PropertyMapping.of(Key.simple("newProp1"), DefaultValue.of(42), Aggregation.NONE))
             .build()
             .graph();
 
@@ -123,8 +125,8 @@ class NativeNodePropertyExporterTest extends BaseTest {
     @Test
     void exportMultipleNodeProperties() {
         Graph graph = createStoreLoaderBuilder()
-            .addNodeProperty("newProp1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
-            .addNodeProperty("newProp2", "prop2", DefaultValue.of(42.0), Aggregation.NONE)
+            .addNodeProperty(PropertyMapping.of(Key.of("newProp1", "prop1"), DefaultValue.of(42.0), Aggregation.NONE))
+            .addNodeProperty(PropertyMapping.of(Key.of("newProp2", "prop2"), DefaultValue.of(42.0), Aggregation.NONE))
             .build()
             .graph();
 
@@ -143,9 +145,9 @@ class NativeNodePropertyExporterTest extends BaseTest {
         exporter.write(nodeProperties);
 
         Graph updatedGraph = createStoreLoaderBuilder()
-            .addNodeProperty("prop1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
-            .addNodeProperty("newProp1", "newProp1", DefaultValue.of(42), Aggregation.NONE)
-            .addNodeProperty("newProp2", "newProp2", DefaultValue.of(42.0), Aggregation.NONE)
+            .addNodeProperty(PropertyMapping.of(Key.simple("prop1"), DefaultValue.of(42.0), Aggregation.NONE))
+            .addNodeProperty(PropertyMapping.of(Key.simple("newProp1"), DefaultValue.of(42), Aggregation.NONE))
+            .addNodeProperty(PropertyMapping.of(Key.simple("newProp2"), DefaultValue.of(42.0), Aggregation.NONE))
             .build()
             .graph();
 

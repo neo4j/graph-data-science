@@ -31,6 +31,7 @@ import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.RelationshipProjection;
@@ -39,6 +40,7 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestNativeGraphLoader;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
@@ -444,7 +446,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                         "TYPE",
                         Orientation.UNDIRECTED,
                         PropertyMappings.of(
-                            PropertyMapping.of("weight", 1D)
+                            PropertyMapping.of(Key.simple("weight"), DefaultValue.of(1D))
                         )
                     )
                 )

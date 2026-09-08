@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappingHelper;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
@@ -110,7 +110,7 @@ class RelationshipPropertiesImportTest extends BaseTest {
             .databaseService(db)
             .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
             .globalOrientation(orientation)
-            .addRelationshipProperty(PropertyMapping.of("w", 0.0))
+            .addRelationshipProperty(PropertyMappingHelper.of("w", 0.0))
             .build()
             .graph();
     }

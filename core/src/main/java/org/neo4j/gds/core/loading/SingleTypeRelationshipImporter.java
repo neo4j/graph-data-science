@@ -169,7 +169,7 @@ public final class SingleTypeRelationshipImporter {
         ) {
             return projection.properties().mappings()
                 .stream()
-                .mapToInt(mapping -> relationshipPropertyTokens.get(mapping.neoPropertyKey())).toArray();
+                .mapToInt(mapping -> relationshipPropertyTokens.get(mapping.externalPropertyKey())).toArray();
         }
 
         private static Aggregation[] aggregations(RelationshipProjection projection) {

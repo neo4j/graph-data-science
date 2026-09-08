@@ -30,6 +30,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
+import org.neo4j.gds.PropertyMappingHelper;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -191,7 +193,7 @@ class GraphStoreTest extends BaseTest {
         runQuery("CREATE (a {nodeProp: 42})-[:REL]->(b {nodeProp: 23})");
 
         var graphStore = initialiseStoreLoaderBuilder()
-            .addNodeProperty(PropertyMapping.of("nodeProp", 0D))
+            .addNodeProperty(PropertyMappingHelper.of("nodeProp", 0D))
             .build()
             .graphStore();
 
@@ -208,15 +210,15 @@ class GraphStoreTest extends BaseTest {
             .addRelationshipProjection(
                 new RelationshipProjection(
                     "REL",
-                    PropertyMappings.of(PropertyMapping.of("p", 3.14))
+                    PropertyMappings.of(PropertyMappingHelper.of("p", 3.14))
                 )
             )
             .addRelationshipProjection(
                 new RelationshipProjection(
                     "LER",
                     PropertyMappings.of(
-                        PropertyMapping.of("p", 3.14),
-                        PropertyMapping.of("q", 3.15)
+                        PropertyMappingHelper.of("p", 3.14),
+                        PropertyMappingHelper.of("q", 3.15)
                     )
                 )
             )
@@ -255,7 +257,7 @@ class GraphStoreTest extends BaseTest {
     void nodeOnlyGraph() {
         var graphStore = initialiseStoreLoaderBuilder()
             .addNodeLabels("A", "B")
-            .addNodeProperty(PropertyMapping.of("nodeProperty"))
+            .addNodeProperty(PropertyMappingHelper.of("nodeProperty"))
             .addRelationshipTypes("T1", "T3")
             .build().graphStore();
 
@@ -271,16 +273,16 @@ class GraphStoreTest extends BaseTest {
         NodeProjection aMapping = new NodeProjection(
             "A",
             PropertyMappings.of(
-                PropertyMapping.of("nodeProperty", -1D),
-                PropertyMapping.of("a", -1D)
+                PropertyMappingHelper.of("nodeProperty", -1D),
+                PropertyMappingHelper.of("a", -1D)
             )
         );
 
         NodeProjection bMapping = new NodeProjection(
             "B",
             PropertyMappings.of(
-                PropertyMapping.of("nodeProperty", -1D),
-                PropertyMapping.of("b", -1D)
+                PropertyMappingHelper.of("nodeProperty", -1D),
+                PropertyMappingHelper.of("b", -1D)
             )
         );
 
@@ -294,8 +296,8 @@ class GraphStoreTest extends BaseTest {
             Orientation.NATURAL,
             Aggregation.NONE,
             PropertyMappings.of(
-                PropertyMapping.of("property1", "property1", DefaultValue.of(42D), Aggregation.NONE),
-                PropertyMapping.of("property2", "property2", DefaultValue.of(1337D), Aggregation.NONE)
+                PropertyMapping.of(Key.simple("property1"), DefaultValue.of(42D), Aggregation.NONE),
+                PropertyMapping.of(Key.simple("property2"), DefaultValue.of(1337D), Aggregation.NONE)
             )
         );
 
@@ -304,7 +306,7 @@ class GraphStoreTest extends BaseTest {
             Orientation.NATURAL,
             Aggregation.NONE,
             PropertyMappings.of(
-                PropertyMapping.of("property1", "property1", DefaultValue.of(42D), Aggregation.NONE)
+                PropertyMapping.of(Key.simple("property1"), DefaultValue.of(42D), Aggregation.NONE)
             )
         );
 
@@ -313,7 +315,7 @@ class GraphStoreTest extends BaseTest {
             Orientation.NATURAL,
             Aggregation.NONE,
             PropertyMappings.of(
-                PropertyMapping.of("property2", "property2", DefaultValue.of(42D), Aggregation.NONE)
+                PropertyMapping.of(Key.simple("property2"), DefaultValue.of(42D), Aggregation.NONE)
             )
         );
 

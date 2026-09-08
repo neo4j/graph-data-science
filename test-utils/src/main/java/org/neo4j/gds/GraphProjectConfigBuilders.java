@@ -105,10 +105,7 @@ public final class GraphProjectConfigBuilders {
             ));
         }
 
-        PropertyMappings relationshipPropertyMappings = PropertyMappings.builder()
-            .addAllMappings(relationshipProperties)
-            .withDefaultAggregation(aggregation)
-            .build();
+        PropertyMappings relationshipPropertyMappings = PropertyMappings.of(relationshipProperties, aggregation);
 
         NodeProjections np = new NodeProjections(tempNP.entrySet().stream().collect(Collectors.toMap(
             e -> NodeLabel.of(e.getKey()),

@@ -205,7 +205,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
                 formatWithLocale(
                     "property '%s.%s'%s",
                     relationshipType,
-                    resolvedPropertyMapping.propertyKey(),
+                    resolvedPropertyMapping.internalPropertyKey(),
                     indexSuffix
                 ),
                 HugeLongArray::memoryEstimation
@@ -260,7 +260,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
                 formatWithLocale(
                     "property '%s.%s%s",
                     relationshipType,
-                    resolvedPropertyMapping.propertyKey(),
+                    resolvedPropertyMapping.internalPropertyKey(),
                     indexSuffix
                 ),
                 AdjacencyListBehavior.adjacencyPropertiesEstimation(relationshipType, undirected)

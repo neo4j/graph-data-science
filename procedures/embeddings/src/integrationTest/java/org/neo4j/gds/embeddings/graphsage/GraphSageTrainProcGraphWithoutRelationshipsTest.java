@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -56,7 +58,7 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
         String query = GdsCypher.call(GRAPH_NAME)
             .graphProject()
             .withAnyLabel()
-            .withNodeProperty(PropertyMapping.of("age", 1.0))
+            .withNodeProperty(PropertyMapping.of(Key.simple("age"), DefaultValue.of(1.0)))
             .withAnyRelationshipType()
             .yields();
 

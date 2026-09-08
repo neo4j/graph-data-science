@@ -32,7 +32,7 @@ public interface Projections<I extends ElementIdentifier, P extends ElementProje
         return projections()
             .values()
             .stream()
-            .flatMap(p -> p.properties().mappings().stream().map(PropertyMapping::propertyKey))
+            .flatMap(p -> p.properties().mappings().stream().map(PropertyMapping::internalPropertyKey))
             .collect(Collectors.toSet());
     }
 

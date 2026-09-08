@@ -27,18 +27,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.GraphFactoryTestSupport.FactoryType;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.TestGraphLoaderFactory;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 
@@ -242,9 +244,9 @@ class CypherFactoryTest extends BaseTest {
                 ", ({prop2: 2})" +
                 ", ({prop3: 3})"
         );
-        PropertyMapping prop1 = PropertyMapping.of("prop1", 0);
-        PropertyMapping prop2 = PropertyMapping.of("prop2", 0);
-        PropertyMapping prop3 = PropertyMapping.of("prop3", 0);
+        PropertyMapping prop1 = PropertyMapping.of(Key.simple("prop1"), DefaultValue.of(0));
+        PropertyMapping prop2 = PropertyMapping.of(Key.simple("prop2"), DefaultValue.of(0));
+        PropertyMapping prop3 = PropertyMapping.of(Key.simple("prop3"), DefaultValue.of(0));
 
         Graph graph = TestGraphLoaderFactory.graphLoader(db, FactoryType.CYPHER)
             .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3))
@@ -268,9 +270,9 @@ class CypherFactoryTest extends BaseTest {
                 ", (n1)-[:REL {prop2: 2.0}]->(n2)" +
                 ", (n1)-[:REL {prop3: 3.0}]->(n2)"
         );
-        PropertyMapping prop1 = PropertyMapping.of("prop1", 0D);
-        PropertyMapping prop2 = PropertyMapping.of("prop2", 0D);
-        PropertyMapping prop3 = PropertyMapping.of("prop3", 42D);
+        PropertyMapping prop1 = PropertyMapping.of(Key.simple("prop1"), DefaultValue.of(0D));
+        PropertyMapping prop2 = PropertyMapping.of(Key.simple("prop2"), DefaultValue.of(0D));
+        PropertyMapping prop3 = PropertyMapping.of(Key.simple("prop3"), DefaultValue.of(42D));
 
         GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, FactoryType.CYPHER)
             .withRelationshipProperties(PropertyMappings.of(prop1, prop2, prop3), false)
@@ -290,7 +292,7 @@ class CypherFactoryTest extends BaseTest {
                     prop1.defaultValue().doubleValue()
                 )
             ),
-            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop1.propertyKey()))
+            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop1.internalPropertyKey()))
         );
 
         assertGraphEquals(
@@ -302,7 +304,7 @@ class CypherFactoryTest extends BaseTest {
                     prop2.defaultValue().doubleValue()
                 )
             ),
-            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop2.propertyKey()))
+            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop2.internalPropertyKey()))
         );
 
         assertGraphEquals(
@@ -314,7 +316,7 @@ class CypherFactoryTest extends BaseTest {
                     3.0
                 )
             ),
-            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop3.propertyKey()))
+            graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop3.internalPropertyKey()))
         );
     }
 

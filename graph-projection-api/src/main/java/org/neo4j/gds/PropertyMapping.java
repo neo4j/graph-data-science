@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 
 import java.util.AbstractMap;
@@ -32,90 +29,75 @@ import java.util.TreeMap;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
-public abstract class PropertyMapping {
+public record PropertyMapping(Key propertyKey, DefaultValue defaultValue, Aggregation aggregation) {
+    public PropertyMapping {
+        validateProperties(propertyKey.internal, propertyKey.external, aggregation);
+    }
+
+    public record Key(String internal, String external) {
+        public static Key of(String internal, String external) {
+            return new Key(internal, external);
+        }
+        public static Key simple(String propertyKey) {
+            return new Key(propertyKey, propertyKey);
+        }
+    }
 
     public static final String PROPERTY_KEY = "property";
     public static final String DEFAULT_VALUE_KEY = "defaultValue";
 
-    /**
-     * property key in the result map Graph.nodeProperties(`propertyKey`)
-     */
-    public abstract @Nullable String propertyKey();
-
-    /**
-     * property name in the graph (a:Node {`propertyKey`:xyz})
-     */
-    @Value.Default
-    public @Nullable String neoPropertyKey() {
-        return propertyKey();
+    public String externalPropertyKey() {
+        return propertyKey.external;
     }
 
-    @Value.Default
-    public DefaultValue defaultValue() {
-        return DefaultValue.DEFAULT;
+    public String internalPropertyKey() {
+        return propertyKey.internal;
     }
 
-    @Value.Default
-    public Aggregation aggregation() {
-        return Aggregation.DEFAULT;
-    }
-
-    @Value.Check
-    public void validateProperties() {
-        if (neoPropertyKey().equals(ElementProjection.PROJECT_ALL) && aggregation() != Aggregation.COUNT) {
+    private void validateProperties(String internalPropertyKey, String externalPropertyKey, Aggregation aggregation) {
+        if (externalPropertyKey.equals(ElementProjection.PROJECT_ALL) && aggregation != Aggregation.COUNT) {
             throw new IllegalArgumentException("A '*' property key can only be used in combination with count aggregation.");
         }
-        validatePropertyKey(propertyKey());
-    }
-
-    public static void validatePropertyKey(String propertyKey) {
-        if (propertyKey.isEmpty()) {
+        if (internalPropertyKey.isEmpty()) {
             throw new IllegalArgumentException("Property key must not be empty.");
         }
     }
 
-    public static PropertyMapping fromObject(String propertyKey, Object stringOrMap) {
-        if (stringOrMap instanceof String) {
-            String neoPropertyKey = (String) stringOrMap;
+    public static PropertyMapping fromObject(String internalPropertyKey, Object stringOrMap) {
+        if (stringOrMap instanceof String externalPropertyKey) {
             return fromObject(
-                propertyKey,
+                internalPropertyKey,
                 Collections.singletonMap(
                     PROPERTY_KEY,
-                    neoPropertyKey
+                    externalPropertyKey
                 )
             );
         } else if (stringOrMap instanceof Map) {
             var propertyMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
             //noinspection unchecked
             propertyMap.putAll((Map<String, Object>) stringOrMap);
-            Object propertyNameValue = propertyMap.getOrDefault(PROPERTY_KEY, propertyKey);
-            if (!(propertyNameValue instanceof String)) {
+            Object propertyNameValue = propertyMap.getOrDefault(PROPERTY_KEY, internalPropertyKey);
+            if (!(propertyNameValue instanceof String externalPropertyKey)) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Expected the value of '%s' to be of type String, but was '%s'.",
                     PROPERTY_KEY, propertyNameValue.getClass().getSimpleName()
                 ));
             }
-            String neoPropertyKey = (String) propertyNameValue;
 
             Object aggregationValue = propertyMap.get(RelationshipProjection.AGGREGATION_KEY);
-            Aggregation aggregation;
-            if (aggregationValue == null) {
-                aggregation = Aggregation.DEFAULT;
-            } else if (aggregationValue instanceof String) {
-                aggregation = Aggregation.parse(aggregationValue);
-            } else {
-                throw new IllegalStateException(formatWithLocale(
+            Aggregation aggregation = switch (aggregationValue) {
+                case null -> Aggregation.DEFAULT;
+                case String aggregationValueString -> Aggregation.parse(aggregationValueString);
+                default -> throw new IllegalStateException(formatWithLocale(
                     "Expected the value of '%s' to be of type String, but was '%s'",
                     RelationshipProjection.AGGREGATION_KEY, aggregationValue.getClass().getSimpleName()
                 ));
-            }
+            };
 
             Object defaultValue = propertyMap.get(DEFAULT_VALUE_KEY);
             boolean isUserDefined = propertyMap.containsKey(DEFAULT_VALUE_KEY);
             return PropertyMapping.of(
-                propertyKey,
-                neoPropertyKey,
+                Key.of(internalPropertyKey, externalPropertyKey),
                 DefaultValue.of(defaultValue, isUserDefined),
                 aggregation
             );
@@ -127,102 +109,36 @@ public abstract class PropertyMapping {
         }
     }
 
-    public boolean hasValidName() {
-        String key = neoPropertyKey();
-        return key != null && !key.isEmpty();
-    }
-
-    public boolean exists() {
-        return false;
-    }
-
     public Map.Entry<String, Object> toObject(boolean includeAggregation) {
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put(PROPERTY_KEY, neoPropertyKey());
-        value.put(DEFAULT_VALUE_KEY, defaultValue().getObject());
+        value.put(PROPERTY_KEY, propertyKey.external);
+        value.put(DEFAULT_VALUE_KEY, defaultValue.getObject());
         if (includeAggregation) {
-            value.put(RelationshipProjection.AGGREGATION_KEY, aggregation().name());
+            value.put(RelationshipProjection.AGGREGATION_KEY, aggregation.name());
         }
-        return new AbstractMap.SimpleImmutableEntry<>(propertyKey(), value);
+        return new AbstractMap.SimpleImmutableEntry<>(propertyKey.internal, value);
     }
 
-    public PropertyMapping setNonDefaultAggregation(Aggregation aggregation) {
+    PropertyMapping setNonDefaultAggregation(Aggregation aggregation) {
         if (aggregation == Aggregation.DEFAULT || aggregation() != Aggregation.DEFAULT) {
             return this;
         }
-        return ((ImmutablePropertyMapping) this).withAggregation(aggregation);
+        return new PropertyMapping(propertyKey, defaultValue, aggregation);
     }
 
-    public static PropertyMapping of(String propertyKey) {
-        return ImmutablePropertyMapping
-            .builder()
-            .propertyKey(propertyKey)
-            .build();
+    public static PropertyMapping of(Key propertyKey) {
+        return new PropertyMapping(propertyKey, DefaultValue.DEFAULT, Aggregation.DEFAULT);
     }
 
-    /**
-     * Creates a PropertyMapping. The given property key is also used for internal reference.
-     */
-    public static PropertyMapping of(String neoPropertyKey, Object defaultValue) {
-        return ImmutablePropertyMapping
-            .builder()
-            .propertyKey(neoPropertyKey)
-            .defaultValue(DefaultValue.of(defaultValue))
-            .build();
+    public static PropertyMapping of(Key propertyKey, DefaultValue defaultValue) {
+        return new PropertyMapping(propertyKey, defaultValue,  Aggregation.DEFAULT);
     }
 
-    public static PropertyMapping of(String propertyKey, String neoPropertyKey, Object defaultValue) {
-        return ImmutablePropertyMapping
-            .builder()
-            .propertyKey(propertyKey)
-            .neoPropertyKey(neoPropertyKey)
-            .defaultValue(DefaultValue.of(defaultValue))
-            .build();
+    public static PropertyMapping of(Key propertyKey, Aggregation aggregation) {
+        return new PropertyMapping(propertyKey, DefaultValue.DEFAULT,  aggregation);
     }
 
-    public static PropertyMapping of(
-        String propertyKey,
-        DefaultValue defaultValue,
-        Aggregation aggregation
-    ) {
-        return ImmutablePropertyMapping
-            .builder()
-            .propertyKey(propertyKey)
-            .defaultValue(defaultValue)
-            .aggregation(aggregation)
-            .build();
-    }
-
-    public static PropertyMapping of(
-        String propertyKey,
-        Aggregation aggregation
-    ) {
-        return ImmutablePropertyMapping
-            .builder()
-            .propertyKey(propertyKey)
-            .aggregation(aggregation)
-            .build();
-    }
-
-    public static PropertyMapping of(
-        String propertyKey,
-        String neoPropertyKey,
-        Aggregation aggregation
-    ) {
-        return ImmutablePropertyMapping
-            .builder()
-            .propertyKey(propertyKey)
-            .neoPropertyKey(neoPropertyKey)
-            .aggregation(aggregation)
-            .build();
-    }
-
-    public static PropertyMapping of(
-        String propertyKey,
-        String neoPropertyKey,
-        DefaultValue defaultValue,
-        Aggregation aggregation
-    ) {
-        return ImmutablePropertyMapping.of(propertyKey, neoPropertyKey, defaultValue, aggregation);
+    public static PropertyMapping of(Key propertyKey, DefaultValue defaultValue, Aggregation aggregation) {
+        return new PropertyMapping(propertyKey, defaultValue, aggregation);
     }
 }

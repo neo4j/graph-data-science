@@ -53,7 +53,7 @@ class AdjacencyBufferTest {
         var factory = DeltaVarLongCompressor.factory(
             () -> nodeCount,
             CompressedAdjacencyListBuilderFactory.of(UncompressedAdjacencyListBuilder::new),
-            PropertyMappings.builder().build(),
+            PropertyMappings.EMPTY,
             new Aggregation[]{Aggregation.NONE},
             true,
             MemoryTracker.EMPTY

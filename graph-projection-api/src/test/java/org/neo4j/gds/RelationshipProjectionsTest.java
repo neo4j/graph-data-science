@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.api.DefaultValue;
 
 import java.util.Arrays;
@@ -88,8 +89,8 @@ class RelationshipProjectionsTest {
                 "FOO",
                 false,
                 PropertyMappings.of(
-                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
-                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
+                    PropertyMapping.of(Key.simple("prop1"), DefaultValue.DEFAULT),
+                    PropertyMapping.of(Key.simple("prop2"), DefaultValue.DEFAULT)
                )
             ))
         );
@@ -164,7 +165,7 @@ class RelationshipProjectionsTest {
                 "T",
                 Aggregation.SINGLE,
                 PropertyMappings.of(
-                    PropertyMapping.of("weight", Aggregation.SINGLE)
+                    new PropertyMapping(Key.simple("weight"), DefaultValue.DEFAULT, Aggregation.SINGLE)
                 )
             )
         ));
@@ -236,8 +237,8 @@ class RelationshipProjectionsTest {
             equalTo(new RelationshipProjection(
                 "FOO",
                 PropertyMappings.of(
-                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
-                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
+                    PropertyMapping.of(Key.simple("prop1"), DefaultValue.DEFAULT),
+                    PropertyMapping.of(Key.simple("prop2"), DefaultValue.DEFAULT)
                 )
             ))
         );

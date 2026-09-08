@@ -36,11 +36,11 @@ class PropertyMappingsTest {
     @Test
     void testFromObjectWithShorthandPropertyMapping() {
         PropertyMappings mappings = PropertyMappings.fromObject(Collections.singletonMap("foo", (Object) "bar"));
-        assertEquals(mappings.numberOfMappings(), 1);
+        assertEquals(mappings.count(), 1);
 
         PropertyMapping propertyMapping = mappings.mappings().get(0);
-        assertEquals(propertyMapping.propertyKey(), "foo");
-        assertEquals(propertyMapping.neoPropertyKey(), "bar");
+        assertEquals(propertyMapping.internalPropertyKey(), "foo");
+        assertEquals(propertyMapping.externalPropertyKey(), "bar");
     }
 
     @Test
@@ -60,18 +60,18 @@ class PropertyMappingsTest {
         );
 
         var mappings = PropertyMappings.fromObject(propertyProjections);
-        assertEquals(mappings.numberOfMappings(), 2);
+        assertEquals(mappings.count(), 2);
 
         Iterator<PropertyMapping> mappingIterator = mappings.iterator();
         PropertyMapping totalUsdMapping = mappingIterator.next();
-        assertEquals(totalUsdMapping.propertyKey(), "total_usd");
-        assertEquals(totalUsdMapping.neoPropertyKey(), "usd");
+        assertEquals(totalUsdMapping.internalPropertyKey(), "total_usd");
+        assertEquals(totalUsdMapping.externalPropertyKey(), "usd");
         assertEquals(totalUsdMapping.aggregation(), Aggregation.MIN);
         assertEquals(totalUsdMapping.defaultValue().doubleValue(), 42.0);
 
         PropertyMapping transactionCountMapping = mappingIterator.next();
-        assertEquals(transactionCountMapping.propertyKey(), "transaction_count");
-        assertEquals(transactionCountMapping.neoPropertyKey(), "usd");
+        assertEquals(transactionCountMapping.internalPropertyKey(), "transaction_count");
+        assertEquals(transactionCountMapping.externalPropertyKey(), "usd");
         assertEquals(transactionCountMapping.aggregation(), Aggregation.SUM);
         assertEquals(transactionCountMapping.defaultValue().doubleValue(), Double.NaN);
     }

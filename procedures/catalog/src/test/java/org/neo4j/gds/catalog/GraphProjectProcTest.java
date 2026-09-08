@@ -34,6 +34,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -625,7 +626,7 @@ class GraphProjectProcTest extends BaseProcTest {
                     "KNOWS",
                     Orientation.NATURAL,
                     PropertyMappings.of(
-                        PropertyMapping.of("weight", "weight", DefaultValue.of(Double.NaN), aggregation)
+                        PropertyMapping.of(Key.simple("weight"), DefaultValue.of(Double.NaN), aggregation)
                     )
                 )
             )
@@ -826,7 +827,7 @@ class GraphProjectProcTest extends BaseProcTest {
             .withNodeLabel("Node")
             .withAnyRelationshipType()
             .withNodeProperty("fooProp", "foo")
-            .withNodeProperty(PropertyMapping.of("barProp", "bar", 19.84))
+            .withNodeProperty(PropertyMapping.of(Key.of("barProp", "bar"), DefaultValue.of(19.84)))
             .yields("nodeCount");
 
         runQuery(query, Map.of());
@@ -856,9 +857,9 @@ class GraphProjectProcTest extends BaseProcTest {
             .call("aggGraph")
             .graphProject()
             .withNodeLabel("Node")
-            .withRelationshipProperty(PropertyMapping.of("sumWeight", "weight", DefaultValue.of(1.0), Aggregation.SUM))
-            .withRelationshipProperty(PropertyMapping.of("minWeight", "weight", Aggregation.MIN))
-            .withRelationshipProperty(PropertyMapping.of("maxCost", "cost", Aggregation.MAX))
+            .withRelationshipProperty(PropertyMapping.of(Key.of("sumWeight", "weight"), DefaultValue.of(1.0), Aggregation.SUM))
+            .withRelationshipProperty(PropertyMapping.of(Key.of("minWeight", "weight"), DefaultValue.DEFAULT, Aggregation.MIN))
+            .withRelationshipProperty(PropertyMapping.of(Key.of("maxCost", "cost"), DefaultValue.DEFAULT, Aggregation.MAX))
             .withRelationshipType("TYPE_1")
             .yields("relationshipProjection");
 

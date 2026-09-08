@@ -28,6 +28,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -98,11 +99,11 @@ class GraphSchemaIntegrationTest extends BaseTest {
         return Stream.of(
             Arguments.of(
                 PropertySchema.of("prop", ValueType.LONG),
-                PropertyMapping.of("prop")
+                PropertyMapping.of(Key.simple("prop"))
             ),
             Arguments.of(
                 PropertySchema.of("prop", ValueType.LONG, DefaultValue.of(1337), PropertyState.PERSISTENT),
-                PropertyMapping.of("prop", 1337)
+                PropertyMapping.of(Key.simple("prop"), DefaultValue.of(1337))
             )
         );
     }
@@ -111,7 +112,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
         return Stream.of(
             Arguments.of(
                 RelationshipPropertySchema.of("relProp", ValueType.DOUBLE),
-                PropertyMapping.of("relProp")
+                PropertyMapping.of(Key.simple("relProp"))
             ),
             Arguments.of(
                 RelationshipPropertySchema.of(
@@ -121,7 +122,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
                     PropertyState.PERSISTENT,
                     Aggregation.MAX
                 ),
-                PropertyMapping.of("relProp", DefaultValue.of(1337.0D), Aggregation.MAX)
+                new PropertyMapping(Key.simple("relProp"), DefaultValue.of(1337.0D), Aggregation.MAX)
             )
         );
     }

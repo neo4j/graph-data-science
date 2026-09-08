@@ -22,6 +22,7 @@ package org.neo4j.gds.pricesteiner;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
@@ -125,7 +126,7 @@ public class PrizeSteinerTreeMemoryEstimateDefinition implements MemoryEstimateD
                             "PLACEHOLDER",
                             Orientation.UNDIRECTED,
                             PropertyMappings.of(
-                                PropertyMapping.of("irrelevant", "irrelevant", DefaultValue.of(0.0))
+                                PropertyMapping.of(Key.simple("irrelevant"), DefaultValue.of(0.0))
                             )
                         )
                     )

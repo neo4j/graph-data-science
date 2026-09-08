@@ -21,9 +21,12 @@ package org.neo4j.gds.similarity.knn;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
@@ -31,7 +34,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
@@ -198,7 +200,7 @@ class KnnWriteProcTest extends BaseProcTest {
             .addNodeLabel("Person")
             .addNodeLabel("Foo")
             .addRelationshipType(relationshipType)
-            .addRelationshipProperty(relationshipProperty, relationshipProperty, DefaultValue.DEFAULT, Aggregation.NONE)
+            .addRelationshipProperty(PropertyMapping.of(Key.simple(relationshipProperty), DefaultValue.DEFAULT, Aggregation.NONE))
             .build()
             .graph();
 

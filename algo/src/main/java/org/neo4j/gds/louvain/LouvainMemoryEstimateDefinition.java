@@ -23,6 +23,7 @@ import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
@@ -72,7 +73,7 @@ public class LouvainMemoryEstimateDefinition implements MemoryEstimateDefinition
                             Orientation.UNDIRECTED,
                             Aggregation.SUM,
                             PropertyMappings.of(
-                                PropertyMapping.of("prop", "prop", DefaultValue.of(0.0))
+                                PropertyMapping.of(Key.simple("prop"), DefaultValue.of(0.0))
                             )
                         )
                     )

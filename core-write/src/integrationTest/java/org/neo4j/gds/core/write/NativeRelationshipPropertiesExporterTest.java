@@ -21,16 +21,18 @@ package org.neo4j.gds.core.write;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -76,8 +78,8 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
                 "PAID",
                 new RelationshipProjection("PAYS", Orientation.NATURAL)
             )
-            .addRelationshipProperty("totalAmount", "amount", DefaultValue.of(0), Aggregation.SUM)
-            .addRelationshipProperty("numberOfPayments", "amount", DefaultValue.of(0), Aggregation.COUNT)
+            .addRelationshipProperty(PropertyMapping.of(Key.of("totalAmount", "amount"), DefaultValue.of(0), Aggregation.SUM))
+            .addRelationshipProperty(PropertyMapping.of(Key.of("numberOfPayments", "amount"), DefaultValue.of(0), Aggregation.COUNT))
             .build()
             .graphStore();
 

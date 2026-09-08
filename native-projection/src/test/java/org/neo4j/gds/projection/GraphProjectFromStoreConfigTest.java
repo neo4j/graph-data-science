@@ -26,6 +26,7 @@ import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
@@ -47,8 +48,7 @@ class GraphProjectFromStoreConfigTest {
     @Test
     void testThrowOnOverlappingNodeProperties() {
         PropertyMappings propertyMappings = PropertyMappings.of(PropertyMapping.of(
-            "duplicate",
-            "foo",
+            Key.of("duplicate", "foo"),
             DefaultValue.of(0.0),
             Aggregation.NONE
         ));
@@ -74,8 +74,7 @@ class GraphProjectFromStoreConfigTest {
     @Test
     void testThrowOnOverlappingRelProperties() {
         var propertyMappings = PropertyMappings.of(PropertyMapping.of(
-            "duplicate",
-            "foo",
+            Key.of("duplicate", "foo"),
             DefaultValue.of(0.0),
             Aggregation.NONE
         ));
@@ -105,16 +104,14 @@ class GraphProjectFromStoreConfigTest {
     @Test
     void testMergingOfNodePropertiesAndProjections() {
         var propertyMappings1 = PropertyMappings.of(PropertyMapping.of(
-                "foo",
-                "foo",
+            Key.simple("foo"),
                 DefaultValue.of(0.0),
                 Aggregation.NONE
             )
         );
 
         var propertyMappings2 = PropertyMappings.of(PropertyMapping.of(
-            "bar",
-            "foo",
+            Key.of("bar", "foo"),
             DefaultValue.of(0.0),
             Aggregation.NONE
         ));
@@ -135,16 +132,19 @@ class GraphProjectFromStoreConfigTest {
         Set<String> allProperties = graphProjectConfig.nodeProjections().allProperties();
         assertTrue(allProperties.contains("foo"));
         assertTrue(allProperties.contains("bar"));
-        assertEquals(0, graphProjectConfig.nodeProperties().numberOfMappings());
+        assertEquals(0, graphProjectConfig.nodeProperties().count());
     }
 
     @Test
     void testMergingOfRelationshipPropertiesAndProjections() {
-        var propertyMappings1 = PropertyMappings.of(PropertyMapping.of("foo", "foo", DefaultValue.of(0.0), Aggregation.NONE));
+        var propertyMappings1 = PropertyMappings.of(PropertyMapping.of(
+            Key.simple("foo"),
+            DefaultValue.of(0.0),
+            Aggregation.NONE
+        ));
 
         var propertyMappings2 = PropertyMappings.of(PropertyMapping.of(
-            "bar",
-            "foo",
+            Key.of("bar", "foo"),
             DefaultValue.of(0.0),
             Aggregation.NONE
         ));
@@ -169,6 +169,6 @@ class GraphProjectFromStoreConfigTest {
         Set<String> allProperties = graphProjectConfig.relationshipProjections().allProperties();
         assertTrue(allProperties.contains("foo"));
         assertTrue(allProperties.contains("bar"));
-        assertEquals(0, graphProjectConfig.relationshipProperties().numberOfMappings());
+        assertEquals(0, graphProjectConfig.relationshipProperties().count());
     }
 }

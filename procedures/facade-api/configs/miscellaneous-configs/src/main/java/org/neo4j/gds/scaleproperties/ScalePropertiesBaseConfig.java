@@ -84,7 +84,7 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
         return fromObject(nodePropertiesOrMappings)
             .mappings()
             .stream()
-            .map(PropertyMapping::propertyKey)
+            .map(PropertyMapping::internalPropertyKey)
             .collect(Collectors.toList());
     }
 

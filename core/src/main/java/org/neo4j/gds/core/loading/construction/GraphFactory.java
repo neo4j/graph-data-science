@@ -25,6 +25,7 @@ import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -224,8 +225,7 @@ public final class GraphFactory {
         var actualOrientation = orientation.orElse(Orientation.NATURAL);
         var propertyMappings = propertyConfigs.stream()
             .map(propertyConfig -> PropertyMapping.of(
-                propertyConfig.propertyKey(),
-                propertyConfig.propertyKey(),
+                Key.simple(propertyConfig.propertyKey()),
                 DefaultValue.of(propertyConfig.defaultValue()),
                 propertyConfig.aggregation()
             )).toList();

@@ -22,7 +22,7 @@ package org.neo4j.gds.core;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappingHelper;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.logging.Log;
@@ -52,10 +52,10 @@ public class PropertyLoadingTest extends BaseTest {
                 Log.noOpLog(),
                 Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
             ))
-            .addNodeProperty(PropertyMapping.of("longProp", 24L))
-            .addNodeProperty(PropertyMapping.of("doubleProp", 73.31D))
-            .addNodeProperty(PropertyMapping.of("longListProp", new long[]{ 0L }))
-            .addNodeProperty(PropertyMapping.of("doubleListProp", new double[]{ 0.0D }))
+            .addNodeProperty(PropertyMappingHelper.of("longProp", 24L))
+            .addNodeProperty(PropertyMappingHelper.of("doubleProp", 73.31D))
+            .addNodeProperty(PropertyMappingHelper.of("longListProp", new long[]{0L}))
+            .addNodeProperty(PropertyMappingHelper.of("doubleListProp", new double[]{0.0D}))
             .build()
             .graph();
     }

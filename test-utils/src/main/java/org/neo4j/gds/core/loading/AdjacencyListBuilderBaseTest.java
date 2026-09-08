@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.annotation.GenerateBuilder;
@@ -145,7 +146,7 @@ public abstract class AdjacencyListBuilderBaseTest {
         var propertyKeyIds = IntStream.range(0, propertyCount).toArray();
         var propertyMappings = PropertyMappings.of(Arrays
             .stream(propertyAggregations)
-            .map(agg -> PropertyMapping.of("foo_" + agg.name(), DefaultValue.of(defaultValue), agg))
+            .map(agg -> PropertyMapping.of(Key.simple("foo_" + agg.name()), DefaultValue.of(defaultValue), agg))
             .toArray(PropertyMapping[]::new));
         var defaultValues = DoubleStream.generate(() -> defaultValue).limit(propertyCount).toArray();
 

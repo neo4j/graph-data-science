@@ -24,6 +24,7 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
@@ -77,7 +78,7 @@ class ScanningRelationshipsImporterTest extends BaseTest {
                     new RelationshipProjection(
                         "R",
                         true,
-                        PropertyMappings.of(PropertyMapping.of("p"))
+                        PropertyMappings.of(PropertyMapping.of(Key.simple("p")))
                     )
                 )
             ).build();

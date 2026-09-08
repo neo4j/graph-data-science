@@ -24,6 +24,7 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
@@ -65,18 +66,18 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
     }
 
     private void initFromPropertyMappings(PropertyMappings propertyMappings) {
-        propertyDefaultValueByName = new ObjectDoubleHashMap<>(propertyMappings.numberOfMappings());
+        propertyDefaultValueByName = new ObjectDoubleHashMap<>(propertyMappings.count());
         propertyMappings
             .stream()
             .forEach(mapping -> propertyDefaultValueByName.put(
-                mapping.neoPropertyKey(),
+                mapping.externalPropertyKey(),
                 mapping.defaultValue().doubleValue()
             ));
 
         propertyConfigs = propertyMappings
             .stream()
             .map(mapping -> new GraphFactory.PropertyConfig(
-                mapping.propertyKey(),
+                mapping.externalPropertyKey(),
                 mapping.aggregation(),
                 mapping.defaultValue()
             ))
@@ -94,8 +95,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
             List<PropertyMapping> propertyMappings = getPropertyColumns(subscription)
                 .stream()
                 .map(propertyColumn -> PropertyMapping.of(
-                    propertyColumn,
-                    propertyColumn,
+                    Key.simple(propertyColumn),
                     DefaultValue.forDouble(),
                     Aggregation.NONE
                 ))

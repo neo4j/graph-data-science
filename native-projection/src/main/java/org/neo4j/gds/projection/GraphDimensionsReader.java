@@ -85,7 +85,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .values()
             .stream()
             .flatMap(projection -> projection.properties().stream())
-            .map(PropertyMapping::neoPropertyKey)
+            .map(PropertyMapping::externalPropertyKey)
             .distinct()
             .toList();
 
@@ -95,7 +95,7 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
             .values()
             .stream()
             .flatMap(projection -> projection.properties().stream())
-            .map(PropertyMapping::neoPropertyKey)
+            .map(PropertyMapping::externalPropertyKey)
             .distinct()
             .toList();
 

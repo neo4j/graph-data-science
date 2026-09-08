@@ -55,7 +55,7 @@ public record Nodes(NodeSchema schema, IdMap idMap, NodePropertyStore properties
                         ? propertyMapping.defaultValue()
                         : nodePropertyValues.valueType().fallbackValue();
                     var nodeProperty = NodeProperty.of(
-                        propertyMapping.propertyKey(),
+                        propertyMapping.internalPropertyKey(),
                         propertyState,
                         nodePropertyValues,
                         defaultValue

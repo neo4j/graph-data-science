@@ -23,7 +23,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
@@ -33,14 +36,13 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.TaskRegistry;
-import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.registration.TaskRegistry;
+import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
@@ -141,8 +143,8 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .databaseService(db)
             .graphStoreFactorySuppliers(GRAPH_STORE_FACTORY_SUPPLIERS)
             .addRelationshipType(relationshipType)
-            .addRelationshipProperty(longKey, longKey, DefaultValue.forLong(), Aggregation.NONE)
-            .addRelationshipProperty(doubleKey, doubleKey, DefaultValue.forDouble(), Aggregation.NONE)
+            .addRelationshipProperty(PropertyMapping.of(Key.simple(longKey), DefaultValue.forLong(), Aggregation.NONE))
+            .addRelationshipProperty(PropertyMapping.of(Key.simple(doubleKey), DefaultValue.forDouble(), Aggregation.NONE))
             .build()
             .graphStore()
             .getUnion();
