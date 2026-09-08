@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.UserInputAsStringOrListOfString;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -38,7 +39,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
-public interface GraphStreamRelationshipsConfig extends BaseConfig, ConcurrencyConfig {
+public interface GraphStreamRelationshipsConfig extends BaseConfig, ConcurrencyConfig, JobIdConfig {
 
     @Configuration.Parameter
     Optional<String> graphName();

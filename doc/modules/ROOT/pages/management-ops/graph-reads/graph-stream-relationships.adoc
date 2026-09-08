@@ -40,6 +40,7 @@ YIELD
 |===
 | Name                   | Type                  | Default | Optional | Description
 include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId] | String | Generated internally | yes | An ID that can be provided to more easily track the progress.
 |===
 
 .Results
@@ -84,6 +85,7 @@ YIELD
 |===
 | Name                   | Type                  | Default | Optional | Description
 include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId] | String | Generated internally | yes | An ID that can be provided to more easily track the progress.
 |===
 
 .Results
@@ -134,6 +136,7 @@ YIELD
 |===
 | Name                   | Type                  | Default | Optional | Description
 include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId] | String | Generated internally | yes | An ID that can be provided to more easily track the progress.
 |===
 
 .Results

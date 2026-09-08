@@ -30,6 +30,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.Aggregation;
 
@@ -170,6 +171,49 @@ class CatalogConfigurationServiceTest {
                 Map.of()
             );
         }).withMessageStartingWith("Type mismatch for nodeLabels: expected List<String> or String, but found");
+    }
+
+    @Test
+    void shouldParseStreamConfigurationsWithProvidedJobId() {
+        var service = new CatalogConfigurationService();
+
+        var nodePropertiesConfiguration = service.parseGraphStreamNodePropertiesConfiguration(
+            GraphName.parse("some graph"),
+            "foo",
+            List.of("*"),
+            Map.of("jobId", "my-job-id")
+        );
+        assertThat(nodePropertiesConfiguration.jobId()).isEqualTo(new JobId("my-job-id"));
+
+        var relationshipPropertiesConfiguration = service.parseGraphStreamRelationshipPropertiesConfiguration(
+            GraphName.parse("some graph"),
+            List.of("foo"),
+            List.of("*"),
+            Map.of("jobId", "my-job-id")
+        );
+        assertThat(relationshipPropertiesConfiguration.jobId()).isEqualTo(new JobId("my-job-id"));
+
+        var relationshipsConfiguration = service.parseGraphStreamRelationshipsConfiguration(
+            GraphName.parse("some graph"),
+            List.of("*"),
+            Map.of("jobId", "my-job-id")
+        );
+        assertThat(relationshipsConfiguration.jobId()).isEqualTo(new JobId("my-job-id"));
+    }
+
+    @Test
+    void shouldGenerateRandomJobIdInStreamConfigurationsByDefault() {
+        var service = new CatalogConfigurationService();
+
+        var nodePropertiesConfiguration = service.parseGraphStreamNodePropertiesConfiguration(
+            GraphName.parse("some graph"),
+            "foo",
+            List.of("*"),
+            emptyMap()
+        );
+
+        assertThat(nodePropertiesConfiguration.jobId()).isNotNull();
+        assertThat(nodePropertiesConfiguration.jobId().value()).startsWith("jid-");
     }
 
     private static Stream<Object> stuffThatIsNotStringOrListOfString() {

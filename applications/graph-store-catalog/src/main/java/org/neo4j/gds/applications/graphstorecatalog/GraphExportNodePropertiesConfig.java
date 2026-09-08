@@ -23,6 +23,7 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.UserInputAsStringOrListOfString;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface GraphExportNodePropertiesConfig extends GraphNodePropertiesConfig {
+public interface GraphExportNodePropertiesConfig extends GraphNodePropertiesConfig, JobIdConfig {
 
     boolean LIST_NODE_LABELS_DEFAULT_VALUE = false;
 
