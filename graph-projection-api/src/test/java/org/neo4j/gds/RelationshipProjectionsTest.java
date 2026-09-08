@@ -101,14 +101,14 @@ class RelationshipProjectionsTest {
     void syntacticSugars(Object argument) {
         RelationshipProjections actual = RelationshipProjections.fromObject(argument);
 
-        RelationshipProjections expected = ImmutableRelationshipProjections.builder().projections(singletonMap(
+        RelationshipProjections expected = new RelationshipProjections(singletonMap(
             RelationshipType.of("T"),
             new RelationshipProjection(
                 "T",
                 Orientation.NATURAL,
                 Aggregation.DEFAULT
             )
-        )).build();
+        ));
 
         assertThat(actual, equalTo(expected));
         assertThat(actual.typeFilter(), equalTo("T"));
@@ -118,9 +118,12 @@ class RelationshipProjectionsTest {
     void shouldSupportStar() {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");
 
-        RelationshipProjections expected = ImmutableRelationshipProjections.builder()
-            .projections(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL))
-            .build();
+        RelationshipProjections expected = new RelationshipProjections(
+            singletonMap(
+                ALL_RELATIONSHIPS,
+                RelationshipProjection.ALL
+            )
+        );
 
         assertThat(actual, equalTo(expected));
         assertThat(actual.typeFilter(), equalTo("*"));
@@ -130,10 +133,10 @@ class RelationshipProjectionsTest {
     void shouldParseMultipleRelationshipTypes() {
         RelationshipProjections actual = RelationshipProjections.fromObject(Arrays.asList("A", "B"));
 
-        RelationshipProjections expected = ImmutableRelationshipProjections.builder()
-            .putProjection(RelationshipType.of("A"), new RelationshipProjection("A"))
-            .putProjection(RelationshipType.of("B"), new RelationshipProjection("B"))
-            .build();
+        RelationshipProjections expected = new RelationshipProjections(Map.of(
+            RelationshipType.of("A"), new RelationshipProjection("A"),
+            RelationshipType.of("B"), new RelationshipProjection("B")
+        ));
 
         assertThat(actual, equalTo(expected));
         assertThat(actual.typeFilter(), equalTo("A|B"));
@@ -155,17 +158,16 @@ class RelationshipProjectionsTest {
 
         RelationshipProjections actual = RelationshipProjections.fromObject(projection);
 
-        RelationshipProjections expected = ImmutableRelationshipProjections.builder().projections(
-            singletonMap(
-                RelationshipType.of("MY_TYPE"),
-                new RelationshipProjection(
-                    "T",
-                    Aggregation.SINGLE,
-                    PropertyMappings.of(
-                        PropertyMapping.of("weight", Aggregation.SINGLE)
-                    )
+        RelationshipProjections expected = new RelationshipProjections(singletonMap(
+            RelationshipType.of("MY_TYPE"),
+            new RelationshipProjection(
+                "T",
+                Aggregation.SINGLE,
+                PropertyMappings.of(
+                    PropertyMapping.of("weight", Aggregation.SINGLE)
                 )
-            )).build();
+            )
+        ));
 
         assertThat(
             actual,

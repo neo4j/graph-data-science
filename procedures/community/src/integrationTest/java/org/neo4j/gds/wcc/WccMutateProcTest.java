@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
@@ -481,7 +480,7 @@ class WccMutateProcTest extends BaseProcTest {
             .username(TEST_USERNAME)
             .graphName(GRAPH_NAME)
             .nodeProjections(
-                ImmutableNodeProjections.of(
+                new NodeProjections(
                     Map.of(NodeLabel.of("X"), new NodeProjection("X", PropertyMappings.of()))
                 )
             ).relationshipProjections(RelationshipProjections.ALL)

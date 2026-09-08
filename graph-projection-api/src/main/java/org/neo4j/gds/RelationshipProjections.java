@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.LinkedHashMap;
@@ -35,13 +34,17 @@ import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
-@Value.Immutable(singleton = true)
-public abstract class RelationshipProjections extends AbstractProjections<RelationshipType, RelationshipProjection> {
+@GenerateBuilder
+public record RelationshipProjections(
+    Map<RelationshipType, RelationshipProjection> projections
+) implements AbstractProjections<RelationshipType, RelationshipProjection> {
 
+    private static final RelationshipProjections EMPTY = new RelationshipProjections(emptyMap());
     public static final RelationshipProjections ALL = create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL));
 
-    public abstract Map<RelationshipType, RelationshipProjection> projections();
+    public static RelationshipProjectionsBuilder builder() {
+        return RelationshipProjectionsBuilder.builder();
+    }
 
     public static RelationshipProjections fromObject(Object object) {
         if (object == null) {
@@ -107,10 +110,7 @@ public abstract class RelationshipProjections extends AbstractProjections<Relati
     }
 
     public static RelationshipProjections single(RelationshipType relationshipType, RelationshipProjection projection) {
-        return ImmutableRelationshipProjections
-            .builder()
-            .putProjection(relationshipType, projection)
-            .build();
+        return new RelationshipProjections(singletonMap(relationshipType, projection));
     }
 
     private static RelationshipProjections create(Map<RelationshipType, RelationshipProjection> projections) {
@@ -119,7 +119,7 @@ public abstract class RelationshipProjections extends AbstractProjections<Relati
                 "An empty relationship projection was given; at least one relationship type must be projected.");
         }
 
-        return ImmutableRelationshipProjections.of(projections);
+        return new RelationshipProjections(projections);
     }
 
     public RelationshipProjection getFilter(RelationshipType relationshipType) {
@@ -132,7 +132,7 @@ public abstract class RelationshipProjections extends AbstractProjections<Relati
 
     public RelationshipProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
-            return ImmutableRelationshipProjections.copyOf(this);
+            return RelationshipProjectionsBuilder.builder(this).build();
         }
         return modifyProjections(p -> p.withAdditionalPropertyMappings(mappings));
     }
@@ -164,7 +164,7 @@ public abstract class RelationshipProjections extends AbstractProjections<Relati
     }
 
     public boolean isEmpty() {
-        return this == ImmutableRelationshipProjections.of();
+        return this == EMPTY;
     }
 
     public Map<String, Object> toObject() {

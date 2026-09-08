@@ -110,12 +110,12 @@ public final class GraphProjectConfigBuilders {
             .withDefaultAggregation(aggregation)
             .build();
 
-        NodeProjections np = ImmutableNodeProjections.of(tempNP.entrySet().stream().collect(Collectors.toMap(
+        NodeProjections np = new NodeProjections(tempNP.entrySet().stream().collect(Collectors.toMap(
             e -> NodeLabel.of(e.getKey()),
             Map.Entry::getValue
         )));
 
-        RelationshipProjections rp = ImmutableRelationshipProjections.of(tempRP.entrySet().stream().collect(Collectors.toMap(
+        RelationshipProjections rp = new RelationshipProjections(tempRP.entrySet().stream().collect(Collectors.toMap(
             e -> RelationshipType.of(e.getKey()),
             Map.Entry::getValue
         )));

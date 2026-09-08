@@ -20,12 +20,12 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
@@ -75,8 +75,8 @@ class GraphAggregationPhase {
                     .highestRelationshipId(minRelCount)
                     .build();
 
-                var relationshipProjections = ImmutableRelationshipProjections.builder()
-                    .putProjection(
+                var relationshipProjections = new RelationshipProjections(
+                    Map.of(
                         RelationshipType.of("AGGREGATE"),
                         new RelationshipProjection(
                             "AGGREGATE",
@@ -87,7 +87,7 @@ class GraphAggregationPhase {
                             )
                         )
                     )
-                    .build();
+                );
 
                 var memoryEstimation = CSRGraphStoreFactory.getMemoryEstimation(
                     NodeProjections.all(),

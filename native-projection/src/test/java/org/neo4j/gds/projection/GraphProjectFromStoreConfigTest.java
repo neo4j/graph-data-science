@@ -21,7 +21,6 @@ package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
@@ -81,7 +80,7 @@ class GraphProjectFromStoreConfigTest {
             Aggregation.NONE
         ));
 
-        RelationshipProjections relProjections = ImmutableRelationshipProjections.single(
+        RelationshipProjections relProjections = RelationshipProjections.single(
             RelationshipType.of("A"),
             new RelationshipProjection(
                 "A",
@@ -150,7 +149,7 @@ class GraphProjectFromStoreConfigTest {
             Aggregation.NONE
         ));
 
-        RelationshipProjections relProjections = ImmutableRelationshipProjections.single(
+        RelationshipProjections relProjections = RelationshipProjections.single(
             RelationshipType.of("A"),
             new RelationshipProjection(
                 "A",

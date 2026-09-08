@@ -446,19 +446,12 @@ class GdsCypherTest {
                 .propertyKey("GlobalNodeProp")
                 .build()
             ))
-            .relationshipProjections(ImmutableRelationshipProjections
-                .builder()
-                .putProjection(
-                    new RelationshipType("Rel"),
-                    new RelationshipProjection("TYPE")
-                )
-                .putProjection(
-                    new RelationshipType("BarRel"),
-                    barRel
-                )
-                .build()
-            )
-            .relationshipProperties(PropertyMappings.of(ImmutablePropertyMapping
+            .relationshipProjections(new RelationshipProjections(Map.of(
+                new RelationshipType("Rel"),
+                new RelationshipProjection("TYPE"),
+                new RelationshipType("BarRel"),
+                barRel
+            ))).relationshipProperties(PropertyMappings.of(ImmutablePropertyMapping
                 .builder()
                 .propertyKey("global")
                 .neoPropertyKey("RelProp")

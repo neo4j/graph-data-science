@@ -176,17 +176,17 @@ class NodeProjectionsTest {
         PropertyMapping second,
         String... messages
     ) {
-        var builder = ImmutableNodeProjections.builder().projections(
-            Map.of(
-                NodeLabel.of("A"),
-                new NodeProjection("A", PropertyMappings.of(first)),
-                NodeLabel.of("B"),
-                new NodeProjection("B", PropertyMappings.of(second))
-            )
-        );
 
-        var throwableAssert = assertThatThrownBy(builder::build)
-            .isInstanceOf(IllegalArgumentException.class);
+        var throwableAssert = assertThatThrownBy(() ->
+            new NodeProjections(
+                Map.of(
+                    NodeLabel.of("A"),
+                    new NodeProjection("A", PropertyMappings.of(first)),
+                    NodeLabel.of("B"),
+                    new NodeProjection("B", PropertyMappings.of(second))
+                )
+            )
+        ).isInstanceOf(IllegalArgumentException.class);
         for (var message : messages) {
             throwableAssert.hasMessageContaining(message);
         }
