@@ -149,16 +149,15 @@ public final class GraphImporter {
             var intermediateTargetId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
 
             if (relationshipProperties != null) {
-                validateRelationshipProperties(relationshipProperties, relImporter);
+                var propertyCount = relationshipProperties.size();
+                validateRelationshipProperties(relationshipProperties, propertyCount, relImporter);
 
-                if (relationshipProperties.size() == 1) {
-                    relationshipProperties.forEach((key, value) -> {
-                        var property = RelationshipPropertyExtractor.extractValue(
-                            value,
-                            DefaultValue.DOUBLE_DEFAULT_FALLBACK
-                        );
-                        relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, property);
-                    });
+                if (propertyCount == 1) {
+                    var property = RelationshipPropertyExtractor.extractValue(
+                        relationshipProperties.getSingle(),
+                        DefaultValue.DOUBLE_DEFAULT_FALLBACK
+                    );
+                    relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, property);
                 } else {
                     var propertyValues = new double[relationshipProperties.size()];
                     int[] index = {0};
@@ -182,10 +181,11 @@ public final class GraphImporter {
 
     private static void validateRelationshipProperties(
         PropertyValues relationshipProperties,
+        int propertyCount,
         RelationshipsBuilder relImporter
     ) {
         // only checking for size to avoid costly comparisons
-        if (relImporter.propertyConfigs().size() != relationshipProperties.size()) {
+        if (relImporter.propertyConfigs().size() != propertyCount) {
             throw new IllegalArgumentException(String.format(
                 Locale.US,
                 "Unexpected relationship properties for relationships type `%s`. " +

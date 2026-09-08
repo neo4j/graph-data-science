@@ -25,10 +25,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-public final class NativePropertyValues extends PropertyValues {
+final class NativePropertyValues implements PropertyValues {
     private final Map<String, GdsValue> properties;
 
-    public NativePropertyValues(Map<String, GdsValue> properties) {
+    NativePropertyValues(Map<String, GdsValue> properties) {
         this.properties = properties;
     }
 
@@ -55,5 +55,10 @@ public final class NativePropertyValues extends PropertyValues {
     @Override
     public GdsValue get(String key) {
         return properties.get(key);
+    }
+
+    @Override
+    public GdsValue getSingle() {
+        return properties.values().iterator().next();
     }
 }
