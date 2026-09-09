@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.api.properties.relationships;
 
-public interface RelationshipCursor {
-    long sourceId();
-    long targetId();
-    double property();
+public record ImmutableRelationshipCursor(long sourceId, long targetId, double property) implements RelationshipCursor {
+    public static RelationshipCursor of(long sourceId, long targetId,  double property) {
+        return new ImmutableRelationshipCursor(sourceId, targetId, property);
+    }
 }

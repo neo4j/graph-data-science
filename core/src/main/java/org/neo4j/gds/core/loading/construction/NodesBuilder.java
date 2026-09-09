@@ -183,7 +183,7 @@ public final class NodesBuilder {
         var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, concurrency);
         var nodeProperties = buildProperties(idMap);
         var nodeSchema = buildNodeSchema(idMap, nodeProperties);
-        var nodePropertyStore = NodePropertyStore.builder().properties(nodeProperties).build();
+        var nodePropertyStore = new NodePropertyStore(nodeProperties);
 
         return new Nodes(nodeSchema, idMap, nodePropertyStore);
     }

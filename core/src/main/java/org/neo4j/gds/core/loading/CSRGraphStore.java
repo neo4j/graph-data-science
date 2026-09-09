@@ -242,11 +242,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
 
             var nodeProperty = NodeProperty.of(propertyKey, PropertyState.TRANSIENT, propertyValues);
 
-            graphStore.nodeProperties = NodePropertyStore
-                .builder()
-                .from(graphStore.nodeProperties)
-                .putIfAbsent(propertyKey, nodeProperty)
-                .build();
+            graphStore.nodeProperties = graphStore.nodeProperties.copyAndAdd(nodeProperty);
 
             var nodeSchema = labels.stream()
                 .collect(
@@ -263,11 +259,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
     @Override
     public void removeNodeProperty(String propertyKey) {
         updateGraphStore(graphStore -> {
-            graphStore.nodeProperties = NodePropertyStore
-                .builder()
-                .from(graphStore.nodeProperties)
-                .removeProperty(propertyKey)
-                .build();
+            graphStore.nodeProperties = graphStore.nodeProperties.copyAndRemove(propertyKey);
 
             var nodeSchemaBuilder = NodeSchema.builder();
             schema().nodeSchema().entries().forEach((nodeLabel, propertySchemas) -> {
