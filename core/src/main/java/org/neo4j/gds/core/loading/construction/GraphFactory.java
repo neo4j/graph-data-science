@@ -182,7 +182,7 @@ public final class GraphFactory {
         PropertyState propertyState
     ) {
         public PropertyConfig(String propertyKey, Aggregation aggregation, DefaultValue defaultValue) {
-            this(propertyKey, aggregation, DefaultValue.forDouble(), PropertyState.TRANSIENT);
+            this(propertyKey, aggregation, defaultValue, PropertyState.TRANSIENT);
         }
         public PropertyConfig(String propertyKey, Aggregation aggregation) {
             this(propertyKey, aggregation, DefaultValue.forDouble(), PropertyState.TRANSIENT);
