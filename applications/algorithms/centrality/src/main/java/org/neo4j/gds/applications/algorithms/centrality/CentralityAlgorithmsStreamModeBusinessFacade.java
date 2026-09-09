@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
@@ -63,7 +63,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final HitsHookGenerator hitsHookGenerator;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
-    private final CompletionConvenience completionConvenience;
+    private final Synchroniser synchroniser;
 
     CentralityAlgorithmsStreamModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
@@ -71,14 +71,14 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
-        CompletionConvenience completionConvenience
+        Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.hitsHookGenerator = hitsHookGenerator;
         this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
-        this.completionConvenience = completionConvenience;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> Stream<RESULT> articleRank(
@@ -105,15 +105,13 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         StreamResultBuilder<ArticulationPointsResult, RESULT> resultBuilder,
         boolean shouldComputeComponents
     ) {
-        var future = centralityAlgorithmsBusinessFacade.articulationPoints(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.articulationPoints(
             graphName,
             configuration,
             Optional.empty(), // this is the value add for this layer
             new StreamResultRenderer<>(resultBuilder), // and this
             shouldComputeComponents
-        );
-
-        return completionConvenience.completeWork(future); // and this
+        ));
     }
 
     public <RESULT> Stream<RESULT> betweennessCentrality(
@@ -212,14 +210,12 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         HarmonicCentralityBaseConfig configuration,
         StreamResultBuilder<HarmonicResult, RESULT> resultBuilder
     ) {
-        var future = centralityAlgorithmsBusinessFacade.harmonicCentrality(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.harmonicCentrality(
             graphName,
             configuration,
             Optional.empty(),
             new StreamResultRenderer<>(resultBuilder)
-        );
-
-        return completionConvenience.completeWork(future);
+        ));
     }
 
     public <RESULT> Stream<RESULT> hits(

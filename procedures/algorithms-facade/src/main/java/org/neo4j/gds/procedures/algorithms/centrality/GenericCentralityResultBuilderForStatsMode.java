@@ -33,7 +33,7 @@ class GenericCentralityResultBuilderForStatsMode {
     public <CONFIGURATION extends ConcurrencyConfig & ToMapConvertible> CentralityStatsResult build(
         IdMap idMap,
         CONFIGURATION configuration,
-        Optional<CentralityAlgorithmResult> result,
+        Optional<? extends CentralityAlgorithmResult> result,
         AlgorithmProcessingTimings timings,
         boolean shouldComputeCentralityDistribution
     ) {

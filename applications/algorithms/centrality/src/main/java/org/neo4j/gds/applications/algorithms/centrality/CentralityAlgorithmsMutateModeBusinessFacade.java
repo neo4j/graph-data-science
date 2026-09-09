@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
@@ -77,7 +77,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final MutateNodePropertyService mutateNodePropertyService;
     private final HitsHookGenerator hitsHookGenerator;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
-    private final CompletionConvenience completionConvenience;
+    private final Synchroniser synchroniser;
 
     public CentralityAlgorithmsMutateModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
@@ -86,7 +86,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         MutateNodePropertyService mutateNodePropertyService,
         HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
-        CompletionConvenience completionConvenience
+        Synchroniser synchroniser
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
@@ -94,7 +94,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.hitsHookGenerator = hitsHookGenerator;
         this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
-        this.completionConvenience = completionConvenience;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT articleRank(
@@ -127,15 +127,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration.nodeLabels()
         );
 
-        var future = centralityAlgorithmsBusinessFacade.articulationPoints(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.articulationPoints(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)), // and this
             new MutateResultRenderer<>(configuration, resultBuilder), // and this
             false
-        );
-
-        return completionConvenience.completeWork(future); // and this
+        ));
     }
 
     public <RESULT> RESULT betweennessCentrality(
@@ -239,14 +237,12 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration.nodeLabels()
         );
 
-        var future = centralityAlgorithmsBusinessFacade.harmonicCentrality(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.harmonicCentrality(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),
             new MutateResultRenderer<>(configuration, resultBuilder)
-        );
-
-        return completionConvenience.completeWork(future);
+        ));
     }
 
     public <RESULT> RESULT pageRank(

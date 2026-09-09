@@ -412,10 +412,12 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             ArticulationPointsStatsConfig::of
         );
 
+        var resultBuilder = new ArticulationPointsResultBuilderForStatsMode(parsedConfiguration);
+
         return centralityApplications.stats().articulationPoints(
             GraphName.parse(graphName),
             parsedConfiguration,
-            new ArticulationPointsResultBuilderForStatsMode(parsedConfiguration)
+            resultBuilder
         );
     }
 
@@ -1151,6 +1153,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             configuration,
             HarmonicCentralityStatsConfig::of
         );
+
         var resultBuilder = new HarmonicCentralityResultBuilderForStatsMode(
             parsedConfiguration,
             shouldComputeSimilarityDistribution

@@ -83,7 +83,7 @@ public final class CentralityApplications {
             mutateNodePropertyService,
             hitsHookGenerator,
             raw,
-            completionConvenience
+            synchroniser
         );
 
         var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
@@ -92,7 +92,7 @@ public final class CentralityApplications {
             algorithmProcessingTemplateConvenience,
             hitsHookGenerator,
             raw,
-            completionConvenience
+            synchroniser
         );
 
         var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
@@ -101,7 +101,7 @@ public final class CentralityApplications {
             algorithmProcessingTemplateConvenience,
             hitsHookGenerator,
             raw,
-            completionConvenience
+            synchroniser
         );
 
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
