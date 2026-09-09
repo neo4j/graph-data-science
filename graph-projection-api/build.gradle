@@ -8,12 +8,8 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor openGds.immutables.builder
-    annotationProcessor openGds.immutables.value
     annotationProcessor openGds.recordBuilder
 
-    compileOnly         openGds.immutables.builder
-    compileOnly         openGds.immutables.value.annotations
     compileOnly         openGds.jetbrains.annotations
     compileOnly         openGds.recordBuilder
 
@@ -24,9 +20,6 @@ dependencies {
 
     api openGds.jackson.databind
     api openGds.jackson.dataformat.csv
-
-    testCompileOnly         openGds.immutables.builder
-    testCompileOnly         openGds.immutables.value.annotations
 
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic
