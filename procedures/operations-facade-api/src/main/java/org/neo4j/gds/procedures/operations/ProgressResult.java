@@ -70,7 +70,7 @@ public record ProgressResult(
         );
     }
 
-    static ProgressResult fromTaskWithDepth(String username, Task task, JobId jobId, int depth) {
+    public static ProgressResult fromTaskWithDepth(String username, Task task, JobId jobId, int depth) {
         var treeViewTaskName = StructuredOutputHelper.treeViewDescription(task.description(), depth);
         return new ProgressResult(username, task, jobId, treeViewTaskName);
     }
