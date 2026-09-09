@@ -20,7 +20,6 @@
 package org.neo4j.gds.memory.tracking;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.registration.StoredTask;
 
@@ -32,18 +31,18 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 class TaskMemoryContainer {
-    private final Map<User, ConcurrentHashMap<JobId, Pair<String, Long>>> memoryInUse = new ConcurrentHashMap<>();
+    private final Map<String, ConcurrentHashMap<JobId, Pair<String, Long>>> memoryInUse = new ConcurrentHashMap<>();
     private final AtomicLong allocatedMemory = new AtomicLong();
 
-    void reserve(User user, String taskName, JobId jobId,long memoryAmount){
-        memoryInUse.putIfAbsent(user, new ConcurrentHashMap<>());
-        memoryInUse.get(user).put(jobId,Pair.of(taskName,memoryAmount));
+    void reserve(String username, String taskName, JobId jobId,long memoryAmount){
+        memoryInUse.putIfAbsent(username, new ConcurrentHashMap<>());
+        memoryInUse.get(username).put(jobId,Pair.of(taskName,memoryAmount));
 
         allocatedMemory.addAndGet(memoryAmount);
     }
 
     long removeTask(StoredTask storedTask) {
-        var memPair = memoryInUse.getOrDefault(storedTask.user(), new ConcurrentHashMap<>()).remove(storedTask.jobId());
+        var memPair = memoryInUse.getOrDefault(storedTask.user().getUsername(), new ConcurrentHashMap<>()).remove(storedTask.jobId());
         if (memPair != null) {
             var mem = memPair.getRight();
             allocatedMemory.addAndGet(-mem);
@@ -56,15 +55,15 @@ class TaskMemoryContainer {
         return allocatedMemory.get();
     }
 
-    Stream<UserEntityMemory> listTasks(User user) {
+    Stream<UserEntityMemory> listTasks(String username) {
         return memoryInUse
-            .getOrDefault(user, new ConcurrentHashMap<>())
+            .getOrDefault(username, new ConcurrentHashMap<>())
             .entrySet()
             .stream()
             .map(
                 jobIdPairEntry
                     -> UserEntityMemory.createTask(
-                    user,
+                    username,
                     jobIdPairEntry.getValue().getLeft(),
                     jobIdPairEntry.getKey(),
                     jobIdPairEntry.getValue().getRight()
@@ -75,18 +74,18 @@ class TaskMemoryContainer {
         return memoryInUse.keySet().stream().flatMap(this::listTasks);
     }
 
-    long memoryOfTasks(User user) {
+    long memoryOfTasks(String username) {
         return memoryInUse
-            .getOrDefault(user, new ConcurrentHashMap<>())
+            .getOrDefault(username, new ConcurrentHashMap<>())
             .values()
             .stream()
             .map(Pair::getRight)
             .reduce(0L, Long::sum);
     }
 
-    Set<User> taskUsers(Set<User> inputUsers) {
-        var users = new HashSet<>(inputUsers);
-        users.addAll(memoryInUse.keySet());
-        return users;
+    Set<String> taskUsers(Set<String> inputUsernames) {
+        var usernames = new HashSet<>(inputUsernames);
+        usernames.addAll(memoryInUse.keySet());
+        return usernames;
     }
 }

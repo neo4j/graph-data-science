@@ -54,8 +54,8 @@ class MemoryTrackerTest {
     void shouldHaveAvailableMemoryWithoutTheTrackedMemory() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
 
-        memoryTracker.track(new User("a", false), "b", new JobId("foo"), 9);
-        memoryTracker.track(new User("a", false), "b", new JobId("bar"), 3);
+        memoryTracker.track("a", "b", new JobId("foo"), 9);
+        memoryTracker.track("a", "b", new JobId("bar"), 3);
 
         assertThat(memoryTracker.availableMemory())
             .isEqualTo(memoryTracker.availableMemory())
@@ -65,11 +65,11 @@ class MemoryTrackerTest {
     @Test
     void shouldListForUser() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
-        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 9);
-        memoryTracker.track(new User("alice", false), "task2", new JobId("job2"), 3);
-        memoryTracker.track(new User("bob", false), "task3", new JobId("job3"), 5);
+        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
+        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
+        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
         memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
-        var aliceList = memoryTracker.listUser(new User("alice", false)).toList();
+        var aliceList = memoryTracker.listUser("alice").toList();
         assertThat(aliceList.stream().map(UserEntityMemory::name).toList()).containsExactlyInAnyOrder(
             "task1",
             "task2",
@@ -91,9 +91,9 @@ class MemoryTrackerTest {
     @Test
     void shouldListForAll() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
-        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 9);
-        memoryTracker.track(new User("alice", false), "task2", new JobId("job2"), 3);
-        memoryTracker.track(new User("bob", false), "task3", new JobId("job3"), 5);
+        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
+        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
+        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
         memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
 
         var list = memoryTracker.listAll().toList();
@@ -121,16 +121,16 @@ class MemoryTrackerTest {
     @Test
     void shouldReturnMemoryForUser() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
-        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 9);
-        memoryTracker.track(new User("alice", false), "task2", new JobId("job2"), 3);
-        memoryTracker.track(new User("bob", false), "task3", new JobId("job3"), 5);
+        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
+        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
+        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
         memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
 
-        var aliceMemory = memoryTracker.memorySummary(new User("alice", false));
+        var aliceMemory = memoryTracker.memorySummary("alice");
         assertThat(aliceMemory.totalGraphsMemory()).isEqualTo(11L);
         assertThat(aliceMemory.totalTasksMemory()).isEqualTo(12L);
 
-        var bobMemory = memoryTracker.memorySummary(new User("bob", false));
+        var bobMemory = memoryTracker.memorySummary("bob");
         assertThat(bobMemory.totalGraphsMemory()).isEqualTo(0L);
         assertThat(bobMemory.totalTasksMemory()).isEqualTo(5L);
 
@@ -139,9 +139,9 @@ class MemoryTrackerTest {
     @Test
     void shouldReturnMemoryForAll() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
-        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 9);
-        memoryTracker.track(new User("alice", false), "task2", new JobId("job2"), 3);
-        memoryTracker.track(new User("bob", false), "task3", new JobId("job3"), 5);
+        memoryTracker.track("alice", "task1", new JobId("job1"), 9);
+        memoryTracker.track("alice", "task2", new JobId("job2"), 3);
+        memoryTracker.track("bob", "task3", new JobId("job3"), 5);
         memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
 
         var list = memoryTracker.memorySummary().toList();
@@ -151,12 +151,44 @@ class MemoryTrackerTest {
 
     }
 
+    // Regression: `User` equality includes the admin flag. Graphs are keyed by a non-admin User,
+    // tasks by the calling User (admin for e.g. `neo4j`), splitting one username into two entries.
+    @Test
+    void shouldReturnSingleSummaryRowRegardlessOfAdminFlag() {
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
+
+        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("neo4j", "neo4j", "graph1", 11));
+        memoryTracker.track("neo4j", "task1", new JobId("job1"), 9);
+
+        var summary = memoryTracker.memorySummary().toList();
+
+        assertThat(summary).hasSize(1);
+        assertThat(summary.get(0).user()).isEqualTo("neo4j");
+        assertThat(summary.get(0).totalGraphsMemory()).isEqualTo(11L);
+        assertThat(summary.get(0).totalTasksMemory()).isEqualTo(9L);
+    }
+
+    // Regression: the admin-flag mismatch makes lookups miss the graph entries entirely,
+    // so `gds.memory.summary` / `gds.memory.list` report 0 graph memory for such users.
+    @Test
+    void shouldReturnGraphMemoryWhenAdminFlagDiffers() {
+        var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
+
+        memoryTracker.onGraphStoreAdded(new GraphStoreAddedEvent("alice", "neo4j", "graph1", 11));
+
+        var aliceSummary = memoryTracker.memorySummary("alice");
+        assertThat(aliceSummary.totalGraphsMemory()).isEqualTo(11L);
+
+        var aliceList = memoryTracker.listUser("alice").toList();
+        assertThat(aliceList.stream().map(UserEntityMemory::name).toList()).containsExactly("graph1");
+    }
+
     @Test
     void shouldFreeMemoryOnTaskCompleted() {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 19L);
 
-        memoryTracker.track(new User("a", false), "b", new JobId("foo"), 9);
-        memoryTracker.track(new User("a", false), "b", new JobId("bar"), 3);
+        memoryTracker.track("a", "b", new JobId("foo"), 9);
+        memoryTracker.track("a", "b", new JobId("bar"), 3);
 
         var userTaskMock = mock(StoredTask.class, Answers.RETURNS_MOCKS);
         when(userTaskMock.jobId()).thenReturn(new JobId("foo"));
@@ -173,7 +205,7 @@ class MemoryTrackerTest {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
 
         // Should not throw exception
-        memoryTracker.tryToTrack(new User("alice", false), "task1", new JobId("job1"), 50L);
+        memoryTracker.tryToTrack("alice", "task1", new JobId("job1"), 50L);
 
         assertThat(memoryTracker.availableMemory()).isEqualTo(50L);
     }
@@ -183,7 +215,7 @@ class MemoryTrackerTest {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
 
         assertThatThrownBy(() ->
-            memoryTracker.tryToTrack(new User("alice", false), "task1", new JobId("job1"), 150L)
+            memoryTracker.tryToTrack("alice", "task1", new JobId("job1"), 150L)
         ).isInstanceOf(TotalMemoryReservationExceededException.class)
             .hasFieldOrPropertyWithValue("bytesRequired", 150L)
             .hasFieldOrPropertyWithValue("bytesAvailable", 100L);
@@ -192,10 +224,10 @@ class MemoryTrackerTest {
     @Test
     void tryToTrackShouldFailWhenExceedingAvailableMemory() throws MemoryGuardException {
         var memoryTracker = new MemoryTracker(Log.noOpLog(), 100L);
-        memoryTracker.track(new User("alice", false), "task1", new JobId("job1"), 80L);
+        memoryTracker.track("alice", "task1", new JobId("job1"), 80L);
 
         assertThatThrownBy(() ->
-            memoryTracker.tryToTrack(new User("bob", false), "task2", new JobId("job2"), 30L)
+            memoryTracker.tryToTrack("bob", "task2", new JobId("job2"), 30L)
         ).isInstanceOf(AvailableMemoryReservationExceededException.class)
             .hasFieldOrPropertyWithValue("bytesRequired", 30L)
             .hasFieldOrPropertyWithValue("bytesAvailable", 20L);

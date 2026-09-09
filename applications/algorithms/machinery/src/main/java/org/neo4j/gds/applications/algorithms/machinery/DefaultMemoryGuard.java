@@ -87,11 +87,11 @@ public final class DefaultMemoryGuard implements MemoryGuard {
 
             var bytesToReserve = memoryRequirement.requiredMemory();
             if (bypassMemoryEstimation) {
-                memoryTracker.track(user,label.asString(), jobId, bytesToReserve);
+                memoryTracker.track(user.getUsername(),label.asString(), jobId, bytesToReserve);
                 return;
             }
 
-            memoryTracker.tryToTrack(user, label.asString(), jobId, bytesToReserve);
+            memoryTracker.tryToTrack(user.getUsername(), label.asString(), jobId, bytesToReserve);
 
         } catch (MemoryEstimationNotImplementedException e) {
             log.info("Memory usage estimate not available for " + label + ", skipping guard");

@@ -103,7 +103,7 @@ class DefaultMemoryGuardTest {
             memoryTracker
         );
 
-        doNothing().when(memoryTracker).tryToTrack(new User("Mark", false), "labels everywhere", jobIdMock, 13L);
+        doNothing().when(memoryTracker).tryToTrack("Mark", "labels everywhere", jobIdMock, 13L);
         memoryGuard.assertAlgorithmCanRun(
             graphMock,
             graphStoreMock,
@@ -133,7 +133,7 @@ class DefaultMemoryGuardTest {
 
         var memoryGuardException = new TotalMemoryReservationExceededException("foo", 7, 5);
         doThrow(memoryGuardException).when(memoryTracker).tryToTrack(
-            new User("Alice", false),
+            "Alice",
             "some other label",
             jobIdMock,
             117L
@@ -170,7 +170,7 @@ class DefaultMemoryGuardTest {
 
         var memoryGuardException = new AvailableMemoryReservationExceededException("bar", 19, 15);
         doThrow(memoryGuardException).when(memoryTracker).tryToTrack(
-            new User("Bob", false),
+            "Bob",
             "yet another label",
             jobIdMock,
             243L
@@ -218,6 +218,6 @@ class DefaultMemoryGuardTest {
             true
         ));
 
-        verify(memoryTracker).track(new User("Eve", false), "labels galore", jobIdMock, 43L);
+        verify(memoryTracker).track("Eve", "labels galore", jobIdMock, 43L);
     }
 }

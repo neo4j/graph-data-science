@@ -20,7 +20,6 @@
 package org.neo4j.gds.memory.tracking;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
 
@@ -52,7 +51,7 @@ class GraphStoreMemoryContainerTest {
         graphStoreMemoryContainer.addGraph(new GraphStoreAddedEvent("Alice","DB","graph2",15));
 
         graphStoreMemoryContainer.addGraph(new GraphStoreAddedEvent("Bob","DB","graph3",20));
-        var aliceList =graphStoreMemoryContainer.listGraphs(new User("Alice", false)).toList();
+        var aliceList =graphStoreMemoryContainer.listGraphs("Alice").toList();
         assertThat(aliceList).hasSize(2);
         assertThat(aliceList.stream().map(UserEntityMemory::name).toList()).containsExactlyInAnyOrder("graph1","graph2");
         assertThat(aliceList.stream().map(UserEntityMemory::memoryInBytes).toList()).containsExactlyInAnyOrder(10L,15L);
@@ -80,7 +79,7 @@ class GraphStoreMemoryContainerTest {
         graphStoreMemoryContainer.addGraph(new GraphStoreAddedEvent("Alice","DB","graph2",15));
 
         graphStoreMemoryContainer.addGraph(new GraphStoreAddedEvent("Bob","DB","graph3",20));
-        assertThat(graphStoreMemoryContainer.memoryOfGraphs(new User("Alice", false))).isEqualTo(25L);
+        assertThat(graphStoreMemoryContainer.memoryOfGraphs("Alice")).isEqualTo(25L);
     }
 
 

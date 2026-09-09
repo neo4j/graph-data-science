@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.memory.tracking;
 
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.JobId;
 
 /**
@@ -27,11 +26,11 @@ import org.neo4j.gds.core.JobId;
  * As such, we are only allowed certain types - no User for example (guess how I found this out :facepalm:)
  */
 public record UserEntityMemory(String user, String name, String entity, long memoryInBytes) {
-    static UserEntityMemory createGraph(User user, String name, long memoryInBytes) {
-        return new UserEntityMemory(user.getUsername(), name, "graph", memoryInBytes);
+    static UserEntityMemory createGraph(String username, String name, long memoryInBytes) {
+        return new UserEntityMemory(username, name, "graph", memoryInBytes);
     }
 
-    static UserEntityMemory createTask(User user, String name, JobId jobId, long memoryInBytes) {
-        return new UserEntityMemory(user.getUsername(), name, jobId.asString(), memoryInBytes);
+    static UserEntityMemory createTask(String username, String name, JobId jobId, long memoryInBytes) {
+        return new UserEntityMemory(username, name, jobId.asString(), memoryInBytes);
     }
 }

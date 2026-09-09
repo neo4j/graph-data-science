@@ -66,7 +66,7 @@ public class MemoryUsageValidator {
             if (config.sudo()) {
                 log.debug("Sudo mode: Won't check for available memory.");
                 memoryTracker.track(
-                    user,
+                    user.getUsername(),
                     taskName,
                     config.jobId(),
                     useMaxMemoryEstimation ? estimatedMemoryRange.max : estimatedMemoryRange.min
@@ -148,6 +148,6 @@ public class MemoryUsageValidator {
             log.info(message);
             throw new IllegalStateException(message);
         }
-        memoryTracker.track(user, taskName, jobId, requiredBytes);
+        memoryTracker.track(user.getUsername(), taskName, jobId, requiredBytes);
     }
 }

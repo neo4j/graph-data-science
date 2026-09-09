@@ -37,14 +37,14 @@ public class MemoryFacade {
     }
 
     public void track(String taskName, JobId jobId, long memoryEstimate) {
-        memoryTracker.track(user, taskName,jobId,memoryEstimate);
+        memoryTracker.track(user.getUsername(), taskName,jobId,memoryEstimate);
     }
 
     public Stream<UserEntityMemory> list() {
         if (user.isAdmin()){
             return memoryTracker.listAll();
         } else{
-            return  memoryTracker.listUser(user);
+            return  memoryTracker.listUser(user.getUsername());
         }
     }
 
@@ -53,7 +53,7 @@ public class MemoryFacade {
         if (user.isAdmin()){
             return memoryTracker.memorySummary();
         } else{
-            return  Stream.of(memoryTracker.memorySummary(user));
+            return  Stream.of(memoryTracker.memorySummary(user.getUsername()));
         }
     }
 
