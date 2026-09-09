@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
@@ -73,6 +74,7 @@ public final class CentralityApplications {
             launchConvenience
         );
         var completionConvenience = new CompletionConvenience(log);
+        var synchroniser = new Synchroniser(completionConvenience);
 
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,
@@ -111,7 +113,7 @@ public final class CentralityApplications {
             algorithmProcessingTemplateConvenience,
             hitsHookGenerator,
             raw,
-            completionConvenience
+            synchroniser
         );
 
         return new CentralityApplications(estimation, mutation, raw, stats, streaming, writing);
