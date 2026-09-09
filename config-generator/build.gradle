@@ -10,8 +10,6 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor openGds.google.auto.service
     annotationProcessor openGds.recordBuilder
-    annotationProcessor openGds.immutables.builder
-    annotationProcessor openGds.immutables.value
 
     compileOnly openGds.google.auto.service
     compileOnly openGds.recordBuilder
@@ -19,7 +17,6 @@ dependencies {
     implementation project(':annotations')
     implementation openGds.google.auto.common
     implementation openGds.javapoet
-    implementation openGds.immutables.value.annotations
     implementation openGds.jetbrains.annotations
 
     testCompileOnly openGds.google.auto.service

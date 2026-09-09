@@ -109,7 +109,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Optional<String> idMapBuilderType
     ) {
         var config = graphProjectConfig.orElseGet(
-            () -> ImmutableGraphProjectFromGdlConfig.builder()
+            () -> GraphProjectFromGdlConfigImpl.builder()
                 .username(userName.orElse(Username.EMPTY_USERNAME.username()))
                 .graphName(graphName.orElse("graph"))
                 .gdlGraph(gdlGraph.orElse(""))

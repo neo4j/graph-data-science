@@ -99,7 +99,7 @@ class GdlFactoryTest {
     @Test
     void testInverseIndexedRelationshipTypes() {
         var graphFactory = GdlFactory.builder()
-            .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+            .graphProjectConfig(GraphProjectFromGdlConfigImpl.builder()
                 .gdlGraph("(a)-[:REL]->(b)-[:REL]->(c),(a)-[:REL]->(c)")
                 .graphName("test")
                 .indexInverse(true)
@@ -132,7 +132,7 @@ class GdlFactoryTest {
     @Test
     void testInverseIndexedWeightedRelationshipTypes() {
         var graphFactory = GdlFactory.builder()
-            .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+            .graphProjectConfig(GraphProjectFromGdlConfigImpl.builder()
                 .gdlGraph("(a)-[:REL { prop: 42 }]->(b)-[:REL { prop: 1337 } ]->(c),(a)-[:REL { prop: 1984 }]->(c)")
                 .graphName("test")
                 .indexInverse(true)
@@ -296,7 +296,7 @@ class GdlFactoryTest {
     @MethodSource("orientations")
     void correctRelationshipSchemaDirection(Orientation orientation) {
         var graphStore = GdlFactory.builder().graphProjectConfig(
-            ImmutableGraphProjectFromGdlConfig.builder()
+            GraphProjectFromGdlConfigImpl.builder()
                 .gdlGraph(
                     "  (a1:A   {double: 42.0D, long: 42L, doubleArray: [42.0D], longArray: [42L]})" +
                     ", (a2b:A  {double: 84.0D})" +
@@ -348,7 +348,7 @@ class GdlFactoryTest {
     @Test
     void testIndexInverse() {
         var gdlFactory = GdlFactory.builder()
-            .graphProjectConfig(ImmutableGraphProjectFromGdlConfig
+            .graphProjectConfig(GraphProjectFromGdlConfigImpl
                 .builder()
                 .graphName("testGraph")
                 .gdlGraph("(a)-[:REL { foo: 42 }]->(b)")

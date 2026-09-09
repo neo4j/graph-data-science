@@ -32,7 +32,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.gdl.GraphProjectFromGdlConfigImpl;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -188,7 +188,7 @@ class GraphStoreMetadataMapperTest {
     void toRelationshipSchemaWithManyRelationshipProperties(Aggregation aggregation) {
         var graphStore = GdlFactory.builder()
             .graphProjectConfig(
-                ImmutableGraphProjectFromGdlConfig.builder()
+                GraphProjectFromGdlConfigImpl.builder()
                     .gdlGraph("()-[:REL1 {aProp: 42L, bProp: 1337L}]->(), ()-[:REL2 {cProp: 1.0, dProp: 2.0}]->()")
                     .aggregation(aggregation)
                     .graphName("test")

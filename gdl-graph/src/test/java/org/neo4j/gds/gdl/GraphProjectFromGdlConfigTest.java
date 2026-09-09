@@ -27,7 +27,7 @@ class GraphProjectFromGdlConfigTest {
 
     @Test
     void asProcedureResultConfigurationFieldReturnsModifiableMap() {
-        GraphProjectFromGdlConfig config = ImmutableGraphProjectFromGdlConfig.builder()
+        GraphProjectFromGdlConfig config = GraphProjectFromGdlConfigImpl.builder()
             .graphName("g")
             .gdlGraph("foo")
             .build();

@@ -28,9 +28,7 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor openGds.immutables.value
 
-    compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
 
     api project(':graph-dimensions')
@@ -41,8 +39,6 @@ dependencies {
         openGds.hppc,
         openGds.jol.core,
     )
-
-    testCompileOnly    openGds.immutables.value.annotations
 
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.bundles.test.basic

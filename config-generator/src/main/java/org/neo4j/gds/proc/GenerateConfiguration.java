@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.Configuration.ConvertWith;
 import org.neo4j.gds.annotation.Configuration.Parameter;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.core.CypherMapAccess;
 
 import javax.annotation.processing.Messager;
@@ -181,7 +181,7 @@ final class GenerateConfiguration {
     private static FieldDefinitions defineFields(Spec config) {
         NameAllocator names = new NameAllocator();
 
-        ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
+        var builder = FieldDefinitionsBuilder.builder().names(names);
         config.members().stream()
             .filter(m -> m.isConfigValue() || m.collectsProvidedKeys())
             .map(member -> {
@@ -195,7 +195,7 @@ final class GenerateConfiguration {
                 }
                 return fieldBuilder.build();
             })
-            .forEach(builder::addField);
+            .forEach(builder::addFields);
         return builder.build();
     }
 
@@ -474,7 +474,7 @@ final class GenerateConfiguration {
 
     private Optional<MemberDefinition> memberDefinition(NameAllocator names, Spec.Member member) {
         if (member.collectsProvidedKeys()) {
-            return Optional.of(ImmutableMemberDefinition
+            return Optional.of(MemberDefinitionBuilder
                 .builder()
                 .member(member)
                 .fieldName(names.get(member))
@@ -609,9 +609,8 @@ final class GenerateConfiguration {
 
                 if (isTypeOf(Optional.class, targetType)) {
                     return memberDefinition(names, member, targetType, Optional.of(converterInputType))
-                        .map(definition -> ImmutableMemberDefinition.builder()
-                            .from(definition)
-                            .addConverter(codeBlock -> CodeBlock.of(
+                        .map(definition -> MemberDefinitionBuilder.builder(definition)
+                            .addConverters(codeBlock -> CodeBlock.of(
                                 "$L.map($T::$N)",
                                 codeBlock,
                                 receiverType,
@@ -621,9 +620,8 @@ final class GenerateConfiguration {
                         );
                 }
                 return memberDefinition(names, member, converterInputType, Optional.empty())
-                    .map(d -> ImmutableMemberDefinition.builder()
-                        .from(d)
-                        .addConverter(c -> CodeBlock.of(
+                    .map(d -> MemberDefinitionBuilder.builder(d)
+                        .addConverters(c -> CodeBlock.of(
                             "$T.$N($L)",
                             receiverType,
                             candidate.getSimpleName().toString(),
@@ -702,7 +700,7 @@ final class GenerateConfiguration {
         TypeMirror targetType,
         Optional<TypeMirror> converterInputType
     ) {
-        ImmutableMemberDefinition.Builder builder = ImmutableMemberDefinition
+        var builder = MemberDefinitionBuilder
             .builder()
             .member(member)
             .fieldName(names.get(member))
@@ -719,7 +717,7 @@ final class GenerateConfiguration {
             case DOUBLE -> builder.methodName("Double");
             case BYTE, SHORT, FLOAT -> builder
                 .methodName("Number")
-                .addConverter(c -> CodeBlock.of("$L.$LValue()", c, targetType));
+                .addConverters(c -> CodeBlock.of("$L.$LValue()", c, targetType));
             case DECLARED -> {
                 if (isTypeOf(String.class, targetType)) {
                     builder.methodName("String");
@@ -808,52 +806,33 @@ final class GenerateConfiguration {
         return Optional.empty();
     }
 
-    @ValueClass
-    interface FieldDefinitions {
-        List<FieldSpec> fields();
+    @GenerateBuilder
+    record FieldDefinitions(List<FieldSpec> fields, NameAllocator names) {}
 
-        NameAllocator names();
-    }
+    @GenerateBuilder
+    record MemberDefinition(
+        Spec.Member member,
+        TypeMirror fieldType,
+        TypeMirror parameterType,
+        String fieldName,
+        String configParamName,
+        String methodPrefix,
+        String methodName,
+        String configKey,
+        Optional<CodeBlock> defaultProvider,
+        Optional<CodeBlock> expectedTypeCodeBlock,
+        Optional<TypeMirror> expectedType,
+        Optional<TypeMirror> expectedTypeWrappedInOptional,
+        List<UnaryOperator<CodeBlock>> converters
+    ) {}
 
-    @ValueClass
-    interface MemberDefinition {
-        Spec.Member member();
-
-        TypeMirror fieldType();
-
-        TypeMirror parameterType();
-
-        String fieldName();
-
-        String configParamName();
-
-        String methodPrefix();
-
-        String methodName();
-
-        String configKey();
-
-        Optional<CodeBlock> defaultProvider();
-
-        Optional<CodeBlock> expectedTypeCodeBlock();
-
-        Optional<TypeMirror> expectedType();
-
-        Optional<TypeMirror> expectedTypeWrappedInOptional();
-
-        List<UnaryOperator<CodeBlock>> converters();
-    }
-
-    @ValueClass
-    interface InvalidCandidate {
-        Element element();
-
-        String message();
-
-        Object[] args();
-
+    record InvalidCandidate(
+        Element element,
+        String message,
+        Object[] args
+    ) {
         static InvalidCandidate of(Element element, String format, Object... args) {
-            return ImmutableInvalidCandidate.builder().element(element).message(format).args(args).build();
+            return new InvalidCandidate(element, format, args);
         }
     }
 }

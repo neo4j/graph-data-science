@@ -240,8 +240,8 @@ class ConfigurationProcessorTest {
     @Test
     void invalidOptionals() {
         runNegativeTest("Optionals",
-            e("Optional must have a Cypher-supported type as type argument, but found none.", 30, 14),
-            e("Optional fields can not to be declared default (Optional.empty is the default).", 32, 30)
+            e("Optional must have a Cypher-supported type as type argument, but found none.", 29, 14),
+            e("Optional fields can not to be declared default (Optional.empty is the default).", 31, 30)
         );
     }
 

@@ -32,14 +32,14 @@ class BufferedCompositeRelationshipConsumerTest {
     void shouldNotThrowWhenFull() {
         var compositeBatchBuffer = createCompositeBuffer(2, 2);
 
-        var type0Rel = ImmutableTestRelationship.builder()
+        var type0Rel = TestRelationshipBuilder.builder()
             .typeTokenId(0)
             .relationshipId(0)
             .sourceNodeReference(0)
             .targetNodeReference(1)
             .build();
 
-        var type1Rel = ImmutableTestRelationship.builder()
+        var type1Rel = TestRelationshipBuilder.builder()
             .typeTokenId(1)
             .relationshipId(1)
             .sourceNodeReference(0)

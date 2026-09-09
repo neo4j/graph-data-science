@@ -35,7 +35,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.gdl.GraphProjectFromGdlConfigImpl;
 
 import java.util.Collections;
 import java.util.Map;
@@ -205,7 +205,7 @@ class GraphStoreMetadataFactoryTest {
             // changing property states
             Arguments.of(
                 GdlFactory.builder()
-                    .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+                    .graphProjectConfig(GraphProjectFromGdlConfigImpl.builder()
                         .graphName("gdl")
                         .gdlGraph(
                             "(:A { prop1: 42, prop2: 4.2 })-->(:B { prop3: [1.0, 3.0, 3.0, 7.0], prop4: [1L, 3L, 3L, 7L] })")
@@ -306,7 +306,7 @@ class GraphStoreMetadataFactoryTest {
             // variation in relationship schema
             Arguments.of(
                 GdlFactory.builder()
-                    .graphProjectConfig(ImmutableGraphProjectFromGdlConfig.builder()
+                    .graphProjectConfig(GraphProjectFromGdlConfigImpl.builder()
                         .graphName("gdl")
                         .gdlGraph("()-[:REL1 { w1: 13.37 }]->()-[:REL1 { w1: 13.38 }]->()-[:REL2]->()")
                         .propertyState(org.neo4j.gds.api.PropertyState.PERSISTENT)

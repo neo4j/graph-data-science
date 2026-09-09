@@ -20,7 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.Reference;
@@ -50,7 +50,7 @@ class BufferedRelationshipConsumerTest {
             .capacity(2)
             .build();
 
-        var testRelationship = ImmutableTestRelationship.builder()
+        var testRelationship = TestRelationshipBuilder.builder()
             .typeTokenId(0)
             .relationshipId(0)
             .sourceNodeReference(0)
@@ -63,11 +63,15 @@ class BufferedRelationshipConsumerTest {
         assertThat(relationshipsBatchBuffer.relationshipsBatchBuffer().isFull()).isTrue();
     }
 
-    @ValueClass
-    public interface TestRelationship extends RelationshipReference {
-
+    @GenerateBuilder
+    record TestRelationship(
+        long relationshipId,
+        int typeTokenId,
+        long sourceNodeReference,
+        long targetNodeReference
+    ) implements RelationshipReference {
         @Override
-        default Reference propertiesReference() {
+        public Reference propertiesReference() {
             return LongReference.NULL_REFERENCE;
         }
     }

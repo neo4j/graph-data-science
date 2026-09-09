@@ -12,6 +12,7 @@ dependencies {
     annotationProcessor openGds.immutables.value
     annotationProcessor neo4j.annotations
 
+    compileOnly project(':config-generator')
     compileOnly openGds.immutables.value
     compileOnly openGds.immutables.builder
     compileOnly openGds.jetbrains.annotations

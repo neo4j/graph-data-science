@@ -51,10 +51,12 @@ dependencies {
     // Test dependencies
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor openGds.immutables.value
+    testAnnotationProcessor openGds.recordBuilder
 
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
+    testCompileOnly openGds.recordBuilder
 
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')
