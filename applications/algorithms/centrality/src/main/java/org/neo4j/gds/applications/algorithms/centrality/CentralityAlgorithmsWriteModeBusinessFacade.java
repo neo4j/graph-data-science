@@ -65,7 +65,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Clo
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HITS;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
@@ -161,13 +160,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT articulationPoints(
+    public <CONFIGURATION extends ArticulationPointsWriteConfig, RESULT> RESULT articulationPoints(
         GraphName graphName,
-        ArticulationPointsWriteConfig configuration,
-        ResultBuilder<ArticulationPointsWriteConfig, ArticulationPointsResult, RESULT, NodePropertiesWritten> resultBuilder
+        CONFIGURATION configuration,
+        ResultBuilder<CONFIGURATION, ArticulationPointsResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
         // this is the value add for this layer
-        var articulationPointsWriteStep = new ArticulationPointsWriteStep(
+        var writeStep = new ArticulationPointsWriteStep(
             writeNodePropertyService,
             configuration::resolveResultStore,
             configuration.writeConcurrency(),
@@ -177,7 +176,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var future = centralityAlgorithmsBusinessFacade.articulationPoints(
             graphName,
             configuration,
-            Optional.of(new WriteSideEffect<>(configuration.jobId(), articulationPointsWriteStep)),
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
             new WriteResultRenderer<>(configuration, resultBuilder), // and this
             false
         );
@@ -280,15 +279,14 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new HarmonicCentralityWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        var future = centralityAlgorithmsBusinessFacade.harmonicCentrality(
             graphName,
             configuration,
-            HarmonicCentrality,
-            estimationFacade::harmonicCentrality,
-            (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
-            writeStep,
-            resultBuilder
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
         );
+
+        return completionConvenience.completeWork(future);
     }
 
     public <RESULT> RESULT pageRank(
