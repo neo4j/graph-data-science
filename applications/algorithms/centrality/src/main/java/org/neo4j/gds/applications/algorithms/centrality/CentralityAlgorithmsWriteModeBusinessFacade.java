@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -65,7 +65,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Clo
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HITS;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
@@ -75,7 +74,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final WriteNodePropertyService writeNodePropertyService;
     private final HitsHookGenerator hitsHookGenerator;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
-    private final CompletionConvenience completionConvenience;
+    private final Synchroniser synchroniser;
 
     private CentralityAlgorithmsWriteModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
@@ -84,7 +83,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         WriteNodePropertyService writeNodePropertyService,
         HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
-        CompletionConvenience completionConvenience
+        Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
@@ -92,7 +91,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         this.writeNodePropertyService = writeNodePropertyService;
         this.hitsHookGenerator = hitsHookGenerator;
         this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
-        this.completionConvenience = completionConvenience;
+        this.synchroniser = synchroniser;
     }
 
     public static CentralityAlgorithmsWriteModeBusinessFacade create(
@@ -104,7 +103,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
-        CompletionConvenience completionConvenience
+        Synchroniser synchroniser
     ) {
         var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
@@ -115,7 +114,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             writeToDatabase,
             hitsHookGenerator,
             centralityAlgorithmsBusinessFacade,
-            completionConvenience
+            synchroniser
         );
     }
 
@@ -143,6 +142,28 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         );
     }
 
+    public <CONFIGURATION extends ArticulationPointsWriteConfig, RESULT> RESULT articulationPoints(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        ResultBuilder<CONFIGURATION, ArticulationPointsResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        // this is the value add for this layer
+        var writeStep = new ArticulationPointsWriteStep(
+            writeNodePropertyService,
+            configuration::resolveResultStore,
+            configuration.writeConcurrency(),
+            configuration.writeProperty()
+        );
+
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.articulationPoints(
+            graphName,
+            configuration,
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder), // and this
+            false
+        ));
+    }
+
     public <RESULT> RESULT betweennessCentrality(
         GraphName graphName,
         BetweennessCentralityWriteConfig configuration,
@@ -159,30 +180,6 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             writeStep,
             resultBuilder
         );
-    }
-
-    public <RESULT> RESULT articulationPoints(
-        GraphName graphName,
-        ArticulationPointsWriteConfig configuration,
-        ResultBuilder<ArticulationPointsWriteConfig, ArticulationPointsResult, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        // this is the value add for this layer
-        var articulationPointsWriteStep = new ArticulationPointsWriteStep(
-            writeNodePropertyService,
-            configuration::resolveResultStore,
-            configuration.writeConcurrency(),
-            configuration.writeProperty()
-        );
-
-        var future = centralityAlgorithmsBusinessFacade.articulationPoints(
-            graphName,
-            configuration,
-            Optional.of(new WriteSideEffect<>(configuration.jobId(), articulationPointsWriteStep)),
-            new WriteResultRenderer<>(configuration, resultBuilder), // and this
-            false
-        );
-
-        return completionConvenience.completeWork(future); // and this
     }
 
     public <CONFIGURATION extends InfluenceMaximizationWriteConfig, RESULT> RESULT celf(
@@ -280,15 +277,12 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new HarmonicCentralityWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.harmonicCentrality(
             graphName,
             configuration,
-            HarmonicCentrality,
-            estimationFacade::harmonicCentrality,
-            (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT pageRank(

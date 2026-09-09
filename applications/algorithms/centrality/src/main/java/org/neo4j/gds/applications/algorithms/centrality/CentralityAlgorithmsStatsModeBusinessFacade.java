@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultRenderer;
@@ -31,7 +31,8 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
-import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
@@ -50,7 +51,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Clo
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HITS;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsStatsModeBusinessFacade {
@@ -59,7 +59,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final HitsHookGenerator hitsHookGenerator;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
-    private final CompletionConvenience completionConvenience;
+    private final Synchroniser synchroniser;
 
     CentralityAlgorithmsStatsModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
@@ -67,14 +67,14 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
-        CompletionConvenience completionConvenience
+        Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.hitsHookGenerator = hitsHookGenerator;
         this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
-        this.completionConvenience = completionConvenience;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT articleRank(
@@ -97,15 +97,13 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
         ArticulationPointsBaseConfig configuration,
         StatsResultBuilder<ArticulationPointsResult, RESULT> resultBuilder
     ) {
-        var future = centralityAlgorithmsBusinessFacade.articulationPoints(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.articulationPoints(
             graphName,
             configuration,
             Optional.empty(),
             new StatsResultRenderer<>(resultBuilder),
             false
-        );
-
-        return completionConvenience.completeWork(future);
+        ));
     }
 
     public <RESULT> RESULT betweennessCentrality(
@@ -185,17 +183,15 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT harmonicCentrality(
         GraphName graphName,
-        HarmonicCentralityStatsConfig configuration,
-        StatsResultBuilder<CentralityAlgorithmResult, RESULT> resultBuilder
+        HarmonicCentralityBaseConfig configuration,
+        StatsResultBuilder<HarmonicResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.harmonicCentrality(
             graphName,
             configuration,
-            HarmonicCentrality,
-            estimationFacade::harmonicCentrality,
-            (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT pageRank(

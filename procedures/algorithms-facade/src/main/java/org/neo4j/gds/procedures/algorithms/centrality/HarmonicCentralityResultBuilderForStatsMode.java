@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class HarmonicCentralityResultBuilderForStatsMode implements StatsResultBuilder<CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
+class HarmonicCentralityResultBuilderForStatsMode implements StatsResultBuilder<HarmonicResult, Stream<CentralityStatsResult>> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
     private final HarmonicCentralityStatsConfig configuration;
@@ -45,7 +45,7 @@ class HarmonicCentralityResultBuilderForStatsMode implements StatsResultBuilder<
     @Override
     public Stream<CentralityStatsResult> build(
         Graph graph,
-        Optional<CentralityAlgorithmResult> result,
+        Optional<HarmonicResult> result,
         AlgorithmProcessingTimings timings
     ) {
         var centralityStatsResult = genericResultBuilder.build(
