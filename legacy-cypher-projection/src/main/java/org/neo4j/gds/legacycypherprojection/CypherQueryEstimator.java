@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
-import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.ArrayList;
@@ -54,7 +53,11 @@ public class CypherQueryEstimator {
                 var propertyColumns = new ArrayList<>(result.columns());
                 propertyColumns.removeAll(reservedColumns);
 
-                propertyColumns.forEach(PropertyMapping::validatePropertyKey);
+                for (String propertyColumn : propertyColumns) {
+                    if (propertyColumn.isEmpty()) {
+                        throw new IllegalArgumentException("Property key must not be empty.");
+                    }
+                }
 
                 return EstimationResult.of(estimatedRows, propertyColumns);
             }
