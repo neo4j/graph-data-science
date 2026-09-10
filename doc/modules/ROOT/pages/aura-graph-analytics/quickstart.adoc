@@ -105,7 +105,7 @@ RETURN ranIterations, nodePropertiesWritten
 [opts="header"]
 |===
 | ranIterations | nodePropertiesWritten
-| 1             | 6
+| 20            | 6
 |===
 --
 
