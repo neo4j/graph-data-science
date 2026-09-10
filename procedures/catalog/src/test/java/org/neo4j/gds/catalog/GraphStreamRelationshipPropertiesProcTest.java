@@ -28,6 +28,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -85,19 +86,19 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         runQuery(GdsCypher.call(TEST_GRAPH_DIFFERENT_PROPERTIES)
             .graphProject()
             .withAnyLabel()
-            .withRelationshipType("REL1", RelationshipProjection.builder()
-                .type("REL1")
-                .addProperties(
+            .withRelationshipType("REL1", new RelationshipProjection(
+                "REL1",
+                PropertyMappings.of(
                     PropertyMapping.of("newRelProp1", "relProp1", 1337),
                     PropertyMapping.of("newRelProp2", "relProp2", 1337)
                 )
-                .build()
-            )
-            .withRelationshipType("REL2", RelationshipProjection.builder()
-                .type("REL2")
-                .addProperties(PropertyMapping.of("newRelProp1", "relProp1", 1337))
-                .build()
-            )
+            ))
+            .withRelationshipType("REL2", new RelationshipProjection(
+                "REL2",
+                PropertyMappings.of(
+                    PropertyMapping.of("newRelProp1", "relProp1", 1337)
+                )
+            ))
             .yields());
     }
 

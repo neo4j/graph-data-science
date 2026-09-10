@@ -104,7 +104,7 @@ class CELFMutateProcTest extends BaseProcTest {
             .withNodeLabel("Node")
             .withRelationshipType(
                 "RELATIONSHIP",
-                RelationshipProjection.of(
+                new RelationshipProjection(
                     "RELATIONSHIP",
                     Orientation.NATURAL,
                     Aggregation.DEFAULT

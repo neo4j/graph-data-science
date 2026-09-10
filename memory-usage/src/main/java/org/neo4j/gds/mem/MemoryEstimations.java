@@ -686,7 +686,7 @@ final class CompositeEstimation extends BaseEstimation {
     public MemoryTree estimate(final GraphDimensions dimensions, final Concurrency concurrency) {
         List<MemoryTree> newComponent = components.stream()
                 .map(e -> e.estimate(dimensions, concurrency))
-                .collect(Collectors.toList());
+                .toList();
         return new CompositeTree(description(), newComponent);
     }
 }

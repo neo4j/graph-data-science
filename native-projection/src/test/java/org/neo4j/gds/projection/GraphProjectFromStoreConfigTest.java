@@ -20,7 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ImmutableRelationshipProjections;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
@@ -31,7 +31,6 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.Aggregation;
 
 import java.util.Set;
 
@@ -56,7 +55,7 @@ class GraphProjectFromStoreConfigTest {
 
         var nodeProjections = NodeProjections.single(
             NodeLabel.of("A"),
-            NodeProjection.builder().label("A").properties(propertyMappings).build()
+            new NodeProjection("A", propertyMappings)
         );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
@@ -81,13 +80,13 @@ class GraphProjectFromStoreConfigTest {
             Aggregation.NONE
         ));
 
-        RelationshipProjections relProjections = ImmutableRelationshipProjections.single(
+        RelationshipProjections relProjections = RelationshipProjections.single(
             RelationshipType.of("A"),
-            RelationshipProjection.builder()
-                .type("A")
-                .orientation(Orientation.NATURAL)
-                .properties(propertyMappings)
-                .build()
+            new RelationshipProjection(
+                "A",
+                Orientation.NATURAL,
+                propertyMappings
+            )
         );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
@@ -122,7 +121,7 @@ class GraphProjectFromStoreConfigTest {
 
         var nodeProjections = NodeProjections.single(
             NodeLabel.of("A"),
-            NodeProjection.builder().label("A").properties(propertyMappings2).build()
+            new NodeProjection("A", propertyMappings2)
         );
 
         GraphProjectFromStoreConfig graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
@@ -150,13 +149,13 @@ class GraphProjectFromStoreConfigTest {
             Aggregation.NONE
         ));
 
-        RelationshipProjections relProjections = ImmutableRelationshipProjections.single(
+        RelationshipProjections relProjections = RelationshipProjections.single(
             RelationshipType.of("A"),
-            RelationshipProjection.builder()
-                .type("A")
-                .orientation(Orientation.NATURAL)
-                .properties(propertyMappings2)
-                .build()
+            new RelationshipProjection(
+                "A",
+                Orientation.NATURAL,
+                propertyMappings2
+            )
         );
 
         GraphProjectFromStoreConfig graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()

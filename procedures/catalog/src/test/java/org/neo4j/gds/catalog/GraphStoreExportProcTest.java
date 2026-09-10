@@ -406,25 +406,23 @@ class GraphStoreExportProcTest extends BaseProcTest {
             .withNodeProperty("prop1")
             .withNodeProperty("prop2")
             .withRelationshipType("REL1",
-                RelationshipProjection
-                    .builder()
-                    .type("REL1")
-                    .properties(PropertyMappings.of(PropertyMapping.of("weight1")))
-                    .build()
+                new RelationshipProjection(
+                    "REL1",
+                    PropertyMappings.of(PropertyMapping.of("weight1"))
+                )
             )
             .withRelationshipType("REL2",
-                RelationshipProjection
-                    .builder()
-                    .type("REL2")
-                    .properties(PropertyMappings.of(PropertyMapping.of("weight2")))
-                    .build()
+                new RelationshipProjection(
+                    "REL2",
+                    PropertyMappings.of(PropertyMapping.of("weight2"))
+                )
             )
             .withRelationshipType("REL3",
-                RelationshipProjection
-                    .builder()
-                    .type("REL3")
-                    .properties(PropertyMappings.of(PropertyMapping.of("weight3")))
-                    .build())
+                new RelationshipProjection(
+                    "REL3",
+                    PropertyMappings.of(PropertyMapping.of("weight3"))
+                )
+            )
             .yields());
     }
 }

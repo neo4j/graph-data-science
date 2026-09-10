@@ -398,10 +398,10 @@ class GraphProjectProcTest extends BaseProcTest {
             .withAnyLabel()
             .withRelationshipType(
                 "B",
-                RelationshipProjection.builder()
-                    .type("REL")
-                    .orientation(Orientation.parse(orientation))
-                    .build()
+                new RelationshipProjection(
+                    "REL",
+                    Orientation.parse(orientation)
+                )
             )
             .yields();
 
@@ -436,10 +436,10 @@ class GraphProjectProcTest extends BaseProcTest {
             .graphProject()
             .withAnyLabel()
             .withRelationshipType(
-                "B", RelationshipProjection.builder()
-                    .type("REL")
-                    .properties(PropertyMappings.fromObject(properties))
-                    .build()
+                "B", new RelationshipProjection(
+                    "REL",
+                    PropertyMappings.fromObject(properties)
+                )
             )
             .yields();
 
@@ -621,11 +621,13 @@ class GraphProjectProcTest extends BaseProcTest {
             .withAnyLabel()
             .withRelationshipType(
                 "KNOWS",
-                RelationshipProjection.builder()
-                    .type("KNOWS")
-                    .orientation(Orientation.NATURAL)
-                    .addProperty("weight", "weight", DefaultValue.of(Double.NaN), aggregation)
-                    .build()
+                new RelationshipProjection(
+                    "KNOWS",
+                    Orientation.NATURAL,
+                    PropertyMappings.of(
+                        PropertyMapping.of("weight", "weight", DefaultValue.of(Double.NaN), aggregation)
+                    )
+                )
             )
             .yields();
 

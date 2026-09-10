@@ -31,6 +31,7 @@ import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -111,7 +112,7 @@ class GraphSageStreamProcTest extends BaseProcTest {
             .withNodeProperty(PropertyMapping.of("death_year", 1.0))
             .withRelationshipType(
                 "R",
-                RelationshipProjection.of(
+                new RelationshipProjection(
                     "*",
                     Orientation.UNDIRECTED
                 )
@@ -236,11 +237,12 @@ class GraphSageStreamProcTest extends BaseProcTest {
                     .graphName("implicitWeightedGraph")
                     .nodeProjections(NodeProjections.single(
                         NodeLabel.of("King"),
-                        NodeProjection.builder()
-                            .label("King")
-                            .addProperty(
+                        new NodeProjection(
+                            "King",
+                            PropertyMappings.of(
                                 PropertyMapping.of("age")
-                            ).build()
+                            )
+                        )
                     ))
                     .relationshipProjections(RelationshipProjections.fromString("REL")
                     ).build(),
@@ -254,12 +256,13 @@ class GraphSageStreamProcTest extends BaseProcTest {
                     .graphName("implicitWeightedGraph")
                     .nodeProjections(NodeProjections.single(
                         NodeLabel.of("King"),
-                        NodeProjection.builder()
-                            .label("King")
-                            .addProperties(
+                        new NodeProjection(
+                            "King",
+                            PropertyMappings.of(
                                 PropertyMapping.of("age"),
                                 PropertyMapping.of("birth_year")
-                            ).build()
+                            )
+                        )
                     ))
                     .relationshipProjections(RelationshipProjections.fromString("REL")
                     ).build(),

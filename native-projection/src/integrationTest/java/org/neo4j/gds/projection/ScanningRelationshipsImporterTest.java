@@ -74,13 +74,13 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             .relationshipProjections(
                 RelationshipProjections.single(
                     relationshipType,
-                    RelationshipProjection.builder()
-                        .type("R")
-                        .indexInverse(true)
-                        .properties(PropertyMappings.of(PropertyMapping.of("p")))
-                        .build()
-                ))
-            .build();
+                    new RelationshipProjection(
+                        "R",
+                        true,
+                        PropertyMappings.of(PropertyMapping.of("p"))
+                    )
+                )
+            ).build();
 
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(db);
         var transactionContext = DatabaseTransactionContext.of(db, db.beginTx());

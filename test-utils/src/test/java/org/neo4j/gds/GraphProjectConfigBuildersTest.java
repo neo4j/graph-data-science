@@ -31,6 +31,7 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,10 +60,9 @@ class GraphProjectConfigBuildersTest {
                 new StoreConfigBuilder().jobId(jobId).build(),
                 GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.single(ALL_NODES, NodeProjection.all()))
-                    .relationshipProjections(ImmutableRelationshipProjections.builder()
-                        .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.ALL)
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
+                    .relationshipProjections(new RelationshipProjections(
+                        Map.of(ALL_RELATIONSHIPS, RelationshipProjection.ALL)
+                    )).nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
                     .jobId(jobId)
                     .build()
@@ -70,33 +70,31 @@ class GraphProjectConfigBuildersTest {
             Arguments.arguments(
                 new StoreConfigBuilder().addNodeLabel("Foo").addRelationshipType("BAR").jobId(jobId).build(),
                 GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
-                    .relationshipProjections(ImmutableRelationshipProjections.builder()
-                        .putProjection(
+                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), new NodeProjection("Foo")))
+                    .relationshipProjections(new RelationshipProjections(
+                        Map.of(
                             RelationshipType.of("BAR"),
-                            RelationshipProjection.of("BAR", Orientation.NATURAL, Aggregation.DEFAULT)
+                            new RelationshipProjection("BAR", Orientation.NATURAL, Aggregation.DEFAULT)
                         )
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
+                    )).nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
                     .jobId(jobId)
                     .build()
             ),
             Arguments.arguments(
                 new StoreConfigBuilder()
-                    .addNodeProjection(NodeProjection.fromString("Foo"))
+                    .addNodeProjection(new NodeProjection("Foo"))
                     .addRelationshipType("BAR")
                     .jobId(jobId)
                     .build(),
                 GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
-                    .relationshipProjections(ImmutableRelationshipProjections.builder()
-                        .putProjection(
+                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), new NodeProjection("Foo")))
+                    .relationshipProjections(new RelationshipProjections(
+                        Map.of(
                             RelationshipType.of("BAR"),
-                            RelationshipProjection.of("BAR", Orientation.NATURAL, Aggregation.DEFAULT)
+                            new RelationshipProjection("BAR", Orientation.NATURAL, Aggregation.DEFAULT)
                         )
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
+                    )).nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
                     .jobId(jobId)
                     .build()
@@ -109,14 +107,13 @@ class GraphProjectConfigBuildersTest {
                     .jobId(jobId)
                     .build(),
                 GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
-                    .relationshipProjections(ImmutableRelationshipProjections.builder()
-                        .putProjection(
+                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), new NodeProjection("Foo")))
+                    .relationshipProjections(new RelationshipProjections(
+                        Map.of(
                             RelationshipType.of("BAR"),
-                            RelationshipProjection.of("BAR", Orientation.UNDIRECTED, Aggregation.DEFAULT)
+                            new RelationshipProjection("BAR", Orientation.UNDIRECTED, Aggregation.DEFAULT)
                         )
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
+                    )).nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
                     .jobId(jobId)
                     .build()
@@ -125,22 +122,20 @@ class GraphProjectConfigBuildersTest {
                 new StoreConfigBuilder()
                     .addNodeLabel("Foo")
                     .addRelationshipType("BAR")
-                    .addRelationshipProjection(RelationshipProjection.of("BAZ", Orientation.NATURAL))
+                    .addRelationshipProjection(new RelationshipProjection("BAZ", Orientation.NATURAL))
                     .globalProjection(Orientation.UNDIRECTED)
                     .jobId(jobId)
                     .build(),
                 GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
-                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
-                    .relationshipProjections(ImmutableRelationshipProjections.builder()
-                        .putProjection(
+                    .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), new NodeProjection("Foo")))
+                    .relationshipProjections(new RelationshipProjections(
+                        Map.of(
                             RelationshipType.of("BAR"),
-                            RelationshipProjection.of("BAR", Orientation.UNDIRECTED, Aggregation.DEFAULT)
-                        )
-                        .putProjection(
+                            new RelationshipProjection("BAR", Orientation.UNDIRECTED, Aggregation.DEFAULT),
                             RelationshipType.of("BAZ"),
-                            RelationshipProjection.of("BAZ", Orientation.NATURAL, Aggregation.DEFAULT)
+                            new RelationshipProjection("BAZ", Orientation.NATURAL, Aggregation.DEFAULT)
                         )
-                        .build())
+                    ))
                     .nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
                     .jobId(jobId)
@@ -160,21 +155,24 @@ class GraphProjectConfigBuildersTest {
                 GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.single(
                             NodeLabel.of("Foo"),
-                            NodeProjection.builder()
-                                .label("Foo")
-                                .addProperty(PropertyMapping.of("nProp", DefaultValue.of(23.0D)))
-                                .build()
+                            new NodeProjection(
+                                "Foo",
+                                PropertyMappings.of(
+                                    PropertyMapping.of("nProp", DefaultValue.of(23.0D))
+                                )
+                            )
                         ))
-                    .relationshipProjections(ImmutableRelationshipProjections.builder()
-                        .putProjection(
+                    .relationshipProjections(new RelationshipProjections(
+                        Map.of(
                             RelationshipType.of("BAR"),
-                            RelationshipProjection.builder()
-                                .type("BAR")
-                                .addProperty(PropertyMapping.of("rProp", DefaultValue.of(42.0D)))
-                                .build()
+                            new RelationshipProjection(
+                                "BAR",
+                                PropertyMappings.of(
+                                    PropertyMapping.of("rProp", DefaultValue.of(42.0D))
+                                )
+                            )
                         )
-                        .build())
-                    .nodeProperties(PropertyMappings.of())
+                    )).nodeProperties(PropertyMappings.of())
                     .relationshipProperties(PropertyMappings.of())
                     .jobId(jobId)
                     .build()

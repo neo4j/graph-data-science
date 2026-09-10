@@ -20,7 +20,6 @@
 package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -36,6 +35,7 @@ import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryTree;
 
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -82,17 +82,15 @@ class NativeFactoryTest {
             .build();
 
         NodeProjections nodeProjections = NodeProjections.all();
-        RelationshipProjections relationshipProjections = ImmutableRelationshipProjections
-            .builder()
-            .putProjection(
+        RelationshipProjections relationshipProjections = new RelationshipProjections(
+            Map.of(
                 RelationshipType.of("TYPE1"),
-                RelationshipProjection
-                    .builder()
-                    .type("TYPE1")
-                    .orientation(Orientation.NATURAL)
-                    .build()
+                new RelationshipProjection(
+                    "TYPE1",
+                    Orientation.NATURAL
+                )
             )
-            .build();
+        );
 
         MemoryTree estimate = CSRGraphStoreFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
@@ -110,18 +108,16 @@ class NativeFactoryTest {
             .build();
 
         NodeProjections nodeProjections = NodeProjections.all();
-        RelationshipProjections relationshipProjections = ImmutableRelationshipProjections
-            .builder()
-            .putProjection(
+        RelationshipProjections relationshipProjections = new RelationshipProjections(
+            Map.of(
                 RelationshipType.of("TYPE1"),
-                RelationshipProjection
-                    .builder()
-                    .type("TYPE1")
-                    .orientation(Orientation.NATURAL)
-                    .indexInverse(true)
-                    .build()
+                new RelationshipProjection(
+                    "TYPE1",
+                    Orientation.NATURAL,
+                    true
+                )
             )
-            .build();
+        );
 
         MemoryTree estimate = CSRGraphStoreFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
@@ -140,11 +136,10 @@ class NativeFactoryTest {
             .build();
 
         NodeProjections nodeProjections = NodeProjections.all();
-        RelationshipProjections relationshipProjections = ImmutableRelationshipProjections
-            .builder()
-            .putProjection(RelationshipType.of("TYPE1"), RelationshipProjection.of("TYPE1", Orientation.NATURAL))
-            .putProjection(RelationshipType.of("TYPE2"), RelationshipProjection.of("TYPE2", Orientation.NATURAL))
-            .build();
+        RelationshipProjections relationshipProjections = new RelationshipProjections(Map.of(
+            RelationshipType.of("TYPE1"), new RelationshipProjection("TYPE1", Orientation.NATURAL),
+            RelationshipType.of("TYPE2"), new RelationshipProjection("TYPE2", Orientation.NATURAL)
+        ));
 
         MemoryTree estimate = CSRGraphStoreFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)

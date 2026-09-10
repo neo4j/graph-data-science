@@ -101,7 +101,7 @@ class CELFStreamProcTest extends BaseProcTest {
             .withNodeLabel("Node")
             .withRelationshipType(
                 "RELATIONSHIP",
-                RelationshipProjection.of(
+                new RelationshipProjection(
                     "RELATIONSHIP",
                     Orientation.NATURAL,
                     Aggregation.DEFAULT
@@ -150,7 +150,7 @@ class CELFStreamProcTest extends BaseProcTest {
             .addParameter("propagationProbability", 0.2)
             .addParameter("monteCarloSimulations", 10)
             .yields();
-        
+
         assertThatNoException().isThrownBy(() -> runQuery(query));
     }
 

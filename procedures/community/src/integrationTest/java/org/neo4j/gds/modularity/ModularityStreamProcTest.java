@@ -68,7 +68,7 @@ class ModularityStreamProcTest extends BaseProcTest {
             .withAnyLabel()
             .withRelationshipType(
                 "R",
-                RelationshipProjection.builder().type("R").orientation(Orientation.UNDIRECTED).build()
+                new RelationshipProjection("R", Orientation.UNDIRECTED)
             )
             .yields();
 

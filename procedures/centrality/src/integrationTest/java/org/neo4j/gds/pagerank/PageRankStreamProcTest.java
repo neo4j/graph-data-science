@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.IdFunction;
@@ -101,10 +102,13 @@ class PageRankStreamProcTest extends BaseProcTest {
         runQuery(GdsCypher.call("graphLabel1")
             .graphProject()
             .withNodeLabel("Label1")
-            .withRelationshipType("TYPE1", RelationshipProjection.builder().type("TYPE1")
-                .addProperties(PropertyMapping.of("equalWeight"), PropertyMapping.of("weight"))
-                .build())
-            .yields());
+            .withRelationshipType("TYPE1", new RelationshipProjection(
+                "TYPE1",
+                    PropertyMappings.of(
+                        PropertyMapping.of("equalWeight"), PropertyMapping.of("weight")
+                    )
+                )
+            ).yields());
     }
 
     @Test

@@ -424,7 +424,7 @@ class GraphLoaderTest extends BaseTest {
             .putNodeProjectionsWithIdentifier("Node", NodeProjection.all())
             .putRelationshipProjectionsWithIdentifier(
                 relationshipType.name(),
-                RelationshipProjection.builder().type("*").indexInverse(true).build()
+                new RelationshipProjection("*", true)
             )
             .build()
             .graphStore();
@@ -448,8 +448,8 @@ class GraphLoaderTest extends BaseTest {
         var graphStore = initialiseStoreLoaderBuilder()
             .graphName("graph")
             .addNodeLabel("Node1")
-            .addRelationshipProjection(RelationshipProjection.of("REL1", orientation1))
-            .addRelationshipProjection(RelationshipProjection.of("REL2", orientation2))
+            .addRelationshipProjection(new RelationshipProjection("REL1", orientation1))
+            .addRelationshipProjection(new RelationshipProjection("REL2", orientation2))
             .build()
             .graphStore();
 

@@ -21,8 +21,6 @@ package org.neo4j.gds.config;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.ImmutableNodeProjections;
-import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
@@ -96,12 +94,12 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
     @Configuration.Ignore
     @Configuration.ToMapValue("org.neo4j.gds.NodeProjections#toObject")
     default NodeProjections nodeProjections() {
-        return ImmutableNodeProjections.builder()
-            .putProjection(
+        return new NodeProjections(
+            Map.of(
                 NodeLabel.of(nodeCount() + "_Nodes"),
-                NodeProjection.of(nodeCount() + "_Nodes")
+                new NodeProjection(nodeCount() + "_Nodes")
             )
-            .build();
+        );
     }
 
     @Configuration.Ignore
@@ -112,12 +110,12 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
     @Configuration.Ignore
     @Configuration.ToMapValue("org.neo4j.gds.RelationshipProjections#toObject")
     default RelationshipProjections relationshipProjections() {
-        return ImmutableRelationshipProjections.builder()
-            .putProjection(
+        return new RelationshipProjections(
+            Map.of(
                 relationshipType(),
-                RelationshipProjection.of(relationshipType().name, orientation(), aggregation())
+                new RelationshipProjection(relationshipType().name, orientation(), aggregation())
             )
-            .build();
+        );
     }
 
     @Configuration.Ignore

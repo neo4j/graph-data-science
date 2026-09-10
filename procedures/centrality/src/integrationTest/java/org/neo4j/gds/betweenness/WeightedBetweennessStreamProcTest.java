@@ -71,7 +71,7 @@ class WeightedBetweennessStreamProcTest extends BaseProcTest {
             .withNodeLabel("Node")
             .withRelationshipType(
                 "REL",
-                RelationshipProjection.of(
+                new RelationshipProjection(
                     "REL",
                     Orientation.NATURAL,
                     Aggregation.DEFAULT

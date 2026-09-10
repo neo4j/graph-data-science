@@ -103,7 +103,7 @@ class GraphSageIntegrationTest extends BaseProcTest {
             .withNodeProperty(PropertyMapping.of("death_year", 1.0))
             .withRelationshipType(
                 "R",
-                RelationshipProjection.of(
+                new RelationshipProjection(
                     "*",
                     Orientation.UNDIRECTED
                 )

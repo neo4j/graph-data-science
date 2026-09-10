@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.huge;
 
-import org.immutables.builder.Builder;
-import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
@@ -94,7 +92,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">more abount vlong</a>
  * @see <a href="https://shipilev.net/jvm-anatomy-park/4-tlab-allocation/">more abount TLAB allocation</a>
  */
-@Value.Style(typeBuilder = "HugeGraphBuilder")
 public class HugeGraph implements CSRGraph {
 
     static final double NO_PROPERTY_VALUE = Double.NaN;
@@ -123,8 +120,17 @@ public class HugeGraph implements CSRGraph {
     protected final boolean hasRelationshipProperty;
     protected final boolean isMultiGraph;
 
-    @Builder.Factory
-    static HugeGraph create(
+    public static HugeGraph create(
+        IdMap nodes,
+        GraphSchema schema,
+        GraphCharacteristics characteristics,
+        Map<String, NodePropertyValues> nodeProperties,
+        Topology topology
+    ) {
+        return create(nodes, schema, characteristics, nodeProperties, topology, Optional.empty(), Optional.empty(), Optional.empty());
+    }
+
+    public static HugeGraph create(
         IdMap nodes,
         GraphSchema schema,
         GraphCharacteristics characteristics,

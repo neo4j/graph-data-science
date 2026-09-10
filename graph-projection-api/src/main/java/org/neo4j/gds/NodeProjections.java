@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.HashMap;
@@ -37,13 +36,21 @@ import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
-@Value.Immutable(singleton = true)
-public abstract class NodeProjections extends AbstractProjections<NodeLabel, NodeProjection> {
+@GenerateBuilder
+public record NodeProjections(
+    Map<NodeLabel, NodeProjection> projections
+) implements Projections<NodeLabel, NodeProjection> {
 
+    public NodeProjections {
+        validatePropertyKeyMappings(projections);
+    }
+
+    private static final NodeProjections EMPTY = new NodeProjections(emptyMap());
     public static final NodeProjections ALL = create(singletonMap(ALL_NODES, NodeProjection.all()));
 
-    public abstract Map<NodeLabel, NodeProjection> projections();
+    public static NodeProjectionsBuilder builder() {
+        return NodeProjectionsBuilder.builder();
+    }
 
     public static NodeProjections fromObject(Object object) {
         if (object == null) {
@@ -80,7 +87,7 @@ public abstract class NodeProjections extends AbstractProjections<NodeLabel, Nod
         }
 
         NodeLabel nodeLabel = new NodeLabel(labelString);
-        NodeProjection projection = NodeProjection.fromString(labelString);
+        NodeProjection projection = new NodeProjection(labelString);
         return create(singletonMap(nodeLabel, projection));
     }
 
@@ -112,11 +119,11 @@ public abstract class NodeProjections extends AbstractProjections<NodeLabel, Nod
                 "An empty node projection was given; at least one node label must be projected."
             );
         }
-        return ImmutableNodeProjections.of(unmodifiableMap(projections));
+        return new NodeProjections(unmodifiableMap(projections));
     }
 
     public static NodeProjections single(NodeLabel label, NodeProjection projection) {
-        return ImmutableNodeProjections.of(Map.of(label, projection));
+        return new NodeProjections(Map.of(label, projection));
     }
 
     public static NodeProjections all() {
@@ -125,7 +132,7 @@ public abstract class NodeProjections extends AbstractProjections<NodeLabel, Nod
 
     public NodeProjections addPropertyMappings(PropertyMappings mappings) {
         if (!mappings.hasMappings()) {
-            return ImmutableNodeProjections.copyOf(this);
+            return this;
         }
         Map<NodeLabel, NodeProjection> newProjections = projections().entrySet().stream().collect(toMap(
             Map.Entry::getKey,
@@ -150,7 +157,7 @@ public abstract class NodeProjections extends AbstractProjections<NodeLabel, Nod
     }
 
     public boolean isEmpty() {
-        return this == ImmutableNodeProjections.of();
+        return this == EMPTY;
     }
 
     public Map<String, Object> toObject() {
@@ -174,11 +181,10 @@ public abstract class NodeProjections extends AbstractProjections<NodeLabel, Nod
         }
     }
 
-    @Value.Check
-    public void validatePropertyKeyMappings() {
+    private void validatePropertyKeyMappings(Map<NodeLabel, NodeProjection> toValidate) {
         var seenMappings = new HashMap<String, PropertyMapping>();
 
-        projections().values().stream()
+        toValidate.values().stream()
             .flatMap(nodeProjection -> nodeProjection.properties().stream())
             .forEach(propertyMapping -> {
                 var propertyKey = propertyMapping.propertyKey();
@@ -190,7 +196,7 @@ public abstract class NodeProjections extends AbstractProjections<NodeLabel, Nod
                     if (!Objects.equals(seenMapping.neoPropertyKey(), propertyMapping.neoPropertyKey())) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Specifying multiple neoPropertyKeys for the same property is not allowed, " +
-                            "found propertyKey: `%s` with conflicting neoPropertyKeys: `%s`, `%s`.",
+                                "found propertyKey: `%s` with conflicting neoPropertyKeys: `%s`, `%s`.",
                             propertyKey,
                             propertyMapping.neoPropertyKey(),
                             seenMapping.neoPropertyKey()
@@ -200,7 +206,7 @@ public abstract class NodeProjections extends AbstractProjections<NodeLabel, Nod
                     if (!Objects.equals(seenMapping.defaultValue(), propertyMapping.defaultValue())) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Specifying different default values for the same property with identical neoPropertyKey is not allowed, " +
-                            "found propertyKey: `%s` with conflicting default values: `%s`, `%s`.",
+                                "found propertyKey: `%s` with conflicting default values: `%s`, `%s`.",
                             propertyKey,
                             propertyMapping.defaultValue().getObject(),
                             seenMapping.defaultValue().getObject()
@@ -211,4 +217,5 @@ public abstract class NodeProjections extends AbstractProjections<NodeLabel, Nod
                 seenMappings.put(propertyKey, propertyMapping);
             });
     }
+
 }

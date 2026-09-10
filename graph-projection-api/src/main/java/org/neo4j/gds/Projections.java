@@ -24,11 +24,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractProjections<I extends ElementIdentifier, P extends ElementProjection> {
+public interface Projections<I extends ElementIdentifier, P extends ElementProjection> {
 
-    public abstract Map<I, P> projections();
+    Map<I, P> projections();
 
-    public Set<String> allProperties() {
+    default Set<String> allProperties() {
         return projections()
             .values()
             .stream()
@@ -36,7 +36,7 @@ public abstract class AbstractProjections<I extends ElementIdentifier, P extends
             .collect(Collectors.toSet());
     }
 
-    public Collection<P> allProjections() {
+    default Collection<P> allProjections() {
         return projections().values();
     }
 }

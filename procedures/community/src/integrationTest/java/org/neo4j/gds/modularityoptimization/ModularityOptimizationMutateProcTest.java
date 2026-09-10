@@ -26,10 +26,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutableNodeProjection;
-import org.neo4j.gds.ImmutableNodeProjections;
-import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -290,8 +288,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .databaseService(db)
             .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .graphName(TEST_GRAPH_NAME)
-            .addNodeProjection(ImmutableNodeProjection.of("A", PropertyMappings.of()))
-            .addNodeProjection(ImmutableNodeProjection.of("B", PropertyMappings.of()));
+            .addNodeProjection(new NodeProjection("A", PropertyMappings.of()))
+            .addNodeProjection(new NodeProjection("B", PropertyMappings.of()));
         RelationshipProjections.ALL.projections().forEach((relationshipType, projection) ->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
         GraphLoader loader = storeLoaderBuilder.build();
@@ -353,7 +351,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         runQuery("CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
         var graphStore = new TestNativeGraphLoader(db)
             .withLabels("A", "B")
-            .withNodeProperties(ImmutablePropertyMappings.of())
+            .withNodeProperties(PropertyMappings.of())
             .withDefaultOrientation(Orientation.NATURAL)
             .graphStore();
 
@@ -419,8 +417,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .graphName(TEST_GRAPH_NAME)
             .username(TEST_USERNAME)
             .nodeProjections(
-                ImmutableNodeProjections.of(
-                    Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                new NodeProjections(
+                    Map.of(NodeLabel.of("X"), new NodeProjection("X", PropertyMappings.of()))
                 )
             )
             .relationshipProjections(RelationshipProjections.ALL)
@@ -442,11 +440,13 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .nodeProperties(PropertyMappings.fromObject(Arrays.asList("seed1", "seed2")))
             .relationshipProjections(RelationshipProjections.single(
                     ALL_RELATIONSHIPS,
-                    RelationshipProjection.builder()
-                        .type("TYPE")
-                        .orientation(Orientation.UNDIRECTED)
-                        .addProperty(PropertyMapping.of("weight", 1D))
-                        .build()
+                    new RelationshipProjection(
+                        "TYPE",
+                        Orientation.UNDIRECTED,
+                        PropertyMappings.of(
+                            PropertyMapping.of("weight", 1D)
+                        )
+                    )
                 )
             ).build();
 
@@ -523,7 +523,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .nodeProjections(
                 NodeProjections.create(Map.of(
                     ALL_NODES,
-                    ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
+                    new NodeProjection(PROJECT_ALL, PropertyMappings.of())
                 ))
             )
             .relationshipProjections(RelationshipProjections.ALL)

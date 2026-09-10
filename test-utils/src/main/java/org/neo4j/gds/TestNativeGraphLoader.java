@@ -22,12 +22,12 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.gds.projection.NativeProjectionGraphStoreFactorySupplier;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.gds.logging.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -130,20 +130,15 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
         if (relTypes.isEmpty()) {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(
                 ALL_RELATIONSHIPS.name,
-                RelationshipProjection
-                    .builder()
-                    .from(RelationshipProjection.ALL)
-                    .aggregation(aggregation)
-                    .orientation(orientation)
-                    .build()
+                RelationshipProjection.ALL.withOrientation(orientation).withAggregation(aggregation)
             );
         } else {
             relTypes.forEach(relType -> {
-                RelationshipProjection template = RelationshipProjection.builder()
-                    .type(relType)
-                    .aggregation(aggregation)
-                    .orientation(orientation)
-                    .build();
+                RelationshipProjection template = new RelationshipProjection(
+                    relType,
+                    orientation,
+                    aggregation
+                );
                 storeLoaderBuilder.addRelationshipProjection(template);
             });
         }

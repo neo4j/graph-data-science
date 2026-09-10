@@ -27,10 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutableNodeProjection;
-import org.neo4j.gds.ImmutableNodeProjections;
-import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
@@ -346,14 +344,8 @@ class WccMutateProcTest extends BaseProcTest {
             .databaseService(db)
             .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .graphName(graphName)
-            .addNodeProjection(ImmutableNodeProjection.of(
-                "A",
-                PropertyMappings.of()
-            ))
-            .addNodeProjection(ImmutableNodeProjection.of(
-                "B",
-                PropertyMappings.of()
-            ));
+            .addNodeProjection(new NodeProjection("A", PropertyMappings.of()))
+            .addNodeProjection(new NodeProjection("B", PropertyMappings.of()));
         RelationshipProjections.ALL.projections().forEach((relationshipType, projection) ->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
         GraphLoader loader = storeLoaderBuilder.build();
@@ -417,7 +409,7 @@ class WccMutateProcTest extends BaseProcTest {
         var orientation = Orientation.NATURAL;
         GraphStore graphStore = new TestNativeGraphLoader(db)
             .withLabels("A", "B")
-            .withNodeProperties(ImmutablePropertyMappings.of())
+            .withNodeProperties(PropertyMappings.of())
             .withDefaultOrientation(orientation)
             .graphStore();
 
@@ -488,11 +480,10 @@ class WccMutateProcTest extends BaseProcTest {
             .username(TEST_USERNAME)
             .graphName(GRAPH_NAME)
             .nodeProjections(
-                ImmutableNodeProjections.of(
-                    Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                new NodeProjections(
+                    Map.of(NodeLabel.of("X"), new NodeProjection("X", PropertyMappings.of()))
                 )
-            )
-            .relationshipProjections(RelationshipProjections.ALL)
+            ).relationshipProjections(RelationshipProjections.ALL)
             .build();
         GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
 
@@ -559,10 +550,9 @@ class WccMutateProcTest extends BaseProcTest {
             .nodeProjections(
                 NodeProjections.create(singletonMap(
                     ALL_NODES,
-                    ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
+                    new NodeProjection(PROJECT_ALL, PropertyMappings.of())
                 ))
-            )
-            .relationshipProjections(rels)
+            ).relationshipProjections(rels)
             .build();
     }
 

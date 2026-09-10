@@ -19,58 +19,106 @@
  */
 package org.neo4j.gds;
 
-import org.immutables.value.Value;
+import io.soabase.recordbuilder.core.RecordBuilder;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.ConfigKeyValidation;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
-public abstract class RelationshipProjection extends ElementProjection {
+@RecordBuilder.Options(
+    useImmutableCollections = true,
+    addSingleItemCollectionBuilders = true,
+    prefixEnclosingClassNames = false,
+    addStaticBuilder = false,
+    addConcreteSettersForOptional = true,
+    interpretNotNulls = true
+)
+@RecordBuilder
+public record RelationshipProjection(
+    String type,
+    Orientation orientation,
+    Aggregation aggregation,
+    boolean indexInverse,
+    PropertyMappings properties
+) implements ElementProjection, RelationshipProjectionBuilder.With {
 
-    public static final RelationshipProjection ALL = of(PROJECT_ALL, Orientation.NATURAL);
-    public static final RelationshipProjection ALL_UNDIRECTED = of(PROJECT_ALL, Orientation.UNDIRECTED);
-
-    public abstract String type();
-
-    @Value.Default
-    public Orientation orientation() {
-        return Orientation.NATURAL;
-    }
-
-    @Value.Default
-    public Aggregation aggregation() {
-        return Aggregation.DEFAULT;
-    }
-
-    @Value.Default
-    public boolean indexInverse() {
-        return false;
-    }
-
-    @Value.Default
-    @Value.Parameter(false)
-    @Override
-    public PropertyMappings properties() {
-        return super.properties();
-    }
-
-    @Value.Check
-    protected void check() {
-        if (orientation() == Orientation.UNDIRECTED && indexInverse()) {
+    public RelationshipProjection {
+        if (orientation == Orientation.UNDIRECTED && indexInverse) {
             throw new IllegalArgumentException(
-                "Relationship projection `" + type() + "` cannot be UNDIRECTED and inverse indexed. " +
-                "Indexing the inverse orientation is only allowed for NATURAL and REVERSE."
+                "Relationship projection `" + type + "` cannot be UNDIRECTED and inverse indexed. " +
+                    "Indexing the inverse orientation is only allowed for NATURAL and REVERSE."
             );
         }
     }
+
+    public RelationshipProjection(String type) {
+        this(type, DEFAULT_ORIENTATION, DEFAULT_AGGREGATION, DEFAULT_INDEX_INVERSE, DEFAULT_PROPERTIES);
+    }
+
+    public RelationshipProjection(String type, Aggregation aggregation) {
+        this(type, DEFAULT_ORIENTATION, aggregation, DEFAULT_INDEX_INVERSE, DEFAULT_PROPERTIES);
+    }
+
+    public RelationshipProjection(String type, PropertyMappings properties) {
+        this(type, DEFAULT_ORIENTATION, DEFAULT_AGGREGATION, DEFAULT_INDEX_INVERSE, properties);
+    }
+
+    public RelationshipProjection(String type, Orientation orientation) {
+        this(type, orientation, DEFAULT_AGGREGATION, DEFAULT_INDEX_INVERSE, DEFAULT_PROPERTIES);
+    }
+
+    public RelationshipProjection(String type, boolean indexInverse) {
+        this(type, DEFAULT_ORIENTATION, DEFAULT_AGGREGATION, indexInverse, DEFAULT_PROPERTIES);
+    }
+
+    public RelationshipProjection(String type, Orientation orientation, Aggregation aggregation) {
+        this(type, orientation, aggregation, DEFAULT_INDEX_INVERSE, DEFAULT_PROPERTIES);
+    }
+
+    public RelationshipProjection(String type, Orientation orientation, boolean indexInverse) {
+        this(type, orientation, DEFAULT_AGGREGATION, indexInverse, DEFAULT_PROPERTIES);
+    }
+
+    public RelationshipProjection(String type, Orientation orientation, PropertyMappings properties) {
+        this(type, orientation, DEFAULT_AGGREGATION, DEFAULT_INDEX_INVERSE, properties);
+    }
+
+    public RelationshipProjection(String type, Aggregation aggregation, PropertyMappings properties) {
+        this(type, DEFAULT_ORIENTATION, aggregation, DEFAULT_INDEX_INVERSE, properties);
+    }
+
+    public RelationshipProjection(String type, boolean indexInverse, PropertyMappings properties) {
+        this(type, DEFAULT_ORIENTATION, DEFAULT_AGGREGATION, indexInverse, properties);
+    }
+
+    public RelationshipProjection(String type, Orientation orientation, boolean indexInverse, PropertyMappings properties) {
+        this(type, orientation, DEFAULT_AGGREGATION, indexInverse, properties);
+    }
+
+    public RelationshipProjection(String type, Orientation orientation, Aggregation aggregation, boolean indexInverse) {
+        this(type, orientation, aggregation, indexInverse, DEFAULT_PROPERTIES);
+    }
+
+    public RelationshipProjection(String type, Orientation orientation, Aggregation aggregation, PropertyMappings properties) {
+        this(type, orientation, aggregation, DEFAULT_INDEX_INVERSE, properties);
+    }
+
+    public RelationshipProjection inverse() {
+        return new RelationshipProjection(type, orientation.inverse(), aggregation, indexInverse, properties);
+    }
+
+    private static final Orientation DEFAULT_ORIENTATION = Orientation.NATURAL;
+    private static final Aggregation DEFAULT_AGGREGATION = Aggregation.DEFAULT;
+    private static final boolean DEFAULT_INDEX_INVERSE = false;
+    private static final PropertyMappings DEFAULT_PROPERTIES = PropertyMappings.of();
+
+    public static final RelationshipProjection ALL = new RelationshipProjection(PROJECT_ALL, Orientation.NATURAL);
 
     /**
      * Checks if the projection defines a global aggregation that requires at least one property mapping, such as `MIN`.
@@ -78,8 +126,6 @@ public abstract class RelationshipProjection extends ElementProjection {
      * (see org.neo4j.gds.config.GraphProjectFromStoreConfig#withNormalizedPropertyMappings()),
      */
     public void checkAggregation() {
-        check();
-
         if (properties().isEmpty()) {
             switch (aggregation()) {
                 case DEFAULT, NONE, SINGLE -> {}
@@ -88,40 +134,37 @@ public abstract class RelationshipProjection extends ElementProjection {
         }
     }
 
-    @Override
-    public boolean projectAll() {
-        return type().equals(PROJECT_ALL);
-    }
-
     public static final String TYPE_KEY = "type";
     public static final String ORIENTATION_KEY = "orientation";
     public static final String AGGREGATION_KEY = "aggregation";
     public static final String INDEX_INVERSE_KEY = "indexInverse";
 
     public static RelationshipProjection fromMap(Map<String, Object> map, RelationshipType relationshipType) {
-        RelationshipProjection.Builder builder = RelationshipProjection.builder();
-        String type = String.valueOf(map.getOrDefault(TYPE_KEY, relationshipType.name));
-
         validateConfigKeys(map);
-
-        builder.type(type);
-        if (map.containsKey(ORIENTATION_KEY)) {
-            builder.orientation(Orientation.parse(nonEmptyString(map, ORIENTATION_KEY)));
-        }
-        if (map.containsKey(INDEX_INVERSE_KEY)) {
-            boolean indexInverse = (boolean) map.get(INDEX_INVERSE_KEY);
-            builder.indexInverse(indexInverse);
-        }
-        if (map.containsKey(AGGREGATION_KEY)) {
-            Aggregation aggregation = Aggregation.parse(nonEmptyString(map, AGGREGATION_KEY));
-            builder.aggregation(aggregation);
-            return create(map, aggregation, properties -> builder.properties(properties).build());
-        }
-        return create(map, properties -> builder.properties(properties).build());
+        var type = String.valueOf(map.getOrDefault(TYPE_KEY, relationshipType.name));
+        var orientation = map.containsKey(ORIENTATION_KEY)
+            ? Orientation.parse(nonEmptyString(map, ORIENTATION_KEY))
+            : DEFAULT_ORIENTATION;
+        var aggregation = map.containsKey(AGGREGATION_KEY)
+            ? Aggregation.parse(nonEmptyString(map, AGGREGATION_KEY))
+            : DEFAULT_AGGREGATION;
+        var indexInverse = map.containsKey(INDEX_INVERSE_KEY)
+            ? (boolean) map.get(INDEX_INVERSE_KEY)
+            : DEFAULT_INDEX_INVERSE;
+        var inputProperties = map.getOrDefault(PROPERTIES_KEY, emptyMap());
+        var properties = PropertyMappings.fromObject(inputProperties, aggregation);
+        return new RelationshipProjection(type, orientation, aggregation, indexInverse, properties);
     }
 
-    public static RelationshipProjection fromString(@Nullable String type) {
-        return RelationshipProjection.builder().type(type).build();
+    private static String nonEmptyString(Map<String, Object> config, String key) {
+        @Nullable Object value = config.get(key);
+        if (!(value instanceof String) || ((String) value).isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "'%s' is not a valid value for the key '%s'",
+                value, key
+            ));
+        }
+        return (String) value;
     }
 
     public static RelationshipProjection fromObject(Object object, RelationshipType relationshipType) {
@@ -129,7 +172,7 @@ public abstract class RelationshipProjection extends ElementProjection {
             return ALL;
         }
         if (object instanceof String) {
-            return fromString((String) object);
+            return new RelationshipProjection((String) object);
         }
         if (object instanceof Map) {
             var caseInsensitiveMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -143,18 +186,6 @@ public abstract class RelationshipProjection extends ElementProjection {
         ));
     }
 
-    public static RelationshipProjection of(String type, Orientation orientation) {
-        return RelationshipProjection.builder().type(type).orientation(orientation).build();
-    }
-
-    public static RelationshipProjection of(String type, Aggregation aggregation) {
-        return RelationshipProjection.builder().type(type).aggregation(aggregation).build();
-    }
-
-    public static RelationshipProjection of(String type, Orientation orientation, Aggregation aggregation) {
-        return RelationshipProjection.builder().type(type).aggregation(aggregation).orientation(orientation).build();
-    }
-
     public boolean isMultiGraph() {
         boolean somePropertyIsNotAggregated = properties()
             .mappings()
@@ -163,46 +194,24 @@ public abstract class RelationshipProjection extends ElementProjection {
         return Aggregation.equivalentToNone(aggregation()) && (properties().isEmpty() || somePropertyIsNotAggregated);
     }
 
-    @Override
-    boolean includeAggregation() {
-        return true;
+    public Map<String, Object> toObject() {
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put(TYPE_KEY, type);
+        value.put(ORIENTATION_KEY, orientation.name());
+        value.put(AGGREGATION_KEY, aggregation.name());
+        value.put(INDEX_INVERSE_KEY, indexInverse);
+        value.put(PROPERTIES_KEY, properties().toObject(true));
+        return value;
     }
 
-    @Override
-    void writeToObject(Map<String, Object> value) {
-        value.put(TYPE_KEY, type());
-        value.put(ORIENTATION_KEY, orientation().name());
-        value.put(AGGREGATION_KEY, aggregation().name());
-        value.put(INDEX_INVERSE_KEY, indexInverse());
-    }
+    RelationshipProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
+        var withSameAggregation = PropertyMappings.fromObject(mappings, aggregation);
+        var newMappings = properties.mergeWith(withSameAggregation);
 
-    @Override
-    public RelationshipProjection withAdditionalPropertyMappings(PropertyMappings mappings) {
-        PropertyMappings withSameAggregation = PropertyMappings
-            .builder()
-            .from(mappings)
-            .withDefaultAggregation(aggregation())
-            .build();
-
-        PropertyMappings newMappings = properties().mergeWith(withSameAggregation);
-
-        return newMappings.equals(properties())
-            ? ImmutableRelationshipProjection.copyOf(this)
-            : ImmutableRelationshipProjection.builder().from(this).properties(newMappings).build();
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    private static RelationshipProjection create(
-        Map<String, Object> config,
-        Aggregation defaultAggregation,
-        Function<PropertyMappings, RelationshipProjection> constructor
-    ) {
-        Object properties = config.getOrDefault(PROPERTIES_KEY, emptyMap());
-        PropertyMappings propertyMappings = PropertyMappings.fromObject(properties, defaultAggregation);
-        return constructor.apply(propertyMappings);
+        if (newMappings == properties) {
+            return this;
+        }
+        return new RelationshipProjection(type, orientation, aggregation, indexInverse, newMappings);
     }
 
     private static void validateConfigKeys(Map<String, Object> map) {
@@ -213,31 +222,5 @@ public abstract class RelationshipProjection extends ElementProjection {
             PROPERTIES_KEY,
             INDEX_INVERSE_KEY
         ), map.keySet());
-    }
-
-    @org.immutables.builder.Builder.AccessibleFields
-    public static final class Builder extends ImmutableRelationshipProjection.Builder implements InlineProperties<Builder> {
-
-        private InlinePropertiesBuilder propertiesBuilder;
-
-        Builder() {
-        }
-
-        @Override
-        public RelationshipProjection build() {
-            buildProperties();
-            return super.build();
-        }
-
-        @Override
-        public InlinePropertiesBuilder inlineBuilder() {
-            if (propertiesBuilder == null) {
-                propertiesBuilder = new InlinePropertiesBuilder(
-                    () -> this.properties,
-                    newProperties -> this.properties = newProperties
-                );
-            }
-            return propertiesBuilder;
-        }
     }
 }

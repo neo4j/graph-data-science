@@ -29,9 +29,8 @@ import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.ImmutableNodeProjection;
-import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMappings;
@@ -321,8 +320,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .databaseService(db)
             .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
             .graphName(TEST_GRAPH_NAME)
-            .addNodeProjection(ImmutableNodeProjection.of("A", PropertyMappings.of()))
-            .addNodeProjection(ImmutableNodeProjection.of("B", PropertyMappings.of()));
+            .addNodeProjection(new NodeProjection("A", PropertyMappings.of()))
+            .addNodeProjection(new NodeProjection("B", PropertyMappings.of()));
         RelationshipProjections.ALL.projections().forEach((relationshipType, projection) ->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
         GraphLoader loader = storeLoaderBuilder.build();
@@ -382,7 +381,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         runQuery("CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
         GraphStore graphStore = new TestNativeGraphLoader(db)
             .withLabels("A", "B")
-            .withNodeProperties(ImmutablePropertyMappings.of())
+            .withNodeProperties(PropertyMappings.of())
             .withDefaultOrientation(Orientation.NATURAL)
             .graphStore();
 
@@ -480,7 +479,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .graphName(graphName)
             .nodeProjections(
                 NodeProjections.create(
-                    Map.of(ALL_NODES, ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of()))
+                    Map.of(ALL_NODES, new NodeProjection(PROJECT_ALL, PropertyMappings.of()))
                 )
             )
             .relationshipProjections(RelationshipProjections.ALL)

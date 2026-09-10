@@ -101,7 +101,7 @@ class NodeSimilarityWriteProcTest extends BaseProcTest {
                 .withAnyLabel()
                 .withRelationshipType(
                     "LIKES",
-                    RelationshipProjection.builder().type("LIKES").orientation(orientation).build()
+                    new RelationshipProjection("LIKES", orientation)
                 )
                 .yields();
             runQuery(createQuery);

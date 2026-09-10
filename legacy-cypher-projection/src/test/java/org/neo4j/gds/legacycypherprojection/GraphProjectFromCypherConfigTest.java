@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.AbstractProjections;
-import org.neo4j.gds.ImmutableNodeProjections;
-import org.neo4j.gds.ImmutableRelationshipProjections;
+import org.neo4j.gds.Projections;
+import org.neo4j.gds.NodeProjections;
+import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
@@ -45,7 +45,7 @@ class GraphProjectFromCypherConfigTest {
 
     @ParameterizedTest
     @MethodSource("invalidKeys")
-    void testThrowForInvalidProcedureConfigKeys(String invalidKey, AbstractProjections<?, ?> projections) {
+    void testThrowForInvalidProcedureConfigKeys(String invalidKey, Projections<?, ?> projections) {
         CypherMapWrapper config = CypherMapWrapper.empty()
             .withString(NODE_QUERY_KEY, ALL_NODES_QUERY)
             .withString(RELATIONSHIP_QUERY_KEY, ALL_RELATIONSHIPS_QUERY)
@@ -71,9 +71,9 @@ class GraphProjectFromCypherConfigTest {
 
     static Stream<Arguments> invalidKeys() {
         return Stream.of(
-            Arguments.of("nodeProjection", ImmutableNodeProjections.of()),
-            Arguments.of("relationshipProjection", ImmutableRelationshipProjections.of()),
-            Arguments.of("nodeProperties", ImmutableNodeProjections.of())
+            Arguments.of("nodeProjection", new NodeProjections(Map.of())),
+            Arguments.of("relationshipProjection", new RelationshipProjections(Map.of())),
+            Arguments.of("nodeProperties", new NodeProjections(Map.of()))
         );
     }
 

@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
-import org.neo4j.gds.ImmutableRelationshipProjections;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
@@ -31,11 +32,13 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
-import org.neo4j.gds.Aggregation;
+
+import java.util.Map;
 
 public class LouvainMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -61,17 +64,19 @@ public class LouvainMemoryEstimateDefinition implements MemoryEstimateDefinition
                 GraphDimensions sparseDimensions = dimensionsBuilder.build();
 
                 // Louvain creates a new graph every iteration, this graph has one relationship property
-                RelationshipProjections relationshipProjections = ImmutableRelationshipProjections.builder()
-                    .putProjection(
+                RelationshipProjections relationshipProjections = new RelationshipProjections(
+                    Map.of(
                         RelationshipType.of("AGGREGATE"),
-                        RelationshipProjection.builder()
-                            .type("AGGREGATE")
-                            .orientation(Orientation.UNDIRECTED)
-                            .aggregation(Aggregation.SUM)
-                            .addProperty("prop", "prop", DefaultValue.of(0.0))
-                            .build()
+                        new RelationshipProjection(
+                            "AGGREGATE",
+                            Orientation.UNDIRECTED,
+                            Aggregation.SUM,
+                            PropertyMappings.of(
+                                PropertyMapping.of("prop", "prop", DefaultValue.of(0.0))
+                            )
+                        )
                     )
-                    .build();
+                );
 
                 long maxGraphSize = CSRGraphStoreFactory
                     .getMemoryEstimation(NodeProjections.all(), relationshipProjections, false)

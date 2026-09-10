@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.ImmutableRelationshipProjection;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodes.IdMap;
@@ -163,11 +162,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         RelationshipType relationshipType,
         RelationshipProjection projection
     ) {
-        var inverseProjection = ImmutableRelationshipProjection
-            .builder()
-            .from(projection)
-            .orientation(projection.orientation().inverse())
-            .build();
+        var inverseProjection = projection.inverse();
 
         var inverseImportMetaData = SingleTypeRelationshipImporter.ImportMetaData.of(
             inverseProjection,

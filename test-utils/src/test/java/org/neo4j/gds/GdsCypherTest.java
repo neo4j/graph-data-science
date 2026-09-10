@@ -419,17 +419,21 @@ class GdsCypherTest {
             .relationshipProperties(PropertyMappings.fromObject(configMap.get("relationshipProperties")))
             .build();
 
-        NodeProjection fooNode = NodeProjection.builder()
-            .label("Foo")
-            .addProperty("nodeProp", "NodePropertyName", DefaultValue.of(42.1337))
-            .build();
+        NodeProjection fooNode = new NodeProjection(
+            "Foo",
+            PropertyMappings.of(
+                PropertyMapping.of("nodeProp", "NodePropertyName", DefaultValue.of(42.1337))
+            )
+        );
 
-        RelationshipProjection barRel = RelationshipProjection.builder()
-            .type("Bar")
-            .orientation(Orientation.UNDIRECTED)
-            .aggregation(Aggregation.SINGLE)
-            .addProperty("relProp", "RelationshipPropertyName", DefaultValue.of(1337), Aggregation.MAX)
-            .build();
+        RelationshipProjection barRel = new RelationshipProjection(
+            "Bar",
+            Orientation.UNDIRECTED,
+            Aggregation.SINGLE,
+            PropertyMappings.of(
+                PropertyMapping.of("relProp", "RelationshipPropertyName", DefaultValue.of(1337), Aggregation.MAX)
+            )
+        );
 
         GraphProjectFromStoreConfig configFromBuilder = GraphProjectFromStoreConfigImpl.builder()
             .username("")
@@ -442,19 +446,12 @@ class GdsCypherTest {
                 .propertyKey("GlobalNodeProp")
                 .build()
             ))
-            .relationshipProjections(ImmutableRelationshipProjections
-                .builder()
-                .putProjection(
-                    new RelationshipType("Rel"),
-                    RelationshipProjection.builder().type("TYPE").build()
-                )
-                .putProjection(
-                    new RelationshipType("BarRel"),
-                    barRel
-                )
-                .build()
-            )
-            .relationshipProperties(PropertyMappings.of(ImmutablePropertyMapping
+            .relationshipProjections(new RelationshipProjections(Map.of(
+                new RelationshipType("Rel"),
+                new RelationshipProjection("TYPE"),
+                new RelationshipType("BarRel"),
+                barRel
+            ))).relationshipProperties(PropertyMappings.of(ImmutablePropertyMapping
                 .builder()
                 .propertyKey("global")
                 .neoPropertyKey("RelProp")

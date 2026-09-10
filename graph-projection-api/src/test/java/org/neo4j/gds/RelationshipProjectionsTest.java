@@ -75,29 +75,23 @@ class RelationshipProjectionsTest {
         assertThat(projections.allProjections(), hasSize(2));
         assertThat(
             projections.getFilter(RelationshipType.of("MY_TYPE")),
-            equalTo(RelationshipProjection
-                .builder()
-                .type("T")
-                .aggregation(Aggregation.SINGLE)
-                .orientation(Orientation.NATURAL)
-                .indexInverse(true)
-                .build()
-            )
+            equalTo(new RelationshipProjection(
+                "T",
+                Orientation.NATURAL,
+                Aggregation.SINGLE,
+                true
+            ))
         );
         assertThat(
             projections.getFilter(RelationshipType.of("ANOTHER")),
-            equalTo(RelationshipProjection
-                .builder()
-                .type("FOO")
-                .indexInverse(false)
-                .properties(PropertyMappings
-                    .builder()
-                    .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
-                    .addMapping(PropertyMapping.of("prop2", DefaultValue.DEFAULT))
-                    .build()
-                )
-                .build()
-            )
+            equalTo(new RelationshipProjection(
+                "FOO",
+                false,
+                PropertyMappings.of(
+                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
+                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
+               )
+            ))
         );
         assertThat(projections.typeFilter(), equalTo("T|FOO"));
     }
@@ -107,16 +101,14 @@ class RelationshipProjectionsTest {
     void syntacticSugars(Object argument) {
         RelationshipProjections actual = RelationshipProjections.fromObject(argument);
 
-        RelationshipProjections expected = ImmutableRelationshipProjections.builder().projections(singletonMap(
+        RelationshipProjections expected = new RelationshipProjections(singletonMap(
             RelationshipType.of("T"),
-            RelationshipProjection
-                .builder()
-                .type("T")
-                .orientation(Orientation.NATURAL)
-                .aggregation(Aggregation.DEFAULT)
-                .properties(PropertyMappings.of())
-                .build()
-        )).build();
+            new RelationshipProjection(
+                "T",
+                Orientation.NATURAL,
+                Aggregation.DEFAULT
+            )
+        ));
 
         assertThat(actual, equalTo(expected));
         assertThat(actual.typeFilter(), equalTo("T"));
@@ -126,9 +118,12 @@ class RelationshipProjectionsTest {
     void shouldSupportStar() {
         RelationshipProjections actual = RelationshipProjections.fromObject("*");
 
-        RelationshipProjections expected = ImmutableRelationshipProjections.builder()
-            .projections(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL))
-            .build();
+        RelationshipProjections expected = new RelationshipProjections(
+            singletonMap(
+                ALL_RELATIONSHIPS,
+                RelationshipProjection.ALL
+            )
+        );
 
         assertThat(actual, equalTo(expected));
         assertThat(actual.typeFilter(), equalTo("*"));
@@ -138,10 +133,10 @@ class RelationshipProjectionsTest {
     void shouldParseMultipleRelationshipTypes() {
         RelationshipProjections actual = RelationshipProjections.fromObject(Arrays.asList("A", "B"));
 
-        RelationshipProjections expected = ImmutableRelationshipProjections.builder()
-            .putProjection(RelationshipType.of("A"), RelationshipProjection.builder().type("A").build())
-            .putProjection(RelationshipType.of("B"), RelationshipProjection.builder().type("B").build())
-            .build();
+        RelationshipProjections expected = new RelationshipProjections(Map.of(
+            RelationshipType.of("A"), new RelationshipProjection("A"),
+            RelationshipType.of("B"), new RelationshipProjection("B")
+        ));
 
         assertThat(actual, equalTo(expected));
         assertThat(actual.typeFilter(), equalTo("A|B"));
@@ -163,18 +158,16 @@ class RelationshipProjectionsTest {
 
         RelationshipProjections actual = RelationshipProjections.fromObject(projection);
 
-        RelationshipProjections expected = ImmutableRelationshipProjections.builder().projections(
-            singletonMap(
-                RelationshipType.of("MY_TYPE"),
-                RelationshipProjection
-                    .builder()
-                    .type("T")
-                    .aggregation(Aggregation.SINGLE)
-                    .properties(PropertyMappings.of(
-                        PropertyMapping.of("weight", Aggregation.SINGLE)
-                    ))
-                    .build()
-            )).build();
+        RelationshipProjections expected = new RelationshipProjections(singletonMap(
+            RelationshipType.of("MY_TYPE"),
+            new RelationshipProjection(
+                "T",
+                Aggregation.SINGLE,
+                PropertyMappings.of(
+                    PropertyMapping.of("weight", Aggregation.SINGLE)
+                )
+            )
+        ));
 
         assertThat(
             actual,
@@ -197,21 +190,20 @@ class RelationshipProjectionsTest {
     @Test
     void shouldFailOnUndirectedAndIndexInverse() {
         assertThatThrownBy(() ->
-            RelationshipProjection
-                .builder()
-                .type("REL")
-                .orientation(Orientation.UNDIRECTED)
-                .indexInverse(true)
-                .build())
+            new RelationshipProjection(
+                "REL",
+                Orientation.UNDIRECTED,
+                true
+            )
+        )
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("`REL` cannot be UNDIRECTED and inverse indexed");
 
         assertThatNoException().isThrownBy(() ->
-            RelationshipProjection
-                .builder()
-                .type("REL")
-                .orientation(Orientation.UNDIRECTED)
-                .build()
+            new RelationshipProjection(
+                "REL",
+                Orientation.UNDIRECTED
+            )
         );
     }
 
@@ -237,21 +229,17 @@ class RelationshipProjectionsTest {
         assertThat(projections.allProjections(), hasSize(2));
         assertThat(
             projections.getFilter(RelationshipType.of("MY_TYPE")),
-            equalTo(RelationshipProjection.of("T", Orientation.UNDIRECTED, Aggregation.SINGLE))
+            equalTo(new RelationshipProjection("T", Orientation.UNDIRECTED, Aggregation.SINGLE))
         );
         assertThat(
             projections.getFilter(RelationshipType.of("ANOTHER")),
-            equalTo(RelationshipProjection
-                .builder()
-                .type("FOO")
-                .properties(PropertyMappings
-                    .builder()
-                    .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
-                    .addMapping(PropertyMapping.of("prop2", DefaultValue.DEFAULT))
-                    .build()
+            equalTo(new RelationshipProjection(
+                "FOO",
+                PropertyMappings.of(
+                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
+                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
                 )
-                .build()
-            )
+            ))
         );
         assertThat(projections.typeFilter(), equalTo("T|FOO"));
     }
@@ -276,12 +264,7 @@ class RelationshipProjectionsTest {
         names = {"SUM", "MIN", "MAX", "COUNT"})
     void failsWhenAggregationIsUsedWithoutProperties(Aggregation aggregation) {
         assertThatThrownBy(() ->
-            RelationshipProjection
-                .builder()
-                .type("REL")
-                .aggregation(aggregation)
-                .build()
-                .checkAggregation()
+            new RelationshipProjection("REL", aggregation).checkAggregation()
         )
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(

@@ -22,16 +22,17 @@ package org.neo4j.gds.core.loading.construction;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.ImmutableRelationshipProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphCharacteristics;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -42,12 +43,11 @@ import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.loading.ShardedIdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.ShardedIdMapBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -222,22 +222,19 @@ public final class GraphFactory {
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
 
         var actualOrientation = orientation.orElse(Orientation.NATURAL);
-        var projectionBuilder = RelationshipProjection
-            .builder()
-            .type(relationshipType.name())
-            .orientation(actualOrientation)
-            .indexInverse(indexInverse.orElse(false));
-
-        propertyConfigs.forEach(
-            propertyConfig -> projectionBuilder.addProperty(
+        var propertyMappings = propertyConfigs.stream()
+            .map(propertyConfig -> PropertyMapping.of(
                 propertyConfig.propertyKey(),
                 propertyConfig.propertyKey(),
                 DefaultValue.of(propertyConfig.defaultValue()),
                 propertyConfig.aggregation()
-            )
+            )).toList();
+        var projection = new RelationshipProjection(
+            relationshipType.name(),
+            actualOrientation,
+            indexInverse.orElse(false),
+            PropertyMappings.of(propertyMappings)
         );
-
-        var projection = projectionBuilder.build();
 
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
@@ -274,24 +271,9 @@ public final class GraphFactory {
             .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .build();
 
-        var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()
-            .idMap(nodes)
-            .importer(singleTypeRelationshipImporter)
-            .bufferSize(bufferSize)
-            .relationshipType(relationshipType)
-            .propertyConfigs(propertyConfigs)
-            .isMultiGraph(isMultiGraph)
-            .loadRelationshipProperty(loadRelationshipProperties)
-            .direction(Direction.fromOrientation(actualOrientation))
-            .executorService(executorService.orElse(DefaultPool.INSTANCE))
-            .concurrency(finalConcurrency);
-
+        SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
         if (indexInverse.orElse(false)) {
-            var inverseProjection = ImmutableRelationshipProjection
-                .builder()
-                .from(projection)
-                .orientation(projection.orientation().inverse())
-                .build();
+            var inverseProjection = projection.inverse();
 
             var inverseImportMetaData = new SingleTypeRelationshipImporter.ImportMetaData(
                 inverseProjection,
@@ -308,10 +290,33 @@ public final class GraphFactory {
                 .importSizing(importSizing)
                 .build();
 
-            singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
+            singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilder.Indexed(
+                nodes,
+                singleTypeRelationshipImporter,
+                inverseImporter,
+                bufferSize,
+                relationshipType,
+                propertyConfigs,
+                isMultiGraph,
+                loadRelationshipProperties,
+                Direction.fromOrientation(actualOrientation),
+                executorService.orElse(DefaultPool.INSTANCE),
+                finalConcurrency
+            );
+        } else {
+            singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilder.NonIndexed(
+                nodes,
+                singleTypeRelationshipImporter,
+                bufferSize,
+                relationshipType,
+                propertyConfigs,
+                isMultiGraph,
+                loadRelationshipProperties,
+                Direction.fromOrientation(actualOrientation),
+                executorService.orElse(DefaultPool.INSTANCE),
+                finalConcurrency
+            );
         }
-
-        var singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilderBuilder.build();
 
         var localBuilderProvider = usePooledBuilderProvider.orElse(false)
             ? LocalRelationshipsBuilderProvider
@@ -378,15 +383,15 @@ public final class GraphFactory {
         var characteristicsBuilder = GraphCharacteristics.builder().withDirection(graphSchema.direction());
         relationships.inverseTopology().ifPresent(__ -> characteristicsBuilder.inverseIndexed());
 
-        return new HugeGraphBuilder()
-            .nodes(idMap)
-            .schema(graphSchema)
-            .characteristics(characteristicsBuilder.build())
-            .nodeProperties(nodeProperties)
-            .topology(topology)
-            .inverseTopology(inverseTopology)
-            .relationshipProperties(properties)
-            .inverseRelationshipProperties(inverseProperties)
-            .build();
+        return HugeGraph.create(
+            idMap,
+            graphSchema,
+            characteristicsBuilder.build(),
+            nodeProperties,
+            topology,
+            properties,
+            inverseTopology,
+            inverseProperties
+        );
     }
 }

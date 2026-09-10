@@ -28,6 +28,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -74,19 +75,22 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
         runQuery(GdsCypher.call(TEST_GRAPH_DIFFERENT_PROPERTIES)
             .graphProject()
-            .withNodeLabel("A", NodeProjection.builder()
-                .label("A")
-                .addProperties(
-                    PropertyMapping.of("newNodeProp1", "nodeProp1", 1337),
-                    PropertyMapping.of("newNodeProp2", "nodeProp2", 1337)
-                ).build()
+            .withNodeLabel(
+                "A", new NodeProjection(
+                    "A",
+                    PropertyMappings.of(
+                        PropertyMapping.of("newNodeProp1", "nodeProp1", 1337),
+                        PropertyMapping.of("newNodeProp2", "nodeProp2", 1337)
+                    )
+                )
             )
-            .withNodeLabel("B",
-                NodeProjection
-                    .builder()
-                    .label("B")
-                    .addProperty(PropertyMapping.of("newNodeProp1", "nodeProp1", 1337))
-                    .build()
+            .withNodeLabel(
+                "B", new NodeProjection(
+                    "B",
+                    PropertyMappings.of(
+                        PropertyMapping.of("newNodeProp1", "nodeProp1", 1337)
+                    )
+                )
             )
             .withAnyRelationshipType()
             .yields()

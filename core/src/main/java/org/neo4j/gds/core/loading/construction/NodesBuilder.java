@@ -28,7 +28,7 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
-import org.neo4j.gds.core.loading.NodeImporterBuilder;
+import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -82,11 +82,11 @@ public final class NodesBuilder implements NodesBuilderApi {
             : LabelInformationBuilders.multiLabelWithCapacity(maxIntermediateId + 1);
 
         this.importedNodes = new LongAdder();
-        var nodeImporter = new NodeImporterBuilder()
-            .idMapBuilder(idMapBuilder)
-            .labelInformationBuilder(labelInformationBuilder)
-            .importProperties(hasProperties)
-            .build();
+        var nodeImporter = new NodeImporter(
+            idMapBuilder,
+            labelInformationBuilder,
+            hasProperties
+        );
 
         LongPredicate seenNodeIdPredicate = seenNodesPredicate(deduplicateIds, maxOriginalId);
 
