@@ -488,11 +488,8 @@ public final class GraphImporter {
         }
 
         public void releaseBatches() {
-            for (var iterator = batchBuildersPerType.entrySet().iterator(); iterator.hasNext(); ) {
-                var entry = iterator.next();
-                iterator.remove();
-                entry.getValue().close();
-            }
+            batchBuildersPerType.values().forEach(RelationshipsBuilder.Batch::close);
+            batchBuildersPerType.clear();
         }
 
         /**
