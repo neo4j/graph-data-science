@@ -27,6 +27,8 @@ import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphStoreFactorySupplier;
 
+import java.util.concurrent.ExecutorService;
+
 public final class CypherProjectionGraphStoreFactorySupplier implements GraphStoreFactorySupplier {
     private final Log log;
     private final GraphProjectFromCypherConfig graphProjectFromCypherConfig;
@@ -43,7 +45,8 @@ public final class CypherProjectionGraphStoreFactorySupplier implements GraphSto
     public CypherFactory get(
         GraphLoaderContext loaderContext,
         DependencyResolver dependencyResolver,
-        RequestCorrelationId requestCorrelationId
+        RequestCorrelationId requestCorrelationId,
+        ExecutorService executorService
     ) {
         return CypherFactory.createWithDerivedDimensions(
             graphProjectFromCypherConfig,
@@ -57,9 +60,10 @@ public final class CypherProjectionGraphStoreFactorySupplier implements GraphSto
     @Override
     public CypherFactory getWithDimension(
         GraphLoaderContext loaderContext,
-        GraphDimensions graphDimensions,
         DependencyResolver dependencyResolver,
-        RequestCorrelationId requestCorrelationId
+        RequestCorrelationId requestCorrelationId,
+        ExecutorService executorService,
+        GraphDimensions graphDimensions
     ) {
         return CypherFactory.createWithBaseDimensions(
             graphProjectFromCypherConfig,

@@ -234,22 +234,22 @@ public class LinkPredictionRelationshipSampler {
 
         return MemoryEstimations.builder("Split relationships")
             .add(estimatePositiveRelations(
-                checkTargetRelType.name,
+                checkTargetRelType,
                 splitConfig.testFraction(),
                 splitConfig.trainFraction(),
                 relationshipWeight))
             .add(estimateNegativeSampling(
-                checkTargetRelType.name,
+                checkTargetRelType,
                 splitConfig.testFraction(),
                 splitConfig.trainFraction(),
                 splitConfig.negativeSamplingRatio(),
-                splitConfig.negativeRelationshipType()
+                splitConfig.negativeRelationshipType().map(RelationshipType::of)
             ))
             .build();
     }
 
     private static MemoryEstimation estimatePositiveRelations(
-        String relationshipType,
+        RelationshipType relationshipType,
         double testFraction,
         double trainFraction,
         Optional<String> relationshipWeight
@@ -274,11 +274,11 @@ public class LinkPredictionRelationshipSampler {
 
 
     private static MemoryEstimation estimateNegativeSampling(
-        String relationshipType,
+        RelationshipType relationshipType,
         double testFraction,
         double trainFraction,
         double negativeSamplingRatio,
-        Optional<String> negativeRelationshipType
+        Optional<RelationshipType> negativeRelationshipType
     ) {
         var sizePerRel = Double.BYTES + 2 * Long.BYTES;
 
@@ -293,11 +293,11 @@ public class LinkPredictionRelationshipSampler {
 
     private static long estimateNegativeRelCount(
         GraphDimensions graphDimensions,
-        String relationshipType,
+        RelationshipType relationshipType,
         double testFraction,
         double trainFraction,
         double negativeSamplingRatio,
-        Optional<String> negativeRelationshipType
+        Optional<RelationshipType> negativeRelationshipType
     ) {
          if (negativeRelationshipType.isPresent()) {
              return graphDimensions.estimatedRelCount(List.of(negativeRelationshipType.get()));

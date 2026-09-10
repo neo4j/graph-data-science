@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.ImportSizing;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.math.BigDecimal;
@@ -41,26 +41,30 @@ abstract class ScanningRecordsImporter<Record, T> {
     private final Log log;
     private final StoreScanner.Factory<Record> storeScannerFactory;
     protected final ExecutorService executorService;
-    protected final TransactionContext transaction;
+    protected final TransactionContext transactionContext;
     protected final GraphDimensions dimensions;
     protected final ProgressTracker progressTracker;
     protected final Concurrency concurrency;
+    protected final TerminationFlag terminationFlag;
 
     ScanningRecordsImporter(
-        Log log,
         StoreScanner.Factory<Record> storeScannerFactory,
-        GraphLoaderContext loadingContext,
+        Log log,
+        TransactionContext transactionContext,
+        TerminationFlag terminationFlag,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
+        ExecutorService executorService,
         Concurrency concurrency
     ) {
         this.log = log;
         this.storeScannerFactory = storeScannerFactory;
-        this.transaction = loadingContext.transactionContext();
+        this.transactionContext = transactionContext;
         this.dimensions = dimensions;
-        this.executorService = loadingContext.executor();
+        this.executorService = executorService;
         this.progressTracker = progressTracker;
         this.concurrency = concurrency;
+        this.terminationFlag = terminationFlag;
     }
 
     public final T call() {
@@ -70,7 +74,7 @@ abstract class ScanningRecordsImporter<Record, T> {
 
         try (StoreScanner<Record> storeScanner = storeScannerFactory.newScanner(
             StoreScanner.DEFAULT_PREFETCH_SIZE,
-            transaction
+            transactionContext
         )) {
             progressTracker.beginSubTask(/*Store Scan*/);
 

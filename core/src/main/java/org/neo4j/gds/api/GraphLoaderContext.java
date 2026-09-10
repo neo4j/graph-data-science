@@ -19,56 +19,35 @@
  */
 package org.neo4j.gds.api;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 
-import java.util.concurrent.ExecutorService;
+public record GraphLoaderContext(
+    TransactionContext transactionContext,
+    DatabaseId databaseId,
+    Log log,
+    TerminationFlag terminationFlag,
+    TaskRegistryFactory taskRegistryFactory
+) {
 
-@ValueClass
-public interface GraphLoaderContext {
-    TransactionContext transactionContext();
-
-    DatabaseId databaseId();
-
-    Log log();
-
-    @Value.Default
-    default ExecutorService executor() {
-        return DefaultPool.INSTANCE;
+    public GraphLoaderContext(TransactionContext transactionContext, DatabaseId databaseId) {
+        this(
+            transactionContext,
+            databaseId,
+            Log.noOpLog(),
+            TerminationFlag.RUNNING_TRUE,
+            TaskRegistryFactory.empty()
+        );
     }
 
-    @Value.Default
-    default TerminationFlag terminationFlag() {
-        return TerminationFlag.RUNNING_TRUE;
-    }
-
-    TaskRegistryFactory taskRegistryFactory();
-
-    GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext() {
-        @Override
-        public TransactionContext transactionContext() {
-            return null;
-        }
-
-        @Override
-        public DatabaseId databaseId() {
-            return null;
-        }
-
-        @Override
-        public Log log() {
-            return Log.noOpLog();
-        }
-
-        @Override
-        public TaskRegistryFactory taskRegistryFactory() {
-            return EmptyTaskRegistryFactory.INSTANCE;
-        }
-    };
+    public static final GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext(
+        null,
+        null,
+        Log.noOpLog(),
+        TerminationFlag.RUNNING_TRUE,
+        EmptyTaskRegistryFactory.INSTANCE
+    );
 }

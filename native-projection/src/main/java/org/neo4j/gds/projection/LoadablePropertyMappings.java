@@ -21,18 +21,14 @@ package org.neo4j.gds.projection;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Map;
 
 import static java.util.stream.Collectors.toMap;
 
-@ValueClass
-public interface LoadablePropertyMappings {
+public record LoadablePropertyMappings(Map<NodeLabel, PropertyMappings> storedProperties) {
 
-    Map<NodeLabel, PropertyMappings> storedProperties();
-
-    static Map<NodeLabel, PropertyMappings> propertyMappings(GraphProjectFromStoreConfig graphProjectConfig) {
+    public static Map<NodeLabel, PropertyMappings> propertyMappings(GraphProjectFromStoreConfig graphProjectConfig) {
         return graphProjectConfig
             .nodeProjections()
             .projections()
@@ -46,14 +42,8 @@ public interface LoadablePropertyMappings {
             ));
     }
 
-    static LoadablePropertyMappings of(GraphProjectFromStoreConfig graphProjectConfig) {
+    public static LoadablePropertyMappings of(GraphProjectFromStoreConfig graphProjectConfig) {
         var storeLoadedProperties = propertyMappings(graphProjectConfig);
-
-        return ImmutableLoadablePropertyMappings
-            .builder()
-            .putAllStoredProperties(storeLoadedProperties)
-            .build();
+        return new LoadablePropertyMappings(storeLoadedProperties);
     }
 }
-
-

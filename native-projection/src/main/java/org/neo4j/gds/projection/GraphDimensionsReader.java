@@ -23,13 +23,10 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.immutables.builder.Builder;
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.InternalReadOps;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -65,11 +62,10 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     private final Collection<String> nodeProperties;
     private final Collection<String> relationshipProperties;
 
-    @Builder.Factory
     static GraphDimensionsReader graphDimensionsReader(
-        GraphLoaderContext graphLoaderContext,
+        TransactionContext transactionContext,
         GraphProjectFromStoreConfig graphProjectConfig,
-        DependencyResolver dependencyResolver
+        IdGeneratorFactory idGeneratorFactory
     ) {
         var nodeLabelMappings = graphProjectConfig.nodeProjections().projections().entrySet().stream()
             .collect(Collectors.toMap(
@@ -105,8 +101,8 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
 
 
         return new GraphDimensionsReader(
-            graphLoaderContext.transactionContext(),
-            dependencyResolver.resolveDependency(IdGeneratorFactory.class),
+            transactionContext,
+            idGeneratorFactory,
             nodeLabelMappings,
             relationshipTypeMappings,
             nodeProperties,
@@ -175,37 +171,28 @@ public final class GraphDimensionsReader extends StatementFunction<GraphDimensio
     }
 
     private TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
-        var labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<NodeLabel>(
-            ANY_LABEL);
-        nodeLabelMappings
-            .forEach((nodeLabel, neoLabel) -> {
-                var labelToken = neoLabel.equals(PROJECT_ALL) ? ANY_LABEL : getNodeLabelToken(tokenRead, neoLabel);
-                labelTokenNodeLabelMappings.put(labelToken, nodeLabel);
-            });
+        var labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<NodeLabel>(ANY_LABEL);
+        nodeLabelMappings.forEach((nodeLabel, neoLabel) -> {
+            var labelToken = neoLabel.equals(PROJECT_ALL) ? ANY_LABEL : getNodeLabelToken(tokenRead, neoLabel);
+            labelTokenNodeLabelMappings.put(labelToken, nodeLabel);
+        });
         return labelTokenNodeLabelMappings;
     }
 
     private TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
-        var typeTokenRelTypeMappings = new TokenElementIdentifierMappings<RelationshipType>(
-            ANY_RELATIONSHIP_TYPE);
-
-        relationshipTypeMappings
-            .forEach((relType, neoRelType) -> {
-                var typeToken = neoRelType.equals(PROJECT_ALL) ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(
-                    tokenRead,
-                    neoRelType
-                );
-                typeTokenRelTypeMappings.put(typeToken, relType);
-            });
+        var typeTokenRelTypeMappings = new TokenElementIdentifierMappings<RelationshipType>(ANY_RELATIONSHIP_TYPE);
+        relationshipTypeMappings.forEach((relType, neoRelType) -> {
+            var typeToken = neoRelType.equals(PROJECT_ALL) ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(
+                tokenRead,
+                neoRelType
+            );
+            typeTokenRelTypeMappings.put(typeToken, relType);
+        });
         return typeTokenRelTypeMappings;
     }
 
-    private Map<String, Integer> loadPropertyTokens(
-        Collection<String> properties,
-        TokenRead tokenRead
-    ) {
-        return properties
-            .stream()
+    private Map<String, Integer> loadPropertyTokens(Collection<String> properties, TokenRead tokenRead) {
+        return properties.stream()
             .collect(Collectors.toMap(
                 Function.identity(),
                 property -> property != null ? tokenRead.propertyKey(property) : StatementConstants.NO_SUCH_PROPERTY_KEY,

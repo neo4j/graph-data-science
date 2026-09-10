@@ -20,13 +20,13 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResultFactory;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
@@ -128,7 +128,8 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
             var graphStoreFactory = graphStoreFactorySupplier.get(
                 graphLoaderContext,
                 dependencyResolver,
-                requestScopedDependencies.correlationId()
+                requestScopedDependencies.correlationId(),
+                DefaultPool.INSTANCE
             );
             var graphStoreCreator = new GraphStoreFromDatabaseLoader(
                 configuration,
@@ -163,12 +164,12 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         RequestScopedDependencies requestScopedDependencies,
         TransactionContext transactionContext
     ) {
-        return ImmutableGraphLoaderContext.builder()
-            .databaseId(requestScopedDependencies.databaseId())
-            .log(log)
-            .taskRegistryFactory(requestScopedDependencies.taskRegistryFactory())
-            .terminationFlag(requestScopedDependencies.terminationFlag())
-            .transactionContext(transactionContext)
-            .build();
+        return new GraphLoaderContext(
+            transactionContext,
+            requestScopedDependencies.databaseId(),
+            log,
+            requestScopedDependencies.terminationFlag(),
+            requestScopedDependencies.taskRegistryFactory()
+        );
     }
 }

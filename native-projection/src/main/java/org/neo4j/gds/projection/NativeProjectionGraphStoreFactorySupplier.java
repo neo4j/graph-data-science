@@ -25,6 +25,9 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.internal.id.IdGeneratorFactory;
+
+import java.util.concurrent.ExecutorService;
 
 public final class NativeProjectionGraphStoreFactorySupplier implements GraphStoreFactorySupplier {
     private final GraphProjectFromStoreConfig graphProjectFromStoreConfig;
@@ -46,29 +49,32 @@ public final class NativeProjectionGraphStoreFactorySupplier implements GraphSto
     public NativeFactory get(
         GraphLoaderContext loaderContext,
         DependencyResolver dependencyResolver,
-        RequestCorrelationId requestCorrelationId
+        RequestCorrelationId requestCorrelationId,
+        ExecutorService executorService
     ) {
-        return new NativeFactoryBuilder()
-            .graphProjectFromStoreConfig(graphProjectFromStoreConfig)
-            .loadingContext(loaderContext)
-            .dependencyResolver(dependencyResolver)
-            .requestCorrelationId(requestCorrelationId)
-            .build();
+        return NativeFactory.nativeFactory(
+            graphProjectFromStoreConfig,
+            loaderContext,
+            requestCorrelationId,
+            dependencyResolver.resolveDependency(IdGeneratorFactory.class),
+            executorService
+        );
     }
 
     @Override
     public NativeFactory getWithDimension(
         GraphLoaderContext loaderContext,
-        GraphDimensions graphDimensions,
         DependencyResolver dependencyResolver,
-        RequestCorrelationId requestCorrelationId
+        RequestCorrelationId requestCorrelationId,
+        ExecutorService executorService,
+        GraphDimensions graphDimensions
     ) {
-        return new NativeFactoryBuilder()
-            .graphProjectFromStoreConfig(graphProjectFromStoreConfig)
-            .loadingContext(loaderContext)
-            .graphDimensions(graphDimensions)
-            .dependencyResolver(dependencyResolver)
-            .requestCorrelationId(requestCorrelationId)
-            .build();
+        return NativeFactory.nativeFactory(
+            graphProjectFromStoreConfig,
+            loaderContext,
+            requestCorrelationId,
+            graphDimensions,
+            executorService
+        );
     }
 }

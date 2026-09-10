@@ -178,10 +178,6 @@ public interface GraphDimensions {
             .build();
     }
 
-    default long estimatedRelCount(List<String> relTypeNames) {
-        return estimatedRelCount(relTypeNames.stream().map(RelationshipType::of).toList());
-    }
-
     default long estimatedRelCount(Collection<RelationshipType> relationshipTypes) {
         if (!(relationshipTypes.contains(RelationshipType.ALL_RELATIONSHIPS))) {
             Map<RelationshipType, Long> relCounts = relationshipCounts();

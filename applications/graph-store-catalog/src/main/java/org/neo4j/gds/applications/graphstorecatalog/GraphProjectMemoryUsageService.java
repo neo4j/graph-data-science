@@ -21,12 +21,12 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.memory.tracking.MemoryTracker;
@@ -78,7 +78,8 @@ public class GraphProjectMemoryUsageService {
         var graphStoreFactory = graphStoreFactorySupplier.get(
             graphLoaderContext,
             dependencyResolver,
-            requestScopedDependencies.correlationId()
+            requestScopedDependencies.correlationId(),
+            DefaultPool.INSTANCE
         );
 
         var graphStoreCreator = new GraphStoreFromDatabaseLoader(configuration, graphStoreFactory);
@@ -113,13 +114,13 @@ public class GraphProjectMemoryUsageService {
         RequestScopedDependencies requestScopedDependencies,
         TransactionContext transactionContext
     ) {
-        return ImmutableGraphLoaderContext.builder()
-            .databaseId(requestScopedDependencies.databaseId())
-            .log(log)
-            .taskRegistryFactory(requestScopedDependencies.taskRegistryFactory())
-            .terminationFlag(requestScopedDependencies.terminationFlag())
-            .transactionContext(transactionContext)
-            .build();
+        return new GraphLoaderContext(
+            transactionContext,
+            requestScopedDependencies.databaseId(),
+            log,
+            requestScopedDependencies.terminationFlag(),
+            requestScopedDependencies.taskRegistryFactory()
+        );
     }
 
     private static MemoryTreeWithDimensions computeEstimate(

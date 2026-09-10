@@ -30,23 +30,21 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.AdjacencyTestUtils;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
+import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.function.LongToIntFunction;
 
@@ -85,17 +83,19 @@ class ScanningRelationshipsImporterTest extends BaseTest {
             .build();
 
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(db);
-        var graphLoaderContext = graphLoaderContext();
-        var graphDimensions = graphDimensions(graphProjectConfig, graphLoaderContext, dependencyResolver);
-        var importer = new ScanningRelationshipsImporterBuilder()
-            .log(Log.noOpLog())
-            .idMap(new DirectIdMap(graphDimensions.nodeCount()))
-            .loadingContext(graphLoaderContext)
-            .progressTracker(ProgressTracker.NULL_TRACKER)
-            .dimensions(graphDimensions)
-            .concurrency(new Concurrency(1))
-            .graphProjectConfig(graphProjectConfig)
-            .build();
+        var transactionContext = DatabaseTransactionContext.of(db, db.beginTx());
+        var graphDimensions = graphDimensions(graphProjectConfig, transactionContext, dependencyResolver);
+        var importer = ScanningRelationshipsImporter.scanningRelationshipsImporter(
+            graphProjectConfig,
+            Log.noOpLog(),
+            transactionContext,
+            TerminationFlag.RUNNING_TRUE,
+            graphDimensions,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE,
+            new Concurrency(1),
+            new DirectIdMap(graphDimensions.nodeCount())
+        );
 
         var relationshipsAndProperties = importer.call();
 
@@ -144,27 +144,15 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         return AdjacencyTestUtils.properties(idFunction.of(nodeVariable), adjacencyProperties, degreeFn);
     }
 
-    private GraphLoaderContext graphLoaderContext() {
-        return ImmutableGraphLoaderContext.builder()
-            .executor(DefaultPool.INSTANCE)
-            .log(Log.noOpLog())
-            .terminationFlag(TerminationFlag.RUNNING_TRUE)
-            .transactionContext(DatabaseTransactionContext.of(db, db.beginTx()))
-            .taskRegistryFactory(TaskRegistryFactory.empty())
-            .databaseId(DatabaseId.of(db.databaseName()))
-            .build();
-    }
-
     private GraphDimensions graphDimensions(
         GraphProjectFromStoreConfig graphProjectConfig,
-        GraphLoaderContext graphLoaderContext,
+        TransactionContext transactionContext,
         DependencyResolver dependencyResolver
     ) {
-        return new GraphDimensionsReaderBuilder()
-            .graphProjectConfig(graphProjectConfig)
-            .graphLoaderContext(graphLoaderContext)
-            .dependencyResolver(dependencyResolver)
-            .build()
-            .call();
+        return GraphDimensionsReader.graphDimensionsReader(
+            transactionContext,
+            graphProjectConfig,
+            dependencyResolver.resolveDependency(IdGeneratorFactory.class)
+        ).call();
     }
 }

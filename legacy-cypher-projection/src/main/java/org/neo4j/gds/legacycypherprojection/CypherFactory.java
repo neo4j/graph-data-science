@@ -29,6 +29,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
@@ -38,12 +39,13 @@ import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.tasks.Tasks;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.gds.progress.tracking.TaskTreeProgressTracker;
-import org.neo4j.gds.progress.tasks.Tasks;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.Collection;
@@ -140,12 +142,21 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
             .relCountUpperBound(relCountUpperBound)
             .build();
 
+        var progressTracker = initProgressTracker(
+            graphProjectConfig,
+            dim,
+            loadingContext.log(),
+            loadingContext.taskRegistryFactory()
+        );
+
         return new CypherFactory(
             graphProjectConfig,
-            loadingContext,
+            loadingContext.transactionContext(),
+            loadingContext.databaseId(),
             dim,
             nodeEstimation.propertyCount(),
             relationEstimation.propertyCount(),
+            progressTracker,
             dependencyResolver,
             log,
             requestCorrelationId
@@ -154,10 +165,12 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
 
     private CypherFactory(
         GraphProjectFromCypherConfig graphProjectConfig,
-        GraphLoaderContext loadingContext,
+        TransactionContext transactionContext,
+        DatabaseId databaseId,
         GraphDimensions graphDimensions,
         long estimatedNumberOfNodeProperties,
         long estimatedNumberOfRelProperties,
+        ProgressTracker progressTracker,
         DependencyResolver dependencyResolver,
         Log log,
         RequestCorrelationId requestCorrelationId
@@ -165,7 +178,8 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         super(
             graphProjectConfig,
             new Capabilities(Capabilities.WriteMode.LOCAL),
-            loadingContext,
+            transactionContext,
+            databaseId,
             graphDimensions,
             log,
             requestCorrelationId
@@ -174,7 +188,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         this.cypherConfig = graphProjectConfig;
         this.numberOfNodeProperties = estimatedNumberOfNodeProperties;
         this.numberOfRelationshipProperties = estimatedNumberOfRelProperties;
-        this.progressTracker = initProgressTracker();
+        this.progressTracker = progressTracker;
         this.dependencyResolver = dependencyResolver;
     }
 
@@ -247,7 +261,12 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         }
     }
 
-    private ProgressTracker initProgressTracker() {
+    private static ProgressTracker initProgressTracker(
+        GraphProjectFromCypherConfig graphProjectConfig,
+        GraphDimensions dimensions,
+        Log log,
+        TaskRegistryFactory taskRegistryFactory
+    ) {
         var concurrency = graphProjectConfig.readConcurrency();
 
         var task = Tasks.task(
@@ -258,11 +277,11 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         );
 
         if (graphProjectConfig.logProgress()) {
-            var taskRegistry = loadingContext.taskRegistryFactory().newInstance(graphProjectConfig.jobId());
+            var taskRegistry = taskRegistryFactory.newInstance(graphProjectConfig.jobId());
 
             return TaskProgressTracker.create(
-                loadingContext.log(),
-                new LoggerForProgressTrackingAdapter(loadingContext.log()),
+                log,
+                new LoggerForProgressTrackingAdapter(log),
                 task,
                 concurrency,
                 PlainSimpleRequestCorrelationId.create(),
@@ -271,18 +290,18 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         }
 
         return TaskTreeProgressTracker.create(
-            loadingContext.log(),
-            new LoggerForProgressTrackingAdapter(loadingContext.log()),
+            log,
+            new LoggerForProgressTrackingAdapter(log),
             task,
             concurrency,
             graphProjectConfig.jobId(),
             PlainSimpleRequestCorrelationId.create(),
-            loadingContext.taskRegistryFactory()
+            taskRegistryFactory
         );
     }
 
     private TransactionContext readOnlyTransaction() {
-        return loadingContext.transactionContext().withRestrictedAccess(READ);
+        return transactionContext.withRestrictedAccess(READ);
     }
 
     private NodeProjections buildEstimateNodeProjections() {

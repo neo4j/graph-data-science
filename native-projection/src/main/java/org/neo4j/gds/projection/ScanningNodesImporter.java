@@ -19,51 +19,50 @@
  */
 package org.neo4j.gds.projection;
 
-import org.immutables.builder.Builder;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
-import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.NodeImporterBuilder;
 import org.neo4j.gds.core.loading.Nodes;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.gds.logging.Log;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, Nodes> {
     private final Map<NodeLabel, PropertyMappings> propertyMappingsByLabel;
-    private final TerminationFlag terminationFlag;
     private final IdMapBuilder idMapBuilder;
     private final LabelInformation.Builder labelInformationBuilder;
     private final NativeNodePropertyImporter nodePropertyImporter;
 
-    @Builder.Factory
     public static ScanningNodesImporter scanningNodesImporter(
-        Log log,
         GraphProjectFromStoreConfig graphProjectConfig,
-        GraphLoaderContext loadingContext,
+        Log log,
+        TransactionContext transactionContext,
+        TerminationFlag terminationFlag,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
+        ExecutorService executorService,
         Concurrency concurrency
     ) {
         var expectedCapacity = dimensions.highestPossibleNodeCount();
 
-        var scannerFactory = scannerFactory(loadingContext.transactionContext(), dimensions, loadingContext.log());
+        var scannerFactory = scannerFactory(transactionContext, dimensions, log);
 
         var idMapBuilder = IdMapBehaviorServiceProvider
             .idMapBehavior()
@@ -85,8 +84,6 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             );
         }
 
-        var propertyMappings = LoadablePropertyMappings.propertyMappings(graphProjectConfig);
-
         var loadablePropertyMappings = LoadablePropertyMappings.of(graphProjectConfig);
 
         var nodePropertyImporter = initializeNodePropertyImporter(
@@ -96,13 +93,15 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         );
 
         return new ScanningNodesImporter(
-            log,
             scannerFactory,
-            loadingContext,
+            log,
+            transactionContext,
+            terminationFlag,
             dimensions,
             progressTracker,
+            executorService,
             concurrency,
-            propertyMappings,
+            loadablePropertyMappings,
             nodePropertyImporter,
             idMapBuilder,
             labelInformationBuilder
@@ -110,28 +109,31 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     }
 
     private ScanningNodesImporter(
-        Log log,
         StoreScanner.Factory<NodeReference> scannerFactory,
-        GraphLoaderContext loadingContext,
+        Log log,
+        TransactionContext transactionContext,
+        TerminationFlag terminationFlag,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
+        ExecutorService executorService,
         Concurrency concurrency,
-        Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
+        LoadablePropertyMappings loadablePropertyMappings,
         NativeNodePropertyImporter nodePropertyImporter,
         IdMapBuilder idMapBuilder,
         LabelInformation.Builder labelInformationBuilder
     ) {
         super(
-            log,
             scannerFactory,
-            loadingContext,
+            log,
+            transactionContext,
+            terminationFlag,
             dimensions,
             progressTracker,
+            executorService,
             concurrency
         );
 
-        this.terminationFlag = loadingContext.terminationFlag();
-        this.propertyMappingsByLabel = propertyMappingsByLabel;
+        this.propertyMappingsByLabel = loadablePropertyMappings.storedProperties();
         this.nodePropertyImporter = nodePropertyImporter;
         this.idMapBuilder = idMapBuilder;
         this.labelInformationBuilder = labelInformationBuilder;
@@ -164,7 +166,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             .build();
 
         return NodesScannerTask.factory(
-            transaction,
+            transactionContext,
             storeScanner,
             dimensions.highestPossibleNodeCount(),
             dimensions.nodeLabelTokens(),
