@@ -26,8 +26,8 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Username;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Configuration
 public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
@@ -51,12 +51,12 @@ public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
         return PropertyState.TRANSIENT;
     }
 
-    default boolean indexInverse() { return false; }
+    default boolean indexInverse() {return false;}
 
     @Configuration.Ignore
     @Override
     default Map<String, Object> asProcedureResultConfigurationField() {
-        return cleansed(toMap(), List.of());
+        return cleansed(toMap(), Set.of(NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY));
     }
 
 }

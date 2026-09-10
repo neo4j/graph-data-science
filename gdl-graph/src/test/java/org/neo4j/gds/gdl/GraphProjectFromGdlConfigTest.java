@@ -20,6 +20,10 @@
 package org.neo4j.gds.gdl;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.config.GraphProjectConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,6 +41,27 @@ class GraphProjectFromGdlConfigTest {
         procedureResultConfigurationField.put("bar", "baz");
 
         assertThat(procedureResultConfigurationField).containsEntry("bar", "baz");
+    }
+
+    @Test
+    void asProcedureResultConfigurationFieldHidesFictitiousLoadingKeys() {
+        GraphProjectFromGdlConfig config = GraphProjectFromGdlConfigImpl.builder()
+            .graphName("g")
+            .gdlGraph("foo")
+            .build();
+
+        var procedureResultConfigurationField = config.asProcedureResultConfigurationField();
+
+        // nodeCount / relationshipCount are estimation sentinels (-1), not graph statistics
+        assertThat(procedureResultConfigurationField)
+            .doesNotContainKeys(GraphProjectConfig.NODE_COUNT_KEY, GraphProjectConfig.RELATIONSHIP_COUNT_KEY);
+
+        assertThat(procedureResultConfigurationField)
+            .containsEntry("gdlGraph", "foo")
+            .containsEntry("orientation", Orientation.NATURAL)
+            .containsEntry("aggregation", Aggregation.DEFAULT)
+            .containsEntry("propertyState", PropertyState.TRANSIENT)
+            .containsEntry("indexInverse", false);
     }
 
 }
