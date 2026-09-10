@@ -25,8 +25,6 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
-import org.neo4j.gds.bridges.BridgeResult;
-import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.centrality.validation.BetweennessCentralityRequirements;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
@@ -134,36 +132,6 @@ public class CentralityComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.betweennessCentrality(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> bridges(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        BridgesParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<BridgeResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidation(
-                new UndirectedOnlyRequirement("Bridges")
-            ),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.bridges(
             graph,
             parameters,
             jobId,

@@ -49,7 +49,6 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bridges;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
@@ -132,17 +131,16 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> bridges(
         GraphName graphName,
         BridgesStreamConfig configuration,
-        StreamResultBuilder<BridgeResult, RESULT> streamResultBuilder,
+        StreamResultBuilder<BridgeResult, RESULT> resultBuilder,
         boolean shouldComputeComponents
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.bridges(
             graphName,
             configuration,
-            Bridges,
-            ()-> estimationFacade.bridges(shouldComputeComponents),
-            (graph, __) -> algorithms.bridges(graph, configuration,shouldComputeComponents),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder),
+            shouldComputeComponents
+        ));
     }
 
     public <RESULT> Stream<RESULT> celf(

@@ -26,6 +26,8 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
+import org.neo4j.gds.bridges.BridgeResult;
+import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
@@ -69,6 +71,25 @@ public class CentralityAlgorithmsBusinessFacade {
             graph -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
             AlgorithmLabel.ArticulationPoints,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> bridges(
+        GraphName graphName,
+        BridgesStreamConfig configuration,
+        Optional<SideEffect<BridgeResult, METADATA>> sideEffect,
+        ResultRenderer<BridgeResult, RESULT, METADATA> resultRenderer,
+        boolean shouldComputeComponents
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            new UndirectedOnlyRequirement("Bridges"),
+            graph -> algorithms.bridges(graph, configuration, shouldComputeComponents),
+            () -> estimationFacade.bridges(shouldComputeComponents),
+            AlgorithmLabel.Bridges,
             sideEffect,
             resultRenderer
         );
