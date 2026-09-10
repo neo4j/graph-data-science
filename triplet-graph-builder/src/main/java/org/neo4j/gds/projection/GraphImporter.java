@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -80,6 +81,9 @@ public final class GraphImporter {
     private final ProgressTracker progressTracker;
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
+
+    private final Set<ThreadLocalBatches> threadLocalBatches;
+    private volatile @Nullable GraphImporter.ThreadLocalBatches defaultSession;
 
     public static Task graphImporterTask(Concurrency concurrency, int taskVolume) {
         return Tasks.task(
@@ -116,12 +120,62 @@ public final class GraphImporter {
         this.progressTracker = progressTracker;
         this.relImporters = new ConcurrentHashMap<>();
         this.graphSchemaBuilder = MutableGraphSchema.builder();
+        this.threadLocalBatches = ConcurrentHashMap.newKeySet();
 
         progressTracker.beginSubTask(/*Graph aggregation*/);
         progressTracker.beginSubTask(/*Update aggregation*/);
     }
 
+    public ThreadLocalBatches newThreadLocalBatches() {
+        var threadLocalBatches = new ThreadLocalBatches();
+        this.threadLocalBatches.add(threadLocalBatches);
+        return threadLocalBatches;
+    }
+
+    /**
+     * Single-session convenience for callers that drive the import from one
+     * thread (tests, benchmarks). It holds one pooled
+     * builder claim per relationship type for the whole import instead of
+     * paying claim/release per row; the claim is released in {@link #result}.
+     */
     public void update(
+        long sourceNode,
+        long targetNode,
+        @Nullable PropertyValues sourceNodePropertyValues,
+        @Nullable PropertyValues targetNodePropertyValues,
+        NodeLabelToken sourceNodeLabels,
+        NodeLabelToken targetNodeLabels,
+        RelationshipType relationshipType,
+        @Nullable PropertyValues relationshipProperties
+    ) {
+        update(
+            defaultSession(),
+            sourceNode,
+            targetNode,
+            sourceNodePropertyValues,
+            targetNodePropertyValues,
+            sourceNodeLabels,
+            targetNodeLabels,
+            relationshipType,
+            relationshipProperties
+        );
+    }
+
+    private ThreadLocalBatches defaultSession() {
+        var session = this.defaultSession;
+        if (session == null) {
+            synchronized (this) {
+                if (this.defaultSession == null) {
+                    this.defaultSession = newThreadLocalBatches();
+                }
+                session = this.defaultSession;
+            }
+        }
+        return session;
+    }
+
+    public void update(
+        ThreadLocalBatches threadLocalBatches,
         long sourceNode,
         long targetNode,
         @Nullable PropertyValues sourceNodePropertyValues,
@@ -148,6 +202,7 @@ public final class GraphImporter {
 
             var intermediateTargetId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
 
+            var batch = threadLocalBatches.batchBuilderFor(relationshipType, relImporter);
             if (relationshipProperties != null) {
                 var propertyCount = relationshipProperties.size();
                 validateRelationshipProperties(relationshipProperties, propertyCount, relImporter);
@@ -157,7 +212,7 @@ public final class GraphImporter {
                         relationshipProperties.getSingle(),
                         DefaultValue.DOUBLE_DEFAULT_FALLBACK
                     );
-                    relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, property);
+                    batch.addFromInternal(intermediateSourceId, intermediateTargetId, property);
                 } else {
                     var propertyValues = new double[relationshipProperties.size()];
                     int[] index = {0};
@@ -169,10 +224,10 @@ public final class GraphImporter {
                         var i = index[0]++;
                         propertyValues[i] = property;
                     });
-                    relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValues);
+                    batch.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValues);
                 }
             } else {
-                relImporter.addFromInternal(intermediateSourceId, intermediateTargetId);
+                batch.addFromInternal(intermediateSourceId, intermediateTargetId);
             }
         }
 
@@ -206,6 +261,12 @@ public final class GraphImporter {
         boolean hasSeenArbitraryId
     ) {
         progressTracker.endSubTask(/*Update aggregation*/);
+
+        // Release all pooled builder claims before building — a leaked claim would
+        // otherwise block pool.shutdown() inside build() for up to the claim timeout.
+        this.threadLocalBatches.forEach(ThreadLocalBatches::close);
+        this.threadLocalBatches.clear();
+
         progressTracker.beginSubTask(/*Build graph store*/);
         progressTracker.beginSubTask(/*Nodes*/);
         var graphName = config.graphName();
@@ -394,5 +455,57 @@ public final class GraphImporter {
         // release all references to the builders
         // we are only be called once and don't support double invocations of `result` building
         this.relImporters.clear();
+    }
+
+    /**
+     * Per-updater holder of pooled {@link RelationshipsBuilder.Batch} objects.
+     * Used by a single thread at a time (the owning aggregation updater);
+     * {@link #close()} may additionally be called from another thread (result/close).
+     */
+    public static final class ThreadLocalBatches implements AutoCloseable {
+
+        private final Map<RelationshipType, RelationshipsBuilder.Batch> batchBuildersPerType;
+        private final AtomicBoolean closed;
+
+        ThreadLocalBatches() {
+            this.batchBuildersPerType = new ConcurrentHashMap<>();
+            this.closed = new AtomicBoolean(false);
+        }
+
+        RelationshipsBuilder.Batch batchBuilderFor(
+            RelationshipType relationshipType,
+            RelationshipsBuilder relationshipsBuilder
+        ) {
+            if (closed.get()) {
+                throw new IllegalStateException("Batch session is already closed");
+            }
+            var batchBuilder = batchBuildersPerType.get(relationshipType);
+            if (batchBuilder == null) {
+                batchBuilder = relationshipsBuilder.newBatch();
+                batchBuildersPerType.put(relationshipType, batchBuilder);
+            }
+            return batchBuilder;
+        }
+
+        public void releaseBatches() {
+            batchBuildersPerType.values().forEach(RelationshipsBuilder.Batch::close);
+            batchBuildersPerType.clear();
+        }
+
+        /**
+         * Terminal, idempotent release; safe from any thread.
+         * <p>
+         * Residual race: if the owner thread passes the closed check in
+         * {@link #batchBuilderFor} while another thread drains the batches here, the
+         * owner may add a batch that nobody releases. Under the kernel contract
+         * (result/close only run after all morsels are done) this is unreachable;
+         * the pooled-builder claim timeout is the backstop.
+         */
+        @Override
+        public void close() {
+            if (closed.compareAndSet(false, true)) {
+                releaseBatches();
+            }
+        }
     }
 }

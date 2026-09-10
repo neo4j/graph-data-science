@@ -19,22 +19,20 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.NodeImporterBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
-import org.neo4j.gds.values.GdsValue;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -46,7 +44,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
-public final class NodesBuilder {
+public final class NodesBuilder implements NodesBuilderApi {
     static final Integer NO_PROPERTY = -1;
     public static final long UNKNOWN_MAX_ID = -1L;
 
@@ -101,31 +99,11 @@ public final class NodesBuilder {
             nodesBuilderContext.threadLocalContext()
         );
         this.localNodesBuilderProvider = usePooledBuilderProvider
-            ? LocalNodesBuilderProvider.pooled(nodesBuilderSupplier,concurrency)
+            ? LocalNodesBuilderProvider.pooled(nodesBuilderSupplier, concurrency)
             : LocalNodesBuilderProvider.threadLocal(nodesBuilderSupplier);
     }
 
-    private static LongPredicate seenNodesPredicate(
-        boolean deduplicateIds,
-        long maxOriginalId
-    ) {
-        if (deduplicateIds) {
-            if (maxOriginalId == UNKNOWN_MAX_ID) {
-                var seenIds = HugeAtomicGrowingBitSet.create(0);
-                return seenIds::getAndSet;
-            } else {
-                var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1);
-                return seenIds::getAndSet;
-            }
-        } else {
-            return nodeId -> false;
-        }
-    }
-
-    public void addNode(long originalId) {
-        this.addNode(originalId, NodeLabelTokens.empty());
-    }
-
+    @Override
     public void addNode(long originalId, NodeLabelToken nodeLabels) {
         var slot = this.localNodesBuilderProvider.acquire();
         try {
@@ -135,30 +113,7 @@ public final class NodesBuilder {
         }
     }
 
-    public void addNode(long originalId, NodeLabel... nodeLabels) {
-        this.addNode(originalId, NodeLabelTokens.ofNodeLabels(nodeLabels));
-    }
-
-    public void addNode(long originalId, NodeLabel nodeLabel) {
-        this.addNode(originalId, NodeLabelTokens.ofNodeLabel(nodeLabel));
-    }
-
-    public void addNode(long originalId, Map<String, GdsValue> properties) {
-        this.addNode(originalId, properties, NodeLabelTokens.empty());
-    }
-
-    public void addNode(long originalId, Map<String, GdsValue> properties, NodeLabelToken nodeLabels) {
-        this.addNode(originalId, nodeLabels, PropertyValues.of(properties));
-    }
-
-    public void addNode(long originalId, Map<String, GdsValue> properties, NodeLabel... nodeLabels) {
-        this.addNode(originalId, properties, NodeLabelTokens.ofNodeLabels(nodeLabels));
-    }
-
-    public void addNode(long originalId, Map<String, GdsValue> properties, NodeLabel nodeLabel) {
-        this.addNode(originalId, properties, NodeLabelTokens.ofNodeLabel(nodeLabel));
-    }
-
+    @Override
     public void addNode(long originalId, NodeLabelToken nodeLabels, PropertyValues properties) {
         var slot = this.localNodesBuilderProvider.acquire();
         try {
@@ -166,6 +121,10 @@ public final class NodesBuilder {
         } finally {
             slot.release();
         }
+    }
+
+    public Batch newBatch() {
+        return new Batch(localNodesBuilderProvider.acquire());
     }
 
     public long importedNodes() {
@@ -241,6 +200,23 @@ public final class NodesBuilder {
         ));
     }
 
+    private static LongPredicate seenNodesPredicate(
+        boolean deduplicateIds,
+        long maxOriginalId
+    ) {
+        if (deduplicateIds) {
+            if (maxOriginalId == UNKNOWN_MAX_ID) {
+                var seenIds = HugeAtomicGrowingBitSet.create(0);
+                return seenIds::getAndSet;
+            } else {
+                var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1);
+                return seenIds::getAndSet;
+            }
+        } else {
+            return nodeId -> false;
+        }
+    }
+
     private static NodeProperty entryToNodeProperty(
         Map.Entry<String, NodePropertiesFromStoreBuilder> entry,
         PropertyState propertyState,
@@ -253,5 +229,31 @@ public final class NodesBuilder {
     public void close(RuntimeException exception) {
         this.localNodesBuilderProvider.close();
         throw exception;
+    }
+
+    public static class Batch implements NodesBuilderApi, AutoCloseable {
+
+        private final LocalNodesBuilderProvider.LocalNodesBuilderSlot slot;
+        private final LocalNodesBuilder builder;
+
+        Batch(LocalNodesBuilderProvider.LocalNodesBuilderSlot slot) {
+            this.slot = slot;
+            this.builder = slot.get();
+        }
+
+        @Override
+        public void addNode(long originalId, NodeLabelToken nodeLabels) {
+            builder.addNode(originalId, nodeLabels);
+        }
+
+        @Override
+        public void addNode(long originalId, NodeLabelToken nodeLabels, PropertyValues properties) {
+            builder.addNode(originalId, nodeLabels, properties);
+        }
+
+        @Override
+        public void close() {
+            slot.release();
+        }
     }
 }

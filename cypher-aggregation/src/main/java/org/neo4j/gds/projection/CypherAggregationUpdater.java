@@ -19,32 +19,12 @@
  */
 package org.neo4j.gds.projection;
 
-import org.intellij.lang.annotations.PrintFormat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.ConfigKeyValidation;
-import org.neo4j.gds.core.CypherMapAccess;
-import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.LazyIdMapBuilder;
-import org.neo4j.gds.core.loading.LazyIdMapBuilderBuilder;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
-import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
-import org.neo4j.gds.progress.registration.TaskStore;
-import org.neo4j.gds.progress.tracking.BatchingTaskProgressTrackerFactory;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.progress.tracking.TaskProgressTracker;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
 import org.neo4j.values.AnyValue;
@@ -52,21 +32,12 @@ import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
 import org.neo4j.values.virtual.MapValue;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import static org.neo4j.gds.projection.CypherAggregation.FUNCTION_NAME;
 import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class CypherAggregationUpdater implements UserAggregationUpdater, AutoCloseable {
 
-    private static final String RELATIONSHIP_TYPE = "relationshipType";
 
     static final String SOURCE_NODE_PROPERTIES = "sourceNodeProperties";
     static final String SOURCE_NODE_LABELS = "sourceNodeLabels";
@@ -74,84 +45,65 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
     static final String TARGET_NODE_LABELS = "targetNodeLabels";
     static final String ALPHA_RELATIONSHIP_PROPERTIES = "properties";
     static final String RELATIONSHIP_PROPERTIES = "relationshipProperties";
+    static final String RELATIONSHIP_TYPE = "relationshipType";
 
+    private final LazyGraphImporter lazyGraphImporter;
 
-    private final QueryEstimator queryEstimator;
-    private final ExecutingQueryProvider queryProvider;
-    private final Capabilities.WriteMode writeMode;
-
-    private final String username;
-    private final DatabaseId databaseId;
-
-    private final Lock lock;
     private final ExtractNodeId extractNodeId;
+    private final InputValuesMapper inputValuesMapper;
     private final ConfigValidator configValidator;
 
-    private final GraphStoreCatalogService graphStoreCatalogService;
-    private final RequestCorrelationId requestCorrelationId;
-    private final TaskStore taskStore;
-    private final Log log;
+    private volatile @Nullable GraphImporter.ThreadLocalBatches threadLocalBatches;
 
-    private volatile @Nullable GraphImporter importer;
+    public interface InputValuesMapper {
+        AnyValue[] map(AnyValue[] from);
 
-    private ProgressTracker progressTracker;
+        static InputValuesMapper identity() {
+            return from -> from;
+        }
+    }
 
     public CypherAggregationUpdater(
-        QueryEstimator queryEstimator,
-        ExecutingQueryProvider queryProvider,
-        Capabilities.WriteMode writeMode,
-        String username,
-        DatabaseId databaseId,
+        LazyGraphImporter lazyGraphImporter,
         ExtractNodeId extractNodeId,
-        GraphStoreCatalogService graphStoreCatalogService,
-        RequestCorrelationId requestCorrelationId,
-        TaskStore taskStore,
-        Log log
+        InputValuesMapper inputValuesMapper
     ) {
-        this.queryEstimator = queryEstimator;
-        this.queryProvider = queryProvider;
-        this.writeMode = writeMode;
-        this.username = username;
-        this.databaseId = databaseId;
+        this.lazyGraphImporter = lazyGraphImporter;
         this.extractNodeId = extractNodeId;
-        this.graphStoreCatalogService = graphStoreCatalogService;
-        this.requestCorrelationId = requestCorrelationId;
-        this.taskStore = taskStore;
-        this.log = log;
-        this.lock = new ReentrantLock();
+        this.inputValuesMapper = inputValuesMapper;
         this.configValidator = new ConfigValidator();
     }
 
     @Override
     public void update(AnyValue[] input) throws ProcedureException {
         try {
+            var mappedInput = inputValuesMapper.map(input);
             projectNextRelationship(
-                (TextValue) input[0],
-                input[1],
-                input[2],
-                input[3],
-                input[4],
-                input[5]
+                (TextValue) mappedInput[0],
+                mappedInput[1],
+                mappedInput[2],
+                mappedInput[3],
+                mappedInput[4],
+                mappedInput[5]
             );
-        } catch (Throwable T) {
-            throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
+        } catch (Throwable t) {
+            throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), t);
         }
     }
 
     @Override
-    public void applyUpdates() throws ProcedureException {
-
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (progressTracker != null) {
-            progressTracker.endSubTaskWithFailure();
+    public void applyUpdates() {
+        var session = this.threadLocalBatches;
+        if (session != null) {
+            session.releaseBatches();
         }
     }
 
-    public GraphImporter importer() {
-        return importer;
+    GraphImporter.ThreadLocalBatches getThreadLocalBatches(GraphImporter graphImporter) {
+        if (threadLocalBatches == null) {
+            threadLocalBatches = graphImporter.newThreadLocalBatches();
+        }
+        return threadLocalBatches;
     }
 
     void projectNextRelationship(
@@ -164,7 +116,7 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
     ) {
         this.configValidator.validateConfig(dataConfig, config, migrationConfig);
 
-        var data = initGraphData(graphName, config);
+        var importer = lazyGraphImporter.initializeImporter(graphName, config, dataConfig, migrationConfig);
 
         @Nullable PropertyValues sourceNodePropertyValues = null;
         @Nullable PropertyValues targetNodePropertyValues = null;
@@ -189,7 +141,8 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
             relationshipType = typeConfig(RELATIONSHIP_TYPE, (MapValue) dataConfig);
         }
 
-        data.update(
+        importer.update(
+            getThreadLocalBatches(importer),
             extractNodeId(sourceNode),
             targetNode == NoValue.NO_VALUE ? NO_TARGET_NODE : extractNodeId(targetNode),
             sourceNodePropertyValues,
@@ -201,73 +154,16 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
         );
     }
 
-    private GraphImporter initGraphData(TextValue graphName, AnyValue config) {
-        var data = this.importer;
-        if (data != null) {
-            return data;
+    @Override
+    public void close() {
+        if (threadLocalBatches != null) {
+            threadLocalBatches.close();
         }
-
-        this.lock.lock();
-        try {
-            data = this.importer;
-            if (data == null) {
-                this.importer = data = createGraphImporter(graphName, config);
-            }
-            return data;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    private GraphImporter createGraphImporter(
-        TextValue graphNameValue,
-        AnyValue configMap
-    ) {
-        var graphName = graphNameValue.stringValue();
-        var query = this.queryProvider.executingQuery().orElse("");
-
-        validateGraphName(graphName, this.username, this.databaseId);
-        var configMapValue = (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY;
-        var config = GraphProjectFromCypherAggregationConfig.of(
-            this.username,
-            graphName,
-            query,
-            configMapValue
-        );
-        ConfigKeyValidation.requireOnlyKeysFrom(config.configKeys(), configMapValue.keySet());
-
-        var idMapBuilder = idMapBuilder(config.readConcurrency());
-
-        var taskVolume = queryEstimator.estimateRows(query);
-
-        var taskRegistryFactory = TaskRegistryFactory.local(log, taskStore, new User(username, false));
-        var taskRegistry = taskRegistryFactory.newInstance(config.jobId());
-
-        var internalProgressTracker = TaskProgressTracker.create(
-            log,
-            new LoggerForProgressTrackingAdapter(log),
-            GraphImporter.graphImporterTask(config.readConcurrency(), taskVolume),
-            config.readConcurrency(),
-            requestCorrelationId,
-            taskRegistry
-        );
-        this.progressTracker = new BatchingTaskProgressTrackerFactory().create(internalProgressTracker, taskVolume, config.readConcurrency());
-
-        return new GraphImporter(
-            log,
-            config,
-            config.undirectedRelationshipTypes(),
-            config.inverseIndexedRelationshipTypes(),
-            idMapBuilder,
-            writeMode,
-            query,
-            graphStoreCatalogService,
-            progressTracker
-        );
+        lazyGraphImporter.close();
     }
 
     @Nullable
-    static PropertyValues propertiesConfig(String key, @NotNull MapValue container) {
+    private static PropertyValues propertiesConfig(String key, @NotNull MapValue container) {
         var properties = container.get(key);
         if (properties instanceof MapValue mapProperties) {
             if (mapProperties.isEmpty()) return null;
@@ -290,23 +186,6 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
 
     private long extractNodeId(@NotNull AnyValue node) {
         return node.map(this.extractNodeId);
-    }
-
-    private static LazyIdMapBuilder idMapBuilder(Concurrency readConcurrency) {
-        return new LazyIdMapBuilderBuilder()
-            .concurrency(readConcurrency)
-            .hasLabelInformation(true)
-            .hasProperties(true)
-            .propertyState(PropertyState.PERSISTENT)
-            .build();
-    }
-
-
-    private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
-        CypherMapAccess.failOnBlank("graphName", graphName);
-        if (GraphStoreCatalog.exists(username, databaseId, graphName)) {
-            throw new IllegalArgumentException("Graph " + graphName + " already exists");
-        }
     }
 
     private static NodeLabelToken labelsConfig(String nodeLabelKey, @NotNull MapValue nodesConfig) {
@@ -351,139 +230,4 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
         );
     }
 
-    static final class ConfigValidator {
-        private static final Set<String> DATA_CONFIG_KEYS = Set.of(
-            SOURCE_NODE_PROPERTIES,
-            SOURCE_NODE_LABELS,
-            TARGET_NODE_PROPERTIES,
-            TARGET_NODE_LABELS,
-            RELATIONSHIP_PROPERTIES,
-            RELATIONSHIP_TYPE
-        );
-
-        private static final Set<String> PROJECTION_CONFIG_KEYS = Set.copyOf(
-            GraphProjectFromCypherAggregationConfig.of("", "", "", MapValue.EMPTY).configKeys()
-        );
-
-        private final AtomicBoolean validate = new AtomicBoolean(true);
-
-        void validateConfig(AnyValue dataConfig, AnyValue projectionConfig, AnyValue migrationConfig) {
-            if (dataConfig instanceof MapValue || projectionConfig instanceof MapValue) {
-                if (this.validate.get()) {
-                    if (this.validate.getAndSet(false)) {
-                        if (dataConfig instanceof MapValue) {
-                            validateDataConfig((MapValue) dataConfig, projectionConfig);
-                        }
-                        if (projectionConfig instanceof MapValue) {
-                            validateProjectionConfig((MapValue) projectionConfig, migrationConfig);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void validateDataConfig(MapValue dataConfig, AnyValue projectionConfig) {
-            checkForNotMigratedConfigKeys(dataConfig);
-
-            // most map implementation create a new collection, unlike what most Java collections might do, so we cache it.
-            var dataConfigKeys = mapKeys(dataConfig);
-
-            checkForMergedOrSwappedOrForgottenConfig(projectionConfig, dataConfigKeys);
-
-            ConfigKeyValidation.requireOnlyKeysFrom(DATA_CONFIG_KEYS, dataConfigKeys);
-
-            checkForMutuallyRequiredKeys(dataConfig, SOURCE_NODE_LABELS, TARGET_NODE_LABELS);
-            checkForMutuallyRequiredKeys(dataConfig, TARGET_NODE_LABELS, SOURCE_NODE_LABELS);
-            checkForMutuallyRequiredKeys(dataConfig, SOURCE_NODE_PROPERTIES, TARGET_NODE_PROPERTIES);
-            checkForMutuallyRequiredKeys(dataConfig, TARGET_NODE_PROPERTIES, SOURCE_NODE_PROPERTIES);
-        }
-
-        private void validateProjectionConfig(MapValue projectionConfig, AnyValue migrationConfig) {
-            var containsRelationshipKeys = projectionConfig.containsKey(RELATIONSHIP_PROPERTIES) || projectionConfig
-                .containsKey(RELATIONSHIP_TYPE) || projectionConfig.containsKey(ALPHA_RELATIONSHIP_PROPERTIES);
-
-            var configAsAlphaParameter = migrationConfig != NoValue.NO_VALUE;
-
-            if (containsRelationshipKeys || configAsAlphaParameter) {
-                throw error(
-                    "The parameters for `nodesConfig` and `relationshipsConfig` have been merged. " +
-                        "Update your query by merging the 4th and 5th parameter into one parameter."
-                );
-            }
-        }
-
-        private static void checkForNotMigratedConfigKeys(MapValue dataConfig) {
-            if (dataConfig.containsKey(ALPHA_RELATIONSHIP_PROPERTIES)) {
-                throw error(
-                    "The configuration key '%s' is now called '%s'.",
-                    ALPHA_RELATIONSHIP_PROPERTIES,
-                    RELATIONSHIP_PROPERTIES
-                );
-            }
-        }
-
-        private static void checkForMergedOrSwappedOrForgottenConfig(
-            AnyValue projectionConfig,
-            Collection<String> dataConfigKeys
-        ) {
-            if (dataConfigKeys.stream().anyMatch(PROJECTION_CONFIG_KEYS::contains)) {
-                checkForSwappedOrForgottenConfig(projectionConfig, dataConfigKeys);
-                checkForMergedConfig(dataConfigKeys);
-            }
-        }
-
-        private static void checkForSwappedOrForgottenConfig(
-            AnyValue projectionConfig,
-            Collection<String> dataConfigKeys
-        ) {
-            if (PROJECTION_CONFIG_KEYS.containsAll(dataConfigKeys)) {
-                if (projectionConfig == NoValue.NO_VALUE) {
-                    throw error(
-                        "The `dataConfig` configuration parameter is missing. " +
-                            "If you meant to provide an empty configuration for the 4th parameter, " +
-                            "you can pass an empty map: '{}'."
-                    );
-                } else {
-                    throw error(
-                        "The configuration parameters are provided in the wrong order. " +
-                            "Update your query by swapping the 4th and 5th parameter."
-                    );
-                }
-            }
-        }
-
-        private static void checkForMergedConfig(Collection<String> dataConfigKeys) {
-            if (dataConfigKeys.stream().anyMatch(DATA_CONFIG_KEYS::contains)) {
-                throw error(
-                    "The configuration parameters are merged and provided as one parameter. " +
-                        "Update your query by splitting the configuration into two parameters. " +
-                        "Refer to the documentation for details."
-                );
-            }
-        }
-
-        private static void checkForMutuallyRequiredKeys(MapValue dataConfig, String firstKey, String secondKey) {
-            if (dataConfig.containsKey(firstKey) && !dataConfig.containsKey(secondKey)) {
-                throw error(
-                    "The configuration key '%1$s' is missing, but '%2$s' is provided. " +
-                        "If you really meant to only provide `%2$s` with no value for `%1$s`, " +
-                        "you can set `%1$s` to `NULL`.",
-                    secondKey,
-                    firstKey
-                );
-            }
-        }
-
-        private static IllegalArgumentException error(@PrintFormat String message, Object... args) {
-            return new IllegalArgumentException(formatWithLocale(message, args));
-        }
-
-        private static Collection<String> mapKeys(MapValue map) {
-            var keys = map.keySet();
-            if (keys instanceof Collection) {
-                return (Collection<String>) keys;
-            }
-            return StreamSupport.stream(keys.spliterator(), false).collect(Collectors.toSet());
-        }
-    }
 }

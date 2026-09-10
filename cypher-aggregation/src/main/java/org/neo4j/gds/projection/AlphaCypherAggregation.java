@@ -26,7 +26,9 @@ import org.neo4j.gds.compat.UserFunctionSignatureBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.integration.Neo4jPoweredRequestCorrelationId;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
+import org.neo4j.gds.progress.registration.EmptyTaskStore;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
@@ -111,18 +113,22 @@ public class AlphaCypherAggregation implements CallableUserAggregationFunction {
 
         var extractNodeId = new ExtractNodeId();
         return new CypherAggregationReducer(
-            new AlphaCypherAggregationUpdater(
-                queryProvider,
-                writeMode,
+
+            new LazyGraphImporter(
                 username,
                 DatabaseId.of(databaseId.name()),
-                extractNodeId,
+                queryProvider,
+                QueryEstimator.empty(),
+                writeMode,
                 graphStoreCatalogService,
-                requestCorrelationId
+                requestCorrelationId,
+                EmptyTaskStore.INSTANCE,
+                Log.noOpLog()
             ),
             metrics.projectionMetrics(),
             DatabaseId.of(databaseId.name()),
-            extractNodeId
+            extractNodeId,
+            new AlphaCypherAggregationInputMapper()
         );
     }
 }

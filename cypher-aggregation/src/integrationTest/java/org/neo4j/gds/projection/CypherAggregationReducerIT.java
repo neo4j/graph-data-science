@@ -52,6 +52,25 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 class CypherAggregationReducerIT {
 
+    private static LazyGraphImporter newLazyGraphImporter(
+        String userName,
+        DatabaseId databaseId,
+        GraphStoreCatalogService graphStoreCatalogService,
+        TaskStore taskStore
+    ) {
+        return new LazyGraphImporter(
+            userName,
+            databaseId,
+            ExecutingQueryProvider.empty(),
+            QueryEstimator.empty(),
+            Capabilities.WriteMode.LOCAL,
+            graphStoreCatalogService,
+            PlainSimpleRequestCorrelationId.create(),
+            taskStore,
+            Log.noOpLog()
+        );
+    }
+
     @Test
     void shouldImportHighNodeIds() throws Exception {
         var userName = "neo4j";
@@ -61,37 +80,32 @@ class CypherAggregationReducerIT {
         var graphStoreCatalogService = new GraphStoreCatalogService();
         var extractNodeId = new ExtractNodeId();
         try (
-            var updater = new CypherAggregationUpdater(
-                QueryEstimator.empty(),
-                ExecutingQueryProvider.empty(),
-                Capabilities.WriteMode.LOCAL,
+            var lazyGraphImporter = newLazyGraphImporter(
                 userName,
                 databaseId,
-                extractNodeId,
                 graphStoreCatalogService,
-                PlainSimpleRequestCorrelationId.create(),
-                EmptyTaskStore.INSTANCE,
-                Log.noOpLog()
+                EmptyTaskStore.INSTANCE
             );
             var reducer = new CypherAggregationReducer(
-                updater,
+                lazyGraphImporter,
                 ProjectionMetricsService.DISABLED,
                 databaseId,
-                extractNodeId
+                extractNodeId,
+                CypherAggregationUpdater.InputValuesMapper.identity()
             )
         ) {
-
             long source = 1L << 50;
             long target = (1L << 50) + 1;
 
-            updater.projectNextRelationship(
+            var updater = (CypherAggregationUpdater) reducer.newUpdater();
+            updater.update(new AnyValue[]{
                 Values.stringValue(graphName),
                 Values.longValue(source),
                 Values.longValue(target),
-                MapValue.EMPTY,
-                MapValue.EMPTY,
-                NoValue.NO_VALUE
-            );
+                MapValue.EMPTY,      // dataConfig
+                MapValue.EMPTY,      // configuration
+                NoValue.NO_VALUE     // alphaMigrationConfig
+            });
 
             var result = reducer.buildGraph();
 
@@ -122,19 +136,22 @@ class CypherAggregationReducerIT {
     void shouldFailOnEmptyGraphName(String emptyGraphName, String description) throws Exception {
         var taskStore = mock(TaskStore.class);
         try (
-            var updater = new CypherAggregationUpdater(
-                QueryEstimator.empty(),
-                ExecutingQueryProvider.empty(),
-                Capabilities.WriteMode.LOCAL,
+            var lazyGraphImporter = newLazyGraphImporter(
                 "neo4j",
                 DatabaseId.random(),
-                new ExtractNodeId(),
                 new GraphStoreCatalogService(),
-                PlainSimpleRequestCorrelationId.create(),
-                taskStore,
-                Log.noOpLog()
+                taskStore
+            );
+            var reducer = new CypherAggregationReducer(
+                lazyGraphImporter,
+                ProjectionMetricsService.DISABLED,
+                DatabaseId.random(),
+                new ExtractNodeId(),
+                CypherAggregationUpdater.InputValuesMapper.identity()
             )
         ) {
+            var updater = (CypherAggregationUpdater) reducer.newUpdater();
+
             assertThatIllegalArgumentException().isThrownBy(() ->
                 updater.projectNextRelationship(
                     Values.stringValue(emptyGraphName),
@@ -163,34 +180,23 @@ class CypherAggregationReducerIT {
         var taskStore = PerDatabaseTaskStore.create(Duration.ofMinutes(5));
         var databaseId = DatabaseId.random();
         var extractNodeId = new ExtractNodeId();
-        var updater = new CypherAggregationUpdater(
-            QueryEstimator.empty(),
-            ExecutingQueryProvider.empty(),
-            Capabilities.WriteMode.LOCAL,
-            "neo4j",
-            databaseId,
-            extractNodeId,
-            new GraphStoreCatalogService(),
-            PlainSimpleRequestCorrelationId.create(),
-            taskStore,
-            Log.noOpLog()
-        );
         var reducer = new CypherAggregationReducer(
-            updater,
+            newLazyGraphImporter("neo4j", databaseId, new GraphStoreCatalogService(), taskStore),
             ProjectionMetricsService.DISABLED,
             databaseId,
-            extractNodeId
+            extractNodeId,
+            CypherAggregationUpdater.InputValuesMapper.identity()
         );
 
         assertThatThrownBy(() ->
-            updater.update(new AnyValue[] {
+            reducer.newUpdater().update(new AnyValue[]{
                 Values.stringValue("my-graph"),
                 Values.longValue(1L),
                 Values.stringValue("invalidID"),
                 MapValue.EMPTY,
                 MapValue.EMPTY,
-                NoValue.NO_VALUE }
-            ))
+                NoValue.NO_VALUE
+            }))
             .hasCauseInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("The node has to be either a NODE or an INTEGER, but got String");
 

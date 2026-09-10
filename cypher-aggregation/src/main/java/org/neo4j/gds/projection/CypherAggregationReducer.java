@@ -24,6 +24,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
+import org.neo4j.gds.projection.CypherAggregationUpdater.InputValuesMapper;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
 import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
@@ -33,6 +34,8 @@ import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.MapValueBuilder;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.neo4j.gds.projection.CypherAggregation.FUNCTION_NAME;
@@ -41,32 +44,40 @@ public class CypherAggregationReducer implements UserAggregationReducer, AutoClo
 
     private final AtomicBoolean completedSuccessfully;
 
-    private final CypherAggregationUpdater updater;
+    private final LazyGraphImporter lazyGraphImporter;
     private final ProjectionMetricsService projectionMetricsService;
 
     private final DatabaseId databaseId;
     private final ProgressTimer progressTimer;
     private final ExtractNodeId extractNodeId;
+    private final InputValuesMapper inputValuesMapper;
+
+    private final Collection<CypherAggregationUpdater> updaters;
 
     // #result() may be called twice, we cache the result of the first call to return it again in the second invocation
     private @Nullable ProjectionResult result;
 
     public CypherAggregationReducer(
-        CypherAggregationUpdater updater,
+        LazyGraphImporter lazyGraphImporter,
         ProjectionMetricsService projectionMetricsService,
         DatabaseId databaseId,
-        ExtractNodeId extractNodeId
+        ExtractNodeId extractNodeId,
+        InputValuesMapper inputValuesMapper
     ) {
-        this.updater = updater;
+        this.lazyGraphImporter = lazyGraphImporter;
         this.projectionMetricsService = projectionMetricsService;
         this.databaseId = databaseId;
         this.extractNodeId = extractNodeId;
+        this.inputValuesMapper = inputValuesMapper;
+        this.updaters = new ArrayList<>();
         completedSuccessfully = new AtomicBoolean(false);
         progressTimer = ProgressTimer.start();
     }
 
     @Override
     public UserAggregationUpdater newUpdater() throws ProcedureException {
+        var updater = new CypherAggregationUpdater(lazyGraphImporter, extractNodeId, inputValuesMapper);
+        updaters.add(updater);
         return updater;
     }
 
@@ -107,12 +118,12 @@ public class CypherAggregationReducer implements UserAggregationReducer, AutoClo
     @Override
     public void close() throws Exception {
         if (!completedSuccessfully.get()) {
-            updater.close();
+            updaters.forEach(CypherAggregationUpdater::close);
         }
     }
 
     public @Nullable ProjectionResult buildGraph() {
-        var importer = updater.importer();
+        var importer = lazyGraphImporter.getImporter();
         if (importer == null) {
             // Nothing aggregated
             return null;
