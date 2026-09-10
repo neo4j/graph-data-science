@@ -39,7 +39,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GenerateBuilder
 public record NodeProjections(
     Map<NodeLabel, NodeProjection> projections
-) implements AbstractProjections<NodeLabel, NodeProjection> {
+) implements Projections<NodeLabel, NodeProjection> {
 
     public NodeProjections {
         validatePropertyKeyMappings(projections);

@@ -773,7 +773,7 @@ public abstract class GdsCypher {
     }
 
     private static <I extends ElementIdentifier, P extends ElementProjection> MinimalObject toMinimalObject(
-        AbstractProjections<I, P> allProjections
+        Projections<I, P> allProjections
     ) {
         Map<I, P> projections = allProjections.projections();
         if (projections.isEmpty()) {

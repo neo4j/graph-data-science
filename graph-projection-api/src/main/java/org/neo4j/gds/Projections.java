@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public interface AbstractProjections<I extends ElementIdentifier, P extends ElementProjection> {
+public interface Projections<I extends ElementIdentifier, P extends ElementProjection> {
 
     Map<I, P> projections();
 

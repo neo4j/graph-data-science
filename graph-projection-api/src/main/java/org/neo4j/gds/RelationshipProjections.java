@@ -37,9 +37,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GenerateBuilder
 public record RelationshipProjections(
     Map<RelationshipType, RelationshipProjection> projections
-) implements AbstractProjections<RelationshipType, RelationshipProjection> {
+) implements Projections<RelationshipType, RelationshipProjection> {
 
-    private static final RelationshipProjections EMPTY = new RelationshipProjections(emptyMap());
     public static final RelationshipProjections ALL = create(singletonMap(ALL_RELATIONSHIPS, RelationshipProjection.ALL));
 
     public static RelationshipProjectionsBuilder builder() {
@@ -164,7 +163,7 @@ public record RelationshipProjections(
     }
 
     public boolean isEmpty() {
-        return this == EMPTY;
+        return projections.isEmpty();
     }
 
     public Map<String, Object> toObject() {
