@@ -145,29 +145,25 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
             var idx = new MutableInt(0);
             var importers = this.singleTypeRelationshipImporters.stream()
                 .map(importer -> {
-                        var buffer = new BufferedRelationshipConsumerBuilder()
-                            .idMap(idMap)
-                            .type(importer.typeId())
-                            .skipDanglingRelationships(importer.skipDanglingRelationships())
-                            .capacity(scanner.bufferSize())
-                            .build();
-
-                        buffers[idx.getAndIncrement()] = buffer;
+                    var buffer = BufferedRelationshipConsumer.of(
+                        idMap,
+                        importer.typeId(),
+                        scanner.bufferSize(),
+                        importer.skipDanglingRelationships()
+                    );
+                    buffers[idx.getAndIncrement()] = buffer;
 
                     PropertyReader<Reference> propertyReader = importer.loadProperties()
-                            ? storeBackedPropertyReader(transaction, importer.typeId())
-                            : emptyPropertyReader();
+                        ? storeBackedPropertyReader(transaction, importer.typeId())
+                        : emptyPropertyReader();
 
-                        return importer.threadLocalImporter(
-                            buffer.relationshipsBatchBuffer(),
-                            propertyReader
-                        );
-                    }
-                ).toList();
+                    return importer.threadLocalImporter(
+                        buffer.relationshipsBatchBuffer(),
+                        propertyReader
+                    );
+                }).toList();
 
-            var compositeBuffer = new BufferedCompositeRelationshipConsumerBuilder()
-                .buffers(buffers)
-                .build();
+            var compositeBuffer =  BufferedCompositeRelationshipConsumer.of(buffers);
 
             long allImportedRels = 0L;
             long allImportedWeights = 0L;

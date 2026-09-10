@@ -27,7 +27,6 @@ import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.annotation.GenerateBuilder;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.AdjacencyProperties;
@@ -171,16 +170,10 @@ public abstract class AdjacencyListBuilderBaseTest {
             importMetaData.aggregations()
         );
 
-        AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
-            .adjacencyCompressorFactory(adjacencyCompressorFactory)
-            .importMetaData(importMetaData)
-            .importSizing(ImportSizing.of(new Concurrency(1), nodeCount))
-            .build();
+        var importSizing = ImportSizing.of(new Concurrency(1), nodeCount);
+        AdjacencyBuffer adjacencyBuffer = AdjacencyBuffer.of(importMetaData, adjacencyCompressorFactory, importSizing);
 
-        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder<Integer>()
-            .capacity(relationshipCount)
-            .propertyReferenceClass(Integer.class)
-            .build();
+        var relationshipsBatchBuffer = RelationshipsBatchBuffer.of(relationshipCount, Integer.class);
 
         PropertyReader.Buffered<Integer> propertyReader = PropertyReader.buffered(relationshipCount, propertyCount);
 
@@ -275,10 +268,7 @@ public abstract class AdjacencyListBuilderBaseTest {
                 .mapToObj(aggregatedProperties::get)
                 .collect(Collectors.toList());
 
-            var properties = ImmutableGraphPropertyStructures.builder()
-                .adjacencyProperties(actualProperties)
-                .expectedProperties(expectedProperties)
-                .build();
+            var properties = new GraphPropertyStructures(actualProperties, expectedProperties);
 
             builder.addProperties(properties);
         }
@@ -307,17 +297,12 @@ public abstract class AdjacencyListBuilderBaseTest {
         }
     }
 
-    @ValueClass
-    interface GraphPropertyStructures {
-
-        AdjacencyProperties adjacencyProperties();
-
-        List<Double> expectedProperties();
-
-        default GraphPropertyStructureAssertions assertions() {
-            return new GraphPropertyStructureAssertions(
-                expectedProperties()
-            );
+    public record GraphPropertyStructures(
+        AdjacencyProperties adjacencyProperties,
+        List<Double> expectedProperties
+    ) {
+        private GraphPropertyStructureAssertions assertions() {
+            return new GraphPropertyStructureAssertions(expectedProperties());
         }
     }
 

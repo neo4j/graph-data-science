@@ -86,7 +86,7 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         var dependencyResolver = GraphDatabaseApiProxy.dependencyResolver(db);
         var transactionContext = DatabaseTransactionContext.of(db, db.beginTx());
         var graphDimensions = graphDimensions(graphProjectConfig, transactionContext, dependencyResolver);
-        var importer = ScanningRelationshipsImporter.scanningRelationshipsImporter(
+        var importer = ScanningRelationshipsImporter.of(
             graphProjectConfig,
             Log.noOpLog(),
             transactionContext,

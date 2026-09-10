@@ -228,7 +228,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
     }
 
     private RelationshipImportResult loadRelationships(IdMap idMap, Concurrency concurrency) {
-        var scanningRelationshipsImporter = ScanningRelationshipsImporter.scanningRelationshipsImporter(
+        var scanningRelationshipsImporter = ScanningRelationshipsImporter.of(
             graphProjectConfig,
             log,
             transactionContext,

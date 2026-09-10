@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.builder.Builder;
-
 import java.lang.reflect.Array;
 
 public final class RelationshipsBatchBuffer<PROPERTY_REF> extends RecordsBatchBuffer {
@@ -38,8 +36,7 @@ public final class RelationshipsBatchBuffer<PROPERTY_REF> extends RecordsBatchBu
     private final PROPERTY_REF[] propertyReferencesCopy;
     private final int[] histogram;
 
-    @Builder.Factory
-    static <PROPERTY_REF> RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer(
+    public static <PROPERTY_REF> RelationshipsBatchBuffer<PROPERTY_REF> of(
         int capacity,
         Class<PROPERTY_REF> propertyReferenceClass
     ) {

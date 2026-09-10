@@ -44,12 +44,8 @@ class AdjacencyBufferTest {
     @Test
     void skipsNodeIdsThatShouldntBeThereWhenBuildingAdjacencyLists() {
         var nodeCount = 7L;
-        var metadata = SingleTypeRelationshipImporter.ImportMetaData.of(
-            new RelationshipProjection(
-                "T",
-                Orientation.NATURAL
-            ), 1, Map.of(), false
-        );
+        var relationshipProjection = new RelationshipProjection("T", Orientation.NATURAL);
+        var metadata = SingleTypeRelationshipImporter.ImportMetaData.of(relationshipProjection, 1, Map.of(), false);
         var factory = DeltaVarLongCompressor.factory(
             () -> nodeCount,
             CompressedAdjacencyListBuilderFactory.of(UncompressedAdjacencyListBuilder::new),
@@ -58,16 +54,9 @@ class AdjacencyBufferTest {
             true,
             MemoryTracker.EMPTY
         );
-        var adjacencyBuffer = AdjacencyBuffer.of(
-            metadata,
-            factory,
-            ImportSizing.of(new Concurrency(4), nodeCount)
-        );
+        var adjacencyBuffer = AdjacencyBuffer.of(metadata, factory, ImportSizing.of(new Concurrency(4), nodeCount));
 
-        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder<Integer>()
-            .capacity(6)
-            .propertyReferenceClass(Integer.class)
-            .build();
+        var relationshipsBatchBuffer = RelationshipsBatchBuffer.of(6, Integer.class);
 
         // more unique original node ids than nodeCount
         relationshipsBatchBuffer.add(0, 1);
