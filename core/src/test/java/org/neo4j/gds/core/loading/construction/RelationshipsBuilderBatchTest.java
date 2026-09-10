@@ -24,7 +24,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.gdl.GraphProjectFromGdlConfigImpl;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +34,7 @@ class RelationshipsBuilderBatchTest {
 
     private static RelationshipsBuilder pooledBuilder(Concurrency concurrency) {
         var gdlFactory = GdlFactory.builder().graphProjectConfig(
-            ImmutableGraphProjectFromGdlConfig.builder()
+            GraphProjectFromGdlConfigImpl.builder()
                 .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
                 .graphName("test")
                 .build()
