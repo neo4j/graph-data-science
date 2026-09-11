@@ -21,15 +21,11 @@ package org.neo4j.gds.projection;
 
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
-import org.immutables.builder.Builder;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
-import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.Reference;
 import org.neo4j.token.api.TokenConstants;
-
-import java.util.Optional;
 
 public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<NodeReference> {
 
@@ -39,30 +35,19 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
     private final LongSet nodeLabelIds;
     private final boolean readProperty;
 
-    @Builder.Factory
-    static BufferedNodeConsumer bufferedNodeConsumer(
+    public static BufferedNodeConsumer of(int capacity, long highestPossibleNodeCount) {
+        return of(capacity, highestPossibleNodeCount, new LongHashSet(), false, false);
+    }
+
+    public static BufferedNodeConsumer of(
         int capacity,
         long highestPossibleNodeCount,
-        Optional<LongSet> nodeLabelIds,
-        Optional<Boolean> hasLabelInformation,
-        Optional<Boolean> readProperty
+        LongSet nodeLabelIds,
+        boolean hasLabelInformation,
+        boolean readProperty
     ) {
-        var buffer = new NodesBatchBufferBuilder<Reference>()
-            .capacity(capacity)
-            .hasLabelInformation(hasLabelInformation)
-            .readProperty(readProperty)
-            .propertyReferenceClass(Reference.class)
-            .build();
-
-        LongSet labelIds = nodeLabelIds.orElseGet(LongHashSet::new);
-        boolean readProps = readProperty.orElse(false);
-
-        return new BufferedNodeConsumer(
-            buffer,
-            highestPossibleNodeCount,
-            labelIds,
-            readProps
-        );
+        var buffer = NodesBatchBuffer.of(capacity, hasLabelInformation, readProperty, Reference.class);
+        return new BufferedNodeConsumer(buffer, highestPossibleNodeCount, nodeLabelIds, readProperty);
     }
 
     private BufferedNodeConsumer(

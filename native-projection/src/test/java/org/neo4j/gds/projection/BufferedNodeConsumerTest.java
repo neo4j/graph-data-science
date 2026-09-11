@@ -39,10 +39,7 @@ class BufferedNodeConsumerTest {
 
     @Test
     void shouldIgnoreNodesThatAreOutOfBoundsOnOffer() {
-        var buffer = new BufferedNodeConsumerBuilder()
-            .capacity(3)
-            .highestPossibleNodeCount(43)
-            .build();
+        var buffer = BufferedNodeConsumer.of(3, 43);
 
         // within range
         buffer.offer(new TestNode(21));
@@ -58,12 +55,13 @@ class BufferedNodeConsumerTest {
 
     @Test
     void shouldIgnoreNodesThatAreOutOfBoundsOnOfferWithLabelInformation() {
-        var nodesBatchBuffer = new BufferedNodeConsumerBuilder()
-            .capacity(3)
-            .highestPossibleNodeCount(43)
-            .hasLabelInformation(true)
-            .nodeLabelIds(LongHashSet.from(0))
-            .build();
+        var nodesBatchBuffer = BufferedNodeConsumer.of(
+            3,
+            43,
+            LongHashSet.from(0),
+            true,
+            false
+        );
 
         // within range
         nodesBatchBuffer.offer(new TestNode(21, 0));
@@ -79,10 +77,7 @@ class BufferedNodeConsumerTest {
 
     @Test
     void shouldNotThrowWhenFull() {
-        var nodesBatchBuffer = new BufferedNodeConsumerBuilder()
-            .capacity(2)
-            .highestPossibleNodeCount(42)
-            .build();
+        var nodesBatchBuffer = BufferedNodeConsumer.of(2, 42);
 
         assertThat(nodesBatchBuffer.offer(new TestNode(0))).isTrue();
         assertThat(nodesBatchBuffer.offer(new TestNode(1))).isFalse();

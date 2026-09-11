@@ -86,12 +86,7 @@ class ShardedIdMapTest {
     void withFilteredLabelsReturnsCommunityFilteredMap() {
         // Build a multi-label sharded id map via the lazy builder; in :core the community
         // behavior produces an ArrayIdMap-backed filtered translator.
-        var builder = new LazyIdMapBuilderBuilder()
-            .concurrency(new Concurrency(4))
-            .hasLabelInformation(true)
-            .hasProperties(false)
-            .propertyState(PropertyState.PERSISTENT)
-            .build();
+        var builder = new LazyIdMapBuilder(new Concurrency(4), true, PropertyState.PERSISTENT);
         builder.addNode(1000, NodeLabelTokens.ofStrings("A"));
         builder.addNode(2000, NodeLabelTokens.ofStrings("B"));
         builder.addNode(3000, NodeLabelTokens.ofStrings("C"));

@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.builder.Builder;
-
 import java.lang.reflect.Array;
-import java.util.Optional;
 
 public final class NodesBatchBuffer<PROPERTY_REF> extends RecordsBatchBuffer {
 
@@ -30,23 +27,29 @@ public final class NodesBatchBuffer<PROPERTY_REF> extends RecordsBatchBuffer {
     private final NodeLabelTokenSet[] labelTokens;
     private final PROPERTY_REF[] propertyReferences;
 
-    @Builder.Factory
-    static <PROPERTY_REF> NodesBatchBuffer<PROPERTY_REF> nodesBatchBuffer(
+    public static <PROPERTY_REF> NodesBatchBuffer<PROPERTY_REF> of(
         int capacity,
-        Optional<Boolean> hasLabelInformation,
-        Optional<Boolean> readProperty,
+        Class<PROPERTY_REF> propertyReferenceClass
+    ) {
+        return of(capacity, false, false, propertyReferenceClass);
+    }
+
+    public static <PROPERTY_REF> NodesBatchBuffer<PROPERTY_REF> of(
+        int capacity,
+        boolean hasLabelInformation,
+        boolean readProperty,
         Class<PROPERTY_REF> propertyReferenceClass
     ) {
         return new NodesBatchBuffer<>(
             // TODO: we probably wanna adjust the capacity here
             capacity,
-            hasLabelInformation.orElse(false),
-            readProperty.orElse(false),
+            hasLabelInformation,
+            readProperty,
             propertyReferenceClass
         );
     }
 
-    private NodesBatchBuffer(
+    NodesBatchBuffer(
         int capacity,
         boolean hasLabelInformation,
         boolean readProperty,

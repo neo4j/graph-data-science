@@ -31,7 +31,6 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
-import org.neo4j.gds.core.loading.LazyIdMapBuilderBuilder;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
@@ -194,11 +193,6 @@ public class LazyGraphImporter implements AutoCloseable {
     }
 
     private static LazyIdMapBuilder idMapBuilder(Concurrency readConcurrency) {
-        return new LazyIdMapBuilderBuilder()
-            .concurrency(readConcurrency)
-            .hasLabelInformation(true)
-            .hasProperties(true)
-            .propertyState(PropertyState.PERSISTENT)
-            .build();
+        return new LazyIdMapBuilder(readConcurrency, true, true, PropertyState.PERSISTENT);
     }
 }

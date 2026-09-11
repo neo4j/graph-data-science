@@ -37,12 +37,7 @@ class LazyShardedIdMapTest {
 
     @Test
     void labelInformationIsAttributedToCorrectNodesUnderConcurrency() throws Exception {
-        var builder = new LazyIdMapBuilderBuilder()
-            .concurrency(new Concurrency(4))
-            .hasLabelInformation(true)
-            .hasProperties(false)
-            .propertyState(PropertyState.PERSISTENT)
-            .build();
+        var builder = new LazyIdMapBuilder(new Concurrency(4), true, PropertyState.PERSISTENT);
 
         int nodeCount = 20_000;
         var even = NodeLabel.of("Even");
@@ -90,12 +85,7 @@ class LazyShardedIdMapTest {
 
     @Test
     void lazyBuilderProducesShardedIdMap() {
-        var builder = new LazyIdMapBuilderBuilder()
-            .concurrency(new Concurrency(4))
-            .hasLabelInformation(true)
-            .hasProperties(false)
-            .propertyState(PropertyState.PERSISTENT)
-            .build();
+        var builder = new LazyIdMapBuilder(new Concurrency(4), true, PropertyState.PERSISTENT);
 
         builder.addNode(1000, NodeLabelTokens.ofStrings("A"));
         builder.addNode(2000, NodeLabelTokens.ofStrings("B"));
@@ -112,12 +102,7 @@ class LazyShardedIdMapTest {
 
     @Test
     void unmappedExternalIdReturnsNotFound() {
-        var builder = new LazyIdMapBuilderBuilder()
-            .concurrency(new Concurrency(1))
-            .hasLabelInformation(false)
-            .hasProperties(false)
-            .propertyState(PropertyState.PERSISTENT)
-            .build();
+        var builder = new LazyIdMapBuilder(new Concurrency(1), true, PropertyState.PERSISTENT);
         builder.addNode(5, NodeLabelTokens.empty());
 
         var idMap = builder.build().idMap();

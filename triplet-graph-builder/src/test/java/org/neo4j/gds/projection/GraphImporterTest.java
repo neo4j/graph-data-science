@@ -38,7 +38,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.LazyIdMapBuilderBuilder;
+import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -85,12 +85,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilderBuilder()
-                .concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
@@ -138,12 +133,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilderBuilder()
-                .concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
@@ -188,12 +178,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilderBuilder()
-                .concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
@@ -239,12 +224,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilderBuilder()
-                .concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
@@ -291,12 +271,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilderBuilder()
-                .concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
@@ -344,12 +319,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilderBuilder()
-                .concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
@@ -397,12 +367,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilderBuilder()
-                .concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
@@ -445,11 +410,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of("UNUSED_REL"),
             List.of(),
-            new LazyIdMapBuilderBuilder().concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
@@ -482,11 +443,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of("UNUSED_REL"),
-            new LazyIdMapBuilderBuilder().concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
@@ -533,12 +490,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilderBuilder()
-                .concurrency(new Concurrency(4))
-                .hasLabelInformation(true)
-                .hasProperties(true)
-                .propertyState(PropertyState.REMOTE)
-                .build(),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,
