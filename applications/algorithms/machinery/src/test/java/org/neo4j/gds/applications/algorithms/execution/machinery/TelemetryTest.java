@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.execution.machinery;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimingsBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
@@ -43,11 +44,13 @@ class TelemetryTest {
         var timingsBuilder = mock(AlgorithmProcessingTimingsBuilder.class);
         var constructAndRun = new DummyConstructAndRun();
         var graph = mock(Graph.class);
+        var graphStore = mock(GraphStore.class);
         when(
             algorithmTimer.runAlgorithmAndRecordTiming(
                 computationTimer,
                 constructAndRun,
-                graph
+                graph,
+                graphStore
             )
         ).thenReturn("my dummy result");
         var configuration = mock(AlgoBaseConfig.class);
@@ -57,7 +60,8 @@ class TelemetryTest {
             () -> "my algorithm",
             configuration,
             constructAndRun,
-            graph
+            graph,
+            graphStore
         );
 
         assertEquals("my dummy result", result);

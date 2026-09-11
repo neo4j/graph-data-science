@@ -20,12 +20,17 @@
 package org.neo4j.gds.applications.algorithms.execution.machinery;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 
 /**
- * This is a placeholder for constructing an algorithm, including it's progress tracker, and running it,
- * including managing the progress tracker.
+ * This is a placeholder for constructing an algorithm, including its progress tracker;
+ * and running it, including managing the progress tracker.
  * Obtuse name, but at least not misleading.
  */
 public interface ConstructAndRun<RESULT> {
-    RESULT constructAndRun(Graph graph);
+    /**
+     * The parameter list here is the superset of algorithm needs.
+     * Most algorithms need one or the other, not both.
+     */
+    RESULT constructAndRun(Graph graph, GraphStore graphStore);
 }

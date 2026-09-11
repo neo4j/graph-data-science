@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
@@ -34,6 +36,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -67,8 +70,9 @@ public class CentralityAlgorithmsBusinessFacade {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            new UndirectedOnlyRequirement("Articulation Points"),
-            graph -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
+            Set.of(new UndirectedOnlyRequirement("Articulation Points")),
+            true,
+            (graph, __) -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
             AlgorithmLabel.ArticulationPoints,
             sideEffect,
@@ -86,8 +90,9 @@ public class CentralityAlgorithmsBusinessFacade {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            new UndirectedOnlyRequirement("Bridges"),
-            graph -> algorithms.bridges(graph, configuration, shouldComputeComponents),
+            Set.of(new UndirectedOnlyRequirement("Bridges")),
+            true,
+            (graph, __) -> algorithms.bridges(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.bridges(shouldComputeComponents),
             AlgorithmLabel.Bridges,
             sideEffect,
@@ -104,8 +109,9 @@ public class CentralityAlgorithmsBusinessFacade {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRule.EMPTY,
-            graph -> algorithms.harmonicCentrality(graph, configuration),
+            Set.of(ValidationRule.EMPTY),
+            true,
+            (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
             AlgorithmLabel.HarmonicCentrality,
             sideEffect,

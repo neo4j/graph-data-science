@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.execution.machinery;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimingsBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -46,7 +47,8 @@ class MetricsRecorder {
         Label label,
         CONFIGURATION configuration,
         ConstructAndRun<RESULT> constructAndRun,
-        Graph graph
+        Graph graph,
+        GraphStore graphStore
     ) {
         try (var executionMetric = algorithmMetricsService.create(label.asString())) {
             executionMetric.start();
@@ -58,7 +60,8 @@ class MetricsRecorder {
                     label,
                     configuration,
                     constructAndRun,
-                    graph
+                    graph,
+                    graphStore
                 );
             } catch (RuntimeException e) {
                 log.warn("computation failed, halting metrics gathering", e);

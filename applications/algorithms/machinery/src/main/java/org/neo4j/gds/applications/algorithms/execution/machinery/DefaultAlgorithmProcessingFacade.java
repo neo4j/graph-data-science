@@ -123,7 +123,6 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
                 user,
                 constructAndRun,
                 configuration,
-                terminationFlag,
                 dimensionTransformer,
                 estimationSupplier,
                 label,

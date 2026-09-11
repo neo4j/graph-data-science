@@ -29,7 +29,6 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -71,7 +70,6 @@ final class ComputationFacade {
         User user,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
-        TerminationFlag terminationFlag,
         DimensionTransformer dimensionTransformer,
         Supplier<MemoryEstimation> estimationSupplier,
         Label label,

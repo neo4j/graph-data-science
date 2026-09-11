@@ -126,10 +126,10 @@ public final class ApplicationsFacade {
         var algorithmProcessingTemplateConvenience = new AlgorithmProcessingTemplateConvenience(algorithmProcessingTemplate);
 
         var mutateNodeProperty = new MutateNodePropertyService(loggers.log());
-        var mutateRelationshipService =new MutateRelationshipService(loggers.log());
+        var mutateRelationshipService = new MutateRelationshipService(loggers.log());
 
         var centralityApplications = CentralityApplications.create(
-            loggers.log(),
+            loggers,
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,

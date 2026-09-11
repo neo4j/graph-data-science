@@ -79,7 +79,8 @@ class MemoryChecker {
             label,
             configuration,
             constructAndRun,
-            graphResources.graph()
+            graphResources.graph(),
+            graphResources.graphStore()
         );
     }
 }

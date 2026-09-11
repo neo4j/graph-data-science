@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.execution.machinery;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.Graph;
 
 import java.util.function.LongSupplier;
 
@@ -36,7 +35,7 @@ class TimerTest {
         var timeSupplier = mock(LongSupplier.class);
         when(timeSupplier.getAsLong()).thenReturn(23L, 87L);
         var computationTimer = new ComputationTimer(timeSupplier);
-        var result = timer.runAlgorithmAndRecordTiming(computationTimer, __ -> 42, mock(Graph.class));
+        var result = timer.runAlgorithmAndRecordTiming(computationTimer, (__, ___) -> 42, null, null);
 
         assertEquals(42, result);
         assertEquals(23L, computationTimer.startTimeInEpochMilliseconds());

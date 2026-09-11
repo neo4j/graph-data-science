@@ -65,17 +65,17 @@ public class LaunchConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
-        ValidationRule algorithmSpecificValidationRule, // for now, we have seen only one, but might be multiple
+        Iterable<ValidationRule> algorithmSpecificValidationRules,
+        boolean includeGraph,
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
     ) {
-        // wow, this code _speaks_ to me
-        var graphStoreValidation = validationRuleFromConfigurationParser.parse(configuration)
-            .withValidationRule(algorithmSpecificValidationRule)
-            .build();
+        var builder = validationRuleFromConfigurationParser.parse(configuration);
+        algorithmSpecificValidationRules.forEach(builder::withValidationRule);
+        var graphStoreValidation = builder.build();
 
         return algorithmProcessingFacade.loadGraphThenRunAlgorithm(
             requestScopedDependencies.databaseId(),
@@ -85,7 +85,7 @@ public class LaunchConvenience {
             configuration.toGraphParameters(),
             Optional.empty(), // simple basic convenience here
             graphStoreValidation,
-            true, // simple basic convenience here
+            includeGraph,
             Optional.empty(), // or make this a DISABLED
             constructAndRun,
             configuration,

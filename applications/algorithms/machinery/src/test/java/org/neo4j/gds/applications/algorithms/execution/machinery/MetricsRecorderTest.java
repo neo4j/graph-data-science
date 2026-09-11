@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.execution.machinery;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimingsBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -51,13 +52,15 @@ class MetricsRecorderTest {
         var configuration = mock(AlgoBaseConfig.class);
         var constructAndRun = new DummyConstructAndRun();
         var graph = mock(Graph.class);
+        var graphStore = mock(GraphStore.class);
         when(algorithmTelemetry.runAlgorithmAndLogTelemetry(
             timingsBuilder,
             graphId,
             label,
             configuration,
             constructAndRun,
-            graph
+            graph,
+            graphStore
         )).thenReturn("my dummy result");
         var result = metricsRecorder.recordMetricsAndRunAlgorithm(
             timingsBuilder,
@@ -65,7 +68,8 @@ class MetricsRecorderTest {
             label,
             configuration,
             constructAndRun,
-            graph
+            graph,
+            graphStore
         );
 
         assertEquals("my dummy result", result);
@@ -89,13 +93,15 @@ class MetricsRecorderTest {
         var constructAndRun = new DummyConstructAndRun();
         var exception = new RuntimeException("c'est la vie");
         var graph = mock(Graph.class);
+        var graphStore = mock(GraphStore.class);
         when(algorithmTelemetry.runAlgorithmAndLogTelemetry(
             timingsBuilder,
             graphId,
             label,
             configuration,
             constructAndRun,
-            graph
+            graph,
+            graphStore
         )).thenThrow(exception);
         try {
             metricsRecorder.recordMetricsAndRunAlgorithm(
@@ -104,7 +110,8 @@ class MetricsRecorderTest {
                 label,
                 configuration,
                 constructAndRun,
-                graph
+                graph,
+                graphStore
             );
 
             fail();

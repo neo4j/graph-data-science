@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.execution.machinery;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimingsBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
@@ -48,7 +49,9 @@ class MemoryCheckerTest {
         var timingsBuilder = mock(AlgorithmProcessingTimingsBuilder.class);
         var graphResources = mock(GraphResources.class);
         var graph = mock(Graph.class);
+        var graphStore = mock(GraphStore.class);
         when(graphResources.graph()).thenReturn(graph);
+        when(graphResources.graphStore()).thenReturn(graphStore);
         var graphId = new GraphId(System.identityHashCode(graph));
         var label = new StandardLabel("my algorithm");
         var configuration = mock(AlgoBaseConfig.class);
@@ -59,7 +62,8 @@ class MemoryCheckerTest {
             label,
             configuration,
             algorithm,
-            graph
+            graph,
+            graphStore
         )).thenReturn("my dummy result");
         var result = memoryChecker.checkMemoryAndRunAlgorithm(
             timingsBuilder,

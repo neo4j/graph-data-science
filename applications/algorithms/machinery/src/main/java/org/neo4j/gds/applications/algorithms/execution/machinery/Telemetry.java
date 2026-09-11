@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.execution.machinery;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimingsBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -59,11 +60,12 @@ class Telemetry {
         Label label,
         CONFIGURATION configuration,
         ConstructAndRun<RESULT> constructAndRun,
-        Graph graph
+        Graph graph,
+        GraphStore graphStore
     ) {
         var computationTimer = computationTimerSupplier.get();
 
-        var result = timer.runAlgorithmAndRecordTiming(computationTimer, constructAndRun, graph);
+        var result = timer.runAlgorithmAndRecordTiming(computationTimer, constructAndRun, graph, graphStore);
 
         timingsBuilder.withComputeMillis(computationTimer.durationInMilliseconds());
 

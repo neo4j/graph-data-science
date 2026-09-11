@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.execution.machinery;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 
 /**
  * At the base, we run the algorithm and record timing.
@@ -31,10 +32,11 @@ class Timer {
     <RESULT> RESULT runAlgorithmAndRecordTiming(
         ComputationTimer computationTimer,
         ConstructAndRun<RESULT> constructAndRun,
-        Graph graph
+        Graph graph,
+        GraphStore graphStore
     ) {
         try (var ignored = computationTimer.start()) {
-            return constructAndRun.constructAndRun(graph);
+            return constructAndRun.constructAndRun(graph, graphStore);
         }
     }
 }
