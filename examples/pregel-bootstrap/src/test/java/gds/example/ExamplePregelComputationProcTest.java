@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.extension.GdlGraph;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +34,6 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class ExamplePregelComputationProcTest extends BaseProcTest {
 
-    @GdlGraph
     private static final String MY_TEST_GRAPH =
         "CREATE" +
         "  (alice)" +

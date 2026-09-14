@@ -20,14 +20,14 @@
 package gds.example;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.TestGraph;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 
@@ -65,7 +65,8 @@ class ExamplePregelComputationAlgoTest {
             config,
             new ExamplePregelComputation(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = pregelJob.run();
@@ -78,6 +79,10 @@ class ExamplePregelComputationAlgoTest {
         expected.put("bob", 1L);
         expected.put("eve", 2L);
 
-        TestSupport.assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(KEY, nodeId), expected);
+        expected.forEach((variable, expectedValue) -> assertEquals(
+            expectedValue,
+            result.nodeValues().longValue(KEY, graph.toMappedNodeId(variable)),
+            variable
+        ));
     }
 }
