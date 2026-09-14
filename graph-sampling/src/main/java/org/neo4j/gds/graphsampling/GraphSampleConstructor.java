@@ -139,8 +139,7 @@ public class GraphSampleConstructor {
             filteredSchema,
             new Nodes(filteredSchema.nodeSchema(), idMap, nodePropertyStore),
             relationshipImportResult,
-            concurrency,
-            Optional.empty()
+            concurrency
         );
 
         log.info(StringFormatting.formatWithLocale(

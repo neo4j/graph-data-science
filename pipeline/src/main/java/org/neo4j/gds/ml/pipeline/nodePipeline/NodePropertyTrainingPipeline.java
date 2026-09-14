@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
-import org.neo4j.gds.settings.Neo4jSettings;
 
 import java.util.List;
 import java.util.Map;
@@ -31,7 +30,7 @@ public abstract class NodePropertyTrainingPipeline extends TrainingPipeline<Node
     protected NodePropertyPredictionSplitConfig splitConfig;
 
     protected NodePropertyTrainingPipeline(TrainingType trainingType) {
-        super(trainingType, Neo4jSettings.dbTemporalTimezone().defaultValue());
+        super(trainingType);
         this.splitConfig = NodePropertyPredictionSplitConfig.DEFAULT_CONFIG;
     }
 

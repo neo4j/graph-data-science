@@ -21,12 +21,16 @@ package org.neo4j.gds.core.utils;
 
 import java.time.Clock;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public final class TimeUtil {
 
-    public static ZonedDateTime now(ZoneId zoneId) {
-        return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
+    public static ZonedDateTime nowSystemDefault() {
+        return ZonedDateTime.now(Clock.system(ZoneId.systemDefault()));
+    }
+    public static ZonedDateTime nowUTC() {
+        return ZonedDateTime.now(Clock.system(ZoneOffset.UTC));
     }
     private TimeUtil() {}
 }

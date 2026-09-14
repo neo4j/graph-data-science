@@ -45,7 +45,6 @@ import org.neo4j.gds.utils.StringFormatting;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -174,8 +173,7 @@ public final class GraphStoreFilter {
                 filteredSchema,
                 new Nodes(filteredSchema.nodeSchema(), filteredNodes.idMap(), filteredNodes.propertyStores()),
                 new RelationshipImportResult(filteredRelationships),
-                config.readConcurrency(),
-                Optional.empty()
+                config.readConcurrency()
             );
 
             log.info(StringFormatting.formatWithLocale(

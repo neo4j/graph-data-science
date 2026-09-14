@@ -52,7 +52,6 @@ import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.utils.StringJoining;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -85,7 +84,6 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
 
     private NodePropertyStore nodeProperties;
 
-    private final ZoneId zoneId;
     private final ZonedDateTime creationTime;
     private ZonedDateTime modificationTime;
 
@@ -96,8 +94,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         IdMap nodes,
         NodePropertyStore nodeProperties,
         Map<RelationshipType, SingleTypeRelationships> relationships,
-        Concurrency concurrency,
-        ZoneId zoneId
+        Concurrency concurrency
     ) {
         this.databaseInfo = databaseInfo;
         this.capabilities = capabilities;
@@ -111,8 +108,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         this.relationships = new HashMap<>(relationships);
 
         this.concurrency = concurrency;
-        this.zoneId = zoneId;
-        this.creationTime = TimeUtil.now(zoneId);
+        this.creationTime = TimeUtil.nowSystemDefault();
         this.modificationTime = this.creationTime;
     }
 
@@ -122,8 +118,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         MutableGraphSchema schema,
         Nodes nodes,
         RelationshipImportResult relationshipImportResult,
-        Concurrency concurrency,
-        Optional<ZoneId> zoneId
+        Concurrency concurrency
     ) {
         return new CSRGraphStore(
             databaseInfo,
@@ -132,8 +127,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
             nodes.idMap(),
             nodes.properties(),
             relationshipImportResult.importResults(),
-            concurrency,
-            zoneId.orElseGet(ZoneId::systemDefault)
+            concurrency
         );
     }
 
@@ -525,7 +519,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
 
     private synchronized void updateGraphStore(Consumer<CSRGraphStore> updateFunction) {
         updateFunction.accept(this);
-        this.modificationTime = TimeUtil.now(zoneId);
+        this.modificationTime = TimeUtil.nowSystemDefault();
     }
 
     private CSRGraph createGraph(

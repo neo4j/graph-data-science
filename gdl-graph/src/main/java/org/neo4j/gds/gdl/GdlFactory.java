@@ -203,8 +203,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             schema,
             nodes,
             relationshipImportResult,
-            new Concurrency(1),
-            Optional.empty()
+            new Concurrency(1)
         );
     }
 

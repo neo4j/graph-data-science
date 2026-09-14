@@ -298,8 +298,7 @@ public final class GraphImporter {
             this.graphSchemaBuilder.build(),
             nodes,
             relationshipImportResults,
-            this.config.readConcurrency(),
-            Optional.empty()
+            this.config.readConcurrency()
         );
 
         validateRelTypes(graphStore.schema().relationshipSchema());

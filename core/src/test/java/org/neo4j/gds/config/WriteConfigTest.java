@@ -39,7 +39,6 @@ import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -77,8 +76,7 @@ class WriteConfigTest {
             GraphSchema.mutable(),
             nodes,
             RelationshipImportResult.empty(),
-            new Concurrency(1),
-            Optional.empty()
+            new Concurrency(1)
         );
 
         var assertion = assertThatCode(
@@ -115,8 +113,7 @@ class WriteConfigTest {
             GraphSchema.mutable(),
             nodes,
             RelationshipImportResult.empty(),
-            new Concurrency(1),
-            Optional.empty()
+            new Concurrency(1)
         );
 
         assertThatCode(

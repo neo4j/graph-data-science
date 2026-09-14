@@ -175,8 +175,7 @@ class GraphStoreRelationshipVisitorTest {
             MutableGraphSchema.from(expectedGraph.schema()),
             nodes,
             actualRelationships,
-            new Concurrency(1),
-            Optional.empty()
+            new Concurrency(1)
         ).getUnion();
     }
 

@@ -30,7 +30,6 @@ import org.neo4j.gds.compat.SettingsUtil;
 import org.neo4j.graphdb.config.Setting;
 
 import java.nio.file.Path;
-import java.time.ZoneId;
 import java.util.List;
 
 public final class Neo4jSettings {
@@ -61,10 +60,6 @@ public final class Neo4jSettings {
 
     public static Setting<Boolean> httpsEnabled() {
         return HttpsConnector.enabled;
-    }
-
-    public static Setting<ZoneId> dbTemporalTimezone() {
-        return GraphDatabaseSettings.db_temporal_timezone;
     }
 
     public static Setting<Path> neo4jHome() {

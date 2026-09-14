@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.core.utils.TimeUtil;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -53,10 +52,10 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
             ));
     }
 
-    protected TrainingPipeline(TrainingType trainingType, ZoneId zoneId) {
+    protected TrainingPipeline(TrainingType trainingType) {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
-        this.creationTime = TimeUtil.now(zoneId);
+        this.creationTime = TimeUtil.nowUTC();
 
         this.trainingParameterSpace = new EnumMap<>(TrainingMethod.class);
         this.autoTuningConfig = AutoTuningConfig.DEFAULT_CONFIG;

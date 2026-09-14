@@ -26,7 +26,6 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
-import org.neo4j.gds.settings.Neo4jSettings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +44,7 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
     private LinkPredictionSplitConfig splitConfig;
 
     public LinkPredictionTrainingPipeline() {
-        super(TrainingType.CLASSIFICATION, Neo4jSettings.dbTemporalTimezone().defaultValue());
+        super(TrainingType.CLASSIFICATION);
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
     }
 

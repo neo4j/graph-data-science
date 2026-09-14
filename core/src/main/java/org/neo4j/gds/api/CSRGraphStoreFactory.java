@@ -50,7 +50,6 @@ import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -88,8 +87,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             schema,
             nodes,
             relationshipImportResult,
-            graphProjectConfig.readConcurrency(),
-            Optional.empty()
+            graphProjectConfig.readConcurrency()
         );
     }
 

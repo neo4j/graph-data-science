@@ -112,8 +112,7 @@ public final class CSRGraphStoreUtil {
             mutableGraphSchema,
             new Nodes(nodeSchema, idMap, nodeProperties),
             builder.build(),
-            concurrency,
-            Optional.empty()
+            concurrency
         );
     }
 
