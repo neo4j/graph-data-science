@@ -33,12 +33,13 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.DirectIdMap;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -70,14 +71,15 @@ class WriteConfigTest {
 
         var nodes = new Nodes(NodeSchema.empty(), new DirectIdMap(0), NodePropertyStore.empty());
 
-        var testGraphStore = new GraphStoreBuilder()
-            .databaseInfo(DatabaseInfo.create(DatabaseId.of("neo4j"), DatabaseLocation.LOCAL))
-            .capabilities(new Capabilities(writeMode))
-            .schema(GraphSchema.mutable())
-            .nodes(nodes)
-            .relationshipImportResult(RelationshipImportResult.empty())
-            .concurrency(new Concurrency(1))
-            .build();
+        var testGraphStore = CSRGraphStore.of(
+            DatabaseInfo.create(DatabaseId.of("neo4j"), DatabaseLocation.LOCAL),
+            new Capabilities(writeMode),
+            GraphSchema.mutable(),
+            nodes,
+            RelationshipImportResult.empty(),
+            new Concurrency(1),
+            Optional.empty()
+        );
 
         var assertion = assertThatCode(
             () -> testConfig.validateGraphIsSuitableForWrite(
@@ -107,14 +109,15 @@ class WriteConfigTest {
 
         var nodes = new Nodes(NodeSchema.empty(), new DirectIdMap(0), NodePropertyStore.empty());
 
-        var testGraphStore = new GraphStoreBuilder()
-            .databaseInfo(DatabaseInfo.create(DatabaseId.of("neo4j"), DatabaseLocation.LOCAL))
-            .capabilities(new Capabilities(writeMode))
-            .schema(GraphSchema.mutable())
-            .nodes(nodes)
-            .relationshipImportResult(RelationshipImportResult.empty())
-            .concurrency(new Concurrency(1))
-            .build();
+        var testGraphStore = CSRGraphStore.of(
+            DatabaseInfo.create(DatabaseId.of("neo4j"), DatabaseLocation.LOCAL),
+            new Capabilities(writeMode),
+            GraphSchema.mutable(),
+            nodes,
+            RelationshipImportResult.empty(),
+            new Concurrency(1),
+            Optional.empty()
+        );
 
         assertThatCode(
             () -> testConfig.validateGraphIsSuitableForWrite(

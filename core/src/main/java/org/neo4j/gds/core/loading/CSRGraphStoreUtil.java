@@ -106,14 +106,15 @@ public final class CSRGraphStoreUtil {
         }
 
         var databaseInfo = DatabaseInfo.create(databaseId, DatabaseInfo.DatabaseLocation.LOCAL);
-        return new GraphStoreBuilder()
-            .databaseInfo(databaseInfo)
-            .capabilities(new Capabilities(Capabilities.WriteMode.NONE))
-            .schema(mutableGraphSchema)
-            .nodes(new Nodes(nodeSchema, idMap, nodeProperties))
-            .relationshipImportResult(builder.build())
-            .concurrency(concurrency)
-            .build();
+        return CSRGraphStore.of(
+            databaseInfo,
+            new Capabilities(Capabilities.WriteMode.NONE),
+            mutableGraphSchema,
+            new Nodes(nodeSchema, idMap, nodeProperties),
+            builder.build(),
+            concurrency,
+            Optional.empty()
+        );
     }
 
     private static SingleTypeRelationships singleTypeRelationshipsFromGraph(

@@ -21,6 +21,7 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.common.Validator;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
@@ -30,8 +31,8 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.RelationshipImportResultBuilder;
@@ -51,6 +52,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class FileToGraphStoreImporter {
@@ -61,7 +63,6 @@ public abstract class FileToGraphStoreImporter {
     private final Concurrency concurrency;
 
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
-    private final GraphStoreBuilder graphStoreBuilder;
     private final Log log;
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
@@ -83,9 +84,6 @@ public abstract class FileToGraphStoreImporter {
         this.concurrency = concurrency;
         this.importPath = importPath;
         this.graphSchemaBuilder = ImmutableMutableGraphSchema.builder();
-        this.graphStoreBuilder = new GraphStoreBuilder()
-            .concurrency(concurrency)
-            .capabilities(new Capabilities(Capabilities.WriteMode.LOCAL));
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
         this.jobId = jobId;
@@ -95,6 +93,8 @@ public abstract class FileToGraphStoreImporter {
 
     protected abstract String rootTaskName();
 
+    private record PartialGraphStoreInputs(DatabaseInfo databaseInfo, Capabilities capabilities, Nodes nodes, RelationshipImportResult relationshipImportResult) {}
+
     public record UserGraphStore(String userName, GraphStore graphStore) {}
     public UserGraphStore run() {
         var fileInput = fileInput(importPath);
@@ -102,9 +102,18 @@ public abstract class FileToGraphStoreImporter {
 
         try {
             progressTracker.beginSubTask();
-            importGraphStore(fileInput);
-            graphStoreBuilder.schema(graphSchemaBuilder.build());
-            var userGraphStore = new UserGraphStore(fileInput.userName(), graphStoreBuilder.build());
+            var inputs = importGraphStore(fileInput);
+            var schema = graphSchemaBuilder.build();
+            var graphStore = CSRGraphStore.of(
+                inputs.databaseInfo,
+                inputs.capabilities,
+                schema,
+                inputs.nodes,
+                inputs.relationshipImportResult,
+                concurrency,
+                Optional.empty()
+            );
+            var userGraphStore = new UserGraphStore(fileInput.userName(), graphStore);
             progressTracker.endSubTask();
 
             return userGraphStore;
@@ -124,12 +133,13 @@ public abstract class FileToGraphStoreImporter {
         return builder.build();
     }
 
-    private void importGraphStore(FileInput fileInput) {
-        graphStoreBuilder.databaseInfo(fileInput.graphInfo().databaseInfo());
-        graphStoreBuilder.capabilities(fileInput.capabilities());
+    private PartialGraphStoreInputs importGraphStore(FileInput fileInput) {
+        var databaseInfo = fileInput.graphInfo().databaseInfo();
+        var capabilities = fileInput.capabilities();
 
         var nodes = importNodes(fileInput);
-        importRelationships(fileInput, nodes.idMap());
+        var relationshipImportResults = importRelationships(fileInput, nodes.idMap());
+        return  new PartialGraphStoreInputs(databaseInfo, capabilities, nodes, relationshipImportResults);
     }
 
     private ProgressTracker createProgressTracker(FileInput fileInput) {
@@ -191,14 +201,12 @@ public abstract class FileToGraphStoreImporter {
 
         var nodes = nodesBuilder.build();
 
-        this.graphStoreBuilder.nodes(nodes);
-
         this.progressTracker.endSubTask();
 
         return nodes;
     }
 
-    private void importRelationships(FileInput fileInput, IdMap nodes) {
+    private RelationshipImportResult importRelationships(FileInput fileInput, IdMap nodes) {
         progressTracker.beginSubTask();
         var relationshipBuildersByType = new ConcurrentHashMap<String, RelationshipsBuilder>();
         var relationshipSchema = fileInput.relationshipSchema();
@@ -222,9 +230,8 @@ public abstract class FileToGraphStoreImporter {
 
         var relationshipImportResult = relationshipImportResult(relationshipBuildersByType);
 
-        graphStoreBuilder.relationshipImportResult(relationshipImportResult);
-
         progressTracker.endSubTask();
+        return relationshipImportResult;
     }
 
     public static final Validator<Path> DIRECTORY_IS_READABLE = value -> {

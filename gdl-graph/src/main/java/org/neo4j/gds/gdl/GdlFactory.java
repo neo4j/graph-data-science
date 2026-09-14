@@ -44,7 +44,6 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.RelationshipImportResultBuilder;
@@ -198,14 +197,15 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             relationshipImportResult.relationshipSchema()
         );
 
-        return new GraphStoreBuilder()
-            .databaseInfo(databaseInfo)
-            .capabilities(capabilities)
-            .schema(schema)
-            .nodes(nodes)
-            .relationshipImportResult(relationshipImportResult)
-            .concurrency(new Concurrency(1))
-            .build();
+        return CSRGraphStore.of(
+            databaseInfo,
+            capabilities,
+            schema,
+            nodes,
+            relationshipImportResult,
+            new Concurrency(1),
+            Optional.empty()
+        );
     }
 
     private Nodes loadNodes() {

@@ -34,17 +34,18 @@ import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.beta.filter.expression.ValidationContext;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.loading.GraphStoreBuilder;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tasks.Tasks;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.utils.StringFormatting;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -167,14 +168,15 @@ public final class GraphStoreFilter {
 
             var filteredSchema = filterSchema(graphStore.schema(), filteredNodes, filteredRelationships.keySet());
 
-            var result = new GraphStoreBuilder()
-                .databaseInfo(graphStore.databaseInfo())
-                .capabilities(graphStore.capabilities())
-                .schema(filteredSchema)
-                .nodes(new Nodes(filteredSchema.nodeSchema(), filteredNodes.idMap(), filteredNodes.propertyStores()))
-                .relationshipImportResult(new RelationshipImportResult(filteredRelationships))
-                .concurrency(config.readConcurrency())
-                .build();
+            var result = CSRGraphStore.of(
+                graphStore.databaseInfo(),
+                graphStore.capabilities(),
+                filteredSchema,
+                new Nodes(filteredSchema.nodeSchema(), filteredNodes.idMap(), filteredNodes.propertyStores()),
+                new RelationshipImportResult(filteredRelationships),
+                config.readConcurrency(),
+                Optional.empty()
+            );
 
             log.info(StringFormatting.formatWithLocale(
                 "Filtered Graph: {nodes: {count: %d, propertyCount: %d, labelCount: %d}, relationships: {count: %d, typeCount: %d, propertyCount: %d}}",

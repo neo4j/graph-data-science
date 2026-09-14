@@ -32,7 +32,7 @@ import org.neo4j.gds.config.GraphSampleAlgoConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.loading.GraphStoreBuilder;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -133,14 +133,15 @@ public class GraphSampleConstructor {
 
         var relationshipImportResult = new RelationshipImportResult(filteredRelationships);
 
-        var outputGraphStore = new GraphStoreBuilder()
-            .databaseInfo(inputGraphStore.databaseInfo())
-            .capabilities(inputGraphStore.capabilities())
-            .schema(filteredSchema)
-            .nodes(new Nodes(filteredSchema.nodeSchema(), idMap, nodePropertyStore))
-            .relationshipImportResult(relationshipImportResult)
-            .concurrency(concurrency)
-            .build();
+        var outputGraphStore = CSRGraphStore.of(
+            inputGraphStore.databaseInfo(),
+            inputGraphStore.capabilities(),
+            filteredSchema,
+            new Nodes(filteredSchema.nodeSchema(), idMap, nodePropertyStore),
+            relationshipImportResult,
+            concurrency,
+            Optional.empty()
+        );
 
         log.info(StringFormatting.formatWithLocale(
             "Sampled Graph: {nodes: {count: %d, propertyCount: %d, labelCount: %d}, relationships: {count: %d, typeCount: %d, propertyCount: %d}}",

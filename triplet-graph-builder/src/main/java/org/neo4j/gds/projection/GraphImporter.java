@@ -34,11 +34,12 @@ import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.Nodes;
+import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.RelationshipImportResultBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
@@ -285,18 +286,22 @@ public final class GraphImporter {
             ? Capabilities.WriteMode.NONE
             : this.writeMode;
 
-        var graphStoreBuilder = new GraphStoreBuilder()
-            .concurrency(this.config.readConcurrency())
-            .capabilities(new Capabilities(writeMode))
-            .databaseInfo(databaseInfo);
-
-        var valueMapper = buildNodesWithProperties(graphStoreBuilder);
+        var nodes = buildNodesWithProperties();
         progressTracker.endSubTask(/*Nodes*/);
 
         progressTracker.beginSubTask(/*Relationships*/);
-        buildRelationshipsWithProperties(graphStoreBuilder, valueMapper);
+        var relationshipImportResults = buildRelationshipsWithProperties();
 
-        var graphStore = graphStoreBuilder.schema(this.graphSchemaBuilder.build()).build();
+        var graphStore = CSRGraphStore.of(
+            databaseInfo,
+            new Capabilities(writeMode),
+            this.graphSchemaBuilder.build(),
+            nodes,
+            relationshipImportResults,
+            this.config.readConcurrency(),
+            Optional.empty()
+        );
+
         validateRelTypes(graphStore.schema().relationshipSchema());
         progressTracker.endSubTask(/*Relationships*/);
 
@@ -419,7 +424,7 @@ public final class GraphImporter {
             );
     }
 
-    private AdjacencyCompressor.ValueMapper buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
+    private Nodes buildNodesWithProperties() {
         var idMapAndProperties = this.idMapBuilder.build();
 
         var idMap = idMapAndProperties.idMap();
@@ -427,20 +432,15 @@ public final class GraphImporter {
 
         this.graphSchemaBuilder.nodeSchema(nodeSchema);
 
-        var nodes = new Nodes(nodeSchema, idMap, idMapAndProperties.propertyStore());
+        return new Nodes(nodeSchema, idMap, idMapAndProperties.propertyStore());
+    }
 
-        graphStoreBuilder.nodes(nodes);
+    private RelationshipImportResult buildRelationshipsWithProperties() {
+        var builder = RelationshipImportResultBuilder.builder();
 
         // Relationships are added using their intermediate node ids, which equal the
         // mapped ids for the ShardedIdMap, so we map them through the identity function.
-        return AdjacencyCompressor.ValueMapper.Identity.INSTANCE;
-    }
-
-    private void buildRelationshipsWithProperties(
-        GraphStoreBuilder graphStoreBuilder,
-        AdjacencyCompressor.ValueMapper valueMapper
-    ) {
-        var builder = RelationshipImportResultBuilder.builder();
+        var valueMapper = AdjacencyCompressor.ValueMapper.Identity.INSTANCE;
 
         var relationshipSchema = MutableRelationshipSchema.empty();
         this.relImporters.forEach((relationshipType, relImporter) -> {
@@ -449,12 +449,12 @@ public final class GraphImporter {
             builder.addImportResults(relationshipType, relationships);
         });
 
-        graphStoreBuilder.relationshipImportResult(builder.build());
         this.graphSchemaBuilder.relationshipSchema(relationshipSchema);
 
         // release all references to the builders
         // we are only be called once and don't support double invocations of `result` building
         this.relImporters.clear();
+        return builder.build();
     }
 
     /**

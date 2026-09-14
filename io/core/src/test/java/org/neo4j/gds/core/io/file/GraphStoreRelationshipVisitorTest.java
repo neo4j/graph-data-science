@@ -30,8 +30,8 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -169,15 +169,15 @@ class GraphStoreRelationshipVisitorTest {
 
         var nodes = new Nodes(expectedGraph.schema().nodeSchema(), expectedGraph, NodePropertyStore.empty());
 
-        return new GraphStoreBuilder()
-            .schema(MutableGraphSchema.from(expectedGraph.schema()))
-            .capabilities(new Capabilities(Capabilities.WriteMode.LOCAL))
-            .nodes(nodes)
-            .relationshipImportResult(actualRelationships)
-            .databaseInfo(DatabaseInfo.create(DatabaseId.random(), DatabaseLocation.LOCAL))
-            .concurrency(new Concurrency(1))
-            .build()
-            .getUnion();
+        return CSRGraphStore.of(
+            DatabaseInfo.create(DatabaseId.random(), DatabaseLocation.LOCAL),
+            new Capabilities(Capabilities.WriteMode.LOCAL),
+            MutableGraphSchema.from(expectedGraph.schema()),
+            nodes,
+            actualRelationships,
+            new Concurrency(1),
+            Optional.empty()
+        ).getUnion();
     }
 
     private void visitRelationshipType(

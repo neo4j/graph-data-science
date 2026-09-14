@@ -38,7 +38,6 @@ import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -51,6 +50,7 @@ import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -82,14 +82,15 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             DatabaseLocation.LOCAL
         );
 
-        return new GraphStoreBuilder()
-            .databaseInfo(databaseInfo)
-            .capabilities(capabilities)
-            .schema(schema)
-            .nodes(nodes)
-            .relationshipImportResult(relationshipImportResult)
-            .concurrency(graphProjectConfig.readConcurrency())
-            .build();
+        return CSRGraphStore.of(
+            databaseInfo,
+            capabilities,
+            schema,
+            nodes,
+            relationshipImportResult,
+            graphProjectConfig.readConcurrency(),
+            Optional.empty()
+        );
     }
 
     protected void logLoadingSummary(GraphStore graphStore) {

@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.builder.Builder;
-import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -71,7 +69,6 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@Value.Style(typeBuilder = "GraphStoreBuilder")
 public final class CSRGraphStore implements GraphStoreWithTopology {
 
     private final Concurrency concurrency;
@@ -119,7 +116,6 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
         this.modificationTime = this.creationTime;
     }
 
-    @Builder.Factory
     public static CSRGraphStore of(
         DatabaseInfo databaseInfo,
         Capabilities capabilities,
