@@ -25,6 +25,7 @@ import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
@@ -122,7 +123,7 @@ class NativeRelationshipExporterTest extends BaseTest {
                 "NEW_REL",
                 new RelationshipProjection("BARFOO", Orientation.NATURAL)
             )
-            .addRelationshipProperty("newWeight", "weight2", DefaultValue.of(0), Aggregation.NONE)
+            .addRelationshipProperty(PropertyMapping.of(Key.of("newWeight", "weight2"), DefaultValue.of(0), Aggregation.NONE))
             .build()
             .graphStore();
 
@@ -233,7 +234,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         StoreLoaderBuilder storeLoaderBuilder = createStoreLoaderBuilder()
             .addRelationshipType("BARFOO");
         if (includeProperties) {
-            storeLoaderBuilder.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING));
+            storeLoaderBuilder.addRelationshipProperty(PropertyMapping.of(Key.simple("weight"), DefaultValue.of(PROPERTY_VALUE_IF_MISSING)));
         }
 
         Graph fromGraph = storeLoaderBuilder
@@ -278,7 +279,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         StoreLoaderBuilder loader = createStoreLoaderBuilder()
             .addRelationshipType("FOOBAR");
         if (loadRelProperty) {
-            loader.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN));
+            loader.addRelationshipProperty(PropertyMapping.of(Key.simple("weight"), DefaultValue.of(PROPERTY_VALUE_IF_NOT_WRITTEN)));
         }
         return loader.build().graph();
     }

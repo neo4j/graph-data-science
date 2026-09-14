@@ -29,6 +29,7 @@ import org.neo4j.cypherdsl.core.Expression;
 import org.neo4j.cypherdsl.core.SymbolicName;
 import org.neo4j.cypherdsl.core.renderer.Configuration;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.Username;
@@ -415,19 +416,15 @@ public abstract class GdsCypher {
         }
 
         public GraphProjectBuilder withNodeProperty(String nodeProperty) {
-            return withNodeProperty(ImmutablePropertyMapping.builder().propertyKey(nodeProperty).build());
+            return withNodeProperty(PropertyMapping.of(Key.simple(nodeProperty)));
         }
 
         public GraphProjectBuilder withNodeProperty(String propertyKey, String neoPropertyKey) {
-            return withNodeProperty(ImmutablePropertyMapping
-                .builder()
-                .propertyKey(propertyKey)
-                .neoPropertyKey(neoPropertyKey)
-                .build());
+            return withNodeProperty(PropertyMapping.of(Key.of(propertyKey, neoPropertyKey)));
         }
 
         public GraphProjectBuilder withNodeProperty(String neoPropertyKey, DefaultValue defaultValue) {
-            return withNodeProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
+            return withNodeProperty(PropertyMapping.of(Key.simple(neoPropertyKey), defaultValue));
         }
 
         public GraphProjectBuilder withNodeProperty(
@@ -435,7 +432,7 @@ public abstract class GdsCypher {
             String neoPropertyKey,
             DefaultValue defaultValue
         ) {
-            return withNodeProperty(PropertyMapping.of(propertyKey, neoPropertyKey, defaultValue));
+            return withNodeProperty(PropertyMapping.of(Key.of(propertyKey, neoPropertyKey), defaultValue));
         }
 
         public GraphProjectBuilder withNodeProperty(
@@ -443,14 +440,7 @@ public abstract class GdsCypher {
             DefaultValue defaultValue,
             Aggregation aggregation
         ) {
-            return withNodeProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
-        }
-
-        public GraphProjectBuilder withNodeProperty(
-            String propertyKey,
-            Aggregation aggregation
-        ) {
-            return withNodeProperty(PropertyMapping.of(propertyKey, aggregation));
+            return withNodeProperty(PropertyMapping.of(Key.simple(propertyKey), defaultValue, aggregation));
         }
 
         public GraphProjectBuilder withNodeProperty(
@@ -460,8 +450,7 @@ public abstract class GdsCypher {
             Aggregation aggregation
         ) {
             return withNodeProperty(PropertyMapping.of(
-                propertyKey,
-                neoPropertyKey,
+                Key.of(propertyKey, neoPropertyKey),
                 defaultValue,
                 aggregation
             ));
@@ -478,22 +467,15 @@ public abstract class GdsCypher {
         }
 
         public GraphProjectBuilder withRelationshipProperty(String relationshipProperty) {
-            return withRelationshipProperty(ImmutablePropertyMapping
-                .builder()
-                .propertyKey(relationshipProperty)
-                .build());
+            return withRelationshipProperty(PropertyMapping.of(Key.simple(relationshipProperty)));
         }
 
         public GraphProjectBuilder withRelationshipProperty(String propertyKey, String neoPropertyKey) {
-            return withRelationshipProperty(ImmutablePropertyMapping
-                .builder()
-                .propertyKey(propertyKey)
-                .neoPropertyKey(neoPropertyKey)
-                .build());
+            return withRelationshipProperty(PropertyMapping.of(Key.of(propertyKey, neoPropertyKey)));
         }
 
         public GraphProjectBuilder withRelationshipProperty(String neoPropertyKey, DefaultValue defaultValue) {
-            return withRelationshipProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
+            return withRelationshipProperty(PropertyMapping.of(Key.simple(neoPropertyKey), defaultValue));
         }
 
         public GraphProjectBuilder withRelationshipProperty(
@@ -501,7 +483,7 @@ public abstract class GdsCypher {
             String neoPropertyKey,
             DefaultValue defaultValue
         ) {
-            return withRelationshipProperty(PropertyMapping.of(propertyKey, neoPropertyKey, defaultValue));
+            return withRelationshipProperty(PropertyMapping.of(Key.of(propertyKey, neoPropertyKey), defaultValue));
         }
 
         public GraphProjectBuilder withRelationshipProperty(
@@ -509,14 +491,14 @@ public abstract class GdsCypher {
             DefaultValue defaultValue,
             Aggregation aggregation
         ) {
-            return withRelationshipProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
+            return withRelationshipProperty(PropertyMapping.of(Key.simple(propertyKey), defaultValue, aggregation));
         }
 
         public GraphProjectBuilder withRelationshipProperty(
             String propertyKey,
             Aggregation aggregation
         ) {
-            return withRelationshipProperty(PropertyMapping.of(propertyKey, aggregation));
+            return withRelationshipProperty(PropertyMapping.of(Key.simple(propertyKey), DefaultValue.DEFAULT, aggregation));
         }
 
         public GraphProjectBuilder withRelationshipProperty(
@@ -526,8 +508,7 @@ public abstract class GdsCypher {
             Aggregation aggregation
         ) {
             return withRelationshipProperty(PropertyMapping.of(
-                propertyKey,
-                neoPropertyKey,
+                Key.of(propertyKey, neoPropertyKey),
                 defaultValue,
                 aggregation
             ));
@@ -899,8 +880,8 @@ public abstract class GdsCypher {
         boolean includeAggregation,
         boolean allowStringShortcut
     ) {
-        String propertyKey = propertyMapping.propertyKey();
-        String neoPropertyKey = propertyMapping.neoPropertyKey();
+        String propertyKey = propertyMapping.internalPropertyKey();
+        String neoPropertyKey = propertyMapping.externalPropertyKey();
         if (propertyKey == null || neoPropertyKey == null) {
             return MinimalObject.empty();
         }
@@ -914,7 +895,7 @@ public abstract class GdsCypher {
         if (includeAggregation && aggregation != Aggregation.DEFAULT) {
             value.put(AGGREGATION_KEY, aggregation.name());
         }
-        if (allowStringShortcut && value.size() == 1 && propertyKey.equals(propertyMapping.neoPropertyKey())) {
+        if (allowStringShortcut && value.size() == 1 && propertyKey.equals(propertyMapping.externalPropertyKey())) {
             return MinimalObject.string(propertyKey);
         }
         return MinimalObject.map(propertyKey, value);

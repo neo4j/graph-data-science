@@ -31,10 +31,12 @@ import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderWithConfigBuilder;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -107,9 +109,9 @@ class GraphSageMutateProcTest extends BaseProcTest {
         String query = GdsCypher.call(graphName)
             .graphProject()
             .withNodeLabel("King")
-            .withNodeProperty(PropertyMapping.of("age", 1.0))
-            .withNodeProperty(PropertyMapping.of("birth_year", 1.0))
-            .withNodeProperty(PropertyMapping.of("death_year", 1.0))
+            .withNodeProperty(PropertyMapping.of(Key.simple("age"), DefaultValue.of(1.0)))
+            .withNodeProperty(PropertyMapping.of(Key.simple("birth_year"), DefaultValue.of(1.0)))
+            .withNodeProperty(PropertyMapping.of(Key.simple("death_year"), DefaultValue.of(1.0)))
             .withRelationshipType(
                 "R",
                 new RelationshipProjection(
@@ -228,7 +230,7 @@ class GraphSageMutateProcTest extends BaseProcTest {
                         new NodeProjection(
                             "King",
                             PropertyMappings.of(
-                                PropertyMapping.of("age")
+                                PropertyMapping.of(Key.simple("age"))
                             )
                         )
                     ))
@@ -247,8 +249,8 @@ class GraphSageMutateProcTest extends BaseProcTest {
                         new NodeProjection(
                             "King",
                             PropertyMappings.of(
-                                PropertyMapping.of("age"),
-                                PropertyMapping.of("birth_year")
+                                PropertyMapping.of(Key.simple("age")),
+                                PropertyMapping.of(Key.simple("birth_year"))
                             )
                         )
                     ))

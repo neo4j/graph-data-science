@@ -206,7 +206,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         boolean loadProperties = propertyMappingsByLabel
             .values()
             .stream()
-            .anyMatch(mappings -> mappings.numberOfMappings() > 0);
+            .anyMatch(mappings -> mappings.count() > 0);
 
         if (loadProperties) {
             return NativeNodePropertyImporter

@@ -30,11 +30,13 @@ import org.neo4j.gds.GraphFactoryTestSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestGraphLoaderFactory;
+import org.neo4j.gds.PropertyMappingHelper;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -100,7 +102,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                 new NodeProjection(
                     "Node1",
                     PropertyMappings.of(
-                        PropertyMapping.of("prop1", 0.0D)
+                        PropertyMappingHelper.of("prop1", 0.0D)
                     )
                 )
             )
@@ -109,7 +111,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                 new NodeProjection(
                     "Node2",
                     PropertyMappings.of(
-                        PropertyMapping.of("prop2", 1.0D)
+                        PropertyMappingHelper.of("prop2", 1.0D)
                     )
                 )
             )
@@ -142,8 +144,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                 new NodeProjection(
                     "*",
                     PropertyMappings.of(
-                        PropertyMapping.of("prop1", 42.0D),
-                        PropertyMapping.of("prop2", 8.0D)
+                        PropertyMappingHelper.of("prop1", 42.0D),
+                        PropertyMappingHelper.of("prop2", 8.0D)
                     )
                 )
             ).putNodeProjectionsWithIdentifier(
@@ -151,7 +153,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                 new NodeProjection(
                     "Node2",
                     PropertyMappings.of(
-                        PropertyMapping.of("prop2", 8.0D)
+                        PropertyMappingHelper.of("prop2", 8.0D)
                     )
                 )
             ).graphName("myGraph")
@@ -206,7 +208,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     @AllGraphStoreFactoryTypesTest
     void parallelRelationships(GraphFactoryTestSupport.FactoryType factoryType) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
-            .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+            .withRelationshipProperties(PropertyMappingHelper.of("weight", 1.0))
             .withDefaultAggregation(Aggregation.NONE)
             .graph();
 
@@ -243,7 +245,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     ) {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withDefaultAggregation(aggregation)
-            .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+            .withRelationshipProperties(PropertyMappingHelper.of("weight", 1.0))
             .graph();
 
         Graph expected = fromGdl(formatWithLocale(
@@ -262,7 +264,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     void parallelRelationshipsWithAggregation_SINGLE() {
         Graph graph = TestGraphLoaderFactory.graphLoader(db, NATIVE)
             .withDefaultAggregation(Aggregation.SINGLE)
-            .withRelationshipProperties(PropertyMapping.of("weight", 1.0))
+            .withRelationshipProperties(PropertyMappingHelper.of("weight", 1.0))
             .graph();
 
         String expectedGraph =
@@ -303,7 +305,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
     void multipleTypesWithProperties(GraphFactoryTestSupport.FactoryType factoryType) {
         GraphStore graphStore = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipTypes("REL1", "REL2")
-            .withRelationshipProperties(PropertyMapping.of("prop1", 1337D))
+            .withRelationshipProperties(PropertyMappingHelper.of("prop1", 1337D))
             .graphStore();
 
         assertEquals(2, graphStore.relationshipTypes().size());
@@ -334,13 +336,13 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                 new RelationshipProjection(
                     rel1.name,
                     PropertyMappings.of(
-                        PropertyMapping.of(prop1, prop1, DefaultValue.of(Double.NaN))
+                        PropertyMappingHelper.of(prop1, Double.NaN)
                     )
                 ),
                 new RelationshipProjection(
                     rel2.name,
                     PropertyMappings.of(
-                        PropertyMapping.of(prop2, prop2, DefaultValue.of(Double.NaN))
+                        PropertyMappingHelper.of(prop2, Double.NaN)
                     )
                 )
             ).build().graphStore();
@@ -377,9 +379,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
         GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipProperties(
-                PropertyMapping.of("agg1", "p1", DefaultValue.of(1.0), Aggregation.NONE),
-                PropertyMapping.of("agg2", "p2", DefaultValue.of(2.0), Aggregation.NONE),
-                PropertyMapping.of("agg3", "p3", DefaultValue.of(2.0), Aggregation.NONE)
+                PropertyMapping.of(Key.of("agg1", "p1"), DefaultValue.of(1.0), Aggregation.NONE),
+                PropertyMapping.of(Key.of("agg2", "p2"), DefaultValue.of(2.0), Aggregation.NONE),
+                PropertyMapping.of(Key.of("agg3", "p3"), DefaultValue.of(2.0), Aggregation.NONE)
             )
             .graphStore();
 
@@ -429,9 +431,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         );
         GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipProperties(
-                PropertyMapping.of("agg1", "p1", DefaultValue.of(1.0), Aggregation.MIN),
-                PropertyMapping.of("agg2", "p1", DefaultValue.of(50.0), Aggregation.MAX),
-                PropertyMapping.of("agg3", "p1", DefaultValue.of(3.0), Aggregation.SUM)
+                PropertyMapping.of(Key.of("agg1", "p1"), DefaultValue.of(1.0), Aggregation.MIN),
+                PropertyMapping.of(Key.of("agg2", "p1"), DefaultValue.of(50.0), Aggregation.MAX),
+                PropertyMapping.of(Key.of("agg3", "p1"), DefaultValue.of(3.0), Aggregation.SUM)
             )
             .graphStore();
 
@@ -476,8 +478,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
             TestGraphLoaderFactory.graphLoader(db, factoryType)
                 .withRelationshipProperties(
-                    PropertyMapping.of("p1", "p1", DefaultValue.of(1.0), Aggregation.NONE),
-                    PropertyMapping.of("p2", "p2", DefaultValue.of(2.0), Aggregation.SUM)
+                    PropertyMapping.of(Key.simple("p1"), DefaultValue.of(1.0), Aggregation.NONE),
+                    PropertyMapping.of(Key.simple("p2"), DefaultValue.of(2.0), Aggregation.SUM)
                 )
                 .graphStore()
         );
@@ -505,8 +507,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 
         GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipProperties(
-                PropertyMapping.of("agg1", "p1", DefaultValue.of(1.0), Aggregation.MAX),
-                PropertyMapping.of("agg2", "p1", DefaultValue.of(2.0), Aggregation.MIN)
+                PropertyMapping.of(Key.of("agg1", "p1"), DefaultValue.of(1.0), Aggregation.MAX),
+                PropertyMapping.of(Key.of("agg2", "p1"), DefaultValue.of(2.0), Aggregation.MIN)
             )
             .graphStore();
 
@@ -566,8 +568,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, NATIVE)
             .withDefaultAggregation(globalAggregation)
             .withRelationshipProperties(
-                PropertyMapping.of("p1", "p1", DefaultValue.of(1.0), localAggregation1),
-                PropertyMapping.of("p2", "p2", DefaultValue.of(2.0), localAggregation2)
+                PropertyMapping.of(Key.simple("p1"), DefaultValue.of(1.0), localAggregation1),
+                PropertyMapping.of(Key.simple("p2"), DefaultValue.of(2.0), localAggregation2)
             )
             .graphStore();
 
@@ -608,7 +610,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             .withRelationshipTypes("REL_1", "REL_2", "REL_3")
             .withDefaultAggregation(Aggregation.MAX)
             .withRelationshipProperties(
-                PropertyMapping.of("agg", "p1", DefaultValue.of(1.0), Aggregation.MAX)
+                PropertyMapping.of(Key.of("agg", "p1"), DefaultValue.of(1.0), Aggregation.MAX)
             )
             .graphStore();
 
@@ -645,8 +647,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         );
         GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, NATIVE)
             .withRelationshipProperties(
-                PropertyMapping.of("p1", "p1", DefaultValue.of(1.0), aggregation1),
-                PropertyMapping.of("p2", "p2", DefaultValue.of(2.0), aggregation2)
+                PropertyMapping.of(Key.simple("p1"), DefaultValue.of(1.0), aggregation1),
+                PropertyMapping.of(Key.simple("p2"), DefaultValue.of(2.0), aggregation2)
             )
             .graphStore();
 
@@ -682,8 +684,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         );
         GraphStore graphStore = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withRelationshipProperties(
-                PropertyMapping.of("p1", "p1", DefaultValue.of(1.0), Aggregation.SINGLE),
-                PropertyMapping.of("p2", "p2", DefaultValue.of(2.0), Aggregation.SINGLE)
+                PropertyMapping.of(Key.simple("p1"), DefaultValue.of(1.0), Aggregation.SINGLE),
+                PropertyMapping.of(Key.simple("p2"), DefaultValue.of(2.0), Aggregation.SINGLE)
             )
             .graphStore();
 

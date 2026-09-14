@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.builder.Builder;
-import org.immutables.value.Value;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.utils.RawValues;
 
@@ -35,7 +33,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * Each importing thread holds an instance of this class for each relationship
  * type that is being imported.
  */
-@Value.Style(typeBuilder = "ThreadLocalSingleTypeRelationshipImporterBuilder")
 public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
     private final AdjacencyBuffer adjacencyBuffer;
@@ -43,7 +40,6 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
     final PropertyReader<PROPERTY_REF> propertyReader;
 
-    @Builder.Factory
     static <PROPERTY_REF> ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> of(
         AdjacencyBuffer adjacencyBuffer,
         RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
@@ -145,12 +146,11 @@ class GraphProjectConfigBuildersTest {
                 new StoreConfigBuilder()
                     .addNodeLabel("Foo")
                     .addRelationshipType("BAR")
-                    .nodeProperties(Collections.singletonList(PropertyMapping.of("nProp", DefaultValue.of(23.0D))))
-                    .relationshipProperties(Collections.singletonList(PropertyMapping.of(
-                        "rProp",
-                        DefaultValue.of(42.0D)
-                    )))
-                    .jobId(jobId)
+                    .nodeProperties(Collections.singletonList(
+                        PropertyMapping.of(Key.simple("nProp"), DefaultValue.of(23.0D)))
+                    ).relationshipProperties(Collections.singletonList(
+                        PropertyMapping.of(Key.simple("rProp"), DefaultValue.of(42.0D)))
+                    ).jobId(jobId)
                     .build(),
                 GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.single(
@@ -158,7 +158,7 @@ class GraphProjectConfigBuildersTest {
                             new NodeProjection(
                                 "Foo",
                                 PropertyMappings.of(
-                                    PropertyMapping.of("nProp", DefaultValue.of(23.0D))
+                                    PropertyMapping.of(Key.simple("nProp"), DefaultValue.of(23.0D))
                                 )
                             )
                         ))
@@ -168,7 +168,7 @@ class GraphProjectConfigBuildersTest {
                             new RelationshipProjection(
                                 "BAR",
                                 PropertyMappings.of(
-                                    PropertyMapping.of("rProp", DefaultValue.of(42.0D))
+                                    PropertyMapping.of(Key.simple("rProp"), DefaultValue.of(42.0D))
                                 )
                             )
                         )

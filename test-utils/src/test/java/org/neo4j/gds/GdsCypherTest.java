@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
@@ -422,7 +423,7 @@ class GdsCypherTest {
         NodeProjection fooNode = new NodeProjection(
             "Foo",
             PropertyMappings.of(
-                PropertyMapping.of("nodeProp", "NodePropertyName", DefaultValue.of(42.1337))
+                PropertyMapping.of(Key.of("nodeProp", "NodePropertyName"), DefaultValue.of(42.1337))
             )
         );
 
@@ -431,7 +432,7 @@ class GdsCypherTest {
             Orientation.UNDIRECTED,
             Aggregation.SINGLE,
             PropertyMappings.of(
-                PropertyMapping.of("relProp", "RelationshipPropertyName", DefaultValue.of(1337), Aggregation.MAX)
+                PropertyMapping.of(Key.of("relProp", "RelationshipPropertyName"), DefaultValue.of(1337), Aggregation.MAX)
             )
         );
 
@@ -441,22 +442,14 @@ class GdsCypherTest {
             .nodeProjections(NodeProjections.create(Collections.singletonMap(
                 new NodeLabel("FooNode"), fooNode
             )))
-            .nodeProperties(PropertyMappings.of(ImmutablePropertyMapping
-                .builder()
-                .propertyKey("GlobalNodeProp")
-                .build()
-            ))
+            .nodeProperties(PropertyMappings.of(PropertyMapping.of(Key.simple("GlobalNodeProp"))))
             .relationshipProjections(new RelationshipProjections(Map.of(
                 new RelationshipType("Rel"),
                 new RelationshipProjection("TYPE"),
                 new RelationshipType("BarRel"),
                 barRel
-            ))).relationshipProperties(PropertyMappings.of(ImmutablePropertyMapping
-                .builder()
-                .propertyKey("global")
-                .neoPropertyKey("RelProp")
-                .build()
-            ))
+            )))
+            .relationshipProperties(PropertyMappings.of(PropertyMapping.of(Key.of("global", "RelProp"))))
             .build();
 
 

@@ -19,13 +19,9 @@
  */
 package org.neo4j.gds.projection;
 
-import org.immutables.builder.Builder;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
-import org.neo4j.gds.core.loading.RelationshipsBatchBufferBuilder;
 import org.neo4j.storageengine.api.Reference;
-
-import java.util.Optional;
 
 import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateSourceNodeIsLoaded;
@@ -40,21 +36,13 @@ public final class BufferedRelationshipConsumer implements StoreScanner.RecordCo
     private final int type;
     private final boolean skipDanglingRelationships;
 
-    @Builder.Factory
-    static BufferedRelationshipConsumer bufferedRelationshipConsumer(
-        PartialIdMap idMap,
-        int type,
-        int capacity,
-        Optional<Boolean> skipDanglingRelationships
-    ) {
-        var buffer = new RelationshipsBatchBufferBuilder<Reference>()
-            .capacity(capacity)
-            .propertyReferenceClass(Reference.class)
-            .build();
+    static BufferedRelationshipConsumer of(PartialIdMap idMap, int type, int capacity) {
+        return of(idMap, type, capacity, true);
+    }
 
-        boolean skipDangling = skipDanglingRelationships.orElse(true);
-
-        return new BufferedRelationshipConsumer(buffer, idMap, type, skipDangling);
+    static BufferedRelationshipConsumer of(PartialIdMap idMap, int type, int capacity, boolean skipDanglingRelationships) {
+        var buffer = RelationshipsBatchBuffer.of(capacity, Reference.class);
+        return new BufferedRelationshipConsumer(buffer, idMap, type, skipDanglingRelationships);
     }
 
     private BufferedRelationshipConsumer(

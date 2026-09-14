@@ -28,7 +28,9 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -79,8 +81,8 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
                 "A", new NodeProjection(
                     "A",
                     PropertyMappings.of(
-                        PropertyMapping.of("newNodeProp1", "nodeProp1", 1337),
-                        PropertyMapping.of("newNodeProp2", "nodeProp2", 1337)
+                        PropertyMapping.of(Key.of("newNodeProp1", "nodeProp1"), DefaultValue.of(1337)),
+                        PropertyMapping.of(Key.of("newNodeProp2", "nodeProp2"), DefaultValue.of(1337))
                     )
                 )
             )
@@ -88,7 +90,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
                 "B", new NodeProjection(
                     "B",
                     PropertyMappings.of(
-                        PropertyMapping.of("newNodeProp1", "nodeProp1", 1337)
+                        PropertyMapping.of(Key.of("newNodeProp1", "nodeProp1"), DefaultValue.of(1337))
                     )
                 )
             )

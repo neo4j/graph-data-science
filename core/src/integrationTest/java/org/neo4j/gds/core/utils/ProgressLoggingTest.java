@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappingHelper;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.gds.logging.GdsTestLog;
@@ -65,7 +65,7 @@ class ProgressLoggingTest extends BaseTest {
             .log(log)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
-            .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
+            .addRelationshipProperty(PropertyMappingHelper.of(PROPERTY, 1.0))
             .build()
             .graph();
 

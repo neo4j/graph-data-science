@@ -187,19 +187,19 @@ public record NodeProjections(
         toValidate.values().stream()
             .flatMap(nodeProjection -> nodeProjection.properties().stream())
             .forEach(propertyMapping -> {
-                var propertyKey = propertyMapping.propertyKey();
+                var propertyKey = propertyMapping.internalPropertyKey();
 
                 if (seenMappings.containsKey(propertyKey)) {
                     // we have another mapping with the same GDS key
                     var seenMapping = seenMappings.get(propertyKey);
 
-                    if (!Objects.equals(seenMapping.neoPropertyKey(), propertyMapping.neoPropertyKey())) {
+                    if (!Objects.equals(seenMapping.externalPropertyKey(), propertyMapping.externalPropertyKey())) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Specifying multiple neoPropertyKeys for the same property is not allowed, " +
                                 "found propertyKey: `%s` with conflicting neoPropertyKeys: `%s`, `%s`.",
                             propertyKey,
-                            propertyMapping.neoPropertyKey(),
-                            seenMapping.neoPropertyKey()
+                            propertyMapping.externalPropertyKey(),
+                            seenMapping.externalPropertyKey()
                         ));
                     }
 

@@ -28,9 +28,11 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -138,7 +140,7 @@ class ModularityOptimizationStatsProcTest  extends BaseProcTest {
                         "TYPE",
                         Orientation.UNDIRECTED,
                         PropertyMappings.of(
-                            PropertyMapping.of("weight", 1D)
+                            PropertyMapping.of(Key.simple("weight"), DefaultValue.of(1D))
                         )
                     )
                 )

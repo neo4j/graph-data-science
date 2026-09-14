@@ -23,7 +23,6 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
-import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.utils.RawValues;
 
 import java.util.ArrayList;
@@ -54,12 +53,12 @@ final class LocalNodesBuilder implements AutoCloseable {
         this.seenNodeIdPredicate = seenNodeIdPredicate;
         this.threadLocalContext = threadLocalContext;
 
-        this.buffer = new NodesBatchBufferBuilder<Integer>()
-            .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
-            .hasLabelInformation(hasLabelInformation)
-            .readProperty(hasProperties)
-            .propertyReferenceClass(Integer.class)
-            .build();
+        this.buffer = NodesBatchBuffer.of(
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            hasLabelInformation,
+            hasProperties,
+            Integer.class
+        );
 
         this.nodeImporter = nodeImporter;
         this.batchNodeProperties = new ArrayList<>(buffer.capacity());

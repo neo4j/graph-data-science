@@ -57,16 +57,10 @@ class BufferedCompositeRelationshipConsumerTest {
 
     private static BufferedCompositeRelationshipConsumer createCompositeBuffer(int typeCount, int capacity) {
         var buffers = IntStream.range(0, typeCount)
-            .mapToObj(type -> new BufferedRelationshipConsumerBuilder()
-                .idMap(new DirectIdMap(2))
-                .type(type)
-                .capacity(capacity)
-                .build())
+            .mapToObj(type -> BufferedRelationshipConsumer.of(new DirectIdMap(2), type, capacity))
             .toArray(BufferedRelationshipConsumer[]::new);
 
-        return (BufferedCompositeRelationshipConsumer) new BufferedCompositeRelationshipConsumerBuilder()
-            .buffers(buffers)
-            .build();
+        return (BufferedCompositeRelationshipConsumer) BufferedCompositeRelationshipConsumer.of(buffers);
     }
 
 }

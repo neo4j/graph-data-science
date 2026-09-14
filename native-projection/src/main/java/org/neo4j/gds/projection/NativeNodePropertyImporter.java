@@ -227,7 +227,7 @@ public final class NativeNodePropertyImporter {
                  .stream()
                  .flatMap(propertyMappings -> propertyMappings.mappings().stream())
                  .forEach(propertyMapping -> propertyBuildersByKey.putIfAbsent(
-                     propertyMapping.propertyKey(),
+                     propertyMapping.internalPropertyKey(),
                      NodePropertiesFromStoreBuilder.of(
                          propertyMapping.defaultValue(),
                          concurrency
@@ -238,7 +238,7 @@ public final class NativeNodePropertyImporter {
             for (var entry : propertyMappingsByLabel.entrySet()) {
                 var label = entry.getKey();
                 for (var propertyMapping : entry.getValue()) {
-                    instance.put(label, propertyMapping, propertyBuildersByKey.get(propertyMapping.propertyKey()));
+                    instance.put(label, propertyMapping, propertyBuildersByKey.get(propertyMapping.internalPropertyKey()));
                 }
             }
             return instance;
@@ -255,8 +255,8 @@ public final class NativeNodePropertyImporter {
         }
 
         private void put(NodeLabel label, PropertyMapping propertyMapping, NodePropertiesFromStoreBuilder builder) {
-            propertyMappings.put(propertyMapping.propertyKey(), propertyMapping);
-            buildersByPropertyKey.put(propertyMapping.propertyKey(), builder);
+            propertyMappings.put(propertyMapping.internalPropertyKey(), propertyMapping);
+            buildersByPropertyKey.put(propertyMapping.internalPropertyKey(), builder);
             buildersByLabel
                 .computeIfAbsent(label, __ -> new HashMap<>())
                 .computeIfAbsent(propertyMapping, __ -> builder);
@@ -290,7 +290,7 @@ public final class NativeNodePropertyImporter {
             buildersByLabel.forEach((labelIdentifier, builders) -> {
                 int labelId = labelIdByLabel.get(labelIdentifier);
                 builders.forEach((propertyMapping, builder) -> {
-                    int propertyId = propertyIds.get(propertyMapping.neoPropertyKey());
+                    int propertyId = propertyIds.get(propertyMapping.externalPropertyKey());
                     instance.put(labelId, propertyId, builder);
                 });
             });

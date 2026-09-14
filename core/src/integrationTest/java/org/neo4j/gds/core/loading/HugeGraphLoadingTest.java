@@ -25,11 +25,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappingHelper;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -40,7 +41,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compression.common.BumpAllocator;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
@@ -112,7 +112,7 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         Graph graph = createStoreLoaderBuilder()
             .addNodeLabel(label.name())
-            .addNodeProperty(PropertyMapping.of("bar", -1.0))
+            .addNodeProperty(PropertyMappingHelper.of("bar", -1.0))
             .build()
             .graph();
 
@@ -180,7 +180,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         });
 
         final Graph graph = createStoreLoaderBuilder()
-            .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
+            .addRelationshipProperty(PropertyMappingHelper.of("weight", 1.0))
             .build()
             .graph();
 
@@ -207,7 +207,7 @@ final class HugeGraphLoadingTest extends BaseTest {
                 "TYPE_UNDIRECTED",
                 new RelationshipProjection("TYPE", Orientation.UNDIRECTED)
             )
-            .addNodeProperty(PropertyMapping.of("id", 42.0))
+            .addNodeProperty(PropertyMappingHelper.of("id", 42.0))
             .build()
             .graphStore();
 
@@ -243,7 +243,7 @@ final class HugeGraphLoadingTest extends BaseTest {
                 "TYPE_PROP_NONE",
                 new RelationshipProjection(
                     "TYPE",
-                    PropertyMappings.of(PropertyMapping.of("t", Aggregation.NONE))
+                    PropertyMappings.of( PropertyMappingHelper.of("t"))
                 )
             )
             .putRelationshipProjectionsWithIdentifier(
@@ -254,7 +254,7 @@ final class HugeGraphLoadingTest extends BaseTest {
                 "TYPE_PROP_SINGLE",
                 new RelationshipProjection(
                     "TYPE",
-                    PropertyMappings.of(PropertyMapping.of("t", Aggregation.SINGLE))
+                    PropertyMappings.of(PropertyMappingHelper.of("t", Aggregation.SINGLE))
                 )
             )
             .addRelationshipProjection(new RelationshipProjection("TYPE2", Aggregation.SINGLE))
@@ -363,8 +363,8 @@ final class HugeGraphLoadingTest extends BaseTest {
         });
 
         var graph = createStoreLoaderBuilder()
-            .addRelationshipProperty(PropertyMapping.of("p1", "weight", 1.0))
-            .addRelationshipProperty(PropertyMapping.of("p2", "weight", 1.0))
+            .addRelationshipProperty(PropertyMappingHelper.of("p1", "weight", 1.0))
+            .addRelationshipProperty(PropertyMappingHelper.of("p2", "weight", 1.0))
             .concurrency(new Concurrency(4))
             .build()
             .graph();
@@ -455,14 +455,12 @@ final class HugeGraphLoadingTest extends BaseTest {
             .addNodeProjection(
                 new NodeProjection(
                     "A",
-                    PropertyMappings.of(PropertyMapping.of("prop1"))
+                    PropertyMappings.of(PropertyMappingHelper.of("prop1"))
                 )
             ).addNodeProjection(
                 new NodeProjection(
                     "B",
-                    PropertyMappings.of(
-                        PropertyMapping.of("prop2")
-                    )
+                    PropertyMappings.of(PropertyMappingHelper.of("prop2"))
                 )
             ).build()
             .graph();

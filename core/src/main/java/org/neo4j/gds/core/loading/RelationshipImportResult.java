@@ -123,7 +123,7 @@ public record RelationshipImportResult(Map<RelationshipType, SingleTypeRelations
                 propertyMapping.defaultValue().doubleValue()
             );
             var schema = RelationshipPropertySchema.of(
-                propertyMapping.propertyKey(),
+                propertyMapping.internalPropertyKey(),
                 ValueType.DOUBLE,
                 propertyMapping.defaultValue().isUserDefined()
                     ? propertyMapping.defaultValue()
@@ -132,7 +132,7 @@ public record RelationshipImportResult(Map<RelationshipType, SingleTypeRelations
                 propertyMapping.aggregation()
             );
             var relationshipProperty = new RelationshipProperty(properties, schema);
-            propertyStoreBuilder.putIfAbsent(propertyMapping.propertyKey(), relationshipProperty);
+            propertyStoreBuilder.putIfAbsent(propertyMapping.internalPropertyKey(), relationshipProperty);
         }
 
         return propertyStoreBuilder.build();

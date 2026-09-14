@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds;
 
-import org.immutables.builder.Builder.AccessibleFields;
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,63 +33,71 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
-@Value.Immutable(singleton = true)
-public abstract class PropertyMappings implements Iterable<PropertyMapping> {
+public record PropertyMappings(List<PropertyMapping> mappings) implements Iterable<PropertyMapping> {
+    public PropertyMappings {
+        checkForAggregationMixing(mappings);
+    }
+    public static final PropertyMappings EMPTY = new PropertyMappings(Collections.emptyList());
 
-    public abstract List<PropertyMapping> mappings();
-
-    @Value.Default
     public int count() {
         return mappings().size();
     }
 
     public static PropertyMappings of(PropertyMapping... mappings) {
         if (mappings == null || mappings.length == 0) {
-            return ImmutablePropertyMappings.of();
+            return EMPTY;
         }
-        return ImmutablePropertyMappings.builder().addMappings(mappings).build();
+        return new PropertyMappings(Arrays.asList(mappings));
     }
 
     public static PropertyMappings of(List<PropertyMapping> mappings) {
         if (mappings == null || mappings.isEmpty()) {
-            return ImmutablePropertyMappings.of();
+            return EMPTY;
         }
-        return ImmutablePropertyMappings.builder().addAllMappings(mappings).build();
+        return new PropertyMappings(mappings);
     }
+
+    public static PropertyMappings of(List<PropertyMapping> mappings, Aggregation aggregation) {
+        if (mappings == null || mappings.isEmpty()) {
+            return EMPTY;
+        }
+        return new PropertyMappings(applyAggregation(mappings, aggregation));
+    }
+
 
     public static PropertyMappings fromObject(Object propertyMappingInput) {
         return fromObject(propertyMappingInput, Aggregation.DEFAULT);
     }
 
-    public static PropertyMappings fromObject(Object propertyMappingInput, Aggregation defaultAggregation) {
-        if (propertyMappingInput instanceof ImmutablePropertyMappings properties) {
-            return ImmutablePropertyMappings.builder().from(properties).withDefaultAggregation(defaultAggregation).build();
+    public static PropertyMappings fromObject(Object propertyMappingInput, Aggregation aggregation) {
+        if (propertyMappingInput instanceof PropertyMappings properties) {
+            List<PropertyMapping> newMappings = applyAggregation(properties.mappings, aggregation);
+            return new PropertyMappings(newMappings);
         }
         if (propertyMappingInput instanceof String propertyMapping) {
-            return fromObject(singletonMap(propertyMapping, propertyMapping), defaultAggregation);
+            return fromObject(singletonMap(propertyMapping, propertyMapping), aggregation);
         } else if (propertyMappingInput instanceof List<?> inputList) {
-            PropertyMappings.Builder builder = PropertyMappings.builder().withDefaultAggregation(defaultAggregation);
+            List<PropertyMapping> newMappings = new ArrayList<>();
             for (Object mapping : inputList) {
-                List<PropertyMapping> propertyMappings = fromObject(mapping, defaultAggregation).mappings();
+                List<PropertyMapping> propertyMappings = fromObject(mapping, aggregation).mappings();
                 for (PropertyMapping propertyMapping : propertyMappings) {
-                    if (builder.mappings != null && builder.mappings.contains(propertyMapping)) {
+                    if (newMappings.contains(propertyMapping)) {
                         throw new IllegalStateException(formatWithLocale(
                             "Duplicate property key `%s`",
-                            propertyMapping.propertyKey()
+                            propertyMapping.internalPropertyKey()
                         ));
                     }
-                    builder.addMapping(propertyMapping);
+                    newMappings.add(propertyMapping);
                 }
             }
-            return builder.build();
+            return new PropertyMappings(applyAggregation(newMappings, aggregation));
         } else if (propertyMappingInput instanceof Map) {
-            PropertyMappings.Builder builder = PropertyMappings.builder().withDefaultAggregation(defaultAggregation);
+            List<PropertyMapping> newMappings = new ArrayList<>();
             ((Map<String, Object>) propertyMappingInput).forEach((key, spec) -> {
                 PropertyMapping propertyMapping = PropertyMapping.fromObject(key, spec);
-                builder.addMapping(propertyMapping);
+                newMappings.add(propertyMapping);
             });
-            return builder.build();
+            return new PropertyMappings(applyAggregation(newMappings, aggregation));
         } else {
             throw new IllegalArgumentException(formatWithLocale(
                 "Expected String or Map for property mappings. Got %s.",
@@ -101,12 +106,24 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
         }
     }
 
+    private static List<PropertyMapping> applyAggregation(List<PropertyMapping> mappings, Aggregation aggregation) {
+        List<PropertyMapping> newMappings = new ArrayList<>(mappings.size());
+        if (aggregation != Aggregation.DEFAULT && mappings != null) {
+            for (PropertyMapping mapping : mappings) {
+                newMappings.add(mapping.setNonDefaultAggregation(aggregation));
+            }
+        } else {
+            newMappings.addAll(mappings);
+        }
+        return newMappings;
+    }
+
     public static Map<String, Object> toObject(PropertyMappings propertyMappings) {
         return propertyMappings.toObject(true);
     }
 
     public Set<String> propertyKeys() {
-        return stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet());
+        return stream().map(PropertyMapping::internalPropertyKey).collect(Collectors.toSet());
     }
 
     public Stream<PropertyMapping> stream() {
@@ -120,10 +137,6 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
 
     public boolean hasMappings() {
         return count() > 0;
-    }
-
-    public int numberOfMappings() {
-        return mappings().size();
     }
 
     public boolean isEmpty() {
@@ -146,60 +159,22 @@ public abstract class PropertyMappings implements Iterable<PropertyMapping> {
             return other;
         }
         if (!other.hasMappings()) {
-            return ImmutablePropertyMappings.copyOf(this);
+            var newMappings = new ArrayList<>(mappings);
+            return new PropertyMappings(newMappings);
         }
-        Builder builder = PropertyMappings.builder();
-        builder.addMappings(Stream.concat(stream(), other.stream()).distinct());
-        return builder.build();
+        // TODO: what about aggregation in the merge case? what if they have different aggregations?
+        var newMappings = Stream.concat(mappings().stream(), other.mappings().stream()).toList();
+        return new PropertyMappings(newMappings);
     }
 
-    @Value.Check
-    void checkForAggregationMixing() {
-        long noneStrategyCount = stream()
+    private void checkForAggregationMixing(List<PropertyMapping> mappings) {
+        long noneStrategyCount = mappings.stream()
             .filter(d -> d.aggregation() == Aggregation.NONE)
             .count();
 
-        if (noneStrategyCount > 0 && noneStrategyCount < numberOfMappings()) {
+        if (noneStrategyCount > 0 && noneStrategyCount < mappings.size()) {
             throw new IllegalArgumentException(
                 "Conflicting relationship property aggregations, it is not allowed to mix `NONE` with aggregations.");
-        }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    @AccessibleFields
-    public static final class Builder extends ImmutablePropertyMappings.Builder {
-
-        private Aggregation aggregation;
-
-        Builder() {
-            aggregation = Aggregation.DEFAULT;
-        }
-
-        void addMappings(Stream<? extends PropertyMapping> propertyMappings) {
-            Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
-            propertyMappings.forEach(this::addMapping);
-        }
-
-       public Builder withDefaultAggregation(Aggregation aggregation) {
-            this.aggregation = Objects.requireNonNull(
-                aggregation,
-                "aggregation must not be empty"
-            );
-            return this;
-        }
-
-        @Override
-        public PropertyMappings build() {
-            if (aggregation != Aggregation.DEFAULT && mappings != null) {
-                for (ListIterator<PropertyMapping> iter = mappings.listIterator(); iter.hasNext(); ) {
-                    PropertyMapping mapping = iter.next().setNonDefaultAggregation(aggregation);
-                    iter.set(mapping);
-                }
-            }
-            return super.build();
         }
     }
 }

@@ -32,23 +32,14 @@ class BufferedRelationshipConsumerTest {
 
     @Test
     void flushBufferWhenFull() {
-        var buffer = new BufferedRelationshipConsumerBuilder()
-            .idMap(new DirectIdMap(2))
-            .type(-1)
-            .capacity(1)
-            .build();
-
+        var buffer = BufferedRelationshipConsumer.of(new DirectIdMap(2), -1, 1);
         buffer.relationshipsBatchBuffer().add(0, 1, -1, LongReference.NULL_REFERENCE);
         assertTrue(buffer.relationshipsBatchBuffer().isFull());
     }
 
     @Test
     void shouldNotThrowWhenFull() {
-        var relationshipsBatchBuffer = new BufferedRelationshipConsumerBuilder()
-            .idMap(new DirectIdMap(2))
-            .type(-1)
-            .capacity(2)
-            .build();
+        var relationshipsBatchBuffer = BufferedRelationshipConsumer.of(new DirectIdMap(2), -1, 2);
 
         var testRelationship = TestRelationshipBuilder.builder()
             .typeTokenId(0)

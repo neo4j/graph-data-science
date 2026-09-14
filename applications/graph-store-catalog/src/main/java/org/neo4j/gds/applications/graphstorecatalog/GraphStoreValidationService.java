@@ -274,7 +274,7 @@ public class GraphStoreValidationService {
 
         var duplicateProperties = additionalNodeProperties
             .stream()
-            .map(PropertyMapping::neoPropertyKey)
+            .map(PropertyMapping::externalPropertyKey)
             .filter(nodeProperties::contains)
             .collect(Collectors.toList());
 

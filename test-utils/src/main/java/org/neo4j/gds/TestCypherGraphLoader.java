@@ -20,15 +20,16 @@
 package org.neo4j.gds;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.legacycypherprojection.CypherProjectionGraphStoreFactorySupplier;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.gds.logging.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -167,9 +168,10 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
         MutableInt mutableInt = new MutableInt(0);
         return PropertyMappings.of(propertyMappings.stream()
             .map(mapping -> PropertyMapping.of(
-                mapping.propertyKey(),
-                addSuffix(mapping.neoPropertyKey(), mutableInt.getAndIncrement()),
-                mapping.defaultValue(),
+                Key.of(
+                    mapping.internalPropertyKey(),
+                    addSuffix(mapping.externalPropertyKey(), mutableInt.getAndIncrement())
+                ), mapping.defaultValue(),
                 mapping.aggregation() == Aggregation.DEFAULT ? maybeAggregation.orElse(Aggregation.NONE) : mapping.aggregation()
             ))
             .toArray(PropertyMapping[]::new)
@@ -183,9 +185,9 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
                 .map(mapping -> formatWithLocale(
                     "COALESCE(%s.%s, %s) AS %s",
                     entityVar,
-                    mapping.neoPropertyKey(),
+                    mapping.externalPropertyKey(),
                     mapping.defaultValue().getObject(),
-                    mapping.propertyKey()
+                    mapping.internalPropertyKey()
                 ))
                 .collect(Collectors.joining(", ", ", ", ""))
             : "";
@@ -202,11 +204,11 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
                     formatWithLocale(
                         "COALESCE(%s.%s, %f)",
                         entityVar,
-                        removeSuffix(mapping.neoPropertyKey()),
+                        removeSuffix(mapping.externalPropertyKey()),
                         mapping.defaultValue().getObject()
                     )
                 ),
-                mapping.propertyKey()
+                mapping.internalPropertyKey()
             ))
             .collect(Collectors.joining(", ", ", ", ""))
             : "";

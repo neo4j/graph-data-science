@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.builder.Builder;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.ComposedIdMap;
@@ -34,7 +33,6 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -44,11 +42,18 @@ public final class LazyIdMapBuilder implements PartialIdMap {
 
     private final NodesBuilder nodesBuilder;
 
-    @Builder.Constructor
+    public LazyIdMapBuilder(Concurrency concurrency, PropertyState propertyState) {
+        this(concurrency, false, false, propertyState);
+    }
+
+    public LazyIdMapBuilder(Concurrency concurrency, boolean hasLabelInformation, PropertyState propertyState) {
+        this(concurrency, hasLabelInformation, false, propertyState);
+    }
+
     public LazyIdMapBuilder(
         Concurrency concurrency,
-        Optional<Boolean> hasLabelInformation,
-        Optional<Boolean> hasProperties,
+        boolean hasLabelInformation,
+        boolean hasProperties,
         PropertyState propertyState
     ) {
         this.intermediateIdMapBuilder = ShardedLongLongMap.builder(concurrency);

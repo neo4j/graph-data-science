@@ -31,6 +31,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderBuilder;
@@ -206,7 +208,7 @@ class WccMutateProcTest extends BaseProcTest {
 
         var updatedGraph = new StoreLoaderBuilder().databaseService(db)
             .graphStoreFactorySuppliers(graphStoreFactorySuppliers)
-            .addNodeProperty(MUTATE_PROPERTY, MUTATE_PROPERTY, DefaultValue.of(42.0), Aggregation.NONE)
+            .addNodeProperty(PropertyMapping.of(Key.simple(MUTATE_PROPERTY), DefaultValue.of(42.0), Aggregation.NONE))
             .build()
             .graph();
 

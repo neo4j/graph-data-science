@@ -76,13 +76,13 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
     @Override
     public void accept(KernelTransaction transaction) {
         try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.createCursor(transaction)) {
-            var nodesBatchBuffer = new BufferedNodeConsumerBuilder()
-                .highestPossibleNodeCount(highestPossibleNodeCount)
-                .nodeLabelIds(labels)
-                .capacity(scanner.bufferSize())
-                .hasLabelInformation(labels.size() > 1)
-                .readProperty(nodePropertyImporter != null)
-                .build();
+            var nodesBatchBuffer = BufferedNodeConsumer.of(
+                scanner.bufferSize(),
+                highestPossibleNodeCount,
+                labels,
+                labels.size() > 1,
+                nodePropertyImporter != null
+            );
 
             var scanState = ScanState.of();
             while (scanState.scan(cursor, nodesBatchBuffer)) {

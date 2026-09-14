@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappingHelper;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.logging.Log;
@@ -67,7 +67,7 @@ final class UndirectedLoopsTest extends BaseTest {
                 Log.noOpLog(),
                 Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
             ))
-                .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
+                .addRelationshipProperty(PropertyMappingHelper.of("cost", Double.MAX_VALUE))
                 .build()
                 .graph();
 

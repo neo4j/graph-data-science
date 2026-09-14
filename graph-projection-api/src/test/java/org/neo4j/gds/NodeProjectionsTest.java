@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.api.DefaultValue;
 
 import java.util.Arrays;
@@ -77,8 +78,8 @@ class NodeProjectionsTest {
             new NodeProjection(
                 "A",
                 PropertyMappings.of(
-                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
-                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
+                    PropertyMapping.of(Key.simple("prop1"), DefaultValue.DEFAULT),
+                    PropertyMapping.of(Key.simple("prop2"), DefaultValue.DEFAULT)
                 )
             )
         );
@@ -137,8 +138,8 @@ class NodeProjectionsTest {
         return Stream.of(
             Arguments.of(
                 "different neo key",
-                PropertyMapping.of("foo", "bar", DefaultValue.DEFAULT),
-                PropertyMapping.of("foo", "baz", DefaultValue.DEFAULT),
+                PropertyMapping.of(Key.of("foo", "bar"), DefaultValue.DEFAULT),
+                PropertyMapping.of(Key.of("foo", "baz"), DefaultValue.DEFAULT),
                 new String[]{
                     "Specifying multiple neoPropertyKeys for the same property is not allowed, found propertyKey: `foo` with conflicting neoPropertyKeys:",
                     "`bar`",
@@ -147,8 +148,8 @@ class NodeProjectionsTest {
             ),
             Arguments.of(
                 "different default value types",
-                PropertyMapping.of("foo", "baz", DefaultValue.forLong()),
-                PropertyMapping.of("foo", "baz", DefaultValue.forDouble()),
+                PropertyMapping.of(Key.of("foo", "baz"), DefaultValue.forLong()),
+                PropertyMapping.of(Key.of("foo", "baz"), DefaultValue.forDouble()),
                 new String[]{
                     "Specifying different default values for the same property with identical neoPropertyKey is not allowed, found propertyKey: `foo` with conflicting default values:",
                     "`-9223372036854775808`",
@@ -157,8 +158,8 @@ class NodeProjectionsTest {
             ),
             Arguments.of(
                 "different default values",
-                PropertyMapping.of("foo", "baz", DefaultValue.of(42)),
-                PropertyMapping.of("foo", "baz", DefaultValue.of(1337)),
+                PropertyMapping.of(Key.of("foo", "baz"), DefaultValue.of(42)),
+                PropertyMapping.of(Key.of("foo", "baz"), DefaultValue.of(1337)),
                 new String[]{
                     "Specifying different default values for the same property with identical neoPropertyKey is not allowed, found propertyKey: `foo` with conflicting default values:",
                     "`42`",
@@ -208,8 +209,8 @@ class NodeProjectionsTest {
             new NodeProjection(
                 "A",
                 PropertyMappings.of(
-                    PropertyMapping.of("prop1", DefaultValue.DEFAULT),
-                    PropertyMapping.of("prop2", DefaultValue.DEFAULT)
+                    PropertyMapping.of(Key.simple("prop1"), DefaultValue.DEFAULT),
+                    PropertyMapping.of(Key.simple("prop2"), DefaultValue.DEFAULT)
                 )
             )
         );

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
@@ -34,7 +33,6 @@ import java.util.Optional;
 import java.util.function.LongConsumer;
 import java.util.function.LongSupplier;
 
-@Value.Style(typeBuilder = "SingleTypeRelationshipImporterBuilder")
 public final class SingleTypeRelationshipImporter {
 
     private final AdjacencyCompressorFactory adjacencyCompressorFactory;
@@ -43,35 +41,42 @@ public final class SingleTypeRelationshipImporter {
 
     private final AdjacencyBuffer adjacencyBuffer;
 
-    @org.immutables.builder.Builder.Factory
+    public static SingleTypeRelationshipImporter of(
+        ImportMetaData importMetaData,
+        LongSupplier nodeCountSupplier,
+        ImportSizing importSizing
+    ) {
+        var compressorFactory = AdjacencyListBehavior.asConfigured(
+            nodeCountSupplier,
+            importMetaData.projection().properties(),
+            importMetaData.aggregations()
+        );
+        return of(importMetaData, importSizing, compressorFactory);
+    }
+
     public static SingleTypeRelationshipImporter of(
         ImportMetaData importMetaData,
         LongSupplier nodeCountSupplier,
         ImportSizing importSizing,
-        Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory
+        AdjacencyListBehavior.Factory adjacencyCompressorFactoryFactory
     ) {
-        var compressorFactory = adjacencyCompressorFactory
-            .map(factory -> factory.create(
-                nodeCountSupplier,
-                importMetaData.projection().properties(),
-                importMetaData.aggregations()
-            ))
-            .orElseGet(
-                () -> AdjacencyListBehavior.asConfigured(
-                    nodeCountSupplier,
-                    importMetaData.projection().properties(),
-                    importMetaData.aggregations()
-                )
-            );
+        var compressorFactory = adjacencyCompressorFactoryFactory.create(
+            nodeCountSupplier,
+            importMetaData.projection().properties(),
+            importMetaData.aggregations()
+        );
+        return of(importMetaData, importSizing, compressorFactory);
+    }
 
-        var adjacencyBuffer = new AdjacencyBufferBuilder()
-            .importMetaData(importMetaData)
-            .importSizing(importSizing)
-            .adjacencyCompressorFactory(compressorFactory)
-            .build();
+    public static SingleTypeRelationshipImporter of(
+        ImportMetaData importMetaData,
+        ImportSizing importSizing,
+        AdjacencyCompressorFactory adjacencyCompressorFactory
+    ) {
+        var adjacencyBuffer = AdjacencyBuffer.of(importMetaData, adjacencyCompressorFactory, importSizing);
 
         return new SingleTypeRelationshipImporter(
-            compressorFactory,
+            adjacencyCompressorFactory,
             adjacencyBuffer,
             importMetaData,
             importMetaData.typeTokenId()
@@ -117,12 +122,12 @@ public final class SingleTypeRelationshipImporter {
         RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,
         PropertyReader<PROPERTY_REF> propertyReader
     ) {
-        return new ThreadLocalSingleTypeRelationshipImporterBuilder<PROPERTY_REF>()
-            .adjacencyBuffer(adjacencyBuffer)
-            .relationshipsBatchBuffer(relationshipsBatchBuffer)
-            .importMetaData(importMetaData)
-            .propertyReader(propertyReader)
-            .build();
+        return ThreadLocalSingleTypeRelationshipImporter.of(
+            adjacencyBuffer,
+            relationshipsBatchBuffer,
+            importMetaData,
+            propertyReader
+        );
     }
 
     public AdjacencyListsWithProperties build() {
@@ -169,7 +174,7 @@ public final class SingleTypeRelationshipImporter {
         ) {
             return projection.properties().mappings()
                 .stream()
-                .mapToInt(mapping -> relationshipPropertyTokens.get(mapping.neoPropertyKey())).toArray();
+                .mapToInt(mapping -> relationshipPropertyTokens.get(mapping.externalPropertyKey())).toArray();
         }
 
         private static Aggregation[] aggregations(RelationshipProjection projection) {
@@ -200,6 +205,12 @@ public final class SingleTypeRelationshipImporter {
             SingleTypeRelationshipImporter singleTypeRelationshipImporter
         ) {
             this(relationshipType, relationshipProjection, singleTypeRelationshipImporter, Optional.empty());
+        }
+        public static SingleTypeRelationshipImportContext of(RelationshipType rt, RelationshipProjection rp, SingleTypeRelationshipImporter stri) {
+            return new SingleTypeRelationshipImportContext(rt, rp, stri);
+        }
+        public static SingleTypeRelationshipImportContext of(RelationshipType rt, RelationshipProjection rp, SingleTypeRelationshipImporter stri, RelationshipType irt) {
+            return new SingleTypeRelationshipImportContext(rt, rp, stri, Optional.of(rt));
         }
     }
 }

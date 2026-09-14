@@ -25,6 +25,7 @@ import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -49,7 +50,6 @@ import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.ShardedIdMapBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 import java.util.Arrays;
@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.LongSupplier;
 import java.util.stream.IntStream;
 
 @Value.Style(
@@ -224,8 +225,7 @@ public final class GraphFactory {
         var actualOrientation = orientation.orElse(Orientation.NATURAL);
         var propertyMappings = propertyConfigs.stream()
             .map(propertyConfig -> PropertyMapping.of(
-                propertyConfig.propertyKey(),
-                propertyConfig.propertyKey(),
+                Key.simple(propertyConfig.propertyKey()),
                 DefaultValue.of(propertyConfig.defaultValue()),
                 propertyConfig.aggregation()
             )).toList();
@@ -264,12 +264,10 @@ public final class GraphFactory {
             skipDangling
         );
 
-        var singleTypeRelationshipImporter = new SingleTypeRelationshipImporterBuilder()
-            .importMetaData(importMetaData)
-            .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
-            .importSizing(importSizing)
-            .adjacencyCompressorFactory(adjacencyCompressorFactory)
-            .build();
+        LongSupplier nodeCountSupplier = () -> nodes.rootNodeCount().isPresent() ? nodes.rootNodeCount().getAsLong() : 0;
+        var singleTypeRelationshipImporter = adjacencyCompressorFactory.map(factory ->
+            SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing, factory))
+            .orElseGet(() -> SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing));
 
         SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
         if (indexInverse.orElse(false)) {
@@ -284,11 +282,12 @@ public final class GraphFactory {
                 skipDangling
             );
 
-            var inverseImporter = new SingleTypeRelationshipImporterBuilder()
-                .importMetaData(inverseImportMetaData)
-                .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
-                .importSizing(importSizing)
-                .build();
+
+            var inverseImporter = SingleTypeRelationshipImporter.of(
+                inverseImportMetaData,
+                () -> nodes.rootNodeCount().orElse(0L),
+                importSizing
+            );
 
             singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilder.Indexed(
                 nodes,

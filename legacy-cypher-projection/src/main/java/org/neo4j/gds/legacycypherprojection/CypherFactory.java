@@ -25,6 +25,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
@@ -332,7 +333,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     private static List<PropertyMapping> propertyMappings(long propertyCount) {
         return LongStream
             .range(0, propertyCount)
-            .mapToObj(property -> PropertyMapping.of(Long.toString(property), DefaultValue.DEFAULT))
+            .mapToObj(property -> PropertyMapping.of(Key.simple(Long.toString(property)), DefaultValue.DEFAULT))
             .collect(Collectors.toList());
     }
 }

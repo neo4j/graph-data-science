@@ -28,7 +28,6 @@ import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext;
-import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -36,7 +35,6 @@ import org.neo4j.gds.transaction.TransactionContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -46,7 +44,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final IdMap idMap;
     private List<SingleTypeRelationshipImportContext> importContexts;
 
-    static ScanningRelationshipsImporter scanningRelationshipsImporter(
+    static ScanningRelationshipsImporter of(
         GraphProjectFromStoreConfig graphProjectConfig,
         Log log,
         TransactionContext transactionContext,
@@ -122,19 +120,11 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
                         !graphProjectConfig.validateRelationships()
                     );
 
-                    var importer = new SingleTypeRelationshipImporterBuilder()
-                        .importMetaData(importMetaData)
-                        .nodeCountSupplier(dimensions::nodeCount)
-                        .importSizing(sizing)
-                        .build();
+                    var importer = SingleTypeRelationshipImporter.of(importMetaData, dimensions::nodeCount, sizing);
 
                     var contexts = new ArrayList<SingleTypeRelationshipImportContext>();
 
-                    contexts.add(new SingleTypeRelationshipImportContext(
-                        relationshipType,
-                        projection,
-                        importer
-                    ));
+                    contexts.add(SingleTypeRelationshipImportContext.of(relationshipType, projection, importer));
 
                     if (projection.indexInverse()) {
                         contexts.add(createInverseImporterContext(sizing, relationshipType, projection));
@@ -171,18 +161,9 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             !graphProjectConfig.validateRelationships()
         );
 
-        var inverseImporter = new SingleTypeRelationshipImporterBuilder()
-            .importMetaData(inverseImportMetaData)
-            .nodeCountSupplier(dimensions::nodeCount)
-            .importSizing(sizing)
-            .build();
+        var inverseImporter = SingleTypeRelationshipImporter.of(inverseImportMetaData, dimensions::nodeCount, sizing);
 
-        return new SingleTypeRelationshipImportContext(
-            relationshipType,
-            inverseProjection,
-            inverseImporter,
-            Optional.of(relationshipType)
-            );
+        return SingleTypeRelationshipImportContext.of(relationshipType, inverseProjection, inverseImporter, relationshipType);
     }
 
     @Override

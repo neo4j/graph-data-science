@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -101,8 +102,8 @@ final class CypherExporterTest extends BaseTest {
                 Log.noOpLog(),
                 Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
             ))
-            .addNodeProperty(PropertyMapping.of("property", DefaultValue.of(42)))
-            .addRelationshipProperty(PropertyMapping.of("property", DefaultValue.of(42)))
+            .addNodeProperty(PropertyMapping.of(Key.simple("property"), DefaultValue.of(42)))
+            .addRelationshipProperty(PropertyMapping.of(Key.simple("property"), DefaultValue.of(42)))
             .build()
             .graph();
 

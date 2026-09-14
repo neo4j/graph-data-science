@@ -104,13 +104,13 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         });
 
         verifyProperties(
-            nodeProperties.stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet()),
+            nodeProperties.stream().map(PropertyMapping::internalPropertyKey).collect(Collectors.toSet()),
             nodeProjections().allProperties(),
             "node"
         );
 
         verifyProperties(
-            relationshipProperties.stream().map(PropertyMapping::propertyKey).collect(Collectors.toSet()),
+            relationshipProperties.stream().map(PropertyMapping::internalPropertyKey).collect(Collectors.toSet()),
             relationshipProjections().allProperties(),
             "relationship"
         );

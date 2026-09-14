@@ -29,6 +29,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.compat.DatabaseMode;
@@ -408,19 +409,19 @@ class GraphStoreExportProcTest extends BaseProcTest {
             .withRelationshipType("REL1",
                 new RelationshipProjection(
                     "REL1",
-                    PropertyMappings.of(PropertyMapping.of("weight1"))
+                    PropertyMappings.of(PropertyMapping.of(Key.simple("weight1")))
                 )
             )
             .withRelationshipType("REL2",
                 new RelationshipProjection(
                     "REL2",
-                    PropertyMappings.of(PropertyMapping.of("weight2"))
+                    PropertyMappings.of(PropertyMapping.of(Key.simple("weight2")))
                 )
             )
             .withRelationshipType("REL3",
                 new RelationshipProjection(
                     "REL3",
-                    PropertyMappings.of(PropertyMapping.of("weight3"))
+                    PropertyMappings.of(PropertyMapping.of(Key.simple("weight3")))
                 )
             )
             .yields());

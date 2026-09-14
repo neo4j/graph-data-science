@@ -21,16 +21,18 @@ package org.neo4j.gds.louvain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.Aggregation;
 
 import java.util.Map;
 
@@ -77,7 +79,7 @@ class WeightedLouvainStreamProcTest extends BaseProcTest {
                     Aggregation.NONE
                 )
             )
-            .withRelationshipProperty(PropertyMapping.of("weight", 0.0d))
+            .withRelationshipProperty(PropertyMapping.of(Key.simple("weight"), DefaultValue.of(0.0d)))
             .yields());
     }
 

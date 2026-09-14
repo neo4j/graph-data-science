@@ -19,17 +19,13 @@
  */
 package org.neo4j.gds.projection;
 
-import org.immutables.builder.Builder;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 
 public final class BufferedCompositeRelationshipConsumer extends RecordsBatchBuffer implements StoreScanner.RecordConsumer<RelationshipReference> {
 
     private final BufferedRelationshipConsumer[] buffers;
 
-    @Builder.Factory
-    static StoreScanner.RecordConsumer<RelationshipReference> bufferedCompositeRelationshipConsumer(
-        BufferedRelationshipConsumer[] buffers
-    ) {
+    static StoreScanner.RecordConsumer<RelationshipReference> of(BufferedRelationshipConsumer[] buffers) {
         if (buffers.length == 1) {
             return buffers[0];
         }

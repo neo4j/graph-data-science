@@ -51,8 +51,8 @@ public final class RawCompressor implements AdjacencyCompressor {
     ) {
         @SuppressWarnings(
             "unchecked"
-        ) AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new AdjacencyListBuilder[propertyMappings
-            .numberOfMappings()];
+        ) AdjacencyListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders
+            = new AdjacencyListBuilder[propertyMappings.count()];
         Arrays.setAll(propertyBuilders, i -> adjacencyListBuilderFactory.newAdjacencyPropertiesBuilder(memoryTracker));
 
         return new Factory(

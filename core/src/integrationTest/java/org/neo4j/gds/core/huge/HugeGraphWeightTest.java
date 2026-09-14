@@ -21,7 +21,7 @@ package org.neo4j.gds.core.huge;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappingHelper;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.PageUtil;
@@ -107,7 +107,7 @@ final class HugeGraphWeightTest extends BaseTest {
                 Log.noOpLog(),
                 Map.of(GraphProjectFromStoreConfig.class, NativeProjectionGraphStoreFactorySupplier::create)
             ))
-            .addRelationshipProperty(PropertyMapping.of("weight", 0))
+            .addRelationshipProperty(PropertyMappingHelper.of("weight", 0))
             .build()
             .graph();
     }

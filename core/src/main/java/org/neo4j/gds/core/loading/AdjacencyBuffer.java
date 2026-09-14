@@ -21,8 +21,6 @@ package org.neo4j.gds.core.loading;
 
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.immutables.builder.Builder;
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
@@ -59,7 +57,6 @@ import static org.neo4j.gds.mem.Estimate.sizeOfObjectArray;
  *     <li>Creates tasks that write compressed long arrays into the final adjacency list using a specific compressor</li>
  * </ul>
  */
-@Value.Style(typeBuilder = "AdjacencyBufferBuilder")
 public final class AdjacencyBuffer {
     private static final double NO_SUCH_PROPERTY_KEY = -1;
 
@@ -110,7 +107,6 @@ public final class AdjacencyBuffer {
             .build();
     }
 
-    @Builder.Factory
     public static AdjacencyBuffer of(
         SingleTypeRelationshipImporter.ImportMetaData importMetaData,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
