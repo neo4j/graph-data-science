@@ -70,7 +70,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final TrackedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteNodePropertyService writeNodePropertyService;
-    private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
+    private final InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms;
     private final Synchroniser synchroniser;
 
     private CentralityAlgorithmsWriteModeBusinessFacade(
@@ -78,14 +78,14 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         TrackedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteNodePropertyService writeNodePropertyService,
-        CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
+        InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms,
         Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeNodePropertyService = writeNodePropertyService;
-        this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
+        this.instrumentedCentralityAlgorithms = instrumentedCentralityAlgorithms;
         this.synchroniser = synchroniser;
     }
 
@@ -96,7 +96,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         TrackedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
+        InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms,
         Synchroniser synchroniser
     ) {
         var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
@@ -106,7 +106,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             algorithms,
             algorithmProcessingTemplateConvenience,
             writeToDatabase,
-            centralityAlgorithmsBusinessFacade,
+            instrumentedCentralityAlgorithms,
             synchroniser
         );
     }
@@ -148,7 +148,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration.writeProperty()
         );
 
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.articulationPoints(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.articulationPoints(
             graphName,
             configuration,
             Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
@@ -270,7 +270,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new HarmonicCentralityWriteStep(writeNodePropertyService, configuration);
 
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.harmonicCentrality(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.harmonicCentrality(
             graphName,
             configuration,
             Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
@@ -292,7 +292,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration.writeProperty()
         );
 
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.hits(
             graphName,
             configuration,
             Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),

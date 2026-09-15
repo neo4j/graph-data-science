@@ -73,7 +73,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final TrackedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
+    private final InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms;
     private final Synchroniser synchroniser;
 
     public CentralityAlgorithmsMutateModeBusinessFacade(
@@ -81,14 +81,14 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         TrackedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodePropertyService,
-        CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
+        InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms,
         Synchroniser synchroniser
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
+        this.instrumentedCentralityAlgorithms = instrumentedCentralityAlgorithms;
         this.synchroniser = synchroniser;
     }
 
@@ -122,7 +122,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration.nodeLabels()
         );
 
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.articulationPoints(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.articulationPoints(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)), // and this
@@ -232,7 +232,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration.nodeLabels()
         );
 
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.harmonicCentrality(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.harmonicCentrality(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),
@@ -253,7 +253,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration.nodeLabels()
         );
 
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.hits(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),

@@ -58,20 +58,20 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final TrackedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
+    private final InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms;
     private final Synchroniser synchroniser;
 
     CentralityAlgorithmsStreamModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         TrackedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
+        InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms,
         Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
+        this.instrumentedCentralityAlgorithms = instrumentedCentralityAlgorithms;
         this.synchroniser = synchroniser;
     }
 
@@ -99,7 +99,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         StreamResultBuilder<ArticulationPointsResult, RESULT> resultBuilder,
         boolean shouldComputeComponents
     ) {
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.articulationPoints(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.articulationPoints(
             graphName,
             configuration,
             Optional.empty(), // this is the value add for this layer
@@ -129,7 +129,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         StreamResultBuilder<BridgeResult, RESULT> resultBuilder,
         boolean shouldComputeComponents
     ) {
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.bridges(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.bridges(
             graphName,
             configuration,
             Optional.empty(),
@@ -203,7 +203,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         HarmonicCentralityBaseConfig configuration,
         StreamResultBuilder<HarmonicResult, RESULT> resultBuilder
     ) {
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.harmonicCentrality(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.harmonicCentrality(
             graphName,
             configuration,
             Optional.empty(),
@@ -216,7 +216,7 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
         HitsConfig configuration,
         StreamResultBuilder<PregelResult, RESULT> resultBuilder
     ) {
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.hits(
             graphName,
             configuration,
             Optional.empty(),

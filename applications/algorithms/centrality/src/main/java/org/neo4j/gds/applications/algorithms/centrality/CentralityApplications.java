@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.logging.GdsLoggers;
 public final class CentralityApplications {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CentralityAlgorithmsMutateModeBusinessFacade mutation;
-    private final CentralityAlgorithmsBusinessFacade raw;
+    private final InstrumentedCentralityAlgorithms raw;
     private final CentralityAlgorithmsStatsModeBusinessFacade stats;
     private final CentralityAlgorithmsStreamModeBusinessFacade streaming;
     private final CentralityAlgorithmsWriteModeBusinessFacade writing;
@@ -41,7 +41,7 @@ public final class CentralityApplications {
     private CentralityApplications(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
         CentralityAlgorithmsMutateModeBusinessFacade mutation,
-        CentralityAlgorithmsBusinessFacade raw,
+        InstrumentedCentralityAlgorithms raw,
         CentralityAlgorithmsStatsModeBusinessFacade stats,
         CentralityAlgorithmsStreamModeBusinessFacade streaming,
         CentralityAlgorithmsWriteModeBusinessFacade writing
@@ -67,7 +67,7 @@ public final class CentralityApplications {
         var algorithms = new CentralityAlgorithms(requestScopedDependencies.terminationFlag());
         var trackedAlgorithms = new TrackedCentralityAlgorithms(algorithms, progressTrackerCreator);
         var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
-        var raw = CentralityAlgorithmsBusinessFacade.create(
+        var raw = InstrumentedCentralityAlgorithms.create(
             trackedAlgorithms,
             estimation,
             launchConvenience,
@@ -127,7 +127,7 @@ public final class CentralityApplications {
     /**
      * Raw as in, no mode applied, just access to the asynchronous machinery
      */
-    public CentralityAlgorithmsBusinessFacade raw() {
+    public InstrumentedCentralityAlgorithms raw() {
         return raw;
     }
 

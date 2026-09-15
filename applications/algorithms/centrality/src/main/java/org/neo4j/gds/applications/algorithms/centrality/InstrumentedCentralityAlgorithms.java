@@ -49,13 +49,13 @@ import java.util.concurrent.CompletableFuture;
  * because anything else would be duplication.
  * Side effects and result rendering behaviours get injected as parameters.
  */
-public final class CentralityAlgorithmsBusinessFacade {
+public final class InstrumentedCentralityAlgorithms {
     private final TrackedCentralityAlgorithms algorithms;
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
     private final HitsHookGenerator hitsHookGenerator;
 
-    private CentralityAlgorithmsBusinessFacade(
+    private InstrumentedCentralityAlgorithms(
         TrackedCentralityAlgorithms algorithms,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience,
@@ -67,7 +67,7 @@ public final class CentralityAlgorithmsBusinessFacade {
         this.hitsHookGenerator = hitsHookGenerator;
     }
 
-    public static CentralityAlgorithmsBusinessFacade create(
+    public static InstrumentedCentralityAlgorithms create(
         TrackedCentralityAlgorithms algorithms,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience,
@@ -76,7 +76,7 @@ public final class CentralityAlgorithmsBusinessFacade {
     ) {
         var hitsHookGenerator = new HitsHookGenerator(progressTrackerCreator, terminationFlag);
 
-        return new CentralityAlgorithmsBusinessFacade(
+        return new InstrumentedCentralityAlgorithms(
             algorithms,
             estimationFacade,
             launchConvenience,

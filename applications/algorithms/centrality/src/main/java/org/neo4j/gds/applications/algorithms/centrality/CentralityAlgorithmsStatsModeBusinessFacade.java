@@ -55,20 +55,20 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final TrackedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
+    private final InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms;
     private final Synchroniser synchroniser;
 
     CentralityAlgorithmsStatsModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         TrackedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
+        InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms,
         Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
+        this.instrumentedCentralityAlgorithms = instrumentedCentralityAlgorithms;
         this.synchroniser = synchroniser;
     }
 
@@ -92,7 +92,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
         ArticulationPointsBaseConfig configuration,
         StatsResultBuilder<ArticulationPointsResult, RESULT> resultBuilder
     ) {
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.articulationPoints(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.articulationPoints(
             graphName,
             configuration,
             Optional.empty(),
@@ -181,7 +181,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
         HarmonicCentralityBaseConfig configuration,
         StatsResultBuilder<HarmonicResult, RESULT> resultBuilder
     ) {
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.harmonicCentrality(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.harmonicCentrality(
             graphName,
             configuration,
             Optional.empty(),
@@ -194,7 +194,7 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
         HitsConfig configuration,
         StatsResultBuilder<PregelResult, RESULT> resultBuilder
     ) {
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.hits(
             graphName,
             configuration,
             Optional.empty(),
