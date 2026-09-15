@@ -65,10 +65,10 @@ public final class CentralityApplications {
         MutateNodePropertyService mutateNodePropertyService
     ) {
         var algorithms = new CentralityAlgorithms(requestScopedDependencies.terminationFlag());
-        var instrumentedAlgorithms = new InstrumentedCentralityAlgorithms(algorithms, progressTrackerCreator);
+        var trackedAlgorithms = new TrackedCentralityAlgorithms(algorithms, progressTrackerCreator);
         var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
         var raw = CentralityAlgorithmsBusinessFacade.create(
-            instrumentedAlgorithms,
+            trackedAlgorithms,
             estimation,
             launchConvenience,
             progressTrackerCreator,
@@ -79,7 +79,7 @@ public final class CentralityApplications {
 
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,
-            instrumentedAlgorithms,
+            trackedAlgorithms,
             algorithmProcessingTemplateConvenience,
             mutateNodePropertyService,
             raw,
@@ -88,7 +88,7 @@ public final class CentralityApplications {
 
         var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
             estimation,
-            instrumentedAlgorithms,
+            trackedAlgorithms,
             algorithmProcessingTemplateConvenience,
             raw,
             synchroniser
@@ -96,7 +96,7 @@ public final class CentralityApplications {
 
         var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
             estimation,
-            instrumentedAlgorithms,
+            trackedAlgorithms,
             algorithmProcessingTemplateConvenience,
             raw,
             synchroniser
@@ -107,7 +107,7 @@ public final class CentralityApplications {
             requestScopedDependencies,
             writeContext,
             estimation,
-            instrumentedAlgorithms,
+            trackedAlgorithms,
             algorithmProcessingTemplateConvenience,
             raw,
             synchroniser

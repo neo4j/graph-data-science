@@ -70,7 +70,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
-    private final InstrumentedCentralityAlgorithms algorithms;
+    private final TrackedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
@@ -78,7 +78,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
 
     public CentralityAlgorithmsMutateModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
-        InstrumentedCentralityAlgorithms algorithms,
+        TrackedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodePropertyService,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,

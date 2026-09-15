@@ -50,13 +50,13 @@ import java.util.concurrent.CompletableFuture;
  * Side effects and result rendering behaviours get injected as parameters.
  */
 public final class CentralityAlgorithmsBusinessFacade {
-    private final InstrumentedCentralityAlgorithms algorithms;
+    private final TrackedCentralityAlgorithms algorithms;
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
     private final HitsHookGenerator hitsHookGenerator;
 
     private CentralityAlgorithmsBusinessFacade(
-        InstrumentedCentralityAlgorithms algorithms,
+        TrackedCentralityAlgorithms algorithms,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience,
         HitsHookGenerator hitsHookGenerator
@@ -68,7 +68,7 @@ public final class CentralityAlgorithmsBusinessFacade {
     }
 
     public static CentralityAlgorithmsBusinessFacade create(
-        InstrumentedCentralityAlgorithms algorithms,
+        TrackedCentralityAlgorithms algorithms,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience,
         ProgressTrackerCreator progressTrackerCreator,

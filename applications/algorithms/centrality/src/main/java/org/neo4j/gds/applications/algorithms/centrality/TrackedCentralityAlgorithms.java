@@ -53,13 +53,13 @@ import org.neo4j.gds.pagerank.PageRankResult;
  * Progress tracking is intrinsic, so coupled directly.
  * Other instrumentation is more generic - think timings - and those sits in the execution machinery.
  */
-public class InstrumentedCentralityAlgorithms {
+public class TrackedCentralityAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final CentralityAlgorithms algorithms;
     private final ProgressTrackerCreator progressTrackerCreator;
 
-    public InstrumentedCentralityAlgorithms(
+    public TrackedCentralityAlgorithms(
         CentralityAlgorithms algorithms,
         ProgressTrackerCreator progressTrackerCreator
     ) {

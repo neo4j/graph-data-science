@@ -56,14 +56,14 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 
 public final class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final InstrumentedCentralityAlgorithms algorithms;
+    private final TrackedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
     private final Synchroniser synchroniser;
 
     CentralityAlgorithmsStreamModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        InstrumentedCentralityAlgorithms algorithms,
+        TrackedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
         Synchroniser synchroniser

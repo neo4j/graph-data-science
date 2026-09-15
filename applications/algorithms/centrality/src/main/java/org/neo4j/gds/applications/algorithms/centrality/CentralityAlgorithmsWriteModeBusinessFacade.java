@@ -67,7 +67,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Pag
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final InstrumentedCentralityAlgorithms algorithms;
+    private final TrackedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteNodePropertyService writeNodePropertyService;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
@@ -75,7 +75,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
 
     private CentralityAlgorithmsWriteModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        InstrumentedCentralityAlgorithms algorithms,
+        TrackedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteNodePropertyService writeNodePropertyService,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
@@ -94,7 +94,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        InstrumentedCentralityAlgorithms algorithms,
+        TrackedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
         Synchroniser synchroniser
