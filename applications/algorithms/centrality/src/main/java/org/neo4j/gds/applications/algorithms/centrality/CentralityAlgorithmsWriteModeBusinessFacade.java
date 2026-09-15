@@ -278,6 +278,28 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         ));
     }
 
+    public <RESULT> RESULT hits(
+        GraphName graphName,
+        HitsConfig configuration,
+        ResultBuilder<HitsConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new HitsWriteStep(
+            writeNodePropertyService,
+            configuration::resolveResultStore,
+            configuration.writeConcurrency(),
+            configuration.authProperty(),
+            configuration.hubProperty(),
+            configuration.writeProperty()
+        );
+
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
+            graphName,
+            configuration,
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
     public <RESULT> RESULT pageRank(
         GraphName graphName,
         PageRankWriteConfig configuration,
@@ -300,27 +322,5 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             writeStep,
             resultBuilder
         );
-    }
-
-    public <RESULT> RESULT hits(
-        GraphName graphName,
-        HitsConfig configuration,
-        ResultBuilder<HitsConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var writeStep = new HitsWriteStep(
-            writeNodePropertyService,
-            configuration::resolveResultStore,
-            configuration.writeConcurrency(),
-            configuration.authProperty(),
-            configuration.hubProperty(),
-            configuration.writeProperty()
-        );
-
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
-            graphName,
-            configuration,
-            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
-            new WriteResultRenderer<>(configuration, resultBuilder)
-        ));
     }
 }

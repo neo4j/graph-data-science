@@ -189,6 +189,19 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
         ));
     }
 
+    public <RESULT> RESULT hits(
+        GraphName graphName,
+        HitsConfig configuration,
+        StatsResultBuilder<PregelResult, RESULT> resultBuilder
+    ) {
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
+            graphName,
+            configuration,
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
+    }
+
     public <RESULT> RESULT pageRank(
         GraphName graphName,
         PageRankStatsConfig configuration,
@@ -202,18 +215,5 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
             (graph, __) -> algorithms.pageRank(graph, configuration),
             resultBuilder
         );
-    }
-
-    public <RESULT> RESULT hits(
-        GraphName graphName,
-        HitsConfig configuration,
-        StatsResultBuilder<PregelResult, RESULT> resultBuilder
-    ) {
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
-            graphName,
-            configuration,
-            Optional.empty(),
-            new StatsResultRenderer<>(resultBuilder)
-        ));
     }
 }

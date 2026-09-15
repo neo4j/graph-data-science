@@ -240,22 +240,25 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         ));
     }
 
-    public <RESULT> RESULT pageRank(
+    public <RESULT> RESULT hits(
         GraphName graphName,
-        PageRankMutateConfig configuration,
-        ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+        HitsConfig configuration,
+        ResultBuilder<HitsConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new GenericRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
+        var mutateStep = new HitsMutateStep(
+            mutateNodePropertyService,
+            configuration.authProperty(),
+            configuration.hubProperty(),
+            configuration.mutateProperty(),
+            configuration.nodeLabels()
+        );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
             graphName,
             configuration,
-            PageRank,
-            estimation::pageRank,
-            (graph, __) -> algorithms.pageRank(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT indirectExposure(
@@ -281,24 +284,21 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT hits(
+    public <RESULT> RESULT pageRank(
         GraphName graphName,
-        HitsConfig configuration,
-        ResultBuilder<HitsConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
+        PageRankMutateConfig configuration,
+        ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new HitsMutateStep(
-            mutateNodePropertyService,
-            configuration.authProperty(),
-            configuration.hubProperty(),
-            configuration.mutateProperty(),
-            configuration.nodeLabels()
-        );
+        var mutateStep = new GenericRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
-        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
-            Optional.of(new MutateSideEffect<>(mutateStep)),
-            new MutateResultRenderer<>(configuration, resultBuilder)
-        ));
+            PageRank,
+            estimation::pageRank,
+            (graph, __) -> algorithms.pageRank(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
     }
 }
