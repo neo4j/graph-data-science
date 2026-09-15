@@ -180,40 +180,6 @@ public class CommunityComputeFacade {
         );
     }
 
-    CompletableFuture<TimedAlgorithmResult<ConductanceResult>> conductance(
-        Graph graph,
-        ConductanceParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ConductanceResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.conductance(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var algorithm = new Conductance(
-            progressTracker,
-            graph,
-            parameters.concurrency(),
-            parameters.minBatchSize(),
-            parameters.hasRelationshipWeightProperty(),
-            parameters.communityProperty(),
-            DefaultPool.INSTANCE
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
-    }
-
     CompletableFuture<TimedAlgorithmResult<Labels>> hdbscan(
         Graph graph,
         HDBScanParameters parameters,

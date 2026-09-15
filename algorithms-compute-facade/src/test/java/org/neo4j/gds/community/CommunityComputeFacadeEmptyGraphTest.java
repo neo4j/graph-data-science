@@ -30,8 +30,6 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
-import org.neo4j.gds.conductance.ConductanceParameters;
-import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.hdbscan.HDBScanParameters;
@@ -118,22 +116,6 @@ class CommunityComputeFacadeEmptyGraphTest {
         var results = future.join();
 
         assertThat(results.result()).isEqualTo(CliqueCountingResult.EMPTY);
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void conductance(){
-        var future = facade.conductance(
-            graph,
-            mock(ConductanceParameters.class),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result()).isEqualTo(ConductanceResult.EMPTY);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }
