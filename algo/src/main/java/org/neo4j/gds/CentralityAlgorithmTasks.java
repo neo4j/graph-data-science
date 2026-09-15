@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -33,7 +32,6 @@ import org.neo4j.gds.degree.DegreeCentralityProgressTask;
 import org.neo4j.gds.harmonic.HarmonicCentralityProgressTask;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.hits.HitsProgressTrackerCreator;
-import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFProgressTask;
@@ -99,18 +97,6 @@ public final class CentralityAlgorithmTasks {
         );
     }
 
-    public static Task hits(
-        GraphStore graphStore,
-        HitsConfig configuration,
-        InverseRelationshipsParameters inverseRelationshipsParameters
-    ) {
-        return HitsProgressTrackerCreator.progressTaskWithInvertedIndex(
-            graphStore.nodeCount(),
-            configuration.maxIterations(),
-            inverseRelationshipsParameters
-        );
-    }
-
     public static Task indirectExposure(Graph graph, IndirectExposureConfig configuration) {
         return Tasks.task(
             AlgorithmLabel.IndirectExposure.asString(),
@@ -118,5 +104,4 @@ public final class CentralityAlgorithmTasks {
             Pregel.progressTask(graph.nodeCount(), configuration, MemoryRange.empty(), "ExposurePropagation")
         );
     }
-
 }
