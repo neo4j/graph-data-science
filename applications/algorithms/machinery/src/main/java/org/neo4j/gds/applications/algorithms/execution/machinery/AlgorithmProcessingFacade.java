@@ -57,7 +57,6 @@ public interface AlgorithmProcessingFacade {
      * It is a lot. Should we apply <a href="https://refactoring.com/catalog/introduceParameterObject.html">Parameter Object</a>?
      * The important bit here is: keep this lifetime scoped, not request scoped;
      * use parameterisation, not constructor injection.
-     * </p>
      * And in the interest of practicality: since this is an interface for the purpose of decorating, let's have only this one method - less work decorating innit.
      * Convenience and overrides can live above.
      */
