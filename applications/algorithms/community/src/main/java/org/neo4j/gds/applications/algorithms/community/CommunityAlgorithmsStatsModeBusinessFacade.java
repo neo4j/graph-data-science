@@ -20,8 +20,10 @@
 package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultRenderer;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
@@ -41,8 +43,8 @@ import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
+import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
-import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
@@ -53,6 +55,8 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
+import java.util.Optional;
+
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HDBScan;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
@@ -62,7 +66,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Modularity;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
@@ -73,15 +76,21 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CommunityAlgorithmsBusinessFacade communityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
+    private final InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms;
+    private final Synchroniser synchroniser;
 
     CommunityAlgorithmsStatsModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CommunityAlgorithmsBusinessFacade communityAlgorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
+        InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.communityAlgorithms = communityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
+        this.instrumentedCommunityAlgorithms = instrumentedCommunityAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT cliqueCounting(
@@ -207,17 +216,15 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT modularity(
         GraphName graphName,
-        ModularityStatsConfig configuration,
+        ModularityBaseConfig configuration,
         StatsResultBuilder<ModularityResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.modularity(
             graphName,
             configuration,
-            Modularity,
-            estimationFacade::modularity,
-            (graph, __) -> communityAlgorithms.modularity(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT modularityOptimization(

@@ -47,8 +47,8 @@ import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
-import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
@@ -74,7 +74,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Modularity;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
@@ -253,17 +252,15 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> modularity(
         GraphName graphName,
-        ModularityStreamConfig configuration,
-        StreamResultBuilder<ModularityResult, RESULT> streamResultBuilder
+        ModularityBaseConfig configuration,
+        StreamResultBuilder<ModularityResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.modularity(
             graphName,
             configuration,
-            Modularity,
-            estimationFacade::modularity,
-            (graph, __) -> algorithms.modularity(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> modularityOptimization(

@@ -89,7 +89,9 @@ public final class CommunityApplications {
         var stats = new CommunityAlgorithmsStatsModeBusinessFacade(
             estimation,
             algorithmsBusinessFacade,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            raw,
+            synchroniser
         );
         var stream = new CommunityAlgorithmsStreamModeBusinessFacade(
             estimation,

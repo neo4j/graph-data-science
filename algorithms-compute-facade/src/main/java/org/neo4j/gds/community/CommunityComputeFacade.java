@@ -33,9 +33,6 @@ import org.neo4j.gds.cliqueCounting.CliqueCounting;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.conductance.Conductance;
-import org.neo4j.gds.conductance.ConductanceParameters;
-import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -65,9 +62,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
-import org.neo4j.gds.modularity.ModularityCalculator;
-import org.neo4j.gds.modularity.ModularityParameters;
-import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
@@ -431,29 +425,6 @@ public class CommunityComputeFacade {
             parameters,
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
-    }
-
-    CompletableFuture<TimedAlgorithmResult<ModularityResult>> modularity(
-        Graph graph,
-        ModularityParameters parameters,
-        JobId jobId
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ModularityResult.EMPTY));
-        }
-
-        var algorithm = ModularityCalculator.create(
-            terminationFlag,
-            graph,
-            graph.nodeProperties(parameters.communityProperty())::longValue,
-            parameters.concurrency()
         );
 
         return algorithmCaller.run(

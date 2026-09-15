@@ -27,6 +27,8 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
+import org.neo4j.gds.modularity.ModularityBaseConfig;
+import org.neo4j.gds.modularity.ModularityResult;
 
 import java.util.Optional;
 import java.util.Set;
@@ -65,6 +67,26 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __) -> algorithms.conductance(graph, configuration),
             estimationFacade::conductance,
             AlgorithmLabel.Conductance,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> modularity(
+        GraphName graphName,
+        ModularityBaseConfig configuration,
+        Optional<SideEffect<ModularityResult, METADATA>> sideEffect,
+        ResultRenderer<ModularityResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            Set.of(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
+            Optional.empty(),
+            (graph, __) -> algorithms.modularity(graph, configuration),
+            estimationFacade::modularity,
+            AlgorithmLabel.Modularity,
             sideEffect,
             resultRenderer
         );

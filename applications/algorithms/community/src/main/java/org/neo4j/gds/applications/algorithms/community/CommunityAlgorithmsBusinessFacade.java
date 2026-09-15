@@ -45,8 +45,6 @@ import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
-import org.neo4j.gds.modularity.ModularityBaseConfig;
-import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
@@ -175,10 +173,6 @@ public class CommunityAlgorithmsBusinessFacade {
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.louvain(graph, parameters, progressTracker),
             progressTracker, true);
-    }
-
-    ModularityResult modularity(Graph graph, ModularityBaseConfig configuration) {
-        return algorithms.modularity(graph, configuration.toParameters());
     }
 
     ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {

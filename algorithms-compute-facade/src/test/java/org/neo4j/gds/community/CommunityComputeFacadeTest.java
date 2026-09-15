@@ -30,7 +30,6 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.cliquecounting.CliqueCountingMode;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
-import org.neo4j.gds.conductance.ConductanceParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
@@ -48,7 +47,6 @@ import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainParameters;
-import org.neo4j.gds.modularity.ModularityParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfigImpl;
@@ -150,26 +148,6 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().globalCount()).containsExactly(1);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void conductance(){
-        var future = facade.conductance(
-            graph,
-            new ConductanceParameters(
-               new Concurrency(4),
-                10_000,
-                false,
-                "prop"
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().globalAverageConductance()).isGreaterThan(0d);
         assertThat(results.computeMillis()).isNotNegative();
     }
 
@@ -338,23 +316,6 @@ class CommunityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().ranLevels()).isGreaterThan(0);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void modularity(){
-        var future = facade.modularity(
-            graph,
-            new ModularityParameters(
-               "prop",
-                new Concurrency(4)
-            ),
-            jobIdMock
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().nodeCount()).isEqualTo(3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 
