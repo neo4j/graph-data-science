@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 
@@ -55,7 +54,6 @@ class TreeProducerTest {
 
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(5)
-            .concurrency(new Concurrency(1))
             .build();
 
         nodesBuilder.addNode(0);

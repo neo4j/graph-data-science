@@ -166,7 +166,6 @@ public class GraphSampleConstructor {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(concurrency)
             .maxOriginalId(inputGraph.highestOriginalId())
-            .hasProperties(false)
             .hasLabelInformation(hasLabelInformation)
             .deduplicateIds(false)
             .build();

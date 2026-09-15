@@ -308,7 +308,6 @@ class TransientCsrListTest {
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .nodeCount(nodeCount)
                 .maxOriginalId(nodeCount)
-                .hasLabelInformation(false)
                 .build();
 
             for (int i = 0; i < nodeCount; i++) {

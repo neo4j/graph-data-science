@@ -77,7 +77,6 @@ class LargeIntersectingTriangleCountTest {
 
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
-            .concurrency(new Concurrency(1))
             .build();
 
         for (var nodeId = 0; nodeId < nodeCount; ++nodeId) {

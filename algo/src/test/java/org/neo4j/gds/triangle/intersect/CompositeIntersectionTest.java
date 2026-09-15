@@ -27,7 +27,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -110,7 +109,6 @@ final class CompositeIntersectionTest {
         Random random = new Random(0);
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(2 + DEGREE)
-            .concurrency(new Concurrency(1))
             .build();
 
         for (long i = 0; i < 3 + DEGREE; ++i) {

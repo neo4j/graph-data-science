@@ -68,7 +68,6 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(hasProperties)
             .deduplicateIds(false)
-            .usePooledBuilderProvider(false)
             .propertyState(propertyState)
             .build();
     }
