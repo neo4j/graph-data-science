@@ -34,6 +34,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.PostLoadETLHook;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -89,7 +90,7 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
-        boolean includeGraph,
+        Optional<Iterable<PostLoadETLHook>> postLoadETLHooks,
         Optional<GraphValidation> graphValidation,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
@@ -112,7 +113,7 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
                 graphParameters,
                 relationshipProperty,
                 graphStoreValidation,
-                includeGraph,
+                postLoadETLHooks,
                 graphValidation
             );
 
@@ -140,18 +141,19 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
-        boolean includeGraph,
+        Optional<Iterable<PostLoadETLHook>> postLoadETLHooks,
         Optional<GraphValidation> graphValidation
     ) {
         try (var ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
-            return graphStoreCatalogService.fetchGraphResources(
+            return graphStoreCatalogService.loadGraphResources(
                 databaseId,
                 graphName,
                 user,
                 graphParameters,
+                Optional.empty(),
                 relationshipProperty,
                 graphStoreValidation,
-                includeGraph,
+                postLoadETLHooks,
                 graphValidation
             );
         }

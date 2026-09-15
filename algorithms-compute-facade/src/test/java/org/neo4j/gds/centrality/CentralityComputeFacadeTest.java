@@ -40,7 +40,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.hits.HitsConfigImpl;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfigImpl;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.logging.Log;
@@ -50,7 +49,6 @@ import org.neo4j.gds.pagerank.PageRankConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -225,25 +223,6 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().iterations()).isBetween(1, 3);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void hits() {
-
-        var config = HitsConfigImpl.builder().concurrency(4).build();
-
-        var future = facade.hits(
-            inverseGraphStore,
-            config,
-            Set.of(),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().pregelResult().ranIterations()).isGreaterThan(0);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

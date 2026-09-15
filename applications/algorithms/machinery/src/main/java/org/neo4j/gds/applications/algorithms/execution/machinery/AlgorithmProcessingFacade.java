@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.core.loading.PostLoadETLHook;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -56,7 +57,7 @@ public interface AlgorithmProcessingFacade {
      * It is a lot. Should we apply <a href="https://refactoring.com/catalog/introduceParameterObject.html">Parameter Object</a>?
      * The important bit here is: keep this lifetime scoped, not request scoped;
      * use parameterisation, not constructor injection.
-     *
+     * </p>
      * And in the interest of practicality: since this is an interface for the purpose of decorating, let's have only this one method - less work decorating innit.
      * Convenience and overrides can live above.
      */
@@ -68,7 +69,7 @@ public interface AlgorithmProcessingFacade {
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
-        boolean includeGraph,
+        Optional<Iterable<PostLoadETLHook>> postLoadETLHooks,
         Optional<GraphValidation> graphValidation,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,

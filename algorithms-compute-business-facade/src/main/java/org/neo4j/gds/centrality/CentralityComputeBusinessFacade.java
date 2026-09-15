@@ -30,17 +30,11 @@ import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
-import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.degree.DegreeCentralityResult;
-import org.neo4j.gds.hits.HitsCompanion;
-import org.neo4j.gds.hits.HitsConfig;
-import org.neo4j.gds.hits.HitsResultWithGraph;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
@@ -250,42 +244,6 @@ public class CentralityComputeBusinessFacade {
         return computeFacade.eigenVector(
             graph,
             config,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> hits(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        HitsConfig hitsConfig,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<HitsResultWithGraph>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidationBuilder()
-                .withValidationRule(new PregelPropertiesRequirement(hitsConfig.writeProperty()))
-                .withValidationRule(new DirectedOnlyRequirement("Hits"))
-                .build(),
-            false,
-            null
-        );
-        var graphStore = graphResources.graphStore();
-        var relTypes = HitsCompanion.relationshipsWithoutIndices(
-            graphStore,
-            hitsConfig.internalRelationshipTypes(graphStore)
-        );
-
-        return computeFacade.hits(
-            graphStore,
-            hitsConfig,
-            relTypes,
             jobId,
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));

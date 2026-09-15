@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.loading.PostLoadETLHook;
 import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.mem.MemoryEstimation;
 
@@ -66,7 +67,7 @@ public class LaunchConvenience {
         GraphName graphName,
         CONFIGURATION configuration,
         Iterable<ValidationRule> algorithmSpecificValidationRules,
-        boolean includeGraph,
+        Optional<Iterable<PostLoadETLHook>> postLoadETLHooks,
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,
@@ -85,7 +86,7 @@ public class LaunchConvenience {
             configuration.toGraphParameters(),
             Optional.empty(), // simple basic convenience here
             graphStoreValidation,
-            includeGraph,
+            postLoadETLHooks,
             Optional.empty(), // or make this a DISABLED
             constructAndRun,
             configuration,

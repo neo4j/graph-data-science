@@ -55,7 +55,6 @@ import org.neo4j.gds.pagerank.EigenvectorWriteConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
@@ -64,7 +63,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CEL
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HITS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
@@ -72,7 +70,6 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final InstrumentedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteNodePropertyService writeNodePropertyService;
-    private final HitsHookGenerator hitsHookGenerator;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
     private final Synchroniser synchroniser;
 
@@ -81,7 +78,6 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         InstrumentedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteNodePropertyService writeNodePropertyService,
-        HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
         Synchroniser synchroniser
     ) {
@@ -89,7 +85,6 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeNodePropertyService = writeNodePropertyService;
-        this.hitsHookGenerator = hitsHookGenerator;
         this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
         this.synchroniser = synchroniser;
     }
@@ -101,7 +96,6 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         InstrumentedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
         Synchroniser synchroniser
     ) {
@@ -112,7 +106,6 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             algorithms,
             algorithmProcessingTemplateConvenience,
             writeToDatabase,
-            hitsHookGenerator,
             centralityAlgorithmsBusinessFacade,
             synchroniser
         );
@@ -323,20 +316,11 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration.writeProperty()
         );
 
-        var hitsETLHook = hitsHookGenerator.createETLHook(configuration);
-
-        return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
             graphName,
             configuration,
-            HITS,
-            estimationFacade::hits,
-            (graph, __) -> algorithms.hits(graph, configuration),
-            writeStep,
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(List.of(hitsETLHook))
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
-
 }

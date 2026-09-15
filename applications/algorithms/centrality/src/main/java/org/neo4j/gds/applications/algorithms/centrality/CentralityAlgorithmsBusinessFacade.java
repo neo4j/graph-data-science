@@ -19,21 +19,25 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
+import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
+import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.Set;
@@ -45,19 +49,39 @@ import java.util.concurrent.CompletableFuture;
  * because anything else would be duplication.
  * Side effects and result rendering behaviours get injected as parameters.
  */
-public class CentralityAlgorithmsBusinessFacade {
+public final class CentralityAlgorithmsBusinessFacade {
     private final InstrumentedCentralityAlgorithms algorithms;
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
+    private final HitsHookGenerator hitsHookGenerator;
 
-    public CentralityAlgorithmsBusinessFacade(
+    private CentralityAlgorithmsBusinessFacade(
         InstrumentedCentralityAlgorithms algorithms,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        LaunchConvenience launchConvenience
+        LaunchConvenience launchConvenience,
+        HitsHookGenerator hitsHookGenerator
     ) {
         this.algorithms = algorithms;
         this.estimationFacade = estimationFacade;
         this.launchConvenience = launchConvenience;
+        this.hitsHookGenerator = hitsHookGenerator;
+    }
+
+    public static CentralityAlgorithmsBusinessFacade create(
+        InstrumentedCentralityAlgorithms algorithms,
+        CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
+        LaunchConvenience launchConvenience,
+        ProgressTrackerCreator progressTrackerCreator,
+        TerminationFlag terminationFlag
+    ) {
+        var hitsHookGenerator = new HitsHookGenerator(progressTrackerCreator, terminationFlag);
+
+        return new CentralityAlgorithmsBusinessFacade(
+            algorithms,
+            estimationFacade,
+            launchConvenience,
+            hitsHookGenerator
+        );
     }
 
     public <RESULT, METADATA> CompletableFuture<RESULT> articulationPoints(
@@ -71,7 +95,7 @@ public class CentralityAlgorithmsBusinessFacade {
             graphName,
             configuration,
             Set.of(new UndirectedOnlyRequirement("Articulation Points")),
-            true,
+            Optional.empty(),
             (graph, __) -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
             AlgorithmLabel.ArticulationPoints,
@@ -91,7 +115,7 @@ public class CentralityAlgorithmsBusinessFacade {
             graphName,
             configuration,
             Set.of(new UndirectedOnlyRequirement("Bridges")),
-            true,
+            Optional.empty(),
             (graph, __) -> algorithms.bridges(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.bridges(shouldComputeComponents),
             AlgorithmLabel.Bridges,
@@ -110,10 +134,35 @@ public class CentralityAlgorithmsBusinessFacade {
             graphName,
             configuration,
             Set.of(ValidationRule.EMPTY),
-            true,
+            Optional.empty(),
             (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
             AlgorithmLabel.HarmonicCentrality,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> hits(
+        GraphName graphName,
+        HitsConfig configuration,
+        Optional<SideEffect<PregelResult, METADATA>> sideEffect,
+        ResultRenderer<PregelResult, RESULT, METADATA> resultRenderer
+    ) {
+        // the hook creates inverse indexes
+        var etlHook = hitsHookGenerator.createETLHook(configuration);
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            Set.of(
+                new PregelPropertiesRequirement(configuration.writeProperty()),
+                new DirectedOnlyRequirement("Hits")
+            ),
+            Optional.of(Set.of(etlHook)),
+            (graph, __) -> algorithms.hits(graph, configuration),
+            estimationFacade::hits,
+            AlgorithmLabel.HITS,
             sideEffect,
             resultRenderer
         );

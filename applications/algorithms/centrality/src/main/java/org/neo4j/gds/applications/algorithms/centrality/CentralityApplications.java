@@ -28,7 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 
 public final class CentralityApplications {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
@@ -55,7 +55,7 @@ public final class CentralityApplications {
     }
 
     public static CentralityApplications create(
-        Log log,
+        GdsLoggers loggers,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate estimationTemplate,
@@ -67,13 +67,14 @@ public final class CentralityApplications {
         var algorithms = new CentralityAlgorithms(requestScopedDependencies.terminationFlag());
         var instrumentedAlgorithms = new InstrumentedCentralityAlgorithms(algorithms, progressTrackerCreator);
         var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
-        var hitsHookGenerator = new HitsHookGenerator(progressTrackerCreator,requestScopedDependencies.terminationFlag());
-        var raw = new CentralityAlgorithmsBusinessFacade(
+        var raw = CentralityAlgorithmsBusinessFacade.create(
             instrumentedAlgorithms,
             estimation,
-            launchConvenience
+            launchConvenience,
+            progressTrackerCreator,
+            requestScopedDependencies.terminationFlag()
         );
-        var completionConvenience = new CompletionConvenience(log);
+        var completionConvenience = new CompletionConvenience(loggers.log());
         var synchroniser = new Synchroniser(completionConvenience);
 
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
@@ -81,7 +82,6 @@ public final class CentralityApplications {
             instrumentedAlgorithms,
             algorithmProcessingTemplateConvenience,
             mutateNodePropertyService,
-            hitsHookGenerator,
             raw,
             synchroniser
         );
@@ -90,7 +90,6 @@ public final class CentralityApplications {
             estimation,
             instrumentedAlgorithms,
             algorithmProcessingTemplateConvenience,
-            hitsHookGenerator,
             raw,
             synchroniser
         );
@@ -99,19 +98,17 @@ public final class CentralityApplications {
             estimation,
             instrumentedAlgorithms,
             algorithmProcessingTemplateConvenience,
-            hitsHookGenerator,
             raw,
             synchroniser
         );
 
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
-            log,
+            loggers.log(),
             requestScopedDependencies,
             writeContext,
             estimation,
             instrumentedAlgorithms,
             algorithmProcessingTemplateConvenience,
-            hitsHookGenerator,
             raw,
             synchroniser
         );

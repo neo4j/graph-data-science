@@ -127,7 +127,34 @@ public class GraphStoreCatalogService {
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
-        boolean includeGraph,
+        boolean includeGraph, // always true but don't change now
+        Optional<GraphValidation> graphValidation
+    ) {
+        return loadGraphResources(
+            databaseId,
+            graphName,
+            user,
+            graphParameters,
+            Optional.empty(),
+            relationshipProperty,
+            graphStoreValidation,
+            Optional.empty(),
+            graphValidation
+        );
+    }
+
+    /**
+     * Load graph store and graph, under validation and ETL
+     */
+    public GraphResources loadGraphResources(
+        DatabaseId databaseId,
+        GraphName graphName,
+        User user,
+        GraphParameters graphParameters,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<String> relationshipProperty,
+        GraphStoreValidation graphStoreValidation,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Optional<GraphValidation> graphValidation
     ) {
         var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
@@ -139,6 +166,8 @@ public class GraphStoreCatalogService {
 
         var graphStore = graphStoreCatalogEntry.graphStore();
 
+        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraphStore(graphStore, hooks));
+
         var nodeLabels = GraphStoreCatalogService.resolveNodeLabels(graphStore, graphParameters.nodeLabelsFilter());
         var relationshipTypes = GraphStoreCatalogService.resolveRelationshipTypes(
             graphStore,
@@ -148,7 +177,7 @@ public class GraphStoreCatalogService {
 
         graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
 
-        if (!includeGraph) return new GraphResources(graphStore, null, graphStoreCatalogEntry.resultStore());
+        postGraphStoreLoadETLHooks.ifPresent(postLoadETLHooks -> extractAndTransform(graphStore, postLoadETLHooks));
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
 

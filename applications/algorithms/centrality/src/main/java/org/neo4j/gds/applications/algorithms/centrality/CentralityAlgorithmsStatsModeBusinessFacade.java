@@ -41,7 +41,6 @@ import org.neo4j.gds.pagerank.EigenvectorStatsConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
@@ -50,14 +49,12 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CEL
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HITS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final InstrumentedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final HitsHookGenerator hitsHookGenerator;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
     private final Synchroniser synchroniser;
 
@@ -65,14 +62,12 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         InstrumentedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
         Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.hitsHookGenerator = hitsHookGenerator;
         this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
         this.synchroniser = synchroniser;
     }
@@ -214,20 +209,11 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
         HitsConfig configuration,
         StatsResultBuilder<PregelResult, RESULT> resultBuilder
     ) {
-        var hitsETLHook = hitsHookGenerator.createETLHook(configuration);
-
-        return algorithmProcessingTemplateConvenience.processAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
             graphName,
             configuration,
-            HITS,
-            estimationFacade::hits,
-            (graph, __) -> algorithms.hits(graph, configuration),
-            resultBuilder,
             Optional.empty(),
-            Optional.of(List.of(hitsETLHook)),
-            Optional.empty()
-        );
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
-
-
 }

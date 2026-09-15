@@ -57,7 +57,6 @@ import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
@@ -66,7 +65,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CEL
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HITS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.IndirectExposure;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
@@ -75,7 +73,6 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final InstrumentedCentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
-    private final HitsHookGenerator hitsHookGenerator;
     private final CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade;
     private final Synchroniser synchroniser;
 
@@ -84,7 +81,6 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         InstrumentedCentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodePropertyService,
-        HitsHookGenerator hitsHookGenerator,
         CentralityAlgorithmsBusinessFacade centralityAlgorithmsBusinessFacade,
         Synchroniser synchroniser
     ) {
@@ -92,7 +88,6 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.hitsHookGenerator = hitsHookGenerator;
         this.centralityAlgorithmsBusinessFacade = centralityAlgorithmsBusinessFacade;
         this.synchroniser = synchroniser;
     }
@@ -298,20 +293,12 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration.mutateProperty(),
             configuration.nodeLabels()
         );
-        var hook = hitsHookGenerator.createETLHook(configuration);
-        return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
+
+        return synchroniser.synchronise(() -> centralityAlgorithmsBusinessFacade.hits(
             graphName,
             configuration,
-            HITS,
-            estimation::hits,
-            (graph, __) -> algorithms.hits(graph, configuration),
-            mutateStep,
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(List.of(hook))
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
-
-
 }

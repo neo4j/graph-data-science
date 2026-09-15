@@ -21,9 +21,7 @@ package org.neo4j.gds.centrality;
 
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.CentralityAlgorithmTasks;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
@@ -41,11 +39,6 @@ import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.degree.DegreeCentralityResult;
-import org.neo4j.gds.hits.Hits;
-import org.neo4j.gds.hits.HitsConfig;
-import org.neo4j.gds.hits.HitsResultWithGraph;
-import org.neo4j.gds.hits.HitsWithInvertedIndexValidation;
-import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.indirectExposure.IndirectExposure;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
@@ -66,7 +59,6 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 import static org.neo4j.gds.pagerank.PageRankVariant.ARTICLE_RANK;
@@ -363,48 +355,6 @@ public class CentralityComputeFacade {
             configuration,
             mappedSourceNodes,
             degreeFunction
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<HitsResultWithGraph>> hits(
-        GraphStore graphStore,
-        HitsConfig configuration,
-        Collection<RelationshipType> relationshipTypesWithoutIndex,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        var inverseRelationshipsParameters = new InverseRelationshipsParameters(
-            configuration.concurrency(),
-            relationshipTypesWithoutIndex
-        );
-
-        var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.hits(graphStore, configuration, inverseRelationshipsParameters),
-            jobId,
-            configuration.concurrency(),
-            logProgress
-        );
-
-        var hits = new HitsWithInvertedIndexValidation(
-            progressTracker,
-            terminationFlag,
-            inverseRelationshipsParameters,
-            graphStore,
-            configuration.nodeLabelsFilter(),
-            configuration.internalRelationshipTypes(graphStore),
-            (graph -> new Hits(
-                graph,
-                configuration,
-                DefaultPool.INSTANCE,
-                progressTracker,
-                terminationFlag
-            ))
-        );
-
-        return algorithmCaller.run(
-            hits::compute,
-            jobId
         );
     }
 

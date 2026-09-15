@@ -54,6 +54,29 @@ class MemoryChecker {
         CONFIGURATION configuration,
         ConstructAndRun<RESULT> constructAndRun
     ) {
+        checkMemory(graphResources, estimationSupplier, dimensionTransformer, user, label, configuration);
+
+        var graphId = GraphId.from(graphResources.graph());
+
+        return metricsRecorder.recordMetricsAndRunAlgorithm(
+            timingsBuilder,
+            graphId,
+            label,
+            configuration,
+            constructAndRun,
+            graphResources.graph(),
+            graphResources.graphStore()
+        );
+    }
+
+    private <CONFIGURATION extends AlgoBaseConfig> void checkMemory(
+        GraphResources graphResources,
+        Supplier<MemoryEstimation> estimationSupplier,
+        DimensionTransformer dimensionTransformer,
+        User user,
+        Label label,
+        CONFIGURATION configuration
+    ) {
         try {
             memoryGuard.assertAlgorithmCanRun(
                 graphResources.graph(),
@@ -70,17 +93,5 @@ class MemoryChecker {
         } catch (MemoryGuardException e) {
             MemoryGuardExceptionTransformer.throwAsIllegalStateException(e);
         }
-
-        var graphId = GraphId.from(graphResources.graph());
-
-        return metricsRecorder.recordMetricsAndRunAlgorithm(
-            timingsBuilder,
-            graphId,
-            label,
-            configuration,
-            constructAndRun,
-            graphResources.graph(),
-            graphResources.graphStore()
-        );
     }
 }
