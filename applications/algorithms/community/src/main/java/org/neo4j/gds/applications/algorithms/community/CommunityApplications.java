@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
+import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
@@ -30,6 +32,7 @@ import org.neo4j.gds.logging.Log;
 public final class CommunityApplications {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CommunityAlgorithmsMutateModeBusinessFacade mutation;
+    private final InstrumentedCommunityAlgorithms raw;
     private final CommunityAlgorithmsStatsModeBusinessFacade stats;
     private final CommunityAlgorithmsStreamModeBusinessFacade stream;
     private final CommunityAlgorithmsWriteModeBusinessFacade write;
@@ -37,12 +40,14 @@ public final class CommunityApplications {
     private CommunityApplications(
         CommunityAlgorithmsEstimationModeBusinessFacade estimation,
         CommunityAlgorithmsMutateModeBusinessFacade mutation,
+        InstrumentedCommunityAlgorithms raw,
         CommunityAlgorithmsStatsModeBusinessFacade stats,
         CommunityAlgorithmsStreamModeBusinessFacade stream,
         CommunityAlgorithmsWriteModeBusinessFacade write
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
+        this.raw = raw;
         this.stats = stats;
         this.stream = stream;
         this.write = write;
@@ -53,15 +58,14 @@ public final class CommunityApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        LaunchConvenience launchConvenience,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
-        MutateNodePropertyService mutateNodePropertyService
+        MutateNodePropertyService mutateNodePropertyService,
+        Synchroniser synchroniser
     ) {
         var estimation = new CommunityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
-        var algorithms = new CommunityAlgorithms(
-            log,
-            requestScopedDependencies.terminationFlag()
-        );
+        var algorithms = new CommunityAlgorithms(log, requestScopedDependencies.terminationFlag());
         var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
             log,
             algorithms,
@@ -73,6 +77,15 @@ public final class CommunityApplications {
             algorithmProcessingTemplateConvenience,
             mutateNodePropertyService
         );
+        var trackedCommunityAlgorithms = new TrackedCommunityAlgorithms(
+            progressTrackerCreator,
+            algorithms
+        );
+        var raw = new InstrumentedCommunityAlgorithms(
+            trackedCommunityAlgorithms,
+            estimation,
+            launchConvenience
+        );
         var stats = new CommunityAlgorithmsStatsModeBusinessFacade(
             estimation,
             algorithmsBusinessFacade,
@@ -81,7 +94,9 @@ public final class CommunityApplications {
         var stream = new CommunityAlgorithmsStreamModeBusinessFacade(
             estimation,
             algorithmsBusinessFacade,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            raw,
+            synchroniser
         );
         var write = CommunityAlgorithmsWriteModeBusinessFacade.create(
             log,
@@ -91,8 +106,7 @@ public final class CommunityApplications {
             algorithmsBusinessFacade,
             algorithmProcessingTemplateConvenience
         );
-
-        return new CommunityApplications(estimation, mutation, stats, stream, write);
+        return new CommunityApplications(estimation, mutation, raw, stats, stream, write);
     }
 
     public CommunityAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -101,6 +115,10 @@ public final class CommunityApplications {
 
     public CommunityAlgorithmsMutateModeBusinessFacade mutate() {
         return mutation;
+    }
+
+    public InstrumentedCommunityAlgorithms raw() {
+        return raw;
     }
 
     public CommunityAlgorithmsStatsModeBusinessFacade stats() {

@@ -29,9 +29,6 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.conductance.ConductanceBaseConfig;
-import org.neo4j.gds.conductance.ConductanceConfigTransformer;
-import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.Labels;
@@ -97,15 +94,6 @@ public class CommunityAlgorithmsBusinessFacade {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.cliqueCounting(graph, params, progressTracker),
-            progressTracker, true);
-    }
-
-    ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.conductance(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        var params = ConductanceConfigTransformer.toParameters(configuration);
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.conductance(graph, params, progressTracker),
             progressTracker, true);
     }
 

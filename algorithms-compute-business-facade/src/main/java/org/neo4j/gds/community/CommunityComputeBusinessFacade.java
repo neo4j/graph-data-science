@@ -32,8 +32,6 @@ import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.community.validation.MinCommunitySizeSumRequirement;
 import org.neo4j.gds.community.validation.TriangleCountGraphStoreRequirements;
-import org.neo4j.gds.conductance.ConductanceParameters;
-import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
@@ -152,36 +150,6 @@ public class CommunityComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.cliqueCounting(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> conductance(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        ConductanceParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<ConductanceResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidation(new NodePropertyMustExistOnAnyLabel(parameters.communityProperty())),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.conductance(
             graph,
             parameters,
             jobId,

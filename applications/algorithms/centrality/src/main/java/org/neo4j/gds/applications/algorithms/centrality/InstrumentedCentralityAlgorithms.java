@@ -94,6 +94,7 @@ public final class InstrumentedCentralityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Set.of(new UndirectedOnlyRequirement("Articulation Points")),
             Optional.empty(),
             (graph, __) -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
@@ -114,6 +115,7 @@ public final class InstrumentedCentralityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Set.of(new UndirectedOnlyRequirement("Bridges")),
             Optional.empty(),
             (graph, __) -> algorithms.bridges(graph, configuration, shouldComputeComponents),
@@ -133,6 +135,7 @@ public final class InstrumentedCentralityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Set.of(ValidationRule.EMPTY),
             Optional.empty(),
             (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
@@ -155,6 +158,7 @@ public final class InstrumentedCentralityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
+            configuration.relationshipWeightProperty(),
             Set.of(
                 new PregelPropertiesRequirement(configuration.writeProperty()),
                 new DirectedOnlyRequirement("Hits")

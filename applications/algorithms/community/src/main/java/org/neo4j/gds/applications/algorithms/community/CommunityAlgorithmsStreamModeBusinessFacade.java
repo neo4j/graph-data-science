@@ -20,16 +20,18 @@
 package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanStreamConfig;
 import org.neo4j.gds.hdbscan.Labels;
@@ -59,11 +61,11 @@ import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Conductance;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HDBScan;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
@@ -84,15 +86,21 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CommunityAlgorithmsBusinessFacade algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
+    private final InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms;
+    private final Synchroniser synchroniser;
 
     CommunityAlgorithmsStreamModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CommunityAlgorithmsBusinessFacade algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
+        InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
+        this.instrumentedCommunityAlgorithms = instrumentedCommunityAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> Stream<RESULT> approximateMaximumKCut(
@@ -127,17 +135,15 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> conductance(
         GraphName graphName,
-        ConductanceStreamConfig configuration,
-        StreamResultBuilder<ConductanceResult, RESULT> streamResultBuilder
+        ConductanceBaseConfig configuration,
+        StreamResultBuilder<ConductanceResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.conductance(
             graphName,
             configuration,
-            Conductance,
-            estimationFacade::conductance,
-            (graph, __) -> algorithms.conductance(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> k1Coloring(

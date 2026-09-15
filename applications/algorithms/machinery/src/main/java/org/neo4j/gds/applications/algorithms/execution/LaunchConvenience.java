@@ -56,8 +56,8 @@ public class LaunchConvenience {
 
     /**
      * This is currently the most specific convenience needed thus far.
-     * It does no relationship override, no graph validation, no dimension transformer.
-     * It does do graph store validation and side effects, however.
+     * It does no graph validation, no dimension transformer.
+     * It does do relationship override, graph store validation and side effects, however.
      * There will be other convenience methods, and we can manage them over time to be overloads of this one,
      * to avoid duplication.
      * <p>
@@ -66,8 +66,9 @@ public class LaunchConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
+        Optional<String> relationshipProperty, // only used by conductance thus far
         Iterable<ValidationRule> algorithmSpecificValidationRules,
-        Optional<Iterable<PostLoadETLHook>> postLoadETLHooks,
+        Optional<Iterable<PostLoadETLHook>> postLoadETLHooks, // only used by hits thus far
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,
@@ -84,7 +85,7 @@ public class LaunchConvenience {
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.user(),
             configuration.toGraphParameters(),
-            Optional.empty(), // simple basic convenience here
+            relationshipProperty,
             graphStoreValidation,
             postLoadETLHooks,
             Optional.empty(), // or make this a DISABLED

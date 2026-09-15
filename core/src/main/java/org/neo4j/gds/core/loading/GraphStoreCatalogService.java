@@ -74,7 +74,10 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.get(catalogRequest, graphName.value());
     }
 
-
+    /**
+     * @deprecated migrate to {@link org.neo4j.gds.core.loading.GraphStoreCatalogService#loadGraphResources}
+     */
+    @Deprecated
     public GraphResources getGraphResources(
         GraphName graphName,
         GraphParameters graphParameters,
@@ -120,6 +123,10 @@ public class GraphStoreCatalogService {
         return getGraphStoreCatalogEntry(CatalogRequest.of(user, databaseId, usernameOverride), graphName);
     }
 
+    /**
+     * @deprecated get rid
+     */
+    @Deprecated
     public GraphResources fetchGraphResources(
         DatabaseId databaseId,
         GraphName graphName,

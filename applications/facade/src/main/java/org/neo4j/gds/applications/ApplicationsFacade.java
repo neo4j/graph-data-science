@@ -22,8 +22,10 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
 import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
+import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProcessingFacade;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningApplications;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
@@ -128,6 +130,9 @@ public final class ApplicationsFacade {
         var mutateNodeProperty = new MutateNodePropertyService(loggers.log());
         var mutateRelationshipService = new MutateRelationshipService(loggers.log());
 
+        var completionConvenience = new CompletionConvenience(loggers.log());
+        var synchroniser = new Synchroniser(completionConvenience);
+
         var centralityApplications = CentralityApplications.create(
             loggers,
             requestScopedDependencies,
@@ -136,7 +141,8 @@ public final class ApplicationsFacade {
             launchConvenience,
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
-            mutateNodeProperty
+            mutateNodeProperty,
+            synchroniser
         );
 
         var communityApplications = CommunityApplications.create(
@@ -144,9 +150,11 @@ public final class ApplicationsFacade {
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
+            launchConvenience,
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
-            mutateNodeProperty
+            mutateNodeProperty,
+            synchroniser
         );
 
         var graphCatalogApplications = createGraphCatalogApplications(

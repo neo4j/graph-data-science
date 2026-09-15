@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import org.neo4j.gds.applications.algorithms.execution.CompletionConvenience;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
@@ -62,7 +61,8 @@ public final class CentralityApplications {
         LaunchConvenience launchConvenience,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
-        MutateNodePropertyService mutateNodePropertyService
+        MutateNodePropertyService mutateNodePropertyService,
+        Synchroniser synchroniser
     ) {
         var algorithms = new CentralityAlgorithms(requestScopedDependencies.terminationFlag());
         var trackedAlgorithms = new TrackedCentralityAlgorithms(algorithms, progressTrackerCreator);
@@ -74,8 +74,6 @@ public final class CentralityApplications {
             progressTrackerCreator,
             requestScopedDependencies.terminationFlag()
         );
-        var completionConvenience = new CompletionConvenience(loggers.log());
-        var synchroniser = new Synchroniser(completionConvenience);
 
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,
