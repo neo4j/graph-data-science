@@ -288,7 +288,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration.writeProperty(),
             configuration.writeConcurrency(),
             configuration::resolveResultStore,
-            ArticleRank
+            PageRank
         );
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
