@@ -29,10 +29,13 @@ import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
+import org.neo4j.gds.triangle.TriangleResult;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 /**
  * Community algorithms in all modes need to go through here, lest we have duplication.
@@ -87,6 +90,26 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __) -> algorithms.modularity(graph, configuration),
             estimationFacade::modularity,
             AlgorithmLabel.Modularity,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> triangles(
+        GraphName graphName,
+        TriangleCountBaseConfig configuration,
+        Optional<SideEffect<Stream<TriangleResult>, METADATA>> sideEffect,
+        ResultRenderer<Stream<TriangleResult>, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            Optional.empty(),
+            Set.of(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
+            Optional.empty(),
+            (graph, __) -> algorithms.triangles(graph, configuration),
+            estimationFacade::triangles,
+            AlgorithmLabel.Triangles,
             sideEffect,
             resultRenderer
         );

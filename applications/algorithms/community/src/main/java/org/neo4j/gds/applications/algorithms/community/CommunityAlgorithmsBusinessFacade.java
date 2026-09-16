@@ -53,10 +53,7 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
-
-import java.util.stream.Stream;
 
 public class CommunityAlgorithmsBusinessFacade {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
@@ -201,10 +198,6 @@ public class CommunityAlgorithmsBusinessFacade {
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.triangleCount(graph, params, progressTracker),
             progressTracker, true);
-    }
-
-    Stream<TriangleResult> triangles(Graph graph, TriangleCountBaseConfig configuration) {
-        return algorithms.triangles(graph, configuration.toParameters());
     }
 
     public DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {

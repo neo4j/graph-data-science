@@ -78,14 +78,11 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.triangle.TriangleResult;
-import org.neo4j.gds.triangle.TriangleStream;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 public class CommunityComputeFacade {
     private final Log log;
@@ -563,29 +560,6 @@ public class CommunityComputeFacade {
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
-    }
-
-    CompletableFuture<TimedAlgorithmResult<Stream<TriangleResult>>> triangles(
-        Graph graph,
-        TriangleCountParameters parameters,
-        JobId jobId
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Stream.empty()));
-        }
-
-        var algorithm = TriangleStream.create(
-            terminationFlag, graph,
-            DefaultPool.INSTANCE,
-            parameters.concurrency(),
-            parameters.labelFilter()
         );
 
         return algorithmCaller.run(

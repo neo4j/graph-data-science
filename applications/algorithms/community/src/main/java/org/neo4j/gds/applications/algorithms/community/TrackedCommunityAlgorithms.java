@@ -28,6 +28,10 @@ import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
+import org.neo4j.gds.triangle.TriangleResult;
+
+import java.util.stream.Stream;
 
 class TrackedCommunityAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
@@ -57,5 +61,9 @@ class TrackedCommunityAlgorithms {
 
     ModularityResult modularity(Graph graph, ModularityBaseConfig configuration) {
         return algorithms.modularity(graph, configuration.toParameters());
+    }
+
+    Stream<TriangleResult> triangles(Graph graph, TriangleCountBaseConfig configuration) {
+        return algorithms.triangles(graph, configuration.toParameters());
     }
 }

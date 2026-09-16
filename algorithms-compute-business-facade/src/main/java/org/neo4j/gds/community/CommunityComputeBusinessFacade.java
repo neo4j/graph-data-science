@@ -31,7 +31,6 @@ import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.community.validation.MinCommunitySizeSumRequirement;
-import org.neo4j.gds.community.validation.TriangleCountGraphStoreRequirements;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
@@ -67,13 +66,11 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 public class CommunityComputeBusinessFacade {
 
@@ -519,33 +516,6 @@ public class CommunityComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
-    public <TR> CompletableFuture<TR> triangles(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        TriangleCountParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<Stream<TriangleResult>>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidation(TriangleCountGraphStoreRequirements.create(parameters.labelFilter())),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.triangles(
-            graph,
-            parameters,
-            jobId
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
     public <TR> CompletableFuture<TR> wcc(
         GraphName graphName,
         GraphParameters graphParameters,
@@ -575,6 +545,4 @@ public class CommunityComputeBusinessFacade {
 
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
-
-
 }
