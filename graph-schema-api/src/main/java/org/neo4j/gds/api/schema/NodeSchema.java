@@ -96,8 +96,16 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
         return entries.keySet();
     }
 
+    public boolean isEmpty() {
+        return entries.isEmpty();
+    }
+
     public boolean containsOnlyAllNodesLabel() {
         return entries.keySet().equals(Set.of(NodeLabel.ALL_NODES));
+    }
+
+    public boolean containsOtherThanAllNodesLabel() {
+        return !(isEmpty() || containsOnlyAllNodesLabel());
     }
 
     public List<PropertySchema> allProperties() {

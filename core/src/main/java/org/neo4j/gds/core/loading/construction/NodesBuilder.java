@@ -64,12 +64,12 @@ public final class NodesBuilder implements NodesBuilderApi {
         long maxOriginalId,
         long maxIntermediateId,
         Concurrency concurrency,
-        NodesBuilderContext nodesBuilderContext,
         IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
-        boolean hasProperties,
         boolean deduplicateIds,
         boolean usePooledBuilderProvider,
+        NodesBuilderContext nodesBuilderContext,
+        boolean hasProperties,
         Function<String, PropertyState> propertyStates
     ) {
         this.maxOriginalId = maxOriginalId;

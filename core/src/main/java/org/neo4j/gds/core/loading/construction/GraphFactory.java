@@ -72,6 +72,7 @@ public final class GraphFactory {
 
     public static NodesBuilderBuilder initNodesBuilder() {
         return new NodesBuilderBuilder()
+            .nodeSchema(NodeSchema.empty())
             .concurrency(new Concurrency(1))
             .hasLabelInformation(false)
             .hasProperties(false)
@@ -85,7 +86,7 @@ public final class GraphFactory {
     static NodesBuilder nodesBuilder(
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount,
-        Optional<NodeSchema> nodeSchema,
+        NodeSchema nodeSchema,
         boolean hasLabelInformation,
         boolean hasProperties,
         boolean deduplicateIds,
@@ -94,8 +95,7 @@ public final class GraphFactory {
         String idMapBuilderType,
         boolean usePooledBuilderProvider
     ) {
-        hasLabelInformation = nodeSchema.map(ns -> !(ns.availableLabels().isEmpty() || ns.containsOnlyAllNodesLabel()))
-            .orElse(hasLabelInformation);
+        if (nodeSchema.containsOtherThanAllNodesLabel()) hasLabelInformation = true;
 
         // Make sure that we do not pass on negative values to the id map builders.
         maxOriginalId = maxOriginalId.filter(id -> id > 0);
@@ -127,51 +127,33 @@ public final class GraphFactory {
             }
         }
 
-        return nodeSchema.isPresent()
-            ? fromSchema(
-                maxOriginalNodeId,
-                maxIntermediateId,
-                idMapBuilder,
-                concurrency,
-                nodeSchema.get(),
-                hasLabelInformation,
-                deduplicateIds,
-                usePooledBuilderProvider
-            )
-            : new NodesBuilder(
-                maxOriginalNodeId,
-                maxIntermediateId,
-                concurrency,
-                NodesBuilderContext.lazy(concurrency),
-                idMapBuilder,
-                hasLabelInformation,
-                hasProperties,
-                deduplicateIds,
-                usePooledBuilderProvider,
-                __ -> propertyState
-            );
+        if (nodeSchema.isEmpty()) {
+            return new NodesBuilder(maxOriginalNodeId, maxIntermediateId, concurrency, idMapBuilder, hasLabelInformation, deduplicateIds, usePooledBuilderProvider, NodesBuilderContext.lazy(concurrency), hasProperties, __ -> propertyState);
+        } else {
+                  return fromSchema(maxOriginalNodeId, maxIntermediateId, concurrency, idMapBuilder, hasLabelInformation, deduplicateIds, usePooledBuilderProvider, nodeSchema);
+        }
     }
 
     private static NodesBuilder fromSchema(
         long maxOriginalId,
         long maxIntermediateId,
-        IdMapBuilder idMapBuilder,
         Concurrency concurrency,
-        NodeSchema nodeSchema,
+        IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
         boolean deduplicateIds,
-        boolean usePooledBuilderProvider
+        boolean usePooledBuilderProvider,
+        NodeSchema nodeSchema
     ) {
         return new NodesBuilder(
             maxOriginalId,
             maxIntermediateId,
             concurrency,
-            NodesBuilderContext.fixed(nodeSchema, concurrency),
             idMapBuilder,
             hasLabelInformation,
-            nodeSchema.hasProperties(),
             deduplicateIds,
             usePooledBuilderProvider,
+            NodesBuilderContext.fixed(nodeSchema, concurrency),
+            nodeSchema.hasProperties(),
             propertyKey -> nodeSchema.properties().get(propertyKey).state()
         );
     }
