@@ -188,6 +188,15 @@ public class CommunityAlgorithmsBusinessFacade {
             progressTracker, true);
     }
 
+    PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
+        var task = CommunityAlgorithmTasks.speakerListenerLPA(graph, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.speakerListenerLPA(graph, configuration, progressTracker),
+            progressTracker, true);
+    }
+
     public DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
         var task = CommunityAlgorithmTasks.wcc(graph, configuration.concurrency());
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
@@ -198,15 +207,6 @@ public class CommunityAlgorithmsBusinessFacade {
         var params = configuration.toParameters();
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.wcc(graph, params, progressTracker),
-            progressTracker, true);
-    }
-
-    PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
-        var task = CommunityAlgorithmTasks.speakerListenerLPA(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.speakerListenerLPA(graph, configuration, progressTracker),
             progressTracker, true);
     }
 }
