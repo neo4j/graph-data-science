@@ -71,7 +71,14 @@ public final class GraphFactory {
     private GraphFactory() {}
 
     public static NodesBuilderBuilder initNodesBuilder() {
-        return new NodesBuilderBuilder();
+        return new NodesBuilderBuilder()
+            .concurrency(new Concurrency(1))
+            .hasLabelInformation(false)
+            .hasProperties(false)
+            .deduplicateIds(true)
+            .idMapBuilderType(IdMap.NO_TYPE)
+            .propertyState(PropertyState.PERSISTENT)
+            .usePooledBuilderProvider(false);
     }
 
     @Builder.Factory
@@ -79,39 +86,32 @@ public final class GraphFactory {
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount,
         Optional<NodeSchema> nodeSchema,
-        Optional<Boolean> hasLabelInformation,
-        Optional<Boolean> hasProperties,
-        Optional<Boolean> deduplicateIds,
-        Optional<Concurrency> concurrency,
-        Optional<PropertyState> propertyState,
-        Optional<String> idMapBuilderType,
-        Optional<Boolean> usePooledBuilderProvider
+        boolean hasLabelInformation,
+        boolean hasProperties,
+        boolean deduplicateIds,
+        Concurrency concurrency,
+        PropertyState propertyState,
+        String idMapBuilderType,
+        boolean usePooledBuilderProvider
     ) {
-        boolean labelInformation = nodeSchema
-            .map(schema -> !(schema.availableLabels().isEmpty() || schema.containsOnlyAllNodesLabel()))
-            .or(() -> hasLabelInformation)
-            .orElse(false);
-        var threadCount = concurrency.orElse(new Concurrency(1));
+        hasLabelInformation = nodeSchema.map(ns -> !(ns.availableLabels().isEmpty() || ns.containsOnlyAllNodesLabel()))
+            .orElse(hasLabelInformation);
 
         // Make sure that we do not pass on negative values to the id map builders.
         maxOriginalId = maxOriginalId.filter(id -> id > 0);
 
         var idMapBehavior = IdMapBehaviorServiceProvider.idMapBehavior();
-
-        var idMapType = idMapBuilderType.orElse(IdMap.NO_TYPE);
         var idMapBuilder = idMapBehavior.create(
-            idMapType,
-            threadCount,
+            idMapBuilderType,
+            concurrency,
             maxOriginalId,
             nodeCount
         );
 
         long maxOriginalNodeId = maxOriginalId.orElse(NodesBuilder.UNKNOWN_MAX_ID);
-        boolean deduplicate = deduplicateIds.orElse(true);
-        boolean usePooled = usePooledBuilderProvider.orElse(false);
         long maxIntermediateId = maxOriginalNodeId;
 
-        if (ShardedIdMapBuilder.isShardedIdMapType(idMapType)) {
+        if (ShardedIdMapBuilder.isShardedIdMapType(idMapBuilderType)) {
             // If the requested id map is high limit, we need to make sure that
             // internal data structures are sized accordingly. Using the highest
             // original id will potentially fail due to size limitations.
@@ -119,7 +119,7 @@ public final class GraphFactory {
             // which is fine since label building relies on growing bitsets.
             maxIntermediateId = nodeCount.map(nc -> nc - 1).orElse(NodesBuilder.UNKNOWN_MAX_ID);
 
-            if (deduplicate) {
+            if (deduplicateIds) {
                 // We internally use HABS for deduplication, which is being initialized
                 // with max original id. This is fine for all id maps except high limit,
                 // where original ids can exceed the supported HABS range.
@@ -132,23 +132,23 @@ public final class GraphFactory {
                 maxOriginalNodeId,
                 maxIntermediateId,
                 idMapBuilder,
-                threadCount,
+                concurrency,
                 nodeSchema.get(),
-                labelInformation,
-                deduplicate,
-                usePooled
+                hasLabelInformation,
+                deduplicateIds,
+                usePooledBuilderProvider
             )
             : new NodesBuilder(
                 maxOriginalNodeId,
                 maxIntermediateId,
-                threadCount,
-                NodesBuilderContext.lazy(threadCount),
+                concurrency,
+                NodesBuilderContext.lazy(concurrency),
                 idMapBuilder,
-                labelInformation,
-                hasProperties.orElse(false),
-                deduplicate,
-                usePooled,
-                __ -> propertyState.orElse(PropertyState.PERSISTENT)
+                hasLabelInformation,
+                hasProperties,
+                deduplicateIds,
+                usePooledBuilderProvider,
+                __ -> propertyState
             );
     }
 

@@ -83,7 +83,7 @@ public final class RandomGraphGenerator {
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
     private final List<PropertyProducer<double[]>> relationshipPropertyProducers;
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers;
-    private final Optional<String> idMapBuilderType;
+    private final String idMapBuilderType;
     private final AdjacencyListBehavior.Factory adjacencyCompressorFactory;
     private final boolean forceDag;
     private final HugeLongArray randomDagMapping;
@@ -100,7 +100,7 @@ public final class RandomGraphGenerator {
         Aggregation aggregation,
         Direction direction,
         AllowSelfLoops allowSelfLoops,
-        Optional<String> idMapBuilderType,
+        String idMapBuilderType,
         AdjacencyListBehavior.Factory adjacencyCompressorFactory,
         boolean forceDag,
         boolean inverseIndex

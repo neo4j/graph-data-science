@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.generator;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
@@ -46,7 +47,7 @@ public class RandomGraphGeneratorBuilder {
     private Direction direction = Direction.DIRECTED;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
     private RelationshipType relationshipType = RelationshipType.of("REL");
-    private Optional<String> idMapBuilderType = Optional.empty();
+    private String idMapBuilderType = IdMap.NO_TYPE;
     private AdjacencyListBehavior.Factory adjacencyCompressorFactory = null;
     private boolean forceDag = false;
     private boolean inverseIndex = false;
@@ -124,7 +125,7 @@ public class RandomGraphGeneratorBuilder {
     }
 
     public RandomGraphGeneratorBuilder idMapBuilderType(String idMapBuilderType) {
-        this.idMapBuilderType = Optional.of(idMapBuilderType);
+        this.idMapBuilderType = idMapBuilderType;
         return this;
     }
 
