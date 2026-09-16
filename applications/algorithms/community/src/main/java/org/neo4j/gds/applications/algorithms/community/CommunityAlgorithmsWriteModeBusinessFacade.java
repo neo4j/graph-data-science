@@ -22,11 +22,14 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.WriteResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.WriteSideEffect;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutWriteConfig;
@@ -61,6 +64,8 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
+import java.util.Optional;
+
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
@@ -73,7 +78,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Lou
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.TriangleCount;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
@@ -81,17 +85,23 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     private final CommunityAlgorithmsBusinessFacade algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteNodePropertyService writeNodePropertyService;
+    private final InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms;
+    private final Synchroniser synchroniser;
 
     private CommunityAlgorithmsWriteModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CommunityAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteNodePropertyService writeNodePropertyService
+        WriteNodePropertyService writeNodePropertyService,
+        InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeNodePropertyService = writeNodePropertyService;
+        this.instrumentedCommunityAlgorithms = instrumentedCommunityAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public static CommunityAlgorithmsWriteModeBusinessFacade create(
@@ -100,7 +110,9 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         WriteContext writeContext,
         CommunityAlgorithmsEstimationModeBusinessFacade estimation,
         CommunityAlgorithmsBusinessFacade algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
+        InstrumentedCommunityAlgorithms raw,
+        Synchroniser synchroniser
     ) {
         var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
@@ -108,7 +120,9 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             estimation,
             algorithms,
             algorithmProcessingTemplateConvenience,
-            writeToDatabase
+            writeToDatabase,
+            raw,
+            synchroniser
         );
     }
 
@@ -335,15 +349,12 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new TriangleCountWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.triangleCount(
             graphName,
             configuration,
-            TriangleCount,
-            estimationFacade::triangleCount,
-            (graph, __) -> algorithms.triangleCount(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT wcc(

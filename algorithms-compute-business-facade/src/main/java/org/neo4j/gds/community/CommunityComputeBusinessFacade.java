@@ -64,8 +64,6 @@ import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
-import org.neo4j.gds.triangle.TriangleCountParameters;
-import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.List;
@@ -484,35 +482,6 @@ public class CommunityComputeBusinessFacade {
             config,
             jobId,
             logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> triangleCount(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        TriangleCountParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<TriangleCountResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidation(TriangleCountGraphStoreRequirements.create(parameters.labelFilter())),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.triangleCount(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 

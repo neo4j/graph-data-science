@@ -30,6 +30,7 @@ import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
+import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class InstrumentedCommunityAlgorithms {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
 
-    InstrumentedCommunityAlgorithms(
+    public InstrumentedCommunityAlgorithms(
         TrackedCommunityAlgorithms algorithms,
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience
@@ -110,6 +111,26 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __) -> algorithms.triangles(graph, configuration),
             estimationFacade::triangles,
             AlgorithmLabel.Triangles,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> triangleCount(
+        GraphName graphName,
+        TriangleCountBaseConfig configuration,
+        Optional<SideEffect<TriangleCountResult, METADATA>> sideEffect,
+        ResultRenderer<TriangleCountResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            Optional.empty(),
+            Set.of(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
+            Optional.empty(),
+            (graph, __) -> algorithms.triangleCount(graph, configuration),
+            estimationFacade::triangleCount,
+            AlgorithmLabel.TriangleCount,
             sideEffect,
             resultRenderer
         );

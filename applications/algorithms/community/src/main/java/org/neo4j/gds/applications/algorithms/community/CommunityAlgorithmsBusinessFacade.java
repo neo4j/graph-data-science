@@ -51,8 +51,6 @@ import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
-import org.neo4j.gds.triangle.TriangleCountBaseConfig;
-import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 public class CommunityAlgorithmsBusinessFacade {
@@ -187,16 +185,6 @@ public class CommunityAlgorithmsBusinessFacade {
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.scc(graph, progressTracker),
-            progressTracker, true);
-    }
-
-    TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.triangleCount(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        var params = configuration.toParameters();
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.triangleCount(graph, params, progressTracker),
             progressTracker, true);
     }
 

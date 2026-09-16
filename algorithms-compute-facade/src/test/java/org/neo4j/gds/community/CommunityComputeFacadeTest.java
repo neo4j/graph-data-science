@@ -52,7 +52,6 @@ import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
-import org.neo4j.gds.triangle.TriangleCountParameters;
 import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.List;
@@ -355,45 +354,6 @@ class CommunityComputeFacadeTest {
 
         assertThat(results.result().toArray()).hasSize(3);
         assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void triangleCount(){
-        var future = facade.triangleCount(
-            graph,
-            new TriangleCountParameters(
-                new Concurrency(4),
-                10,
-                List.of()
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().globalTriangles()).isEqualTo(1L);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void triangles() {
-        var future = facade.triangles(
-            graph,
-            new TriangleCountParameters(new Concurrency(4), 100,List.of()),
-            jobIdMock
-        );
-
-        var results = future.join();
-        long a = idFunction.of("a");
-        long b = idFunction.of("b");
-        long c = idFunction.of("c");
-
-        assertThat(results.result()).isNotEmpty()
-            .anySatisfy(r -> {
-                long[] triangleArray = new long[]{r.nodeA,r.nodeB,r.nodeC};
-                assertThat(triangleArray).containsExactlyInAnyOrder(a,b,c);
-            });
     }
 
     @Test

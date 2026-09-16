@@ -57,7 +57,6 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
@@ -77,8 +76,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Lou
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.TriangleCount;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Triangles;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -295,32 +292,28 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> triangleCount(
         GraphName graphName,
-        TriangleCountStreamConfig configuration,
-        StreamResultBuilder<TriangleCountResult, RESULT> streamResultBuilder
+        TriangleCountBaseConfig configuration,
+        StreamResultBuilder<TriangleCountResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.triangleCount(
             graphName,
             configuration,
-            TriangleCount,
-            estimationFacade::triangleCount,
-            (graph, __) -> algorithms.triangleCount(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> triangles(
         GraphName graphName,
         TriangleCountBaseConfig configuration,
-        StreamResultBuilder<Stream<TriangleResult>, RESULT> streamResultBuilder
+        StreamResultBuilder<Stream<TriangleResult>, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.triangles(
             graphName,
             configuration,
-            Triangles,
-            estimationFacade::triangles,
-            (graph, __) -> algorithms.triangles(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> wcc(

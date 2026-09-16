@@ -51,8 +51,8 @@ import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
@@ -69,7 +69,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Lou
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.TriangleCount;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
@@ -259,17 +258,15 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT triangleCount(
         GraphName graphName,
-        TriangleCountStatsConfig configuration,
+        TriangleCountBaseConfig configuration,
         StatsResultBuilder<TriangleCountResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.triangleCount(
             graphName,
             configuration,
-            TriangleCount,
-            estimationFacade::triangleCount,
-            (graph, __) -> communityAlgorithms.triangleCount(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT wcc(

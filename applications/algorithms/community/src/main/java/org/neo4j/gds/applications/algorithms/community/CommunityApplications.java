@@ -71,12 +71,6 @@ public final class CommunityApplications {
             algorithms,
             progressTrackerCreator
         );
-        var mutation = new CommunityAlgorithmsMutateModeBusinessFacade(
-            estimation,
-            algorithmsBusinessFacade,
-            algorithmProcessingTemplateConvenience,
-            mutateNodePropertyService
-        );
         var trackedCommunityAlgorithms = new TrackedCommunityAlgorithms(
             progressTrackerCreator,
             algorithms
@@ -85,6 +79,14 @@ public final class CommunityApplications {
             trackedCommunityAlgorithms,
             estimation,
             launchConvenience
+        );
+        var mutation = new CommunityAlgorithmsMutateModeBusinessFacade(
+            estimation,
+            algorithmsBusinessFacade,
+            algorithmProcessingTemplateConvenience,
+            mutateNodePropertyService,
+            raw,
+            synchroniser
         );
         var stats = new CommunityAlgorithmsStatsModeBusinessFacade(
             estimation,
@@ -106,7 +108,9 @@ public final class CommunityApplications {
             writeContext,
             estimation,
             algorithmsBusinessFacade,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            raw,
+            synchroniser
         );
         return new CommunityApplications(estimation, mutation, raw, stats, stream, write);
     }

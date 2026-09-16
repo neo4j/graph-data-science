@@ -22,8 +22,11 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.MutateSideEffect;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
@@ -76,6 +79,8 @@ import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
+import java.util.Optional;
+
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
@@ -88,7 +93,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Lou
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.TriangleCount;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
@@ -96,17 +100,23 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     private final CommunityAlgorithmsBusinessFacade algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
+    private final InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms;
+    private final Synchroniser synchroniser;
 
     public CommunityAlgorithmsMutateModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimation,
         CommunityAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodePropertyService mutateNodePropertyService
+        MutateNodePropertyService mutateNodePropertyService,
+        InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodePropertyService = mutateNodePropertyService;
+        this.instrumentedCommunityAlgorithms = instrumentedCommunityAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT approximateMaximumKCut(
@@ -349,17 +359,18 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         TriangleCountMutateConfig configuration,
         ResultBuilder<TriangleCountMutateConfig, TriangleCountResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new TriangleCountMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
+        var mutateStep = new TriangleCountMutateStep(
+            mutateNodePropertyService,
+            configuration.nodeLabels(),
+            configuration.mutateProperty()
+        );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.triangleCount(
             graphName,
             configuration,
-            TriangleCount,
-            estimation::triangleCount,
-            (graph, __) -> algorithms.triangleCount(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT wcc(

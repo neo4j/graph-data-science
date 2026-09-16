@@ -29,17 +29,18 @@ import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
+import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 
 import java.util.stream.Stream;
 
-class TrackedCommunityAlgorithms {
+public class TrackedCommunityAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final ProgressTrackerCreator progressTrackerCreator;
     private final CommunityAlgorithms algorithms;
 
-    TrackedCommunityAlgorithms(
+    public TrackedCommunityAlgorithms(
         ProgressTrackerCreator progressTrackerCreator,
         CommunityAlgorithms algorithms
     ) {
@@ -61,6 +62,18 @@ class TrackedCommunityAlgorithms {
 
     ModularityResult modularity(Graph graph, ModularityBaseConfig configuration) {
         return algorithms.modularity(graph, configuration.toParameters());
+    }
+
+    TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
+        var task = CommunityAlgorithmTasks.triangleCount(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var params = configuration.toParameters();
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.triangleCount(graph, params, progressTracker),
+            progressTracker,
+            true
+        );
     }
 
     Stream<TriangleResult> triangles(Graph graph, TriangleCountBaseConfig configuration) {
