@@ -482,7 +482,6 @@ Some that are mentioned here may be supported in the future, while others may ne
 
 The following graph catalog procedures are not supported:
 
-* `gds.graph.project`
 * `gds.graph.project.estimate`
 * `gds.graph.project.cypher`
 * `gds.graph.project.cypher.estimate`
@@ -500,7 +499,6 @@ After the session is deleted, all trained models will be lost.
 
 The following Machine Learning procedures are not supported:
 
-* `gds.model.publish`
 * `gds.splitRelationships`
 
 
