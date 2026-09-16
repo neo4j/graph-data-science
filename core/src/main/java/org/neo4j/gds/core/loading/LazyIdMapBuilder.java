@@ -66,9 +66,8 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             .idMapBuilderType(IdentityIdMap.Builder.ID)
             .concurrency(concurrency)
             .hasLabelInformation(hasLabelInformation)
-            .hasProperties(hasProperties)
             .deduplicateIds(false)
-            .propertyState(propertyState)
+            .propertyInfo(GraphFactory.PropertyInfo.of(hasProperties, propertyState))
             .build();
     }
 

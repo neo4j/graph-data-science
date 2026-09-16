@@ -27,7 +27,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -60,14 +59,44 @@ public final class NodesBuilder implements NodesBuilderApi {
 
     private final NodesBuilderContext nodesBuilderContext;
 
+    static class LocalNodesBuilderProviderProvider {
+        private final Concurrency concurrency;
+        private final boolean usePooledBuilderProvider;
+
+        public LocalNodesBuilderProviderProvider(Concurrency concurrency, boolean usePooledBuilderProvider) {
+            this.concurrency = concurrency;
+            this.usePooledBuilderProvider = usePooledBuilderProvider;
+        }
+
+        public LocalNodesBuilderProvider provide(Supplier<LocalNodesBuilder> builderSupplier) {
+            return usePooledBuilderProvider
+                ? LocalNodesBuilderProvider.pooled(builderSupplier, concurrency)
+                : LocalNodesBuilderProvider.threadLocal(builderSupplier);
+        }
+    }
+
     NodesBuilder(
         long maxOriginalId,
-        long maxIntermediateId,
+        LabelInformation.Builder labelInformationBuilder,
         Concurrency concurrency,
         IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
         boolean deduplicateIds,
-        boolean usePooledBuilderProvider,
+        LocalNodesBuilderProviderProvider localNodesBuilderProviderProvider,
+        NodesBuilderContext nodesBuilderContext,
+        GraphFactory.PropertyInfo propertyInfo
+    ) {
+        this(maxOriginalId, labelInformationBuilder, concurrency, idMapBuilder, hasLabelInformation, deduplicateIds, localNodesBuilderProviderProvider, nodesBuilderContext, propertyInfo.hasProperties(), propertyInfo.propertyStateFunction());
+    }
+
+    NodesBuilder(
+        long maxOriginalId,
+        LabelInformation.Builder labelInformationBuilder,
+        Concurrency concurrency,
+        IdMapBuilder idMapBuilder,
+        boolean hasLabelInformation,
+        boolean deduplicateIds,
+        LocalNodesBuilderProviderProvider localNodesBuilderProviderProvider,
         NodesBuilderContext nodesBuilderContext,
         boolean hasProperties,
         Function<String, PropertyState> propertyStates
@@ -77,9 +106,7 @@ public final class NodesBuilder implements NodesBuilderApi {
         this.nodesBuilderContext = nodesBuilderContext;
         this.idMapBuilder = idMapBuilder;
         this.propertyStates = propertyStates;
-        this.labelInformationBuilder = !hasLabelInformation
-            ? LabelInformationBuilders.allNodes()
-            : LabelInformationBuilders.multiLabelWithCapacity(maxIntermediateId + 1);
+        this.labelInformationBuilder = labelInformationBuilder;
 
         this.importedNodes = new LongAdder();
         var nodeImporter = new NodeImporter(
@@ -98,9 +125,7 @@ public final class NodesBuilder implements NodesBuilderApi {
             hasProperties,
             nodesBuilderContext.threadLocalContext()
         );
-        this.localNodesBuilderProvider = usePooledBuilderProvider
-            ? LocalNodesBuilderProvider.pooled(nodesBuilderSupplier, concurrency)
-            : LocalNodesBuilderProvider.threadLocal(nodesBuilderSupplier);
+        this.localNodesBuilderProvider = localNodesBuilderProviderProvider.provide(nodesBuilderSupplier);
     }
 
     @Override

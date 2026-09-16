@@ -58,6 +58,7 @@ class GraphStoreNodeVisitorTest {
             .nodeSchema(nodeSchema)
             .maxOriginalId(graphStore.nodeCount())
             .nodeCount(graph.nodeCount())
+            .propertyInfo(GraphFactory.PropertyInfo.fromSchema(nodeSchema))
             .build();
         GraphStoreNodeVisitor nodeVisitor = new GraphStoreNodeVisitor(nodeSchema, nodesBuilder);
         graph.forEachNode(nodeId -> {

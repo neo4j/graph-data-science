@@ -47,6 +47,7 @@ import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
+import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.ShardedIdMapBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
@@ -57,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.stream.IntStream;
 
@@ -75,42 +77,25 @@ public final class GraphFactory {
             .nodeSchema(NodeSchema.empty())
             .concurrency(new Concurrency(1))
             .hasLabelInformation(false)
-            .hasProperties(false)
             .deduplicateIds(true)
             .idMapBuilderType(IdMap.NO_TYPE)
-            .propertyState(PropertyState.PERSISTENT)
-            .usePooledBuilderProvider(false);
+            .usePooledBuilderProvider(false)
+            .propertyInfo(PropertyInfo.empty());
     }
 
-    @Builder.Factory
-    static NodesBuilder nodesBuilder(
-        Optional<Long> maxOriginalId,
-        Optional<Long> nodeCount,
-        NodeSchema nodeSchema,
-        boolean hasLabelInformation,
-        boolean hasProperties,
-        boolean deduplicateIds,
-        Concurrency concurrency,
-        PropertyState propertyState,
-        String idMapBuilderType,
-        boolean usePooledBuilderProvider
-    ) {
-        if (nodeSchema.containsOtherThanAllNodesLabel()) hasLabelInformation = true;
+    private static IdMapBuilder initIdMapBuilder(String idMapBuilderType, Concurrency concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount, boolean deduplicateIds) {
+        if (ShardedIdMapBuilder.isShardedIdMapType(idMapBuilderType) && deduplicateIds) {
+            // We internally use HABS for deduplication, which is being initialized
+            // with max original id. This is fine for all id maps except high limit,
+            // where original ids can exceed the supported HABS range.
+            throw new IllegalArgumentException("Cannot use high limit id map with deduplication.");
+        }
+        return IdMapBehaviorServiceProvider.idMapBehavior()
+            .create(idMapBuilderType, concurrency, maxOriginalId, nodeCount);
+    }
 
-        // Make sure that we do not pass on negative values to the id map builders.
-        maxOriginalId = maxOriginalId.filter(id -> id > 0);
-
-        var idMapBehavior = IdMapBehaviorServiceProvider.idMapBehavior();
-        var idMapBuilder = idMapBehavior.create(
-            idMapBuilderType,
-            concurrency,
-            maxOriginalId,
-            nodeCount
-        );
-
-        long maxOriginalNodeId = maxOriginalId.orElse(NodesBuilder.UNKNOWN_MAX_ID);
+    private static long computeMaxIntermediateId(long maxOriginalNodeId, Optional<Long> nodeCount, String idMapBuilderType) {
         long maxIntermediateId = maxOriginalNodeId;
-
         if (ShardedIdMapBuilder.isShardedIdMapType(idMapBuilderType)) {
             // If the requested id map is high limit, we need to make sure that
             // internal data structures are sized accordingly. Using the highest
@@ -118,44 +103,77 @@ public final class GraphFactory {
             // If the node count is not given, we fall back to an unknown max id,
             // which is fine since label building relies on growing bitsets.
             maxIntermediateId = nodeCount.map(nc -> nc - 1).orElse(NodesBuilder.UNKNOWN_MAX_ID);
-
-            if (deduplicateIds) {
-                // We internally use HABS for deduplication, which is being initialized
-                // with max original id. This is fine for all id maps except high limit,
-                // where original ids can exceed the supported HABS range.
-                throw new IllegalArgumentException("Cannot use high limit id map with deduplication.");
-            }
         }
-
-        if (nodeSchema.isEmpty()) {
-            return new NodesBuilder(maxOriginalNodeId, maxIntermediateId, concurrency, idMapBuilder, hasLabelInformation, deduplicateIds, usePooledBuilderProvider, NodesBuilderContext.lazy(concurrency), hasProperties, __ -> propertyState);
-        } else {
-                  return fromSchema(maxOriginalNodeId, maxIntermediateId, concurrency, idMapBuilder, hasLabelInformation, deduplicateIds, usePooledBuilderProvider, nodeSchema);
-        }
+        return maxIntermediateId;
     }
 
-    private static NodesBuilder fromSchema(
-        long maxOriginalId,
-        long maxIntermediateId,
-        Concurrency concurrency,
-        IdMapBuilder idMapBuilder,
+    public interface PropertyInfo {
+        boolean hasProperties();
+        Function<String, PropertyState> propertyStateFunction();
+        static PropertyInfo empty() {
+            return new PropertyInfoFromParameters(false, __ -> PropertyState.PERSISTENT);
+        }
+        static PropertyInfo withDefaultState() {
+            return new PropertyInfoFromParameters(true, __ -> PropertyState.PERSISTENT);
+        }
+        static PropertyInfo withState(PropertyState state) {
+            return new PropertyInfoFromParameters(true, __ -> state);
+        }
+        static PropertyInfo fromSchema(NodeSchema nodeSchema) {
+            return new PropertyInfoFromSchema(nodeSchema);
+        }
+        static PropertyInfo of(boolean hasProperties, PropertyState state) {
+            return new PropertyInfoFromParameters(hasProperties, __ -> state);
+        }
+    }
+    static class PropertyInfoFromSchema implements PropertyInfo {
+        private final NodeSchema nodeSchema;
+        PropertyInfoFromSchema(NodeSchema nodeSchema) {
+            this.nodeSchema = nodeSchema;
+        }
+        @Override
+        public boolean hasProperties() {
+            return nodeSchema.hasProperties();
+        }
+
+        @Override
+        public Function<String, PropertyState> propertyStateFunction() {
+            return propertyKey -> nodeSchema.properties().get(propertyKey).state();
+        }
+    }
+    private record PropertyInfoFromParameters(boolean hasProperties, Function<String, PropertyState> propertyStateFunction) implements PropertyInfo {}
+
+    @Builder.Factory
+    static NodesBuilder nodesBuilder(
+        Optional<Long> maxOriginalId,
+        Optional<Long> nodeCount,
+        NodeSchema nodeSchema,
         boolean hasLabelInformation,
         boolean deduplicateIds,
+        Concurrency concurrency,
+        String idMapBuilderType,
         boolean usePooledBuilderProvider,
-        NodeSchema nodeSchema
+        PropertyInfo propertyInfo
     ) {
-        return new NodesBuilder(
-            maxOriginalId,
-            maxIntermediateId,
-            concurrency,
-            idMapBuilder,
-            hasLabelInformation,
-            deduplicateIds,
-            usePooledBuilderProvider,
-            NodesBuilderContext.fixed(nodeSchema, concurrency),
-            nodeSchema.hasProperties(),
-            propertyKey -> nodeSchema.properties().get(propertyKey).state()
-        );
+        if (nodeSchema.containsOtherThanAllNodesLabel()) hasLabelInformation = true;
+
+        // Make sure that we do not pass on negative values to the id map builders.
+        maxOriginalId = maxOriginalId.filter(id -> id > 0);
+        var idMapBuilder = initIdMapBuilder(idMapBuilderType, concurrency, maxOriginalId, nodeCount, deduplicateIds);
+
+        long maxOriginalNodeId = maxOriginalId.orElse(NodesBuilder.UNKNOWN_MAX_ID);
+        long maxIntermediateId = computeMaxIntermediateId(maxOriginalNodeId, nodeCount, idMapBuilderType);
+
+        var localNodesBuilderProviderProvider = new NodesBuilder.LocalNodesBuilderProviderProvider(concurrency, usePooledBuilderProvider);
+        var labelInformationBuilder = !hasLabelInformation
+            ? LabelInformationBuilders.allNodes()
+            : LabelInformationBuilders.multiLabelWithCapacity(maxIntermediateId + 1);
+
+        if (nodeSchema.isEmpty()) {
+            return new NodesBuilder(maxOriginalNodeId, labelInformationBuilder, concurrency, idMapBuilder, hasLabelInformation, deduplicateIds, localNodesBuilderProviderProvider, NodesBuilderContext.lazy(concurrency),              propertyInfo);
+        } else {
+            return new NodesBuilder(maxOriginalNodeId, labelInformationBuilder, concurrency, idMapBuilder, hasLabelInformation, deduplicateIds, localNodesBuilderProviderProvider, NodesBuilderContext.fixed(nodeSchema, concurrency), propertyInfo);
+        }
     }
 
     public record PropertyConfig(

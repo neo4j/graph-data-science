@@ -185,6 +185,7 @@ public abstract class FileToGraphStoreImporter {
             .nodeCount(fileInput.graphInfo().nodeCount())
             .deduplicateIds(false)
             .idMapBuilderType(fileInput.graphInfo().idMapBuilderType())
+            .propertyInfo(GraphFactory.PropertyInfo.fromSchema(nodeSchema))
             .build();
         nodeVisitorBuilder.withNodeSchema(nodeSchema);
         nodeVisitorBuilder.withNodesBuilder(nodesBuilder);

@@ -62,8 +62,7 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .nodeCount(nodeCount)
             .hasLabelInformation(hasLabelInformation)
-            .hasProperties(!propertyColumns.isEmpty())
-            .propertyState(PropertyState.TRANSIENT)
+            .propertyInfo(GraphFactory.PropertyInfo.of(!propertyColumns.isEmpty(), PropertyState.TRANSIENT))
             .build();
 
         nodeSubscriber.initialize(subscription.fieldNames(), this.nodesBuilder);

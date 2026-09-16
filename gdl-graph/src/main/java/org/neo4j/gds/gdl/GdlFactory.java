@@ -212,10 +212,9 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .maxOriginalId(dimensions.highestPossibleNodeCount() - 1)
             .nodeCount(gdlHandler.getVertices().size())
             .hasLabelInformation(true)
-            .hasProperties(true)
             .deduplicateIds(false)
-            .propertyState(graphProjectConfig.propertyState())
             .idMapBuilderType(this.idMapBuilderType)
+            .propertyInfo(GraphFactory.PropertyInfo.withState(graphProjectConfig.propertyState()))
             .build();
 
         gdlHandler.getVertices().forEach(vertex -> {
