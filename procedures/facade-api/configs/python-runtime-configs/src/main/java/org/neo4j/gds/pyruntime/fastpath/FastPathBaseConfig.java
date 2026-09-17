@@ -75,8 +75,8 @@ public interface FastPathBaseConfig extends RandomSeedConfig, JobIdConfig {
 
     Optional<String> baseNodeObservationTimeProperty();
 
-    @Configuration.IntegerRange(min = 1)
-    int lookbackHorizon();
+    @Configuration.ConvertWith(method = "toDouble")
+    Double lookbackHorizon();
 
     // default inlined from data_science_python_runtime FastPathConfig.smoothing_rate
     default double smoothingRate() {
@@ -92,6 +92,17 @@ public interface FastPathBaseConfig extends RandomSeedConfig, JobIdConfig {
     @Configuration.IntegerRange(min = 0)
     default int smoothingWindow() {
         return 0;
+    }
+
+    static Double toDouble(Object obj) {
+        return switch (obj) {
+            case Float a -> a.doubleValue();
+            case Double a -> a;
+            case Integer i -> i.doubleValue();
+            case Long l -> l.doubleValue();
+            case null, default -> throw new IllegalArgumentException(
+                "Object must be of numeric type");
+        };
     }
 
     @Configuration.Check
