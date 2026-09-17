@@ -20,8 +20,6 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.PathFindingAlgorithmTasks;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
@@ -77,19 +75,6 @@ public class PathFindingAlgorithmsBusinessFacade {
         this.algorithms = algorithms;
         this.requestScopedDependencies = requestScopedDependencies;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    Stream<AllShortestPathsStreamResult> allShortestPaths(Graph graph, AllShortestPathsConfig configuration) {
-        var progressTracker = ProgressTracker.NULL_TRACKER;
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.allShortestPaths(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag(),
-                DefaultPool.INSTANCE
-            ), progressTracker, true);
     }
 
     public BellmanFordResult bellmanFord(Graph graph, AllShortestPathsBellmanFordBaseConfig configuration) {

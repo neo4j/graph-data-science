@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -71,7 +72,8 @@ public final class PathFindingApplications {
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService,
-        LaunchConvenience launchConvenience
+        LaunchConvenience launchConvenience,
+        Synchroniser synchroniser
     ) {
         var algorithms = new PathFindingAlgorithms(log);
         var pathFindingAlgorithms = new PathFindingAlgorithmsBusinessFacade(algorithms, requestScopedDependencies, progressTrackerCreator);
@@ -94,10 +96,19 @@ public final class PathFindingApplications {
             pathFindingAlgorithms
         );
 
+        var trackedAlgorithms = new TrackedPathFindingAlgorithms(
+            algorithms,
+            requestScopedDependencies,
+            progressTrackerCreator
+        );
+        var raw = new InstrumentedPathFindingAlgorithms(trackedAlgorithms, estimationModeFacade, launchConvenience);
+
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
             estimationModeFacade,
             pathFindingAlgorithms,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            raw,
+            synchroniser
         );
 
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
@@ -109,13 +120,6 @@ public final class PathFindingApplications {
             estimationModeFacade,
             pathFindingAlgorithms
         );
-
-        var trackedAlgorithms = new TrackedPathFindingAlgorithms(
-            algorithms,
-            requestScopedDependencies,
-            progressTrackerCreator
-        );
-        var raw = new InstrumentedPathFindingAlgorithms(trackedAlgorithms, estimationModeFacade, launchConvenience);
 
         return new PathFindingApplications(
             estimationModeFacade,

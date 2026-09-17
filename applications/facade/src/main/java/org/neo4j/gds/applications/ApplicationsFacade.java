@@ -219,7 +219,8 @@ public final class ApplicationsFacade {
             progressTrackerCreator,
             mutateNodeProperty,
             mutateRelationshipService,
-            launchConvenience
+            launchConvenience,
+            synchroniser
         );
 
         var similarityApplications = SimilarityApplications.create(

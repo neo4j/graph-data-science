@@ -22,9 +22,11 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -51,10 +53,10 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AllShortestPaths;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS;
@@ -79,15 +81,21 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     private final PathFindingAlgorithmsBusinessFacade algorithms;
 
     private final AlgorithmProcessingTemplateConvenience convenience;
+    private final InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms;
+    private final Synchroniser synchroniser;
 
     PathFindingAlgorithmsStreamModeBusinessFacade(
         PathFindingAlgorithmsEstimationModeBusinessFacade estimation,
         PathFindingAlgorithmsBusinessFacade algorithms,
-        AlgorithmProcessingTemplateConvenience convenience
+        AlgorithmProcessingTemplateConvenience convenience,
+        InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.convenience = convenience;
         this.algorithms = algorithms;
         this.estimation = estimation;
+        this.instrumentedPathFindingAlgorithms = instrumentedPathFindingAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> Stream<RESULT> allShortestPaths(
@@ -95,14 +103,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         AllShortestPathsConfig configuration,
         StreamResultBuilder<Stream<AllShortestPathsStreamResult>, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.allShortestPaths(
             graphName,
             configuration,
-            AllShortestPaths,
-            () -> estimation.allShortestPaths(configuration),
-            (graph, __) -> algorithms.allShortestPaths(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> bellmanFord(
