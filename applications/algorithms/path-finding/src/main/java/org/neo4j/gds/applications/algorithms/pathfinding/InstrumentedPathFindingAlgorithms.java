@@ -42,7 +42,7 @@ public class InstrumentedPathFindingAlgorithms {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
 
-    InstrumentedPathFindingAlgorithms(
+    public InstrumentedPathFindingAlgorithms(
         TrackedPathFindingAlgorithms algorithms,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience

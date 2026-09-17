@@ -35,7 +35,7 @@ import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.stream.Stream;
 
-class TrackedPathFindingAlgorithms {
+public class TrackedPathFindingAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final PathFindingAlgorithms algorithms;
@@ -44,7 +44,7 @@ class TrackedPathFindingAlgorithms {
     private final RequestScopedDependencies requestScopedDependencies;
     private final ProgressTrackerCreator progressTrackerCreator;
 
-    TrackedPathFindingAlgorithms(
+    public TrackedPathFindingAlgorithms(
         PathFindingAlgorithms algorithms,
         RequestScopedDependencies requestScopedDependencies,
         ProgressTrackerCreator progressTrackerCreator
