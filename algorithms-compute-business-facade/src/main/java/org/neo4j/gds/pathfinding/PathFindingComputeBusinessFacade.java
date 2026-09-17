@@ -20,8 +20,6 @@
 package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.GraphParameters;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
@@ -99,33 +97,6 @@ public class PathFindingComputeBusinessFacade {
         this.executorService = executorService;
         this.user = user;
         this.databaseId = databaseId;
-    }
-
-    public <TR> CompletableFuture<TR> allShortestPaths(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        AllShortestPathsParameters parameters,
-        JobId jobId,
-        ResultTransformerBuilder<TimedAlgorithmResult<Stream<AllShortestPathsStreamResult>>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            GraphStoreValidation.DISABLED,
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.allShortestPaths(
-            graph,
-            parameters,
-            jobId
-        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> bellmanFord(

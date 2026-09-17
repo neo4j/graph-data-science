@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -34,24 +35,27 @@ import org.neo4j.gds.logging.Log;
  * The facade over path finding applications
  */
 public final class PathFindingApplications {
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeFacade;
-    private final PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade;
-    private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade;
-    private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimation;
+    private final PathFindingAlgorithmsMutateModeBusinessFacade mutate;
+    private final InstrumentedPathFindingAlgorithms raw;
+    private final PathFindingAlgorithmsStatsModeBusinessFacade stats;
+    private final PathFindingAlgorithmsStreamModeBusinessFacade stream;
+    private final PathFindingAlgorithmsWriteModeBusinessFacade write;
 
     private PathFindingApplications(
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeFacade,
-        PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade,
-        PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
-        PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimation,
+        PathFindingAlgorithmsMutateModeBusinessFacade mutate,
+        InstrumentedPathFindingAlgorithms raw,
+        PathFindingAlgorithmsStatsModeBusinessFacade stats,
+        PathFindingAlgorithmsStreamModeBusinessFacade stream,
+        PathFindingAlgorithmsWriteModeBusinessFacade write
     ) {
-        this.estimationModeFacade = estimationModeFacade;
-        this.mutateModeFacade = mutateModeFacade;
-        this.statsModeFacade = statsModeFacade;
-        this.streamModeFacade = streamModeFacade;
-        this.writeModeFacade = writeModeFacade;
+        this.estimation = estimation;
+        this.mutate = mutate;
+        this.raw = raw;
+        this.stats = stats;
+        this.stream = stream;
+        this.write = write;
     }
 
     /**
@@ -66,9 +70,9 @@ public final class PathFindingApplications {
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodeProperty,
-        MutateRelationshipService mutateRelationshipService
+        MutateRelationshipService mutateRelationshipService,
+        LaunchConvenience launchConvenience
     ) {
-
         var algorithms = new PathFindingAlgorithms(log);
         var pathFindingAlgorithms = new PathFindingAlgorithmsBusinessFacade(algorithms, requestScopedDependencies, progressTrackerCreator);
 
@@ -106,9 +110,17 @@ public final class PathFindingApplications {
             pathFindingAlgorithms
         );
 
+        var trackedAlgorithms = new TrackedPathFindingAlgorithms(
+            algorithms,
+            requestScopedDependencies,
+            progressTrackerCreator
+        );
+        var raw = new InstrumentedPathFindingAlgorithms(trackedAlgorithms, estimationModeFacade, launchConvenience);
+
         return new PathFindingApplications(
             estimationModeFacade,
             mutateModeFacade,
+            raw,
             statsModeFacade,
             streamModeFacade,
             writeModeFacade
@@ -116,22 +128,26 @@ public final class PathFindingApplications {
     }
 
     public PathFindingAlgorithmsEstimationModeBusinessFacade estimate() {
-        return estimationModeFacade;
+        return estimation;
     }
 
     public PathFindingAlgorithmsMutateModeBusinessFacade mutate() {
-        return mutateModeFacade;
+        return mutate;
+    }
+
+    public InstrumentedPathFindingAlgorithms raw() {
+        return raw;
     }
 
     public PathFindingAlgorithmsStatsModeBusinessFacade stats() {
-        return statsModeFacade;
+        return stats;
     }
 
     public PathFindingAlgorithmsStreamModeBusinessFacade stream() {
-        return streamModeFacade;
+        return stream;
     }
 
     public PathFindingAlgorithmsWriteModeBusinessFacade write() {
-        return writeModeFacade;
+        return write;
     }
 }

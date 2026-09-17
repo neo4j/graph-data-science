@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
@@ -84,20 +83,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
             TerminationFlag.RUNNING_TRUE,
             progressTrackerFactoryMock
         );
-    }
-
-    @Test
-    void allShortestPaths() {
-        var future = facade.allShortestPaths(
-            graph,
-            mock(AllShortestPathsParameters.class),
-            jobIdMock
-        );
-        var result = future.join();
-        assertThat(result.result()).isEmpty();
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

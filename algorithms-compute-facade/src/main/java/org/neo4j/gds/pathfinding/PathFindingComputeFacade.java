@@ -20,10 +20,7 @@
 package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.PathFindingAlgorithmTasks;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
-import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.pathfinding.MSBFSASPAlgorithmFactory;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
@@ -31,7 +28,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
@@ -110,36 +106,6 @@ public class PathFindingComputeFacade {
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
         this.progressTrackerFactory = progressTrackerFactory;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<Stream<AllShortestPathsStreamResult>>> allShortestPaths(
-        Graph graph,
-        AllShortestPathsParameters parameters,
-        JobId jobId
-    ) {
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Stream.empty()));
-        }
-
-        // Create ProgressTracker
-        // `allShortestPaths` doesn't use progress tracker (yet 🤔)
-        var progressTracker = ProgressTracker.NULL_TRACKER;
-
-        // Create the algorithm
-        var allShortestPaths = MSBFSASPAlgorithmFactory.create(
-            graph,
-            parameters,
-            executorService,
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            allShortestPaths::compute,
-            jobId
-        );
-
     }
 
     public CompletableFuture<TimedAlgorithmResult<BellmanFordResult>> bellmanFord(
