@@ -24,7 +24,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -66,7 +65,6 @@ import org.neo4j.gds.spanningtree.SpanningTreeParameters;
 import org.neo4j.gds.steiner.SteinerTreeParameters;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkParameters;
-import org.neo4j.gds.traversal.TraversalParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -150,37 +148,6 @@ public class PathFindingComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.deltaStepping(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> depthFirstSearch(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        TraversalParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
-                parameters.sourceNode(),
-                parameters.targetNodes()
-            )),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.depthFirstSearch(
             graph,
             parameters,
             jobId,

@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
+import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 
 import java.util.Optional;
 import java.util.Set;
@@ -90,6 +91,29 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __) -> algorithms.bfs(graph, configuration),
             estimationFacade::breadthFirstSearch,
             AlgorithmLabel.BFS,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> dfs(
+        GraphName graphName,
+        DfsBaseConfig configuration,
+        Optional<SideEffect<HugeLongArray, METADATA>> sideEffect,
+        ResultRenderer<HugeLongArray, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            Optional.empty(),
+            Set.of(new SourceNodeTargetNodesGraphStoreValidation(
+                configuration.sourceNode(),
+                configuration.targetNodes()
+            )),
+            Optional.empty(),
+            (graph, __) -> algorithms.dfs(graph, configuration),
+            estimationFacade::depthFirstSearch,
+            AlgorithmLabel.DFS,
             sideEffect,
             resultRenderer
         );

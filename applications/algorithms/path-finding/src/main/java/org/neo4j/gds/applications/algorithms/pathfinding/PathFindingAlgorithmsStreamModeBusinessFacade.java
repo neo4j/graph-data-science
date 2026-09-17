@@ -43,7 +43,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
-import org.neo4j.gds.paths.traverse.DfsStreamConfig;
+import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.pcst.PCSTStreamConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
@@ -58,7 +58,6 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LongestPath;
@@ -155,17 +154,15 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> depthFirstSearch(
         GraphName graphName,
-        DfsStreamConfig configuration,
+        DfsBaseConfig configuration,
         StreamResultBuilder<HugeLongArray, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.dfs(
             graphName,
             configuration,
-            DFS,
-            estimation::depthFirstSearch,
-            (graph, __) -> algorithms.depthFirstSearch(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> longestPath(

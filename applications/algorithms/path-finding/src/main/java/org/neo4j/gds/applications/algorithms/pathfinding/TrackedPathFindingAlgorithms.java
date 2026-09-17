@@ -30,6 +30,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
+import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 
@@ -78,6 +79,24 @@ public class TrackedPathFindingAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.breadthFirstSearch(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            true
+        );
+    }
+
+    HugeLongArray dfs(Graph graph, DfsBaseConfig configuration) {
+        var progressTracker = createProgressTracker(
+            PathFindingAlgorithmTasks.dfs(configuration.concurrency()),
+            configuration
+        );
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.depthFirstSearch(
                 graph,
                 configuration.toParameters(),
                 progressTracker,

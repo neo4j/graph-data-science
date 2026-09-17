@@ -25,7 +25,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -46,7 +45,6 @@ import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
-import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
@@ -100,18 +98,6 @@ public class PathFindingAlgorithmsBusinessFacade {
                 configuration.toParameters(),
                 progressTracker,
                 DefaultPool.INSTANCE,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
-    }
-
-    HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.dfs(configuration.concurrency()), configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.depthFirstSearch(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
                 requestScopedDependencies.terminationFlag()
             ), progressTracker, true);
     }

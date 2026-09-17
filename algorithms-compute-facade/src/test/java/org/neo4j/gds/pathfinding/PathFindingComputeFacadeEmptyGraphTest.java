@@ -49,7 +49,6 @@ import org.neo4j.gds.steiner.SteinerTreeParameters;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
-import org.neo4j.gds.traversal.TraversalParameters;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.SET;
@@ -126,23 +125,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
             .extracting((deltaSteppingResult -> deltaSteppingResult.pathFindingResult().pathSet()))
             .asInstanceOf(SET)
             .isEmpty();
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void depthFirstSearch() {
-        var future = facade.depthFirstSearch(
-            graph,
-            mock(TraversalParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result).isNotNull();
-        assertThat(result.result().size()).isZero();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

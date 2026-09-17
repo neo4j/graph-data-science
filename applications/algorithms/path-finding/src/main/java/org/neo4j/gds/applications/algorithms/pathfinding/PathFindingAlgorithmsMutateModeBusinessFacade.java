@@ -71,7 +71,6 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
@@ -183,15 +182,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration.mutateRelationshipType()
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.dfs(
             graphName,
             configuration,
-            DFS,
-            estimationFacade::depthFirstSearch,
-            (graph, __) -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT maxFlow(

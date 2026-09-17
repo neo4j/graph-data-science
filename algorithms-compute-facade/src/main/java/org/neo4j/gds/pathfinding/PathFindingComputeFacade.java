@@ -22,7 +22,6 @@ package org.neo4j.gds.pathfinding;
 import org.neo4j.gds.PathFindingAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -54,8 +53,6 @@ import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.traverse.ExitAndAggregation;
-import org.neo4j.gds.paths.traverse.dfs.DFS;
 import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
@@ -72,7 +69,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
 import org.neo4j.gds.traversal.RandomWalkParameters;
-import org.neo4j.gds.traversal.TraversalParameters;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -171,46 +167,6 @@ public class PathFindingComputeFacade {
 
         return algorithmCaller.run(
             deltaStepping::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<HugeLongArray>> depthFirstSearch(
-        Graph graph,
-        TraversalParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(HugeLongArray.newArray(0L)));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.dfs(parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var exitAndAggregationConditions = ExitAndAggregation.create(graph, parameters);
-        var mappedStartNodeId = graph.toMappedNodeId(parameters.sourceNode());
-
-        var dfs = new DFS(
-            graph,
-            mappedStartNodeId,
-            exitAndAggregationConditions.exitFunction(),
-            exitAndAggregationConditions.aggregatorFunction(),
-            parameters.maxDepth(),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            dfs::compute,
             jobId
         );
     }

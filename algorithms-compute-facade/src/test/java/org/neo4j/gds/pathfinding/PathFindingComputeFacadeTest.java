@@ -52,7 +52,6 @@ import org.neo4j.gds.spanningtree.SpanningTreeParameters;
 import org.neo4j.gds.steiner.SteinerTreeParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
-import org.neo4j.gds.traversal.TraversalParameters;
 import org.neo4j.gds.traversal.WalkParameters;
 
 import java.util.List;
@@ -140,22 +139,6 @@ class PathFindingComputeFacadeTest {
             graph,
             DeltaSteppingParameters.withDefaultDelta(
                 idFunction.of("a"),
-                new Concurrency(2)
-            ),
-            jobIdMock,
-            false
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
-    @Test
-    void depthFirstSearch() {
-        var future = facade.depthFirstSearch(
-            graph,
-            new TraversalParameters(
-                idFunction.of("a"),
-                List.of(idFunction.of("c")),
-                3L,
                 new Concurrency(2)
             ),
             jobIdMock,
