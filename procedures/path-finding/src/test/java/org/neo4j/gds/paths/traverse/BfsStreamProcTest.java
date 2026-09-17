@@ -240,7 +240,7 @@ class BfsStreamProcTest extends BaseProcTest {
 
         Assertions.setMaxStackTraceElementsDisplayed(150);
 
-        assertError(query, "sourceNode nodes do not exist in the in-memory graph: [4242]");
+        assertError(query, "sourceNode node do not exist in the in-memory graph: 4242");
     }
     
 }
