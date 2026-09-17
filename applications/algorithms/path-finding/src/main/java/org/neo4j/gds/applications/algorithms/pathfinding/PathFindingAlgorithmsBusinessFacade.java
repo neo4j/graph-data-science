@@ -30,7 +30,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
-import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
@@ -112,21 +111,6 @@ public class PathFindingAlgorithmsBusinessFacade {
             () -> algorithms.kSpanningTree(
                 graph,
                 configuration.toKSpanningTreeParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
-    }
-
-    PathFindingResult longestPath(Graph graph, DagLongestPathBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.longestPath(graph, configuration.concurrency()),
-            configuration
-        );
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.longestPath(
-                graph,
-                configuration.toParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ), progressTracker, true);

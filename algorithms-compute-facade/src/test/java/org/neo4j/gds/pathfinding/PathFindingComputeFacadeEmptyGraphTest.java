@@ -29,7 +29,6 @@ import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
@@ -141,26 +140,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
         var result = future.join();
 
         assertThat(result.result()).isNotNull().isEqualTo(SpanningTree.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void longestPath() {
-        var future = facade.longestPath(
-            graph,
-            mock(DagLongestPathParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result.result())
-            .isNotNull()
-            .extracting(PathFindingResult::pathSet)
-            .asInstanceOf(SET)
-            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

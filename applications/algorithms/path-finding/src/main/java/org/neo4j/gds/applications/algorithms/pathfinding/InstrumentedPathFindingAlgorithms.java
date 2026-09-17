@@ -28,6 +28,8 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
+import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 
@@ -114,6 +116,26 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __) -> algorithms.dfs(graph, configuration),
             estimationFacade::depthFirstSearch,
             AlgorithmLabel.DFS,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> longestPath(
+        GraphName graphName,
+        DagLongestPathBaseConfig configuration,
+        Optional<SideEffect<PathFindingResult, METADATA>> sideEffect,
+        ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            emptySet(),
+            Optional.empty(),
+            (graph, __) -> algorithms.longestPath(graph, configuration),
+            estimationFacade::longestPath,
+            AlgorithmLabel.LongestPath,
             sideEffect,
             resultRenderer
         );

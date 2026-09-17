@@ -21,9 +21,9 @@ package org.neo4j.gds.dag.longestPath;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 
-public interface DagLongestPathBaseConfig extends AlgoBaseConfig {
-
+public interface DagLongestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
     @Configuration.Ignore
     default DagLongestPathParameters toParameters() {
         return new DagLongestPathParameters(concurrency());

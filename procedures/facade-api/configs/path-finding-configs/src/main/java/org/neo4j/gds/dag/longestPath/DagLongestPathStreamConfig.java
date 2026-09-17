@@ -20,12 +20,10 @@
 package org.neo4j.gds.dag.longestPath;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface DagLongestPathStreamConfig extends DagLongestPathBaseConfig, RelationshipWeightConfig {
-
+public interface DagLongestPathStreamConfig extends DagLongestPathBaseConfig {
     static DagLongestPathStreamConfig of(CypherMapWrapper userInput) {
         return new DagLongestPathStreamConfigImpl(userInput);
     }

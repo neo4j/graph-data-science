@@ -32,7 +32,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.progress.tasks.IterativeTask;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.dag.longestPath.DagLongestPathParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -159,19 +158,6 @@ class PathFindingComputeFacadeTest {
             ),
             jobIdMock,
             false
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
-    @Test
-    void longestPath() {
-        var future = facade.longestPath(
-            graph,
-            new DagLongestPathParameters(
-                new Concurrency(2)
-            ),
-            jobIdMock,
-            true
         );
         assertThat(future.join()).isNotNull();
     }

@@ -28,7 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
+import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.maxflow.FlowResult;
@@ -60,7 +60,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ASt
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LongestPath;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
@@ -167,17 +166,15 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> longestPath(
         GraphName graphName,
-        DagLongestPathStreamConfig configuration,
+        DagLongestPathBaseConfig configuration,
         StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.longestPath(
             graphName,
             configuration,
-            LongestPath,
-            estimation::longestPath,
-            (graph, __) -> algorithms.longestPath(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> maxFlow(
