@@ -30,6 +30,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
@@ -119,6 +121,24 @@ public class TrackedPathFindingAlgorithms {
             () -> algorithms.longestPath(
                 graph,
                 configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            true
+        );
+    }
+
+    FlowResult maxFlow(Graph graph, MaxFlowBaseConfig configuration) {
+        var progressTracker = createProgressTracker(
+            PathFindingAlgorithmTasks.maxFlow(configuration.concurrency()),
+            configuration
+        );
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.maxFlow(
+                graph,
+                configuration.toMaxFlowParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ),

@@ -24,6 +24,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.applications.algorithms.pathfinding.FlowAlgorithmRequirements;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -40,11 +41,8 @@ import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.maxflow.FlowResult;
-import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFParameters;
-import org.neo4j.gds.pathfinding.validation.FlowAlgorithmRequirements;
 import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
@@ -179,35 +177,6 @@ public class PathFindingComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.kSpanningTree(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> maxFlow(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        MaxFlowParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<FlowResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidation(FlowAlgorithmRequirements.create(parameters)),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.maxFlow(
             graph,
             parameters,
             jobId,

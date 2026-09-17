@@ -32,7 +32,7 @@ import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.maxflow.FlowResult;
-import org.neo4j.gds.maxflow.MaxFlowStreamConfig;
+import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
@@ -61,7 +61,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
@@ -179,17 +178,15 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> maxFlow(
         GraphName graphName,
-        MaxFlowStreamConfig configuration,
+        MaxFlowBaseConfig configuration,
         StreamResultBuilder<FlowResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.maxFlow(
             graphName,
             configuration,
-            MaxFlow,
-            () -> estimation.maxFlow(configuration),
-            (graph, __) -> algorithms.maxFlow(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> mcmf(

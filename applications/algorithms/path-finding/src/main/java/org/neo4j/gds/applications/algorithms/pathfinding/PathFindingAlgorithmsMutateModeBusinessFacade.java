@@ -74,7 +74,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -201,15 +200,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             mutateRelationshipService
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.maxFlow(
             graphName,
             configuration,
-            MaxFlow,
-            () -> estimationFacade.maxFlow(configuration),
-            (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT mcmf(

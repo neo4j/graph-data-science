@@ -21,6 +21,7 @@ dependencies {
     implementation project(":community-configs") //Need for SLLPA
     implementation project(':community-params')
     implementation project(":config-api") //Need for Pregel
+    implementation project(':path-finding-algorithms')
     implementation project(':path-finding-params')
     implementation project(":pregel")
     implementation project(':similarity-params')

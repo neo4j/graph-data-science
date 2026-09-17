@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
@@ -28,6 +29,8 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
+import org.neo4j.gds.applications.algorithms.machinery.WriteResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.WriteSideEffect;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -64,6 +67,7 @@ import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
@@ -72,7 +76,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Del
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -91,6 +94,8 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final WriteRelationshipService writeRelationshipService;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
+    private final InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms;
+    private final Synchroniser synchroniser;
 
     PathFindingAlgorithmsWriteModeBusinessFacade(
         Log log,
@@ -99,7 +104,9 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         WriteContext writeContext,
         WriteRelationshipService writeRelationshipService,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms
+        PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms,
+        InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.log = log;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
@@ -108,6 +115,8 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         this.writeRelationshipService = writeRelationshipService;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
+        this.instrumentedPathFindingAlgorithms = instrumentedPathFindingAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT bellmanFord(
@@ -190,15 +199,12 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration.jobId()
         );
 
-        return runAlgorithmAndWrite(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.maxFlow(
             graphName,
             configuration,
-            MaxFlow,
-            () -> estimationFacade.maxFlow(configuration),
-            (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT mcmf(

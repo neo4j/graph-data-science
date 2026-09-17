@@ -33,9 +33,6 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.maxflow.FlowResult;
-import org.neo4j.gds.maxflow.MaxFlow;
-import org.neo4j.gds.maxflow.MaxFlowParameters;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFParameters;
 import org.neo4j.gds.mcmf.MinCostMaxFlow;
@@ -201,40 +198,6 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             kSpanningTree::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<FlowResult>> maxFlow(
-        Graph graph,
-        MaxFlowParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(FlowResult.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.maxFlow(parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var algo = MaxFlow.create(
-            graph,
-            parameters,
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            algo::compute,
             jobId
         );
     }

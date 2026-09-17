@@ -29,6 +29,8 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
+import org.neo4j.gds.maxflow.FlowResult;
+import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
@@ -136,6 +138,26 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __) -> algorithms.longestPath(graph, configuration),
             estimationFacade::longestPath,
             AlgorithmLabel.LongestPath,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> maxFlow(
+        GraphName graphName,
+        MaxFlowBaseConfig configuration,
+        Optional<SideEffect<FlowResult, METADATA>> sideEffect,
+        ResultRenderer<FlowResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            Set.of(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())),
+            Optional.empty(),
+            (graph, __) -> algorithms.maxFlow(graph, configuration),
+            () -> estimationFacade.maxFlow(configuration),
+            AlgorithmLabel.MaxFlow,
             sideEffect,
             resultRenderer
         );

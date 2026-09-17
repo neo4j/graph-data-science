@@ -27,7 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultRenderer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.maxflow.FlowResult;
-import org.neo4j.gds.maxflow.MaxFlowStatsConfig;
+import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFStatsConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
@@ -49,7 +49,6 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MaxFlow;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -121,17 +120,15 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT maxFlow(
         GraphName graphName,
-        MaxFlowStatsConfig configuration,
+        MaxFlowBaseConfig configuration,
         StatsResultBuilder<FlowResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.maxFlow(
             graphName,
             configuration,
-            MaxFlow,
-            () -> estimationFacade.maxFlow(configuration),
-            (graph, __) -> pathFindingAlgorithms.maxFlow(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT mcmf(

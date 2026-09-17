@@ -33,8 +33,6 @@ import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
-import org.neo4j.gds.maxflow.FlowResult;
-import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
@@ -111,21 +109,6 @@ public class PathFindingAlgorithmsBusinessFacade {
             () -> algorithms.kSpanningTree(
                 graph,
                 configuration.toKSpanningTreeParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
-    }
-
-    FlowResult maxFlow(Graph graph, MaxFlowBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.maxFlow(configuration.concurrency()),
-            configuration
-        );
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.maxFlow(
-                graph,
-                configuration.toMaxFlowParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ), progressTracker, true);

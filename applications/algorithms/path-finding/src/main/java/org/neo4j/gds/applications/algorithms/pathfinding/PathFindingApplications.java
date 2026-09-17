@@ -122,7 +122,9 @@ public final class PathFindingApplications {
             writeContext,
             writeRelationshipService,
             estimationModeFacade,
-            pathFindingAlgorithms
+            pathFindingAlgorithms,
+            raw,
+            synchroniser
         );
 
         return new PathFindingApplications(
