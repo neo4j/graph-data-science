@@ -55,7 +55,6 @@ import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.ExitAndAggregation;
-import org.neo4j.gds.paths.traverse.bfs.BFS;
 import org.neo4j.gds.paths.traverse.dfs.DFS;
 import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.YensParameters;
@@ -142,48 +141,6 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             bellmanFord::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<HugeLongArray>> breadthFirstSearch(
-        Graph graph,
-        TraversalParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(HugeLongArray.newArray(0L)));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.bfs(parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var exitAndAggregationConditions = ExitAndAggregation.create(graph, parameters);
-        var mappedStartNodeId = graph.toMappedNodeId(parameters.sourceNode());
-
-        var bfs = BFS.create(
-            graph,
-            mappedStartNodeId,
-            exitAndAggregationConditions.exitFunction(),
-            exitAndAggregationConditions.aggregatorFunction(),
-            parameters.maxDepth(),
-            executorService,
-            parameters.concurrency(),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            bfs::compute,
             jobId
         );
     }

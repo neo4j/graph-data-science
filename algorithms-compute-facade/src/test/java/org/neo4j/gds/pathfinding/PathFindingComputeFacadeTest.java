@@ -134,23 +134,6 @@ class PathFindingComputeFacadeTest {
         verifyNoMoreInteractions(progressTrackerFactoryMock);
     }
 
-
-    @Test
-    void breadthFirstSearch() {
-        var future = facade.breadthFirstSearch(
-            graph,
-            new TraversalParameters(
-                idFunction.of("a"),
-                List.of(idFunction.of("c")),
-                3L,
-                new Concurrency(2)
-            ),
-            jobIdMock,
-            false
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
     @Test
     void deltaStepping() {
         var future = facade.deltaStepping(

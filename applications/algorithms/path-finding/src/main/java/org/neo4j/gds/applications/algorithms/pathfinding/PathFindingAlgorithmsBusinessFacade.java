@@ -46,7 +46,6 @@ import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
-import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
@@ -92,24 +91,6 @@ public class PathFindingAlgorithmsBusinessFacade {
             ), progressTracker, false);
     }
 
-    /**
-     * Here is an example of how resource management and structure collide.
-     * Progress tracker is constructed here for BreadthFirstSearch, then inside it is delegated to BFS.
-     * Ergo we apply the progress tracker resource machinery inside.
-     * But it is not great innit.
-     */
-    HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.bfs(configuration.concurrency()), configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.breadthFirstSearch(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
-    }
-
     public PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
         var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.deltaStepping(configuration.concurrency()), configuration);
 
@@ -123,11 +104,6 @@ public class PathFindingAlgorithmsBusinessFacade {
             ), progressTracker, true);
     }
 
-    /**
-     * Moar resource shenanigans
-     *
-     * @see #breadthFirstSearch(org.neo4j.gds.api.Graph, org.neo4j.gds.paths.traverse.BfsBaseConfig)
-     */
     HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {
         var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.dfs(configuration.concurrency()), configuration);
 

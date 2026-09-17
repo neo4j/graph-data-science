@@ -19,13 +19,18 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.PathFindingAlgorithmTasks;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.paths.traverse.BfsBaseConfig;
+import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.stream.Stream;
@@ -62,6 +67,33 @@ class TrackedPathFindingAlgorithms {
             ),
             progressTracker,
             true
+        );
+    }
+
+    HugeLongArray bfs(Graph graph, BfsBaseConfig configuration) {
+        var progressTracker = createProgressTracker(
+            PathFindingAlgorithmTasks.bfs(configuration.concurrency()),
+            configuration
+        );
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.breadthFirstSearch(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            true
+        );
+    }
+
+    private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {
+        return progressTrackerCreator.createProgressTracker(
+            task,
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
         );
     }
 }

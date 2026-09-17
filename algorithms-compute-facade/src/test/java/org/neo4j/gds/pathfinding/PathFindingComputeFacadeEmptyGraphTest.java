@@ -112,23 +112,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
     }
 
     @Test
-    void breadthFirstSearch() {
-        var future = facade.breadthFirstSearch(
-            graph,
-            mock(TraversalParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result).isNotNull();
-        assertThat(result.result().size()).isZero();
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
     void deltaStepping() {
         var future = facade.deltaStepping(
             graph,

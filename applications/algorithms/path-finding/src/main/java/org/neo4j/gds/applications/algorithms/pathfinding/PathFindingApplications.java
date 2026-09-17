@@ -81,27 +81,31 @@ public final class PathFindingApplications {
         var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies, writeContext);
 
-        var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
-            estimationModeFacade,
-            pathFindingAlgorithms,
-            algorithmProcessingTemplateConvenience,
-            algorithmProcessingTemplate,
-            mutateNodeProperty,
-            mutateRelationshipService
-        );
-
-        var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
-            algorithmProcessingTemplateConvenience,
-            estimationModeFacade,
-            pathFindingAlgorithms
-        );
-
         var trackedAlgorithms = new TrackedPathFindingAlgorithms(
             algorithms,
             requestScopedDependencies,
             progressTrackerCreator
         );
         var raw = new InstrumentedPathFindingAlgorithms(trackedAlgorithms, estimationModeFacade, launchConvenience);
+
+        var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
+            estimationModeFacade,
+            pathFindingAlgorithms,
+            algorithmProcessingTemplateConvenience,
+            algorithmProcessingTemplate,
+            mutateNodeProperty,
+            mutateRelationshipService,
+            raw,
+            synchroniser
+        );
+
+        var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
+            algorithmProcessingTemplateConvenience,
+            estimationModeFacade,
+            pathFindingAlgorithms,
+            raw,
+            synchroniser
+        );
 
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
             estimationModeFacade,

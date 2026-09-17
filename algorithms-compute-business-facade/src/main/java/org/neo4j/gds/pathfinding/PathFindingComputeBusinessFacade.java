@@ -128,37 +128,6 @@ public class PathFindingComputeBusinessFacade {
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
-    public <TR> CompletableFuture<TR> breadthFirstSearch(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        TraversalParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<HugeLongArray>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
-                parameters.sourceNode(),
-                parameters.targetNodes()
-            )),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.breadthFirstSearch(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
     public <TR> CompletableFuture<TR> deltaStepping(
         GraphName graphName,
         GraphParameters graphParameters,

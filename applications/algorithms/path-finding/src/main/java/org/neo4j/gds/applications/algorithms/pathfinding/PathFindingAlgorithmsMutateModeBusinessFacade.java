@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -27,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.MutateSideEffect;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -68,7 +70,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
@@ -91,6 +92,8 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
     private final MutateNodePropertyService mutateNodeProperty;
     private final MutateRelationshipService mutateRelationshipService;
+    private final InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms;
+    private final Synchroniser synchroniser;
 
     public PathFindingAlgorithmsMutateModeBusinessFacade(
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
@@ -98,7 +101,9 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         MutateNodePropertyService mutateNodeProperty,
-        MutateRelationshipService mutateRelationshipService
+        MutateRelationshipService mutateRelationshipService,
+        InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.estimationFacade = estimationFacade;
@@ -106,6 +111,8 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.mutateNodeProperty = mutateNodeProperty;
         this.mutateRelationshipService = mutateRelationshipService;
+        this.instrumentedPathFindingAlgorithms = instrumentedPathFindingAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT bellmanFord(
@@ -140,15 +147,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration.mutateRelationshipType()
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.bfs(
             graphName,
             configuration,
-            BFS,
-            estimationFacade::breadthFirstSearch,
-            (graph, __) -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT deltaStepping(
