@@ -27,9 +27,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
@@ -569,40 +566,4 @@ public class PathFindingComputeFacade {
             jobId
         );
     }
-
-    public CompletableFuture<TimedAlgorithmResult<TopologicalSortResult>> topologicalSort(
-        Graph graph,
-        TopologicalSortParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(TopologicalSortResult.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.topologicalSort(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var topologicalSort = new TopologicalSort(
-            graph,
-            progressTracker,
-            parameters.concurrency(),
-            parameters.computeMaxDistanceFromSource(),
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            topologicalSort::compute,
-            jobId
-        );
-    }
-
 }

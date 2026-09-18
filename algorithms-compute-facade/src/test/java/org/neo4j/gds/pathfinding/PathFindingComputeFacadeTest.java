@@ -32,7 +32,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.progress.tasks.IterativeTask;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortParameters;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -299,19 +298,4 @@ class PathFindingComputeFacadeTest {
         );
         assertThat(future.join()).isNotNull();
     }
-
-    @Test
-    void topologicalSort() {
-        var future = facade.topologicalSort(
-            graph,
-            new TopologicalSortParameters(
-                false,
-                new Concurrency(4)
-            ),
-            jobIdMock,
-            true
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
 }

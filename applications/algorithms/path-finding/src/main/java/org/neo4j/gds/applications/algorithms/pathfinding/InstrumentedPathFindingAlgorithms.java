@@ -29,18 +29,19 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
-
-import static java.util.Collections.emptySet;
 
 public class InstrumentedPathFindingAlgorithms {
     private final TrackedPathFindingAlgorithms algorithms;
@@ -67,7 +68,7 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            emptySet(),
+            Collections.emptySet(),
             Optional.empty(),
             (graph, __) -> algorithms.allShortestPaths(graph, configuration),
             () -> estimationFacade.allShortestPaths(configuration),
@@ -133,7 +134,7 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            emptySet(),
+            Collections.emptySet(),
             Optional.empty(),
             (graph, __) -> algorithms.longestPath(graph, configuration),
             estimationFacade::longestPath,
@@ -158,6 +159,26 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __) -> algorithms.maxFlow(graph, configuration),
             () -> estimationFacade.maxFlow(configuration),
             AlgorithmLabel.MaxFlow,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> topologicalSort(
+        GraphName graphName,
+        TopologicalSortBaseConfig configuration,
+        Optional<SideEffect<TopologicalSortResult, METADATA>> sideEffect,
+        ResultRenderer<TopologicalSortResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            Optional.empty(),
+            Collections.emptySet(),
+            Optional.empty(),
+            (graph, __) -> algorithms.topologicalSort(graph, configuration),
+            estimationFacade::topologicalSort,
+            AlgorithmLabel.TopologicalSort,
             sideEffect,
             resultRenderer
         );

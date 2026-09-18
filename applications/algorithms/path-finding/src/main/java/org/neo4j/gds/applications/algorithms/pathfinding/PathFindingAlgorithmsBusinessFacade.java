@@ -30,8 +30,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
@@ -270,19 +268,6 @@ public class PathFindingAlgorithmsBusinessFacade {
                 progressTracker,
                 requestScopedDependencies.terminationFlag(),
                 DefaultPool.INSTANCE
-            ), progressTracker, true);
-    }
-
-    public TopologicalSortResult topologicalSort(Graph graph, TopologicalSortBaseConfig configuration) {
-        var task = PathFindingAlgorithmTasks.topologicalSort(graph, configuration.concurrency());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.topologicalSort(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
             ), progressTracker, true);
     }
 
