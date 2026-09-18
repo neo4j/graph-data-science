@@ -461,11 +461,6 @@ public final class GraphImporter {
      * Per-updater holder of pooled {@link RelationshipsBuilder.Batch} objects.
      * Used by a single thread at a time (the owning aggregation updater);
      * {@link #close()} may additionally be called from another thread (result/close).
-     * <p>
-     * A session may hold any number of claims, but only while runnable: before
-     * blocking on a claim, it releases all held claims (see
-     * {@link #batchBuilderFor}). Blocking while holding claims is what
-     * deadlocks concurrent import streams across the per-type pools.
      */
     public static final class ThreadLocalBatches implements AutoCloseable {
 
@@ -488,8 +483,7 @@ public final class GraphImporter {
             if (batchBuilder == null) {
                 batchBuilder = relationshipsBuilder.tryNewBatch();
                 if (batchBuilder == null) {
-                    // The claim would block; evict everything we hold so we
-                    // only ever block while holding nothing.
+                    // To avoid deadlocks we release all held builders before blocking
                     releaseBatches();
                     batchBuilder = relationshipsBuilder.newBatch();
                 }
