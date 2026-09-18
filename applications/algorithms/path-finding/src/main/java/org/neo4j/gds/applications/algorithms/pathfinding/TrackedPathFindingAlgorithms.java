@@ -30,6 +30,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -145,6 +147,21 @@ public class TrackedPathFindingAlgorithms {
             progressTracker,
             true
         );
+    }
+
+    public TopologicalSortResult topologicalSort(Graph graph, TopologicalSortBaseConfig configuration) {
+        var task = PathFindingAlgorithmTasks.topologicalSort(graph, configuration.concurrency());
+        var progressTracker = createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.topologicalSort(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            true);
     }
 
     private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {
