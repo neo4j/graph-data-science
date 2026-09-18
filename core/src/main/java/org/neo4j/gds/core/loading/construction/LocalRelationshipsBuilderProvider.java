@@ -53,6 +53,12 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
 
     abstract LocalRelationshipsBuilderSlot acquire();
 
+    /**
+     * Non-blocking version of {@link #acquire()}. Tries to acquire a slot without blocking.
+     * Returns {@code null} if no builder is readily available.
+     */
+    abstract LocalRelationshipsBuilderSlot tryAcquire();
+
     interface LocalRelationshipsBuilderSlot {
         LocalRelationshipsBuilder get();
 
@@ -69,6 +75,11 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
         @Override
         LocalRelationshipsBuilderSlot acquire() {
             return threadLocal.get();
+        }
+
+        @Override
+        LocalRelationshipsBuilderSlot tryAcquire() {
+            return acquire();
         }
 
         @Override
@@ -158,6 +169,13 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        @Override
+        LocalRelationshipsBuilderSlot tryAcquire() {
+            var slot = pool.tryClaim();
+            VarHandle.acquireFence();
+            return slot;
         }
 
         @Override

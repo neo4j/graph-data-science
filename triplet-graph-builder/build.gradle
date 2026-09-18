@@ -35,6 +35,7 @@ dependencies {
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
 
+    testImplementation project(':core-utils')
     testImplementation project(':gdl-graph')
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')

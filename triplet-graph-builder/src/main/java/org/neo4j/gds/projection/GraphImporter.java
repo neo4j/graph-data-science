@@ -481,7 +481,12 @@ public final class GraphImporter {
             }
             var batchBuilder = batchBuildersPerType.get(relationshipType);
             if (batchBuilder == null) {
-                batchBuilder = relationshipsBuilder.newBatch();
+                batchBuilder = relationshipsBuilder.tryNewBatch();
+                if (batchBuilder == null) {
+                    // To avoid deadlocks we release all held builders before blocking
+                    releaseBatches();
+                    batchBuilder = relationshipsBuilder.newBatch();
+                }
                 batchBuildersPerType.put(relationshipType, batchBuilder);
             }
             return batchBuilder;
