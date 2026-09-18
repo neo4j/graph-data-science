@@ -137,7 +137,9 @@ class LocalRelationshipsBuilderProviderTest {
                 assertThat(provider.tryAcquire()).isNull();
 
                 slot.release();
-                assertThat(provider.tryAcquire()).isNotNull();
+                slot = provider.tryAcquire();
+                assertThat(slot).isNotNull();
+                slot.release();
             }
         }
     }
