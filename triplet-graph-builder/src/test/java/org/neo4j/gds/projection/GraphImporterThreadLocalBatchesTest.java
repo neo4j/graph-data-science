@@ -38,6 +38,7 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 
 import java.util.List;
 
@@ -195,6 +196,47 @@ class GraphImporterThreadLocalBatchesTest {
 
         assertThat(result.nodeCount()).isEqualTo(4);
         assertThat(result.relationshipCount()).isEqualTo(3);
+    }
+
+    @Test
+    void shouldEvictClaimsBeforeBlockingOnANewType() {
+        // The claim timeout is captured when the builder pools are created, so it
+        // must be lowered before the first update creates them.
+        var defaultTimeout = GdsFeatureToggles.POOLED_BUILDER_TIMEOUT_SECONDS.get();
+        GdsFeatureToggles.POOLED_BUILDER_TIMEOUT_SECONDS.set(1);
+        try {
+            // readConcurrency 1 -> a single slot per relationship type
+            var importer = newImporter("g");
+            var typeA = RelationshipType.of("A");
+            var typeB = RelationshipType.of("B");
+
+            var sessionA = importer.newThreadLocalBatches();
+            var sessionB = importer.newThreadLocalBatches();
+
+            // session A holds the only B-slot
+            update(importer, sessionA, 0, 1, typeB);
+            // session B holds the only A-slot
+            update(importer, sessionB, 1, 2, typeA);
+
+            // session B needs a B-slot and would block on the pool held by
+            // session A; blocking while holding its A-claim is what deadlocks,
+            // so the A-claim must be evicted first
+            assertThatThrownBy(() -> update(importer, sessionB, 2, 3, typeB))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Timed out");
+
+            // the evicted A-slot is free again: another session claims it without blocking
+            var sessionC = importer.newThreadLocalBatches();
+            update(importer, sessionC, 3, 0, typeA);
+
+            var result = importer.result(TEST_DATABASE_INFO, ProgressTimer.start(), true);
+
+            assertThat(result.nodeCount()).isEqualTo(4);
+            // the relationship of the failed session-B update is not counted
+            assertThat(result.relationshipCount()).isEqualTo(3);
+        } finally {
+            GdsFeatureToggles.POOLED_BUILDER_TIMEOUT_SECONDS.set(defaultTimeout);
+        }
     }
 
     @Test

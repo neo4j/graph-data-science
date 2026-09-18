@@ -123,5 +123,22 @@ class LocalRelationshipsBuilderProviderTest {
 
             verify(mock).close();
         }
+
+        @Test
+        void shouldTryAcquireWithoutBlocking() throws Exception {
+            try(var provider = LocalRelationshipsBuilderProvider.pooled(
+                () -> mock(LocalRelationshipsBuilder.class),
+                new Concurrency(1)
+            )) {
+                var slot = provider.tryAcquire();
+                assertThat(slot).isNotNull();
+
+                // the only pool slot is claimed: try-acquire yields null instead of blocking
+                assertThat(provider.tryAcquire()).isNull();
+
+                slot.release();
+                assertThat(provider.tryAcquire()).isNotNull();
+            }
+        }
     }
 }

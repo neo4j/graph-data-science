@@ -149,6 +149,15 @@ public class RelationshipsBuilder implements RelationshipsBuilderApi {
         return new Batch(localBuilderProvider.acquire());
     }
 
+    /**
+     * Like {@link #newBatch()}, but returns {@code null} instead of blocking
+     * when no builder is readily available.
+     */
+    public Batch tryNewBatch() {
+        var slot = localBuilderProvider.tryAcquire();
+        return slot == null ? null : new Batch(slot);
+    }
+
     private static boolean validateRelationships(long source, long target) {
         return source != NOT_FOUND && target != NOT_FOUND;
     }
