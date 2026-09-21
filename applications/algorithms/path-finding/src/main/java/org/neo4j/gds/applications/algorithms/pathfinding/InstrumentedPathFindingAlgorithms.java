@@ -71,7 +71,6 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            configuration.relationshipWeightProperty(),
             ValidationRules.None,
             PostLoadETLHooks.None,
             GraphValidation.None,
@@ -92,7 +91,6 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            Optional.empty(),
             ValidationRules.from(
                 new SourceNodeTargetNodesGraphStoreValidation(
                     configuration.sourceNode(),
@@ -118,7 +116,6 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            Optional.empty(),
             ValidationRules.from(
                 new SourceNodeTargetNodesGraphStoreValidation(
                     configuration.sourceNode(),
@@ -144,7 +141,6 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            configuration.relationshipWeightProperty(),
             ValidationRules.None,
             PostLoadETLHooks.None,
             GraphValidation.None,
@@ -165,7 +161,6 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            configuration.relationshipWeightProperty(),
             ValidationRules.from(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())),
             PostLoadETLHooks.None,
             GraphValidation.None,
@@ -186,7 +181,6 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            configuration.relationshipWeightProperty(),
             ValidationRules.from(new SourceNodesRequirement(configuration.sourceNodes())),
             PostLoadETLHooks.None,
             new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE),
@@ -207,7 +201,6 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            Optional.empty(),
             ValidationRules.None,
             PostLoadETLHooks.None,
             GraphValidation.None,
