@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pathfinding;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.SingleTypeRelationshipsProducer;
@@ -40,7 +39,6 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
                 .relationshipType(RelationshipType.of(mutateRelationshipType))
                 .nodes(graph)
                 .addPropertyConfig(new GraphFactory.PropertyConfig(TOTAL_COST_KEY))
-                .orientation(Orientation.NATURAL)
                 .build();
 
             result.forEachPath(pathResult -> relationshipsBuilder.addFromInternal(

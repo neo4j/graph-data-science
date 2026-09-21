@@ -22,7 +22,6 @@ package org.neo4j.gds.similarity;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashSet;
@@ -40,7 +39,6 @@ class HugeSimilarityGraphTest {
 
         var similarityGraph =  new SimilarityGraphBuilder(
             graph,
-            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             true
         ).build(Stream.of(
@@ -72,7 +70,6 @@ class HugeSimilarityGraphTest {
 
             var histogram =  new SimilarityGraphBuilder(
                 graph,
-                new Concurrency(1),
                 TerminationFlag.RUNNING_TRUE,
                 false
             ).build(Stream.of(

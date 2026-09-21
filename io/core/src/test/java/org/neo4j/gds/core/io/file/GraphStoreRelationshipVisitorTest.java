@@ -82,7 +82,6 @@ class GraphStoreRelationshipVisitorTest {
         Map<String, RelationshipsBuilder> relationshipBuildersByType = new HashMap<>();
         Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier = () -> GraphFactory
             .initRelationshipsBuilder()
-            .concurrency(new Concurrency(1))
             .nodes(graph);
         var relationshipVisitor = new GraphStoreRelationshipVisitor(
             relationshipSchema,

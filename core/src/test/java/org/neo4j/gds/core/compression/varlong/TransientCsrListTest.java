@@ -31,8 +31,6 @@ import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.compression.packed.PackedAdjacencyList;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 
 import java.util.Arrays;
@@ -404,8 +402,6 @@ class TransientCsrListTest {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .relationshipType(RelationshipType.of("REL"))
-            .concurrency(new Concurrency(1))
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         Arrays.stream(targets).forEach(target -> relationshipsBuilder.add(sourceNodeId, target));

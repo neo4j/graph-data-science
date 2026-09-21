@@ -20,19 +20,16 @@
 package org.neo4j.gds.walking;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.Aggregation;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -77,10 +74,7 @@ public class CollapsePath implements Algorithm<SingleTypeRelationships> {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(pathTemplates.get(0)[0]) // just need any arbitrary graph
             .relationshipType(mutateRelationshipType)
-            .orientation(Orientation.NATURAL)
-            .aggregation(Aggregation.NONE)
             .concurrency(concurrency)
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         Supplier<Runnable> collapsePathTaskSupplier = CollapsePathTaskSupplier.create(

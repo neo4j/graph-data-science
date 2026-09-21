@@ -27,7 +27,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -120,14 +119,12 @@ final class CompositeIntersectionTest {
             .nodes(idMap)
             .relationshipType(org.neo4j.gds.RelationshipType.of("FOO"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         RelationshipsBuilder relationshipsBuilder2 = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .relationshipType(org.neo4j.gds.RelationshipType.of("BAR"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
 

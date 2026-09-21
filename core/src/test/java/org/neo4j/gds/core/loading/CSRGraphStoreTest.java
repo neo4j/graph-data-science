@@ -93,7 +93,6 @@ class CSRGraphStoreTest {
         RelationshipsBuilder relBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .relationshipType(RelationshipType.of("NEW"))
-            .orientation(Orientation.NATURAL)
             .build();
 
         relBuilder.add(gdlFactory.nodeId("a"), gdlFactory.nodeId("d"));

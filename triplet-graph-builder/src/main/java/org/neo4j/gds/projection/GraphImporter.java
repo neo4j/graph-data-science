@@ -20,7 +20,6 @@
 package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseInfo;
@@ -387,7 +386,6 @@ public final class GraphImporter {
             .nodes(this.idMapBuilder)
             .relationshipType(relType)
             .orientation(orientation)
-            .aggregation(Aggregation.NONE)
             .indexInverse(indexInverse)
             .concurrency(this.config.readConcurrency())
             .usePooledBuilderProvider(true);

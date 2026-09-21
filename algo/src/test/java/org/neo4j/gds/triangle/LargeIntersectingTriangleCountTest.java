@@ -89,7 +89,6 @@ class LargeIntersectingTriangleCountTest {
             .nodes(idMap)
             .relationshipType(RelationshipType.of("FOO"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         for (long u = 0; u < nodeCount - 1; ++u) {

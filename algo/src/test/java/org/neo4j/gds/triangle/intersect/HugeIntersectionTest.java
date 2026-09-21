@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.triangle.LabelFilterChecker;
@@ -81,7 +80,6 @@ final class HugeIntersectionTest {
             .nodes(idMap)
             .relationshipType(RelationshipType.of("FOO"))
             .orientation(Orientation.UNDIRECTED)
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
 

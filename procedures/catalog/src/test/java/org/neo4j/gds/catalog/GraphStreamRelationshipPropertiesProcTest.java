@@ -26,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
@@ -234,7 +233,6 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .relationshipType(RelationshipType.of("NEW_REL"))
-            .orientation(Orientation.NATURAL)
             .addPropertyConfig(new GraphFactory.PropertyConfig("newRelProp3"))
             .build();
 
@@ -316,7 +314,6 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .relationshipType(RelationshipType.of("NEW_REL"))
-            .orientation(Orientation.NATURAL)
             .addPropertyConfig(new GraphFactory.PropertyConfig("newRelProp3"))
             .build();
 

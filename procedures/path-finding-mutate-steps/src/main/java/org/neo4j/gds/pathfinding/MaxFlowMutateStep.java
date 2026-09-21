@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pathfinding;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -56,7 +55,6 @@ public class MaxFlowMutateStep implements MutateStep<FlowResult, RelationshipsWr
             .relationshipType(RelationshipType.of(mutateRelationshipType))
             .nodes(graph)
             .addPropertyConfig(new GraphFactory.PropertyConfig(mutateProperty))
-            .orientation(Orientation.NATURAL)
             .build();
 
         for(long idx = 0; idx < result.flow().size(); idx++){

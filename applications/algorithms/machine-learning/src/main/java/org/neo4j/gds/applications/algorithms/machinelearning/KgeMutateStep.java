@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.machinelearning;
 
 import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
@@ -29,7 +28,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -62,10 +60,8 @@ class KgeMutateStep implements MutateStep<KGEPredictResult, RelationshipsWritten
             .aggregation(Aggregation.SINGLE)
             .nodes(graph)
             .relationshipType(mutateRelationshipType)
-            .orientation(Orientation.NATURAL)
             .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.mutateProperty()))
             .concurrency(concurrency)
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var similarityResultStream = result.topKMap().stream();

@@ -21,7 +21,6 @@ package org.neo4j.gds.indexInverse;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.Graph;
@@ -30,7 +29,6 @@ import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -94,7 +92,6 @@ public class InverseRelationships implements Algorithm<Map<RelationshipType, Sin
                 builder()
                 .tasks(tasks)
                 .concurrency(concurrency)
-                .executor(DefaultPool.INSTANCE)
                 .terminationFlag(terminationFlag)
                 .build()
                 .run();
@@ -118,10 +115,7 @@ public class InverseRelationships implements Algorithm<Map<RelationshipType, Sin
         RelationshipsBuilderBuilder relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
             .relationshipType(relationshipType)
             .concurrency(concurrency)
-            .nodes(graphStore.nodes())
-            .executorService(DefaultPool.INSTANCE)
-            .orientation(Orientation.NATURAL)
-            .indexInverse(false);
+            .nodes(graphStore.nodes());
 
         propertySchemas.forEach(propertySchema ->
             relationshipsBuilderBuilder.addPropertyConfig(new GraphFactory.PropertyConfig(
