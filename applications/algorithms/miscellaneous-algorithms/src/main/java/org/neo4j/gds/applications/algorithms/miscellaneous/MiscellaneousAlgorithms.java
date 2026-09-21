@@ -66,7 +66,6 @@ public class MiscellaneousAlgorithms {
             graphStore,
             parameters,
             progressTracker,
-            DefaultPool.INSTANCE,
             terminationFlag
         );
 

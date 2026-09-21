@@ -30,6 +30,7 @@ import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -45,7 +46,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,13 +55,11 @@ public class InverseRelationships implements Algorithm<Map<RelationshipType, Sin
     private final GraphStore graphStore;
     private final InverseRelationshipsParameters parameters;
     private final Concurrency concurrency;
-    private final ExecutorService executorService;
 
     public InverseRelationships(
         GraphStore graphStore,
         InverseRelationshipsParameters parameters,
         ProgressTracker progressTracker,
-        ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
         this.progressTracker = progressTracker;
@@ -69,7 +67,6 @@ public class InverseRelationships implements Algorithm<Map<RelationshipType, Sin
         this.graphStore = graphStore;
         this.parameters = parameters;
         this.concurrency = parameters.concurrency();
-        this.executorService = executorService;
     }
 
     @Override
@@ -97,7 +94,7 @@ public class InverseRelationships implements Algorithm<Map<RelationshipType, Sin
                 builder()
                 .tasks(tasks)
                 .concurrency(concurrency)
-                .executor(executorService)
+                .executor(DefaultPool.INSTANCE)
                 .terminationFlag(terminationFlag)
                 .build()
                 .run();
@@ -122,7 +119,7 @@ public class InverseRelationships implements Algorithm<Map<RelationshipType, Sin
             .relationshipType(relationshipType)
             .concurrency(concurrency)
             .nodes(graphStore.nodes())
-            .executorService(executorService)
+            .executorService(DefaultPool.INSTANCE)
             .orientation(Orientation.NATURAL)
             .indexInverse(false);
 

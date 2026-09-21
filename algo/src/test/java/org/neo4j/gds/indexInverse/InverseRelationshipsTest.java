@@ -31,7 +31,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -80,7 +79,6 @@ class InverseRelationshipsTest {
             graphStore,
             parameters,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).compute();
 
@@ -111,7 +109,6 @@ class InverseRelationshipsTest {
             graphStore,
             parameters,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).compute();
 
@@ -154,7 +151,6 @@ class InverseRelationshipsTest {
             graphStore,
             parameters,
             progressTracker,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
 

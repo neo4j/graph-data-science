@@ -103,7 +103,6 @@ class HitsETLHook implements PostLoadETLHook {
             graphStore,
             parameters,
             progressTracker,
-            DefaultPool.INSTANCE,
             terminationFlag
         );
     }
