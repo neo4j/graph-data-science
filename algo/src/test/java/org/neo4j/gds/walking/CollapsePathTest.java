@@ -28,7 +28,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -125,8 +124,7 @@ class CollapsePathTest {
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             false,
             RelationshipType.of("SAME_DRUG"),
-            new Concurrency(2),
-            DefaultPool.INSTANCE
+            new Concurrency(2)
 
         ).compute();
 
@@ -141,8 +139,7 @@ class CollapsePathTest {
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             true,
             RelationshipType.of("SAME_DRUG"),
-            new Concurrency(2),
-            DefaultPool.INSTANCE
+            new Concurrency(2)
 
         ).compute();
 
@@ -155,8 +152,7 @@ class CollapsePathTest {
             Collections.singletonList(new Graph[]{tookGraph, takenByGraph}),
             false,
             RelationshipType.of("SAME_DRUG"),
-            new Concurrency(2),
-            DefaultPool.INSTANCE
+            new Concurrency(2)
         ).compute();
 
         assertResultGraph(tookGraphStore, relationships, EXPECTED_WITHOUT_LOOPS);
@@ -202,11 +198,7 @@ class CollapsePathTest {
                 mutateRelType.name()
             );
 
-            var relationships = CollapsePath.create(
-                graphStore,
-                parameters,
-                DefaultPool.INSTANCE
-            ).compute();
+            var relationships = CollapsePath.create(graphStore, parameters).compute();
 
             graphStore.addRelationshipType(relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);
@@ -230,11 +222,7 @@ class CollapsePathTest {
                 mutateRelType.name()
             );
 
-            var relationships = CollapsePath.create(
-                graphStore,
-                parameters,
-                DefaultPool.INSTANCE
-            ).compute();
+            var relationships = CollapsePath.create(graphStore, parameters).compute();
 
             graphStore.addRelationshipType(relationships);
             var resultGraph = graphStore.getGraph(mutateRelType);

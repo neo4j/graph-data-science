@@ -26,6 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -34,7 +35,6 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.Aggregation;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
 /**
@@ -47,21 +47,15 @@ public class CollapsePath implements Algorithm<SingleTypeRelationships> {
     private final boolean allowSelfLoops;
     private final RelationshipType mutateRelationshipType;
     private final Concurrency concurrency;
-    private final ExecutorService executorService;
 
-    public static CollapsePath create(
-        GraphStore graphStore,
-        CollapsePathParameters parameters,
-        ExecutorService executorService
-    ) {
+    public static CollapsePath create(GraphStore graphStore, CollapsePathParameters parameters) {
         var pathTemplates = CollapsePathListOfGraphsLoader.graphs(graphStore,parameters);
 
         return new CollapsePath(
             pathTemplates,
             parameters.allowSelfLoops(),
             RelationshipType.of(parameters.typeToCreate()),
-            parameters.concurrency(),
-            executorService
+            parameters.concurrency()
         );
     }
 
@@ -69,15 +63,13 @@ public class CollapsePath implements Algorithm<SingleTypeRelationships> {
         List<Graph[]> pathTemplates,
         boolean allowSelfLoops,
         RelationshipType mutateRelationshipType,
-        Concurrency concurrency,
-        ExecutorService executorService
+        Concurrency concurrency
     ) {
         this.pathTemplates = pathTemplates;
         this.nodeCount = pathTemplates.get(0)[0].nodeCount();
         this.allowSelfLoops = allowSelfLoops;
         this.mutateRelationshipType = mutateRelationshipType;
         this.concurrency = concurrency;
-        this.executorService = executorService;
     }
 
     @Override
@@ -88,7 +80,7 @@ public class CollapsePath implements Algorithm<SingleTypeRelationships> {
             .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
             .concurrency(concurrency)
-            .executorService(executorService)
+            .executorService(DefaultPool.INSTANCE)
             .build();
 
         Supplier<Runnable> collapsePathTaskSupplier = CollapsePathTaskSupplier.create(

@@ -47,11 +47,7 @@ public class MiscellaneousAlgorithms {
     }
 
     public SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathParameters parameters) {
-        var algorithm = CollapsePath.create(
-            graphStore,
-            parameters,
-            DefaultPool.INSTANCE
-        );
+        var algorithm = CollapsePath.create(graphStore, parameters);
 
         return algorithm.compute();
     }

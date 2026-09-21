@@ -25,7 +25,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -110,8 +109,7 @@ class CollapseMultiPathsTest {
             pathTemplates,
             false,
             RelationshipType.of("REL"),
-            new Concurrency(2),
-            DefaultPool.INSTANCE
+            new Concurrency(2)
         ).compute();
 
         // Planes, Trains and Automobiles
@@ -170,8 +168,7 @@ class CollapseMultiPathsTest {
             ),
             false,
             RelationshipType.of("REL"),
-            new Concurrency(2),
-            DefaultPool.INSTANCE
+            new Concurrency(2)
 
         ).compute();
 

@@ -73,11 +73,7 @@ public class MiscellaneousComputeFacade {
             return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SingleTypeRelationships.EMPTY));
         }
 
-        var collapsePath =  CollapsePath.create(
-            graphStore,
-            parameters,
-            DefaultPool.INSTANCE
-        );
+        var collapsePath =  CollapsePath.create(graphStore, parameters);
 
         return algorithmCaller.run(
             collapsePath::compute,
