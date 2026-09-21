@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.PostLoadETLHooks;
+import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
@@ -69,7 +70,7 @@ public class InstrumentedCommunityAlgorithms {
             configuration.relationshipWeightProperty(),
             ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.conductance(graph, configuration),
             estimationFacade::conductance,
             AlgorithmLabel.Conductance,
@@ -90,7 +91,7 @@ public class InstrumentedCommunityAlgorithms {
             configuration.relationshipWeightProperty(),
             ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.modularity(graph, configuration),
             estimationFacade::modularity,
             AlgorithmLabel.Modularity,
@@ -111,7 +112,7 @@ public class InstrumentedCommunityAlgorithms {
             Optional.empty(),
             ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.triangles(graph, configuration),
             estimationFacade::triangles,
             AlgorithmLabel.Triangles,
@@ -132,7 +133,7 @@ public class InstrumentedCommunityAlgorithms {
             Optional.empty(),
             ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.triangleCount(graph, configuration),
             estimationFacade::triangleCount,
             AlgorithmLabel.TriangleCount,

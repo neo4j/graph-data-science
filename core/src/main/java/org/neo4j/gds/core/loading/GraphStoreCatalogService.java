@@ -138,7 +138,7 @@ public class GraphStoreCatalogService {
             relationshipProperty,
             graphStoreValidation,
             PostLoadETLHooks.None,
-            graphValidation
+            graphValidation.orElse(GraphValidation.None) // not changing signature at this point
         );
     }
 
@@ -154,7 +154,7 @@ public class GraphStoreCatalogService {
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
         PostLoadETLHooks postGraphStoreLoadETLHooks,
-        Optional<GraphValidation> graphValidation
+        GraphValidation graphValidation
     ) {
         var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
             graphName,
@@ -180,7 +180,7 @@ public class GraphStoreCatalogService {
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
 
-        graphValidation.ifPresent(gv -> gv.validate(graph));
+        graphValidation.validate(graph);
 
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }

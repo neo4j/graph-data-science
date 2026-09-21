@@ -91,7 +91,7 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
         PostLoadETLHooks postLoadETLHooks,
-        Optional<GraphValidation> graphValidation,
+        GraphValidation graphValidation,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
         TerminationFlag terminationFlag,
@@ -142,7 +142,7 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
         PostLoadETLHooks postLoadETLHooks,
-        Optional<GraphValidation> graphValidation
+        GraphValidation graphValidation
     ) {
         try (var ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
             return graphStoreCatalogService.loadGraphResources(

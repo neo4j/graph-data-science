@@ -69,7 +69,7 @@ public interface AlgorithmProcessingFacade {
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
         PostLoadETLHooks postLoadETLHooks,
-        Optional<GraphValidation> graphValidation,
+        GraphValidation graphValidation,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
         TerminationFlag terminationFlag,

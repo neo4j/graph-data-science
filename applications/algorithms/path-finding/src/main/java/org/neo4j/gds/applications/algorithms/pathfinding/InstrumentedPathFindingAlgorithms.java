@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.PostLoadETLHooks;
+import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.ValidationRules;
@@ -73,7 +74,7 @@ public class InstrumentedPathFindingAlgorithms {
             configuration.relationshipWeightProperty(),
             ValidationRules.None,
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.allShortestPaths(graph, configuration),
             () -> estimationFacade.allShortestPaths(configuration),
             AlgorithmLabel.AllShortestPaths,
@@ -99,7 +100,7 @@ public class InstrumentedPathFindingAlgorithms {
                 )
             ),
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.bfs(graph, configuration),
             estimationFacade::breadthFirstSearch,
             AlgorithmLabel.BFS,
@@ -125,7 +126,7 @@ public class InstrumentedPathFindingAlgorithms {
                 )
             ),
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.dfs(graph, configuration),
             estimationFacade::depthFirstSearch,
             AlgorithmLabel.DFS,
@@ -146,7 +147,7 @@ public class InstrumentedPathFindingAlgorithms {
             configuration.relationshipWeightProperty(),
             ValidationRules.None,
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.longestPath(graph, configuration),
             estimationFacade::longestPath,
             AlgorithmLabel.LongestPath,
@@ -167,7 +168,7 @@ public class InstrumentedPathFindingAlgorithms {
             configuration.relationshipWeightProperty(),
             ValidationRules.from(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())),
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.maxFlow(graph, configuration),
             () -> estimationFacade.maxFlow(configuration),
             AlgorithmLabel.MaxFlow,
@@ -188,7 +189,7 @@ public class InstrumentedPathFindingAlgorithms {
             configuration.relationshipWeightProperty(),
             ValidationRules.from(new SourceNodesRequirement(configuration.sourceNodes())),
             PostLoadETLHooks.None,
-            Optional.of(new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE)),
+            new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE),
             (graph, __) -> algorithms.randomWalk(graph, configuration),
             () -> estimationFacade.randomWalk(configuration),
             AlgorithmLabel.RandomWalk,
@@ -209,7 +210,7 @@ public class InstrumentedPathFindingAlgorithms {
             Optional.empty(),
             ValidationRules.None,
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.topologicalSort(graph, configuration),
             estimationFacade::topologicalSort,
             AlgorithmLabel.TopologicalSort,

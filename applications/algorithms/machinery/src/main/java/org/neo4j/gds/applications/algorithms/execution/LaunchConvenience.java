@@ -67,10 +67,10 @@ public class LaunchConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
-        Optional<String> relationshipProperty, // only used by conductance thus far
+        Optional<String> relationshipProperty,
         ValidationRules algorithmSpecificValidationRules,
         PostLoadETLHooks postLoadETLHooks,
-        Optional<GraphValidation> graphValidation, // for random walk
+        GraphValidation graphValidation,
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,

@@ -32,6 +32,7 @@ import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.core.loading.PostLoadETLHooks;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
+import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.ValidationRules;
@@ -97,7 +98,7 @@ public final class InstrumentedCentralityAlgorithms {
             Optional.empty(),
             ValidationRules.from(new UndirectedOnlyRequirement("Articulation Points")),
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
             AlgorithmLabel.ArticulationPoints,
@@ -119,7 +120,7 @@ public final class InstrumentedCentralityAlgorithms {
             Optional.empty(),
             ValidationRules.from(new UndirectedOnlyRequirement("Bridges")),
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.bridges(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.bridges(shouldComputeComponents),
             AlgorithmLabel.Bridges,
@@ -140,7 +141,7 @@ public final class InstrumentedCentralityAlgorithms {
             Optional.empty(),
             ValidationRules.None,
             PostLoadETLHooks.None,
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
             AlgorithmLabel.HarmonicCentrality,
@@ -167,7 +168,7 @@ public final class InstrumentedCentralityAlgorithms {
                 new DirectedOnlyRequirement("Hits")
             ),
             PostLoadETLHooks.from(etlHook),
-            Optional.empty(),
+            GraphValidation.None,
             (graph, __) -> algorithms.hits(graph, configuration),
             estimationFacade::hits,
             AlgorithmLabel.HITS,

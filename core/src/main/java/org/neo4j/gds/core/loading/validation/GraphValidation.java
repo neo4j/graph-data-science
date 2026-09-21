@@ -22,5 +22,7 @@ package org.neo4j.gds.core.loading.validation;
 import org.neo4j.gds.api.Graph;
 
 public interface GraphValidation {
+    GraphValidation None = graph -> { /* do nothing */ };
+
     void validate(Graph graph);
 }
