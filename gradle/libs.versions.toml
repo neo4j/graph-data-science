@@ -2,7 +2,7 @@
 agrona = "1.23.0"
 asciidoctorj = "3.0.0"
 assertj = "3.26.3"
-bouncycastle-prov = "1.84"
+bouncycastle-prov = "1.85"
 caffeine = "3.1.8"
 checkStyle = "10.12.1"
 commons-io = "2.16.1"
