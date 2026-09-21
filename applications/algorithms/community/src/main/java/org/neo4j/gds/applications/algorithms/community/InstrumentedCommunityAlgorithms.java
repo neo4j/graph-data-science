@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
+import org.neo4j.gds.core.loading.PostLoadETLHooks;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
@@ -67,7 +68,7 @@ public class InstrumentedCommunityAlgorithms {
             configuration,
             configuration.relationshipWeightProperty(),
             ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
-            Optional.empty(),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.conductance(graph, configuration),
             estimationFacade::conductance,
@@ -88,7 +89,7 @@ public class InstrumentedCommunityAlgorithms {
             configuration,
             configuration.relationshipWeightProperty(),
             ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
-            Optional.empty(),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.modularity(graph, configuration),
             estimationFacade::modularity,
@@ -109,7 +110,7 @@ public class InstrumentedCommunityAlgorithms {
             configuration,
             Optional.empty(),
             ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
-            Optional.empty(),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.triangles(graph, configuration),
             estimationFacade::triangles,
@@ -130,7 +131,7 @@ public class InstrumentedCommunityAlgorithms {
             configuration,
             Optional.empty(),
             ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
-            Optional.empty(),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.triangleCount(graph, configuration),
             estimationFacade::triangleCount,

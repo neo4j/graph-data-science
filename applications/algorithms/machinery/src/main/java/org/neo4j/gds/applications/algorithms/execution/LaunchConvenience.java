@@ -28,7 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.loading.PostLoadETLHook;
+import org.neo4j.gds.core.loading.PostLoadETLHooks;
 import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -69,7 +69,7 @@ public class LaunchConvenience {
         CONFIGURATION configuration,
         Optional<String> relationshipProperty, // only used by conductance thus far
         ValidationRules algorithmSpecificValidationRules,
-        Optional<Iterable<PostLoadETLHook>> postLoadETLHooks, // only used by hits thus far
+        PostLoadETLHooks postLoadETLHooks,
         Optional<GraphValidation> graphValidation, // for random walk
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
