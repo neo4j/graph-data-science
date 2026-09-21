@@ -30,6 +30,7 @@ import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -43,7 +44,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -51,7 +51,6 @@ public class ToUndirected implements Algorithm<SingleTypeRelationships> {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final GraphStore graphStore;
-    private final ExecutorService executorService;
     private final Concurrency concurrency;
     private final ToUndirectedParameters parameters;
 
@@ -60,14 +59,12 @@ public class ToUndirected implements Algorithm<SingleTypeRelationships> {
         GraphStore graphStore,
         ToUndirectedParameters params,
         ProgressTracker progressTracker,
-        ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.graphStore = graphStore;
         this.parameters = params;
-        this.executorService = executorService;
         this.concurrency = params.concurrency();
     }
 
@@ -96,7 +93,6 @@ public class ToUndirected implements Algorithm<SingleTypeRelationships> {
             builder()
             .tasks(tasks)
             .concurrency(concurrency)
-            .executor(executorService)
             .terminationFlag(terminationFlag)
             .build()
             .run();
@@ -121,7 +117,7 @@ public class ToUndirected implements Algorithm<SingleTypeRelationships> {
             .relationshipType(relationshipType)
             .concurrency(concurrency)
             .nodes(graphStore.nodes())
-            .executorService(executorService)
+            .executorService(DefaultPool.INSTANCE)
             .orientation(Orientation.UNDIRECTED);
 
         parameters

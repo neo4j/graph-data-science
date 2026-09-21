@@ -40,8 +40,8 @@ class ToUndirectedMemoryEstimateDefinitionTest {
         var uncompressedRunner = TestMethodRunner.runUncompressedOrdered();
 
         return Stream.of(
-            Arguments.of(compressedRunner, 1_724_496),
-            Arguments.of(uncompressedRunner, 3_035_320)
+            Arguments.of(compressedRunner, 1_724_488),
+            Arguments.of(uncompressedRunner, 3_035_312)
         );
     }
 

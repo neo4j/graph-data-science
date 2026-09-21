@@ -163,7 +163,6 @@ public class MiscellaneousComputeFacade {
             graphStore,
             parameters,
             progressTracker,
-            DefaultPool.INSTANCE,
             terminationFlag
         );
 

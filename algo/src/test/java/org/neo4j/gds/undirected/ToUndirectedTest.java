@@ -29,7 +29,6 @@ import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -86,7 +85,6 @@ class ToUndirectedTest {
             directedGraphStore,
             params,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).compute();
 
@@ -135,7 +133,6 @@ class ToUndirectedTest {
             singleDirectedGraphStore,
             params,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).compute();
 
@@ -184,7 +181,6 @@ class ToUndirectedTest {
             noPropertyDirectedGraphStore,
             params,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).compute();
 
@@ -216,7 +212,6 @@ class ToUndirectedTest {
             inputGraphStore,
             params,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).compute();
 
@@ -248,7 +243,6 @@ class ToUndirectedTest {
             input,
             params,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).compute();
 
@@ -289,7 +283,6 @@ class ToUndirectedTest {
             input,
             params,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).compute();
 
@@ -333,7 +326,6 @@ class ToUndirectedTest {
             directedGraphStore,
             params,
             progressTracker,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).compute();
 
