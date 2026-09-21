@@ -41,7 +41,7 @@ import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFParameters;
-import org.neo4j.gds.pathfinding.validation.RandomWalkGraphValidation;
+import org.neo4j.gds.applications.algorithms.pathfinding.RandomWalkGraphValidation;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
 
 public class PathFindingComputeBusinessFacade {
 
@@ -225,36 +224,6 @@ public class PathFindingComputeBusinessFacade {
             jobId,
             logProgress
         ).thenApply(resultTransformerBuilder.build(capacityGraphResources));
-    }
-
-
-    public <TR> CompletableFuture<TR> randomWalk(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        RandomWalkParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<Stream<long[]>>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidation(new SourceNodesRequirement(parameters.sourceNodes())),
-            true,
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService))
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.randomWalk(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> randomWalkCountingNodeVisits(

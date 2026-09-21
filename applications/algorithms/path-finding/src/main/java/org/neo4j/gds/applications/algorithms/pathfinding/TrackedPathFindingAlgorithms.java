@@ -39,6 +39,7 @@ import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.stream.Stream;
 
@@ -146,6 +147,23 @@ public class TrackedPathFindingAlgorithms {
             ),
             progressTracker,
             true
+        );
+    }
+
+    Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration) {
+        var task = PathFindingAlgorithmTasks.randomWalk(graph, configuration.concurrency());
+        var progressTracker = createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.randomWalk(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag(),
+                DefaultPool.INSTANCE
+            ),
+            progressTracker,
+            false
         );
     }
 

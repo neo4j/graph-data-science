@@ -27,6 +27,7 @@ dependencies {
     implementation project(':path-finding-mutate-steps')
     implementation project(':path-finding-write-steps')
     implementation project(':progress-tracking')
+    implementation project(':string-formatting')
     implementation project(':termination')
 
     // Test dependencies

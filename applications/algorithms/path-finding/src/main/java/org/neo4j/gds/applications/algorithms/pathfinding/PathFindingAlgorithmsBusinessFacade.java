@@ -49,8 +49,6 @@ import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
-import java.util.stream.Stream;
-
 public class PathFindingAlgorithmsBusinessFacade {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
@@ -129,20 +127,6 @@ public class PathFindingAlgorithmsBusinessFacade {
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ), progressTracker, true);
-    }
-
-    Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration) {
-        var task = PathFindingAlgorithmTasks.randomWalk(graph, configuration.concurrency());
-        var progressTracker = createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.randomWalk(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag(),
-                DefaultPool.INSTANCE
-            ), progressTracker, false);
     }
 
     HugeAtomicLongArray randomWalkCountingNodeVisits(Graph graph, RandomWalkBaseConfig configuration) {

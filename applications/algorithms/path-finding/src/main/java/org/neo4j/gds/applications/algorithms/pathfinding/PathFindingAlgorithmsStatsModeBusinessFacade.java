@@ -41,7 +41,7 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
-import org.neo4j.gds.traversal.RandomWalkStatsConfig;
+import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,7 +50,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
@@ -165,17 +164,15 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT randomWalk(
         GraphName graphName,
-        RandomWalkStatsConfig configuration,
+        RandomWalkBaseConfig configuration,
         StatsResultBuilder<Stream<long[]>, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.randomWalk(
             graphName,
             configuration,
-            RandomWalk,
-            () -> estimationFacade.randomWalk(configuration),
-            (graph, __) -> pathFindingAlgorithms.randomWalk(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT spanningTree(

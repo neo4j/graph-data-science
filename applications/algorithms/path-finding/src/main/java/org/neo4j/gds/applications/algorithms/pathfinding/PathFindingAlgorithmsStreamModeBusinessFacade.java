@@ -51,7 +51,7 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
-import org.neo4j.gds.traversal.RandomWalkStreamConfig;
+import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -62,7 +62,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Del
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yens;
@@ -218,20 +217,17 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-
     public <RESULT> Stream<RESULT> randomWalk(
         GraphName graphName,
-        RandomWalkStreamConfig configuration,
+        RandomWalkBaseConfig configuration,
         StreamResultBuilder<Stream<long[]>, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.randomWalk(
             graphName,
             configuration,
-            RandomWalk,
-            () -> estimation.randomWalk(configuration),
-            (graph, __) -> algorithms.randomWalk(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> singlePairShortestPathAStar(

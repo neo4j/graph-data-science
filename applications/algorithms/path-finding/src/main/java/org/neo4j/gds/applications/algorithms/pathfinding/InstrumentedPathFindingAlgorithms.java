@@ -27,7 +27,9 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -36,6 +38,7 @@ import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
+import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -70,6 +73,7 @@ public class InstrumentedPathFindingAlgorithms {
             configuration.relationshipWeightProperty(),
             Collections.emptySet(),
             Optional.empty(),
+            Optional.empty(),
             (graph, __) -> algorithms.allShortestPaths(graph, configuration),
             () -> estimationFacade.allShortestPaths(configuration),
             AlgorithmLabel.AllShortestPaths,
@@ -92,6 +96,7 @@ public class InstrumentedPathFindingAlgorithms {
                 configuration.sourceNode(),
                 configuration.targetNodes()
             )),
+            Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.bfs(graph, configuration),
             estimationFacade::breadthFirstSearch,
@@ -116,6 +121,7 @@ public class InstrumentedPathFindingAlgorithms {
                 configuration.targetNodes()
             )),
             Optional.empty(),
+            Optional.empty(),
             (graph, __) -> algorithms.dfs(graph, configuration),
             estimationFacade::depthFirstSearch,
             AlgorithmLabel.DFS,
@@ -135,6 +141,7 @@ public class InstrumentedPathFindingAlgorithms {
             configuration,
             configuration.relationshipWeightProperty(),
             Collections.emptySet(),
+            Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.longestPath(graph, configuration),
             estimationFacade::longestPath,
@@ -156,9 +163,31 @@ public class InstrumentedPathFindingAlgorithms {
             configuration.relationshipWeightProperty(),
             Set.of(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())),
             Optional.empty(),
+            Optional.empty(),
             (graph, __) -> algorithms.maxFlow(graph, configuration),
             () -> estimationFacade.maxFlow(configuration),
             AlgorithmLabel.MaxFlow,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> randomWalk(
+        GraphName graphName,
+        RandomWalkBaseConfig configuration,
+        Optional<SideEffect<Stream<long[]>, METADATA>> sideEffect,
+        ResultRenderer<Stream<long[]>, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            Set.of(new SourceNodesRequirement(configuration.sourceNodes())),
+            Optional.empty(),
+            Optional.of(new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE)),
+            (graph, __) -> algorithms.randomWalk(graph, configuration),
+            () -> estimationFacade.randomWalk(configuration),
+            AlgorithmLabel.RandomWalk,
             sideEffect,
             resultRenderer
         );
@@ -175,6 +204,7 @@ public class InstrumentedPathFindingAlgorithms {
             configuration,
             Optional.empty(),
             Collections.emptySet(),
+            Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.topologicalSort(graph, configuration),
             estimationFacade::topologicalSort,
