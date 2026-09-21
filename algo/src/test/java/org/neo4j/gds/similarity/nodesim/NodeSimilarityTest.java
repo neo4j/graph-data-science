@@ -30,7 +30,6 @@ import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.TestProgressTrackerHelper;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -383,7 +382,6 @@ final class NodeSimilarityTest {
         var graphBuilder = new SimilarityGraphBuilder(
             graph,
             new Concurrency(1),
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             false
         );
@@ -460,7 +458,6 @@ final class NodeSimilarityTest {
         var graphBuilder = new SimilarityGraphBuilder(
             graph,
             parameters.concurrency(),
-            null,
             TerminationFlag.RUNNING_TRUE,
             false
         );
@@ -640,7 +637,6 @@ final class NodeSimilarityTest {
         var graphBuilder = new SimilarityGraphBuilder(
             graph,
             new Concurrency(1),
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             false
         );
@@ -702,7 +698,6 @@ final class NodeSimilarityTest {
         var graphBuilder = new SimilarityGraphBuilder(
             graph,
             new Concurrency(1),
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             false
         );

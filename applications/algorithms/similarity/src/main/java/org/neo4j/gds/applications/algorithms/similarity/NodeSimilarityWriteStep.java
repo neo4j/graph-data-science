@@ -27,7 +27,6 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
@@ -83,7 +82,6 @@ final class NodeSimilarityWriteStep implements WriteStep<NodeSimilarityResult, P
         var graphResult = new SimilarityGraphBuilder(
             graph,
             configuration.concurrency(),
-            DefaultPool.INSTANCE,
             terminationFlag,
             shouldComputeSimilarityDistribution
         ).build(result);

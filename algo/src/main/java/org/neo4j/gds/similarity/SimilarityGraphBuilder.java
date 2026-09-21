@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
@@ -36,7 +37,6 @@ import org.neo4j.gds.similarity.nodesim.TopKGraph;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -80,18 +80,15 @@ public class SimilarityGraphBuilder {
     private final Graph graph;
     private final TerminationFlag terminationFlag;
     private final Concurrency concurrency;
-    private final ExecutorService executorService;
     private final boolean shouldConstructDistribution;
 
     public SimilarityGraphBuilder(
         Graph graph,
         Concurrency concurrency,
-        ExecutorService executorService,
         TerminationFlag terminationFlag,
         boolean shouldConstructDistribution
     ) {
         this.concurrency = concurrency;
-        this.executorService = executorService;
         this.graph = graph;
         this.terminationFlag = terminationFlag;
         this.shouldConstructDistribution = shouldConstructDistribution;
@@ -108,7 +105,7 @@ public class SimilarityGraphBuilder {
                 .orientation(Orientation.NATURAL)
                 .addPropertyConfig(new GraphFactory.PropertyConfig("property"))
                 .concurrency(concurrency)
-                .executorService(executorService)
+                .executorService(DefaultPool.INSTANCE)
                 .build();
 
             var similaritySummaryBuilder = SimilaritySummaryBuilderFactory.create(concurrency, shouldConstructDistribution);

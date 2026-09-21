@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.PostLoadETLHook;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.hits.HitsConfig;

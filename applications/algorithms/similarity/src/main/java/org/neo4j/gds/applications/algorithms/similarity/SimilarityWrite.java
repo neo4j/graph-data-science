@@ -30,7 +30,6 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
@@ -65,7 +64,6 @@ class SimilarityWrite {
         var similarityGraphResult =  new SimilarityGraphBuilder(
             graph,
             concurrencyConfiguration.concurrency(),
-            DefaultPool.INSTANCE,
             terminationFlag,
             shouldComputeDistribution
         ).build(similarityResultStream);

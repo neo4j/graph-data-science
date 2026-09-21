@@ -26,7 +26,6 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -90,7 +89,6 @@ public final class FilteredNodeSimilarityMutateStep implements MutateStep<NodeSi
         var graphResult = new SimilarityGraphBuilder(
             graph,
             concurrency,
-            DefaultPool.INSTANCE,
             terminationFlag,
             shouldComputeSimilarityDistribution
         ).build(result).graph();

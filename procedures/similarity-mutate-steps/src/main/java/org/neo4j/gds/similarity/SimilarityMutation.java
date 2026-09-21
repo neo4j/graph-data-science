@@ -25,7 +25,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
@@ -56,7 +55,6 @@ class SimilarityMutation {
         var similarityGraphBuildResult =  new SimilarityGraphBuilder(
             graph,
             concurrency,
-            DefaultPool.INSTANCE,
             terminationFlag,
             shouldComputeSimilarityDistribution
         ).build(similarityResultStream);
