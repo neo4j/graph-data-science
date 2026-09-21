@@ -43,7 +43,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
@@ -54,7 +53,6 @@ public final class Louvain implements Algorithm<LouvainResult> {
     private final TerminationFlag terminationFlag;
     private final Graph rootGraph;
     private final NodePropertyValues seedingValues;
-    private final ExecutorService executorService;
     // results
     private final LouvainDendrogramManager dendrogramManager;
     private double[] modularities;
@@ -79,7 +77,6 @@ public final class Louvain implements Algorithm<LouvainResult> {
         boolean trackIntermediateCommunities,
         @Nullable String seedProperty,
         ProgressTracker progressTracker,
-        ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
         this.progressTracker = progressTracker;
@@ -90,7 +87,6 @@ public final class Louvain implements Algorithm<LouvainResult> {
         this.seedingValues = Optional.ofNullable(seedProperty)
             .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
             .orElse(null);
-        this.executorService = executorService;
         this.dendrogramManager = new LouvainDendrogramManager(
             graph.nodeCount(),
             maxLevels,
@@ -112,7 +108,6 @@ public final class Louvain implements Algorithm<LouvainResult> {
             parameters.includeIntermediateCommunities(),
             parameters.seedProperty(),
             progressTracker,
-            DefaultPool.INSTANCE,
             terminationFlag
 
         );
@@ -259,7 +254,7 @@ public final class Louvain implements Algorithm<LouvainResult> {
             .relationshipType(RelationshipType.of("IGNORED"))
             .orientation(rootGraph.schema().direction().toOrientation())
             .addPropertyConfig(new GraphFactory.PropertyConfig("property", Aggregation.SUM))
-            .executorService(executorService)
+            .executorService(DefaultPool.INSTANCE)
             .build();
 
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small
@@ -276,7 +271,7 @@ public final class Louvain implements Algorithm<LouvainResult> {
             Optional.empty()
         );
 
-        ParallelUtil.run(relationshipCreators, executorService);
+        ParallelUtil.run(relationshipCreators, DefaultPool.INSTANCE);
 
         return GraphFactory.create(idMap, relationshipsBuilder.build());
     }

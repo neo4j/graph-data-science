@@ -37,7 +37,6 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -133,7 +132,6 @@ class LouvainTest {
             true,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
 
@@ -180,7 +178,6 @@ class LouvainTest {
             true,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
 
@@ -227,7 +224,6 @@ class LouvainTest {
             true,
             "seed",
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
 
@@ -268,7 +264,6 @@ class LouvainTest {
             false,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
 
@@ -294,7 +289,6 @@ class LouvainTest {
             false,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
 
@@ -323,7 +317,6 @@ class LouvainTest {
                     LouvainParameters.DEFAULT_INTERMEDIATE_COMMUNITIES,
                     null,
                     ProgressTracker.NULL_TRACKER,
-                    DefaultPool.INSTANCE,
                     terminationFlag
                 );
 
@@ -351,7 +344,6 @@ class LouvainTest {
             LouvainParameters.DEFAULT_INTERMEDIATE_COMMUNITIES,
             "seed2",
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
 
@@ -382,7 +374,6 @@ class LouvainTest {
             LouvainParameters.DEFAULT_INTERMEDIATE_COMMUNITIES,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
 
