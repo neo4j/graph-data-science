@@ -120,9 +120,8 @@ public class ToUndirected implements Algorithm<SingleTypeRelationships> {
             .executorService(DefaultPool.INSTANCE)
             .orientation(Orientation.UNDIRECTED);
 
-        parameters
-            .aggregation()
-            .map(ToUndirectedAggregations::globalAggregation)
+        parameters.aggregation()
+            .flatMap(ToUndirectedAggregations::globalAggregation)
             .ifPresent(relationshipsBuilderBuilder::aggregation);
 
 
