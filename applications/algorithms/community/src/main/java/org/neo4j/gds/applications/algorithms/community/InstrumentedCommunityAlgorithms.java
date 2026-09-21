@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
+import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
@@ -34,7 +35,6 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -66,7 +66,7 @@ public class InstrumentedCommunityAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Set.of(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
+            ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
             Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.conductance(graph, configuration),
@@ -87,7 +87,7 @@ public class InstrumentedCommunityAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Set.of(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
+            ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
             Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.modularity(graph, configuration),
@@ -108,7 +108,7 @@ public class InstrumentedCommunityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
+            ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
             Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.triangles(graph, configuration),
@@ -129,7 +129,7 @@ public class InstrumentedCommunityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
+            ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
             Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.triangleCount(graph, configuration),

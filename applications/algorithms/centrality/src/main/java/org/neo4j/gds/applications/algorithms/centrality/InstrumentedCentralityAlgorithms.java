@@ -33,7 +33,7 @@ import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
-import org.neo4j.gds.core.loading.validation.ValidationRule;
+import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
@@ -95,7 +95,7 @@ public final class InstrumentedCentralityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(new UndirectedOnlyRequirement("Articulation Points")),
+            ValidationRules.from(new UndirectedOnlyRequirement("Articulation Points")),
             Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
@@ -117,7 +117,7 @@ public final class InstrumentedCentralityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(new UndirectedOnlyRequirement("Bridges")),
+            ValidationRules.from(new UndirectedOnlyRequirement("Bridges")),
             Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.bridges(graph, configuration, shouldComputeComponents),
@@ -138,7 +138,7 @@ public final class InstrumentedCentralityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(ValidationRule.EMPTY),
+            ValidationRules.None,
             Optional.empty(),
             Optional.empty(),
             (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
@@ -162,7 +162,7 @@ public final class InstrumentedCentralityAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Set.of(
+            ValidationRules.from(
                 new PregelPropertiesRequirement(configuration.writeProperty()),
                 new DirectedOnlyRequirement("Hits")
             ),
