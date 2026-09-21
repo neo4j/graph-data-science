@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFParameters;
 import org.neo4j.gds.mcmf.MinCostMaxFlow;
@@ -58,17 +57,14 @@ import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeParameters;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
 
 public class PathFindingComputeFacade {
-    private final Log log;
 
     // Global dependencies
     // This is created with its own ExecutorService workerPool,
@@ -82,13 +78,11 @@ public class PathFindingComputeFacade {
     private final TerminationFlag terminationFlag;
 
     public PathFindingComputeFacade(
-        Log log,
         AsyncAlgorithmCaller algorithmCaller,
         ExecutorService executorService,
         TerminationFlag terminationFlag,
         ProgressTrackerFactory progressTrackerFactory
     ) {
-        this.log = log;
         this.algorithmCaller = algorithmCaller;
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
@@ -231,41 +225,6 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             algo::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<Stream<long[]>>> randomWalk(
-        Graph graph,
-        RandomWalkParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Stream.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.randomWalk(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-        // Create the algorithm
-        var randomWalk = RandomWalk.create(
-            log,
-            graph,
-            parameters,
-            progressTracker,
-            executorService,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            randomWalk::compute,
             jobId
         );
     }

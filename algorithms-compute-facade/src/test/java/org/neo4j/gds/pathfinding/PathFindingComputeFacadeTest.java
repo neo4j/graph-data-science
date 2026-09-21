@@ -101,7 +101,6 @@ class PathFindingComputeFacadeTest {
             .thenReturn(progressTrackerMock);
 
         facade = new PathFindingComputeFacade(
-            Log.noOpLog(),
             new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock),
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -157,23 +156,6 @@ class PathFindingComputeFacadeTest {
             ),
             jobIdMock,
             false
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
-    @Test
-    void randomWalk() {
-        var future = facade.randomWalk(
-            graph,
-            new RandomWalkParameters(
-                List.of(idFunction.of("a")),
-                WalkParameters.DEFAULTS,
-                1000,
-                Optional.of(19L),
-                new Concurrency(2)
-            ),
-            jobIdMock,
-            true
         );
         assertThat(future.join()).isNotNull();
     }

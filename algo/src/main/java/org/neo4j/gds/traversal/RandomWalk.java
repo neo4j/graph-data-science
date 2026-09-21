@@ -95,28 +95,6 @@ public final class RandomWalk implements Algorithm<Stream<long[]>> {
         );
     }
 
-    public static RandomWalk create(
-        Log log,
-        Graph graph,
-        RandomWalkParameters parameters,
-        ProgressTracker progressTracker,
-        ExecutorService executorService,
-        TerminationFlag terminationFlag
-    ) {
-        return create(
-            log,
-            graph,
-            parameters.concurrency(),
-            executorService,
-            parameters.walkParameters(),
-            parameters.sourceNodes(),
-            parameters.walkBufferSize(),
-            parameters.randomSeed(),
-            progressTracker,
-            terminationFlag
-        );
-    }
-
     private static RandomWalk create(
         Log log,
         Graph graph,
