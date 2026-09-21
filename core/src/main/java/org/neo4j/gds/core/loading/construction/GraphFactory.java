@@ -73,14 +73,7 @@ public final class GraphFactory {
     private GraphFactory() {}
 
     public static NodesBuilderBuilder initNodesBuilder() {
-        return new NodesBuilderBuilder()
-            .nodeSchema(NodeSchema.empty())
-            .concurrency(new Concurrency(1))
-            .hasLabelInformation(false)
-            .deduplicateIds(true)
-            .idMapBuilderType(IdMap.NO_TYPE)
-            .usePooledBuilderProvider(false)
-            .propertyInfo(PropertyInfo.empty());
+        return new NodesBuilderBuilder();
     }
 
     private static IdMapBuilder initIdMapBuilder(String idMapBuilderType, Concurrency concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount, boolean deduplicateIds) {
@@ -107,43 +100,26 @@ public final class GraphFactory {
         return maxIntermediateId;
     }
 
-    public interface PropertyInfo {
-        boolean hasProperties();
-        Function<String, PropertyState> propertyStateFunction();
-        static PropertyInfo empty() {
-            return new PropertyInfoFromParameters(false, __ -> PropertyState.PERSISTENT);
+    public record PropertyInfo(boolean hasProperties, Function<String, PropertyState> propertyStateFunction) {
+        public static final PropertyInfo DEFAULT = new PropertyInfo(false, __ -> PropertyState.PERSISTENT);
+
+        public static PropertyInfo of(boolean hasProperties, PropertyState state) {
+            return new PropertyInfo(hasProperties, __ -> state);
         }
-        static PropertyInfo withDefaultState() {
-            return new PropertyInfoFromParameters(true, __ -> PropertyState.PERSISTENT);
+        public static PropertyInfo withState(PropertyState state) {
+            return new PropertyInfo(true, __ -> state);
         }
-        static PropertyInfo withState(PropertyState state) {
-            return new PropertyInfoFromParameters(true, __ -> state);
+        public static PropertyInfo withDefaultState() {
+            return new PropertyInfo(true, __ -> PropertyState.PERSISTENT);
         }
-        static PropertyInfo fromSchema(NodeSchema nodeSchema) {
-            return new PropertyInfoFromSchema(nodeSchema);
-        }
-        static PropertyInfo of(boolean hasProperties, PropertyState state) {
-            return new PropertyInfoFromParameters(hasProperties, __ -> state);
+        private static PropertyInfo fromSchema(NodeSchema nodeSchema) {
+            return new PropertyInfo(
+                nodeSchema.hasProperties(),
+                propertyKey -> nodeSchema.properties().get(propertyKey).state()
+            );
         }
     }
-    static class PropertyInfoFromSchema implements PropertyInfo {
-        private final NodeSchema nodeSchema;
-        PropertyInfoFromSchema(NodeSchema nodeSchema) {
-            this.nodeSchema = nodeSchema;
-        }
-        @Override
-        public boolean hasProperties() {
-            return nodeSchema.hasProperties();
-        }
 
-        @Override
-        public Function<String, PropertyState> propertyStateFunction() {
-            return propertyKey -> nodeSchema.properties().get(propertyKey).state();
-        }
-    }
-    private record PropertyInfoFromParameters(boolean hasProperties, Function<String, PropertyState> propertyStateFunction) implements PropertyInfo {}
-
-    @Builder.Factory
     static NodesBuilder nodesBuilder(
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount,
@@ -153,9 +129,21 @@ public final class GraphFactory {
         Concurrency concurrency,
         String idMapBuilderType,
         boolean usePooledBuilderProvider,
-        PropertyInfo propertyInfo
+        Optional<PropertyInfo> propertyInfo
     ) {
         if (nodeSchema.containsOtherThanAllNodesLabel()) hasLabelInformation = true;
+
+        PropertyInfo effectivePropertyInfo;
+        if (nodeSchema.isEmpty()) {
+            effectivePropertyInfo = propertyInfo.orElse(PropertyInfo.DEFAULT);
+        } else {
+            if (propertyInfo.isPresent()) {
+                throw new IllegalArgumentException(
+                    "Cannot set propertyInfo when nodeSchema is provided; property info is derived from the schema."
+                );
+            }
+            effectivePropertyInfo = PropertyInfo.fromSchema(nodeSchema);
+        }
 
         // Make sure that we do not pass on negative values to the id map builders.
         maxOriginalId = maxOriginalId.filter(id -> id > 0);
@@ -164,16 +152,25 @@ public final class GraphFactory {
         long maxOriginalNodeId = maxOriginalId.orElse(NodesBuilder.UNKNOWN_MAX_ID);
         long maxIntermediateId = computeMaxIntermediateId(maxOriginalNodeId, nodeCount, idMapBuilderType);
 
-        var localNodesBuilderProviderProvider = new NodesBuilder.LocalNodesBuilderProviderProvider(concurrency, usePooledBuilderProvider);
         var labelInformationBuilder = !hasLabelInformation
             ? LabelInformationBuilders.allNodes()
             : LabelInformationBuilders.multiLabelWithCapacity(maxIntermediateId + 1);
 
-        if (nodeSchema.isEmpty()) {
-            return new NodesBuilder(maxOriginalNodeId, labelInformationBuilder, concurrency, idMapBuilder, hasLabelInformation, deduplicateIds, localNodesBuilderProviderProvider, NodesBuilderContext.lazy(concurrency),              propertyInfo);
-        } else {
-            return new NodesBuilder(maxOriginalNodeId, labelInformationBuilder, concurrency, idMapBuilder, hasLabelInformation, deduplicateIds, localNodesBuilderProviderProvider, NodesBuilderContext.fixed(nodeSchema, concurrency), propertyInfo);
-        }
+        var nodesBuilderContext = nodeSchema.isEmpty()
+            ? NodesBuilderContext.lazy(concurrency)
+            : NodesBuilderContext.fixed(nodeSchema, concurrency);
+
+        return new NodesBuilder(
+            maxOriginalNodeId,
+            labelInformationBuilder,
+            concurrency,
+            idMapBuilder,
+            hasLabelInformation,
+            deduplicateIds,
+            usePooledBuilderProvider,
+            nodesBuilderContext,
+            effectivePropertyInfo
+        );
     }
 
     public record PropertyConfig(
