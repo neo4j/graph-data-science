@@ -72,7 +72,6 @@ class GraphWithSelfLoopTest {
             1.0 / graph.relationshipCount(),
             1.0 / graph.relationshipCount(),
             new Concurrency(4),
-            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -182,7 +181,6 @@ class GraphWithSelfLoopTest {
             1.0 / graph.relationshipCount(),
             1.0 / graph.relationshipCount(),
             new Concurrency(4),
-            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 

@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
@@ -53,7 +54,6 @@ final class RefinementPhase {
     private final long seed;
     private long communityCounter = 0L;
     private final Concurrency concurrency;
-    private final ExecutorService executorService;
     private final HugeDoubleArray nextCommunityProbabilities;
     private final ProgressTracker progressTracker;
     static RefinementPhase create(
@@ -65,7 +65,6 @@ final class RefinementPhase {
         double theta,
         long seed,
         Concurrency concurrency,
-        ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
         var encounteredCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
@@ -85,7 +84,6 @@ final class RefinementPhase {
             theta,
             seed,
             concurrency,
-            executorService,
             progressTracker
         );
     }
@@ -101,7 +99,6 @@ final class RefinementPhase {
         double theta,
         long seed,
         Concurrency concurrency,
-        ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
         this.workingGraph = workingGraph;
@@ -118,7 +115,6 @@ final class RefinementPhase {
         encounteredCommunitiesWeights.setAll(c -> -1L);
         this.relationshipsBetweenCommunities = HugeDoubleArray.newArray(workingGraph.nodeCount());
         this.concurrency = concurrency;
-        this.executorService = executorService;
         this.progressTracker = progressTracker;
     }
 
@@ -184,8 +180,7 @@ final class RefinementPhase {
         RunWithConcurrency.builder().
             concurrency(concurrency)
             .tasks(tasks)
-            .executor(executorService).
-            run();
+            .run();
     }
 
     private void mergeNodeSubset(

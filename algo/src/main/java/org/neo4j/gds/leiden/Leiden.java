@@ -36,7 +36,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.DoubleAdder;
 
 //TODO: take care of potential issues w. self-loops
@@ -54,7 +53,6 @@ public class Leiden implements Algorithm<LeidenResult> {
     private double modularity;
     private final LeidenDendrogramManager dendrogramManager;
     private final Optional<NodePropertyValues> seedValues;
-    private final ExecutorService executorService;
     private final Concurrency concurrency;
     private final long randomSeed;
 
@@ -83,7 +81,6 @@ public class Leiden implements Algorithm<LeidenResult> {
         this.theta = theta;
         this.randomSeed = randomSeed;
         // TODO: Pass these two as parameters
-        this.executorService = DefaultPool.INSTANCE;
         this.concurrency = concurrency;
         this.dendrogramManager = new LeidenDendrogramManager(
             rootGraph,
@@ -221,7 +218,6 @@ public class Leiden implements Algorithm<LeidenResult> {
                     theta,
                     randomSeed,
                     concurrency,
-                    executorService,
                     progressTracker
                 );
                 var refinementPhaseResult = refinementPhase.run();
@@ -245,7 +241,7 @@ public class Leiden implements Algorithm<LeidenResult> {
                     this.direction,
                     refinedCommunities,
                     maximumRefinedCommunityId,
-                    this.executorService,
+                    DefaultPool.INSTANCE,
                     this.concurrency,
                     this.terminationFlag,
                     this.progressTracker
@@ -321,7 +317,6 @@ public class Leiden implements Algorithm<LeidenResult> {
                 gamma,
                 modularityScaleCoefficient,
                 concurrency,
-                executorService,
                 progressTracker
             );
         }
@@ -349,8 +344,7 @@ public class Leiden implements Algorithm<LeidenResult> {
             );
             RunWithConcurrency.builder().
                 concurrency(concurrency).
-                tasks(tasks).
-                executor(executorService)
+                tasks(tasks)
                 .run();
             totalVolume = volumeAdder.sum();
         } else {

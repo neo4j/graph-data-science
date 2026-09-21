@@ -28,8 +28,8 @@ class LeidenMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "Concurrency: {0}")
     @CsvSource({
-        "1, 18361384,25830376",
-        "4, 20789008,34314976"
+        "1, 18361368,25830360",
+        "4, 20788992,34314960"
     })
     void shouldEstimateMemory(int concurrency,long expectedMin, long expectedMax) {
         var estimate = new LeidenMemoryEstimateDefinition(new LeidenMemoryEstimationParameters(

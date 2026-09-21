@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
 public final class ModularityComputer {
@@ -55,7 +54,6 @@ public final class ModularityComputer {
         double gamma,
         double coefficient,
         Concurrency concurrency,
-        ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
         var relationshipsOutsideCommunity = HugeAtomicDoubleArray.of(workingGraph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
@@ -74,7 +72,6 @@ public final class ModularityComputer {
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(tasks)
-            .executor(executorService)
             .run();
 
         double modularity = ParallelUtil.parallelStream(
