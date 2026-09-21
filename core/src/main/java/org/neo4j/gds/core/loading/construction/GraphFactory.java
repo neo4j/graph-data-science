@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.immutables.builder.Builder;
-import org.immutables.value.Value;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
@@ -42,7 +40,6 @@ import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.IdMapBuilder;
@@ -62,11 +59,6 @@ import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.stream.IntStream;
 
-@Value.Style(
-    builderVisibility = Value.Style.BuilderVisibility.PUBLIC,
-    depluralize = true,
-    deepImmutablesDetection = true
-)
 public final class GraphFactory {
     private static final int NO_SUCH_RELATIONSHIP_TYPE = -1;
 
@@ -194,24 +186,23 @@ public final class GraphFactory {
         return new RelationshipsBuilderBuilder();
     }
 
-    @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
         PartialIdMap nodes,
         RelationshipType relationshipType,
-        Optional<Orientation> orientation,
+        Orientation orientation,
         List<PropertyConfig> propertyConfigs,
-        Optional<Aggregation> aggregation,
-        Optional<Boolean> skipDanglingRelationships,
-        Optional<Concurrency> concurrency,
-        Optional<Boolean> indexInverse,
-        Optional<ExecutorService> executorService,
-        Optional<Boolean> usePooledBuilderProvider,
+        Aggregation aggregation,
+        boolean skipDanglingRelationships,
+        Concurrency concurrency,
+        boolean indexInverse,
+        ExecutorService executorService,
+        boolean usePooledBuilderProvider,
         Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
         var aggregations = propertyConfigs.isEmpty()
-            ? new Aggregation[]{aggregation.orElse(Aggregation.DEFAULT)}
+            ? new Aggregation[]{aggregation}
             : propertyConfigs.stream()
                 .map(GraphFactory.PropertyConfig::aggregation)
                 .map(Aggregation::resolve)
@@ -219,7 +210,6 @@ public final class GraphFactory {
 
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
 
-        var actualOrientation = orientation.orElse(Orientation.NATURAL);
         var propertyMappings = propertyConfigs.stream()
             .map(propertyConfig -> PropertyMapping.of(
                 Key.simple(propertyConfig.propertyKey()),
@@ -228,23 +218,20 @@ public final class GraphFactory {
             )).toList();
         var projection = new RelationshipProjection(
             relationshipType.name(),
-            actualOrientation,
-            indexInverse.orElse(false),
+            orientation,
+            indexInverse,
             PropertyMappings.of(propertyMappings)
         );
 
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
-        var finalConcurrency = concurrency.orElse(new Concurrency(1));
-        var importSizing = ImportSizing.fromPartialIdMap(finalConcurrency, nodes);
+        var importSizing = ImportSizing.fromPartialIdMap(concurrency, nodes);
 
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
         if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
             bufferSize = (int) nodes.rootNodeCount();
         }
-
-        boolean skipDangling = skipDanglingRelationships.orElse(true);
 
         var importMetaData = new SingleTypeRelationshipImporter.ImportMetaData(
             projection,
@@ -252,7 +239,7 @@ public final class GraphFactory {
             propertyKeyIds,
             defaultValues,
             NO_SUCH_RELATIONSHIP_TYPE,
-            skipDangling
+            skipDanglingRelationships
         );
 
         LongSupplier nodeCountSupplier = nodes::rootNodeCount;
@@ -261,7 +248,7 @@ public final class GraphFactory {
             .orElseGet(() -> SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing));
 
         SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
-        if (indexInverse.orElse(false)) {
+        if (indexInverse) {
             var inverseProjection = projection.inverse();
 
             var inverseImportMetaData = new SingleTypeRelationshipImporter.ImportMetaData(
@@ -270,7 +257,7 @@ public final class GraphFactory {
                 importMetaData.propertyKeyIds(),
                 importMetaData.defaultValues(),
                 importMetaData.typeTokenId(),
-                skipDangling
+                skipDanglingRelationships
             );
 
 
@@ -289,9 +276,9 @@ public final class GraphFactory {
                 propertyConfigs,
                 isMultiGraph,
                 loadRelationshipProperties,
-                Direction.fromOrientation(actualOrientation),
-                executorService.orElse(DefaultPool.INSTANCE),
-                finalConcurrency
+                Direction.fromOrientation(orientation),
+                executorService,
+                concurrency
             );
         } else {
             singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilder.NonIndexed(
@@ -302,19 +289,19 @@ public final class GraphFactory {
                 propertyConfigs,
                 isMultiGraph,
                 loadRelationshipProperties,
-                Direction.fromOrientation(actualOrientation),
-                executorService.orElse(DefaultPool.INSTANCE),
-                finalConcurrency
+                Direction.fromOrientation(orientation),
+                executorService,
+                concurrency
             );
         }
 
-        var localBuilderProvider = usePooledBuilderProvider.orElse(false)
+        var localBuilderProvider = usePooledBuilderProvider
             ? LocalRelationshipsBuilderProvider
-                .pooled(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder, finalConcurrency)
+                .pooled(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder, concurrency)
             : LocalRelationshipsBuilderProvider
                 .threadLocal(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilder, localBuilderProvider, skipDangling);
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilder, localBuilderProvider, skipDanglingRelationships);
     }
 
     /**
