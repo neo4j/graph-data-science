@@ -22,10 +22,9 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.api.GraphStore;
 
 /**
- * Some use cases  can alter the graphStore.
+ * Some use cases can alter the graphStore.
  * This is the hook for it.
  */
 public interface PostLoadETLHook {
     void onGraphStoreLoaded(GraphStore graphStore);
-
 }

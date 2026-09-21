@@ -28,8 +28,10 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.loading.PostLoadETLHooks;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
+import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -40,9 +42,7 @@ import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
-import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -71,8 +71,8 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Collections.emptySet(),
-            Optional.empty(),
+            ValidationRules.None,
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.allShortestPaths(graph, configuration),
             () -> estimationFacade.allShortestPaths(configuration),
@@ -92,11 +92,13 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(new SourceNodeTargetNodesGraphStoreValidation(
-                configuration.sourceNode(),
-                configuration.targetNodes()
-            )),
-            Optional.empty(),
+            ValidationRules.from(
+                new SourceNodeTargetNodesGraphStoreValidation(
+                    configuration.sourceNode(),
+                    configuration.targetNodes()
+                )
+            ),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.bfs(graph, configuration),
             estimationFacade::breadthFirstSearch,
@@ -116,11 +118,13 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(new SourceNodeTargetNodesGraphStoreValidation(
-                configuration.sourceNode(),
-                configuration.targetNodes()
-            )),
-            Optional.empty(),
+            ValidationRules.from(
+                new SourceNodeTargetNodesGraphStoreValidation(
+                    configuration.sourceNode(),
+                    configuration.targetNodes()
+                )
+            ),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.dfs(graph, configuration),
             estimationFacade::depthFirstSearch,
@@ -140,8 +144,8 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Collections.emptySet(),
-            Optional.empty(),
+            ValidationRules.None,
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.longestPath(graph, configuration),
             estimationFacade::longestPath,
@@ -161,8 +165,8 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Set.of(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())),
-            Optional.empty(),
+            ValidationRules.from(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.maxFlow(graph, configuration),
             () -> estimationFacade.maxFlow(configuration),
@@ -182,8 +186,8 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Set.of(new SourceNodesRequirement(configuration.sourceNodes())),
-            Optional.empty(),
+            ValidationRules.from(new SourceNodesRequirement(configuration.sourceNodes())),
+            PostLoadETLHooks.None,
             Optional.of(new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE)),
             (graph, __) -> algorithms.randomWalk(graph, configuration),
             () -> estimationFacade.randomWalk(configuration),
@@ -203,8 +207,8 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Collections.emptySet(),
-            Optional.empty(),
+            ValidationRules.None,
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.topologicalSort(graph, configuration),
             estimationFacade::topologicalSort,

@@ -137,7 +137,7 @@ public class GraphStoreCatalogService {
             Optional.empty(),
             relationshipProperty,
             graphStoreValidation,
-            Optional.empty(),
+            PostLoadETLHooks.None,
             graphValidation
         );
     }
@@ -153,7 +153,7 @@ public class GraphStoreCatalogService {
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
-        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
+        PostLoadETLHooks postGraphStoreLoadETLHooks,
         Optional<GraphValidation> graphValidation
     ) {
         var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
@@ -176,7 +176,7 @@ public class GraphStoreCatalogService {
 
         graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
 
-        postGraphStoreLoadETLHooks.ifPresent(postLoadETLHooks -> extractAndTransform(graphStore, postLoadETLHooks));
+        postGraphStoreLoadETLHooks.forEach(hook -> hook.onGraphStoreLoaded(graphStore));
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
 

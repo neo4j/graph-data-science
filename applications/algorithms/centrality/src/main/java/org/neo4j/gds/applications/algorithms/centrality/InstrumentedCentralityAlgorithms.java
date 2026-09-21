@@ -30,17 +30,17 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
+import org.neo4j.gds.core.loading.PostLoadETLHooks;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
-import org.neo4j.gds.core.loading.validation.ValidationRule;
+import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -95,8 +95,8 @@ public final class InstrumentedCentralityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(new UndirectedOnlyRequirement("Articulation Points")),
-            Optional.empty(),
+            ValidationRules.from(new UndirectedOnlyRequirement("Articulation Points")),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
@@ -117,8 +117,8 @@ public final class InstrumentedCentralityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(new UndirectedOnlyRequirement("Bridges")),
-            Optional.empty(),
+            ValidationRules.from(new UndirectedOnlyRequirement("Bridges")),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.bridges(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.bridges(shouldComputeComponents),
@@ -138,8 +138,8 @@ public final class InstrumentedCentralityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(ValidationRule.EMPTY),
-            Optional.empty(),
+            ValidationRules.None,
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
@@ -162,11 +162,11 @@ public final class InstrumentedCentralityAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Set.of(
+            ValidationRules.from(
                 new PregelPropertiesRequirement(configuration.writeProperty()),
                 new DirectedOnlyRequirement("Hits")
             ),
-            Optional.of(Set.of(etlHook)),
+            PostLoadETLHooks.from(etlHook),
             Optional.empty(),
             (graph, __) -> algorithms.hits(graph, configuration),
             estimationFacade::hits,

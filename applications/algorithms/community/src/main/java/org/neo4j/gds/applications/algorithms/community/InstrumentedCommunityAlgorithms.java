@@ -26,7 +26,9 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
+import org.neo4j.gds.core.loading.PostLoadETLHooks;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
+import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
@@ -34,7 +36,6 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -66,8 +67,8 @@ public class InstrumentedCommunityAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Set.of(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
-            Optional.empty(),
+            ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.conductance(graph, configuration),
             estimationFacade::conductance,
@@ -87,8 +88,8 @@ public class InstrumentedCommunityAlgorithms {
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            Set.of(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
-            Optional.empty(),
+            ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.modularity(graph, configuration),
             estimationFacade::modularity,
@@ -108,8 +109,8 @@ public class InstrumentedCommunityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
-            Optional.empty(),
+            ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.triangles(graph, configuration),
             estimationFacade::triangles,
@@ -129,8 +130,8 @@ public class InstrumentedCommunityAlgorithms {
             graphName,
             configuration,
             Optional.empty(),
-            Set.of(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
-            Optional.empty(),
+            ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
+            PostLoadETLHooks.None,
             Optional.empty(),
             (graph, __) -> algorithms.triangleCount(graph, configuration),
             estimationFacade::triangleCount,
