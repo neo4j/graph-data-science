@@ -75,7 +75,6 @@ class DefaultAlgorithmProcessingTemplateTest {
             eq(Optional.empty()),
             any(GraphStoreValidation.class),
             eq(Optional.empty()),
-            eq(Optional.empty()),
             eq(requestScopedDependencies.user()),
             eq(requestScopedDependencies.databaseId())
             )
@@ -92,7 +91,6 @@ class DefaultAlgorithmProcessingTemplateTest {
             Optional.empty(),
             GraphName.parse("some graph"),
             configuration,
-            Optional.empty(),
             Optional.empty(),
             new StandardLabel("some compute job"),
             DimensionTransformer.DISABLED,
@@ -145,7 +143,6 @@ class DefaultAlgorithmProcessingTemplateTest {
             eq(Optional.empty()),
             any(GraphStoreValidation.class),
             eq(Optional.empty()),
-            eq(Optional.empty()),
             eq(requestScopedDependencies.user()),
             eq(requestScopedDependencies.databaseId())
         )).thenReturn(graphResources);
@@ -161,7 +158,6 @@ class DefaultAlgorithmProcessingTemplateTest {
             Optional.empty(),
             GraphName.parse("some other graph"),
             configuration,
-            Optional.empty(),
             Optional.empty(),
             new StandardLabel("some other compute job"),
             DimensionTransformer.DISABLED,
@@ -214,7 +210,6 @@ class DefaultAlgorithmProcessingTemplateTest {
             eq(Optional.empty()),
             any(GraphStoreValidation.class),
             eq(Optional.empty()),
-            eq(Optional.empty()),
             eq(requestScopedDependencies.user()),
             eq(requestScopedDependencies.databaseId())
         )).thenReturn(graphResources);
@@ -232,7 +227,6 @@ class DefaultAlgorithmProcessingTemplateTest {
                 Optional.empty(),
                 GraphName.parse("some other graph"),
                 configuration,
-                Optional.empty(),
                 Optional.empty(),
                 new StandardLabel("some other compute job"),
                 DimensionTransformer.DISABLED,

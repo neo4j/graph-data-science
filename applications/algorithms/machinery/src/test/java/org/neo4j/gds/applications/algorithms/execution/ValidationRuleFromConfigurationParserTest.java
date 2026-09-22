@@ -26,23 +26,22 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.core.loading.validation.ValidationRule;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class ValidationRuleFromConfigurationParserTest {
     @Test
-    void shouldParseRequirements() {
+    void shouldParseAndPopulateBuilder() {
         var parser1 = mock(ValidationRuleParser.class);
         var parser2 = mock(ValidationRuleParser.class);
         var parser3 = mock(ValidationRuleParser.class);
@@ -50,82 +49,95 @@ class ValidationRuleFromConfigurationParserTest {
         parsers.add(parser1);
         parsers.add(parser2);
         parsers.add(parser3);
-        var ruleParser = new ValidationRuleFromConfigurationParser(parsers);
+        var parser = new ValidationRuleFromConfigurationParser(parsers);
 
-        var builder = mock(GraphStoreValidationBuilder.class);
         var configuration = new AlgoBaseConfig() {
             @Override
             public Optional<String> usernameOverride() {
                 throw new UnsupportedOperationException("TODO");
             }
         };
+        var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         when(parser1.parse(configuration)).thenReturn(Optional.empty());
-        var validationRule = new ValidationRule() {
+        var etlStep = new GraphStoreFilteredETL() {
             @Override
-            public void validate(
+            public void onGraphStoreFiltered(
                 GraphStore graphStore,
                 Collection<NodeLabel> selectedLabels,
-                Collection<RelationshipType> selectedRelationshipTypes
+                Collection<RelationshipType> selectedRelationshipTypes,
+                Optional<String> relationshipProperty
             ) {
                 // do nothing
             }
         };
-        when(parser2.parse(configuration)).thenReturn(Optional.of(validationRule));
+        when(parser2.parse(configuration)).thenReturn(Optional.of(etlStep));
         when(parser3.parse(configuration)).thenReturn(Optional.empty());
-        ruleParser.parse(configuration, builder);
+        parser.parse(configuration, graphLoadETLBuilder);
 
-        verify(builder).withValidationRule(validationRule);
+        verify(graphLoadETLBuilder).with(etlStep);
     }
 
     @Test
     void shouldParseUninterestingConfiguration() {
-        var ruleParser = ValidationRuleFromConfigurationParser.create();
+        var parser = ValidationRuleFromConfigurationParser.create();
 
-        var graphStoreValidation = ruleParser.parse(new AlgoBaseConfig() {
-            @Override
-            public Optional<String> usernameOverride() {
-                throw new UnsupportedOperationException("TODO");
-            }
-        }).build();
+        var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
+        parser.parse(
+            new AlgoBaseConfig() {
+                @Override
+                public Optional<String> usernameOverride() {
+                    throw new UnsupportedOperationException("TODO");
+                }
+            },
+            graphLoadETLBuilder
+        );
 
-        assertEquals(GraphStoreValidation.DISABLED, graphStoreValidation);
+        verifyNoInteractions(graphLoadETLBuilder);
     }
 
     @Test
     void shouldParseNodePropertyNonExistenceRequirement() {
-        var ruleParser = ValidationRuleFromConfigurationParser.create();
+        var parser = ValidationRuleFromConfigurationParser.create();
 
-        var graphStoreValidation = ruleParser.parse(new MutateNodePropertyConfig() {
-            @Override
-            public String mutateProperty() {
-                return "anything goes";
-            }
+        var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
+        parser.parse(
+            new MutateNodePropertyConfig() {
+                @Override
+                public String mutateProperty() {
+                    return "anything goes";
+                }
 
-            @Override
-            public Optional<String> usernameOverride() {
-                throw new UnsupportedOperationException("TODO");
-            }
-        }).build();
+                @Override
+                public Optional<String> usernameOverride() {
+                    throw new UnsupportedOperationException("TODO");
+                }
+            },
+            graphLoadETLBuilder
+        );
 
-        assertNotEquals(GraphStoreValidation.DISABLED, graphStoreValidation);
+        verify(graphLoadETLBuilder).with(any(GraphStoreFilteredETL.class));
     }
 
     @Test
     void shouldParseRelationshipTypeNonExistenceRequirement() {
-        var ruleParser = ValidationRuleFromConfigurationParser.create();
+        var parser = ValidationRuleFromConfigurationParser.create();
 
-        var graphStoreValidation = ruleParser.parse(new MutateRelationshipConfig() {
-            @Override
-            public String mutateRelationshipType() {
-                return "go anywhere";
-            }
+        var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
+        parser.parse(
+            new MutateRelationshipConfig() {
+                @Override
+                public String mutateRelationshipType() {
+                    return "go anywhere";
+                }
 
-            @Override
-            public Optional<String> usernameOverride() {
-                throw new UnsupportedOperationException("TODO");
-            }
-        }).build();
+                @Override
+                public Optional<String> usernameOverride() {
+                    throw new UnsupportedOperationException("TODO");
+                }
+            },
+            graphLoadETLBuilder
+        );
 
-        assertNotEquals(GraphStoreValidation.DISABLED, graphStoreValidation);
+        verify(graphLoadETLBuilder).with(any(GraphStoreFilteredETL.class));
     }
 }

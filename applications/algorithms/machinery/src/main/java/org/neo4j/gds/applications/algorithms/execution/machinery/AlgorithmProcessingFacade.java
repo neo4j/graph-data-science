@@ -29,9 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.loading.PostLoadETLHooks;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.GraphValidation;
+import org.neo4j.gds.core.loading.validation.GraphLoadETL;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -67,9 +65,7 @@ public interface AlgorithmProcessingFacade {
         User user,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
-        GraphStoreValidation graphStoreValidation,
-        PostLoadETLHooks postLoadETLHooks,
-        GraphValidation graphValidation,
+        GraphLoadETL graphLoadETL,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
         TerminationFlag terminationFlag,

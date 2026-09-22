@@ -30,12 +30,10 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
-import org.neo4j.gds.core.loading.PostLoadETLHooks;
+import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
-import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
-import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
@@ -92,12 +90,20 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<ArticulationPointsResult, RESULT, METADATA> resultRenderer,
         boolean shouldComputeComponents
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new UndirectedOnlyRequirement("Articulation Points").validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    )
+            );
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(new UndirectedOnlyRequirement("Articulation Points")),
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
             AlgorithmLabel.ArticulationPoints,
@@ -113,12 +119,20 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<BridgeResult, RESULT, METADATA> resultRenderer,
         boolean shouldComputeComponents
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new UndirectedOnlyRequirement("Bridges").validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    )
+            );
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(new UndirectedOnlyRequirement("Bridges")),
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.bridges(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.bridges(shouldComputeComponents),
             AlgorithmLabel.Bridges,
@@ -136,9 +150,7 @@ public final class InstrumentedCentralityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.None,
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            GraphLoadETLBuilder.empty(),
             (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
             AlgorithmLabel.HarmonicCentrality,
@@ -153,18 +165,19 @@ public final class InstrumentedCentralityAlgorithms {
         Optional<SideEffect<PregelResult, METADATA>> sideEffect,
         ResultRenderer<PregelResult, RESULT, METADATA> resultRenderer
     ) {
-        // the hook creates inverse indexes
-        var etlHook = hitsHookGenerator.createETLHook(configuration);
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(hitsHookGenerator.generate(configuration)) // the hook creates inverse indexes
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new PregelPropertiesRequirement(configuration.writeProperty())
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes)
+            )
+            .with(new DirectedOnlyRequirement("Hits"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(
-                new PregelPropertiesRequirement(configuration.writeProperty()),
-                new DirectedOnlyRequirement("Hits")
-            ),
-            PostLoadETLHooks.from(etlHook),
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.hits(graph, configuration),
             estimationFacade::hits,
             AlgorithmLabel.HITS,

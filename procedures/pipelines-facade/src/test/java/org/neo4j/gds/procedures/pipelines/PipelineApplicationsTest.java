@@ -104,7 +104,6 @@ class PipelineApplicationsTest {
             any(),
             any(),
             any(),
-            any(),
             eq(computation),
             any(),
             any()

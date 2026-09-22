@@ -26,10 +26,8 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.core.loading.PostLoadETLHooks;
-import org.neo4j.gds.core.loading.validation.GraphValidation;
+import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
-import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
@@ -64,12 +62,20 @@ public class InstrumentedCommunityAlgorithms {
         Optional<SideEffect<ConductanceResult, METADATA>> sideEffect,
         ResultRenderer<ConductanceResult, RESULT, METADATA> resultRenderer
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()).validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    )
+            );
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.conductance(graph, configuration),
             estimationFacade::conductance,
             AlgorithmLabel.Conductance,
@@ -84,12 +90,20 @@ public class InstrumentedCommunityAlgorithms {
         Optional<SideEffect<ModularityResult, METADATA>> sideEffect,
         ResultRenderer<ModularityResult, RESULT, METADATA> resultRenderer
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()).validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    )
+            );
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.modularity(graph, configuration),
             estimationFacade::modularity,
             AlgorithmLabel.Modularity,
@@ -104,12 +118,13 @@ public class InstrumentedCommunityAlgorithms {
         Optional<SideEffect<Stream<TriangleResult>, METADATA>> sideEffect,
         ResultRenderer<Stream<TriangleResult>, RESULT, METADATA> resultRenderer
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.triangles(graph, configuration),
             estimationFacade::triangles,
             AlgorithmLabel.Triangles,
@@ -124,12 +139,13 @@ public class InstrumentedCommunityAlgorithms {
         Optional<SideEffect<TriangleCountResult, METADATA>> sideEffect,
         ResultRenderer<TriangleCountResult, RESULT, METADATA> resultRenderer
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.triangleCount(graph, configuration),
             estimationFacade::triangleCount,
             AlgorithmLabel.TriangleCount,

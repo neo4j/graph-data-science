@@ -17,14 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.core.loading.validation;
 
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.Graph;
 
-/**
- * Some use cases can alter the graphStore.
- * This is the hook for it.
- */
-public interface PostLoadETLHook {
-    void onGraphStoreLoaded(GraphStore graphStore);
+public interface GraphLoadedETL {
+    void onGraphLoaded(Graph graph);
 }

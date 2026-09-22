@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.execution;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
+import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 
 import java.util.Set;
 
@@ -43,24 +43,11 @@ class ValidationRuleFromConfigurationParser {
         );
     }
 
-    <CONFIGURATION extends AlgoBaseConfig> GraphStoreValidationBuilder parse(
-        CONFIGURATION configuration
-    ) {
-        var builder = new GraphStoreValidationBuilder();
+    void parse(AlgoBaseConfig configuration, GraphLoadETLBuilder graphLoadETLBuilder) {
+        for (var validationRuleParser : validationRuleParsers) {
+            var etlStep = validationRuleParser.parse(configuration);
 
-        parse(configuration, builder);
-
-        return builder;
-    }
-
-    <CONFIGURATION extends AlgoBaseConfig> void parse(
-        CONFIGURATION configuration,
-        GraphStoreValidationBuilder builder
-    ) {
-        for (var parser : validationRuleParsers) {
-            var rule = parser.parse(configuration);
-
-            rule.ifPresent(builder::withValidationRule);
+            etlStep.ifPresent(graphLoadETLBuilder::with);
         }
     }
 }

@@ -23,17 +23,19 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
-public class HitsHookGenerator {
-
+/**
+ * This just holds dependencies
+ */
+class HitsHookGenerator {
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    public HitsHookGenerator(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
+    HitsHookGenerator(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.terminationFlag = terminationFlag;
     }
 
-    HitsETLHook createETLHook(HitsConfig hitsConfig){
+    HitsETLHook generate(HitsConfig hitsConfig) {
         return new HitsETLHook(
             hitsConfig,
             progressTrackerCreator,

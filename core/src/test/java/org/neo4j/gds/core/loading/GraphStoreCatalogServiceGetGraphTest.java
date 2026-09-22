@@ -82,7 +82,6 @@ class GraphStoreCatalogServiceGetGraphTest {
             Optional.empty(),
             mock(GraphStoreValidation.class),
             Optional.empty(),
-            Optional.empty(),
             new User("bogusUser", false),
             DatabaseId.EMPTY
         );
@@ -130,7 +129,6 @@ class GraphStoreCatalogServiceGetGraphTest {
             graphParameters,
             Optional.empty(),
             mock(GraphStoreValidation.class),
-            Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),
             DatabaseId.EMPTY
@@ -180,7 +178,6 @@ class GraphStoreCatalogServiceGetGraphTest {
             Optional.empty(),
             mock(GraphStoreValidation.class),
             Optional.empty(),
-            Optional.empty(),
             new User("bogusUser", false),
             DatabaseId.EMPTY
         );
@@ -229,7 +226,6 @@ class GraphStoreCatalogServiceGetGraphTest {
             graphParameters,
             Optional.empty(),
             mock(GraphStoreValidation.class),
-            Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),
             DatabaseId.EMPTY
@@ -281,7 +277,6 @@ class GraphStoreCatalogServiceGetGraphTest {
             graphParameters,
             Optional.empty(),
             mock(GraphStoreValidation.class),
-            Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),
             DatabaseId.EMPTY

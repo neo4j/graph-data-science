@@ -24,29 +24,25 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class DirectedOnlyRequirement implements ValidationRule {
-
+public final class DirectedOnlyRequirement implements GraphStoreFilteredETL {
     private final String algorithm;
 
     public DirectedOnlyRequirement(String algorithm) {this.algorithm = algorithm;}
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
-        validateDirected(graphStore, selectedRelationshipTypes);
-    }
-
-    void validateDirected(GraphStore graphStore, Collection<RelationshipType> relationshipTypes) {
-
         var relationshipSchema = graphStore.schema().relationshipSchema();
 
-        var undirectedTypes = relationshipTypes
+        var undirectedTypes = selectedRelationshipTypes
             .stream()
             .filter(relationshipSchema::isUndirected)
             .map(RelationshipType::name)
@@ -60,7 +56,5 @@ public final class DirectedOnlyRequirement implements ValidationRule {
                 undirectedTypes
             ));
         }
-
     }
-
 }

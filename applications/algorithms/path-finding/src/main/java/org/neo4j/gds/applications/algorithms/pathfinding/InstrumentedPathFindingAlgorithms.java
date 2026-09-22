@@ -28,11 +28,10 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.loading.PostLoadETLHooks;
-import org.neo4j.gds.core.loading.validation.GraphValidation;
+import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
+import org.neo4j.gds.core.loading.validation.GraphLoadedETL;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
-import org.neo4j.gds.core.loading.validation.ValidationRules;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -71,9 +70,7 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.None,
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            GraphLoadETLBuilder.empty(),
             (graph, __) -> algorithms.allShortestPaths(graph, configuration),
             () -> estimationFacade.allShortestPaths(configuration),
             AlgorithmLabel.AllShortestPaths,
@@ -88,17 +85,19 @@ public class InstrumentedPathFindingAlgorithms {
         Optional<SideEffect<HugeLongArray, METADATA>> sideEffect,
         ResultRenderer<HugeLongArray, RESULT, METADATA> resultRenderer
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new SourceNodeTargetNodesGraphStoreValidation(
+                        configuration.sourceNode(),
+                        configuration.targetNodes()
+                    ).validate(graphStore, selectedLabels, selectedRelationshipTypes)
+            );
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(
-                new SourceNodeTargetNodesGraphStoreValidation(
-                    configuration.sourceNode(),
-                    configuration.targetNodes()
-                )
-            ),
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.bfs(graph, configuration),
             estimationFacade::breadthFirstSearch,
             AlgorithmLabel.BFS,
@@ -113,17 +112,19 @@ public class InstrumentedPathFindingAlgorithms {
         Optional<SideEffect<HugeLongArray, METADATA>> sideEffect,
         ResultRenderer<HugeLongArray, RESULT, METADATA> resultRenderer
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new SourceNodeTargetNodesGraphStoreValidation(
+                        configuration.sourceNode(),
+                        configuration.targetNodes()
+                    ).validate(graphStore, selectedLabels, selectedRelationshipTypes)
+            );
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(
-                new SourceNodeTargetNodesGraphStoreValidation(
-                    configuration.sourceNode(),
-                    configuration.targetNodes()
-                )
-            ),
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.dfs(graph, configuration),
             estimationFacade::depthFirstSearch,
             AlgorithmLabel.DFS,
@@ -141,9 +142,7 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.None,
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            GraphLoadETLBuilder.empty(),
             (graph, __) -> algorithms.longestPath(graph, configuration),
             estimationFacade::longestPath,
             AlgorithmLabel.LongestPath,
@@ -158,12 +157,21 @@ public class InstrumentedPathFindingAlgorithms {
         Optional<SideEffect<FlowResult, METADATA>> sideEffect,
         ResultRenderer<FlowResult, RESULT, METADATA> resultRenderer
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())
+                        .validate(
+                            graphStore,
+                            selectedLabels,
+                            selectedRelationshipTypes
+                        )
+            );
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())),
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.maxFlow(graph, configuration),
             () -> estimationFacade.maxFlow(configuration),
             AlgorithmLabel.MaxFlow,
@@ -178,12 +186,14 @@ public class InstrumentedPathFindingAlgorithms {
         Optional<SideEffect<Stream<long[]>, METADATA>> sideEffect,
         ResultRenderer<Stream<long[]>, RESULT, METADATA> resultRenderer
     ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with((graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) -> new SourceNodesRequirement(configuration.sourceNodes()).validate(graphStore, selectedLabels, selectedRelationshipTypes))
+            .with((GraphLoadedETL) graph -> new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE).validate(graph));
+
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.from(new SourceNodesRequirement(configuration.sourceNodes())),
-            PostLoadETLHooks.None,
-            new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE),
+            graphLoadETLBuilder,
             (graph, __) -> algorithms.randomWalk(graph, configuration),
             () -> estimationFacade.randomWalk(configuration),
             AlgorithmLabel.RandomWalk,
@@ -201,9 +211,7 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            ValidationRules.None,
-            PostLoadETLHooks.None,
-            GraphValidation.None,
+            GraphLoadETLBuilder.empty(),
             (graph, __) -> algorithms.topologicalSort(graph, configuration),
             estimationFacade::topologicalSort,
             AlgorithmLabel.TopologicalSort,
