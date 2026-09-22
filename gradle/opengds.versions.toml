@@ -21,7 +21,7 @@ hamcrest = "3.0"
 hdrhistogram = "2.2.2"
 # @pin - later versions have breaking changes
 hppc = "0.7.3"
-immutables = "2.12.1"
+immutables = "2.12.2"
 ipaddress = "5.6.2"
 # jackson-annotations uses a separate, minor-only version line (no patch releases)
 jackson = "3.2.1"
