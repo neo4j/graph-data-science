@@ -67,7 +67,6 @@ public class InstrumentedCommunityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            configuration.relationshipWeightProperty(),
             ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
             PostLoadETLHooks.None,
             GraphValidation.None,
@@ -88,7 +87,6 @@ public class InstrumentedCommunityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            configuration.relationshipWeightProperty(),
             ValidationRules.from(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty())),
             PostLoadETLHooks.None,
             GraphValidation.None,
@@ -109,7 +107,6 @@ public class InstrumentedCommunityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            Optional.empty(),
             ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
             PostLoadETLHooks.None,
             GraphValidation.None,
@@ -130,7 +127,6 @@ public class InstrumentedCommunityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            Optional.empty(),
             ValidationRules.from(TriangleCountGraphStoreRequirements.create(configuration.labelFilter())),
             PostLoadETLHooks.None,
             GraphValidation.None,

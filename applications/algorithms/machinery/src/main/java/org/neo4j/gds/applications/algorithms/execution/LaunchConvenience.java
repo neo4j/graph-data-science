@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.PostLoadETLHooks;
 import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.core.loading.validation.ValidationRules;
@@ -63,11 +64,12 @@ public class LaunchConvenience {
      * to avoid duplication.
      * <p>
      * _Work_ is launched asynchronously, caller deals with completing work and handling errors.
+     *
+     * @param configuration if you supply a {@link org.neo4j.gds.config.RelationshipWeightConfig} we extract that for you.
      */
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
-        Optional<String> relationshipProperty,
         ValidationRules algorithmSpecificValidationRules,
         PostLoadETLHooks postLoadETLHooks,
         GraphValidation graphValidation,
@@ -77,6 +79,8 @@ public class LaunchConvenience {
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
     ) {
+        var relationshipProperty = extractRelationshipProperty(configuration);
+
         var builder = validationRuleFromConfigurationParser.parse(configuration);
         algorithmSpecificValidationRules.forEach(builder::withValidationRule);
         var graphStoreValidation = builder.build();
@@ -100,5 +104,12 @@ public class LaunchConvenience {
             sideEffect,
             resultRenderer
         );
+    }
+
+    private <CONFIGURATION extends AlgoBaseConfig> Optional<String> extractRelationshipProperty(CONFIGURATION configuration) {
+        if (configuration instanceof RelationshipWeightConfig relationshipWeightConfig)
+            return relationshipWeightConfig.relationshipWeightProperty();
+
+        return Optional.empty();
     }
 }
