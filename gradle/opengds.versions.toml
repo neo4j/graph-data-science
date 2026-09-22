@@ -24,7 +24,7 @@ hppc = "0.7.3"
 immutables = "2.12.2"
 ipaddress = "5.6.2"
 # jackson-annotations uses a separate, minor-only version line (no patch releases)
-jackson = "3.2.1"
+jackson = "3.2.3"
 jackson-annotations = "2.22"
 javapoet = "1.13.0"
 jetbrains-annotations = "26.1.0"
