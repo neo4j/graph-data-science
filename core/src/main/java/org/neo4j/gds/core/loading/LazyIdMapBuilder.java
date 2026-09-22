@@ -124,6 +124,11 @@ public final class LazyIdMapBuilder implements PartialIdMap {
             : this.nodesBuilder.importedNodes();
     }
 
+    @Override
+    public boolean isFinalized() {
+        return !isEmpty.getAcquire();
+    }
+
     public record ShardedIdMapAndProperties(
         IdMap idMap,
         NodeSchema schema,

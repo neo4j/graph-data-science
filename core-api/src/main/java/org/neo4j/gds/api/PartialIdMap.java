@@ -22,7 +22,11 @@ package org.neo4j.gds.api;
 /**
  * This interface exposes the relevant parts of {@link org.neo4j.gds.api.nodes.IdMap} used
  * for relationship loading. It helps implementations that are only used for relationship
- * loading to avoid implementing unnecessary methods.
+ * loading to avoid implementing unnecessary methods. It is also used for deferred node
+ * building completion, to start loading relationships before node loading is finalized.
+ * For this reason, the node count from a PartialIdMap may not be reliable for all use
+ * cases. When doing node and relationship loading at the same time, caller should check
+ * whether the PartialIdMap is finalized and interpret the node count accordingly.
  */
 public interface PartialIdMap {
 
@@ -38,6 +42,16 @@ public interface PartialIdMap {
     /**
      * Number of mapped node ids in the root mapping.
      * This is necessary for nested (filtered) id mappings.
+     * May return 0 if the PartialIdMap has not yet been finalized.
+     * If this matters, use {@code isFinalized()} to check.
      */
     long rootNodeCount();
+
+    /**
+     * Whether the PartialIdMap has been finalized such that the {@code rootNodeCount()} is reliable.
+     * Most implementations are finalized, only the LazyIdMapBuilder implementation may be not finalized.
+     */
+    default boolean isFinalized() {
+        return true;
+    }
 }
