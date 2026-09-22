@@ -1,5 +1,5 @@
 [versions]
-agrona = "2.4.1"
+agrona = "2.6.1"
 asciidoctorj = "3.0.1"
 assertj = "3.27.7"
 bouncycastle-prov = "1.84"
