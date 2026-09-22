@@ -73,10 +73,9 @@ class LinkPredictionPipelineWriteToResultStoreStep implements WriteStep<LinkPred
 
         var filteredGraph = graphStore.getGraph(lpGraphStoreFilter.predictNodeLabels());
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .aggregation(Aggregation.SINGLE)
             .nodes(filteredGraph)
             .relationshipType(RelationshipType.of(configuration.writeRelationshipType()))
-            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.writeProperty()))
+            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.writeProperty(), Aggregation.NONE))
             .concurrency(configuration.concurrency())
             .build();
 

@@ -57,10 +57,9 @@ class KgeMutateStep implements MutateStep<KGEPredictResult, RelationshipsWritten
         var concurrency = configuration.concurrency();
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .aggregation(Aggregation.SINGLE)
             .nodes(graph)
             .relationshipType(mutateRelationshipType)
-            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.mutateProperty()))
+            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.mutateProperty(),  Aggregation.NONE))
             .concurrency(concurrency)
             .build();
 

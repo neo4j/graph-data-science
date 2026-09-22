@@ -75,11 +75,10 @@ class LinkPredictionPipelineMutateStep implements MutateStep<LinkPredictionResul
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .aggregation(Aggregation.SINGLE)
             .nodes(filteredGraph)
             .relationshipType(mutateRelationshipType)
             .orientation(Orientation.UNDIRECTED)
-            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.mutateProperty()))
+            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.mutateProperty(), Aggregation.NONE))
             .concurrency(configuration.concurrency())
             .build();
 

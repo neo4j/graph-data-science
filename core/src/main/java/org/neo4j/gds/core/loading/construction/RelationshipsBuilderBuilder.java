@@ -145,6 +145,17 @@ public final class RelationshipsBuilderBuilder {
     public RelationshipsBuilder build() {
         Objects.requireNonNull(nodes, "nodes must be set");
         Objects.requireNonNull(relationshipType, "relationshipType must be set");
+        if (aggregation != Aggregation.DEFAULT) {
+            var conflictingAggregations = propertyConfigs.stream().filter(it -> it.aggregation() != aggregation).toList();
+            if (!conflictingAggregations.isEmpty()) {
+                var message = """
+                    Both aggregation and propertyConfigs are set, but with conflicting aggregations:
+                      PropertyConfigs: %s
+                      Aggregation: %s"""
+                    .formatted(conflictingAggregations, aggregation);
+                throw new IllegalArgumentException(message);
+            }
+        }
         return GraphFactory.relationshipsBuilder(
             nodes,
             relationshipType,
