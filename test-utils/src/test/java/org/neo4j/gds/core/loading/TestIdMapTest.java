@@ -22,8 +22,6 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 
-import java.util.OptionalLong;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
@@ -98,7 +96,7 @@ class TestIdMapTest {
     void rootIdMap() {
         var idMap = TestIdMap.builder().add(42, 0).build();
         assertThat(idMap.rootIdMap()).isEqualTo(idMap);
-        assertThat(idMap.rootNodeCount()).isEqualTo(OptionalLong.of(1));
+        assertThat(idMap.rootNodeCount()).isEqualTo(1);
         // ComposedIdMap is its own root, so root mapping is the identity
         assertThat(idMap.toRootNodeId(0)).isEqualTo(0);
         assertThat(idMap.toRootNodeId(1)).isEqualTo(1);

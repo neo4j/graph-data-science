@@ -97,7 +97,7 @@ class ComposedIdMapTest {
         assertThat(idMap.toOriginalNodeId(4)).isEqualTo(104);
         assertThat(idMap.containsOriginalId(104)).isTrue();
         assertThat(idMap.highestOriginalId()).isEqualTo(109);
-        assertThat(idMap.rootNodeCount()).hasValue(10);
+        assertThat(idMap.rootNodeCount()).isEqualTo(10);
         assertThat(idMap.rootIdMap()).isSameAs(idMap);
         assertThat(idMap.toRootNodeId(7)).isEqualTo(7);
         assertThat(idMap.availableNodeLabels()).containsExactlyInAnyOrder(A, B);

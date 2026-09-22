@@ -28,7 +28,6 @@ import org.neo4j.gds.core.utils.LazyBatchCollection;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
@@ -83,8 +82,8 @@ public final class ComposedIdMap implements IdMap {
     // PartialIdMap
 
     @Override
-    public OptionalLong rootNodeCount() {
-        return OptionalLong.of(this.nodeTranslator.nodeCount());
+    public long rootNodeCount() {
+        return this.nodeTranslator.nodeCount();
     }
 
     // NodeLabels

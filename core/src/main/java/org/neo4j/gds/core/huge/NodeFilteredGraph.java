@@ -46,7 +46,6 @@ import org.neo4j.gds.utils.CloseableThreadLocal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
@@ -177,7 +176,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public OptionalLong rootNodeCount() {
+    public long rootNodeCount() {
         return filteredIdMap.rootNodeCount();
     }
 

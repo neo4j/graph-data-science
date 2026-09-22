@@ -237,17 +237,12 @@ public final class GraphFactory {
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
         var finalConcurrency = concurrency.orElse(new Concurrency(1));
-        var maybeRootNodeCount = nodes.rootNodeCount();
-        var importSizing = maybeRootNodeCount.isPresent()
-            ? ImportSizing.of(finalConcurrency, maybeRootNodeCount.getAsLong())
-            : ImportSizing.of(finalConcurrency);
+        long nodeCount = nodes.rootNodeCount();
+        var importSizing = nodeCount == 0 ? ImportSizing.of(finalConcurrency) : ImportSizing.of(finalConcurrency, nodeCount);
 
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
-        if (maybeRootNodeCount.isPresent()) {
-            var rootNodeCount = maybeRootNodeCount.getAsLong();
-            if (rootNodeCount > 0 && rootNodeCount < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
-                bufferSize = (int) rootNodeCount;
-            }
+        if (nodeCount > 0 && nodeCount < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
+            bufferSize = (int) nodeCount;
         }
 
         boolean skipDangling = skipDanglingRelationships.orElse(true);
@@ -261,7 +256,7 @@ public final class GraphFactory {
             skipDangling
         );
 
-        LongSupplier nodeCountSupplier = () -> nodes.rootNodeCount().isPresent() ? nodes.rootNodeCount().getAsLong() : 0;
+        LongSupplier nodeCountSupplier = nodes::rootNodeCount;
         var singleTypeRelationshipImporter = adjacencyCompressorFactory.map(factory ->
             SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing, factory))
             .orElseGet(() -> SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing));
@@ -282,7 +277,7 @@ public final class GraphFactory {
 
             var inverseImporter = SingleTypeRelationshipImporter.of(
                 inverseImportMetaData,
-                () -> nodes.rootNodeCount().orElse(0L),
+                nodeCountSupplier,
                 importSizing
             );
 

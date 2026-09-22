@@ -32,7 +32,6 @@ import org.neo4j.gds.core.utils.LazyBatchCollection;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
@@ -85,8 +84,8 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public OptionalLong rootNodeCount() {
-        return OptionalLong.of(nodeCount);
+    public long rootNodeCount() {
+        return nodeCount;
     }
 
     @Override

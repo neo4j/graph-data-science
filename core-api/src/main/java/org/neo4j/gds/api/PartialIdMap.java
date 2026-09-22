@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.api;
 
-import java.util.OptionalLong;
-
 /**
  * This interface exposes the relevant parts of {@link org.neo4j.gds.api.nodes.IdMap} used
  * for relationship loading. It helps implementations that are only used for relationship
@@ -41,5 +39,5 @@ public interface PartialIdMap {
      * Number of mapped node ids in the root mapping.
      * This is necessary for nested (filtered) id mappings.
      */
-    OptionalLong rootNodeCount();
+    long rootNodeCount();
 }

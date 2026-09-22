@@ -27,7 +27,6 @@ import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.NodeTranslator;
 
 import java.util.ArrayList;
-import java.util.OptionalLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.api.nodes.IdMap.NOT_FOUND;
@@ -49,7 +48,7 @@ class FilteredViewTest {
             idMap(42, 0, 43, 1, 1337, 2),
             idMap(0, 0, 2, 1)
         );
-        assertThat(idMap.rootNodeCount()).isEqualTo(OptionalLong.of(3));
+        assertThat(idMap.rootNodeCount()).isEqualTo(3);
     }
 
     @Test

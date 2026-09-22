@@ -33,7 +33,6 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 
-import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class LazyIdMapBuilder implements PartialIdMap {
@@ -119,10 +118,10 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     @Override
-    public OptionalLong rootNodeCount() {
+    public long rootNodeCount() {
         return isEmpty.getAcquire()
-            ? OptionalLong.empty()
-            : OptionalLong.of(this.nodesBuilder.importedNodes());
+            ? 0
+            : this.nodesBuilder.importedNodes();
     }
 
     public record ShardedIdMapAndProperties(

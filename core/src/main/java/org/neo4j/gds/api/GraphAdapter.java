@@ -35,7 +35,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
@@ -130,7 +129,7 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public OptionalLong rootNodeCount() {
+    public long rootNodeCount() {
         return graph.rootNodeCount();
     }
 
