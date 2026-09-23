@@ -17,27 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.embeddings;
+package org.neo4j.gds.embeddings;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 
 import java.util.Collection;
 
-class HashGnnMutateStep implements MutateStep<HashGNNResult, NodePropertiesWritten> {
+public class HashGnnMutateStep implements MutateStep<HashGNNResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
     private final String mutateProperty;
     private final Collection<String> nodeLabels;
 
-    HashGnnMutateStep(MutateNodePropertyService mutateNodePropertyService, HashGNNMutateConfig configuration) {
+    public HashGnnMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        String mutateProperty,
+        Collection<String> nodeLabels
+    ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateProperty = configuration.mutateProperty();
-        this.nodeLabels = configuration.nodeLabels();
+        this.mutateProperty = mutateProperty;
+        this.nodeLabels = nodeLabels;
     }
 
     @Override

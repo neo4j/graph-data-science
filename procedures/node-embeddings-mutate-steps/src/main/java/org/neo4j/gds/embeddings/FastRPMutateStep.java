@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.embeddings;
+package org.neo4j.gds.embeddings;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -25,27 +25,30 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 
 import java.util.Collection;
 
-class GraphSageMutateStep implements MutateStep<GraphSageResult, NodePropertiesWritten> {
+public class FastRPMutateStep implements MutateStep<FastRPResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
     private final String mutateProperty;
     private final Collection<String> nodeLabels;
 
-    GraphSageMutateStep(MutateNodePropertyService mutateNodePropertyService, GraphSageMutateConfig configuration) {
+    public FastRPMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        String mutateProperty,
+        Collection<String> nodeLabels
+    ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateProperty = configuration.mutateProperty();
-        this.nodeLabels = configuration.nodeLabels();
+        this.mutateProperty = mutateProperty;
+        this.nodeLabels = nodeLabels;
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        GraphSageResult result
+        FastRPResult result
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.embeddings());
 

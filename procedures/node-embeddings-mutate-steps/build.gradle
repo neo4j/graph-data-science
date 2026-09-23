@@ -1,0 +1,17 @@
+plugins {
+    id 'buildlogic-gds-java'
+}
+
+description = 'Neo4j Graph Data Science :: Node Embedding Mutate Steps'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(":algo")
+    implementation project(":algorithms-machinery")
+    implementation project(":node-embeddings-params")
+    implementation project(":algo-common")
+    implementation project(":core")
+    implementation project(":core-api")
+    implementation project(":ml-core")
+}

@@ -20,10 +20,15 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
+
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.embeddings.FastRPMutateStep;
+import org.neo4j.gds.embeddings.GraphSageMutateStep;
+import org.neo4j.gds.embeddings.HashGnnMutateStep;
+import org.neo4j.gds.embeddings.Node2VecMutateStep;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
@@ -66,7 +71,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         FastRPMutateConfig configuration,
         ResultBuilder<FastRPMutateConfig, FastRPResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new FastRPMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new FastRPMutateStep(mutateNodePropertyService, configuration.mutateProperty(),configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -84,7 +89,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         GraphSageMutateConfig configuration,
         ResultBuilder<GraphSageMutateConfig, GraphSageResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new GraphSageMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new GraphSageMutateStep(mutateNodePropertyService, configuration.mutateProperty(),configuration.nodeLabels());
         var graphSageProcessParameters = graphSageAlgorithmProcessing.graphSageValidationHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
@@ -106,7 +111,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         HashGNNMutateConfig configuration,
         ResultBuilder<HashGNNMutateConfig, HashGNNResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new HashGnnMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new HashGnnMutateStep(mutateNodePropertyService, configuration.mutateProperty(),configuration.nodeLabels());
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -124,7 +129,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         Node2VecMutateConfig configuration,
         ResultBuilder<Node2VecMutateConfig, Node2VecResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new Node2VecMutateStep(mutateNodePropertyService, configuration);
+        var mutateStep = new Node2VecMutateStep(mutateNodePropertyService, configuration.mutateProperty(),configuration.nodeLabels());
         var validationHook = new Node2VecValidationHook(configuration);
 
         return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
