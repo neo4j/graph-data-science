@@ -223,7 +223,7 @@ public final class GraphFactory {
         var propertyMappings = propertyConfigs.stream()
             .map(propertyConfig -> PropertyMapping.of(
                 Key.simple(propertyConfig.propertyKey()),
-                DefaultValue.of(propertyConfig.defaultValue()),
+                propertyConfig.defaultValue(),
                 propertyConfig.aggregation()
             )).toList();
         var projection = new RelationshipProjection(

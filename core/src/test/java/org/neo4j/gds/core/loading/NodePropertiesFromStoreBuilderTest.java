@@ -182,7 +182,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void dimensionsWithNulls() {
-        var floatArray = createNodeProperties(3, null, b -> b.set(1, PrimitiveValues.create(new float[]{42.2F, 1337.1F})));
+        var floatArray = createNodeProperties(3, DefaultValue.of(null), b -> b.set(1, PrimitiveValues.create(new float[]{42.2F, 1337.1F})));
         var doubleArray = createNodeProperties(3, new double[3], b -> b.set(1, PrimitiveValues.create(null)));
         var longArray = createNodeProperties(3, new long[0], b -> b.set(0, PrimitiveValues.create(null)));
 
@@ -361,10 +361,10 @@ final class NodePropertiesFromStoreBuilderTest {
     }
 
     static NodePropertyValues createNodeProperties(long nodeCount, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
-        var builder = NodePropertiesFromStoreBuilder.of(
-            DefaultValue.of(defaultValue),
-            new Concurrency(1)
-        );
+        return createNodeProperties(nodeCount, DefaultValue.of(defaultValue), buildBlock);
+    }
+    static NodePropertyValues createNodeProperties(long nodeCount, DefaultValue defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
+        var builder = NodePropertiesFromStoreBuilder.of(defaultValue, new Concurrency(1));
         buildBlock.accept(builder);
         return builder.build(idMap(nodeCount));
     }
