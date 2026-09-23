@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.embeddings;
+package org.neo4j.gds.embeddings;
 
 import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.Graph;
@@ -25,20 +25,23 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
 import java.util.Collection;
 
-class Node2VecMutateStep implements MutateStep<Node2VecResult, NodePropertiesWritten> {
+public class Node2VecMutateStep implements MutateStep<Node2VecResult, NodePropertiesWritten> {
     private final MutateNodePropertyService mutateNodePropertyService;
     private final String mutateProperty;
     private final Collection<String> nodeLabels;
 
-    Node2VecMutateStep(MutateNodePropertyService mutateNodePropertyService, Node2VecMutateConfig configuration) {
+    public Node2VecMutateStep(
+        MutateNodePropertyService mutateNodePropertyService,
+        String mutateProperty,
+        Collection<String> nodeLabels
+    ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
-        this.mutateProperty = configuration.mutateProperty();
-        this.nodeLabels = configuration.nodeLabels();
+        this.mutateProperty = mutateProperty;
+        this.nodeLabels = nodeLabels;
     }
 
     @Override

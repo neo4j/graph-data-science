@@ -25,6 +25,7 @@ dependencies {
     implementation project(":progress-tracking")
     implementation project(":string-formatting")
     implementation project(":termination")
+    implementation project(":node-embeddings-mutate-steps")
 
     testImplementation platform(openGds.junit.bom)
     testImplementation openGds.junit.jupiter.api
