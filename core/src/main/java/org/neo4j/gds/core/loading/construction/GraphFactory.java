@@ -237,12 +237,11 @@ public final class GraphFactory {
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
         var finalConcurrency = concurrency.orElse(new Concurrency(1));
-        long nodeCount = nodes.rootNodeCount();
-        var importSizing = nodes.isFinalized() ? ImportSizing.of(finalConcurrency, nodeCount) : ImportSizing.of(finalConcurrency);
+        var importSizing = nodes.isFinalized() ? ImportSizing.of(finalConcurrency, nodes.rootNodeCount()) : ImportSizing.of(finalConcurrency);
 
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
-        if (nodeCount > 0 && nodeCount < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
-            bufferSize = (int) nodeCount;
+        if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
+            bufferSize = (int) nodes.rootNodeCount();
         }
 
         boolean skipDangling = skipDanglingRelationships.orElse(true);
