@@ -237,7 +237,7 @@ public final class GraphFactory {
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
         var finalConcurrency = concurrency.orElse(new Concurrency(1));
-        var importSizing = nodes.isFinalized() ? ImportSizing.of(finalConcurrency, nodes.rootNodeCount()) : ImportSizing.of(finalConcurrency);
+        var importSizing = ImportSizing.fromPartialIdMap(finalConcurrency, nodes);
 
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
         if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {

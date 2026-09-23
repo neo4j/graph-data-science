@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.BitUtil;
 
@@ -51,12 +52,18 @@ public final class ImportSizing {
         this.pageSize = pageSize;
     }
 
-    public static ImportSizing of(Concurrency concurrency, long nodeCount) {
-        return determineBestThreadSize(nodeCount, concurrency.value());
+    /**
+     * If an PartialIdMap is not yet finalized we may not be able to rely on its node count.
+     * Check and decide how to compute the import sizing.
+     */
+    public static ImportSizing fromPartialIdMap(Concurrency concurrency, PartialIdMap idMap) {
+        return idMap.isFinalized()
+            ? determineBestThreadSize(idMap.rootNodeCount(), concurrency.value())
+            : determineBestThreadSizeWhenNodeCountIsUnknown(concurrency.value());
     }
 
-    public static ImportSizing of(Concurrency concurrency) {
-        return determineBestThreadSize(concurrency.value());
+    public static ImportSizing of(Concurrency concurrency, long nodeCount) {
+        return determineBestThreadSize(nodeCount, concurrency.value());
     }
 
     private static ImportSizing determineBestThreadSize(long nodeCount, long targetThreads) {
@@ -94,7 +101,7 @@ public final class ImportSizing {
         );
     }
 
-    private static ImportSizing determineBestThreadSize(long targetThreads) {
+    private static ImportSizing determineBestThreadSizeWhenNodeCountIsUnknown(long targetThreads) {
         long numberOfPages = targetThreads * PAGES_PER_THREAD.get();
 
         // number of pages must be a power of two
