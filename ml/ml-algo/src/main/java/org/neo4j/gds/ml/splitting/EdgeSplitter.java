@@ -164,7 +164,7 @@ public abstract class EdgeSplitter {
             .aggregation(Aggregation.SINGLE)
             .nodes(rootNodes)
             .orientation(direction.toOrientation())
-            .addAllPropertyConfigs(propertyKey
+            .propertyConfigs(propertyKey
                 .map(key -> List.of(new GraphFactory.PropertyConfig(key, Aggregation.SINGLE)))
                 .orElse(List.of()))
             .build();

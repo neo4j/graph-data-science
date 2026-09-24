@@ -122,7 +122,7 @@ public final class RelationshipsFilter {
             .nodes(outputNodes)
             .relationshipType(relType)
             .concurrency(concurrency)
-            .addAllPropertyConfigs(propertyConfigs)
+            .propertyConfigs(propertyConfigs)
             .indexInverse(graphStore.inverseIndexedRelationshipTypes().contains(relType))
             .build();
 

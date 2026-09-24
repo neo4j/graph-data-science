@@ -233,7 +233,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .relationshipType(RelationshipType.of("NEW_REL"))
-            .addPropertyConfig(new GraphFactory.PropertyConfig("newRelProp3"))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig("newRelProp3")))
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
@@ -314,7 +314,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .relationshipType(RelationshipType.of("NEW_REL"))
-            .addPropertyConfig(new GraphFactory.PropertyConfig("newRelProp3"))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig("newRelProp3")))
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);

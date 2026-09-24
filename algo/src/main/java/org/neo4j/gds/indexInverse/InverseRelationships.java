@@ -33,13 +33,13 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,21 +112,19 @@ public class InverseRelationships implements Algorithm<Map<RelationshipType, Sin
 
     @NotNull
     private RelationshipsBuilder initializeRelationshipsBuilder(RelationshipType relationshipType, List<RelationshipPropertySchema> propertySchemas) {
-        RelationshipsBuilderBuilder relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
+        var propertyConfigs = new ArrayList<GraphFactory.PropertyConfig>();
+        for (var schema : propertySchemas) {
+            propertyConfigs.add(
+                new GraphFactory.PropertyConfig(schema.key(), schema.aggregation(), schema.defaultValue(), schema.state())
+            );
+        }
+
+        return GraphFactory.initRelationshipsBuilder()
             .relationshipType(relationshipType)
             .concurrency(concurrency)
-            .nodes(graphStore.nodes());
-
-        propertySchemas.forEach(propertySchema ->
-            relationshipsBuilderBuilder.addPropertyConfig(new GraphFactory.PropertyConfig(
-                propertySchema.key(),
-                propertySchema.aggregation(),
-                propertySchema.defaultValue(),
-                propertySchema.state()
-            ))
-        );
-
-        return relationshipsBuilderBuilder.build();
+            .nodes(graphStore.nodes())
+            .propertyConfigs(propertyConfigs)
+            .build();
     }
 
     @NotNull

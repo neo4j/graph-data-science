@@ -31,6 +31,7 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.similarity.nodesim.TopKGraph;
 
+import java.util.List;
 import java.util.Map;
 
 public class TopKSimilarityGraph extends SimilarityGraph{
@@ -50,7 +51,7 @@ public class TopKSimilarityGraph extends SimilarityGraph{
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(topKGraph)
             .relationshipType(RelationshipType.of(relationshipType))
-            .addPropertyConfig(new GraphFactory.PropertyConfig(similarityPropertyName))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig(similarityPropertyName)))
             .build();
 
         IdMap idMap = graph;

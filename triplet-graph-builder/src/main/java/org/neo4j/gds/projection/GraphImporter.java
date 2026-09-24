@@ -53,6 +53,7 @@ import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -415,24 +416,22 @@ public final class GraphImporter {
         boolean indexInverse = inverseIndexedRelationshipTypes.contains(relType.name) || inverseIndexedRelationshipTypes
             .contains("*");
 
-        var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
+        var propertyConfigs = new ArrayList<GraphFactory.PropertyConfig>();
+        if (properties != null) {
+            for (String propertyKey : properties.propertyKeys()) {
+                propertyConfigs.add(new GraphFactory.PropertyConfig(propertyKey));
+            }
+        }
+        return GraphFactory.initRelationshipsBuilder()
             .nodes(this.idMapBuilder)
             .relationshipType(relType)
             .orientation(orientation)
             .indexInverse(indexInverse)
             .concurrency(this.config.readConcurrency())
             .usePooledBuilderProvider(true)
-            .bufferSize(this.relationshipBufferSize);
-
-        if (properties != null) {
-            for (String propertyKey : properties.propertyKeys()) {
-                relationshipsBuilderBuilder.addPropertyConfig(
-                    new GraphFactory.PropertyConfig(propertyKey)
-                );
-            }
-        }
-
-        return relationshipsBuilderBuilder.build();
+            .bufferSize(this.relationshipBufferSize)
+            .propertyConfigs(propertyConfigs)
+            .build();
     }
 
     /**

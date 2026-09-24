@@ -29,6 +29,7 @@ import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,7 +39,7 @@ public final class RelationshipsBuilderBuilder {
     private PartialIdMap nodes;
     private RelationshipType relationshipType;
     private Orientation orientation = Orientation.NATURAL;
-    private final List<GraphFactory.PropertyConfig> propertyConfigs = new ArrayList<>();
+    private List<GraphFactory.PropertyConfig> propertyConfigs = new ArrayList<>();
     private Aggregation aggregation = Aggregation.DEFAULT;
     private boolean skipDanglingRelationships = true;
     private Concurrency concurrency = new Concurrency(1);
@@ -68,24 +69,12 @@ public final class RelationshipsBuilderBuilder {
         return this;
     }
 
-    public RelationshipsBuilderBuilder addPropertyConfig(GraphFactory.PropertyConfig element) {
-        this.propertyConfigs.add(Objects.requireNonNull(element));
-        return this;
-    }
-
-    public RelationshipsBuilderBuilder addAllPropertyConfigs(Iterable<? extends GraphFactory.PropertyConfig> elements) {
-        for (var element : elements) {
-            this.propertyConfigs.add(Objects.requireNonNull(element));
-        }
-        return this;
-    }
-
     /**
      * @param propertyConfigs Default is an empty list.
      */
-    public RelationshipsBuilderBuilder propertyConfigs(Iterable<? extends GraphFactory.PropertyConfig> propertyConfigs) {
-        this.propertyConfigs.clear();
-        return addAllPropertyConfigs(propertyConfigs);
+    public RelationshipsBuilderBuilder propertyConfigs(List<? extends GraphFactory.PropertyConfig> propertyConfigs) {
+        this.propertyConfigs = Collections.unmodifiableList(propertyConfigs);
+        return this;
     }
 
     /**

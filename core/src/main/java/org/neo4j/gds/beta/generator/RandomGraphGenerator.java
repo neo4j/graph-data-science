@@ -177,7 +177,7 @@ public final class RandomGraphGenerator {
             .relationshipType(relationshipType)
             .orientation(direction.toOrientation())
             .adjacencyCompressorFactory(this.adjacencyCompressorFactory)
-            .addAllPropertyConfigs(
+            .propertyConfigs(
                 relationshipPropertyProducers.stream().map(propertyProducer -> new GraphFactory.PropertyConfig(
                     propertyProducer.getPropertyName(),
                     aggregation

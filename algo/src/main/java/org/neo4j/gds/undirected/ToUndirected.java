@@ -34,13 +34,12 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -112,34 +111,26 @@ public class ToUndirected implements Algorithm<SingleTypeRelationships> {
         RelationshipType relationshipType,
         List<RelationshipPropertySchema> propertySchemas
     ) {
-        RelationshipsBuilderBuilder relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
-            .relationshipType(relationshipType)
+        var builder = GraphFactory.initRelationshipsBuilder();
+        var propertyConfigs = new ArrayList<GraphFactory.PropertyConfig>();
+        for (var schema : propertySchemas) {
+            var aggregation = parameters.aggregation().map(aggregations -> aggregations.localAggregation(schema.key()))
+                .orElse(schema.aggregation());
+            propertyConfigs.add(
+                new GraphFactory.PropertyConfig(schema.key(), aggregation, schema.defaultValue(), schema.state())
+            );
+        }
+        if (propertyConfigs.isEmpty()) {
+            parameters.aggregation().flatMap(ToUndirectedAggregations::globalAggregation).ifPresent(builder::aggregation);
+        } else {
+            builder.propertyConfigs(propertyConfigs);
+        }
+
+        return builder.relationshipType(relationshipType)
             .concurrency(concurrency)
             .nodes(graphStore.nodes())
-            .orientation(Orientation.UNDIRECTED);
-
-        parameters.aggregation()
-            .flatMap(ToUndirectedAggregations::globalAggregation)
-            .ifPresent(relationshipsBuilderBuilder::aggregation);
-
-
-        propertySchemas.forEach(propertySchema ->
-            {
-                Aggregation aggregation = parameters.aggregation()
-                    .map(aggregations -> aggregations.localAggregation(propertySchema.key()))
-                    .orElse(propertySchema.aggregation());
-
-                relationshipsBuilderBuilder.addPropertyConfig(new GraphFactory.PropertyConfig(
-                        propertySchema.key(),
-                        aggregation,
-                        propertySchema.defaultValue(),
-                        propertySchema.state()
-                    )
-                );
-            }
-        );
-
-        return relationshipsBuilderBuilder.build();
+            .orientation(Orientation.UNDIRECTED)
+            .build();
     }
 
     @NotNull

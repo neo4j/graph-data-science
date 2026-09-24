@@ -35,6 +35,7 @@ import org.neo4j.gds.similarity.nodesim.TopKGraph;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -104,7 +105,7 @@ public class SimilarityGraphBuilder {
             var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(graph.rootIdMap())
                 .relationshipType(RelationshipType.of("REL"))
-                .addPropertyConfig(new GraphFactory.PropertyConfig("property"))
+                .propertyConfigs(List.of(new GraphFactory.PropertyConfig("property")))
                 .concurrency(concurrency)
                 .build();
 

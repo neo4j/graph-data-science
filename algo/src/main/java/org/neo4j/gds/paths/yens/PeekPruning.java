@@ -41,6 +41,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -216,7 +217,7 @@ public final class PeekPruning {
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .relationshipType(RelationshipType.of("_IGNORED_"))
-            .addPropertyConfig(new GraphFactory.PropertyConfig("property"))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig("property")))
             .build();
 
         var relationshipCreators = PartitionUtils.degreePartition(

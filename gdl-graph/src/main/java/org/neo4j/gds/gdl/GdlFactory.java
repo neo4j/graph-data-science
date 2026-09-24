@@ -416,7 +416,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                             .orientation(graphProjectConfig.orientation())
                             .aggregation(graphProjectConfig.aggregation())
                             .indexInverse(graphProjectConfig.indexInverse())
-                            .addAllPropertyConfigs(propertyConfigs)
+                            .propertyConfigs(propertyConfigs)
                             .build();
                     }
                 )

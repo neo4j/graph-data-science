@@ -41,6 +41,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicLong;
@@ -253,7 +254,7 @@ public final class Louvain implements Algorithm<LouvainResult> {
             .nodes(idMap)
             .relationshipType(RelationshipType.of("IGNORED"))
             .orientation(rootGraph.schema().direction().toOrientation())
-            .addPropertyConfig(new GraphFactory.PropertyConfig("property", Aggregation.SUM))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig("property", Aggregation.SUM)))
             .build();
 
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small

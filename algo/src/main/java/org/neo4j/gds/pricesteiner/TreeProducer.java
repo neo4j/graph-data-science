@@ -27,6 +27,7 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 
+import java.util.List;
 import java.util.function.LongPredicate;
 
 public final class TreeProducer {
@@ -49,7 +50,7 @@ public final class TreeProducer {
             .nodes(idMap)
             .relationshipType(RelationshipType.of("TREE"))
             .orientation(Orientation.UNDIRECTED)
-            .addPropertyConfig(new GraphFactory.PropertyConfig("weight"))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig("weight")))
             .build();
 
         for (long i =0; i<numberOfTreeEdges;++i){
