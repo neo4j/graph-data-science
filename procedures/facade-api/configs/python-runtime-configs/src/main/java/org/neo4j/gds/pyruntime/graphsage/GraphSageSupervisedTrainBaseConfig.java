@@ -21,6 +21,7 @@ package org.neo4j.gds.pyruntime.graphsage;
 
 import org.neo4j.gds.annotation.Configuration;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -39,7 +40,12 @@ public interface GraphSageSupervisedTrainBaseConfig extends GraphSageBaseTrainCo
     }
 
     default Map<String, Double> splitRatios() {
-        return Map.of("TRAIN", 0.6, "TEST", 0.2, "VALID", 0.2);
+        // insertion-ordered so that the rendered default is stable across JVMs (Map.of order is salted)
+        var splitRatios = new LinkedHashMap<String, Double>();
+        splitRatios.put("TRAIN", 0.6);
+        splitRatios.put("TEST", 0.2);
+        splitRatios.put("VALID", 0.2);
+        return splitRatios;
     }
 
     default boolean classWeights() {

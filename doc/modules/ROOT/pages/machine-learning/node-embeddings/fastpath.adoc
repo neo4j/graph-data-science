@@ -274,8 +274,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | Name              | Type    | Default                | Optional | Description
 include::partial$/machine-learning/node-embeddings/fastpath/specific-configuration.adoc[]
 | writeProperty     | String  | n/a                    | no       | The node property in the Neo4j database to which the embedding is written
-| concurrency       | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm.
-| writeConcurrency  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result to Neo4j.
+| writeConcurrency  | Integer | 4 | yes      | The number of concurrent threads used for writing the result to Neo4j.
 |===
 
 .Results
