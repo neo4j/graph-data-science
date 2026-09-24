@@ -41,7 +41,6 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -196,8 +195,7 @@ public final class GraphFactory {
         boolean indexInverse,
         ExecutorService executorService,
         boolean usePooledBuilderProvider,
-        int requestedBufferSize,
-        Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory
+        int requestedBufferSize
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
@@ -243,9 +241,7 @@ public final class GraphFactory {
         );
 
         LongSupplier nodeCountSupplier = nodes::rootNodeCount;
-        var singleTypeRelationshipImporter = adjacencyCompressorFactory.map(factory ->
-            SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing, factory))
-            .orElseGet(() -> SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing));
+        var singleTypeRelationshipImporter = SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing);
 
         SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
         if (indexInverse) {

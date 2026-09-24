@@ -25,14 +25,12 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public final class RelationshipsBuilderBuilder {
@@ -47,7 +45,6 @@ public final class RelationshipsBuilderBuilder {
     private ExecutorService executorService = DefaultPool.INSTANCE;
     private boolean usePooledBuilderProvider = false;
     private int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
-    private Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory = Optional.empty();
 
     RelationshipsBuilderBuilder() {}
 
@@ -136,14 +133,6 @@ public final class RelationshipsBuilderBuilder {
         return this;
     }
 
-    /**
-     * @param adjacencyCompressorFactory Default is {@code null}.
-     */
-    public RelationshipsBuilderBuilder adjacencyCompressorFactory(AdjacencyListBehavior.Factory adjacencyCompressorFactory) {
-        this.adjacencyCompressorFactory = Optional.ofNullable(adjacencyCompressorFactory);
-        return this;
-    }
-
     public RelationshipsBuilder build() {
         Objects.requireNonNull(nodes, "nodes must be set");
         Objects.requireNonNull(relationshipType, "relationshipType must be set");
@@ -169,8 +158,7 @@ public final class RelationshipsBuilderBuilder {
             indexInverse,
             executorService,
             usePooledBuilderProvider,
-            bufferSize,
-            adjacencyCompressorFactory
+            bufferSize
         );
     }
 }

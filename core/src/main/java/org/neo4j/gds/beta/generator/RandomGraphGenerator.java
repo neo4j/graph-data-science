@@ -42,7 +42,6 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -84,7 +83,6 @@ public final class RandomGraphGenerator {
     private final List<PropertyProducer<double[]>> relationshipPropertyProducers;
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers;
     private final String idMapBuilderType;
-    private final AdjacencyListBehavior.Factory adjacencyCompressorFactory;
     private final boolean forceDag;
     private final HugeLongArray randomDagMapping;
 
@@ -101,7 +99,6 @@ public final class RandomGraphGenerator {
         Direction direction,
         AllowSelfLoops allowSelfLoops,
         String idMapBuilderType,
-        AdjacencyListBehavior.Factory adjacencyCompressorFactory,
         boolean forceDag,
         boolean inverseIndex
     ) {
@@ -121,7 +118,6 @@ public final class RandomGraphGenerator {
         this.propertyValueRandom = new Random(seed);
         this.randomDagMapping = generateRandomMapping(seed);
         this.inverseIndex = inverseIndex;
-        this.adjacencyCompressorFactory = adjacencyCompressorFactory;
     }
 
     public static RandomGraphGeneratorBuilder builder() {
@@ -176,7 +172,6 @@ public final class RandomGraphGenerator {
             .nodes(idMap)
             .relationshipType(relationshipType)
             .orientation(direction.toOrientation())
-            .adjacencyCompressorFactory(this.adjacencyCompressorFactory)
             .propertyConfigs(
                 relationshipPropertyProducers.stream().map(propertyProducer -> new GraphFactory.PropertyConfig(
                     propertyProducer.getPropertyName(),
