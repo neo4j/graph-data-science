@@ -30,7 +30,6 @@ import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -117,12 +116,10 @@ public class ToUndirected implements Algorithm<SingleTypeRelationships> {
             .relationshipType(relationshipType)
             .concurrency(concurrency)
             .nodes(graphStore.nodes())
-            .executorService(DefaultPool.INSTANCE)
             .orientation(Orientation.UNDIRECTED);
 
-        parameters
-            .aggregation()
-            .map(ToUndirectedAggregations::globalAggregation)
+        parameters.aggregation()
+            .flatMap(ToUndirectedAggregations::globalAggregation)
             .ifPresent(relationshipsBuilderBuilder::aggregation);
 
 

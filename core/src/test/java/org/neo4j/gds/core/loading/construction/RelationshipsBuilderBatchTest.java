@@ -20,9 +20,7 @@
 package org.neo4j.gds.core.loading.construction;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.GraphProjectFromGdlConfigImpl;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -32,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RelationshipsBuilderBatchTest {
 
-    private static RelationshipsBuilder pooledBuilder(Concurrency concurrency) {
+    private static RelationshipsBuilder pooledBuilder() {
         var gdlFactory = GdlFactory.builder().graphProjectConfig(
             GraphProjectFromGdlConfigImpl.builder()
                 .gdlGraph("(a:A)-[:T]->(b:A), (c:A)-[:T]->(d:A)")
@@ -44,15 +42,13 @@ class RelationshipsBuilderBatchTest {
         return GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .relationshipType(RelationshipType.of("REL"))
-            .orientation(Orientation.NATURAL)
-            .concurrency(concurrency)
             .usePooledBuilderProvider(true)
             .build();
     }
 
     @Test
     void shouldReuseReleasedSlotInSubsequentBatch() {
-        var relBuilder = pooledBuilder(new Concurrency(1));
+        var relBuilder = pooledBuilder();
 
         try (var batch = relBuilder.newBatch()) {
             assertThat(batch.addFromInternal(0, 1)).isTrue();
@@ -69,7 +65,7 @@ class RelationshipsBuilderBatchTest {
 
     @Test
     void shouldKeepDataFromReleasedBatchesInBuild() {
-        var relBuilder = pooledBuilder(new Concurrency(1));
+        var relBuilder = pooledBuilder();
 
         // several acquire/release cycles, i.e. one batch per morsel
         for (int i = 0; i < 3; i++) {
@@ -89,7 +85,7 @@ class RelationshipsBuilderBatchTest {
         var defaultTimeout = GdsFeatureToggles.POOLED_BUILDER_TIMEOUT_SECONDS.get();
         GdsFeatureToggles.POOLED_BUILDER_TIMEOUT_SECONDS.set(1);
         try {
-            var relBuilder = pooledBuilder(new Concurrency(1));
+            var relBuilder = pooledBuilder();
 
             try (var ignored = relBuilder.newBatch()) {
                 // holding the only slot

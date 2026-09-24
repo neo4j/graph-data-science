@@ -381,7 +381,6 @@ final class NodeSimilarityTest {
         var nodeSimilarityResult = nodeSimilarity.compute();
         var graphBuilder = new SimilarityGraphBuilder(
             graph,
-            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             false
         );
@@ -636,7 +635,6 @@ final class NodeSimilarityTest {
         var nodeSimilarityResult = nodeSimilarity.compute();
         var graphBuilder = new SimilarityGraphBuilder(
             graph,
-            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             false
         );
@@ -697,7 +695,6 @@ final class NodeSimilarityTest {
         var nodeSimilarityResult = nodeSimilarity.compute();
         var graphBuilder = new SimilarityGraphBuilder(
             graph,
-            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             false
         );

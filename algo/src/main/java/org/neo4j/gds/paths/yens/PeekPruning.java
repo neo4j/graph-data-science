@@ -217,7 +217,6 @@ public final class PeekPruning {
             .nodes(idMap)
             .relationshipType(RelationshipType.of("_IGNORED_"))
             .addPropertyConfig(new GraphFactory.PropertyConfig("property"))
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var relationshipCreators = PartitionUtils.degreePartition(

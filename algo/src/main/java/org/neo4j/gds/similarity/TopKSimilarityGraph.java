@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.similarity.ActualSimilaritySummaryBuilder;
 import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilderFactory;
@@ -27,7 +26,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -52,10 +50,7 @@ public class TopKSimilarityGraph extends SimilarityGraph{
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(topKGraph)
             .relationshipType(RelationshipType.of(relationshipType))
-            .orientation(Orientation.NATURAL)
             .addPropertyConfig(new GraphFactory.PropertyConfig(similarityPropertyName))
-            .concurrency(new Concurrency(1))
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         IdMap idMap = graph;

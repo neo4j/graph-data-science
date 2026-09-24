@@ -71,7 +71,6 @@ class SimilarityGraphBuilderTest {
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             unlabelledGraph,
-            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             false
         );
@@ -94,7 +93,6 @@ class SimilarityGraphBuilderTest {
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             graph,
-            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             false
         );
@@ -120,7 +118,6 @@ class SimilarityGraphBuilderTest {
         NodeFilteredGraph filteredGraph = new NodeFilteredGraph(origGraph,filteredIdMap);
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             filteredGraph,
-            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             false
         );

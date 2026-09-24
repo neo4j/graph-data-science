@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pathfinding;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -57,7 +56,6 @@ public class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSte
             .nodes(graph)
             .relationshipType(RelationshipType.of(mutateRelationshipType))
             .addPropertyConfig(new GraphFactory.PropertyConfig(mutateProperty))
-            .orientation(Orientation.NATURAL)
             .build();
 
         var parentArray = treeResult.parentArray();

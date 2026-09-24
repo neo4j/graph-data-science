@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -29,7 +28,6 @@ import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.logging.Log;
@@ -75,13 +73,10 @@ class LinkPredictionPipelineWriteToResultStoreStep implements WriteStep<LinkPred
 
         var filteredGraph = graphStore.getGraph(lpGraphStoreFilter.predictNodeLabels());
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .aggregation(Aggregation.SINGLE)
             .nodes(filteredGraph)
             .relationshipType(RelationshipType.of(configuration.writeRelationshipType()))
-            .orientation(Orientation.NATURAL)
-            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.writeProperty()))
+            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.writeProperty(), Aggregation.NONE))
             .concurrency(configuration.concurrency())
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var histogram = readyHistogram(true);

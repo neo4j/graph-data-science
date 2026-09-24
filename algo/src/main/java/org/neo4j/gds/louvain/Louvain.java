@@ -254,7 +254,6 @@ public final class Louvain implements Algorithm<LouvainResult> {
             .relationshipType(RelationshipType.of("IGNORED"))
             .orientation(rootGraph.schema().direction().toOrientation())
             .addPropertyConfig(new GraphFactory.PropertyConfig("property", Aggregation.SUM))
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small

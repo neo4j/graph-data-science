@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.similarity;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
@@ -82,6 +80,10 @@ public class SimilarityGraphBuilder {
     private final Concurrency concurrency;
     private final boolean shouldConstructDistribution;
 
+    public SimilarityGraphBuilder(Graph graph, TerminationFlag terminationFlag, boolean shouldConstructDistribution) {
+        this(graph, new Concurrency(1), terminationFlag, shouldConstructDistribution);
+    }
+
     public SimilarityGraphBuilder(
         Graph graph,
         Concurrency concurrency,
@@ -102,10 +104,8 @@ public class SimilarityGraphBuilder {
             var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(graph.rootIdMap())
                 .relationshipType(RelationshipType.of("REL"))
-                .orientation(Orientation.NATURAL)
                 .addPropertyConfig(new GraphFactory.PropertyConfig("property"))
                 .concurrency(concurrency)
-                .executorService(DefaultPool.INSTANCE)
                 .build();
 
             var similaritySummaryBuilder = SimilaritySummaryBuilderFactory.create(concurrency, shouldConstructDistribution);

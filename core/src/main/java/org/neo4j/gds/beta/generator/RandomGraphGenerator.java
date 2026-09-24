@@ -176,7 +176,7 @@ public final class RandomGraphGenerator {
             .nodes(idMap)
             .relationshipType(relationshipType)
             .orientation(direction.toOrientation())
-            .adjacencyCompressorFactory(Optional.ofNullable(this.adjacencyCompressorFactory))
+            .adjacencyCompressorFactory(this.adjacencyCompressorFactory)
             .addAllPropertyConfigs(
                 relationshipPropertyProducers.stream().map(propertyProducer -> new GraphFactory.PropertyConfig(
                     propertyProducer.getPropertyName(),

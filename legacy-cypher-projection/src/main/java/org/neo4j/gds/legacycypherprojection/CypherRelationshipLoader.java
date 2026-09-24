@@ -22,7 +22,6 @@ package org.neo4j.gds.legacycypherprojection;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.Aggregation;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.PropertyMappings;
@@ -158,7 +157,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
                 .relationshipType(relationshipType)
                 .concurrency(cypherConfig.readConcurrency())
                 .propertyConfigs(propertyConfigs)
-                .orientation(Orientation.NATURAL)
                 .skipDanglingRelationships(!cypherConfig.validateRelationships())
                 .build();
         }

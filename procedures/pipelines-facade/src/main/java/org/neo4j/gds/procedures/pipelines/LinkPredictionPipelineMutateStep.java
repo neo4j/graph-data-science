@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.logging.Log;
@@ -76,13 +75,11 @@ class LinkPredictionPipelineMutateStep implements MutateStep<LinkPredictionResul
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .aggregation(Aggregation.SINGLE)
             .nodes(filteredGraph)
             .relationshipType(mutateRelationshipType)
             .orientation(Orientation.UNDIRECTED)
-            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.mutateProperty()))
+            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.mutateProperty(), Aggregation.NONE))
             .concurrency(configuration.concurrency())
-            .executorService(DefaultPool.INSTANCE)
             .build();
 
         var predictedLinkStream = result.stream();

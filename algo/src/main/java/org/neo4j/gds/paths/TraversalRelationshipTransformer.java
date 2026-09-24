@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths;
 
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -35,7 +34,6 @@ public final class TraversalRelationshipTransformer {
             .initRelationshipsBuilder()
             .nodes(graph)
             .relationshipType(RelationshipType.of(relType))
-            .orientation(Orientation.NATURAL)
             .build();
 
         var source = result.get(0);
@@ -54,7 +52,6 @@ public final class TraversalRelationshipTransformer {
             .nodes(graph)
             .relationshipType(RelationshipType.of(relType))
             .addPropertyConfig(new GraphFactory.PropertyConfig(indexProperty))
-            .orientation(Orientation.NATURAL)
             .build();
 
         var source = result.get(0);
