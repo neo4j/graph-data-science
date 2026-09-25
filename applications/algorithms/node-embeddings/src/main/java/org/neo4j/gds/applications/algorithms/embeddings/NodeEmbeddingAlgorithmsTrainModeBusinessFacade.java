@@ -76,8 +76,7 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
             writeToDiskStep,
             resultBuilder,
             Optional.empty(),
-            Optional.of(List.of(validationHook)),
-            Optional.empty()
+            Optional.of(List.of(validationHook))
         );
     }
 }

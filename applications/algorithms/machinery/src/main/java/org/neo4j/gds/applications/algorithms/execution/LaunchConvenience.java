@@ -29,9 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.core.loading.PostLoadETLHooks;
-import org.neo4j.gds.core.loading.validation.GraphValidation;
-import org.neo4j.gds.core.loading.validation.ValidationRules;
+import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
@@ -65,14 +63,13 @@ public class LaunchConvenience {
      * <p>
      * _Work_ is launched asynchronously, caller deals with completing work and handling errors.
      *
-     * @param configuration if you supply a {@link org.neo4j.gds.config.RelationshipWeightConfig} we extract that for you.
+     * @param configuration       if you supply a {@link org.neo4j.gds.config.RelationshipWeightConfig} we extract that for you.
+     * @param graphLoadETLBuilder algorithms load up their specific validations, and we add some cross-cutting ones
      */
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
-        ValidationRules algorithmSpecificValidationRules,
-        PostLoadETLHooks postLoadETLHooks,
-        GraphValidation graphValidation,
+        GraphLoadETLBuilder graphLoadETLBuilder,
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,
@@ -81,9 +78,11 @@ public class LaunchConvenience {
     ) {
         var relationshipProperty = extractRelationshipProperty(configuration);
 
-        var builder = validationRuleFromConfigurationParser.parse(configuration);
-        algorithmSpecificValidationRules.forEach(builder::withValidationRule);
-        var graphStoreValidation = builder.build();
+        // some cross-cutting stuff
+        validationRuleFromConfigurationParser.parse(configuration, graphLoadETLBuilder);
+
+        // now we finally have all validations captured, we can finalise the ETL pipeline
+        var graphLoadETL = graphLoadETLBuilder.build();
 
         return algorithmProcessingFacade.loadGraphThenRunAlgorithm(
             requestScopedDependencies.databaseId(),
@@ -92,9 +91,7 @@ public class LaunchConvenience {
             requestScopedDependencies.user(),
             configuration.toGraphParameters(),
             relationshipProperty,
-            graphStoreValidation,
-            postLoadETLHooks,
-            graphValidation,
+            graphLoadETL,
             constructAndRun,
             configuration,
             requestScopedDependencies.terminationFlag(),

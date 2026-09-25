@@ -32,11 +32,9 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
+import org.neo4j.gds.core.loading.validation.GraphLoadETL;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.PostLoadETLHooks;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -89,9 +87,7 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         User user,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
-        GraphStoreValidation graphStoreValidation,
-        PostLoadETLHooks postLoadETLHooks,
-        GraphValidation graphValidation,
+        GraphLoadETL graphLoadETL,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
         TerminationFlag terminationFlag,
@@ -112,9 +108,7 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
                 user,
                 graphParameters,
                 relationshipProperty,
-                graphStoreValidation,
-                postLoadETLHooks,
-                graphValidation
+                graphLoadETL
             );
 
             return computationQueue.enqueueComputation(
@@ -140,9 +134,7 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         User user,
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
-        GraphStoreValidation graphStoreValidation,
-        PostLoadETLHooks postLoadETLHooks,
-        GraphValidation graphValidation
+        GraphLoadETL graphLoadETL
     ) {
         try (var ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
             return graphStoreCatalogService.loadGraphResources(
@@ -150,11 +142,8 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
                 graphName,
                 user,
                 graphParameters,
-                Optional.empty(),
                 relationshipProperty,
-                graphStoreValidation,
-                postLoadETLHooks,
-                graphValidation
+                graphLoadETL
             );
         }
     }

@@ -23,7 +23,6 @@ import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
@@ -31,6 +30,8 @@ import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
+import org.neo4j.gds.core.loading.validation.GraphLoadETL;
+import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.GraphValidation;
 import org.neo4j.gds.logging.Log;
@@ -80,34 +81,29 @@ public class GraphStoreCatalogService {
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         User user,
         DatabaseId databaseId
     ) {
-        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
+        var graphLoadETLBuilder = new GraphLoadETLBuilder();
+
+        graphLoadETLBuilder.with(graphStoreValidation::validate);
+        postGraphStoreLoadValidationHooks.ifPresent(
+            postLoadValidationHooks -> postLoadValidationHooks.forEach(
+                postLoadValidationHook -> {
+                    graphLoadETLBuilder.with(postLoadValidationHook::onGraphStoreLoaded);
+                    graphLoadETLBuilder.with(postLoadValidationHook::onGraphLoaded);
+                })
+        );
+        var graphLoadETL = graphLoadETLBuilder.build();
+
+        return loadGraphResources(
+            databaseId,
             graphName,
             user,
-            graphParameters.usernameOverride(),
-            databaseId
+            graphParameters,
+            relationshipProperty,
+            graphLoadETL
         );
-
-        var graphStore = graphStoreCatalogEntry.graphStore();
-
-        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraphStore(graphStore, hooks));
-
-        var nodeLabels = GraphStoreCatalogService.resolveNodeLabels(graphStore, graphParameters.nodeLabelsFilter());
-        var relationshipTypes = GraphStoreCatalogService.resolveRelationshipTypes(graphStore, graphParameters.loadAllRelationshipTypes(), graphParameters.relationshipTypesFilter());
-
-        // Validate the graph store before going any further
-        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
-
-        postGraphStoreLoadETLHooks.ifPresent(postLoadETLHooks -> extractAndTransform(graphStore, postLoadETLHooks));
-
-        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
-
-        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraph(graph, hooks));
-
-        return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }
 
     public GraphStoreCatalogEntry getGraphStoreCatalogEntry(
@@ -126,35 +122,44 @@ public class GraphStoreCatalogService {
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphStoreValidation graphStoreValidation,
-        boolean includeGraph, // always true but don't change now
+        boolean ignored,
         Optional<GraphValidation> graphValidation
     ) {
+        // this will fall away once we have de-duplicated
+        var graphLoadETLBuilder = new GraphLoadETLBuilder();
+        graphLoadETLBuilder.with(graphStoreValidation::validate);
+        graphValidation.ifPresent(hook -> graphLoadETLBuilder.with(hook::validate));
+        var graphLoadETL = graphLoadETLBuilder.build();
+
         return loadGraphResources(
             databaseId,
             graphName,
             user,
             graphParameters,
-            Optional.empty(),
             relationshipProperty,
-            graphStoreValidation,
-            PostLoadETLHooks.None,
-            graphValidation.orElse(GraphValidation.None) // not changing signature at this point
+            graphLoadETL
         );
     }
 
     /**
-     * Load graph store and graph, under validation and ETL
+     * Load graph store and graph, under validation and ETL.
+     * There are three hooks for your validation and ETL needs:
+     *
+     * <ol>
+     *     <li>When the graph store has been loaded</li>
+     *     <li>When mode labels and relationship types have been filtered</li>
+     *     <li>When the graph has been loaded</li>
+     * </ol>
+     *
+     * If you want to read books, this method is GoF Template Method and the ETL you pass in is GoF Strategy.
      */
     public GraphResources loadGraphResources(
         DatabaseId databaseId,
         GraphName graphName,
         User user,
         GraphParameters graphParameters,
-        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Optional<String> relationshipProperty,
-        GraphStoreValidation graphStoreValidation,
-        PostLoadETLHooks postGraphStoreLoadETLHooks,
-        GraphValidation graphValidation
+        GraphLoadETL graphLoadETL
     ) {
         var graphStoreCatalogEntry = getGraphStoreCatalogEntry(
             graphName,
@@ -165,7 +170,7 @@ public class GraphStoreCatalogService {
 
         var graphStore = graphStoreCatalogEntry.graphStore();
 
-        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraphStore(graphStore, hooks));
+        graphLoadETL.onGraphStoreLoaded(graphStore);
 
         var nodeLabels = GraphStoreCatalogService.resolveNodeLabels(graphStore, graphParameters.nodeLabelsFilter());
         var relationshipTypes = GraphStoreCatalogService.resolveRelationshipTypes(
@@ -174,43 +179,13 @@ public class GraphStoreCatalogService {
             graphParameters.relationshipTypesFilter()
         );
 
-        graphStoreValidation.validate(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
-
-        postGraphStoreLoadETLHooks.forEach(hook -> hook.onGraphStoreLoaded(graphStore));
+        graphLoadETL.onGraphStoreFiltered(graphStore, nodeLabels, relationshipTypes, relationshipProperty);
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
 
-        graphValidation.validate(graph);
+        graphLoadETL.onGraphLoaded(graph);
 
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
-    }
-
-    /**
-     * Some use cases need special validation. We do this right after loading.
-     *
-     * @throws IllegalArgumentException if the graph store did not conform to desired invariants
-     */
-    private void validateGraphStore(GraphStore graphStore, Iterable<PostLoadValidationHook> validationHooks) {
-        for (PostLoadValidationHook hook : validationHooks) {
-            hook.onGraphStoreLoaded(graphStore);
-        }
-    }
-
-    private void extractAndTransform(GraphStore graphStore, Iterable<PostLoadETLHook> etlHooks) {
-        for (PostLoadETLHook hook : etlHooks) {
-            hook.onGraphStoreLoaded(graphStore);
-        }
-    }
-
-    /**
-     * Some use cases need special validation. We do this right after loading.
-     *
-     * @throws IllegalArgumentException if the graph did not conform to desired invariants
-     */
-    private void validateGraph(Graph graph, Iterable<PostLoadValidationHook> validationHooks) {
-        for (PostLoadValidationHook hook : validationHooks) {
-            hook.onGraphLoaded(graph);
-        }
     }
 
     public Optional<Map<String, Object>> getDegreeDistribution(

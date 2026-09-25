@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.core.loading.PostLoadETLHook;
+import org.neo4j.gds.core.loading.validation.GraphStoreLoadedETL;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.indexInverse.InverseRelationships;
@@ -34,7 +34,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Collection;
 import java.util.List;
 
-class HitsETLHook implements PostLoadETLHook {
+class HitsETLHook implements GraphStoreLoadedETL {
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
     private final HitsConfig configuration;

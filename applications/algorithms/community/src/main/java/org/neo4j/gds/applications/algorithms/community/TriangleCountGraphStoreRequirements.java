@@ -22,16 +22,16 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.ValidationRule;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class TriangleCountGraphStoreRequirements implements ValidationRule {
-
+public final class TriangleCountGraphStoreRequirements implements GraphStoreFilteredETL {
     private final UndirectedOnlyRequirement undirectedOnlyGraphStoreValidation;
     private final List<String> labelFilter;
 
@@ -50,12 +50,12 @@ public final class TriangleCountGraphStoreRequirements implements ValidationRule
         this.labelFilter = labelFilter;
     }
 
-
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
         undirectedOnlyGraphStoreValidation.validate(
             graphStore,
@@ -65,10 +65,7 @@ public final class TriangleCountGraphStoreRequirements implements ValidationRule
         validateLabelsExist(selectedLabels);
     }
 
-
-    void validateLabelsExist(
-        Collection<NodeLabel> nodeLabels
-    ) {
+    void validateLabelsExist(Collection<NodeLabel> nodeLabels) {
         for (String givenLabelString : labelFilter) {
             var givenLabel = NodeLabel.of(givenLabelString);
             if (!nodeLabels.contains(givenLabel)) {

@@ -101,8 +101,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
             mutateStep,
             resultBuilder,
             graphSageProcessParameters.relationshipWeightPropertyFromTrainConfiguration(),
-            Optional.of(List.of(graphSageProcessParameters.validationHook())),
-            Optional.empty()
+            Optional.of(List.of(graphSageProcessParameters.validationHook()))
         );
     }
 
@@ -141,8 +140,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
             mutateStep,
             resultBuilder,
             Optional.empty(),
-            Optional.of(List.of(validationHook)),
-            Optional.empty()
+            Optional.of(List.of(validationHook))
         );
     }
 }

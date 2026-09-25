@@ -26,6 +26,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -48,10 +49,11 @@ class DirectedOnlyRequirementTest {
         when(graphStore.schema()).thenReturn(schema);
 
         var validation = new DirectedOnlyRequirement("foo");
-        assertThatNoException().isThrownBy(() -> validation.validate(
+        assertThatNoException().isThrownBy(() -> validation.onGraphStoreFiltered(
             graphStore,
             null,
-            List.of(relType1,relType2)
+            List.of(relType1,relType2),
+            Optional.empty()
         ));
 
     }
@@ -70,7 +72,7 @@ class DirectedOnlyRequirementTest {
         when(graphStore.schema()).thenReturn(schema);
 
         var validation = new DirectedOnlyRequirement("foo");
-        assertThatThrownBy(() -> validation.validate(graphStore, null, List.of(relType2,relType1)))
+        assertThatThrownBy(() -> validation.onGraphStoreFiltered(graphStore, null, List.of(relType2,relType1), Optional.empty()))
             .hasMessageContaining("The foo algorithm requires relationship projections to be directed. " +
                 "Selected relationships `[REL1]` are not all directed");
 

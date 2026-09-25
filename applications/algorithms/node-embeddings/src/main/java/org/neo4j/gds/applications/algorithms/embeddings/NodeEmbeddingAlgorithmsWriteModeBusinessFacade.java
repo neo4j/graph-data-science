@@ -119,8 +119,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
             writeStep,
             resultBuilder,
             graphSageProcessParameters.relationshipWeightPropertyFromTrainConfiguration(),
-            Optional.of(List.of(graphSageProcessParameters.validationHook())),
-            Optional.empty()
+            Optional.of(List.of(graphSageProcessParameters.validationHook()))
         );
     }
     public <RESULT> RESULT hashGnn(
@@ -158,8 +157,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
             writeStep,
             resultBuilder,
             Optional.empty(),
-            Optional.of(List.of(validationHook)),
-            Optional.empty()
+            Optional.of(List.of(validationHook))
         );
     }
 }
