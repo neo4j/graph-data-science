@@ -145,15 +145,14 @@ public final class SingleTypeRelationshipImporter {
         boolean skipDanglingRelationships
     ) {
 
-        public ImportMetaData(
+        public static ImportMetaData of(
             RelationshipProjection projection,
-            Aggregation[] aggregations,
             int[] propertyKeyIds,
             boolean skipDanglingRelationships
         ) {
-            this(
+            return new ImportMetaData(
                 projection,
-                aggregations,
+                aggregations(projection),
                 propertyKeyIds,
                 defaultValues(projection),
                 NO_SUCH_RELATIONSHIP_TYPE,
