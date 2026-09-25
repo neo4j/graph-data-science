@@ -34,8 +34,8 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
+import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.GraphProjectFromGdlConfigImpl;
 
@@ -145,10 +145,12 @@ public abstract class BaseGdlSupportExtension {
         ResultStore resultStore;
         if (gdlGraphSetup.addToCatalog()) {
             GraphStoreCatalog.set(graphProjectConfig, graphStore);
-            resultStore = GraphStoreCatalog.get(ImmutableCatalogRequest.of(
-                graphProjectConfig.username(),
-                graphStore.databaseInfo().databaseId()
-            ), graphName).resultStore();
+            resultStore = GraphStoreCatalog.get(
+                CatalogRequest.of(
+                    graphProjectConfig.username(),
+                    graphStore.databaseInfo().databaseId()
+                ), graphName
+            ).resultStore();
         } else {
             resultStore = new EphemeralResultStore();
         }

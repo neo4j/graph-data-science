@@ -143,7 +143,7 @@ class GraphSamplingApplicationTest {
 
         var sampledGraphStore = GraphStoreCatalog.get(
             user.getUsername(),
-            graphStore.databaseInfo().databaseId().databaseName(),
+            graphStore.databaseInfo().databaseId(),
             "sample"
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
