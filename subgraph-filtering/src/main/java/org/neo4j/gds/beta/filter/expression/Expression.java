@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +41,18 @@ public interface Expression {
     double VARIABLE = Double.NaN;
 
     double evaluate(EvaluationContext context);
+
+    default double[] evaluateDoubleList(EvaluationContext context) {
+        return new double[]{};
+    }
+
+    default long[] evaluateLongList(EvaluationContext context) {
+        return new long[]{};
+    }
+
+    default float[] evaluateFloatList(EvaluationContext context) {
+        return new float[]{};
+    }
 
     default String prettyString() {
         return toString();
@@ -105,6 +118,30 @@ public interface Expression {
             }
 
             @Override
+            public double[] evaluateDoubleList(EvaluationContext context) {
+                return switch (valueType) {
+                    case DOUBLE_ARRAY, DOUBLE_VECTOR -> context.getDoubleListProperty(propertyKey, valueType);
+                    default -> throw new RuntimeException("Not a double list");
+                };
+            }
+
+            @Override
+            public long[] evaluateLongList(EvaluationContext context) {
+                return switch (valueType) {
+                    case LONG_ARRAY -> context.getLongListProperty(propertyKey, valueType);
+                    default -> throw new RuntimeException("Not a long list");
+                };
+            }
+
+            @Override
+            public float[] evaluateFloatList(EvaluationContext context) {
+                return switch (valueType) {
+                    case FLOAT_ARRAY, FLOAT_VECTOR -> context.getFloatListProperty(propertyKey, valueType);
+                    default -> throw new RuntimeException("Not a float list");
+                };
+            }
+
+            @Override
             public ValidationContext validate(ValidationContext context) {
                 context = in.validate(context);
                 Set<String> availablePropertyKeys = context.availableProperties().keySet();
@@ -116,16 +153,16 @@ public interface Expression {
                     )));
                 }
                 var propertyType = context.availableProperties().get(propertyKey());
-                if (propertyType != ValueType.LONG && propertyType != ValueType.DOUBLE) {
-                    return context.withError(new SemanticErrors.SemanticError(
+                return switch (propertyType) {
+                    case LONG, DOUBLE, DOUBLE_ARRAY, FLOAT_ARRAY, LONG_ARRAY -> context;
+                    default -> context.withError(new SemanticErrors.SemanticError(
                         formatWithLocale(
                             "Unsupported property type `%s` for expression `%s`. Supported types %s",
                             propertyType.name(),
                             prettyString(),
                             StringJoining.join(List.of(ValueType.LONG.name(), ValueType.DOUBLE.name()))
                         )));
-                }
-                return context;
+                };
             }
             @Override
             public String prettyString() {
@@ -195,15 +232,83 @@ public interface Expression {
             @Override
             public double evaluate(EvaluationContext context) {
                 var resolvedParameter = context.resolveParameter(in.name());
-                if (resolvedParameter instanceof Long) {
-                    return resolvedParameter.longValue();
+                if (resolvedParameter instanceof Number numberParameter) {
+                    if (numberParameter instanceof Long) {
+                        return numberParameter.longValue();
+                    }
+                    return numberParameter.doubleValue();
                 }
-                return resolvedParameter.doubleValue();
+                throw new IllegalStateException(formatWithLocale("Expected parameter to be a number, but got `%s`", resolvedParameter.getClass()));
+            }
+
+            @Override
+            public double[] evaluateDoubleList(EvaluationContext context) {
+                var resolvedParameter = context.resolveParameter(in.name());
+                if (resolvedParameter instanceof double[] doubleArray) {
+                    return doubleArray;
+                }
+                throw new IllegalStateException(formatWithLocale("Expected parameter to be a double[], but got `%s`", resolvedParameter.getClass()));
+            }
+
+            @Override
+            public long[] evaluateLongList(EvaluationContext context) {
+                var resolvedParameter = context.resolveParameter(in.name());
+                if (resolvedParameter instanceof long[] longArray) {
+                    return longArray;
+                }
+                throw new IllegalStateException(formatWithLocale("Expected parameter to be a long[], but got `%s`", resolvedParameter.getClass()));
+            }
+
+            @Override
+            public float[] evaluateFloatList(EvaluationContext context) {
+                var resolvedParameter = context.resolveParameter(in.name());
+                if (resolvedParameter instanceof float[] floatArray) {
+                    return floatArray;
+                }
+                throw new IllegalStateException(formatWithLocale("Expected parameter to be a float[], but got `%s`", resolvedParameter.getClass()));
             }
 
             @Override
             public ValidationContext validate(ValidationContext context) {
                 return context;
+            }
+        }
+
+        record NewListLiteral(List<Expression> listElements) implements UnaryExpression {
+            @Override
+            public ValueType valueType() {
+                return ValueType.UNKNOWN;
+            }
+
+            @Override
+            public Expression in() {
+                return new Literal.TrueLiteral();
+            }
+
+            @Override
+            public double evaluate(EvaluationContext context) {
+                throw new IllegalStateException("Not a list literal");
+            }
+
+            @Override
+            public double[] evaluateDoubleList(EvaluationContext context) {
+                return listElements.stream().mapToDouble(expr -> expr.evaluate(context)).toArray();
+            }
+
+            @Override
+            public long[] evaluateLongList(EvaluationContext context) {
+                return listElements.stream().mapToLong(expr -> Double.doubleToRawLongBits(expr.evaluate(context))).toArray();
+            }
+
+            @Override
+            public float[] evaluateFloatList(EvaluationContext context) {
+                var array = new float[listElements.size()];
+                for (int i = 0; i < listElements.size(); i++) {
+                    var listElement = listElements.get(i);
+                    var value = listElement.evaluate(context);
+                    array[i] = (float) value;
+                }
+                return array;
             }
         }
     }
@@ -398,6 +503,67 @@ public interface Expression {
             @Override
             public String prettyString() {
                 return lhs().prettyString() + " <= " + rhs().prettyString();
+            }
+        }
+
+        record ListContains(Expression lhs, Expression rhs) implements BinaryExpression {
+            @Override
+            public double evaluate(EvaluationContext context) {
+                var element = lhs.evaluate(context);
+                var result = switch (rhs.valueType()) {
+                    case DOUBLE_ARRAY, DOUBLE_VECTOR -> Arrays.binarySearch(rhs.evaluateDoubleList(context), element);
+                    case FLOAT_ARRAY, FLOAT_VECTOR -> Arrays.binarySearch(rhs.evaluateFloatList(context), (float) element);
+                    case LONG_ARRAY -> Arrays.binarySearch(rhs.evaluateLongList(context), (long) element);
+                    case UNKNOWN -> switch (lhs.valueType()) {
+                        case LONG -> Arrays.binarySearch(rhs.evaluateLongList(context), (long) element);
+                        case DOUBLE -> Arrays.binarySearch(rhs.evaluateDoubleList(context), element);
+                        default -> throw new RuntimeException("Unsupported type " + lhs.valueType()); // This is covered by the validation check and should never happen
+                    };
+                    default -> throw new IllegalStateException(formatWithLocale("Expected a list value but got `%s`.", rhs.valueType()));
+                };
+                return result < 0 ? FALSE : TRUE;
+            }
+
+            @Override
+            public ValidationContext validate(ValidationContext context) {
+                context = lhs().validate(context);
+                context = rhs().validate(context);
+
+                var leftType = lhs().valueType();
+                var rightType = rhs().valueType();
+
+                return switch (leftType) {
+                    case LONG -> {
+                        if (rightType != ValueType.LONG_ARRAY) {
+                            yield context.withError(new SemanticErrors.SemanticError(
+                                formatWithLocale(
+                                    "Expected list type to match scalar element, but list was of type `%s` with element of type `%s`.",
+                                    rightType,
+                                    leftType
+                                )
+                            ));
+                        }
+                        yield context;
+                    }
+                    case DOUBLE -> {
+                        if (rightType != ValueType.DOUBLE_ARRAY) {
+                            yield context.withError(new SemanticErrors.SemanticError(
+                                formatWithLocale(
+                                    "Expected list type to match scalar element, but list was of type `%s` with element of type `%s`.",
+                                    rightType,
+                                    leftType
+                                )
+                            ));
+                        }
+                        yield context;
+                    }
+                    default -> context.withError(new SemanticErrors.SemanticError(
+                        formatWithLocale(
+                            "Expected element to be a scalar type, but was `%s` in binary expression `%s`.",
+                            leftType,
+                            prettyString()
+                        )));
+                };
             }
         }
     }

@@ -73,11 +73,6 @@ abstract class AstFactoryAdapter implements ASTFactory<NULL,
     }
 
     @Override
-    public Expression in(InputPosition p, Expression lhs, Expression rhs) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Expression isNull(Expression e) {
         throw new UnsupportedOperationException();
     }
@@ -266,11 +261,6 @@ abstract class AstFactoryAdapter implements ASTFactory<NULL,
 
     @Override
     public Expression newNullLiteral(InputPosition p) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Expression listLiteral(InputPosition p, List<Expression> values) {
         throw new UnsupportedOperationException();
     }
 

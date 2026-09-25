@@ -237,8 +237,8 @@ class ExpressionValidationTest {
 
     @ParameterizedTest(name = "{0} {1}")
     @CsvSource(value = {
-        "n.foo,DOUBLE_ARRAY",
-        "n.foo,LONG_ARRAY"})
+        "n.foo,STRING",
+        "n.foo,UNTYPED_ARRAY"})
     void unsupportedTypes(String exprString, ValueType valueType) throws ParseException {
         var context = new ValidationContext(
             NODE,

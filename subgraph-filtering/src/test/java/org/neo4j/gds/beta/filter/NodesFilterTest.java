@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.filter.expression.ExpressionParser;
+import org.neo4j.gds.beta.filter.expression.ValidationContext;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.extension.GdlExtension;
@@ -164,5 +165,21 @@ class NodesFilterTest {
             }
             return true;
         });
+    }
+
+    @Test
+    void filterWithFloatVectorContains() throws ParseException {
+        var filteredNodes = NodesFilter.filterNodes(
+            vectorGraphStore,
+            ExpressionParser.parse("7.0 IN n.emb", ValidationContext.forNodes(vectorGraphStore).availableProperties()),
+            new Concurrency(1),
+            Map.of(),
+            ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var idMap = filteredNodes.idMap();
+        assertThat(idMap.nodeCount()).isEqualTo(1L);
+        assertThat(idMap.containsOriginalId(vectorIdFunction.of("c"))).isTrue();
     }
 }

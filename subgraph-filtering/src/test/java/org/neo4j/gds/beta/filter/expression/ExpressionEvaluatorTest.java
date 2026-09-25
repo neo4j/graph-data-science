@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.beta.filter.expression.Expression.FALSE;
 import static org.neo4j.gds.beta.filter.expression.Expression.TRUE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -346,8 +347,18 @@ class ExpressionEvaluatorTest {
     })
     void property(String propertyKey, double propertyValue, ValueType propertyType) throws ParseException {
         var expr = ExpressionParser.parse("n." + propertyKey, Map.of(propertyKey, propertyType));
-        var context = new TestContext(propertyKey, propertyValue);
+        var context = new TestContext(propertyKey);
+        context.withProperty(propertyValue);
         assertThat(expr.evaluate(context) == propertyValue).isTrue();
+    }
+
+    @Test
+    void arrayProperty() throws ParseException {
+        var expr = ExpressionParser.parse("n.arrayProp", Map.of("arrayProp", ValueType.DOUBLE_ARRAY));
+        var context = new TestContext("arrayProp");
+        double[] doubleArray = {13.37, 4.2};
+        context.withDoubleArrayProperty(doubleArray);
+        assertThat(expr.evaluateDoubleList(context)).isEqualTo(doubleArray);
     }
 
     static Stream<Arguments> hasLabelInput() {
@@ -385,9 +396,51 @@ class ExpressionEvaluatorTest {
         assertThat(expr.evaluate(evaluationContext)).isEqualTo(Double.longBitsToDouble(42));
     }
 
+    @Test
+    void longListLiteral() throws ParseException {
+        var expr = ExpressionParser.parse("[0, 1, 2]", Map.of());
+        assertThatThrownBy(() -> expr.evaluate(EMPTY_EVALUATION_CONTEXT))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Not a list literal");
+        assertThat(expr.evaluateLongList(EMPTY_EVALUATION_CONTEXT)).isEqualTo(new long[]{0, 1, 2});
+    }
+
+    @Test
+    void doubleListLiteral() throws ParseException {
+        var expr = ExpressionParser.parse("[0.0, 0.1, 0.2]", Map.of());
+        assertThatThrownBy(() -> expr.evaluate(EMPTY_EVALUATION_CONTEXT))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Not a list literal");
+        assertThat(expr.evaluateDoubleList(EMPTY_EVALUATION_CONTEXT)).isEqualTo(new double[]{0.0, 0.1, 0.2});
+    }
+
+    @Test
+    void doubleListContains() throws ParseException {
+        var expr = ExpressionParser.parse("0.1 IN [0.0, 0.1, 0.2]", Map.of());
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(TRUE);
+
+        expr = ExpressionParser.parse("0.4 IN [0.0, 0.1, 0.2]", Map.of());
+        assertThat(expr.evaluate(EMPTY_EVALUATION_CONTEXT)).isEqualTo(FALSE);
+    }
+
     private static final EvaluationContext EMPTY_EVALUATION_CONTEXT = new EvaluationContext(Map.of()) {
         @Override
         double getProperty(String propertyKey, ValueType valueType) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        double[] getDoubleListProperty(String propertyKey, ValueType propertyType) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        long[] getLongListProperty(String propertyKey, ValueType propertyType) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        float[] getFloatListProperty(String propertyKey, ValueType propertyType) {
             throw new UnsupportedOperationException();
         }
 
@@ -417,10 +470,13 @@ class ExpressionEvaluatorTest {
         private double propertyValue = Double.NaN;
         private List<String> labelsOrTypes = new ArrayList<>();
 
-        TestContext(String propertyKey, double propertyValue) {
+        private double[] doubleListPropertyValue;
+        private long[] longListPropertyValue;
+        private float[] floatListPropertyValue;
+
+        TestContext(String propertyKey) {
             super(Map.of());
             this.propertyKey = propertyKey;
-            this.propertyValue = propertyValue;
         }
 
         TestContext(List<String> labelsOrTypes) {
@@ -428,12 +484,24 @@ class ExpressionEvaluatorTest {
             this.labelsOrTypes = labelsOrTypes;
         }
 
-        String propertyKey() {
-            return propertyKey;
+        void withProperty(double value) {
+            this.propertyValue = value;
         }
 
-        double propertyValue() {
-            return propertyValue;
+        void withDoubleArrayProperty(double[] doubleArray) {
+            this.doubleListPropertyValue = doubleArray;
+        }
+
+        void withLongArrayProperty(long[] longArray) {
+            this.longListPropertyValue = longArray;
+        }
+
+        void withFloatArrayProperty(float[] floatArray) {
+            this.floatListPropertyValue = floatArray;
+        }
+
+        String propertyKey() {
+            return propertyKey;
         }
 
         List<String> labelsOrTypes() {
@@ -444,7 +512,25 @@ class ExpressionEvaluatorTest {
         @Override
         double getProperty(String propertyKey, ValueType valueType) {
             assertThat(propertyKey).isEqualTo(propertyKey());
-            return propertyValue();
+            return propertyValue;
+        }
+
+        @Override
+        double[] getDoubleListProperty(String propertyKey, ValueType propertyType) {
+            assertThat(propertyKey).isEqualTo(propertyKey());
+            return doubleListPropertyValue;
+        }
+
+        @Override
+        long[] getLongListProperty(String propertyKey, ValueType propertyType) {
+            assertThat(propertyKey).isEqualTo(propertyKey());
+            return longListPropertyValue;
+        }
+
+        @Override
+        float[] getFloatListProperty(String propertyKey, ValueType propertyType) {
+            assertThat(propertyKey).isEqualTo(propertyKey());
+            return floatListPropertyValue;
         }
 
         @Override
