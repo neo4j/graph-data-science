@@ -58,7 +58,6 @@ import java.util.function.LongSupplier;
 import java.util.stream.IntStream;
 
 public final class GraphFactory {
-    private static final int NO_SUCH_RELATIONSHIP_TYPE = -1;
 
     private GraphFactory() {}
 
@@ -178,6 +177,9 @@ public final class GraphFactory {
         public PropertyConfig(String propertyKey) {
             this(propertyKey, Aggregation.NONE);
         }
+        public PropertyMapping toPropertyMapping() {
+            return new PropertyMapping(Key.simple(propertyKey), defaultValue, aggregation);
+        }
     }
 
     public static RelationshipsBuilderBuilder initRelationshipsBuilder() {
@@ -198,48 +200,24 @@ public final class GraphFactory {
         int requestedBufferSize
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
-
-        var aggregations = propertyConfigs.isEmpty()
-            ? new Aggregation[]{globalAggregation}
-            : propertyConfigs.stream()
-                .map(GraphFactory.PropertyConfig::aggregation)
-                .map(Aggregation::resolve)
-                .toArray(Aggregation[]::new);
-
+        var aggregations = aggregations(propertyConfigs, globalAggregation);
         var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
-
-        var propertyMappings = propertyConfigs.stream()
-            .map(propertyConfig -> PropertyMapping.of(
-                Key.simple(propertyConfig.propertyKey()),
-                propertyConfig.defaultValue(),
-                propertyConfig.aggregation()
-            )).toList();
-        var projection = new RelationshipProjection(
-            relationshipType.name(),
-            orientation,
-            indexInverse,
-            PropertyMappings.of(propertyMappings)
-        );
-
+        var projection = relationshipProjection(propertyConfigs, relationshipType, orientation, indexInverse);
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
-        double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
         var importSizing = ImportSizing.fromPartialIdMap(concurrency, nodes);
-
-        int bufferSize = requestedBufferSize;
-        if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < bufferSize) {
-            bufferSize = (int) nodes.rootNodeCount();
-        }
 
         var importMetaData = new SingleTypeRelationshipImporter.ImportMetaData(
             projection,
             aggregations,
             propertyKeyIds,
-            defaultValues,
-            NO_SUCH_RELATIONSHIP_TYPE,
             skipDanglingRelationships
         );
 
+        int bufferSize = requestedBufferSize;
+        if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < bufferSize) {
+            bufferSize = (int) nodes.rootNodeCount();
+        }
         LongSupplier nodeCountSupplier = nodes::rootNodeCount;
         var singleTypeRelationshipImporter = SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing);
 
@@ -247,15 +225,7 @@ public final class GraphFactory {
         if (indexInverse) {
             var inverseProjection = projection.inverse();
 
-            var inverseImportMetaData = new SingleTypeRelationshipImporter.ImportMetaData(
-                inverseProjection,
-                importMetaData.aggregations(),
-                importMetaData.propertyKeyIds(),
-                importMetaData.defaultValues(),
-                importMetaData.typeTokenId(),
-                skipDanglingRelationships
-            );
-
+            var inverseImportMetaData = importMetaData.with(inverseProjection);
 
             var inverseImporter = SingleTypeRelationshipImporter.of(
                 inverseImportMetaData,
@@ -296,6 +266,22 @@ public final class GraphFactory {
                 .threadLocal(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
 
         return new RelationshipsBuilder(singleTypeRelationshipsBuilder, localBuilderProvider, nodes, skipDanglingRelationships);
+    }
+
+    private static RelationshipProjection relationshipProjection(
+        List<PropertyConfig> propertyConfigs,
+        RelationshipType relationshipType,
+        Orientation orientation,
+        boolean indexInverse
+    ) {
+        var propertyMappings = PropertyMappings.of(propertyConfigs.stream().map(PropertyConfig::toPropertyMapping).toList());
+        return new RelationshipProjection(relationshipType.name(), orientation, indexInverse, propertyMappings);
+    }
+
+    private static Aggregation[] aggregations(List<PropertyConfig> propertyConfigs, Aggregation globalAggregation) {
+        if (propertyConfigs.isEmpty()) return new Aggregation[]{globalAggregation};
+        return propertyConfigs.stream().map(propertyConfig -> Aggregation.resolve(propertyConfig.aggregation))
+            .toArray(Aggregation[]::new);
     }
 
     /**

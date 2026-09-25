@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.function.LongConsumer;
 import java.util.function.LongSupplier;
 
+import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
+
 public final class SingleTypeRelationshipImporter {
 
     private final AdjacencyCompressorFactory adjacencyCompressorFactory;
@@ -143,6 +145,22 @@ public final class SingleTypeRelationshipImporter {
         boolean skipDanglingRelationships
     ) {
 
+        public ImportMetaData(
+            RelationshipProjection projection,
+            Aggregation[] aggregations,
+            int[] propertyKeyIds,
+            boolean skipDanglingRelationships
+        ) {
+            this(
+                projection,
+                aggregations,
+                propertyKeyIds,
+                defaultValues(projection),
+                NO_SUCH_RELATIONSHIP_TYPE,
+                skipDanglingRelationships
+            );
+        }
+
         public static ImportMetaData of(
             RelationshipProjection projection,
             int typeTokenId,
@@ -190,6 +208,10 @@ public final class SingleTypeRelationshipImporter {
             }
 
             return aggregations;
+        }
+
+        public ImportMetaData with(RelationshipProjection projection) {
+            return new ImportMetaData(projection, aggregations, propertyKeyIds, defaultValues, typeTokenId, skipDanglingRelationships);
         }
     }
 
