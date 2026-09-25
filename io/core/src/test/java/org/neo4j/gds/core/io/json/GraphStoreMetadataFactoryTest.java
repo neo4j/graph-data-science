@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,6 +72,7 @@ class GraphStoreMetadataFactoryTest {
                     .gdlGraph("()-->()")
                     .build()
                     .build(),
+                Set.of(),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -99,6 +101,7 @@ class GraphStoreMetadataFactoryTest {
                     .gdlGraph("()-->()")
                     .build()
                     .build(),
+                Set.of(),
                 new GraphStoreMetadata(
                     new DatabaseInfo("custom_db_id", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -127,6 +130,7 @@ class GraphStoreMetadataFactoryTest {
                     .gdlGraph("()-->()")
                     .build()
                     .build(),
+                Set.of(),
                 new GraphStoreMetadata(
                     new DatabaseInfo(
                         "another_custom_name",
@@ -152,9 +156,10 @@ class GraphStoreMetadataFactoryTest {
             Arguments.of(
                 GdlFactory.builder()
                     .gdlGraph(
-                        "(:A { prop1: 42, prop2: 4.2 })-->(:B { prop3: [1.0, 3.0, 3.0, 7.0], prop4: [1L, 3L, 3L, 7L] })-->(:C)")
+                        "(:A { prop1: 42, prop2: 4.2 })-->(:B { prop3: [1.0, 3.0, 3.0, 7.0], prop4: [1L, 3L, 3L, 7L]})-->(:C { prop5: 1337 } )")
                     .build()
                     .build(),
+                Set.of("prop1", "prop2", "prop3", "prop4"),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -214,6 +219,7 @@ class GraphStoreMetadataFactoryTest {
                     )
                     .build()
                     .build(),
+                Set.of("prop1", "prop2", "prop3", "prop4"),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -267,6 +273,7 @@ class GraphStoreMetadataFactoryTest {
                         "(:A { floatEmbedding: vector([1.0f, 3.0f, 3.0f]) })-->(:B { doubleEmbedding: vector([1.0d, 3.0d]) })")
                     .build()
                     .build(),
+                Set.of("floatEmbedding", "doubleEmbedding"),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -314,6 +321,7 @@ class GraphStoreMetadataFactoryTest {
                     )
                     .build()
                     .build(),
+                Set.of(),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -348,15 +356,17 @@ class GraphStoreMetadataFactoryTest {
 
     @ParameterizedTest
     @MethodSource("graphStores")
-    void fromGraphStore(GraphStore graphStore, GraphStoreMetadata expected) {
-        var result = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+    void fromGraphStore(GraphStore graphStore, Set<String> nodeProperties, GraphStoreMetadata expected) {
+        var result = GraphStoreMetadataFactory.fromGraphStore(graphStore, nodeProperties);
 
         assertThat(result).isEqualTo(expected);
     }
 
     @Test
     void fromGraphStore() {
-        var result = GraphStoreMetadataFactory.fromGraphStore(graphStore);
+        var nodeProperties = Set.of("prop1", "prop2", "prop3", "prop4");
+
+        var result = GraphStoreMetadataFactory.fromGraphStore(graphStore, nodeProperties);
 
         assertThat(result).isEqualTo(new GraphStoreMetadata(
                 new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
@@ -479,7 +489,9 @@ class GraphStoreMetadataFactoryTest {
 
     @Test
     void toNodeSchema() {
-        var result = GraphStoreMetadataFactory.toNodeSchema(graphStore.schema().nodeSchema());
+        var properties = Set.of("prop1", "prop2", "prop3");
+
+        var result = GraphStoreMetadataFactory.toNodeSchema(graphStore.schema().nodeSchema(), properties);
 
         assertThat(result).isEqualTo(Map.of(
             "Label1", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
@@ -501,12 +513,13 @@ class GraphStoreMetadataFactoryTest {
                     ValueType.LONG_ARRAY,
                     new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
                     PropertyState.TRANSIENT
-                ),
-                "prop4", new NodePropertySchema(
-                    ValueType.FLOAT_ARRAY,
-                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
-                    PropertyState.TRANSIENT
                 )
+//                ),
+//                "prop4", new NodePropertySchema(
+//                    ValueType.FLOAT_ARRAY,
+//                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
+//                    PropertyState.TRANSIENT
+//                )
             )),
             "Label3", new org.neo4j.gds.core.io.json.NodeSchema(Map.of())
         ));
@@ -538,11 +551,13 @@ class GraphStoreMetadataFactoryTest {
             Arguments.of(
                 // empty
                 NodeSchema.empty(),
+                Set.of(),
                 Map.of()
             ),
             Arguments.of(
                 // all nodes label, no properties
                 NodeSchema.builder().addLabel(NodeLabel.ALL_LABEL).build(),
+                Set.of(),
                 Map.of(NodeLabel.ALL_NODES.name(), new org.neo4j.gds.core.io.json.NodeSchema(Map.of()))
             ),
             Arguments.of(
@@ -550,6 +565,7 @@ class GraphStoreMetadataFactoryTest {
                 NodeSchema.builder()
                     .addProperty(NodeLabel.ALL_LABEL, "foo", org.neo4j.gds.api.nodeproperties.ValueType.LONG)
                     .build(),
+                Set.of("foo"),
                 Map.of(
                     NodeLabel.ALL_NODES.name(),
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
@@ -574,6 +590,7 @@ class GraphStoreMetadataFactoryTest {
                         org.neo4j.gds.api.PropertyState.REMOTE
                     )
                     .build(),
+                Set.of("foo", "bar"),
                 Map.of(
                     "A",
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
@@ -619,6 +636,7 @@ class GraphStoreMetadataFactoryTest {
                         )
                     )
                     .build(),
+                Set.of("floatEmbedding", "doubleEmbedding"),
                 Map.of(
                     "A",
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
@@ -657,6 +675,7 @@ class GraphStoreMetadataFactoryTest {
                     )
                     .addProperty("A", "weights", org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_ARRAY)
                     .build(),
+                Set.of("embedding", "weights"),
                 Map.of(
                     "A",
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
@@ -681,8 +700,8 @@ class GraphStoreMetadataFactoryTest {
 
     @ParameterizedTest
     @MethodSource("nodeSchemas")
-    void toNodeSchema(NodeSchema input, Map<String, org.neo4j.gds.core.io.json.NodeSchema> expected) {
-        assertThat(GraphStoreMetadataFactory.toNodeSchema(input)).isEqualTo(expected);
+    void toNodeSchema(NodeSchema input, Set<String> properties, Map<String, org.neo4j.gds.core.io.json.NodeSchema> expected) {
+        assertThat(GraphStoreMetadataFactory.toNodeSchema(input, properties)).isEqualTo(expected);
     }
 
     static Stream<Arguments> relationshipSchemas() {

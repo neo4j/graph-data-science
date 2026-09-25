@@ -30,17 +30,18 @@ import org.neo4j.gds.core.loading.Capabilities;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class GraphStoreMetadataFactory {
     private GraphStoreMetadataFactory() {}
 
-    public static GraphStoreMetadata fromGraphStore(GraphStore graphStore) {
+    public static GraphStoreMetadata fromGraphStore(GraphStore graphStore, Set<String> nodeProperties) {
         var databaseInfo = toDatabaseInfo(graphStore.databaseInfo());
         var writeMode = toWriteMode(graphStore.capabilities().writeMode());
         var idMapInfo = toIdMapInfo(graphStore.nodes());
         var relationshipInfo = toRelationshipInfo(graphStore);
-        var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema());
+        var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema(), nodeProperties);
         var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema());
 
         return new GraphStoreMetadata(
@@ -107,7 +108,7 @@ public final class GraphStoreMetadataFactory {
             ));
     }
 
-    static Map<String, NodeSchema> toNodeSchema(org.neo4j.gds.api.schema.NodeSchema nodeSchema) {
+    static Map<String, NodeSchema> toNodeSchema(org.neo4j.gds.api.schema.NodeSchema nodeSchema, Set<String> nodeProperties) {
         var result = new HashMap<String, NodeSchema>();
 
         for (var entry : nodeSchema.entries().entrySet()) {
@@ -118,7 +119,9 @@ public final class GraphStoreMetadataFactory {
                 result.put(labelName, new NodeSchema(Collections.emptyMap()));
 
             } else {
-                var properties = propertySchemas.stream().collect(Collectors.toMap(
+                var properties = propertySchemas.stream()
+                    .filter(propertySchema -> nodeProperties.contains(propertySchema.key()))
+                    .collect(Collectors.toMap(
                     PropertySchema::key,
                     (propertySchema ->
                         new NodePropertySchema(
