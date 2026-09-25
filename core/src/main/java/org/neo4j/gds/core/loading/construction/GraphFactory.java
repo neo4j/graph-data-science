@@ -189,7 +189,7 @@ public final class GraphFactory {
         RelationshipType relationshipType,
         Orientation orientation,
         List<PropertyConfig> propertyConfigs,
-        Aggregation aggregation,
+        Aggregation globalAggregation,
         boolean skipDanglingRelationships,
         Concurrency concurrency,
         boolean indexInverse,
@@ -200,7 +200,7 @@ public final class GraphFactory {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
         var aggregations = propertyConfigs.isEmpty()
-            ? new Aggregation[]{aggregation}
+            ? new Aggregation[]{globalAggregation}
             : propertyConfigs.stream()
                 .map(GraphFactory.PropertyConfig::aggregation)
                 .map(Aggregation::resolve)

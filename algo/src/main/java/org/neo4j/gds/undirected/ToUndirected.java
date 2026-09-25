@@ -121,7 +121,7 @@ public class ToUndirected implements Algorithm<SingleTypeRelationships> {
             );
         }
         if (propertyConfigs.isEmpty()) {
-            parameters.aggregation().flatMap(ToUndirectedAggregations::globalAggregation).ifPresent(builder::aggregation);
+            parameters.aggregation().flatMap(ToUndirectedAggregations::globalAggregation).ifPresent(builder::globalAggregation);
         } else {
             builder.propertyConfigs(propertyConfigs);
         }

@@ -178,7 +178,7 @@ public final class RandomGraphGenerator {
                     aggregation
                 )).toList()
             ).indexInverse(inverseIndex)
-            .aggregation(aggregation)
+            .globalAggregation(aggregation)
             .build();
 
         generateRelationships(relationshipsBuilder);

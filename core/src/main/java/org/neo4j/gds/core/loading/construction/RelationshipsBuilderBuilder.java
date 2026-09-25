@@ -38,7 +38,7 @@ public final class RelationshipsBuilderBuilder {
     private RelationshipType relationshipType;
     private Orientation orientation = Orientation.NATURAL;
     private List<GraphFactory.PropertyConfig> propertyConfigs = new ArrayList<>();
-    private Aggregation aggregation = Aggregation.DEFAULT;
+    private Aggregation globalAggregation = Aggregation.DEFAULT;
     private boolean skipDanglingRelationships = true;
     private Concurrency concurrency = new Concurrency(1);
     private boolean indexInverse = false;
@@ -75,10 +75,15 @@ public final class RelationshipsBuilderBuilder {
     }
 
     /**
+     * Global aggregation for all properties.<p>
+     * To configure aggregation per property, use {@code propertyConfigs()}.
+     * Global aggregation is only effective if {@code propertyConfigs} is empty.<p>
+     * To set a global aggregation that conflicts with {@code propertyConfigs} is an error.
+     *
      * @param aggregation Default is {@code Aggregation.NONE}.
      */
-    public RelationshipsBuilderBuilder aggregation(Aggregation aggregation) {
-        this.aggregation = Objects.requireNonNull(aggregation);
+    public RelationshipsBuilderBuilder globalAggregation(Aggregation aggregation) {
+        this.globalAggregation = Objects.requireNonNull(aggregation);
         return this;
     }
 
@@ -136,14 +141,14 @@ public final class RelationshipsBuilderBuilder {
     public RelationshipsBuilder build() {
         Objects.requireNonNull(nodes, "nodes must be set");
         Objects.requireNonNull(relationshipType, "relationshipType must be set");
-        if (aggregation != Aggregation.DEFAULT) {
-            var conflictingAggregations = propertyConfigs.stream().filter(it -> it.aggregation() != aggregation).toList();
+        if (globalAggregation != Aggregation.DEFAULT) {
+            var conflictingAggregations = propertyConfigs.stream().filter(it -> it.aggregation() != globalAggregation).toList();
             if (!conflictingAggregations.isEmpty()) {
                 var message = """
                     Both aggregation and propertyConfigs are set, but with conflicting aggregations:
                       PropertyConfigs: %s
                       Aggregation: %s"""
-                    .formatted(conflictingAggregations, aggregation);
+                    .formatted(conflictingAggregations, globalAggregation);
                 throw new IllegalArgumentException(message);
             }
         }
@@ -152,7 +157,7 @@ public final class RelationshipsBuilderBuilder {
             relationshipType,
             orientation,
             List.copyOf(propertyConfigs),
-            aggregation,
+            globalAggregation,
             skipDanglingRelationships,
             concurrency,
             indexInverse,
