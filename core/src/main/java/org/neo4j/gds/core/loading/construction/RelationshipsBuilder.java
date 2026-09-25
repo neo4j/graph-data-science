@@ -45,10 +45,11 @@ public class RelationshipsBuilder implements RelationshipsBuilderApi {
     RelationshipsBuilder(
         SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder,
         LocalRelationshipsBuilderProvider localBuilderProvider,
+        PartialIdMap idMap,
         boolean skipDanglingRelationships
     ) {
         this.singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilder;
-        this.idMap = singleTypeRelationshipsBuilder.partialIdMap();
+        this.idMap = idMap;
         this.localBuilderProvider = localBuilderProvider;
         this.skipDanglingRelationships = skipDanglingRelationships;
     }

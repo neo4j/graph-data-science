@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading.construction;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyListsWithProperties;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.TopologyBuilder;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.relationships.PropertiesBuilder;
@@ -47,7 +46,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 abstract class SingleTypeRelationshipsBuilder {
-    final PartialIdMap idMap;
     final int bufferSize;
     final RelationshipType relationshipType;
     final List<GraphFactory.PropertyConfig> propertyConfigs;
@@ -60,7 +58,6 @@ abstract class SingleTypeRelationshipsBuilder {
     private final Concurrency concurrency;
 
     SingleTypeRelationshipsBuilder(
-        PartialIdMap idMap,
         int bufferSize,
         RelationshipType relationshipType,
         List<GraphFactory.PropertyConfig> propertyConfigs,
@@ -70,7 +67,6 @@ abstract class SingleTypeRelationshipsBuilder {
         ExecutorService executorService,
         Concurrency concurrency
     ) {
-        this.idMap = idMap;
         this.bufferSize = bufferSize;
         this.relationshipType = relationshipType;
         this.propertyConfigs = propertyConfigs;
@@ -89,10 +85,6 @@ abstract class SingleTypeRelationshipsBuilder {
     );
 
     abstract SingleTypeRelationships singleTypeRelationshipImportResult();
-
-    PartialIdMap partialIdMap() {
-        return idMap;
-    }
 
     List<GraphFactory.PropertyConfig> propertyConfigs() {
         return propertyConfigs;
@@ -174,7 +166,6 @@ abstract class SingleTypeRelationshipsBuilder {
         private final SingleTypeRelationshipImporter importer;
 
         NonIndexed(
-            PartialIdMap idMap,
             SingleTypeRelationshipImporter importer,
             int bufferSize,
             RelationshipType relationshipType,
@@ -186,7 +177,6 @@ abstract class SingleTypeRelationshipsBuilder {
             Concurrency concurrency
         ) {
             super(
-                idMap,
                 bufferSize,
                 relationshipType,
                 propertyConfigs,
@@ -244,7 +234,6 @@ abstract class SingleTypeRelationshipsBuilder {
         private final SingleTypeRelationshipImporter inverseImporter;
 
         Indexed(
-            PartialIdMap idMap,
             SingleTypeRelationshipImporter forwardImporter,
             SingleTypeRelationshipImporter inverseImporter,
             int bufferSize,
@@ -257,7 +246,6 @@ abstract class SingleTypeRelationshipsBuilder {
             Concurrency concurrency
         ) {
             super(
-                idMap,
                 bufferSize,
                 relationshipType,
                 propertyConfigs,

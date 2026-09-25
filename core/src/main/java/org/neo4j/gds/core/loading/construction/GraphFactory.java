@@ -268,7 +268,6 @@ public final class GraphFactory {
             );
 
             singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilder.Indexed(
-                nodes,
                 singleTypeRelationshipImporter,
                 inverseImporter,
                 bufferSize,
@@ -282,7 +281,6 @@ public final class GraphFactory {
             );
         } else {
             singleTypeRelationshipsBuilder = new SingleTypeRelationshipsBuilder.NonIndexed(
-                nodes,
                 singleTypeRelationshipImporter,
                 bufferSize,
                 relationshipType,
@@ -301,7 +299,7 @@ public final class GraphFactory {
             : LocalRelationshipsBuilderProvider
                 .threadLocal(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilder, localBuilderProvider, skipDanglingRelationships);
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilder, localBuilderProvider, nodes, skipDanglingRelationships);
     }
 
     /**
