@@ -42,18 +42,6 @@ public interface Expression {
 
     double evaluate(EvaluationContext context);
 
-    default double[] evaluateDoubleList(EvaluationContext context) {
-        return new double[]{};
-    }
-
-    default long[] evaluateLongList(EvaluationContext context) {
-        return new long[]{};
-    }
-
-    default float[] evaluateFloatList(EvaluationContext context) {
-        return new float[]{};
-    }
-
     default String prettyString() {
         return toString();
     }
@@ -115,30 +103,6 @@ public interface Expression {
             @Override
             public double evaluate(EvaluationContext context) {
                 return context.getProperty(propertyKey, valueType);
-            }
-
-            @Override
-            public double[] evaluateDoubleList(EvaluationContext context) {
-                return switch (valueType) {
-                    case DOUBLE_ARRAY, DOUBLE_VECTOR -> context.getDoubleListProperty(propertyKey, valueType);
-                    default -> throw new RuntimeException("Not a double list");
-                };
-            }
-
-            @Override
-            public long[] evaluateLongList(EvaluationContext context) {
-                return switch (valueType) {
-                    case LONG_ARRAY -> context.getLongListProperty(propertyKey, valueType);
-                    default -> throw new RuntimeException("Not a long list");
-                };
-            }
-
-            @Override
-            public float[] evaluateFloatList(EvaluationContext context) {
-                return switch (valueType) {
-                    case FLOAT_ARRAY, FLOAT_VECTOR -> context.getFloatListProperty(propertyKey, valueType);
-                    default -> throw new RuntimeException("Not a float list");
-                };
             }
 
             @Override
@@ -242,33 +206,6 @@ public interface Expression {
             }
 
             @Override
-            public double[] evaluateDoubleList(EvaluationContext context) {
-                var resolvedParameter = context.resolveParameter(in.name());
-                if (resolvedParameter instanceof double[] doubleArray) {
-                    return doubleArray;
-                }
-                throw new IllegalStateException(formatWithLocale("Expected parameter to be a double[], but got `%s`", resolvedParameter.getClass()));
-            }
-
-            @Override
-            public long[] evaluateLongList(EvaluationContext context) {
-                var resolvedParameter = context.resolveParameter(in.name());
-                if (resolvedParameter instanceof long[] longArray) {
-                    return longArray;
-                }
-                throw new IllegalStateException(formatWithLocale("Expected parameter to be a long[], but got `%s`", resolvedParameter.getClass()));
-            }
-
-            @Override
-            public float[] evaluateFloatList(EvaluationContext context) {
-                var resolvedParameter = context.resolveParameter(in.name());
-                if (resolvedParameter instanceof float[] floatArray) {
-                    return floatArray;
-                }
-                throw new IllegalStateException(formatWithLocale("Expected parameter to be a float[], but got `%s`", resolvedParameter.getClass()));
-            }
-
-            @Override
             public ValidationContext validate(ValidationContext context) {
                 return context;
             }
@@ -288,27 +225,6 @@ public interface Expression {
             @Override
             public double evaluate(EvaluationContext context) {
                 throw new IllegalStateException("Not a list literal");
-            }
-
-            @Override
-            public double[] evaluateDoubleList(EvaluationContext context) {
-                return listElements.stream().mapToDouble(expr -> expr.evaluate(context)).toArray();
-            }
-
-            @Override
-            public long[] evaluateLongList(EvaluationContext context) {
-                return listElements.stream().mapToLong(expr -> Double.doubleToRawLongBits(expr.evaluate(context))).toArray();
-            }
-
-            @Override
-            public float[] evaluateFloatList(EvaluationContext context) {
-                var array = new float[listElements.size()];
-                for (int i = 0; i < listElements.size(); i++) {
-                    var listElement = listElements.get(i);
-                    var value = listElement.evaluate(context);
-                    array[i] = (float) value;
-                }
-                return array;
             }
         }
     }
@@ -509,19 +425,49 @@ public interface Expression {
         record ListContains(Expression lhs, Expression rhs) implements BinaryExpression {
             @Override
             public double evaluate(EvaluationContext context) {
-                var element = lhs.evaluate(context);
-                var result = switch (rhs.valueType()) {
-                    case DOUBLE_ARRAY, DOUBLE_VECTOR -> Arrays.binarySearch(rhs.evaluateDoubleList(context), element);
-                    case FLOAT_ARRAY, FLOAT_VECTOR -> Arrays.binarySearch(rhs.evaluateFloatList(context), (float) element);
-                    case LONG_ARRAY -> Arrays.binarySearch(rhs.evaluateLongList(context), (long) element);
-                    case UNKNOWN -> switch (lhs.valueType()) {
-                        case LONG -> Arrays.binarySearch(rhs.evaluateLongList(context), (long) element);
-                        case DOUBLE -> Arrays.binarySearch(rhs.evaluateDoubleList(context), element);
-                        default -> throw new RuntimeException("Unsupported type " + lhs.valueType()); // This is covered by the validation check and should never happen
+                var searchElement = lhs.evaluate(context);
+                return switch (rhs) {
+                    case UnaryExpression.Property property -> switch (property.valueType()) {
+                        case ValueType.DOUBLE_ARRAY, ValueType.DOUBLE_VECTOR -> contains(
+                            context.doubleArrayProperty(property), searchElement);
+                        case ValueType.FLOAT_ARRAY, ValueType.FLOAT_VECTOR -> contains(
+                            context.floatArrayProperty(property), (float) searchElement);
+                        case ValueType.LONG_ARRAY -> contains(
+                            context.longArrayProperty(property),
+                            Double.doubleToRawLongBits(searchElement)
+                        );
+                        default -> throw new IllegalStateException("Unexpected valueType: " + property.valueType());
+                    };
+                    case UnaryExpression.NewListLiteral newListLiteral -> switch (lhs.valueType()) {
+                        case ValueType.DOUBLE -> contains(
+                            newListLiteral.listElements()
+                                .stream()
+                                .mapToDouble(expr -> expr.evaluate(context))
+                                .toArray(),
+                            searchElement
+                        );
+                        case ValueType.LONG -> contains(
+                            newListLiteral.listElements()
+                                .stream()
+                                .mapToLong(expr -> Double.doubleToRawLongBits(expr.evaluate(context)))
+                                .toArray(),
+                            Double.doubleToRawLongBits(searchElement)
+                        );
+                        default -> throw new IllegalStateException("Unexpected valueType: " + lhs.valueType());
+                    };
+                    case UnaryExpression.NewParameter parameter -> switch (lhs.valueType()) {
+                        case ValueType.DOUBLE -> contains(
+                            context.resolveParameter(parameter.in().name(), double[].class),
+                            searchElement
+                        );
+                        case ValueType.LONG -> contains(
+                            context.resolveParameter(parameter.in().name(), long[].class),
+                            Double.doubleToRawLongBits(searchElement)
+                        );
+                        default -> throw new IllegalStateException("Unexpected valueType: " + lhs.valueType());
                     };
                     default -> throw new IllegalStateException(formatWithLocale("Expected a list value but got `%s`.", rhs.valueType()));
                 };
-                return result < 0 ? FALSE : TRUE;
             }
 
             @Override
@@ -564,6 +510,33 @@ public interface Expression {
                             prettyString()
                         )));
                 };
+            }
+
+            private static double contains(double[] array, double searchElement) {
+                for (var element : array) {
+                    if (searchElement == element) {
+                        return TRUE;
+                    }
+                }
+                return FALSE;
+            }
+
+            private static double contains(long[] array, long searchElement) {
+                for (var element : array) {
+                    if (searchElement == element) {
+                        return TRUE;
+                    }
+                }
+                return FALSE;
+            }
+
+            private static double contains(float[] array, float searchElement) {
+                for (var element : array) {
+                    if (searchElement == element) {
+                        return TRUE;
+                    }
+                }
+                return FALSE;
             }
         }
     }
