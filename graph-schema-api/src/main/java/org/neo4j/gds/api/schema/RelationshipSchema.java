@@ -21,10 +21,17 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.RelationshipType;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, MutableRelationshipSchemaEntry, RelationshipPropertySchema> {
+public interface RelationshipSchema {
     Set<RelationshipType> availableTypes();
 
     boolean isUndirected();
@@ -35,4 +42,62 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
     Map<RelationshipType, Direction> directions();
 
     Object toMapOld();
+
+   RelationshipSchema filter(Set<RelationshipType> elementIdentifiersToKeep);
+
+    RelationshipSchema union(RelationshipSchema other);
+
+    Collection<MutableRelationshipSchemaEntry> entries();
+
+    MutableRelationshipSchemaEntry get(RelationshipType identifier);
+
+    default Set<String> allProperties() {
+        return entries()
+            .stream()
+            .flatMap(entry -> entry.properties().keySet().stream())
+            .collect(Collectors.toSet());
+    }
+
+    default Set<String> allProperties(RelationshipType elementIdentifier) {
+        return Optional.ofNullable(get(elementIdentifier))
+            .map(entry -> entry.properties().keySet())
+            .orElse(Set.of());
+    }
+
+    default boolean hasProperties() {
+        return entries().stream().anyMatch(entry -> !entry.properties().isEmpty());
+    }
+
+    default boolean hasProperty(RelationshipType elementIdentifier, String propertyKey) {
+        return Optional.ofNullable(get(elementIdentifier))
+            .map(entry -> entry.properties().containsKey(propertyKey))
+            .orElse(false);
+    }
+
+    default List<RelationshipPropertySchema> propertySchemasFor(RelationshipType elementIdentifier) {
+        return Optional
+            .ofNullable(get(elementIdentifier))
+            .map(entry -> entry.properties().values())
+            .map(ArrayList::new)
+            .orElse(new ArrayList<>());
+    }
+
+    default Map<String, RelationshipPropertySchema> unionProperties() {
+        return entries()
+            .stream()
+            .flatMap(e -> e.properties().entrySet().stream())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (leftSchema, rightSchema) -> leftSchema));
+    }
+
+    default Map<String, Object> toMap() {
+        return entries()
+            .stream()
+            .collect(Collectors.toMap(entry -> entry.identifier().name, ElementSchemaEntry::toMap));
+    }
+
+    default Map<RelationshipType, MutableRelationshipSchemaEntry> unionEntries(RelationshipSchema other) {
+        return Stream
+            .concat(entries().stream(), other.entries().stream())
+            .collect(Collectors.toMap(ElementSchemaEntry::identifier, Function.identity(), ElementSchemaEntry::union));
+    }
 }
