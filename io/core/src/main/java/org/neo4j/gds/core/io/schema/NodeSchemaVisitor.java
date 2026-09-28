@@ -21,7 +21,7 @@ package org.neo4j.gds.core.io.schema;
 
 import org.neo4j.gds.NodeLabel;
 
-public abstract class NodeSchemaVisitor extends InputNodeSchemaVisitor.Adapter {
+public abstract class NodeSchemaVisitor extends ElementSchemaVisitor implements InputNodeSchemaVisitor {
 
     private NodeLabel nodeLabel;
 

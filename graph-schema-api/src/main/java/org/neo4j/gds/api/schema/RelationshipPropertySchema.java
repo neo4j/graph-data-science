@@ -29,7 +29,6 @@ import org.neo4j.gds.Aggregation;
 import java.util.OptionalInt;
 
 @ValueClass
-@SuppressWarnings("immutables:subtype")
 public interface RelationshipPropertySchema extends PropertySchema {
 
     Aggregation aggregation();
@@ -40,7 +39,7 @@ public interface RelationshipPropertySchema extends PropertySchema {
     }
 
     static RelationshipPropertySchema of(String propertyKey, ValueType valueType) {
-        return ImmutableRelationshipPropertySchema.of(
+        return RelationshipPropertySchema.of(
             propertyKey,
             valueType,
             valueType.fallbackValue(),
@@ -60,7 +59,7 @@ public interface RelationshipPropertySchema extends PropertySchema {
     }
 
     static RelationshipPropertySchema of(String propertyKey, ValueType valueType, Aggregation aggregation) {
-        return ImmutableRelationshipPropertySchema.of(
+        return RelationshipPropertySchema.of(
             propertyKey,
             valueType,
             valueType.fallbackValue(),

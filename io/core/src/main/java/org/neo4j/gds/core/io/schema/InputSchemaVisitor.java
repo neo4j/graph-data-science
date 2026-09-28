@@ -39,39 +39,4 @@ public interface InputSchemaVisitor extends Closeable {
     boolean dimension(OptionalInt dimension);
 
     void endOfEntity();
-
-    abstract class Adapter implements InputSchemaVisitor {
-        @Override
-        public boolean key(String key) {
-            return true;
-        }
-
-        @Override
-        public boolean valueType(ValueType valueType) {
-            return true;
-        }
-
-        @Override
-        public boolean defaultValue(DefaultValue defaultValue) {
-            return true;
-        }
-
-        @Override
-        public boolean state(PropertyState state) {
-            return true;
-        }
-
-        @Override
-        public boolean dimension(OptionalInt dimension) {
-            return true;
-        }
-
-        @Override
-        public void endOfEntity() {
-        }
-
-        @Override
-        public void close() {
-        }
-    }
 }
