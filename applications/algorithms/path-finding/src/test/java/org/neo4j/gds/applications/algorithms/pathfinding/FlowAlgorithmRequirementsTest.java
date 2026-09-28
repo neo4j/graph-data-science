@@ -29,6 +29,7 @@ import org.neo4j.gds.core.loading.validation.TargetNodesRequirement;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -36,27 +37,25 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 class FlowAlgorithmRequirementsTest {
-
     @Test
-    void shouldCallCorrectRequirements(){
+    void shouldCallCorrectRequirements() {
         var sources = mock(SourceNodesRequirement.class);
         var targets = mock(TargetNodesRequirement.class);
         var nodeCapacity = mock(OptionalNodePropertyGraphStoreRequirement.class);
 
-        var graphStore =  mock(GraphStore.class);
+        var graphStore = mock(GraphStore.class);
         Collection<NodeLabel> nodeLabels = List.of();
         Collection<RelationshipType> relTypes = List.of();
 
-        new FlowAlgorithmRequirements(sources,targets,nodeCapacity).validate(
+        new FlowAlgorithmRequirements(sources, targets, nodeCapacity).onGraphStoreFiltered(
             graphStore,
             nodeLabels,
-            relTypes
+            relTypes,
+            Optional.empty()
         );
 
-        verify(sources,times(1)).validate(eq(graphStore),eq(nodeLabels),eq(relTypes));
-        verify(targets,times(1)).validate(eq(graphStore),eq(nodeLabels),eq(relTypes));
-        verify(nodeCapacity,times(1)).validate(eq(graphStore),eq(nodeLabels),eq(relTypes));
-
+        verify(sources, times(1)).validate(eq(graphStore), eq(nodeLabels), eq(relTypes));
+        verify(targets, times(1)).validate(eq(graphStore), eq(nodeLabels), eq(relTypes));
+        verify(nodeCapacity, times(1)).validate(eq(graphStore), eq(nodeLabels), eq(relTypes));
     }
-
 }

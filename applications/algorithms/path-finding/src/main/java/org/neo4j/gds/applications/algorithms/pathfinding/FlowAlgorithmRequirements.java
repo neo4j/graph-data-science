@@ -23,16 +23,17 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.validation.CompoundValidationRule;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.OptionalNodePropertyGraphStoreRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.TargetNodesRequirement;
-import org.neo4j.gds.core.loading.validation.ValidationRule;
 import org.neo4j.gds.maxflow.MaxFlowParameters;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
-public class FlowAlgorithmRequirements implements ValidationRule {
+public class FlowAlgorithmRequirements implements GraphStoreFilteredETL {
     private final SourceNodesRequirement sourceNodes;
     private final TargetNodesRequirement targetNodes;
     private final OptionalNodePropertyGraphStoreRequirement nodeCapacityProperty;
@@ -56,10 +57,11 @@ public class FlowAlgorithmRequirements implements ValidationRule {
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
         var validationRule = new CompoundValidationRule(
             List.of(

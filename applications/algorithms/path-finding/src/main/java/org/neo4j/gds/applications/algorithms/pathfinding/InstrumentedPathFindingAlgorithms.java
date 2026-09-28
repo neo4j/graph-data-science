@@ -161,15 +161,7 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<FlowResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())
-                        .validate(
-                            graphStore,
-                            selectedLabels,
-                            selectedRelationshipTypes
-                        )
-            );
+            .with(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -190,15 +182,7 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<CostFlowResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())
-                        .validate(
-                            graphStore,
-                            selectedLabels,
-                            selectedRelationshipTypes
-                        )
-            );
+            .with(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
 
         var secondGraphLoadETLBuilder = new GraphLoadETLBuilder()
             .with(
