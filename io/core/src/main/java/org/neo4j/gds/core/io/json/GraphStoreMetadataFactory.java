@@ -36,13 +36,13 @@ import java.util.stream.Collectors;
 public final class GraphStoreMetadataFactory {
     private GraphStoreMetadataFactory() {}
 
-    public static GraphStoreMetadata fromGraphStore(GraphStore graphStore, Set<String> nodeProperties) {
+    public static GraphStoreMetadata fromGraphStore(GraphStore graphStore, Config config) {
         var databaseInfo = toDatabaseInfo(graphStore.databaseInfo());
         var writeMode = toWriteMode(graphStore.capabilities().writeMode());
         var idMapInfo = toIdMapInfo(graphStore.nodes());
         var relationshipInfo = toRelationshipInfo(graphStore);
-        var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema(), nodeProperties);
-        var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema());
+        var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema(), config.nodeProperties);
+        var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema(), config.relationshipTypes);
 
         return new GraphStoreMetadata(
             databaseInfo,
@@ -140,8 +140,10 @@ public final class GraphStoreMetadataFactory {
         return result;
     }
 
-    static Map<String, RelationshipSchema> toRelationshipSchema(org.neo4j.gds.api.schema.RelationshipSchema relationshipSchema) {
-        return relationshipSchema.availableTypes().stream().collect(Collectors.toMap(
+    static Map<String, RelationshipSchema> toRelationshipSchema(org.neo4j.gds.api.schema.RelationshipSchema relationshipSchema, Set<RelationshipType> relationshipTypes) {
+        return relationshipSchema.availableTypes().stream()
+            .filter(relationshipType -> relationshipTypes.contains(relationshipType))
+            .collect(Collectors.toMap(
             RelationshipType::name,
             relationshipType -> {
                 var direction = toDirection(relationshipSchema, relationshipType);
@@ -218,4 +220,6 @@ public final class GraphStoreMetadataFactory {
                 "Default aggregation is not supported in graph store metadata");
         };
     }
+
+    public static record Config(Set<String> nodeProperties, Set<RelationshipType> relationshipTypes) {}
 }

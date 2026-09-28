@@ -72,7 +72,6 @@ class GraphStoreMetadataFactoryTest {
                     .gdlGraph("()-->()")
                     .build()
                     .build(),
-                Set.of(),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -101,7 +100,6 @@ class GraphStoreMetadataFactoryTest {
                     .gdlGraph("()-->()")
                     .build()
                     .build(),
-                Set.of(),
                 new GraphStoreMetadata(
                     new DatabaseInfo("custom_db_id", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -130,7 +128,6 @@ class GraphStoreMetadataFactoryTest {
                     .gdlGraph("()-->()")
                     .build()
                     .build(),
-                Set.of(),
                 new GraphStoreMetadata(
                     new DatabaseInfo(
                         "another_custom_name",
@@ -156,10 +153,9 @@ class GraphStoreMetadataFactoryTest {
             Arguments.of(
                 GdlFactory.builder()
                     .gdlGraph(
-                        "(:A { prop1: 42, prop2: 4.2 })-->(:B { prop3: [1.0, 3.0, 3.0, 7.0], prop4: [1L, 3L, 3L, 7L]})-->(:C { prop5: 1337 } )")
+                        "(:A { prop1: 42, prop2: 4.2 })-->(:B { prop3: [1.0, 3.0, 3.0, 7.0], prop4: [1L, 3L, 3L, 7L]})-->(:C )")
                     .build()
                     .build(),
-                Set.of("prop1", "prop2", "prop3", "prop4"),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -219,7 +215,6 @@ class GraphStoreMetadataFactoryTest {
                     )
                     .build()
                     .build(),
-                Set.of("prop1", "prop2", "prop3", "prop4"),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -273,7 +268,6 @@ class GraphStoreMetadataFactoryTest {
                         "(:A { floatEmbedding: vector([1.0f, 3.0f, 3.0f]) })-->(:B { doubleEmbedding: vector([1.0d, 3.0d]) })")
                     .build()
                     .build(),
-                Set.of("floatEmbedding", "doubleEmbedding"),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -321,7 +315,6 @@ class GraphStoreMetadataFactoryTest {
                     )
                     .build()
                     .build(),
-                Set.of(),
                 new GraphStoreMetadata(
                     new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
                     WriteMode.LOCAL,
@@ -356,17 +349,19 @@ class GraphStoreMetadataFactoryTest {
 
     @ParameterizedTest
     @MethodSource("graphStores")
-    void fromGraphStore(GraphStore graphStore, Set<String> nodeProperties, GraphStoreMetadata expected) {
-        var result = GraphStoreMetadataFactory.fromGraphStore(graphStore, nodeProperties);
+    void fromGraphStore(GraphStore graphStore, GraphStoreMetadata expected) {
+        var config = createAllConfig(graphStore);
+
+        var result = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         assertThat(result).isEqualTo(expected);
     }
 
     @Test
     void fromGraphStore() {
-        var nodeProperties = Set.of("prop1", "prop2", "prop3", "prop4");
+        var config = createAllConfig(graphStore);
 
-        var result = GraphStoreMetadataFactory.fromGraphStore(graphStore, nodeProperties);
+        var result = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         assertThat(result).isEqualTo(new GraphStoreMetadata(
                 new DatabaseInfo("gdl", DatabaseInfo.DatabaseLocation.LOCAL, Optional.empty()),
@@ -514,12 +509,6 @@ class GraphStoreMetadataFactoryTest {
                     new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
                     PropertyState.TRANSIENT
                 )
-//                ),
-//                "prop4", new NodePropertySchema(
-//                    ValueType.FLOAT_ARRAY,
-//                    new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
-//                    PropertyState.TRANSIENT
-//                )
             )),
             "Label3", new org.neo4j.gds.core.io.json.NodeSchema(Map.of())
         ));
@@ -527,7 +516,9 @@ class GraphStoreMetadataFactoryTest {
 
     @Test
     void toRelationshipSchema() {
-        var result = GraphStoreMetadataFactory.toRelationshipSchema(graphStore.schema().relationshipSchema());
+        var relationshipTypes = graphStore.relationshipTypes();
+
+        var result = GraphStoreMetadataFactory.toRelationshipSchema(graphStore.schema().relationshipSchema(), relationshipTypes);
 
         assertThat(result).isEqualTo(Map.of(
             "REL_TYPE1", new RelationshipSchema(
@@ -709,6 +700,7 @@ class GraphStoreMetadataFactoryTest {
             Arguments.of(
                 // empty
                 org.neo4j.gds.api.schema.MutableRelationshipSchema.empty(),
+                Set.of(),
                 Map.of()
             ),
             Arguments.of(
@@ -718,6 +710,7 @@ class GraphStoreMetadataFactoryTest {
                         RelationshipType.ALL_RELATIONSHIPS,
                         org.neo4j.gds.api.schema.Direction.DIRECTED
                     ),
+                Set.of(RelationshipType.ALL_RELATIONSHIPS),
                 Map.of(
                     RelationshipType.ALL_RELATIONSHIPS.name(),
                     new RelationshipSchema(Direction.DIRECTED, Map.of())
@@ -733,6 +726,7 @@ class GraphStoreMetadataFactoryTest {
                         org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE,
                         org.neo4j.gds.api.PropertyState.TRANSIENT
                     ),
+                Set.of(RelationshipType.of("REL")),
                 Map.of(
                     "REL",
                     new RelationshipSchema(
@@ -748,6 +742,29 @@ class GraphStoreMetadataFactoryTest {
                         )
                     )
                 )
+            ),
+            Arguments.of(
+                // relationship type filtered
+                org.neo4j.gds.api.schema.MutableRelationshipSchema.empty()
+                    .addRelationshipType(
+                        RelationshipType.of("REL1"),
+                        org.neo4j.gds.api.schema.Direction.UNDIRECTED
+                    )
+                    .addRelationshipType(
+                        RelationshipType.of("REL2"),
+                        org.neo4j.gds.api.schema.Direction.DIRECTED
+                    )
+                    .addRelationshipType(
+                        RelationshipType.of("REL3"),
+                        org.neo4j.gds.api.schema.Direction.DIRECTED
+                    ),
+                Set.of(RelationshipType.of("REL1"), RelationshipType.of("REL3")),
+                Map.of(
+                    "REL1",
+                    new RelationshipSchema(Direction.UNDIRECTED, Map.of()),
+                    "REL3",
+                    new RelationshipSchema(Direction.DIRECTED, Map.of())
+                )
             )
         );
     }
@@ -756,8 +773,13 @@ class GraphStoreMetadataFactoryTest {
     @MethodSource("relationshipSchemas")
     void toRelationshipSchema(
         org.neo4j.gds.api.schema.RelationshipSchema input,
+        Set<RelationshipType> types,
         Map<String, RelationshipSchema> expected
     ) {
-        assertThat(GraphStoreMetadataFactory.toRelationshipSchema(input)).isEqualTo(expected);
+        assertThat(GraphStoreMetadataFactory.toRelationshipSchema(input, types)).isEqualTo(expected);
+    }
+
+    private GraphStoreMetadataFactory.Config createAllConfig(GraphStore graphStore) {
+        return new GraphStoreMetadataFactory.Config(graphStore.nodePropertyKeys(), graphStore.relationshipTypes());
     }
 }

@@ -59,7 +59,8 @@ class GraphStoreMetadataMapperTest {
 
     @Test
     void toGraphInfo() {
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toGraphInfo(graphStoreMetadata);
 
@@ -78,7 +79,8 @@ class GraphStoreMetadataMapperTest {
             .gdlGraph("()-->()")
             .build()
             .build();
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toGraphInfo(graphStoreMetadata);
 
@@ -88,7 +90,8 @@ class GraphStoreMetadataMapperTest {
 
     @Test
     void toCapabilities() {
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toCapabilities(graphStoreMetadata);
 
@@ -107,7 +110,8 @@ class GraphStoreMetadataMapperTest {
             .gdlGraph("()-->()")
             .build()
             .build();
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toCapabilities(graphStoreMetadata);
 
@@ -117,7 +121,8 @@ class GraphStoreMetadataMapperTest {
 
     @Test
     void toNodeShema() {
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
 
@@ -136,7 +141,8 @@ class GraphStoreMetadataMapperTest {
             .gdlGraph("(a:A {propertyA: 42L})-[]->(b:B {propertyB: 0.1337}), (c:C {propertyC: [1.0]})-[]->(d:D {propertyD: [42L]})")
             .build()
             .build();
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
 
@@ -151,7 +157,8 @@ class GraphStoreMetadataMapperTest {
                 "(a:A {floatEmbedding: vector([1.0f, 3.0f, 3.0f])})-[]->(b:B {doubleEmbedding: vector([1.0d, 3.0d])})")
             .build()
             .build();
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
 
@@ -165,7 +172,8 @@ class GraphStoreMetadataMapperTest {
             .gdlGraph("(a:A {embedding: vector([1.0f, 3.0f, 3.0f]), weights: [1.0f, 3.0f]})-[]->(b:B)")
             .build()
             .build();
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toNodeSchema(graphStoreMetadata);
 
@@ -175,7 +183,8 @@ class GraphStoreMetadataMapperTest {
 
     @Test
     void toRelationshipSchema() {
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toRelationshipSchema(graphStoreMetadata);
 
@@ -196,7 +205,8 @@ class GraphStoreMetadataMapperTest {
             )
             .build()
             .build();
-        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, graphStore.nodePropertyKeys());
+        var config = createAllConfig(graphStore);
+        var graphStoreMetadata = GraphStoreMetadataFactory.fromGraphStore(graphStore, config);
 
         var result = GraphStoreMetadataMapper.toRelationshipSchema(graphStoreMetadata);
 
@@ -221,5 +231,9 @@ class GraphStoreMetadataMapperTest {
                 )
             .inverseIndexedRelationshipTypes(graphStore.inverseIndexedRelationshipTypes())
             .build();
+    }
+
+    private GraphStoreMetadataFactory.Config createAllConfig(GraphStore graphStore) {
+        return new GraphStoreMetadataFactory.Config(graphStore.nodePropertyKeys(), graphStore.relationshipTypes());
     }
 }
