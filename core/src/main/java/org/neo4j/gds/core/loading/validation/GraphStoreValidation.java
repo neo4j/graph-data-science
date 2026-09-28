@@ -64,23 +64,21 @@ public class GraphStoreValidation {
         ElementTypeValidator.validateTypes(graphStore, selectedRelationshipTypes, "`relationshipTypes`");
     }
 
-    protected void validateRelationshipProperty(
+    private void validateRelationshipProperty(
         GraphStore graphStore,
         Collection<RelationshipType> selectedRelationshipTypes,
         Optional<String> relationshipProperty
     ) {
-        new RelationshipPropertyGraphStoreValidation(
-            relationshipProperty
-        ).validate(graphStore, Set.of(),selectedRelationshipTypes);
+        var etl = new RelationshipPropertyGraphStoreValidation(relationshipProperty);
 
+        etl.onGraphStoreFiltered(graphStore, Set.of(), selectedRelationshipTypes, Optional.empty());
     }
 
-    protected void validateAlgorithmRequirements(
+    private void validateAlgorithmRequirements(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         validationRule.validate(graphStore, selectedLabels, selectedRelationshipTypes);
     }
-
 }

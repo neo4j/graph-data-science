@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class RelationshipPropertyGraphStoreValidation implements ValidationRule {
-
+public class RelationshipPropertyGraphStoreValidation implements GraphStoreFilteredETL {
     private final Optional<String> propertyName;
     private final String parameterName;
 
@@ -47,34 +46,42 @@ public class RelationshipPropertyGraphStoreValidation implements ValidationRule 
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
+        if (propertyName.isEmpty()) return;
 
-        propertyName.ifPresent(
-            prop -> {
-                var relTypesWithoutProperty = selectedRelationshipTypes.stream()
-                .filter(relType -> !graphStore.hasRelationshipProperty(relType, prop))
-                .collect(Collectors.toSet());
+        var propertyNameAsString = propertyName.get();
 
-            if (!relTypesWithoutProperty.isEmpty()) {
-                String parameterOutput = "";
+        var relTypesWithoutProperty = selectedRelationshipTypes.stream()
+            .filter(relType -> !graphStore.hasRelationshipProperty(relType, propertyNameAsString))
+            .collect(Collectors.toSet());
 
-                if (parameterName.equals(RELATIONSHIP_WEIGHT_PROPERTY)){
-                    parameterOutput = formatWithLocale("Relationship weight property `%s`",prop);
-                }else{
-                    parameterOutput= formatWithLocale("Relationship property `%s` for parameter `%s`",prop,parameterName);
-                }
+        if (!relTypesWithoutProperty.isEmpty()) {
+            var parameterOutput = formatParameterOutput(propertyNameAsString);
 
-                throw new IllegalArgumentException(formatWithLocale(
-                    "%s not found in relationship types %s. Properties existing on all relationship types: %s",
-                    parameterOutput,
-                    StringJoining.join(relTypesWithoutProperty.stream().map(RelationshipType::name)),
-                    StringJoining.join(graphStore.relationshipPropertyKeys(selectedRelationshipTypes))
-                ));
-            }
-        });
+            throw new IllegalArgumentException(formatWithLocale(
+                "%s not found in relationship types %s. Properties existing on all relationship types: %s",
+                parameterOutput,
+                StringJoining.join(relTypesWithoutProperty.stream().map(RelationshipType::name)),
+                StringJoining.join(graphStore.relationshipPropertyKeys(selectedRelationshipTypes))
+            ));
+        }
+    }
+
+    private String formatParameterOutput(String propertyNameAsString) {
+        if (parameterName.equals(RELATIONSHIP_WEIGHT_PROPERTY)) return formatWithLocale(
+            "Relationship weight property `%s`",
+            propertyNameAsString
+        );
+
+        return formatWithLocale(
+            "Relationship property `%s` for parameter `%s`",
+            propertyNameAsString,
+            parameterName
+        );
     }
 }

@@ -185,13 +185,7 @@ public class InstrumentedPathFindingAlgorithms {
             .with(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
 
         var secondGraphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    new RelationshipPropertyGraphStoreValidation(
-                        configuration.costProperty(),
-                        "costProperty"
-                    ).validate(graphStore, selectedLabels, selectedRelationshipTypes)
-            );
+            .with(new RelationshipPropertyGraphStoreValidation(configuration.costProperty(), "costProperty"));
 
         return launchConvenience.launchAlgorithm(
             graphName,

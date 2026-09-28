@@ -34,19 +34,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class RelationshipPropertyGraphStoreValidationTest {
-
-
     @Test
     void shouldNotThrowIfPropertyIsEmpty() {
         var graphStore = mock(GraphStore.class);
         var validation = new RelationshipPropertyGraphStoreValidation(Optional.empty());
         var relType = new RelationshipType("FOO");
-        when(graphStore.hasRelationshipProperty(eq(relType),eq("foo"))).thenThrow(new RuntimeException());
+        when(graphStore.hasRelationshipProperty(eq(relType), eq("foo"))).thenThrow(new RuntimeException());
 
-        assertThatNoException().isThrownBy(() -> validation.validate(
+        assertThatNoException().isThrownBy(() -> validation.onGraphStoreFiltered(
             graphStore,
             Set.of(),
-            List.of(relType)
+            List.of(relType),
+            Optional.empty()
         ));
     }
 
@@ -54,13 +53,14 @@ class RelationshipPropertyGraphStoreValidationTest {
     void shouldNotThrowIfPropertyExists() {
         var graphStore = mock(GraphStore.class);
         var relType = new RelationshipType("FOO");
-        when(graphStore.hasRelationshipProperty(eq(relType),eq("foo"))).thenReturn(true);
+        when(graphStore.hasRelationshipProperty(eq(relType), eq("foo"))).thenReturn(true);
         var validation = new RelationshipPropertyGraphStoreValidation(Optional.of("test"));
 
-        assertThatNoException().isThrownBy(() -> validation.validate(
+        assertThatNoException().isThrownBy(() -> validation.onGraphStoreFiltered(
             graphStore,
             Set.of(),
-            List.of()
+            List.of(),
+            Optional.empty()
         ));
     }
 
@@ -68,34 +68,36 @@ class RelationshipPropertyGraphStoreValidationTest {
     void shouldThrowForMissingCustomProperty() {
         var graphStore = mock(GraphStore.class);
         var relType = new RelationshipType("FOO");
-        var relTypes= List.of(relType);
-        when(graphStore.hasRelationshipProperty(eq(relType),eq("foo"))).thenReturn(false);
+        var relTypes = List.of(relType);
+        when(graphStore.hasRelationshipProperty(eq(relType), eq("foo"))).thenReturn(false);
         when(graphStore.relationshipPropertyKeys(eq(relTypes))).thenReturn(Set.of("buzz"));
-        var validation = new RelationshipPropertyGraphStoreValidation(Optional.of("tests"),"bar");
+        var validation = new RelationshipPropertyGraphStoreValidation(Optional.of("tests"), "bar");
 
-        assertThatThrownBy(()-> validation.validate(
+        assertThatThrownBy(() -> validation.onGraphStoreFiltered(
             graphStore,
             Set.of(),
-            relTypes
-        )).hasMessageContaining("Relationship property `tests` for parameter `bar` not found in relationship types ['FOO']. Properties existing on all relationship types: ['buzz']");
+            relTypes,
+            Optional.empty()
+        )).hasMessageContaining(
+            "Relationship property `tests` for parameter `bar` not found in relationship types ['FOO']. Properties existing on all relationship types: ['buzz']");
     }
 
     @Test
     void shouldThrowForMissingRelationshipWeightProperty() {
         var graphStore = mock(GraphStore.class);
         var relType = new RelationshipType("FOO");
-        var relTypes= List.of(relType);
-        when(graphStore.hasRelationshipProperty(eq(relType),eq("foo"))).thenReturn(false);
+        var relTypes = List.of(relType);
+        when(graphStore.hasRelationshipProperty(eq(relType), eq("foo"))).thenReturn(false);
         when(graphStore.relationshipPropertyKeys(eq(relTypes))).thenReturn(Set.of("buzz"));
 
         var validation = new RelationshipPropertyGraphStoreValidation(Optional.of("test"));
 
-        assertThatThrownBy(()-> validation.validate(
+        assertThatThrownBy(() -> validation.onGraphStoreFiltered(
             graphStore,
             Set.of(),
-            relTypes
-        )).hasMessageContaining("Relationship weight property `test` not found in relationship types ['FOO']. Properties existing on all relationship types: ['buzz']");
+            relTypes,
+            Optional.empty()
+        )).hasMessageContaining(
+            "Relationship weight property `test` not found in relationship types ['FOO']. Properties existing on all relationship types: ['buzz']");
     }
-
-
 }
