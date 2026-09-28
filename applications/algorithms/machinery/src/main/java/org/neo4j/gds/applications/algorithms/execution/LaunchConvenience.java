@@ -55,6 +55,33 @@ public class LaunchConvenience {
     }
 
     /**
+     * An overload for all the algorithms that do not need to load a second graph.
+     */
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        GraphLoadETLBuilder graphLoadETLBuilder,
+        ConstructAndRun<RESULT> constructAndRun,
+        Supplier<MemoryEstimation> memoryEstimationSupplier,
+        Label label,
+        Optional<SideEffect<RESULT, METADATA>> sideEffect,
+        ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
+    ) {
+        return launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            Optional.empty(),
+            Optional.empty(),
+            constructAndRun,
+            memoryEstimationSupplier,
+            label,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    /**
      * This is currently the most specific convenience needed thus far.
      * It does no graph validation, no dimension transformer.
      * It does do relationship override, graph store validation and side effects, however.
@@ -63,9 +90,9 @@ public class LaunchConvenience {
      * <p>
      * _Work_ is launched asynchronously, caller deals with completing work and handling errors.
      *
-     * @param configuration              if you supply a {@link org.neo4j.gds.config.RelationshipWeightConfig} we extract that for you.
-     * @param graphLoadETLBuilder        algorithms load up their specific validations, and we add some cross-cutting ones
-     * @param secondGraphLoadETLBuilder  we can optionally load another graph
+     * @param configuration             if you supply a {@link org.neo4j.gds.config.RelationshipWeightConfig} we extract that for you.
+     * @param graphLoadETLBuilder       algorithms load up their specific validations, and we add some cross-cutting ones
+     * @param secondGraphLoadETLBuilder we can optionally load another graph
      */
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
