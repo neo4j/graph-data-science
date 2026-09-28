@@ -234,6 +234,11 @@ class GraphStoreMetadataMapperTest {
     }
 
     private GraphStoreMetadataFactory.Config createAllConfig(GraphStore graphStore) {
-        return new GraphStoreMetadataFactory.Config(graphStore.nodePropertyKeys(), graphStore.relationshipTypes());
+        var relationships = graphStore.relationshipTypes().stream()
+            .collect(Collectors.toMap(
+                Function.identity(),
+                relationshipType -> graphStore.relationshipPropertyKeys(relationshipType)
+            ));
+        return new GraphStoreMetadataFactory.Config(graphStore.nodePropertyKeys(), relationships);
     }
 }

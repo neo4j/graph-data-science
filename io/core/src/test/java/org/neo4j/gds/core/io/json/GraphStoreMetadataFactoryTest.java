@@ -42,6 +42,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -516,9 +518,12 @@ class GraphStoreMetadataFactoryTest {
 
     @Test
     void toRelationshipSchema() {
-        var relationshipTypes = graphStore.relationshipTypes();
+        var relationships = graphStore.relationshipTypes().stream().collect(Collectors.toMap(
+            Function.identity(),
+            relationshipType -> graphStore.relationshipPropertyKeys(relationshipType)
+        ));
 
-        var result = GraphStoreMetadataFactory.toRelationshipSchema(graphStore.schema().relationshipSchema(), relationshipTypes);
+        var result = GraphStoreMetadataFactory.toRelationshipSchema(graphStore.schema().relationshipSchema(), relationships);
 
         assertThat(result).isEqualTo(Map.of(
             "REL_TYPE1", new RelationshipSchema(
@@ -700,7 +705,7 @@ class GraphStoreMetadataFactoryTest {
             Arguments.of(
                 // empty
                 org.neo4j.gds.api.schema.MutableRelationshipSchema.empty(),
-                Set.of(),
+                Map.of(),
                 Map.of()
             ),
             Arguments.of(
@@ -710,7 +715,7 @@ class GraphStoreMetadataFactoryTest {
                         RelationshipType.ALL_RELATIONSHIPS,
                         org.neo4j.gds.api.schema.Direction.DIRECTED
                     ),
-                Set.of(RelationshipType.ALL_RELATIONSHIPS),
+                Map.of(RelationshipType.ALL_RELATIONSHIPS, Set.of()),
                 Map.of(
                     RelationshipType.ALL_RELATIONSHIPS.name(),
                     new RelationshipSchema(Direction.DIRECTED, Map.of())
@@ -726,7 +731,7 @@ class GraphStoreMetadataFactoryTest {
                         org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE,
                         org.neo4j.gds.api.PropertyState.TRANSIENT
                     ),
-                Set.of(RelationshipType.of("REL")),
+                Map.of(RelationshipType.of("REL"), Set.of("relProp")),
                 Map.of(
                     "REL",
                     new RelationshipSchema(
@@ -758,12 +763,97 @@ class GraphStoreMetadataFactoryTest {
                         RelationshipType.of("REL3"),
                         org.neo4j.gds.api.schema.Direction.DIRECTED
                     ),
-                Set.of(RelationshipType.of("REL1"), RelationshipType.of("REL3")),
+                Map.of(
+                    RelationshipType.of("REL1"),
+                    Set.of(),
+                    RelationshipType.of("REL3"),
+                    Set.of()
+                ),
                 Map.of(
                     "REL1",
                     new RelationshipSchema(Direction.UNDIRECTED, Map.of()),
                     "REL3",
                     new RelationshipSchema(Direction.DIRECTED, Map.of())
+                )
+            ),
+            Arguments.of(
+                // relationship type and property filtered
+                org.neo4j.gds.api.schema.MutableRelationshipSchema.empty()
+                    .addProperty(
+                        RelationshipType.of("REL1"),
+                        org.neo4j.gds.api.schema.Direction.DIRECTED,
+                        "relProp1",
+                        org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE,
+                        org.neo4j.gds.api.PropertyState.TRANSIENT
+                    )
+                    .addProperty(
+                        RelationshipType.of("REL1"),
+                        org.neo4j.gds.api.schema.Direction.DIRECTED,
+                        "relProp2",
+                        org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE,
+                        org.neo4j.gds.api.PropertyState.TRANSIENT
+                    )
+                    .addProperty(
+                        RelationshipType.of("REL2"),
+                        org.neo4j.gds.api.schema.Direction.UNDIRECTED,
+                        "relProp1",
+                        org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE,
+                        org.neo4j.gds.api.PropertyState.TRANSIENT
+                    )
+                    .addProperty(
+                        RelationshipType.of("REL3"),
+                        org.neo4j.gds.api.schema.Direction.UNDIRECTED,
+                        "relProp1",
+                        org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE,
+                        org.neo4j.gds.api.PropertyState.TRANSIENT
+                    )
+                    .addProperty(
+                        RelationshipType.of("REL3"),
+                        org.neo4j.gds.api.schema.Direction.UNDIRECTED,
+                        "relProp2",
+                        org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE,
+                        org.neo4j.gds.api.PropertyState.TRANSIENT
+                    ),
+                Map.of(
+                    RelationshipType.of("REL1"),
+                    Set.of("relProp1", "relProp2"),
+                    RelationshipType.of("REL3"),
+                    Set.of("relProp2")
+                ),
+                Map.of(
+                    "REL1",
+                    new RelationshipSchema(
+                        Direction.DIRECTED,
+                        Map.of(
+                            "relProp1",
+                            new RelationshipPropertySchema(
+                                ValueType.DOUBLE,
+                                new DefaultValue(Double.NaN, false),
+                                PropertyState.TRANSIENT,
+                                Aggregation.NONE
+                            ),
+                            "relProp2",
+                            new RelationshipPropertySchema(
+                                ValueType.DOUBLE,
+                                new DefaultValue(Double.NaN, false),
+                                PropertyState.TRANSIENT,
+                                Aggregation.NONE
+                            )
+                        )
+                    ),
+                    "REL3",
+                    new RelationshipSchema(
+                        Direction.UNDIRECTED,
+                        Map.of(
+                            "relProp2",
+                            new RelationshipPropertySchema(
+                                ValueType.DOUBLE,
+                                new DefaultValue(Double.NaN, false),
+                                PropertyState.TRANSIENT,
+                                Aggregation.NONE
+                            )
+                        )
+                    )
                 )
             )
         );
@@ -773,13 +863,18 @@ class GraphStoreMetadataFactoryTest {
     @MethodSource("relationshipSchemas")
     void toRelationshipSchema(
         org.neo4j.gds.api.schema.RelationshipSchema input,
-        Set<RelationshipType> types,
+        Map<RelationshipType, Set<String>> rels,
         Map<String, RelationshipSchema> expected
     ) {
-        assertThat(GraphStoreMetadataFactory.toRelationshipSchema(input, types)).isEqualTo(expected);
+        assertThat(GraphStoreMetadataFactory.toRelationshipSchema(input, rels)).isEqualTo(expected);
     }
 
     private GraphStoreMetadataFactory.Config createAllConfig(GraphStore graphStore) {
-        return new GraphStoreMetadataFactory.Config(graphStore.nodePropertyKeys(), graphStore.relationshipTypes());
+        var relationships = graphStore.relationshipTypes().stream()
+            .collect(Collectors.toMap(
+                Function.identity(),
+                relationshipType -> graphStore.relationshipPropertyKeys(relationshipType)
+            ));
+        return new GraphStoreMetadataFactory.Config(graphStore.nodePropertyKeys(), relationships);
     }
 }

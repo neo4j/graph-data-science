@@ -42,7 +42,7 @@ public final class GraphStoreMetadataFactory {
         var idMapInfo = toIdMapInfo(graphStore.nodes());
         var relationshipInfo = toRelationshipInfo(graphStore);
         var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema(), config.nodeProperties);
-        var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema(), config.relationshipTypes);
+        var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema(), config.relationships);
 
         return new GraphStoreMetadata(
             databaseInfo,
@@ -140,35 +140,41 @@ public final class GraphStoreMetadataFactory {
         return result;
     }
 
-    static Map<String, RelationshipSchema> toRelationshipSchema(org.neo4j.gds.api.schema.RelationshipSchema relationshipSchema, Set<RelationshipType> relationshipTypes) {
+    static Map<String, RelationshipSchema> toRelationshipSchema(
+        org.neo4j.gds.api.schema.RelationshipSchema relationshipSchema,
+        Map<RelationshipType, Set<String>> relationships
+    ) {
         return relationshipSchema.availableTypes().stream()
-            .filter(relationshipType -> relationshipTypes.contains(relationshipType))
+            .filter(relationshipType -> relationships.containsKey(relationshipType))
             .collect(Collectors.toMap(
-            RelationshipType::name,
-            relationshipType -> {
-                var direction = toDirection(relationshipSchema, relationshipType);
-                var propertySchemas = relationshipSchema.propertySchemasFor(relationshipType).stream().collect(
-                    Collectors.toMap(
-                        PropertySchema::key,
-                        propertySchema -> {
-                            var valueType = toValueType(propertySchema.valueType());
-                            var defaultValue = toDefaultValue(propertySchema.defaultValue());
-                            var propertyState = toPropertyState(propertySchema.state());
-                            var aggregation = toAggregation(propertySchema.aggregation());
+                RelationshipType::name,
+                relationshipType -> {
+                    var direction = toDirection(relationshipSchema, relationshipType);
+                    var properties = relationships.get(relationshipType);
+                    var propertySchemas = relationshipSchema.propertySchemasFor(relationshipType).stream()
+                        .filter(propertySchema -> properties.contains(propertySchema.key()))
+                        .collect(
+                        Collectors.toMap(
+                            PropertySchema::key,
+                            propertySchema -> {
+                                var valueType = toValueType(propertySchema.valueType());
+                                var defaultValue = toDefaultValue(propertySchema.defaultValue());
+                                var propertyState = toPropertyState(propertySchema.state());
+                                var aggregation = toAggregation(propertySchema.aggregation());
 
-                            return new RelationshipPropertySchema(
-                                valueType,
-                                defaultValue,
-                                propertyState,
-                                aggregation
-                            );
+                                return new RelationshipPropertySchema(
+                                    valueType,
+                                    defaultValue,
+                                    propertyState,
+                                    aggregation
+                                );
 
-                        }
-                    ));
+                            }
+                        ));
 
-                return new RelationshipSchema(direction, propertySchemas);
-            }
-        ));
+                    return new RelationshipSchema(direction, propertySchemas);
+                }
+            ));
     }
 
     private static DefaultValue toDefaultValue(org.neo4j.gds.api.DefaultValue defaultValue) {
@@ -221,5 +227,5 @@ public final class GraphStoreMetadataFactory {
         };
     }
 
-    public static record Config(Set<String> nodeProperties, Set<RelationshipType> relationshipTypes) {}
+    public static record Config(Set<String> nodeProperties, Map<RelationshipType, Set<String>> relationships) {}
 }
