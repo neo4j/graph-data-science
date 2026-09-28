@@ -40,7 +40,7 @@ public final class GraphStoreMetadataFactory {
         var databaseInfo = toDatabaseInfo(graphStore.databaseInfo());
         var writeMode = toWriteMode(graphStore.capabilities().writeMode());
         var idMapInfo = toIdMapInfo(graphStore.nodes());
-        var relationshipInfo = toRelationshipInfo(graphStore);
+        var relationshipInfo = toRelationshipInfo(graphStore, config.relationships);
         var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema(), config.nodeProperties);
         var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema(), config.relationships);
 
@@ -92,16 +92,23 @@ public final class GraphStoreMetadataFactory {
         );
     }
 
-    static Map<String, RelationshipInfo> toRelationshipInfo(GraphStore graphStore) {
+    static Map<String, RelationshipInfo> toRelationshipInfo(
+        GraphStore graphStore,
+        Map<RelationshipType, Set<String>> relationships
+    ) {
         var inverseIndexedRelationshipTypes = graphStore.inverseIndexedRelationshipTypes();
 
         return graphStore.relationshipTypes().stream()
+            .filter(relationshipType -> relationships.containsKey(relationshipType))
             .collect(Collectors.toMap(
                 RelationshipType::name,
                 relationshipType -> {
                     var relationshipCount = graphStore.relationshipCount(relationshipType);
                     var isInverseIndexed = inverseIndexedRelationshipTypes.contains(relationshipType);
-                    var propertyCount = graphStore.relationshipPropertyKeys(relationshipType).size();
+                    var properties = relationships.get(relationshipType);
+                    var propertyCount = graphStore.relationshipPropertyKeys(relationshipType).stream()
+                        .filter(property -> properties.contains(property))
+                        .collect(Collectors.toSet()).size();
 
                     return new RelationshipInfo(relationshipCount, isInverseIndexed, propertyCount);
                 }

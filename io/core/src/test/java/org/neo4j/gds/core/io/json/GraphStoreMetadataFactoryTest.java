@@ -57,8 +57,8 @@ class GraphStoreMetadataFactoryTest {
             (b:Label2 {prop3: [1L, 3L, 3L, 7L], prop4: [1.0f, 3.0f, 3.0f, 7.0f]}),
             (c:Label3),
             (d:Label3),
-            (a)-[:REL_TYPE1 {relProp1: 13.37}]->(b),
-            (b)-[:REL_TYPE1 {relProp1: 1.337}]->(c),
+            (a)-[:REL_TYPE1 {relProp1: 13.37, relProp2: 4.2}]->(b),
+            (b)-[:REL_TYPE1 {relProp1: 1.337, relProp2: 42.0}]->(c),
             (a)-[:REL_TYPE2]->(c)
             (a)-[:REL_TYPE2]->(d)
         """;
@@ -379,7 +379,7 @@ class GraphStoreMetadataFactoryTest {
                     )
                 ),
                 Map.of(
-                    "REL_TYPE1", new RelationshipInfo(2, false, 1),
+                    "REL_TYPE1", new RelationshipInfo(2, false, 2),
                     "REL_TYPE2", new RelationshipInfo(2, false, 0)
                 ),
                 Map.of(
@@ -418,6 +418,13 @@ class GraphStoreMetadataFactoryTest {
                         Direction.DIRECTED,
                         Map.of(
                             "relProp1",
+                            new RelationshipPropertySchema(
+                                ValueType.DOUBLE,
+                                new DefaultValue(Double.NaN, false),
+                                PropertyState.TRANSIENT,
+                                Aggregation.NONE
+                            ),
+                            "relProp2",
                             new RelationshipPropertySchema(
                                 ValueType.DOUBLE,
                                 new DefaultValue(Double.NaN, false),
@@ -476,7 +483,13 @@ class GraphStoreMetadataFactoryTest {
 
     @Test
     void toRelationshipInfo() {
-        var result = GraphStoreMetadataFactory.toRelationshipInfo(graphStore);
+        Map<RelationshipType, Set<String>> relationships = Map.of(
+            RelationshipType.of("REL_TYPE1"),
+            Set.of("relProp1"),
+            RelationshipType.of("REL_TYPE2"),
+            Set.of()
+        );
+        var result = GraphStoreMetadataFactory.toRelationshipInfo(graphStore, relationships);
 
         assertThat(result).isEqualTo(Map.of(
             "REL_TYPE1", new RelationshipInfo(2, false, 1),
@@ -518,10 +531,12 @@ class GraphStoreMetadataFactoryTest {
 
     @Test
     void toRelationshipSchema() {
-        var relationships = graphStore.relationshipTypes().stream().collect(Collectors.toMap(
-            Function.identity(),
-            relationshipType -> graphStore.relationshipPropertyKeys(relationshipType)
-        ));
+        Map<RelationshipType, Set<String>> relationships = Map.of(
+            RelationshipType.of("REL_TYPE1"),
+            Set.of("relProp1"),
+            RelationshipType.of("REL_TYPE2"),
+            Set.of()
+        );
 
         var result = GraphStoreMetadataFactory.toRelationshipSchema(graphStore.schema().relationshipSchema(), relationships);
 
