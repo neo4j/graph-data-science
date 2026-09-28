@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.utils.StringJoining;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -208,23 +207,6 @@ public interface Expression {
             @Override
             public ValidationContext validate(ValidationContext context) {
                 return context;
-            }
-        }
-
-        record NewListLiteral(List<Expression> listElements) implements UnaryExpression {
-            @Override
-            public ValueType valueType() {
-                return ValueType.UNKNOWN;
-            }
-
-            @Override
-            public Expression in() {
-                return new Literal.TrueLiteral();
-            }
-
-            @Override
-            public double evaluate(EvaluationContext context) {
-                throw new IllegalStateException("Not a list literal");
             }
         }
     }
@@ -438,16 +420,16 @@ public interface Expression {
                         );
                         default -> throw new IllegalStateException("Unexpected valueType: " + property.valueType());
                     };
-                    case UnaryExpression.NewListLiteral newListLiteral -> switch (lhs.valueType()) {
+                    case Literal.ListLiteral listLiteral -> switch (lhs.valueType()) {
                         case ValueType.DOUBLE -> contains(
-                            newListLiteral.listElements()
+                            listLiteral.listElements()
                                 .stream()
                                 .mapToDouble(expr -> expr.evaluate(context))
                                 .toArray(),
                             searchElement
                         );
                         case ValueType.LONG -> contains(
-                            newListLiteral.listElements()
+                            listLiteral.listElements()
                                 .stream()
                                 .mapToLong(expr -> Double.doubleToRawLongBits(expr.evaluate(context)))
                                 .toArray(),
@@ -609,6 +591,18 @@ public interface Expression {
             @Override
             public String prettyString() {
                 return value;
+            }
+        }
+
+        record ListLiteral(List<Expression> listElements) implements Literal {
+            @Override
+            public ValueType valueType() {
+                return ValueType.UNKNOWN;
+            }
+
+            @Override
+            public double evaluate(EvaluationContext context) {
+                throw new UnsupportedOperationException("List literals cannot be evaluated directly. Use a list operation instead.");
             }
         }
     }

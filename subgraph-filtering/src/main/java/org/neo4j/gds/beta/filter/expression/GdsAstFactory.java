@@ -113,7 +113,7 @@ class GdsAstFactory extends AstFactoryAdapter {
 
     @Override
     public Expression listLiteral(InputPosition p, List<Expression> values) {
-        return new Expression.UnaryExpression.NewListLiteral(values);
+        return new Expression.Literal.ListLiteral(values);
     }
 
     @Override
