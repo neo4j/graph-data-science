@@ -34,6 +34,8 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
@@ -142,6 +144,25 @@ public class TrackedPathFindingAlgorithms {
             () -> algorithms.maxFlow(
                 graph,
                 configuration.toMaxFlowParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            true
+        );
+    }
+
+    CostFlowResult minCostMaxFlow(Graph graphOfFlows, Graph graphOfCosts, MCMFBaseConfig configuration) {
+        var progressTracker = createProgressTracker(
+            PathFindingAlgorithmTasks.minCostMaxFlow(configuration.concurrency()),
+            configuration
+        );
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.minCostMaxFlow(
+                graphOfFlows,
+                graphOfCosts,
+                configuration.toMCMFParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ),

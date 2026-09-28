@@ -193,6 +193,46 @@ public class InstrumentedPathFindingAlgorithms {
         );
     }
 
+    public <RESULT, METADATA> CompletableFuture<RESULT> minCostMaxFlow(
+        GraphName graphName,
+        MCMFBaseConfig configuration,
+        Optional<SideEffect<CostFlowResult, METADATA>> sideEffect,
+        ResultRenderer<CostFlowResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())
+                        .validate(
+                            graphStore,
+                            selectedLabels,
+                            selectedRelationshipTypes
+                        )
+            );
+
+        var secondGraphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new RelationshipPropertyGraphStoreValidation(
+                        configuration.costProperty(),
+                        "costProperty"
+                    ).validate(graphStore, selectedLabels, selectedRelationshipTypes)
+            );
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            configuration.costProperty(),
+            Optional.of(secondGraphLoadETLBuilder),
+            (graph, secondGraph, __) -> algorithms.minCostMaxFlow(graph, secondGraph.orElseThrow(), configuration),
+            () -> estimationFacade.mcmf(configuration),
+            AlgorithmLabel.MCMF,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
     public <RESULT, METADATA> CompletableFuture<RESULT> randomWalk(
         GraphName graphName,
         RandomWalkBaseConfig configuration,

@@ -263,6 +263,24 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
+    CostFlowResult minCostMaxFlow(
+        Graph graphOfFlows,
+        Graph graphOfCosts,
+        MCMFParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        var algorithm = MinCostMaxFlow.create(
+            graphOfFlows,
+            graphOfCosts,
+            parameters,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithm.compute();
+    }
+
     public Stream<long[]> randomWalk(
         Graph graph,
         RandomWalkParameters parameters,
