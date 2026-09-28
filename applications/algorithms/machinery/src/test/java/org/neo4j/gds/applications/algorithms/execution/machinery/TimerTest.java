@@ -35,7 +35,7 @@ class TimerTest {
         var timeSupplier = mock(LongSupplier.class);
         when(timeSupplier.getAsLong()).thenReturn(23L, 87L);
         var computationTimer = new ComputationTimer(timeSupplier);
-        var result = timer.runAlgorithmAndRecordTiming(computationTimer, (__, ___) -> 42, null, null);
+        var result = timer.runAlgorithmAndRecordTiming(computationTimer, (__, ___, ____) -> 42, null, null, null);
 
         assertEquals(42, result);
         assertEquals(23L, computationTimer.startTimeInEpochMilliseconds());

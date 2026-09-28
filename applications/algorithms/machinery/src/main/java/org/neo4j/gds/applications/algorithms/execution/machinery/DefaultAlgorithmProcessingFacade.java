@@ -32,9 +32,9 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.loading.validation.GraphLoadETL;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.validation.GraphLoadETL;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -45,6 +45,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 
 public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessingFacade {
@@ -88,6 +89,8 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphLoadETL graphLoadETL,
+        Optional<String> secondRelationshipProperty,
+        Optional<GraphLoadETL> secondGraphLoadETL,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
         TerminationFlag terminationFlag,
@@ -101,7 +104,7 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
             var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
 
             requestScopedLog.onLoadingGraph();
-            var graphResources = loadGraph(
+            var graphResources = loadFirstGraph(
                 timingsBuilder,
                 databaseId,
                 graphName,
@@ -111,10 +114,21 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
                 graphLoadETL
             );
 
+            var secondGraphResources = loadSecondGraph(
+                timingsBuilder,
+                databaseId,
+                graphName,
+                user,
+                graphParameters,
+                secondRelationshipProperty,
+                secondGraphLoadETL
+            );
+
             return computationQueue.enqueueComputation(
                 requestScopedLog,
                 timingsBuilder,
                 graphResources,
+                secondGraphResources,
                 user,
                 constructAndRun,
                 configuration,
@@ -127,7 +141,7 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         }
     }
 
-    private GraphResources loadGraph(
+    private GraphResources loadFirstGraph(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         DatabaseId databaseId,
         GraphName graphName,
@@ -136,7 +150,53 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         Optional<String> relationshipProperty,
         GraphLoadETL graphLoadETL
     ) {
-        try (var ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
+        return loadGraph(
+            databaseId,
+            graphName,
+            user,
+            graphParameters,
+            relationshipProperty,
+            graphLoadETL,
+            timingsBuilder::withPreProcessingMillis
+        );
+    }
+
+    /**
+     * @param graphLoadETL indirect parameterisation: if you provide an ETL pipeline, we load your graph;
+     *                     even if you provide an empty ETL pipeline...
+     */
+    private Optional<GraphResources> loadSecondGraph(
+        AlgorithmProcessingTimingsBuilder timingsBuilder,
+        DatabaseId databaseId,
+        GraphName graphName,
+        User user,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        Optional<GraphLoadETL> graphLoadETL
+    ) {
+        // yeah... indirect parametrisation ftw, or something
+        return graphLoadETL.map(loadETL -> loadGraph(
+            databaseId,
+            graphName,
+            user,
+            graphParameters,
+            relationshipProperty,
+            loadETL,
+            timingsBuilder::withSecondPreProcessingMillis
+        ));
+
+    }
+
+    private GraphResources loadGraph(
+        DatabaseId databaseId,
+        GraphName graphName,
+        User user,
+        GraphParameters graphParameters,
+        Optional<String> relationshipProperty,
+        GraphLoadETL graphLoadETL,
+        LongConsumer timingHook
+    ) {
+        try (var ignored = ProgressTimer.start(timingHook)) {
             return graphStoreCatalogService.loadGraphResources(
                 databaseId,
                 graphName,

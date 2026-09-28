@@ -26,6 +26,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -50,6 +52,7 @@ class TelemetryTest {
                 computationTimer,
                 constructAndRun,
                 graph,
+                Optional.empty(),
                 graphStore
             )
         ).thenReturn("my dummy result");
@@ -61,6 +64,7 @@ class TelemetryTest {
             configuration,
             constructAndRun,
             graph,
+            Optional.empty(),
             graphStore
         );
 

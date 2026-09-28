@@ -30,6 +30,7 @@ import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.memory.tracking.MemoryGuardException;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -47,6 +48,7 @@ class MemoryChecker {
     <CONFIGURATION extends AlgoBaseConfig, RESULT> RESULT checkMemoryAndRunAlgorithm(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphResources graphResources,
+        Optional<GraphResources> secondGraphResources,
         Supplier<MemoryEstimation> estimationSupplier,
         DimensionTransformer dimensionTransformer,
         User user,
@@ -65,6 +67,7 @@ class MemoryChecker {
             configuration,
             constructAndRun,
             graphResources.graph(),
+            secondGraphResources.map(GraphResources::graph),
             graphResources.graphStore()
         );
     }

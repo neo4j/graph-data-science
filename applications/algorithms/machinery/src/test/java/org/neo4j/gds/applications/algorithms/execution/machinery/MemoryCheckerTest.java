@@ -30,6 +30,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.memory.tracking.TotalMemoryReservationExceededException;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,11 +64,13 @@ class MemoryCheckerTest {
             configuration,
             algorithm,
             graph,
+            Optional.empty(),
             graphStore
         )).thenReturn("my dummy result");
         var result = memoryChecker.checkMemoryAndRunAlgorithm(
             timingsBuilder,
             graphResources,
+            Optional.empty(),
             null,
             DimensionTransformer.DISABLED,
             User.DEFAULT,
@@ -99,6 +102,7 @@ class MemoryCheckerTest {
             memoryChecker.checkMemoryAndRunAlgorithm(
                 timingsBuilder,
                 graphResources,
+                Optional.empty(),
                 null,
                 DimensionTransformer.DISABLED,
                 User.DEFAULT,

@@ -27,6 +27,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
+import java.util.Optional;
+
 /**
  * Capture metrics of successfully-run algorithms
  */
@@ -48,6 +50,7 @@ class MetricsRecorder {
         CONFIGURATION configuration,
         ConstructAndRun<RESULT> constructAndRun,
         Graph graph,
+        Optional<Graph> secondGraph,
         GraphStore graphStore
     ) {
         try (var executionMetric = algorithmMetricsService.create(label.asString())) {
@@ -61,6 +64,7 @@ class MetricsRecorder {
                     configuration,
                     constructAndRun,
                     graph,
+                    secondGraph,
                     graphStore
                 );
             } catch (RuntimeException e) {

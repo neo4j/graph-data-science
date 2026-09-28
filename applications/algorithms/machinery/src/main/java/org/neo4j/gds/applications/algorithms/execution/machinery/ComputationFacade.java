@@ -67,6 +67,7 @@ final class ComputationFacade {
         RequestScopedLog requestScopedLog,
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphResources graphResources,
+        Optional<GraphResources> secondGraphResources,
         User user,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
@@ -80,6 +81,7 @@ final class ComputationFacade {
             requestScopedLog,
             timingsBuilder,
             graphResources,
+            secondGraphResources,
             user,
             constructAndRun,
             configuration,
@@ -102,6 +104,7 @@ final class ComputationFacade {
         RequestScopedLog requestScopedLog,
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphResources graphResources,
+        Optional<GraphResources> secondGraphResources,
         User user,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
@@ -111,10 +114,13 @@ final class ComputationFacade {
     ) {
         if (graphResources.graph().isEmpty()) return Optional.empty();
 
+        if (secondGraphResources.isPresent() && secondGraphResources.get().graph().isEmpty()) return Optional.empty();
+
         requestScopedLog.onComputing();
         var result = memoryChecker.checkMemoryAndRunAlgorithm(
             timingsBuilder,
             graphResources,
+            secondGraphResources,
             estimationSupplier,
             dimensionTransformer,
             user,

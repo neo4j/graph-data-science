@@ -63,13 +63,16 @@ public class LaunchConvenience {
      * <p>
      * _Work_ is launched asynchronously, caller deals with completing work and handling errors.
      *
-     * @param configuration       if you supply a {@link org.neo4j.gds.config.RelationshipWeightConfig} we extract that for you.
-     * @param graphLoadETLBuilder algorithms load up their specific validations, and we add some cross-cutting ones
+     * @param configuration              if you supply a {@link org.neo4j.gds.config.RelationshipWeightConfig} we extract that for you.
+     * @param graphLoadETLBuilder        algorithms load up their specific validations, and we add some cross-cutting ones
+     * @param secondGraphLoadETLBuilder  we can optionally load another graph
      */
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
         GraphLoadETLBuilder graphLoadETLBuilder,
+        Optional<String> secondRelationshipProperty,
+        Optional<GraphLoadETLBuilder> secondGraphLoadETLBuilder,
         ConstructAndRun<RESULT> constructAndRun,
         Supplier<MemoryEstimation> memoryEstimationSupplier,
         Label label,
@@ -84,6 +87,14 @@ public class LaunchConvenience {
         // now we finally have all validations captured, we can finalise the ETL pipeline
         var graphLoadETL = graphLoadETLBuilder.build();
 
+        var secondGraphLoadETL = secondGraphLoadETLBuilder.map(
+            builder -> {
+                validationRuleFromConfigurationParser.parse(configuration, builder);
+
+                return builder.build();
+            }
+        );
+
         return algorithmProcessingFacade.loadGraphThenRunAlgorithm(
             requestScopedDependencies.databaseId(),
             graphName,
@@ -92,6 +103,8 @@ public class LaunchConvenience {
             configuration.toGraphParameters(),
             relationshipProperty,
             graphLoadETL,
+            secondRelationshipProperty,
+            secondGraphLoadETL,
             constructAndRun,
             configuration,
             requestScopedDependencies.terminationFlag(),

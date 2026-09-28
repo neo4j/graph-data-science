@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -61,11 +62,18 @@ class Telemetry {
         CONFIGURATION configuration,
         ConstructAndRun<RESULT> constructAndRun,
         Graph graph,
+        Optional<Graph> secondGraph,
         GraphStore graphStore
     ) {
         var computationTimer = computationTimerSupplier.get();
 
-        var result = timer.runAlgorithmAndRecordTiming(computationTimer, constructAndRun, graph, graphStore);
+        var result = timer.runAlgorithmAndRecordTiming(
+            computationTimer,
+            constructAndRun,
+            graph,
+            secondGraph,
+            graphStore
+        );
 
         timingsBuilder.withComputeMillis(computationTimer.durationInMilliseconds());
 
