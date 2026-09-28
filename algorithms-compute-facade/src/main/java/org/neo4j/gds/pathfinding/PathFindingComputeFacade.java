@@ -29,9 +29,6 @@ import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.mcmf.CostFlowResult;
-import org.neo4j.gds.mcmf.MCMFParameters;
-import org.neo4j.gds.mcmf.MinCostMaxFlow;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
@@ -189,42 +186,6 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             kSpanningTree::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<CostFlowResult>> mcmf(
-        Graph capacityGraph,
-        Graph costGraph,
-        MCMFParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (capacityGraph.isEmpty() || costGraph.isEmpty()) { //WIP
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(CostFlowResult.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.minCostMaxFlow(parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var algo = MinCostMaxFlow.create(
-            capacityGraph,
-            costGraph,
-            parameters,
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            algo::compute,
             jobId
         );
     }

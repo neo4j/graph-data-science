@@ -66,6 +66,8 @@ public interface AlgorithmProcessingFacade {
         GraphParameters graphParameters,
         Optional<String> relationshipProperty,
         GraphLoadETL graphLoadETL,
+        Optional<String> secondRelationshipProperty,
+        Optional<GraphLoadETL> secondGraphLoadETL,
         ConstructAndRun<RESULT> constructAndRun,
         CONFIGURATION configuration,
         TerminationFlag terminationFlag,

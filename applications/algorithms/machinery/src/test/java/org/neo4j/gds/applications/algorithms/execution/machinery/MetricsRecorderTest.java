@@ -29,6 +29,8 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,6 +62,7 @@ class MetricsRecorderTest {
             configuration,
             constructAndRun,
             graph,
+            Optional.empty(),
             graphStore
         )).thenReturn("my dummy result");
         var result = metricsRecorder.recordMetricsAndRunAlgorithm(
@@ -69,6 +72,7 @@ class MetricsRecorderTest {
             configuration,
             constructAndRun,
             graph,
+            Optional.empty(),
             graphStore
         );
 
@@ -101,6 +105,7 @@ class MetricsRecorderTest {
             configuration,
             constructAndRun,
             graph,
+            Optional.empty(),
             graphStore
         )).thenThrow(exception);
         try {
@@ -111,6 +116,7 @@ class MetricsRecorderTest {
                 configuration,
                 constructAndRun,
                 graph,
+                Optional.empty(),
                 graphStore
             );
 

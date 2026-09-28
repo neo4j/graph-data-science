@@ -27,12 +27,17 @@ public class AlgorithmProcessingTimingsBuilder {
     private static final int NOT_AVAILABLE = -1;
 
     // timings
-    protected long preProcessingMillis = NOT_AVAILABLE;
-    protected long computeMillis = NOT_AVAILABLE;
-    protected long sideEffectMillis = NOT_AVAILABLE; // rename
+    private long preProcessingMillis = NOT_AVAILABLE;
+    private long secondPreProcessingMillis = NOT_AVAILABLE;
+    private long computeMillis = NOT_AVAILABLE;
+    private long sideEffectMillis = NOT_AVAILABLE; // rename
 
     public void withPreProcessingMillis(long preProcessingMillis) {
         this.preProcessingMillis = preProcessingMillis;
+    }
+
+    public void withSecondPreProcessingMillis(long secondPreProcessingMillis) {
+        this.secondPreProcessingMillis = secondPreProcessingMillis;
     }
 
     public void withComputeMillis(long computeMillis) {
@@ -44,8 +49,12 @@ public class AlgorithmProcessingTimingsBuilder {
     }
 
     public AlgorithmProcessingTimings build() {
+        var finalPreProcessingMillis = preProcessingMillis;
+
+        if (secondPreProcessingMillis != NOT_AVAILABLE) finalPreProcessingMillis += secondPreProcessingMillis;
+
         return new AlgorithmProcessingTimings(
-            preProcessingMillis,
+            finalPreProcessingMillis,
             computeMillis,
             sideEffectMillis
         );

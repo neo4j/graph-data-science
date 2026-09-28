@@ -60,7 +60,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ASt
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -187,19 +186,17 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ));
     }
 
-    public <RESULT> Stream<RESULT> mcmf(
+    public <RESULT> Stream<RESULT> minCostMaxFlow(
         GraphName graphName,
         MCMFBaseConfig configuration,
         StreamResultBuilder<CostFlowResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.minCostMaxFlow(
             graphName,
             configuration,
-            MCMF,
-            () -> estimation.mcmf(configuration),
-            (__, graphStore) -> algorithms.mcmf(graphStore, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> pcst(

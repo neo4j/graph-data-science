@@ -65,7 +65,7 @@ public enum AlgorithmLabel implements Label {
     Louvain("Louvain"),
     LongestPath("LongestPath"),
     MaxFlow("MaxFlow"),
-    MCMF("MinCostMaxFlow"),
+    MinCostMaxFlow("MinCostMaxFlow"),
     Modularity("Modularity"),
     ModularityOptimization("ModularityOptimization"),
     NodeSimilarity("Node Similarity"),
@@ -138,7 +138,7 @@ public enum AlgorithmLabel implements Label {
             case Algorithm.Louvain -> Louvain;
             case Algorithm.LongestPath -> LongestPath;
             case Algorithm.MaxFlow -> MaxFlow;
-            case Algorithm.MCMF -> MCMF;
+            case Algorithm.MinCostMaxFlow -> MinCostMaxFlow;
             case Algorithm.Modularity -> Modularity;
             case Algorithm.ModularityOptimization -> ModularityOptimization;
             case Algorithm.NodeSimilarity -> NodeSimilarity;

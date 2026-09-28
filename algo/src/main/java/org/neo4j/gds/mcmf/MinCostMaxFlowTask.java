@@ -32,7 +32,7 @@ public final class MinCostMaxFlowTask {
 
     public static Task create(Concurrency concurrency) {
         return Tasks.task(
-            AlgorithmLabel.MCMF.asString(),
+            AlgorithmLabel.MinCostMaxFlow.asString(),
             concurrency,
             List.of(
                 MaxFlowTask.create(concurrency),

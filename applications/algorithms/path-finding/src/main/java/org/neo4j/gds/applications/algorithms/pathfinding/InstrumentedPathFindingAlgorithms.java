@@ -30,6 +30,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphLoadedETL;
+import org.neo4j.gds.core.loading.validation.RelationshipPropertyGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
@@ -37,6 +38,8 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
+import org.neo4j.gds.mcmf.CostFlowResult;
+import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
@@ -71,7 +74,9 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             GraphLoadETLBuilder.empty(),
-            (graph, __) -> algorithms.allShortestPaths(graph, configuration),
+            Optional.empty(),
+            Optional.empty(),
+            (graph, __, ___) -> algorithms.allShortestPaths(graph, configuration),
             () -> estimationFacade.allShortestPaths(configuration),
             AlgorithmLabel.AllShortestPaths,
             sideEffect,
@@ -98,7 +103,9 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             graphLoadETLBuilder,
-            (graph, __) -> algorithms.bfs(graph, configuration),
+            Optional.empty(),
+            Optional.empty(),
+            (graph, __, ___) -> algorithms.bfs(graph, configuration),
             estimationFacade::breadthFirstSearch,
             AlgorithmLabel.BFS,
             sideEffect,
@@ -125,7 +132,9 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             graphLoadETLBuilder,
-            (graph, __) -> algorithms.dfs(graph, configuration),
+            Optional.empty(),
+            Optional.empty(),
+            (graph, __, ___) -> algorithms.dfs(graph, configuration),
             estimationFacade::depthFirstSearch,
             AlgorithmLabel.DFS,
             sideEffect,
@@ -143,7 +152,9 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             GraphLoadETLBuilder.empty(),
-            (graph, __) -> algorithms.longestPath(graph, configuration),
+            Optional.empty(),
+            Optional.empty(),
+            (graph, __, ___) -> algorithms.longestPath(graph, configuration),
             estimationFacade::longestPath,
             AlgorithmLabel.LongestPath,
             sideEffect,
@@ -172,9 +183,51 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             graphLoadETLBuilder,
-            (graph, __) -> algorithms.maxFlow(graph, configuration),
+            Optional.empty(),
+            Optional.empty(),
+            (graph, __, ___) -> algorithms.maxFlow(graph, configuration),
             () -> estimationFacade.maxFlow(configuration),
             AlgorithmLabel.MaxFlow,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> minCostMaxFlow(
+        GraphName graphName,
+        MCMFBaseConfig configuration,
+        Optional<SideEffect<CostFlowResult, METADATA>> sideEffect,
+        ResultRenderer<CostFlowResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters())
+                        .validate(
+                            graphStore,
+                            selectedLabels,
+                            selectedRelationshipTypes
+                        )
+            );
+
+        var secondGraphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new RelationshipPropertyGraphStoreValidation(
+                        configuration.costProperty(),
+                        "costProperty"
+                    ).validate(graphStore, selectedLabels, selectedRelationshipTypes)
+            );
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            configuration.costProperty(),
+            Optional.of(secondGraphLoadETLBuilder),
+            (graph, secondGraph, __) -> algorithms.minCostMaxFlow(graph, secondGraph.orElseThrow(), configuration),
+            () -> estimationFacade.mcmf(configuration),
+            AlgorithmLabel.MinCostMaxFlow,
             sideEffect,
             resultRenderer
         );
@@ -194,7 +247,9 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             graphLoadETLBuilder,
-            (graph, __) -> algorithms.randomWalk(graph, configuration),
+            Optional.empty(),
+            Optional.empty(),
+            (graph, __, ___) -> algorithms.randomWalk(graph, configuration),
             () -> estimationFacade.randomWalk(configuration),
             AlgorithmLabel.RandomWalk,
             sideEffect,
@@ -212,7 +267,9 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             GraphLoadETLBuilder.empty(),
-            (graph, __) -> algorithms.topologicalSort(graph, configuration),
+            Optional.empty(),
+            Optional.empty(),
+            (graph, __, ___) -> algorithms.topologicalSort(graph, configuration),
             estimationFacade::topologicalSort,
             AlgorithmLabel.TopologicalSort,
             sideEffect,

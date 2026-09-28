@@ -22,9 +22,11 @@ package org.neo4j.gds.applications.algorithms.execution.machinery;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 
+import java.util.Optional;
+
 record DummyConstructAndRun() implements ConstructAndRun<String> {
     @Override
-    public String constructAndRun(Graph graph, GraphStore graphStore) {
+    public String constructAndRun(Graph graph, Optional<Graph> secondGraph, GraphStore graphStore) {
         return "it is a dummy";
     }
 }
