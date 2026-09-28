@@ -43,7 +43,7 @@ public interface RelationshipSchema {
 
     Object toMapOld();
 
-   RelationshipSchema filter(Set<RelationshipType> elementIdentifiersToKeep);
+   RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep);
 
     RelationshipSchema union(RelationshipSchema other);
 
@@ -58,8 +58,8 @@ public interface RelationshipSchema {
             .collect(Collectors.toSet());
     }
 
-    default Set<String> allProperties(RelationshipType elementIdentifier) {
-        return Optional.ofNullable(get(elementIdentifier))
+    default Set<String> allProperties(RelationshipType relationshipType) {
+        return Optional.ofNullable(get(relationshipType))
             .map(entry -> entry.properties().keySet())
             .orElse(Set.of());
     }
@@ -68,15 +68,15 @@ public interface RelationshipSchema {
         return entries().stream().anyMatch(entry -> !entry.properties().isEmpty());
     }
 
-    default boolean hasProperty(RelationshipType elementIdentifier, String propertyKey) {
-        return Optional.ofNullable(get(elementIdentifier))
+    default boolean hasProperty(RelationshipType relationshipType, String propertyKey) {
+        return Optional.ofNullable(get(relationshipType))
             .map(entry -> entry.properties().containsKey(propertyKey))
             .orElse(false);
     }
 
-    default List<RelationshipPropertySchema> propertySchemasFor(RelationshipType elementIdentifier) {
+    default List<RelationshipPropertySchema> propertySchemasFor(RelationshipType relationshipType) {
         return Optional
-            .ofNullable(get(elementIdentifier))
+            .ofNullable(get(relationshipType))
             .map(entry -> entry.properties().values())
             .map(ArrayList::new)
             .orElse(new ArrayList<>());
