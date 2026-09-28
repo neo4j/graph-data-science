@@ -45,7 +45,6 @@ import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
-import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.ShardedIdMapBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -197,6 +196,7 @@ public final class GraphFactory {
         boolean indexInverse,
         ExecutorService executorService,
         boolean usePooledBuilderProvider,
+        int requestedBufferSize,
         Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
@@ -228,8 +228,8 @@ public final class GraphFactory {
 
         var importSizing = ImportSizing.fromPartialIdMap(concurrency, nodes);
 
-        int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
-        if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < RecordsBatchBuffer.DEFAULT_BUFFER_SIZE) {
+        int bufferSize = requestedBufferSize;
+        if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < bufferSize) {
             bufferSize = (int) nodes.rootNodeCount();
         }
 

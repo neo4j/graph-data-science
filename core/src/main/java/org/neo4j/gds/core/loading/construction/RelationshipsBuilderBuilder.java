@@ -26,6 +26,7 @@ import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
+import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ public final class RelationshipsBuilderBuilder {
     private boolean indexInverse = false;
     private ExecutorService executorService = DefaultPool.INSTANCE;
     private boolean usePooledBuilderProvider = false;
+    private int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
     private Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory = Optional.empty();
 
     RelationshipsBuilderBuilder() {}
@@ -135,6 +137,17 @@ public final class RelationshipsBuilderBuilder {
     }
 
     /**
+     * @param bufferSize Default is {@code RecordsBatchBuffer.DEFAULT_BUFFER_SIZE}.
+     */
+    public RelationshipsBuilderBuilder bufferSize(int bufferSize) {
+        if (bufferSize <= 0) {
+            throw new IllegalArgumentException("bufferSize must be positive, got " + bufferSize);
+        }
+        this.bufferSize = bufferSize;
+        return this;
+    }
+
+    /**
      * @param adjacencyCompressorFactory Default is {@Optional.empty()}.
      */
     public RelationshipsBuilderBuilder adjacencyCompressorFactory(AdjacencyListBehavior.Factory adjacencyCompressorFactory) {
@@ -167,6 +180,7 @@ public final class RelationshipsBuilderBuilder {
             indexInverse,
             executorService,
             usePooledBuilderProvider,
+            bufferSize,
             adjacencyCompressorFactory
         );
     }

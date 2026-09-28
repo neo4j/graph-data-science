@@ -38,6 +38,7 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.Nodes;
+import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.RelationshipImportResultBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -81,6 +82,7 @@ public final class GraphImporter {
     private final ProgressTracker progressTracker;
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
+    private final int relationshipBufferSize;
 
     private final Set<ThreadLocalBatches> threadLocalBatches;
     private volatile @Nullable GraphImporter.ThreadLocalBatches defaultSession;
@@ -109,6 +111,36 @@ public final class GraphImporter {
         GraphStoreCatalogService graphStoreCatalogService,
         ProgressTracker progressTracker
     ) {
+        this(
+            log,
+            config,
+            undirectedRelationshipTypes,
+            inverseIndexedRelationshipTypes,
+            idMapBuilder,
+            writeMode,
+            query,
+            graphStoreCatalogService,
+            progressTracker,
+            RecordsBatchBuffer.DEFAULT_BUFFER_SIZE
+        );
+    }
+
+    /**
+     * @param relationshipBufferSize capacity of each pooled relationships batch buffer, in relationships;
+     *                               see {@link org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder#bufferSize(int)}
+     */
+    public GraphImporter(
+        Log log,
+        GraphProjectConfig config,
+        List<String> undirectedRelationshipTypes,
+        List<String> inverseIndexedRelationshipTypes,
+        LazyIdMapBuilder idMapBuilder,
+        Capabilities.WriteMode writeMode,
+        String query,
+        GraphStoreCatalogService graphStoreCatalogService,
+        ProgressTracker progressTracker,
+        int relationshipBufferSize
+    ) {
         this.log = log;
         this.config = config;
         this.undirectedRelationshipTypes = undirectedRelationshipTypes;
@@ -118,6 +150,7 @@ public final class GraphImporter {
         this.query = query;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.progressTracker = progressTracker;
+        this.relationshipBufferSize = relationshipBufferSize;
         this.relImporters = new ConcurrentHashMap<>();
         this.graphSchemaBuilder = MutableGraphSchema.builder();
         this.threadLocalBatches = ConcurrentHashMap.newKeySet();
@@ -388,7 +421,8 @@ public final class GraphImporter {
             .orientation(orientation)
             .indexInverse(indexInverse)
             .concurrency(this.config.readConcurrency())
-            .usePooledBuilderProvider(true);
+            .usePooledBuilderProvider(true)
+            .bufferSize(this.relationshipBufferSize);
 
         if (properties != null) {
             for (String propertyKey : properties.propertyKeys()) {
