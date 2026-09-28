@@ -80,7 +80,7 @@ public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
     }
 
     @Override
-    public MutableRelationshipSchemaEntry union(MutableRelationshipSchemaEntry other) {
+    public MutableRelationshipSchemaEntry union(RelationshipSchemaEntry other) {
         if (!other.identifier().equals(this.identifier())) {
             throw new UnsupportedOperationException(
                 formatWithLocale(
@@ -96,7 +96,7 @@ public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
                 formatWithLocale("Conflicting directionality for relationship types %s", this.identifier().name));
         }
 
-        return new MutableRelationshipSchemaEntry(this.identifier(), this.direction, unionProperties(other.properties));
+        return new MutableRelationshipSchemaEntry(this.identifier(), this.direction, unionProperties(other.properties()));
     }
 
     @Override

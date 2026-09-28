@@ -92,12 +92,12 @@ public interface RelationshipSchema {
     default Map<String, Object> toMap() {
         return entries()
             .stream()
-            .collect(Collectors.toMap(entry -> entry.identifier().name, ElementSchemaEntry::toMap));
+            .collect(Collectors.toMap(entry -> entry.identifier().name, RelationshipSchemaEntry::toMap));
     }
 
     default Map<RelationshipType, MutableRelationshipSchemaEntry> unionEntries(RelationshipSchema other) {
         return Stream
             .concat(entries().stream(), other.entries().stream())
-            .collect(Collectors.toMap(ElementSchemaEntry::identifier, Function.identity(), ElementSchemaEntry::union));
+            .collect(Collectors.toMap(MutableRelationshipSchemaEntry::identifier, Function.identity(), MutableRelationshipSchemaEntry::union));
     }
 }
