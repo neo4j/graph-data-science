@@ -7,8 +7,6 @@ description = 'Neo4j Graph Data Science :: Core utils'
 group = 'org.neo4j.gds'
 
 dependencies {
-    compileOnly         openGds.immutables.builder
-    compileOnly         openGds.immutables.value.annotations
     compileOnly         openGds.jetbrains.annotations
 
     implementation(openGds.commons.text) {

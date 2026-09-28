@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.utils;
 
-import org.immutables.builder.Builder;
-
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -39,9 +37,8 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements 
         return new AutoCloseableThreadLocal<>(initial, Optional.empty());
     }
 
-    @Builder.Constructor
     public AutoCloseableThreadLocal(
-        @Builder.Parameter Supplier<T> constructor,
+        Supplier<T> constructor,
         Optional<Consumer<? super T>> destructor
     ) {
         this.destructor = destructor.orElse(doNothing -> {});
