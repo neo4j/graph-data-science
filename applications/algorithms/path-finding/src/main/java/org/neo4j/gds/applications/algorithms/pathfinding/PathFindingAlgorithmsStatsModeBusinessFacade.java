@@ -29,7 +29,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
-import org.neo4j.gds.mcmf.MCMFStatsConfig;
+import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
@@ -48,7 +48,6 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 
@@ -130,22 +129,18 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         ));
     }
 
-    public <RESULT> RESULT mcmf(
+    public <RESULT> RESULT minCostMaxFlow(
         GraphName graphName,
-        MCMFStatsConfig configuration,
+        MCMFBaseConfig configuration,
         StatsResultBuilder<CostFlowResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.minCostMaxFlow(
             graphName,
             configuration,
-            MCMF,
-            () -> estimationFacade.mcmf(configuration),
-            (__, graphStore) -> pathFindingAlgorithms.mcmf(graphStore, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
-
-
 
     public <RESULT> RESULT pcst(
         GraphName graphName,

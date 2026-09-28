@@ -73,7 +73,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ASt
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -208,7 +207,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         ));
     }
 
-    public <RESULT> RESULT mcmf(
+    public <RESULT> RESULT minCostMaxFlow(
         GraphName graphName,
         MCMFMutateConfig configuration,
         ResultBuilder<MCMFMutateConfig, CostFlowResult, RESULT, RelationshipsWritten> resultBuilder
@@ -219,15 +218,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             mutateRelationshipService
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.minCostMaxFlow(
             graphName,
             configuration,
-            MCMF,
-            () -> estimationFacade.mcmf(configuration),
-            (__, graphStore) -> pathFindingAlgorithms.mcmf(graphStore, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT pcst(

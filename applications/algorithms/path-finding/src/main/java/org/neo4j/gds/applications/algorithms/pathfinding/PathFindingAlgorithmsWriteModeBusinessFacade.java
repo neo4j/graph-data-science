@@ -75,7 +75,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.MCMF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -207,7 +206,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ));
     }
 
-    public <RESULT> RESULT mcmf(
+    public <RESULT> RESULT minCostMaxFlow(
         GraphName graphName,
         MCMFWriteConfig configuration,
         ResultBuilder<MCMFWriteConfig, CostFlowResult, RESULT, RelationshipsWritten> resultBuilder
@@ -220,15 +219,12 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration.jobId()
         );
 
-        return runAlgorithmAndWrite(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.minCostMaxFlow(
             graphName,
             configuration,
-            MCMF,
-            () -> estimationFacade.mcmf(configuration),
-            ( __, graphStore) -> pathFindingAlgorithms.mcmf(graphStore, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT pcst(

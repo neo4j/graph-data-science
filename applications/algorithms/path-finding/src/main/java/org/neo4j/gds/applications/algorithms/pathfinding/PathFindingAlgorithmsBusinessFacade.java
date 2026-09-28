@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.PathFindingAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -31,8 +30,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
-import org.neo4j.gds.mcmf.CostFlowResult;
-import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -105,25 +102,6 @@ public class PathFindingAlgorithmsBusinessFacade {
             () -> algorithms.kSpanningTree(
                 graph,
                 configuration.toKSpanningTreeParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
-    }
-
-    CostFlowResult mcmf(GraphStore graphStore, MCMFBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.minCostMaxFlow(configuration.concurrency()),
-            configuration
-        );
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.mcmf(
-                graphStore,
-                configuration.relationshipWeightProperty(),
-                configuration.costProperty(),
-                configuration.nodeLabelIdentifiers(graphStore),
-                configuration.internalRelationshipTypes(graphStore),
-                configuration.toMCMFParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ), progressTracker, true);

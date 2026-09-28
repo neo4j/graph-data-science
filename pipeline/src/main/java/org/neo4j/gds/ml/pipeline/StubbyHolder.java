@@ -126,7 +126,7 @@ class StubbyHolder {
             case Louvain -> new LouvainStub();
             case LongestPath -> null;
             case MaxFlow -> new MaxFlowStub();
-            case MCMF -> null;
+            case MinCostMaxFlow -> null;
             case Modularity -> null;
             case ModularityOptimization -> new ModularityOptimizationStub();
             case NodeSimilarity -> new NodeSimilarityStub();

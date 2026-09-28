@@ -77,7 +77,7 @@ public class LocalMCMFMutateStub implements MCMFMutateStub {
             graphName,
             configuration,
             MCMFMutateConfig::of,
-            mutateModeBusinessFacade::mcmf,
+            mutateModeBusinessFacade::minCostMaxFlow,
             resultBuilder
         );
     }

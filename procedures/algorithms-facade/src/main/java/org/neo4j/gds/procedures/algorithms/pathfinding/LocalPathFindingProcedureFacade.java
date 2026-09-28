@@ -740,7 +740,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
 
     @Override
     public Stream<MaxFlowStreamResult> mcmfStream(String graphName, Map<String, Object> configuration) {
-        return streamModeBusinessFacade.mcmf(
+        return streamModeBusinessFacade.minCostMaxFlow(
                 GraphName.parse(graphName),
                 configurationParser.parseConfiguration(configuration, MCMFStreamConfig::of),
                 new MCMFResultBuilderForStreamMode()
@@ -767,7 +767,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
             rawConfiguration,
             MCMFStatsConfig::of
         );
-        return statsModeBusinessFacade.mcmf(
+        return statsModeBusinessFacade.minCostMaxFlow(
                 GraphName.parse(graphName),
                 configuration,
                 new MCMFResultBuilderForStatsMode(configuration)
@@ -790,7 +790,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     @Override
     public Stream<MCMFWriteResult> mcmfWrite(String graphName, Map<String, Object> configuration) {
         return Stream.of(
-            writeModeBusinessFacade.mcmf(
+            writeModeBusinessFacade.minCostMaxFlow(
                 GraphName.parse(graphName),
                 configurationParser.parseConfiguration(configuration, MCMFWriteConfig::of),
                 new MCMFResultBuilderForWriteMode()

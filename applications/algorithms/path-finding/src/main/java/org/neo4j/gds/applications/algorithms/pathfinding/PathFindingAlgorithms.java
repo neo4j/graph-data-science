@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsParameters;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -73,7 +70,6 @@ import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.TraversalParameters;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
@@ -230,31 +226,6 @@ public class PathFindingAlgorithms {
     ) {
         var algorithm = MaxFlow.create(
             graph,
-            parameters,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithm.compute();
-    }
-
-    public CostFlowResult mcmf(
-        GraphStore graphStore,
-        Optional<String> capacityProperty,
-        Optional<String> costProperty,
-        Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relTypes,
-        MCMFParameters parameters,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
-
-        var graphOfFlows = graphStore.getGraph(nodeLabels, relTypes, capacityProperty);
-        var graphOfCosts = graphStore.getGraph(nodeLabels, relTypes, costProperty);
-
-        var algorithm = MinCostMaxFlow.create(
-            graphOfFlows,
-            graphOfCosts,
             parameters,
             progressTracker,
             terminationFlag

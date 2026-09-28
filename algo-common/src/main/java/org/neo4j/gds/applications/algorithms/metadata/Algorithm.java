@@ -69,7 +69,7 @@ public enum Algorithm {
     Louvain,
     LongestPath,
     MaxFlow,
-    MCMF,
+    MinCostMaxFlow,
     Modularity,
     ModularityOptimization,
     NodeSimilarity,

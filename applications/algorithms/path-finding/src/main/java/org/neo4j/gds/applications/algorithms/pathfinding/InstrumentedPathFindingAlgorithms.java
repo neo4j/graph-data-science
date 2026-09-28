@@ -227,7 +227,7 @@ public class InstrumentedPathFindingAlgorithms {
             Optional.of(secondGraphLoadETLBuilder),
             (graph, secondGraph, __) -> algorithms.minCostMaxFlow(graph, secondGraph.orElseThrow(), configuration),
             () -> estimationFacade.mcmf(configuration),
-            AlgorithmLabel.MCMF,
+            AlgorithmLabel.MinCostMaxFlow,
             sideEffect,
             resultRenderer
         );

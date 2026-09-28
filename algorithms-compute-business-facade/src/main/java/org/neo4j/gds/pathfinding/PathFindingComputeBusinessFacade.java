@@ -24,7 +24,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.applications.algorithms.pathfinding.FlowAlgorithmRequirements;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -32,15 +31,12 @@ import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
-import org.neo4j.gds.core.loading.validation.RelationshipPropertyGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.mcmf.CostFlowResult;
-import org.neo4j.gds.mcmf.MCMFParameters;
 import org.neo4j.gds.applications.algorithms.pathfinding.RandomWalkGraphValidation;
 import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
@@ -179,51 +175,6 @@ public class PathFindingComputeBusinessFacade {
             jobId,
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> mcmf(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> capacityProperty,
-        Optional<String> costProperty,
-        MCMFParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<CostFlowResult>, TR> resultTransformerBuilder
-    ) {
-        var capacityGraphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            capacityProperty,
-            new GraphStoreValidation(FlowAlgorithmRequirements.create(parameters.maxFlowParameters())),
-            true,
-            Optional.empty()
-        );
-
-        //the below validation just renames the outputed error variable name (because its not relationship weight property)
-        var costGraphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            costProperty,
-            new GraphStoreValidation(new RelationshipPropertyGraphStoreValidation(costProperty, "costProperty")),
-            true,
-            Optional.empty()
-        );
-
-        var capacityGraph = capacityGraphResources.graph();
-        var costGraph = costGraphResources.graph();
-
-        return computeFacade.mcmf(
-            capacityGraph,
-            costGraph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(capacityGraphResources));
     }
 
     public <TR> CompletableFuture<TR> randomWalkCountingNodeVisits(
