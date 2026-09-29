@@ -102,13 +102,11 @@ public class CentralityAlgorithms {
             .compute();
     }
 
-
     public BetwennessCentralityResult betweennessCentrality(
         Graph graph,
         BetweennessCentralityParameters parameters,
         ProgressTracker progressTracker
     ) {
-
         return BetweennessCentrality
             .create(graph, parameters, progressTracker, terminationFlag)
             .compute();

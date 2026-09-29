@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality.validation;
+package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
@@ -28,6 +28,7 @@ import org.neo4j.gds.api.schema.RelationshipSchema;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -52,13 +53,13 @@ class BetweennessCentralityRequirementsTest {
 
         var validation = new BetweennessCentralityRequirements();
 
-        assertThatNoException().isThrownBy(()->
-            validation.validate(
-            graphStore,
-            List.of(),
-            List.of(RelationshipType.of("foo"),RelationshipType.of("bar"))
-        ));
-
+        assertThatNoException().isThrownBy(() ->
+            validation.onGraphStoreFiltered(
+                graphStore,
+                List.of(),
+                List.of(RelationshipType.of("foo"), RelationshipType.of("bar")),
+                Optional.empty()
+            ));
     }
 
 
@@ -77,8 +78,8 @@ class BetweennessCentralityRequirementsTest {
         when(graphStore.schema()).thenReturn(schema);
 
         var validation = new BetweennessCentralityRequirements();
-        assertThatThrownBy(()->{
-            validation.validate(graphStore,List.of(), directions.keySet());
-        }).hasMessageContaining("['bar (UNDIRECTED)', 'buzz (NATURAL)', 'foo (UNDIRECTED)']");
+        assertThatThrownBy(
+            () -> validation.onGraphStoreFiltered(graphStore, List.of(), directions.keySet(), Optional.empty())
+        ).hasMessageContaining("['bar (UNDIRECTED)', 'buzz (NATURAL)', 'foo (UNDIRECTED)']");
     }
 }

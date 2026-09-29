@@ -23,9 +23,6 @@ import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
-import org.neo4j.gds.centrality.validation.BetweennessCentralityRequirements;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
@@ -97,37 +94,6 @@ public class CentralityComputeBusinessFacade {
         return computeFacade.articleRank(
             graph,
             config,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> betweennessCentrality(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        BetweennessCentralityParameters parameters,
-        Optional<String> relationshipProperty,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<BetwennessCentralityResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidation(
-                new BetweennessCentralityRequirements()
-            ),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.betweennessCentrality(
-            graph,
-            parameters,
             jobId,
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));

@@ -17,26 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.centrality.validation;
+package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.core.loading.validation.ValidationRule;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class BetweennessCentralityRequirements implements ValidationRule {
+public class BetweennessCentralityRequirements implements GraphStoreFilteredETL {
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
         var directionMap = graphStore.schema().relationshipSchema().directions();
 

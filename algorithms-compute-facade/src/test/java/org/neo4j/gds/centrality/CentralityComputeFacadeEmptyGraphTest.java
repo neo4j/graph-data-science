@@ -26,8 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
@@ -88,23 +86,6 @@ class CentralityComputeFacadeEmptyGraphTest {
 
         var result = future.join();
         assertThat(result.result()).isEqualTo(PageRankResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void betweennessCentrality() {
-
-        var future = facade.betweennessCentrality(
-            graph,
-            mock(BetweennessCentralityParameters.class),
-            jobIdMock,
-            true
-        );
-
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(BetwennessCentralityResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

@@ -20,6 +20,7 @@ dependencies {
     implementation project(":memory-usage")
     implementation project(":pregel")
     implementation project(":progress-tracking")
+    implementation project(":string-formatting")
     implementation project(":termination")
 
     testImplementation project(':gdl-junit-extension')
