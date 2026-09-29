@@ -29,7 +29,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.schema.Direction;
@@ -343,7 +342,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             edge.getProperties()
                 .keySet()
                 .forEach(
-                    propertyKey -> entry.addProperty(propertyKey, ValueType.DOUBLE, PropertyState.PERSISTENT)
+                    propertyKey -> entry.addProperty(propertyKey, ValueType.DOUBLE, graphProjectConfig.propertyState())
                 );
         });
 
