@@ -26,9 +26,6 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.beta.pregel.NodeValue;
-import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.cliqueCounting.CliqueCounting;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
@@ -69,8 +66,6 @@ import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccParameters;
-import org.neo4j.gds.sllpa.SpeakerListenerLPA;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
@@ -488,40 +483,6 @@ public class CommunityComputeFacade {
         var algorithm = new Scc(
             graph,
             progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
-    }
-
-    CompletableFuture<TimedAlgorithmResult<PregelResult>> sllpa(
-        Graph graph,
-        SpeakerListenerLPAConfig configuration,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            var empty = NodeValue.of(PregelSchema.empty(), 0, configuration.concurrency());
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(new PregelResult(empty, 0, false)));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.speakerListenerLPA(graph, configuration),
-            jobId,
-            configuration.concurrency(),
-            logProgress
-        );
-
-        var algorithm = new SpeakerListenerLPA(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            Optional.empty(),
             terminationFlag
         );
 

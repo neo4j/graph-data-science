@@ -92,7 +92,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Lei
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
@@ -405,15 +404,12 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new SpeakerListenerLPAMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
             graphName,
             configuration,
-            SLLPA,
-            estimation::speakerListenerLPA,
-            (graph, __) -> algorithms.speakerListenerLPA(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT hdbscan(
@@ -434,7 +430,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         );
     }
 
-    static <C extends MutateNodePropertyConfig & SeedConfig & ConsecutiveIdsConfig> StandardCommunityProperties createNodePropertyCalculator(C config){
+    private static <C extends MutateNodePropertyConfig & SeedConfig & ConsecutiveIdsConfig> StandardCommunityProperties createNodePropertyCalculator(C config){
         return new StandardCommunityProperties(
             config.isIncremental(),
             config.seedProperty(),
@@ -442,5 +438,4 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             config.mutateProperty()
         );
     }
-
 }
