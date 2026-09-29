@@ -24,12 +24,15 @@ import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
+import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
@@ -107,6 +110,27 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.modularity(graph, configuration),
             estimationFacade::modularity,
             AlgorithmLabel.Modularity,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> speakerListenerLPA(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        Optional<SideEffect<PregelResult, METADATA>> sideEffect,
+        ResultRenderer<PregelResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new PregelPropertiesRequirement(configuration.writeProperty()));
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.speakerListenerLPA(graph, configuration),
+            estimationFacade::speakerListenerLPA,
+            AlgorithmLabel.SLLPA,
             sideEffect,
             resultRenderer
         );

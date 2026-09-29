@@ -25,7 +25,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
-import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -48,7 +47,6 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -185,15 +183,6 @@ public class CommunityAlgorithmsBusinessFacade {
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.scc(graph, progressTracker),
-            progressTracker, true);
-    }
-
-    PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
-        var task = CommunityAlgorithmTasks.speakerListenerLPA(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.speakerListenerLPA(graph, configuration, progressTracker),
             progressTracker, true);
     }
 

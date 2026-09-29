@@ -382,15 +382,12 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new SpeakerListenerLPAWriteStep(writeNodePropertyService, configuration, SLLPA);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
             graphName,
             configuration,
-            SLLPA,
-            estimationFacade::speakerListenerLPA,
-            (graph, __) -> algorithms.speakerListenerLPA(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT hdbscan(

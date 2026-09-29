@@ -75,7 +75,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Lei
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -334,16 +333,14 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> sllpa(
         GraphName graphName,
         SpeakerListenerLPAConfig configuration,
-        StreamResultBuilder<PregelResult, RESULT> streamResultBuilder
+        StreamResultBuilder<PregelResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
             graphName,
             configuration,
-            SLLPA,
-            estimationFacade::speakerListenerLPA,
-            (graph, __) -> algorithms.speakerListenerLPA(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> hdbscan(
