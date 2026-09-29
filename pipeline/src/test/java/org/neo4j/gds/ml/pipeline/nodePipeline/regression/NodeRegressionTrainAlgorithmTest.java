@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
@@ -85,7 +85,7 @@ class NodeRegressionTrainAlgorithmTest {
         var result = algorithm.compute();
 
         var schema = result.model().graphSchema();
-        var nodeProperties = schema.nodeSchema().allProperties().stream().map(PropertySchema::key).toList();
+        var nodeProperties = schema.nodeSchema().allProperties().stream().map(NodePropertySchema::key).toList();
         var pipeNodeProperties = pipeline.nodePropertySteps()
             .stream()
             .map(ExecutableNodePropertyStep::mutateNodeProperty)

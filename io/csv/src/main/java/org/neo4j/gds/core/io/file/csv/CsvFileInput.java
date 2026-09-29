@@ -26,6 +26,7 @@ import org.neo4j.batchimport.api.InputIterator;
 import org.neo4j.batchimport.api.input.InputChunk;
 import org.neo4j.batchimport.api.input.InputEntityVisitor;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -191,7 +192,7 @@ public final class CsvFileInput implements FileInput {
         }
     }
 
-    static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchema, PropertySchema> {
+    static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchema, NodePropertySchema> {
 
         NodeImporter(
             Map<NodeFileHeader, List<Path>> headerToDataFilesMapping,
@@ -270,7 +271,7 @@ public final class CsvFileInput implements FileInput {
         }
     }
 
-    static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchema, PropertySchema> {
+    static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchema, NodePropertySchema> {
 
         NodeLineChunk(NodeSchema nodeSchema) {
             super(nodeSchema);

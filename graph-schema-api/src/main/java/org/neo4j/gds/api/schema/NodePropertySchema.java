@@ -27,14 +27,14 @@ import java.util.OptionalInt;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public record NodePropertySchemaRecord(
+public record NodePropertySchema(
     String key,
     ValueType valueType,
     DefaultValue defaultValue,
     PropertyState state,
     OptionalInt dimension
 ) implements PropertySchema {
-    public NodePropertySchemaRecord {
+    public NodePropertySchema {
         if (valueType.isVector() && dimension.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Property `%s` of type `%s` must have a dimension, but has none.",
@@ -59,21 +59,25 @@ public record NodePropertySchemaRecord(
         }
     }
 
-    static PropertySchema of(String propertyKey, ValueType valueType) {
+    public static NodePropertySchema of(String propertyKey, ValueType valueType) {
         return of(propertyKey, valueType, valueType.fallbackValue(), PropertyState.PERSISTENT);
     }
 
-    static PropertySchema of(String propertyKey, ValueType valueType, DefaultValue defaultValue, PropertyState propertyState) {
+    public static NodePropertySchema of(String propertyKey, ValueType valueType, DefaultValue defaultValue) {
+        return of(propertyKey, valueType, defaultValue, PropertyState.PERSISTENT);
+    }
+
+    public static NodePropertySchema of(String propertyKey, ValueType valueType, DefaultValue defaultValue, PropertyState propertyState) {
         return of(propertyKey, valueType, defaultValue, propertyState, OptionalInt.empty());
     }
 
-    static PropertySchema of(
+    public static NodePropertySchema of(
         String propertyKey,
         ValueType valueType,
         DefaultValue defaultValue,
         PropertyState propertyState,
         OptionalInt dimension
     ) {
-        return new NodePropertySchemaRecord(propertyKey, valueType, defaultValue, propertyState, dimension);
+        return new NodePropertySchema(propertyKey, valueType, defaultValue, propertyState, dimension);
     }
 }

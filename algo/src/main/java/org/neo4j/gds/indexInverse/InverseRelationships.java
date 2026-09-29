@@ -26,7 +26,6 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -80,7 +79,7 @@ public class InverseRelationships implements Algorithm<Map<RelationshipType, Sin
                 .schema()
                 .relationshipSchema()
                 .propertySchemasFor(fromRelationshipType);
-            var propertyKeys = propertySchemas.stream().map(PropertySchema::key).collect(Collectors.toList());
+            var propertyKeys = propertySchemas.stream().map(RelationshipPropertySchema::key).collect(Collectors.toList());
 
             var relationshipsBuilder = initializeRelationshipsBuilder(fromRelationshipType, propertySchemas);
 

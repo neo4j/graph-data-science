@@ -108,7 +108,7 @@ public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
                 .stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
+                        innerEntry -> innerEntry.getValue().render()
                     )
                 )
         );

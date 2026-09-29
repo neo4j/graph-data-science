@@ -24,8 +24,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.List;
 import java.util.Map;
@@ -45,20 +45,20 @@ class NodeLabelTokenToPropertyKeysTest {
         mapping.add(NodeLabelTokens.ofStrings("C"), List.of());
 
         var importPropertySchemas = Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
-            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bob", PropertySchema.of("bob", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
+            "baz", NodePropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bob", NodePropertySchema.of("bob", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
         );
 
         assertThat(mapping.propertySchemas(NodeLabel.of("A"), importPropertySchemas)).isEqualTo(Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
-            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
+            "baz", NodePropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
         ));
         assertThat(mapping.propertySchemas(NodeLabel.of("B"), importPropertySchemas)).isEqualTo(Map.of(
-            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bob", PropertySchema.of("bob", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
+            "baz", NodePropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bob", NodePropertySchema.of("bob", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
         ));
         assertThat(mapping.propertySchemas(NodeLabel.of("C"), importPropertySchemas)).isEqualTo(Map.of());
     }
@@ -75,22 +75,22 @@ class NodeLabelTokenToPropertyKeysTest {
             .build();
 
         var importPropertySchemas = Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
-            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bob", PropertySchema.of("bob", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE),
+            "baz", NodePropertySchema.of("baz", ValueType.LONG),
+            "bob", NodePropertySchema.of("bob", ValueType.LONG)
         );
 
         var mapping = NodeLabelTokenToPropertyKeys.fixed(nodeSchema);
 
         assertThat(mapping.propertySchemas(NodeLabel.of("A"), importPropertySchemas)).isEqualTo(Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
-            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE),
+            "baz", NodePropertySchema.of("baz", ValueType.LONG)
         ));
         assertThat(mapping.propertySchemas(NodeLabel.of("B"), importPropertySchemas)).isEqualTo(Map.of(
-            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bob", PropertySchema.of("bob", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT)
+            "baz", NodePropertySchema.of("baz", ValueType.LONG),
+            "bob", NodePropertySchema.of("bob", ValueType.LONG)
         ));
         assertThat(mapping.propertySchemas(NodeLabel.of("C"), importPropertySchemas)).isEqualTo(Map.of());
     }
@@ -102,7 +102,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
         var mapping = fixed.propertySchemas(
             NodeLabel.of("A"),
-            Map.of("foo", PropertySchema.of("foo", ValueType.LONG))
+            Map.of("foo", NodePropertySchema.of("foo", ValueType.LONG))
         );
 
         assertThat(mapping).isEmpty();
@@ -114,7 +114,7 @@ class NodeLabelTokenToPropertyKeysTest {
 
         var mapping = lazy.propertySchemas(
             NodeLabel.of("A"),
-            Map.of("foo", PropertySchema.of("foo", ValueType.LONG))
+            Map.of("foo", NodePropertySchema.of("foo", ValueType.LONG))
         );
 
         assertThat(mapping).isEmpty();
@@ -132,7 +132,7 @@ class NodeLabelTokenToPropertyKeysTest {
         assertThatThrownBy(() -> fixed.propertySchemas(
             NodeLabel.of("A"),
             Map.of(
-                "foo", PropertySchema.of("foo", ValueType.LONG)
+                "foo", NodePropertySchema.of("foo", ValueType.LONG)
             )
         ))
             .isInstanceOf(IllegalStateException.class)
@@ -152,8 +152,8 @@ class NodeLabelTokenToPropertyKeysTest {
         assertThatThrownBy(() -> fixed.propertySchemas(
             NodeLabel.of("A"),
             Map.of(
-                "foo", PropertySchema.of("foo", ValueType.DOUBLE),
-                "baz", PropertySchema.of("baz", ValueType.LONG)
+                "foo", NodePropertySchema.of("foo", ValueType.DOUBLE),
+                "baz", NodePropertySchema.of("baz", ValueType.LONG)
             )
         ))
             .isInstanceOf(IllegalStateException.class)
@@ -168,16 +168,16 @@ class NodeLabelTokenToPropertyKeysTest {
         mapping.add(NodeLabelTokens.ofStrings("A"), List.of("foo"));
         mapping.add(NodeLabelTokens.ofStrings("B"), List.of("bar"));
         var importPropertySchemas = Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
         );
         assertThat(mapping.propertySchemas(NodeLabel.of("A"), importPropertySchemas)).isEqualTo(Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
         ));
         assertThat(mapping.propertySchemas(NodeLabel.of("B"), importPropertySchemas)).isEqualTo(Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
         ));
     }
 
@@ -187,13 +187,13 @@ class NodeLabelTokenToPropertyKeysTest {
         mapping.add(NodeLabelTokens.empty(), List.of("foo", "bar"));
 
         var importPropertySchemas = Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
         );
 
         assertThat(mapping.propertySchemas(NodeLabel.ALL_NODES, importPropertySchemas)).isEqualTo(Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
         ));
     }
 
@@ -234,9 +234,9 @@ class NodeLabelTokenToPropertyKeysTest {
     @Test
     void testMerge() {
         var importPropertySchemas = Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
-            "baz", PropertySchema.of("baz", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
+            "baz", NodePropertySchema.of("baz", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT)
         );
 
         var aLabel = NodeLabel.of("A");
@@ -259,16 +259,15 @@ class NodeLabelTokenToPropertyKeysTest {
         assertThat(union.nodeLabels()).containsExactlyInAnyOrder(aLabel, bLabel, cLabel);
 
         assertThat(union.propertySchemas(aLabel, importPropertySchemas)).isEqualTo(Map.of(
-            "foo", PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
-            "baz", PropertySchema.of("baz", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT)
+            "foo", NodePropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT),
+            "baz", NodePropertySchema.of("baz", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT)
         ));
         assertThat(union.propertySchemas(bLabel, importPropertySchemas)).isEqualTo(Map.of(
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT)
         ));
         assertThat(union.propertySchemas(cLabel, importPropertySchemas)).isEqualTo(Map.of(
-            "bar", PropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
-            "baz", PropertySchema.of("baz", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT)
+            "bar", NodePropertySchema.of("bar", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.PERSISTENT),
+            "baz", NodePropertySchema.of("baz", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.PERSISTENT)
         ));
     }
 }
-

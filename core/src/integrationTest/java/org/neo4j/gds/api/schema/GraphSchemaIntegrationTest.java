@@ -69,7 +69,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
 
     @ParameterizedTest
     @MethodSource(value = "nodePropertyMappingsAndExpectedResults")
-    void computesCorrectNodeSchema(PropertySchema expectedSchema, PropertyMapping propertyMapping) {
+    void computesCorrectNodeSchema(NodePropertySchema expectedSchema, PropertyMapping propertyMapping) {
         Graph graph = createStoreLoaderBuilder()
             .addNodeProjection(
                 new NodeProjection("Node", PropertyMappings.of(propertyMapping))
@@ -98,11 +98,11 @@ class GraphSchemaIntegrationTest extends BaseTest {
     private static Stream<Arguments> nodePropertyMappingsAndExpectedResults() {
         return Stream.of(
             Arguments.of(
-                PropertySchema.of("prop", ValueType.LONG),
+                NodePropertySchema.of("prop", ValueType.LONG),
                 PropertyMapping.of(Key.simple("prop"))
             ),
             Arguments.of(
-                PropertySchema.of("prop", ValueType.LONG, DefaultValue.of(1337), PropertyState.PERSISTENT),
+                NodePropertySchema.of("prop", ValueType.LONG, DefaultValue.of(1337), PropertyState.PERSISTENT),
                 PropertyMapping.of(Key.simple("prop"), DefaultValue.of(1337))
             )
         );

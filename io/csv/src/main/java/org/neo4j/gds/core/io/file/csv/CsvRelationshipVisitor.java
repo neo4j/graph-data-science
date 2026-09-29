@@ -21,7 +21,7 @@ package org.neo4j.gds.core.io.file.csv;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.file.RelationshipVisitor;
@@ -132,7 +132,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
 
     private JacksonFileAppender fileAppender(Path filePath) {
         var propertySchema = getPropertySchema().stream()
-            .sorted(Comparator.comparing(PropertySchema::key))
+            .sorted(Comparator.comparing(RelationshipPropertySchema::key))
             .toList();
         return JacksonFileAppender.of(
             filePath,

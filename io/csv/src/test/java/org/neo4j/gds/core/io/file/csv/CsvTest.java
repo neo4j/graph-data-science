@@ -49,4 +49,3 @@ abstract class CsvTest {
         CsvTestSupport.assertDataContent(tempDir, fileName, data);
     }
 }
-

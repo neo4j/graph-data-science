@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.flatMapping;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toCollection;
 
-public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
+public record NodeSchema(Map<NodeLabel, List<NodePropertySchema>> entries) {
 
     public NodeSchema {
         // Assumes NodeLabel and PropertySchema are immutable classes
@@ -50,7 +50,7 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
             ));
     }
 
-    static NodeSchema of(Map<NodeLabel, List<PropertySchema>> entries) {
+    static NodeSchema of(Map<NodeLabel, List<NodePropertySchema>> entries) {
         return new NodeSchema(entries);
     }
 
@@ -58,7 +58,7 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
         return entries.getOrDefault(NodeLabel.of(label), List.of()).stream()
             .filter(propertySchema -> propertySchema.key().equals(propertyKey))
             .findFirst()
-            .map(PropertySchema::defaultValue);
+            .map(NodePropertySchema::defaultValue);
     }
 
     public NodeSchema filter(Set<NodeLabel> labels) {
@@ -108,7 +108,7 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
         return !(isEmpty() || containsOnlyAllNodesLabel());
     }
 
-    public List<PropertySchema> allProperties() {
+    public List<NodePropertySchema> allProperties() {
         return entries.values().stream()
             .flatMap(List::stream)
             .distinct()
@@ -117,27 +117,27 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
 
     public Set<String> allPropertyKeysWithLabel(String label) {
         return entries.getOrDefault(NodeLabel.of(label), List.of()).stream()
-            .map(PropertySchema::key)
+            .map(NodePropertySchema::key)
             .collect(Collectors.toSet());
     }
 
-    public Map<String, PropertySchema> properties() {
+    public Map<String, NodePropertySchema> properties() {
         return entries.values().stream()
             .flatMap(List::stream)
             .collect(
                 Collectors.toMap(
-                    PropertySchema::key,
+                    NodePropertySchema::key,
                     propertySchema -> propertySchema,
                     (left, right) -> left
                 )
             );
     }
 
-    public Map<String, PropertySchema> propertiesForLabel(NodeLabel label) {
+    public Map<String, NodePropertySchema> propertiesForLabel(NodeLabel label) {
         return entries.getOrDefault(label, List.of()).stream()
             .collect(
                 Collectors.toMap(
-                    PropertySchema::key,
+                    NodePropertySchema::key,
                     propertySchema -> propertySchema,
                     (left, right) -> left
                 )
@@ -168,7 +168,7 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
         }
 
         public NodeSchemaBuilder addProperty(String nodeLabel, String propertyKey, ValueType valueType) {
-            rows.add(new SchemaRow(nodeLabel, Optional.of(PropertySchema.of(propertyKey, valueType))));
+            rows.add(new SchemaRow(nodeLabel, Optional.of(NodePropertySchema.of(propertyKey, valueType))));
             return this;
         }
 
@@ -179,10 +179,10 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
             DefaultValue defaultValue,
             PropertyState propertyState
         ) {
-            return addProperty(nodeLabel, PropertySchema.of(propertyKey, valueType, defaultValue, propertyState));
+            return addProperty(nodeLabel, NodePropertySchema.of(propertyKey, valueType, defaultValue, propertyState));
         }
 
-        public NodeSchemaBuilder addProperty(String nodeLabel, PropertySchema propertySchema) {
+        public NodeSchemaBuilder addProperty(String nodeLabel, NodePropertySchema propertySchema) {
             rows.add(new SchemaRow(nodeLabel, Optional.of(propertySchema)));
             return this;
         }
@@ -206,7 +206,7 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
             return this;
         }
 
-        private void addProperty(NodeLabel nodeLabel, PropertySchema propertySchema) {
+        private void addProperty(NodeLabel nodeLabel, NodePropertySchema propertySchema) {
             rows.add(new SchemaRow(nodeLabel.name(), Optional.of(propertySchema)));
         }
 
@@ -226,7 +226,7 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
                 ));
         }
 
-        private static int comparator(PropertySchema left, PropertySchema right) {
+        private static int comparator(NodePropertySchema left, NodePropertySchema right) {
             var sameKey = left.key().equals(right.key());
             var sameType = left.valueType() == right.valueType();
             if (sameKey && !sameType) {
@@ -248,6 +248,6 @@ public record NodeSchema(Map<NodeLabel, List<PropertySchema>> entries) {
             return left.key().compareTo(right.key());
         }
 
-        private record SchemaRow(String nodeLabel,  Optional<PropertySchema> maybePropertySchema) {}
+        private record SchemaRow(String nodeLabel,  Optional<NodePropertySchema> maybePropertySchema) {}
     }
 }

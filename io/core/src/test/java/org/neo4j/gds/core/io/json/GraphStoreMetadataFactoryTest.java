@@ -28,7 +28,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.extension.GdlExtension;
@@ -171,13 +171,13 @@ class GraphStoreMetadataFactoryTest {
                     Map.of(
                         "A", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "prop1",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.LONG,
                                 new DefaultValue(Long.MIN_VALUE, false),
                                 PropertyState.TRANSIENT
                             ),
                             "prop2",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.DOUBLE,
                                 new DefaultValue(Double.NaN, false),
                                 PropertyState.TRANSIENT
@@ -185,13 +185,13 @@ class GraphStoreMetadataFactoryTest {
                         )),
                         "B", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "prop3",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.FLOAT_ARRAY,
                                 new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
                                 PropertyState.TRANSIENT
                             ),
                             "prop4",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.LONG_ARRAY,
                                 new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
                                 PropertyState.TRANSIENT
@@ -230,13 +230,13 @@ class GraphStoreMetadataFactoryTest {
                     Map.of(
                         "A", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "prop1",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.LONG,
                                 new DefaultValue(Long.MIN_VALUE, false),
                                 PropertyState.PERSISTENT
                             ),
                             "prop2",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.DOUBLE,
                                 new DefaultValue(Double.NaN, false),
                                 PropertyState.PERSISTENT
@@ -244,13 +244,13 @@ class GraphStoreMetadataFactoryTest {
                         )),
                         "B", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "prop3",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.FLOAT_ARRAY,
                                 new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
                                 PropertyState.PERSISTENT
                             ),
                             "prop4",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.LONG_ARRAY,
                                 new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
                                 PropertyState.PERSISTENT
@@ -283,7 +283,7 @@ class GraphStoreMetadataFactoryTest {
                     Map.of(
                         "A", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "floatEmbedding",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.FLOAT_VECTOR,
                                 new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
                                 PropertyState.TRANSIENT,
@@ -292,7 +292,7 @@ class GraphStoreMetadataFactoryTest {
                         )),
                         "B", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                             "doubleEmbedding",
-                            new NodePropertySchema(
+                            new org.neo4j.gds.core.io.json.NodePropertySchema(
                                 ValueType.DOUBLE_VECTOR,
                                 new DefaultValue(org.neo4j.gds.api.DefaultValue.forDoubleArray().getObject(), false),
                                 PropertyState.TRANSIENT,
@@ -385,13 +385,13 @@ class GraphStoreMetadataFactoryTest {
                 Map.of(
                     "Label1", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "prop1",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.LONG,
                             new DefaultValue(Long.MIN_VALUE, false),
                             PropertyState.TRANSIENT
                         ),
                         "prop2",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.DOUBLE,
                             new DefaultValue(Double.NaN, false),
                             PropertyState.TRANSIENT
@@ -399,13 +399,13 @@ class GraphStoreMetadataFactoryTest {
                     )),
                     "Label2", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "prop3",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.LONG_ARRAY,
                             new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
                             PropertyState.TRANSIENT
                         ),
                         "prop4",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.FLOAT_ARRAY,
                             new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
                             PropertyState.TRANSIENT
@@ -506,20 +506,20 @@ class GraphStoreMetadataFactoryTest {
         assertThat(result).isEqualTo(Map.of(
             "Label1", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                 "prop1",
-                new NodePropertySchema(
+                new org.neo4j.gds.core.io.json.NodePropertySchema(
                     ValueType.LONG,
                     new DefaultValue(org.neo4j.gds.api.DefaultValue.forLong().getObject(), false),
                     PropertyState.TRANSIENT
                 ),
                 "prop2",
-                new NodePropertySchema(
+                new org.neo4j.gds.core.io.json.NodePropertySchema(
                     ValueType.DOUBLE,
                     new DefaultValue(org.neo4j.gds.api.DefaultValue.forDouble().getObject(), false),
                     PropertyState.TRANSIENT
                 )
             )),
             "Label2", new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
-                "prop3", new NodePropertySchema(
+                "prop3", new org.neo4j.gds.core.io.json.NodePropertySchema(
                     ValueType.LONG_ARRAY,
                     new DefaultValue(org.neo4j.gds.api.DefaultValue.forLongArray().getObject(), false),
                     PropertyState.TRANSIENT
@@ -581,7 +581,7 @@ class GraphStoreMetadataFactoryTest {
                     NodeLabel.ALL_NODES.name(),
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "foo",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.LONG,
                             new DefaultValue(org.neo4j.gds.api.DefaultValue.forLong().getObject(), false),
                             PropertyState.PERSISTENT
@@ -606,7 +606,7 @@ class GraphStoreMetadataFactoryTest {
                     "A",
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "foo",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.LONG,
                             new DefaultValue(org.neo4j.gds.api.DefaultValue.forLong().getObject(), false),
                             PropertyState.PERSISTENT
@@ -615,7 +615,7 @@ class GraphStoreMetadataFactoryTest {
                     "B",
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "bar",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.LONG,
                             new DefaultValue(42L, true),
                             PropertyState.REMOTE
@@ -628,7 +628,7 @@ class GraphStoreMetadataFactoryTest {
                 NodeSchema.builder()
                     .addProperty(
                         "A",
-                        PropertySchema.of(
+                        NodePropertySchema.of(
                             "floatEmbedding",
                             org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_VECTOR,
                             org.neo4j.gds.api.DefaultValue.forFloatArray(),
@@ -638,7 +638,7 @@ class GraphStoreMetadataFactoryTest {
                     )
                     .addProperty(
                         "B",
-                        PropertySchema.of(
+                        NodePropertySchema.of(
                             "doubleEmbedding",
                             org.neo4j.gds.api.nodeproperties.ValueType.DOUBLE_VECTOR,
                             org.neo4j.gds.api.DefaultValue.forDoubleArray(),
@@ -652,7 +652,7 @@ class GraphStoreMetadataFactoryTest {
                     "A",
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "floatEmbedding",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.FLOAT_VECTOR,
                             new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
                             PropertyState.PERSISTENT,
@@ -662,7 +662,7 @@ class GraphStoreMetadataFactoryTest {
                     "B",
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "doubleEmbedding",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.DOUBLE_VECTOR,
                             new DefaultValue(org.neo4j.gds.api.DefaultValue.forDoubleArray().getObject(), false),
                             PropertyState.TRANSIENT,
@@ -676,7 +676,7 @@ class GraphStoreMetadataFactoryTest {
                 NodeSchema.builder()
                     .addProperty(
                         "A",
-                        PropertySchema.of(
+                        NodePropertySchema.of(
                             "embedding",
                             org.neo4j.gds.api.nodeproperties.ValueType.FLOAT_VECTOR,
                             org.neo4j.gds.api.DefaultValue.forFloatArray(),
@@ -691,14 +691,14 @@ class GraphStoreMetadataFactoryTest {
                     "A",
                     new org.neo4j.gds.core.io.json.NodeSchema(Map.of(
                         "embedding",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.FLOAT_VECTOR,
                             new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
                             PropertyState.PERSISTENT,
                             3
                         ),
                         "weights",
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             ValueType.FLOAT_ARRAY,
                             new DefaultValue(org.neo4j.gds.api.DefaultValue.forFloatArray().getObject(), false),
                             PropertyState.PERSISTENT

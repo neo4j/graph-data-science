@@ -118,7 +118,7 @@ class NodeSchemaTest {
         var result = NodeSchema.builder()
             .addProperty(
                 label,
-                PropertySchema.of(
+                NodePropertySchema.of(
                     propertyKey,
                     valueType,
                     valueType.fallbackValue(),
@@ -338,7 +338,7 @@ class NodeSchemaTest {
 
     @Test
     void clientNotAllowedToMutateNodeSchemasProperties() {
-        var entries = new HashMap<NodeLabel, List<PropertySchema>>();
+        var entries = new HashMap<NodeLabel, List<NodePropertySchema>>();
         var label1 = NodeLabel.of("LabelA");
         entries.put(label1, new ArrayList<>());
         var schema = new NodeSchema(entries);
@@ -347,7 +347,7 @@ class NodeSchemaTest {
             UnsupportedOperationException.class, () ->
                 schema.entries()
                     .get(label1)
-                    .add(PropertySchema.of("BAR", ValueType.DOUBLE))
+                    .add(NodePropertySchema.of("BAR", ValueType.DOUBLE))
         );
     }
 
@@ -366,15 +366,15 @@ class NodeSchemaTest {
             UnsupportedOperationException.class, () ->
                 schema.entries()
                     .get(NodeLabel.of(label1))
-                    .add(PropertySchema.of("BAR", ValueType.DOUBLE))
+                    .add(NodePropertySchema.of("BAR", ValueType.DOUBLE))
         );
     }
 
     @Test
     void clientNotAllowedToMutateFilteredNodeSchema() {
         var label1 = NodeLabel.of("LabelA");
-        var entries = new HashMap<NodeLabel, List<PropertySchema>>();
-        var propertySchemas = new ArrayList<PropertySchema>();
+        var entries = new HashMap<NodeLabel, List<NodePropertySchema>>();
+        var propertySchemas = new ArrayList<NodePropertySchema>();
         entries.put(label1, propertySchemas);
         entries.put(NodeLabel.of("LabelB"), new ArrayList<>());
 
@@ -388,7 +388,7 @@ class NodeSchemaTest {
         assertThat(filteredSchema.entries().size()).isEqualTo(1);
 
         // Changing original property list should not change the schema, nor the filtered schema
-        propertySchemas.add(PropertySchema.of("BAR", ValueType.DOUBLE));
+        propertySchemas.add(NodePropertySchema.of("BAR", ValueType.DOUBLE));
         assertThat(entries.get(label1).size()).isEqualTo(1);
         assertThat(schema.entries().get(label1).size()).isEqualTo(0);
         assertThat(filteredSchema.entries().get(label1).size()).isEqualTo(0);
@@ -448,8 +448,8 @@ class NodeSchemaTest {
     void unionBetweenSchemasWithSamePropertyButDifferentDimensionsIsInvalid() {
         var label = "LabelA";
         var propertyKey = "PropertyX";
-        var schemaWithValueType1 = NodeSchema.builder().addProperty(label, PropertySchema.of(propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(4))).build();
-        var schemaWithValueType2 = NodeSchema.builder().addProperty(label, PropertySchema.of(propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(5))).build();
+        var schemaWithValueType1 = NodeSchema.builder().addProperty(label, NodePropertySchema.of(propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(4))).build();
+        var schemaWithValueType2 = NodeSchema.builder().addProperty(label, NodePropertySchema.of(propertyKey, ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(5))).build();
 
         assertThatThrownBy(() -> schemaWithValueType1.union(schemaWithValueType2))
             .isInstanceOf(IllegalArgumentException.class)
@@ -458,8 +458,8 @@ class NodeSchemaTest {
 
     @Test
     void unionBetweenSchemasWithDifferentPropertyAndDifferentDimensionsIsValid() {
-        var schemaWithValueType1 = NodeSchema.builder().addProperty("labelA", PropertySchema.of("propertyX", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(313))).build();
-        var schemaWithValueType2 = NodeSchema.builder().addProperty("labelB", PropertySchema.of("propertyY", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(313))).build();
+        var schemaWithValueType1 = NodeSchema.builder().addProperty("labelA", NodePropertySchema.of("propertyX", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(313))).build();
+        var schemaWithValueType2 = NodeSchema.builder().addProperty("labelB", NodePropertySchema.of("propertyY", ValueType.FLOAT_VECTOR, DefaultValue.forFloatArray(), PropertyState.TRANSIENT, OptionalInt.of(313))).build();
 
         assertThatNoException().isThrownBy(() -> schemaWithValueType1.union(schemaWithValueType2));
     }
@@ -565,7 +565,7 @@ class NodeSchemaTest {
 
         var result = schema.allProperties();
         var resultingKeys = result.stream()
-            .map(PropertySchema::key)
+            .map(NodePropertySchema::key)
             .sorted()
             .toList();
 
@@ -586,7 +586,7 @@ class NodeSchemaTest {
 
         var result = schema.allProperties();
         var resultingKeys = result.stream()
-            .map(PropertySchema::key)
+            .map(NodePropertySchema::key)
             .sorted()
             .toList();
 
@@ -655,9 +655,9 @@ class NodeSchemaTest {
         var result = schema.properties();
 
         var expected = Map.of(
-            "PropertyX", PropertySchema.of("PropertyX", ValueType.LONG),
-            "PropertyY", PropertySchema.of("PropertyY", ValueType.LONG),
-            "PropertyZ", PropertySchema.of("PropertyZ", ValueType.LONG)
+            "PropertyX", NodePropertySchema.of("PropertyX", ValueType.LONG),
+            "PropertyY", NodePropertySchema.of("PropertyY", ValueType.LONG),
+            "PropertyZ", NodePropertySchema.of("PropertyZ", ValueType.LONG)
         );
         assertThat(result).isEqualTo(expected);
     }
@@ -671,7 +671,7 @@ class NodeSchemaTest {
 
         var result = schema.properties();
 
-        var expected = Map.of("PropertyX", PropertySchema.of("PropertyX", ValueType.LONG));
+        var expected = Map.of("PropertyX", NodePropertySchema.of("PropertyX", ValueType.LONG));
         assertThat(result).isEqualTo(expected);
     }
 
@@ -686,8 +686,8 @@ class NodeSchemaTest {
         var result = schema.propertiesForLabel(NodeLabel.of("LabelA"));
 
         var expected = Map.of(
-            "PropertyX", PropertySchema.of("PropertyX", ValueType.LONG),
-            "PropertyY", PropertySchema.of("PropertyY", ValueType.LONG)
+            "PropertyX", NodePropertySchema.of("PropertyX", ValueType.LONG),
+            "PropertyY", NodePropertySchema.of("PropertyY", ValueType.LONG)
         );
         assertThat(result).isEqualTo(expected);
     }

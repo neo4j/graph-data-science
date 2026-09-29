@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.io.schema;
 
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 
 public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
 
@@ -38,7 +38,7 @@ public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
         } else {
             builder.addProperty(
                 nodeLabel().name(),
-                PropertySchema.of(key(), valueType(), defaultValue(), state(), dimension())
+                NodePropertySchema.of(key(), valueType(), defaultValue(), state(), dimension())
             );
         }
     }

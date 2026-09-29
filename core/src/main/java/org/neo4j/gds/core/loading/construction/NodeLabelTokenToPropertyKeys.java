@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.HashMap;
@@ -65,9 +65,9 @@ abstract class NodeLabelTokenToPropertyKeys {
     /**
      * Return the property schemas for the given node label.
      */
-    abstract Map<String, PropertySchema> propertySchemas(
+    abstract Map<String, NodePropertySchema> propertySchemas(
         NodeLabel nodeLabelToken,
-        Map<String, PropertySchema> importPropertySchemas
+        Map<String, NodePropertySchema> importPropertySchemas
     );
 
     /**
@@ -77,7 +77,7 @@ abstract class NodeLabelTokenToPropertyKeys {
     static NodeLabelTokenToPropertyKeys union(
         NodeLabelTokenToPropertyKeys left,
         NodeLabelTokenToPropertyKeys right,
-        Map<String, PropertySchema> importPropertySchemas
+        Map<String, NodePropertySchema> importPropertySchemas
     ) {
         var union = NodeLabelTokenToPropertyKeys.lazy();
 
@@ -112,9 +112,9 @@ abstract class NodeLabelTokenToPropertyKeys {
         }
 
         @Override
-        Map<String, PropertySchema> propertySchemas(
+        Map<String, NodePropertySchema> propertySchemas(
             NodeLabel nodeLabel,
-            Map<String, PropertySchema> importPropertySchemas
+            Map<String, NodePropertySchema> importPropertySchemas
         ) {
             var userDefinedPropertySchemas = nodeSchema.propertiesForLabel(nodeLabel);
 
@@ -186,9 +186,9 @@ abstract class NodeLabelTokenToPropertyKeys {
         }
 
         @Override
-        Map<String, PropertySchema> propertySchemas(
+        Map<String, NodePropertySchema> propertySchemas(
             NodeLabel nodeLabel,
-            Map<String, PropertySchema> importPropertySchemas
+            Map<String, NodePropertySchema> importPropertySchemas
         ) {
             return labelToPropertyKeys.keySet().stream()
                 .filter(nodeLabelToken -> {

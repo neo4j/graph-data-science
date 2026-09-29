@@ -22,11 +22,11 @@ package org.neo4j.gds.api.properties.nodes;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.Property;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 
 import java.util.OptionalInt;
 
-public record NodeProperty(NodePropertyValues values, PropertySchema propertySchema) implements Property<NodePropertyValues> {
+public record NodeProperty(NodePropertyValues values, NodePropertySchema propertySchema) implements Property<NodePropertyValues> {
 
     public static NodeProperty of(
         String key,
@@ -44,7 +44,7 @@ public record NodeProperty(NodePropertyValues values, PropertySchema propertySch
     ) {
         return new NodeProperty(
             values,
-            PropertySchema.of(key, values.valueType(), defaultValue, origin, vectorDimension(values))
+            NodePropertySchema.of(key, values.valueType(), defaultValue, origin, vectorDimension(values))
         );
     }
 

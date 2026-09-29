@@ -24,7 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 
 import java.util.List;
 import java.util.Map;
@@ -56,13 +56,13 @@ class NodeSchemaBuilderVisitorTest {
 
             assertThat(result).isNotNull();
             assertThat(result.entries()).isEqualTo(Map.of(
-                labelA, List.of(PropertySchema.of(
+                labelA, List.of(NodePropertySchema.of(
                     "prop1",
                     ValueType.LONG,
                     DefaultValue.of(42L),
                     PropertyState.PERSISTENT
                 )),
-                labelB, List.of(PropertySchema.of(
+                labelB, List.of(NodePropertySchema.of(
                     "prop2",
                     ValueType.DOUBLE,
                     DefaultValue.of(13.37D),

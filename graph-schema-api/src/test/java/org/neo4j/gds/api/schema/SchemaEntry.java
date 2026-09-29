@@ -77,13 +77,13 @@ final class SchemaEntry {
 
     String label() { return label; }
 
-    Optional<PropertySchema> toPropertySchema() {
+    Optional<NodePropertySchema> toPropertySchema() {
         if (maybePropertyKey.isEmpty() || maybeValueType.isEmpty()) {
             return Optional.empty();
         } else if (maybeDefaultValue.isEmpty() || maybePropertyState.isEmpty()) {
-            return Optional.of(PropertySchema.of(maybePropertyKey.get(), maybeValueType.get()));
+            return Optional.of(NodePropertySchema.of(maybePropertyKey.get(), maybeValueType.get()));
         } else {
-            return Optional.of(PropertySchema.of(
+            return Optional.of(NodePropertySchema.of(
                 maybePropertyKey.get(),
                 maybeValueType.get(),
                 maybeDefaultValue.get(),

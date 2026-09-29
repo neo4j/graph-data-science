@@ -32,12 +32,12 @@ class PropertySchemaDimensionTest {
 
     @Test
     void defaultsToNoDimension() {
-        assertThat(PropertySchema.of("scores", ValueType.FLOAT_ARRAY).dimension()).isEmpty();
+        assertThat(NodePropertySchema.of("scores", ValueType.FLOAT_ARRAY).dimension()).isEmpty();
     }
 
     @Test
     void rejectsVectorWithoutDimension() {
-        assertThatThrownBy(() -> PropertySchema.of("embedding", ValueType.FLOAT_VECTOR).dimension())
+        assertThatThrownBy(() -> NodePropertySchema.of("embedding", ValueType.FLOAT_VECTOR).dimension())
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("must have a dimension, but has none.");
     }
@@ -64,18 +64,13 @@ class PropertySchemaDimensionTest {
     }
 
     @Test
-    void aRelationshipPropertyNeverCarriesADimension() {
-        assertThat(RelationshipPropertySchema.of("cost", ValueType.DOUBLE).dimension()).isEmpty();
-    }
-
-    @Test
     void dimensionParticipatesInEquality() {
         assertThat(vector(ValueType.FLOAT_VECTOR, 128)).isNotEqualTo(vector(ValueType.FLOAT_VECTOR, 64));
         assertThat(vector(ValueType.FLOAT_VECTOR, 128)).isEqualTo(vector(ValueType.FLOAT_VECTOR, 128));
     }
 
-    private static PropertySchema vector(ValueType valueType, int dimension) {
-        return PropertySchema.of(
+    private static NodePropertySchema vector(ValueType valueType, int dimension) {
+        return NodePropertySchema.of(
             "embedding",
             valueType,
             valueType.fallbackValue(),
