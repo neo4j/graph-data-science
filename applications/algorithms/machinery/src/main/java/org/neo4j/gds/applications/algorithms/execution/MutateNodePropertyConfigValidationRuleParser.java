@@ -30,14 +30,7 @@ class MutateNodePropertyConfigValidationRuleParser implements ValidationRulePars
     @Override
     public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(CONFIGURATION configuration) {
         if (configuration instanceof MutateNodePropertyConfig mutateNodePropertyConfig) {
-            return Optional.of(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    new NodePropertyMustNotExistOnAnyLabels(mutateNodePropertyConfig.mutateProperty()).validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    )
-            );
+            return Optional.of(new NodePropertyMustNotExistOnAnyLabels(mutateNodePropertyConfig.mutateProperty()));
         }
 
         return Optional.empty();

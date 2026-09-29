@@ -28,7 +28,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.core.JobId;
@@ -48,7 +47,6 @@ import org.neo4j.gds.pagerank.EigenvectorConfigImpl;
 import org.neo4j.gds.pagerank.PageRankConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.Optional;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -121,23 +119,6 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().iterations()).isBetween(1, 3);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void betweennessCentrality() {
-
-        var params = new BetweennessCentralityParameters(new Concurrency(1), Optional.empty(), false);
-        var future = facade.betweennessCentrality(
-            graph,
-            params,
-            jobIdMock,
-            true
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().centralities().size()).isEqualTo(6L);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

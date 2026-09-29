@@ -23,9 +23,6 @@ import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.betweenness.BetweennessCentrality;
-import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.Bridges;
 import org.neo4j.gds.bridges.BridgesParameters;
@@ -145,32 +142,6 @@ public class CentralityComputeFacade {
             probabilityProvider,
             degreeFunction,
             avgDegree
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<BetwennessCentralityResult>> betweennessCentrality(
-        Graph graph,
-        BetweennessCentralityParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(BetwennessCentralityResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.betweennessCentrality(graph, parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var betweennessCentrality = BetweennessCentrality
-            .create(graph, parameters, progressTracker, terminationFlag);
-
-        return algorithmCaller.run(
-            betweennessCentrality::compute,
-            jobId
         );
     }
 

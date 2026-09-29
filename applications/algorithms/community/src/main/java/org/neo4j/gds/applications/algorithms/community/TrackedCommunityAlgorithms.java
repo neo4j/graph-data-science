@@ -40,10 +40,7 @@ public class TrackedCommunityAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
     private final CommunityAlgorithms algorithms;
 
-    public TrackedCommunityAlgorithms(
-        ProgressTrackerCreator progressTrackerCreator,
-        CommunityAlgorithms algorithms
-    ) {
+    public TrackedCommunityAlgorithms(ProgressTrackerCreator progressTrackerCreator, CommunityAlgorithms algorithms) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithms = algorithms;
     }

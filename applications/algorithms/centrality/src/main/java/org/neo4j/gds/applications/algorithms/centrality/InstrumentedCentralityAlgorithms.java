@@ -28,6 +28,8 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
@@ -107,6 +109,27 @@ public final class InstrumentedCentralityAlgorithms {
             (graph, __, ___) -> algorithms.articulationPoints(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.articulationPoints(shouldComputeComponents),
             AlgorithmLabel.ArticulationPoints,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> betweennessCentrality(
+        GraphName graphName,
+        BetweennessCentralityBaseConfig configuration,
+        Optional<SideEffect<BetwennessCentralityResult, METADATA>> sideEffect,
+        ResultRenderer<BetwennessCentralityResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new BetweennessCentralityRequirements());
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.betweennessCentrality(graph, configuration),
+            () -> estimationFacade.betweennessCentrality(configuration),
+            AlgorithmLabel.BetweennessCentrality,
             sideEffect,
             resultRenderer
         );

@@ -24,10 +24,11 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodePropertyMustNotExistOnAnyLabels implements ValidationRule {
+public class NodePropertyMustNotExistOnAnyLabels implements GraphStoreFilteredETL {
     private final String nodeProperty;
 
     public NodePropertyMustNotExistOnAnyLabels(String nodeProperty) {
@@ -35,10 +36,11 @@ public class NodePropertyMustNotExistOnAnyLabels implements ValidationRule {
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
         if (nodeProperty != null) {
             for (var label : selectedLabels) {
