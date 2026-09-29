@@ -30,18 +30,19 @@ import org.neo4j.gds.core.loading.Capabilities;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class GraphStoreMetadataFactory {
     private GraphStoreMetadataFactory() {}
 
-    public static GraphStoreMetadata fromGraphStore(GraphStore graphStore) {
+    public static GraphStoreMetadata fromGraphStore(GraphStore graphStore, Config config) {
         var databaseInfo = toDatabaseInfo(graphStore.databaseInfo());
         var writeMode = toWriteMode(graphStore.capabilities().writeMode());
         var idMapInfo = toIdMapInfo(graphStore.nodes());
-        var relationshipInfo = toRelationshipInfo(graphStore);
-        var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema());
-        var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema());
+        var relationshipInfo = toRelationshipInfo(graphStore, config.relationships);
+        var nodeSchema = toNodeSchema(graphStore.schema().nodeSchema(), config.nodeProperties);
+        var relationshipSchema = toRelationshipSchema(graphStore.schema().relationshipSchema(), config.relationships);
 
         return new GraphStoreMetadata(
             databaseInfo,
@@ -91,23 +92,30 @@ public final class GraphStoreMetadataFactory {
         );
     }
 
-    static Map<String, RelationshipInfo> toRelationshipInfo(GraphStore graphStore) {
+    static Map<String, RelationshipInfo> toRelationshipInfo(
+        GraphStore graphStore,
+        Map<RelationshipType, Set<String>> relationships
+    ) {
         var inverseIndexedRelationshipTypes = graphStore.inverseIndexedRelationshipTypes();
 
         return graphStore.relationshipTypes().stream()
+            .filter(relationshipType -> relationships.containsKey(relationshipType))
             .collect(Collectors.toMap(
                 RelationshipType::name,
                 relationshipType -> {
                     var relationshipCount = graphStore.relationshipCount(relationshipType);
                     var isInverseIndexed = inverseIndexedRelationshipTypes.contains(relationshipType);
-                    var propertyCount = graphStore.relationshipPropertyKeys(relationshipType).size();
+                    var properties = relationships.get(relationshipType);
+                    var propertyCount = graphStore.relationshipPropertyKeys(relationshipType).stream()
+                        .filter(property -> properties.contains(property))
+                        .collect(Collectors.toSet()).size();
 
                     return new RelationshipInfo(relationshipCount, isInverseIndexed, propertyCount);
                 }
             ));
     }
 
-    static Map<String, NodeSchema> toNodeSchema(org.neo4j.gds.api.schema.NodeSchema nodeSchema) {
+    static Map<String, NodeSchema> toNodeSchema(org.neo4j.gds.api.schema.NodeSchema nodeSchema, Set<String> nodeProperties) {
         var result = new HashMap<String, NodeSchema>();
 
         for (var entry : nodeSchema.entries().entrySet()) {
@@ -118,7 +126,9 @@ public final class GraphStoreMetadataFactory {
                 result.put(labelName, new NodeSchema(Collections.emptyMap()));
 
             } else {
-                var properties = propertySchemas.stream().collect(Collectors.toMap(
+                var properties = propertySchemas.stream()
+                    .filter(propertySchema -> nodeProperties.contains(propertySchema.key()))
+                    .collect(Collectors.toMap(
                     PropertySchema::key,
                     (propertySchema ->
                         new NodePropertySchema(
@@ -137,33 +147,41 @@ public final class GraphStoreMetadataFactory {
         return result;
     }
 
-    static Map<String, RelationshipSchema> toRelationshipSchema(org.neo4j.gds.api.schema.RelationshipSchema relationshipSchema) {
-        return relationshipSchema.availableTypes().stream().collect(Collectors.toMap(
-            RelationshipType::name,
-            relationshipType -> {
-                var direction = toDirection(relationshipSchema, relationshipType);
-                var propertySchemas = relationshipSchema.propertySchemasFor(relationshipType).stream().collect(
-                    Collectors.toMap(
-                        PropertySchema::key,
-                        propertySchema -> {
-                            var valueType = toValueType(propertySchema.valueType());
-                            var defaultValue = toDefaultValue(propertySchema.defaultValue());
-                            var propertyState = toPropertyState(propertySchema.state());
-                            var aggregation = toAggregation(propertySchema.aggregation());
+    static Map<String, RelationshipSchema> toRelationshipSchema(
+        org.neo4j.gds.api.schema.RelationshipSchema relationshipSchema,
+        Map<RelationshipType, Set<String>> relationships
+    ) {
+        return relationshipSchema.availableTypes().stream()
+            .filter(relationshipType -> relationships.containsKey(relationshipType))
+            .collect(Collectors.toMap(
+                RelationshipType::name,
+                relationshipType -> {
+                    var direction = toDirection(relationshipSchema, relationshipType);
+                    var properties = relationships.get(relationshipType);
+                    var propertySchemas = relationshipSchema.propertySchemasFor(relationshipType).stream()
+                        .filter(propertySchema -> properties.contains(propertySchema.key()))
+                        .collect(
+                        Collectors.toMap(
+                            PropertySchema::key,
+                            propertySchema -> {
+                                var valueType = toValueType(propertySchema.valueType());
+                                var defaultValue = toDefaultValue(propertySchema.defaultValue());
+                                var propertyState = toPropertyState(propertySchema.state());
+                                var aggregation = toAggregation(propertySchema.aggregation());
 
-                            return new RelationshipPropertySchema(
-                                valueType,
-                                defaultValue,
-                                propertyState,
-                                aggregation
-                            );
+                                return new RelationshipPropertySchema(
+                                    valueType,
+                                    defaultValue,
+                                    propertyState,
+                                    aggregation
+                                );
 
-                        }
-                    ));
+                            }
+                        ));
 
-                return new RelationshipSchema(direction, propertySchemas);
-            }
-        ));
+                    return new RelationshipSchema(direction, propertySchemas);
+                }
+            ));
     }
 
     private static DefaultValue toDefaultValue(org.neo4j.gds.api.DefaultValue defaultValue) {
@@ -215,4 +233,6 @@ public final class GraphStoreMetadataFactory {
                 "Default aggregation is not supported in graph store metadata");
         };
     }
+
+    public static record Config(Set<String> nodeProperties, Map<RelationshipType, Set<String>> relationships) {}
 }
