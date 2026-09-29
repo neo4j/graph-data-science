@@ -158,6 +158,15 @@ public class MutableRelationshipSchema implements RelationshipSchema {
         return this;
     }
 
+    public MutableRelationshipSchema addProperty(
+        RelationshipType relationshipType,
+        Direction direction,
+        RelationshipPropertySchema relationshipPropertySchema
+    ) {
+        getOrCreateRelationshipType(relationshipType, direction).addProperty(relationshipPropertySchema.key(), relationshipPropertySchema);
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

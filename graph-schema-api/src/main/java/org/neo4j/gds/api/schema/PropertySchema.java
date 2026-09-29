@@ -78,6 +78,10 @@ public interface PropertySchema {
         return of(propertyKey, valueType, valueType.fallbackValue(), PropertyState.PERSISTENT);
     }
 
+    static PropertySchema of(String propertyKey, ValueType valueType, DefaultValue defaultValue) {
+        return of(propertyKey, valueType, defaultValue, PropertyState.PERSISTENT);
+    }
+
     static PropertySchema of(String propertyKey, ValueType valueType, DefaultValue defaultValue, PropertyState propertyState) {
         return of(propertyKey, valueType, defaultValue, propertyState, OptionalInt.empty());
     }
