@@ -25,8 +25,9 @@ import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
-public class SourceNodeTargetNodesGraphStoreValidation implements ValidationRule {
+public class SourceNodeTargetNodesGraphStoreValidation implements GraphStoreFilteredETL {
 
     private final SourceNodeRequirement sourceNodeValidation;
     private final TargetNodesRequirement targetNodesValidation;
@@ -40,10 +41,11 @@ public class SourceNodeTargetNodesGraphStoreValidation implements ValidationRule
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
         // validate the source node
         sourceNodeValidation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
@@ -51,5 +53,4 @@ public class SourceNodeTargetNodesGraphStoreValidation implements ValidationRule
         // validate the target nodes
         targetNodesValidation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
     }
-
 }
