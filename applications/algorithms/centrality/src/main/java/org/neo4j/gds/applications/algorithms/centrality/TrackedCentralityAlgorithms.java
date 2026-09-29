@@ -73,9 +73,10 @@ public class TrackedCentralityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.articleRank(graph, configuration, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
-
 
     ArticulationPointsResult articulationPoints(
         Graph graph,
@@ -89,7 +90,9 @@ public class TrackedCentralityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.articulationPoints(graph, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
@@ -100,7 +103,9 @@ public class TrackedCentralityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.betweennessCentrality(graph, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     BridgeResult bridges(Graph graph, BridgesBaseConfig configuration, boolean shouldComputeComponents) {
@@ -111,11 +116,12 @@ public class TrackedCentralityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.bridges(graph, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     public CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
-
         var params = configuration.toParameters();
         var task = CentralityAlgorithmTasks.CELF(graph, params);
 
@@ -123,15 +129,12 @@ public class TrackedCentralityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.celf(graph, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
-
-    public ClosenessCentralityResult closenessCentrality(
-        Graph graph,
-        ClosenessCentralityBaseConfig configuration
-    ) {
-
+    public ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
         var params = configuration.toParameters();
         var task = CentralityAlgorithmTasks.closenessCentrality(graph, configuration.concurrency());
 
@@ -139,11 +142,12 @@ public class TrackedCentralityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.closenessCentrality(graph, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
-
         var params = configuration.toParameters();
         var task = CentralityAlgorithmTasks.degreeCentrality(graph, configuration.concurrency());
 
@@ -151,18 +155,20 @@ public class TrackedCentralityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.degreeCentrality(graph, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     PageRankResult eigenVector(Graph graph, EigenvectorConfig configuration) {
-
         var task = CentralityAlgorithmTasks.eigenVector(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.eigenVector(graph, configuration, progressTracker),
-            progressTracker, true);
-
+            progressTracker,
+            true
+        );
     }
 
     /**
@@ -178,17 +184,20 @@ public class TrackedCentralityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.harmonicCentrality(graph, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     PregelResult hits(Graph graph, HitsConfig configuration) {
-
         var task = CentralityAlgorithmTasks.hits(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.hits(graph, configuration, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     IndirectExposureResult indirectExposure(Graph graph, IndirectExposureConfig configuration) {
@@ -197,16 +206,19 @@ public class TrackedCentralityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.indirectExposure(graph, configuration, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     public PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
-
         var task = CentralityAlgorithmTasks.pageRank(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.pageRank(graph, configuration, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 }
