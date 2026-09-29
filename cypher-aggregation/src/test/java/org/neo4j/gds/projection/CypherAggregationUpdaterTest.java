@@ -29,12 +29,14 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.progress.registration.EmptyTaskStore;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.MapValueBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -186,6 +188,56 @@ class CypherAggregationUpdaterTest {
                 assertThat(result.nodeCount()).isEqualTo(8);
                 assertThat(result.relationshipCount()).isEqualTo(6);
             });
+        }
+    }
+
+    @Test
+    void shouldCloseUpdatersCreatedConcurrently() throws Exception {
+        var workers = 8;
+        var updatersPerWorker = 250;
+
+        try (
+            var lazyGraphImporter = newLazyGraphImporter();
+            var reducer = newReducer(lazyGraphImporter, new ExtractNodeId())
+        ) {
+            List<UserAggregationUpdater> updaters = assertTimeoutPreemptively(java.time.Duration.ofSeconds(60), () -> {
+                ExecutorService executor = Executors.newFixedThreadPool(workers);
+                try {
+                    List<Future<List<UserAggregationUpdater>>> futures = new ArrayList<>();
+                    for (int i = 0; i < workers; i++) {
+                        long base = i * 100_000L;
+                        futures.add(executor.submit(() -> {
+                            List<UserAggregationUpdater> created = new ArrayList<>();
+                            for (int j = 0; j < updatersPerWorker; j++) {
+                                var updater = reducer.newUpdater();
+                                updater.update(row("g", base + j, base + j + 1));
+                                updater.applyUpdates();
+                                created.add(updater);
+                            }
+                            return created;
+                        }));
+                    }
+
+                    List<UserAggregationUpdater> collected = new ArrayList<>();
+                    for (Future<List<UserAggregationUpdater>> future : futures) {
+                        collected.addAll(future.get(30, TimeUnit.SECONDS));
+                    }
+                    return collected;
+                } finally {
+                    executor.shutdown();
+                }
+            });
+
+            // failure path: no result was produced, so close must reach every updater
+            reducer.close();
+
+            // a lost updater would still hold an open session instead of throwing
+            assertThat(updaters).hasSize(workers * updatersPerWorker);
+            for (var updater : updaters) {
+                assertThatThrownBy(() -> updater.update(row("g", 0, 1)))
+                    .isInstanceOf(ProcedureException.class)
+                    .hasMessageContaining("Batch session is already closed");
+            }
         }
     }
 

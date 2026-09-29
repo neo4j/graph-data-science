@@ -34,8 +34,8 @@ import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.MapValueBuilder;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.neo4j.gds.projection.CypherAggregation.FUNCTION_NAME;
@@ -69,7 +69,7 @@ public class CypherAggregationReducer implements UserAggregationReducer, AutoClo
         this.databaseId = databaseId;
         this.extractNodeId = extractNodeId;
         this.inputValuesMapper = inputValuesMapper;
-        this.updaters = new ArrayList<>();
+        this.updaters = new ConcurrentLinkedQueue<>();
         completedSuccessfully = new AtomicBoolean(false);
         progressTimer = ProgressTimer.start();
     }
