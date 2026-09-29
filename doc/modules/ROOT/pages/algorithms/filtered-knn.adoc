@@ -103,6 +103,9 @@ This parameter accepts one of:
 | `targetNodeFilter: 'Person'`
 |===
 
+An empty list (`[]`) for `sourceNodeFilter` or `targetNodeFilter` is treated as no filter.
+That side of the comparison stays unfiltered, so the algorithm considers every node rather than matching nothing and returning an empty result.
+
 Seeding can be enabled with the `seedTargetNodes` configuration parameter. It defaults to `false`.
 
 [[algorithms-filtered-knn-syntax]]
