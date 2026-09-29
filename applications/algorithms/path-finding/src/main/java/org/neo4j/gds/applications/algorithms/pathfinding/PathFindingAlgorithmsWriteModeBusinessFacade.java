@@ -76,7 +76,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Del
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yens;
 
 /**
@@ -356,15 +355,12 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration.jobId()
         );
 
-        return runAlgorithmAndWrite(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.steinerTree(
             graphName,
             configuration,
-            SteinerTree,
-            () -> estimationFacade.steinerTree(configuration),
-            (graph, __) -> pathFindingAlgorithms.steinerTree(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     /**

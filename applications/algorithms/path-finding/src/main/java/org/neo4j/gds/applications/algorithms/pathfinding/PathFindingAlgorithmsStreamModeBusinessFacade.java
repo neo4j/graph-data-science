@@ -49,8 +49,8 @@ import org.neo4j.gds.pcst.PCSTStreamConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
+import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
-import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.Optional;
@@ -61,7 +61,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yens;
 
 /**
@@ -303,17 +302,15 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> steinerTree(
         GraphName graphName,
-        SteinerTreeStreamConfig configuration,
+        SteinerTreeBaseConfig configuration,
         StreamResultBuilder<SteinerTreeResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.steinerTree(
             graphName,
             configuration,
-            SteinerTree,
-            () -> estimation.steinerTree(configuration),
-            (graph, __) -> algorithms.steinerTree(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> topologicalSort(

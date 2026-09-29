@@ -49,9 +49,6 @@ import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
-import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
-import org.neo4j.gds.steiner.SteinerTreeParameters;
-import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
 import org.neo4j.gds.traversal.RandomWalkParameters;
@@ -400,51 +397,6 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             prim::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<SteinerTreeResult>> steinerTree(
-        Graph graph,
-        SteinerTreeParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SteinerTreeResult.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.steinerTree(parameters, graph),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var mappedSourceNodeId = graph.toMappedNodeId(parameters.sourceNode());
-        var mappedTargetNodeIds = parameters.targetNodes()
-            .stream()
-            .map(graph::safeToMappedNodeId)
-            .toList();
-
-        var steinerTree = new ShortestPathsSteinerAlgorithm(
-            graph,
-            mappedSourceNodeId,
-            mappedTargetNodeIds,
-            parameters.delta(),
-            parameters.concurrency(),
-            parameters.applyRerouting(),
-            executorService,
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            steinerTree::compute,
             jobId
         );
     }

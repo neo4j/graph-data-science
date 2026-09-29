@@ -49,6 +49,8 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
+import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
+import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.Collection;
@@ -271,6 +273,40 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __, ___) -> algorithms.singlePairShortestPathDijkstra(graph, configuration),
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             AlgorithmLabel.Dijkstra,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> steinerTree(
+        GraphName graphName,
+        SteinerTreeBaseConfig configuration,
+        Optional<SideEffect<SteinerTreeResult, METADATA>> sideEffect,
+        ResultRenderer<SteinerTreeResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new SourceNodeTargetNodesGraphStoreValidation(
+                        configuration.sourceNode(),
+                        configuration.targetNodes()
+                    ).validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.steinerTree(graph, configuration),
+            () -> estimationFacade.steinerTree(configuration),
+            AlgorithmLabel.SteinerTree,
             sideEffect,
             resultRenderer
         );

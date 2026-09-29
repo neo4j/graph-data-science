@@ -39,8 +39,8 @@ import org.neo4j.gds.pcst.PCSTStatsConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
+import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
-import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.Optional;
@@ -49,7 +49,6 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
@@ -187,18 +186,14 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT steinerTree(
         GraphName graphName,
-        SteinerTreeStatsConfig configuration,
+        SteinerTreeBaseConfig configuration,
         StatsResultBuilder<SteinerTreeResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.steinerTree(
             graphName,
             configuration,
-            SteinerTree,
-            () -> estimationFacade.steinerTree(configuration),
-            (graph, __) -> pathFindingAlgorithms.steinerTree(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
-
-
 }

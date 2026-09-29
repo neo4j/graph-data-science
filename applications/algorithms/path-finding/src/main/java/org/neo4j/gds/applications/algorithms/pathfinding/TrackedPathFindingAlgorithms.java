@@ -42,6 +42,8 @@ import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
+import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.stream.Stream;
@@ -204,6 +206,27 @@ public class TrackedPathFindingAlgorithms {
             ),
             progressTracker,
             false
+        );
+    }
+
+    public SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+
+        var progressTracker = createProgressTracker(
+            PathFindingAlgorithmTasks.steinerTree(parameters, graph),
+            configuration
+        );
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.steinerTree(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag(),
+                DefaultPool.INSTANCE
+            ),
+            progressTracker,
+            true
         );
     }
 

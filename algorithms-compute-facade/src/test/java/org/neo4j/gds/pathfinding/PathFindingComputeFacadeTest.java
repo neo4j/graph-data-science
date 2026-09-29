@@ -46,7 +46,6 @@ import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.spanningtree.PrimOperators;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
-import org.neo4j.gds.steiner.SteinerTreeParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.WalkParameters;
@@ -241,23 +240,6 @@ class PathFindingComputeFacadeTest {
             new SpanningTreeParameters(
                 PrimOperators.MIN_OPERATOR,
                 idFunction.of("a")
-            ),
-            jobIdMock,
-            true
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
-    @Test
-    void steinerTree() {
-        var future = facade.steinerTree(
-            graph,
-            new SteinerTreeParameters(
-                new Concurrency(4),
-                idFunction.of("a"),
-                List.of(idFunction.of("c")),
-                2.0,
-                false
             ),
             jobIdMock,
             true

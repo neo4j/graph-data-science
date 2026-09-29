@@ -460,14 +460,11 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             mutateRelationshipService
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.steinerTree(
             graphName,
             configuration,
-            SteinerTree,
-            () -> estimationFacade.steinerTree(configuration),
-            (graph, __) -> pathFindingAlgorithms.steinerTree(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 }

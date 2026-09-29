@@ -41,8 +41,6 @@ import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
-import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
-import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 public class PathFindingAlgorithmsBusinessFacade {
@@ -195,24 +193,6 @@ public class PathFindingAlgorithmsBusinessFacade {
                 configuration.toParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
-    }
-
-    public SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {
-        var parameters = configuration.toParameters();
-
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.steinerTree(parameters, graph),
-            configuration
-        );
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.steinerTree(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag(),
-                DefaultPool.INSTANCE
             ), progressTracker, true);
     }
 

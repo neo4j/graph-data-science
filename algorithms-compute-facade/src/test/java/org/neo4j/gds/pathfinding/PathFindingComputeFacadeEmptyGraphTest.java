@@ -40,8 +40,6 @@ import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
-import org.neo4j.gds.steiner.SteinerTreeParameters;
-import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 
@@ -244,22 +242,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
         var result = future.join();
 
         assertThat(result.result()).isNotNull().isEqualTo(SpanningTree.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void steinerTree() {
-        var future = facade.steinerTree(
-            graph,
-            mock(SteinerTreeParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result.result()).isNotNull().isEqualTo(SteinerTreeResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
