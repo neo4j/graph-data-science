@@ -41,11 +41,21 @@ public abstract class EvaluationContext {
         this.parameterMap = parameterMap;
     }
 
-    Number resolveParameter(String parameterName) {
-        return (Number) this.parameterMap.get(parameterName);
+    Object resolveParameter(String parameterName) {
+        return this.parameterMap.get(parameterName);
+    }
+
+    <T> T resolveParameter(String parameterName, Class<T> type) {
+        return type.cast(this.parameterMap.get(parameterName));
     }
 
     abstract double getProperty(String propertyKey, ValueType propertyType);
+
+    abstract long[] longArrayProperty(Expression.UnaryExpression.Property property);
+
+    abstract double[] doubleArrayProperty(Expression.UnaryExpression.Property property);
+
+    abstract float[] floatArrayProperty(Expression.UnaryExpression.Property property);
 
     public abstract boolean hasNodeLabels(List<NodeLabel> labels);
 
@@ -78,6 +88,36 @@ public abstract class EvaluationContext {
                 return propertyType == ValueType.LONG
                     ? Double.longBitsToDouble(nodePropertyValues.longValue(nodeId))
                     : nodePropertyValues.doubleValue(nodeId);
+            }
+        }
+
+        @Override
+        double[] doubleArrayProperty(Expression.UnaryExpression.Property property) {
+            if (!graphStore.hasNodeProperty(property.propertyKey())) {
+                return DefaultValue.DOUBLE_ARRAY_DEFAULT_FALLBACK;
+            } else {
+                var nodePropertyValues = graphStore.nodeProperty(property.propertyKey()).values();
+                return nodePropertyValues.doubleArrayValue(nodeId);
+            }
+        }
+
+        @Override
+        long[] longArrayProperty(Expression.UnaryExpression.Property property) {
+            if (!graphStore.hasNodeProperty(property.propertyKey())) {
+                return DefaultValue.LONG_ARRAY_DEFAULT_FALLBACK;
+            } else {
+                var nodePropertyValues = graphStore.nodeProperty(property.propertyKey()).values();
+                return nodePropertyValues.longArrayValue(nodeId);
+            }
+        }
+
+        @Override
+        float[] floatArrayProperty(Expression.UnaryExpression.Property property) {
+            if (!graphStore.hasNodeProperty(property.propertyKey())) {
+                return DefaultValue.FLOAT_ARRAY_DEFAULT_FALLBACK;
+            } else {
+                var nodePropertyValues = graphStore.nodeProperty(property.propertyKey()).values();
+                return nodePropertyValues.floatArrayValue(nodeId);
             }
         }
 
@@ -136,6 +176,21 @@ public abstract class EvaluationContext {
         @Override
         double getProperty(String propertyKey, ValueType propertyType) {
             return properties[propertyIndices.get(propertyKey)];
+        }
+
+        @Override
+        double[] doubleArrayProperty(Expression.UnaryExpression.Property property) {
+            throw new UnsupportedOperationException("Relationships do not support list properties");
+        }
+
+        @Override
+        long[] longArrayProperty(Expression.UnaryExpression.Property property) {
+            throw new UnsupportedOperationException("Relationships do not support list properties");
+        }
+
+        @Override
+        float[] floatArrayProperty(Expression.UnaryExpression.Property property) {
+            throw new UnsupportedOperationException("Relationships do not support list properties");
         }
 
         @Override

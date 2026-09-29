@@ -112,6 +112,11 @@ class GdsAstFactory extends AstFactoryAdapter {
     }
 
     @Override
+    public Expression listLiteral(InputPosition p, List<Expression> values) {
+        return new Expression.Literal.ListLiteral(values);
+    }
+
+    @Override
     public Expression hasLabelsOrTypes(Expression subject, List<ASTFactory.StringPos<InputPosition>> labels) {
         if (subject instanceof Variable variable) {
             if (variable.name().equals("n")) {
@@ -237,5 +242,10 @@ class GdsAstFactory extends AstFactoryAdapter {
     @Override
     public InputPosition inputPosition(int offset, int line, int column) {
         return new InputPosition(offset, line, column);
+    }
+
+    @Override
+    public Expression in(InputPosition p, Expression lhs, Expression rhs) {
+        return new Expression.BinaryExpression.ListContains(lhs, rhs);
     }
 }
