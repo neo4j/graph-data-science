@@ -24,8 +24,9 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
+import java.util.Optional;
 
-public class PregelPropertiesRequirement implements ValidationRule {
+public class PregelPropertiesRequirement implements GraphStoreFilteredETL {
    private final String writeProperty;
 
     public PregelPropertiesRequirement(String writeProperty) {
@@ -33,12 +34,13 @@ public class PregelPropertiesRequirement implements ValidationRule {
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
-        // See PregelProcedureConfig for exaplanation of this
+        // See PregelProcedureConfig for explanation of this
         if (writeProperty.isBlank()) {
             return;
         }
@@ -48,5 +50,4 @@ public class PregelPropertiesRequirement implements ValidationRule {
             throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
         }
     }
-
 }
