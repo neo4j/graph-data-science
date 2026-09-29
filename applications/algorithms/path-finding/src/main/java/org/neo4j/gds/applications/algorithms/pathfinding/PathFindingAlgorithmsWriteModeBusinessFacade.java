@@ -73,7 +73,6 @@ import java.util.function.Supplier;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
@@ -271,14 +270,22 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ShortestPathDijkstraWriteConfig configuration,
         ResultBuilder<ShortestPathDijkstraWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        return runAlgorithmAndWrite(
+        var writeStep = new ShortestPathWriteStep(
+            writeRelationshipService,
+            configuration.writeRelationshipType(),
+            configuration.writeNodeIds(),
+            configuration.writeCosts(),
+            configuration::resolveResultStore,
+            configuration.jobId()
+        );
+
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathDijkstra(
             graphName,
             configuration,
-            Dijkstra,
-            () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
-            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder),
+            false
+        ));
     }
 
     public <RESULT> RESULT singlePairShortestPathYens(
