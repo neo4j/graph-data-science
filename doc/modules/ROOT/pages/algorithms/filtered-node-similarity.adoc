@@ -215,7 +215,7 @@ YIELD
   configuration: Map
 ----
 
-include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+include::partial$/algorithms/common-configuration/common-write-parameters.adoc[]
 
 :instance: write
 .Configuration
