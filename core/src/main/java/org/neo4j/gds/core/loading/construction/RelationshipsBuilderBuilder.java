@@ -121,7 +121,7 @@ public final class RelationshipsBuilderBuilder {
     }
 
     /**
-     * @param executorService Default is {@Dcode efaultPool.INSTANCE}.
+     * @param executorService Default is {@code efaultPool.INSTANCE}.
      */
     public RelationshipsBuilderBuilder executorService(ExecutorService executorService) {
         this.executorService = Objects.requireNonNull(executorService);
@@ -148,7 +148,7 @@ public final class RelationshipsBuilderBuilder {
     }
 
     /**
-     * @param adjacencyCompressorFactory Default is {@Optional.empty()}.
+     * @param adjacencyCompressorFactory Default is {@code null}.
      */
     public RelationshipsBuilderBuilder adjacencyCompressorFactory(AdjacencyListBehavior.Factory adjacencyCompressorFactory) {
         this.adjacencyCompressorFactory = Optional.ofNullable(adjacencyCompressorFactory);
