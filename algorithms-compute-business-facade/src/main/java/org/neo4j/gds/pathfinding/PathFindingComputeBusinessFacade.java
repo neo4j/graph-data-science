@@ -44,7 +44,6 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
-import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
@@ -268,38 +267,6 @@ public class PathFindingComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.singlePairShortestPathAStar(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> singlePairShortestPathDijkstra(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        DijkstraSourceTargetParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidation(new SourceNodeTargetNodesGraphStoreValidation(
-                parameters.sourceNode(),
-                parameters.targetsList()
-            )),
-            true,
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService))
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.singlePairShortestPathDijkstra(
             graph,
             parameters,
             jobId,

@@ -19,9 +19,13 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
@@ -30,6 +34,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphLoadedETL;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.RelationshipPropertyGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
@@ -41,10 +46,12 @@ import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -190,6 +197,7 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
+            false,
             graphLoadETLBuilder,
             configuration.costProperty(),
             Optional.of(secondGraphLoadETLBuilder),
@@ -218,6 +226,51 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __, ___) -> algorithms.randomWalk(graph, configuration),
             () -> estimationFacade.randomWalk(configuration),
             AlgorithmLabel.RandomWalk,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> singlePairShortestPathDijkstra(
+        GraphName graphName,
+        DijkstraSourceTargetsBaseConfig configuration,
+        Optional<SideEffect<PathFindingResult, METADATA>> sideEffect,
+        ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer,
+        boolean skipRelationshipProperty
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new SourceNodeTargetNodesGraphStoreValidation(
+                        configuration.sourceNode(),
+                        configuration.targetsList()
+                    ).validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            })
+            .with(new GraphLoadedETL() {
+                @Override
+                public void onGraphLoaded(Graph graph) {
+                    // rename this, it is clearly generic
+                    new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE).validate(graph);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            skipRelationshipProperty,
+            graphLoadETLBuilder,
+            Optional.empty(),
+            Optional.empty(),
+            (graph, __, ___) -> algorithms.singlePairShortestPathDijkstra(graph, configuration),
+            () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
+            AlgorithmLabel.Dijkstra,
             sideEffect,
             resultRenderer
         );

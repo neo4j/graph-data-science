@@ -39,7 +39,6 @@ import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
-import org.neo4j.gds.paths.dijkstra.DijkstraSourceTargetParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.YensParameters;
@@ -295,43 +294,6 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             aStar::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singlePairShortestPathDijkstra(
-        Graph graph,
-        DijkstraSourceTargetParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.dijkstra(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var dijkstra = DijkstraFactory.sourceTarget(
-            graph,
-            parameters.sourceNode(),
-            parameters.targetsList(),
-            false,
-            Optional.empty(),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            dijkstra::compute,
             jobId
         );
     }

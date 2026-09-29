@@ -55,7 +55,7 @@ public class LaunchConvenience {
     }
 
     /**
-     * An overload for all the algorithms that do not need to load a second graph.
+     * A convenient overload for many regular algorithms.
      */
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
@@ -70,6 +70,7 @@ public class LaunchConvenience {
         return launchAlgorithm(
             graphName,
             configuration,
+            false,
             graphLoadETLBuilder,
             Optional.empty(),
             Optional.empty(),
@@ -97,6 +98,7 @@ public class LaunchConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
+        boolean skipRelationshipProperty,
         GraphLoadETLBuilder graphLoadETLBuilder,
         Optional<String> secondRelationshipProperty,
         Optional<GraphLoadETLBuilder> secondGraphLoadETLBuilder,
@@ -106,7 +108,7 @@ public class LaunchConvenience {
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
     ) {
-        var relationshipProperty = extractRelationshipProperty(configuration);
+        var relationshipProperty = extractRelationshipProperty(configuration, skipRelationshipProperty);
 
         // some cross-cutting stuff
         validationRuleFromConfigurationParser.parse(configuration, graphLoadETLBuilder);
@@ -143,7 +145,12 @@ public class LaunchConvenience {
         );
     }
 
-    private <CONFIGURATION extends AlgoBaseConfig> Optional<String> extractRelationshipProperty(CONFIGURATION configuration) {
+    private <CONFIGURATION extends AlgoBaseConfig> Optional<String> extractRelationshipProperty(
+        CONFIGURATION configuration,
+        boolean skipRelationshipProperty
+    ) {
+        if (skipRelationshipProperty) return Optional.empty();
+
         if (configuration instanceof RelationshipWeightConfig relationshipWeightConfig)
             return relationshipWeightConfig.relationshipWeightProperty();
 

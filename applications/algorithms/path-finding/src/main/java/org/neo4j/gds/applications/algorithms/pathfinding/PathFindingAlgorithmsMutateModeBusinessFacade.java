@@ -72,7 +72,6 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -296,15 +295,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration.mutateRelationshipType(), mutateRelationshipService);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathDijkstra(
             graphName,
             configuration,
-            Dijkstra,
-            () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
-            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder),
+            false
+        ));
     }
 
     public <RESULT> RESULT singlePairShortestPathDijkstraWithPaths(
@@ -315,18 +312,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
 
-        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
-            Optional.empty(),
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathDijkstra(
             graphName,
             configuration,
-            Optional.empty(),
-            Dijkstra,
-            DimensionTransformer.DISABLED,
-            () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
-            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.of(sideEffect),
-            new MutateResultRenderer<>(configuration, resultBuilder)
-        );
+            new MutateResultRenderer<>(configuration, resultBuilder),
+            true
+        ));
     }
 
     public <RESULT> RESULT singlePairShortestPathYens(
