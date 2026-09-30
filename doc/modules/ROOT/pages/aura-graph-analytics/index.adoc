@@ -7,10 +7,9 @@ Aura Graph Analytics is an on-demand ephemeral compute environment for running g
 Aura Graph Analytics is based on _sessions_.
 Each session is a standalone link:https://neo4j.com/docs/aura/graph-analytics/#aura-gds-serverless[Neo4j Aura compute environment] that is created when needed and deleted when no longer usefulfootnote:[Or when the <<max-lifetime, maximum session lifetime>> is reached.], all without any instance management operations.
 
-Depending on where your data is, you can use three types of session:
+Depending on where your data is, you can use two types of session:
 
 * *Attached*: when the data source is a Neo4j AuraDB instance.
-* *Self-managed*: when the data source is a self-managed Neo4j DBMS.
 * *Standalone*: when the data source is not based on Neo4j.
 
 == Workflow
@@ -20,10 +19,10 @@ The typical workflow with Aura Graph Analytics is:
 . Create a session.
 . Load your data into a session via a _remote projection_ (similar to a standard xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection]).
 . Run graph algorithms or train machine learning models on the data.
-. Write the results back to the original data source using _remote write-back_ (for attached and self-managed sessions) or a custom method (for standalone sessions).
+. Write the results back to the original data source using _remote write-back_ (for attached sessions) or a custom method (for standalone sessions).
 . Delete the session.
 
-You can create and use sessions with the Cypher API (a collection of Cypher procedures shown in the xref:aura-graph-analytics/quickstart.adoc[] and, more in detail, in the xref:aura-graph-analytics/cypher.adoc[] page) or with the Python client (see the link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/[overview] and the tutorials on link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless/[attached], link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless-self-managed/[self-managed], and link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless-standalone/[standalone] sessions).
+You can create and use sessions with the Cypher API (a collection of Cypher procedures shown in the xref:aura-graph-analytics/quickstart.adoc[] and, more in detail, in the xref:aura-graph-analytics/cypher.adoc[] page) or with the Python client (see the link:https://neo4j.com/docs/graph-data-science-client/current/graph-analytics-serverless/[overview] and the tutorials on link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless/[attached] and link:https://neo4j.com/docs/graph-data-science-client/current/tutorials/graph-analytics-serverless-standalone/[standalone] sessions).
 
 [IMPORTANT]
 ====

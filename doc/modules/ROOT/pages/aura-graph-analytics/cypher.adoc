@@ -226,7 +226,6 @@ CALL gds.session.getOrCreate(
   sessionName: String,
   memory: String,
   ttl: Duration
-  cloudLocation: Map
 ) YIELD
   id: String,
   name: String,
