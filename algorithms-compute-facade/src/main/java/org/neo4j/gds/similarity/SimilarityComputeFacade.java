@@ -25,9 +25,6 @@ import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.result.TimedAlgorithmResult;
-import org.neo4j.gds.similarity.filteredknn.FilteredKNNFactory;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
@@ -97,36 +94,6 @@ public class SimilarityComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             knn::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<FilteredKnnResult>> filteredKnn(
-        Graph graph,
-        FilteredKnnParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(FilteredKnnResult.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            SimilarityAlgorithmTasks.filteredKnn(graph,parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-        var knnContext = new KnnContext(progressTracker);
-
-        // Create the algorithm
-        var filteredKnn = FilteredKNNFactory.create(graph, parameters, knnContext,terminationFlag);
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            filteredKnn::compute,
             jobId
         );
     }

@@ -24,8 +24,8 @@ import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultRenderer;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
@@ -34,7 +34,6 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.NodeSimilarity;
 
@@ -61,17 +60,15 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT filteredKnn(
         GraphName graphName,
-        FilteredKnnStatsConfig configuration,
+        FilteredKnnBaseConfig configuration,
         StatsResultBuilder<FilteredKnnResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.filteredKnn(
             graphName,
             configuration,
-            FilteredKNN,
-            () -> estimationFacade.filteredKnn(configuration),
-            (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT filteredNodeSimilarity(

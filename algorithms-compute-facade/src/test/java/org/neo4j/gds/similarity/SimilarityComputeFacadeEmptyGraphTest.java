@@ -28,7 +28,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -73,21 +72,6 @@ class SimilarityComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
         assertThat(result.result()).isEqualTo(KnnResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void filteredKnn() {
-        var future = facade.filteredKnn(
-            graph,
-            null,
-            jobIdMock,
-            true
-        );
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(FilteredKnnResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

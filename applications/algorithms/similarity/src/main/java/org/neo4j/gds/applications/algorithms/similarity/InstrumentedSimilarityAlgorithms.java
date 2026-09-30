@@ -25,6 +25,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
@@ -44,6 +46,33 @@ public class InstrumentedSimilarityAlgorithms {
         this.algorithms = algorithms;
         this.estimationFacade = estimationFacade;
         this.launchConvenience = launchConvenience;
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> filteredKnn(
+        GraphName graphName,
+        FilteredKnnBaseConfig configuration,
+        Optional<SideEffect<FilteredKnnResult, METADATA>> sideEffect,
+        ResultRenderer<FilteredKnnResult, RESULT, METADATA> resultRenderer
+    ) {
+        var filteredKnnParameters = configuration.toFilteredKnnParameters();
+
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new KnnETL(filteredKnnParameters.knnParametersSansNodeCount().nodePropertiesNames()))
+            .with(new NodeFilterETL(
+                filteredKnnParameters.filteringParameters().sourceFilter(),
+                filteredKnnParameters.filteringParameters().targetFilter()
+            ));
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.filteredKnn(graph, configuration),
+            () -> estimationFacade.filteredKnn(configuration),
+            AlgorithmLabel.FilteredKNN,
+            sideEffect,
+            resultRenderer
+        );
     }
 
     public <RESULT, METADATA> CompletableFuture<RESULT> filteredNodeSimilarity(

@@ -24,8 +24,8 @@ import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
@@ -35,7 +35,6 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.NodeSimilarity;
 
@@ -62,17 +61,15 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> filteredKnn(
         GraphName graphName,
-        FilteredKnnStreamConfig configuration,
+        FilteredKnnBaseConfig configuration,
         StreamResultBuilder<FilteredKnnResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedSimilarityAlgorithms.filteredKnn(
             graphName,
             configuration,
-            FilteredKNN,
-            () -> estimationFacade.filteredKnn(configuration),
-            (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> filteredNodeSimilarity(

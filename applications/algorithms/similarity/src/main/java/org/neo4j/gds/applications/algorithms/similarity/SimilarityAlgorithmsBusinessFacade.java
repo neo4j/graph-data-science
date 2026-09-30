@@ -23,8 +23,6 @@ import org.neo4j.gds.SimilarityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
@@ -42,16 +40,6 @@ public class SimilarityAlgorithmsBusinessFacade {
     ) {
         this.similarityAlgorithms = similarityAlgorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    FilteredKnnResult filteredKnn(Graph graph, FilteredKnnBaseConfig configuration) {
-        var parameters = configuration.toFilteredKnnParameters().finalize(graph.nodeCount());
-        var task = SimilarityAlgorithmTasks.filteredKnn(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> similarityAlgorithms.filteredKnn(graph, parameters, progressTracker),
-            progressTracker, true);
     }
 
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {

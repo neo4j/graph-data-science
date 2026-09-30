@@ -17,33 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.validation;
+package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.ValidationRule;
-import org.neo4j.gds.similarity.NodeFilterSpec;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
+import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 
 import java.util.Collection;
+import java.util.Optional;
 
-public class NodeFilterValidation implements ValidationRule {
+class KnnETL implements GraphStoreFilteredETL {
+    private final Collection<String> nodeProperties;
 
-    private final NodeFilterSpec sourceFilter;
-    private final NodeFilterSpec targetFilter;
-
-    public NodeFilterValidation(NodeFilterSpec sourceFilter, NodeFilterSpec targetFilter) {
-        this.sourceFilter = sourceFilter;
-        this.targetFilter = targetFilter;
+    KnnETL(Collection<String> nodeProperties) {
+        this.nodeProperties = nodeProperties;
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
-        sourceFilter.validate(graphStore,selectedLabels,"sourceNodeFilter");
-        targetFilter.validate(graphStore,selectedLabels,"targetNodeFilter");
+        nodeProperties.forEach(
+            nodeProperty -> {
+                new NodePropertyMustExistOnAllLabels(nodeProperty).validate(
+                    graphStore,
+                    selectedLabels,
+                    selectedRelationshipTypes
+                );
+            }
+        );
     }
 }

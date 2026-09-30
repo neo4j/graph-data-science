@@ -40,7 +40,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.NodeSimilarity;
 
@@ -83,16 +82,12 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             terminationFlag
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedSimilarityAlgorithms.filteredKnn(
             graphName,
             configuration,
-            FilteredKNN,
-            () -> estimationFacade.filteredKnn(configuration),
-            (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
-            writeStep,
-            resultBuilder
-
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT filteredNodeSimilarity(
