@@ -30,10 +30,7 @@ import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.similarity.knn.KnnParametersSansNodeCount;
 import org.neo4j.gds.similarity.knn.KnnResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.validation.KnnAlgorithmRequirements;
-import org.neo4j.gds.similarity.validation.NodeSimilarityRequirement;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -81,39 +78,6 @@ public class SimilarityComputeBusinessFacade {
         var parameters = parametersSansNodeCount.finalize(graphResources.graph().nodeCount());
 
         return computeFacade.knn(
-            graphResources.graph(),
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> nodeSimilarity(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        NodeSimilarityParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<NodeSimilarityResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidation(
-                new NodeSimilarityRequirement(
-                    parameters.useComponents(),
-                    parameters.componentProperty()
-                )
-            ),
-            true,
-            Optional.empty()
-        );
-
-        return computeFacade.nodeSimilarity(
             graphResources.graph(),
             parameters,
             jobId,

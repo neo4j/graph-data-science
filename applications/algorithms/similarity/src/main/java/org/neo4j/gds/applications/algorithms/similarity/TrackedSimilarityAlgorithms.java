@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 public class TrackedSimilarityAlgorithms {
@@ -61,6 +62,18 @@ public class TrackedSimilarityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> similarityAlgorithms.filteredNodeSimilarity(graph, parameters, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+        var task = SimilarityAlgorithmTasks.nodeSimilarity(graph, parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> similarityAlgorithms.nodeSimilarity(graph, parameters, progressTracker),
             progressTracker,
             true
         );
