@@ -21,9 +21,12 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
+import org.neo4j.gds.applications.algorithms.machinery.WriteResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.WriteSideEffect;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
@@ -35,9 +38,9 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.NodeSimilarity;
 
@@ -47,18 +50,24 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteRelationshipService writeRelationshipService;
     private final TerminationFlag terminationFlag;
+    private final InstrumentedSimilarityAlgorithms instrumentedSimilarityAlgorithms;
+    private final Synchroniser synchroniser;
 
     SimilarityAlgorithmsWriteModeBusinessFacade(
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         SimilarityAlgorithmsBusinessFacade similarityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteRelationshipService writeRelationshipService, TerminationFlag terminationFlag
+        WriteRelationshipService writeRelationshipService, TerminationFlag terminationFlag,
+        InstrumentedSimilarityAlgorithms instrumentedSimilarityAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.similarityAlgorithms = similarityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeRelationshipService = writeRelationshipService;
         this.terminationFlag = terminationFlag;
+        this.instrumentedSimilarityAlgorithms = instrumentedSimilarityAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT filteredKnn(
@@ -99,15 +108,12 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             shouldComputeSimilarityDistribution
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedSimilarityAlgorithms.filteredNodeSimilarity(
             graphName,
             configuration,
-            FilteredNodeSimilarity,
-            () -> estimationFacade.filteredNodeSimilarity(configuration),
-            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT knn(

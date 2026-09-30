@@ -31,7 +31,6 @@ import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParametersSansNodeCount;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
-import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityParameters;
 import org.neo4j.gds.similarity.knn.KnnParametersSansNodeCount;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
@@ -162,45 +161,4 @@ public class SimilarityComputeBusinessFacade {
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));
     }
-
-    public <TR> CompletableFuture<TR> filteredNodeSimilarity(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        FilteredNodeSimilarityParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<NodeSimilarityResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidationBuilder()
-                .withValidationRule(
-                    new NodeFilterValidation(
-                        parameters.filteringParameters().sourceFilter(),
-                        parameters.filteringParameters().targetFilter()
-                    )
-                ).withValidationRule(
-                    new NodeSimilarityRequirement(
-                        parameters.nodeSimilarityParameters().useComponents(),
-                        parameters.nodeSimilarityParameters().componentProperty()
-                    )
-                ).build(),
-            true,
-            Optional.empty()
-        );
-
-        return computeFacade.filteredNodeSimilarity(
-            graphResources.graph(),
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-
 }

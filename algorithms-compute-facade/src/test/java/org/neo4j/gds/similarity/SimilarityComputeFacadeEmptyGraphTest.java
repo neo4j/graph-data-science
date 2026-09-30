@@ -107,20 +107,4 @@ class SimilarityComputeFacadeEmptyGraphTest {
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }
-
-    @Test
-    void filteredNodeSimilarity() {
-        var future = facade.filteredNodeSimilarity(
-            graph,
-            null,
-            jobIdMock,
-            true
-        );
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(NodeSimilarityResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
 }

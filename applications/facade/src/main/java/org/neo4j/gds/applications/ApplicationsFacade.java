@@ -230,7 +230,9 @@ public final class ApplicationsFacade {
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateRelationshipService,
-            writeContext
+            writeContext,
+            launchConvenience,
+            synchroniser
         );
 
         return new ApplicationsFacadeBuilder()

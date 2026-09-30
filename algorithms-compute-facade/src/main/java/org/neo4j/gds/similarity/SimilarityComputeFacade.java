@@ -28,7 +28,6 @@ import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKNNFactory;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnParameters;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
-import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityParameters;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
@@ -167,43 +166,4 @@ public class SimilarityComputeFacade {
             jobId
         );
     }
-
-    public CompletableFuture<TimedAlgorithmResult<NodeSimilarityResult>> filteredNodeSimilarity(
-        Graph graph,
-        FilteredNodeSimilarityParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(NodeSimilarityResult.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            SimilarityAlgorithmTasks.filteredNodeSimilarity(graph,parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var sourceNodeFilter = parameters.filteringParameters().sourceFilter().toNodeFilter(graph);
-        var targetNodeFilter = parameters.filteringParameters().targetFilter().toNodeFilter(graph);
-
-        var nodeSimilarity = new NodeSimilarity(
-            graph,
-            parameters.nodeSimilarityParameters(),
-            progressTracker,
-            sourceNodeFilter,
-            targetNodeFilter,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            nodeSimilarity::compute,
-            jobId
-        );
-    }
-
 }
