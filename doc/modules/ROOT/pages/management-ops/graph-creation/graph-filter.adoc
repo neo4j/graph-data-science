@@ -89,6 +89,7 @@ GDS currently supports the following literals:
 * float literals, e.g., `13.37`
 * integer literals, e.g., `42`
 * boolean literals, i.e., `TRUE` and `FALSE`
+* list literals, i.e., `[1, 2, 3]` or `[0.1, 0.2, 0.3]`
 
 Property, label and relationship type expressions are bound to an entity.
 The node entity is always identified by the variable `n`, the relationship entity is identified by `r`.
@@ -110,6 +111,7 @@ GDS supports the following boolean predicates:
   * `n.age = 23 OR n.age = 42`
   * `n.age = 23 XOR n.age = 42`
   * `n.age IS NOT 23`
+* list contains operator, such as `n.age IN [23, 42]`
 
 Variable names that can be used within predicates are not arbitrary.
 A node predicate must refer to variable `n`.
