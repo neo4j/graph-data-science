@@ -37,7 +37,7 @@ public final class NodeSchemaUtils {
             } else {
                 var properties = propertySchemas.stream()
                     .collect(Collectors.toMap(
-                            PropertySchema::key,
+                            NodePropertySchema::key,
                             NodeSchemaUtils::toStringRepresentation
                         )
                     );
@@ -48,7 +48,7 @@ public final class NodeSchemaUtils {
         return result;
     }
 
-    private static String toStringRepresentation(PropertySchema propertySchema) {
+    private static String toStringRepresentation(NodePropertySchema propertySchema) {
         return String.format(
             Locale.ENGLISH,
             "%s (%s, %s)",

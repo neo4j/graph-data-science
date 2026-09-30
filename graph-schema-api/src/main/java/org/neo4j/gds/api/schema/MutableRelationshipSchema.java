@@ -111,7 +111,7 @@ public class MutableRelationshipSchema implements RelationshipSchema {
                     .entrySet()
                     .stream()
                     .collect(Collectors.toMap(Map.Entry::getKey,
-                        innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
+                        innerEntry -> innerEntry.getValue().render()
                     ))
             ));
     }
@@ -155,6 +155,15 @@ public class MutableRelationshipSchema implements RelationshipSchema {
         PropertyState propertyState
     ) {
         getOrCreateRelationshipType(relationshipType, direction).addProperty(propertyKey, valueType, propertyState);
+        return this;
+    }
+
+    public MutableRelationshipSchema addProperty(
+        RelationshipType relationshipType,
+        Direction direction,
+        RelationshipPropertySchema relationshipPropertySchema
+    ) {
+        getOrCreateRelationshipType(relationshipType, direction).addProperty(relationshipPropertySchema.key(), relationshipPropertySchema);
         return this;
     }
 

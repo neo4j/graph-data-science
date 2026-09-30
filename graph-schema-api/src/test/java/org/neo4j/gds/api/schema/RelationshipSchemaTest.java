@@ -71,7 +71,6 @@ class RelationshipSchemaTest {
 
         DefaultValue defaultValue = DefaultValue.of(42.0D);
         Aggregation aggregation = Aggregation.COUNT;
-        PropertyState propertyState = PropertyState.PERSISTENT;
         String propertyName = "baz";
         var relationshipSchema = MutableRelationshipSchema.empty()
             .addProperty(
@@ -82,7 +81,6 @@ class RelationshipSchemaTest {
                     propertyName,
                     ValueType.DOUBLE,
                     defaultValue,
-                    propertyState,
                     aggregation
                 )
             );
@@ -94,7 +92,6 @@ class RelationshipSchemaTest {
         assertThat(relationshipPropertySchema.defaultValue().isUserDefined()).isTrue();
 
         assertThat(relationshipPropertySchema.defaultValue()).isEqualTo(defaultValue);
-        assertThat(relationshipPropertySchema.state()).isEqualTo(propertyState);
         assertThat(relationshipPropertySchema.aggregation()).isEqualTo(aggregation);
     }
 
@@ -108,21 +105,24 @@ class RelationshipSchemaTest {
     @ParameterizedTest
     @MethodSource("directions")
     void testFiltering(Direction orientation, boolean isUndirected) {
-        var label1 = RelationshipType.of("Foo");
-        var label2 = RelationshipType.of("Bar");
+        var type1 = RelationshipType.of("Foo");
+        var type2 = RelationshipType.of("Bar");
 
-        var relationshipSchema = MutableRelationshipSchema.empty()
-            .addProperty(label1, orientation, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT)
-            .addProperty(label1, orientation, "baz", ValueType.DOUBLE, PropertyState.PERSISTENT)
-            .addProperty(label2, orientation, "baz", ValueType.DOUBLE, PropertyState.PERSISTENT);
+        var relationshipSchema = MutableRelationshipSchema.empty();
+        relationshipSchema.getOrCreateRelationshipType(type1, orientation)
+            .addProperty("bar", RelationshipPropertySchema.of("bar", ValueType.DOUBLE))
+            .addProperty("baz", RelationshipPropertySchema.of("baz", ValueType.DOUBLE));
+        relationshipSchema.getOrCreateRelationshipType(type2, orientation)
+            .addProperty("baz", RelationshipPropertySchema.of("baz", ValueType.DOUBLE));
 
-        assertThat(relationshipSchema.filter(Set.of(label1, label2))).isEqualTo(relationshipSchema);
+        assertThat(relationshipSchema.filter(Set.of(type1, type2))).isEqualTo(relationshipSchema);
 
-        var expected = MutableRelationshipSchema.empty()
-            .addProperty(label1, orientation, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT)
-            .addProperty(label1, orientation, "baz", ValueType.DOUBLE, PropertyState.PERSISTENT);
+        var expected = MutableRelationshipSchema.empty();
+        expected.getOrCreateRelationshipType(type1, orientation)
+            .addProperty("bar", RelationshipPropertySchema.of("bar", ValueType.DOUBLE))
+            .addProperty("baz", RelationshipPropertySchema.of("baz", ValueType.DOUBLE));
 
-        assertThat(relationshipSchema.filter(Set.of(label1))).isEqualTo(expected);
+        assertThat(relationshipSchema.filter(Set.of(type1))).isEqualTo(expected);
         assertThat(relationshipSchema.isUndirected()).isEqualTo(isUndirected);
     }
 
@@ -131,10 +131,12 @@ class RelationshipSchemaTest {
         var directedType = RelationshipType.of("D");
         var undirectedType = RelationshipType.of("U");
 
-        var directed = MutableRelationshipSchema.empty()
-            .addProperty(directedType, Direction.DIRECTED, "bar", ValueType.DOUBLE, PropertyState.PERSISTENT);
-        var undirected = MutableRelationshipSchema.empty()
-            .addProperty(undirectedType, Direction.UNDIRECTED, "flob", ValueType.DOUBLE, PropertyState.PERSISTENT);
+        var directed = MutableRelationshipSchema.empty();
+        directed.getOrCreateRelationshipType(directedType, Direction.DIRECTED)
+            .addProperty("bar", RelationshipPropertySchema.of("bar", ValueType.DOUBLE));
+        var undirected = MutableRelationshipSchema.empty();
+        undirected.getOrCreateRelationshipType(undirectedType, Direction.UNDIRECTED)
+            .addProperty("flob", RelationshipPropertySchema.of("flob", ValueType.DOUBLE));
         var mixed = directed.union(undirected);
 
         assertThat(mixed.isUndirected()).isFalse();
@@ -195,25 +197,17 @@ class RelationshipSchemaTest {
 
     @Test
     void unionOnSameTypeSamePropertyDifferentValueTypeFails() {
-        var schema1 = MutableRelationshipSchema
-            .empty()
-            .addProperty(RelationshipType.of("X"), Direction.DIRECTED, "x", ValueType.DOUBLE, PropertyState.PERSISTENT)
-            .addProperty(RelationshipType.of("Y"),
-                Direction.UNDIRECTED,
-                "unlikelypartofmessage",
-                ValueType.DOUBLE,
-                PropertyState.PERSISTENT
-            );
+        var schema1 = MutableRelationshipSchema.empty();
+        schema1.getOrCreateRelationshipType(RelationshipType.of("X"), Direction.DIRECTED)
+            .addProperty("x", RelationshipPropertySchema.of("x", ValueType.DOUBLE));
+        schema1.getOrCreateRelationshipType(RelationshipType.of("Y"), Direction.UNDIRECTED)
+            .addProperty("unlikelypartofmessage", RelationshipPropertySchema.of("unlikelypartofmessage", ValueType.DOUBLE));
 
-        var schema2 = MutableRelationshipSchema
-            .empty()
-            .addProperty(RelationshipType.of("X"), Direction.DIRECTED, "x", ValueType.LONG, PropertyState.PERSISTENT)
-            .addProperty(RelationshipType.of("Y"),
-                Direction.UNDIRECTED,
-                "unlikelypartofmessage",
-                ValueType.DOUBLE,
-                PropertyState.PERSISTENT
-            );
+        var schema2 = MutableRelationshipSchema.empty();
+        schema2.getOrCreateRelationshipType(RelationshipType.of("X"), Direction.DIRECTED)
+            .addProperty("x", RelationshipPropertySchema.of("x", ValueType.LONG));
+        schema2.getOrCreateRelationshipType(RelationshipType.of("Y"), Direction.UNDIRECTED)
+            .addProperty("unlikelypartofmessage", RelationshipPropertySchema.of("unlikelypartofmessage", ValueType.DOUBLE));
 
         assertThatThrownBy(() -> schema1.union(schema2))
             .hasMessageContaining("Combining schema entries with value type")
@@ -235,19 +229,17 @@ class RelationshipSchemaTest {
             ),
             Arguments.of(MutableRelationshipSchema
                 .empty()
-                .addProperty(RelationshipType.of("A"),
+                .addProperty(
+                    RelationshipType.of("A"),
                     Direction.DIRECTED,
-                    "foo",
-                    ValueType.LONG,
-                    PropertyState.PERSISTENT
+                    RelationshipPropertySchema.of("foo", ValueType.LONG)
                 ), true),
             Arguments.of(MutableRelationshipSchema
                 .empty()
-                .addProperty(RelationshipType.of("A"),
+                .addProperty(
+                    RelationshipType.of("A"),
                     Direction.UNDIRECTED,
-                    "foo",
-                    ValueType.LONG,
-                    PropertyState.PERSISTENT
+                    RelationshipPropertySchema.of("foo", ValueType.LONG)
                 ), true)
         );
     }
@@ -274,58 +266,35 @@ class RelationshipSchemaTest {
 
     @Test
     void testBuildProperties() {
-        MutableRelationshipSchema relationshipSchema = MutableRelationshipSchema.empty()
-            .addProperty(
-                RelationshipType.of("X"),
-                Direction.UNDIRECTED,
-                "x",
-                ValueType.DOUBLE,
-                PropertyState.PERSISTENT
-            );
-        relationshipSchema
-            .getOrCreateRelationshipType(RelationshipType.of("Y"), Direction.DIRECTED)
-            .addProperty(
-                "y",
-                RelationshipPropertySchema.of(
-                    "y",
-                    ValueType.DOUBLE,
-                    DefaultValue.forDouble(),
-                    PropertyState.PERSISTENT,
-                    Aggregation.MIN
-                )
-            );
-        var schema = relationshipSchema
-            .addProperty(
-                RelationshipType.of("Z"),
-                Direction.UNDIRECTED,
-                "z",
-                RelationshipPropertySchema.of("z", ValueType.DOUBLE)
-            );
+        var relationshipSchema = MutableRelationshipSchema.empty();
+        relationshipSchema.getOrCreateRelationshipType(RelationshipType.of("X"), Direction.UNDIRECTED)
+            .addProperty("x", RelationshipPropertySchema.of("x", ValueType.DOUBLE));
+        relationshipSchema.getOrCreateRelationshipType(RelationshipType.of("Y"), Direction.DIRECTED)
+            .addProperty("y", RelationshipPropertySchema.of("y", ValueType.DOUBLE, DefaultValue.forDouble(), Aggregation.MIN));
+        relationshipSchema.getOrCreateRelationshipType(RelationshipType.of("Z"), Direction.UNDIRECTED)
+            .addProperty("z", RelationshipPropertySchema.of("z", ValueType.DOUBLE));
 
-        assertThat(schema.isUndirected()).isFalse();
-        assertThat(schema.availableTypes()).contains(RelationshipType.of("X"), RelationshipType.of("Y"));
+        assertThat(relationshipSchema.isUndirected()).isFalse();
+        assertThat(relationshipSchema.availableTypes()).contains(RelationshipType.of("X"), RelationshipType.of("Y"));
 
-        assertThat(schema.get(RelationshipType.of("X")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("x", RelationshipPropertySchema.of("x", ValueType.DOUBLE)));
-        assertThat(schema.get(RelationshipType.of("Y")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("y", RelationshipPropertySchema.of("y", ValueType.DOUBLE, Aggregation.MIN)));
-        assertThat(schema.get(RelationshipType.of("Z")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("z", RelationshipPropertySchema.of("z", ValueType.DOUBLE)));
+        assertThat(relationshipSchema.get(RelationshipType.of("X")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("x", RelationshipPropertySchema.of("x", ValueType.DOUBLE)));
+        assertThat(relationshipSchema.get(RelationshipType.of("Y")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("y", RelationshipPropertySchema.of("y", ValueType.DOUBLE, Aggregation.MIN)));
+        assertThat(relationshipSchema.get(RelationshipType.of("Z")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("z", RelationshipPropertySchema.of("z", ValueType.DOUBLE)));
 
-        assertThat(schema.get(RelationshipType.of("X")).direction()).isEqualTo(Direction.UNDIRECTED);
-        assertThat(schema.get(RelationshipType.of("Y")).direction()).isEqualTo(Direction.DIRECTED);
-        assertThat(schema.get(RelationshipType.of("Z")).direction()).isEqualTo(Direction.UNDIRECTED);
+        assertThat(relationshipSchema.get(RelationshipType.of("X")).direction()).isEqualTo(Direction.UNDIRECTED);
+        assertThat(relationshipSchema.get(RelationshipType.of("Y")).direction()).isEqualTo(Direction.DIRECTED);
+        assertThat(relationshipSchema.get(RelationshipType.of("Z")).direction()).isEqualTo(Direction.UNDIRECTED);
     }
 
     @Test
     void shouldCreateDeepCopiesWhenFiltering() {
         var relType = RelationshipType.of("A");
         var relationshipSchema = MutableRelationshipSchema.empty();
-        relationshipSchema.getOrCreateRelationshipType(relType, Direction.DIRECTED).addProperty("prop", ValueType.LONG,
-            PropertyState.PERSISTENT
-        );
+        relationshipSchema.getOrCreateRelationshipType(relType, Direction.DIRECTED)
+            .addProperty("prop", ValueType.LONG, PropertyState.PERSISTENT);
         var filteredSchema = relationshipSchema.filter(Set.of(relType));
-        filteredSchema
-            .getOrCreateRelationshipType(relType, Direction.DIRECTED).addProperty("shouldNotExistInOriginalSchema", ValueType.LONG,
-                PropertyState.PERSISTENT
-            );
+        filteredSchema.getOrCreateRelationshipType(relType, Direction.DIRECTED)
+            .addProperty("shouldNotExistInOriginalSchema", ValueType.LONG, PropertyState.PERSISTENT);
 
         assertThat(relationshipSchema.get(relType).properties())
             .doesNotContainKey("shouldNotExistInOriginalSchema")

@@ -24,7 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
@@ -130,7 +130,7 @@ final class Neo4jDatabaseNodePropertyWriter {
 
     private static void validatePropertiesCanBeWritten(
         Capabilities.WriteMode writeMode,
-        Map<String, PropertySchema> propertySchemas,
+        Map<String, NodePropertySchema> propertySchemas,
         Collection<NodePropertyRecord> nodeProperties,
         boolean useResultStore
     ) {

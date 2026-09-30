@@ -22,7 +22,6 @@ package org.neo4j.gds.api.schema;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -68,22 +67,4 @@ public interface GraphSchema {
         return MutableGraphSchema.empty();
     }
 
-    static <PS extends PropertySchema> String forPropertySchema(PS propertySchema) {
-        if (propertySchema instanceof RelationshipPropertySchema) {
-            return String.format(
-                Locale.ENGLISH,
-                "%s (%s, %s, Aggregation.%s)",
-                propertySchema.valueType().cypherName(),
-                propertySchema.defaultValue(),
-                propertySchema.state(),
-                ((RelationshipPropertySchema) propertySchema).aggregation());
-        }
-        return String.format(
-            Locale.ENGLISH,
-            "%s (%s, %s)",
-            propertySchema.valueType().cypherName(),
-            propertySchema.defaultValue(),
-            propertySchema.state()
-        );
-    }
 }

@@ -28,7 +28,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.api.schema.ElementSchemaEntry;
+import org.neo4j.gds.api.schema.RelationshipSchemaEntry;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.assertj.MemoryRangeRepresentation;
 import org.neo4j.gds.compat.TestLog;
@@ -201,7 +201,7 @@ class LinkPredictionRelationshipSamplerTest {
             .relationshipSchema()
             .entries()
             .stream()
-            .collect(Collectors.toMap(ElementSchemaEntry::identifier, e -> e.properties().keySet()));
+            .collect(Collectors.toMap(RelationshipSchemaEntry::identifier, e -> e.properties().keySet()));
 
         assertThat(actualRelProperties).usingRecursiveComparison().isEqualTo(expectedRelProperties);
     }

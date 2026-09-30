@@ -24,7 +24,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import tools.jackson.dataformat.csv.CsvSchema;
 
 import java.nio.file.Path;
@@ -41,7 +41,7 @@ class JacksonFileAppenderTest {
 
     @Test
     void shouldAppendDouble() {
-        var doublePropertySchema = PropertySchema.of("doublePropertySchema", ValueType.DOUBLE);
+        var doublePropertySchema = NodePropertySchema.of("doublePropertySchema", ValueType.DOUBLE);
         var doublePropertyFilePath = tempDir.resolve("double-property-test.csv");
         try (var appender = JacksonFileAppender.of(
             doublePropertyFilePath,
@@ -60,7 +60,7 @@ class JacksonFileAppenderTest {
 
     @Test
     void shouldAppendEmptyForDoubleFallbackValue() {
-        var doublePropertySchema = PropertySchema.of("doublePropertySchema", ValueType.DOUBLE);
+        var doublePropertySchema = NodePropertySchema.of("doublePropertySchema", ValueType.DOUBLE);
         var doublePropertyFilePath = tempDir.resolve("double-property-test.csv");
         try (var appender = JacksonFileAppender.of(
             doublePropertyFilePath,
@@ -83,7 +83,7 @@ class JacksonFileAppenderTest {
         INTEGER_DEFAULT_FALLBACK
     })
     void shouldAppendEmptyForLongFallbackValues(long fallbackValue) {
-        var longPropertySchema = PropertySchema.of("longPropertySchema", ValueType.LONG);
+        var longPropertySchema = NodePropertySchema.of("longPropertySchema", ValueType.LONG);
         var longPropertyFilePath = tempDir.resolve("long-property-test.csv");
         try (var appender = JacksonFileAppender.of(
             longPropertyFilePath,
@@ -102,7 +102,7 @@ class JacksonFileAppenderTest {
 
     @Test
     void shouldAppendDoubleArray() {
-        var doubleArrayPropertySchema = PropertySchema.of("doubleArrayPropertySchema", ValueType.DOUBLE_ARRAY);
+        var doubleArrayPropertySchema = NodePropertySchema.of("doubleArrayPropertySchema", ValueType.DOUBLE_ARRAY);
         var doubleArrayPropertyFilePath = tempDir.resolve("double-array-property-test.csv");
         try (var appender = JacksonFileAppender.of(
             doubleArrayPropertyFilePath,
@@ -121,7 +121,7 @@ class JacksonFileAppenderTest {
 
     @Test
     void shouldAppendEmptyForNullValue() {
-        var nullPropertySchema = PropertySchema.of("nullPropertySchema", ValueType.LONG);
+        var nullPropertySchema = NodePropertySchema.of("nullPropertySchema", ValueType.LONG);
         var nullPropertyFilePath = tempDir.resolve("null-property-test.csv");
         try (var appender = JacksonFileAppender.of(
             nullPropertyFilePath,
@@ -140,7 +140,7 @@ class JacksonFileAppenderTest {
 
     @Test
     void shouldAppendLong() {
-        var longPropertySchema = PropertySchema.of("longPropertySchema", ValueType.LONG);
+        var longPropertySchema = NodePropertySchema.of("longPropertySchema", ValueType.LONG);
         var longPropertyFilePath = tempDir.resolve("long-property-test.csv");
         try (var appender = JacksonFileAppender.of(
             longPropertyFilePath,
@@ -159,7 +159,7 @@ class JacksonFileAppenderTest {
 
     @Test
     void shouldAppendLongArray() {
-        var longArrayPropertySchema = PropertySchema.of("longArrayPropertySchema", ValueType.LONG_ARRAY);
+        var longArrayPropertySchema = NodePropertySchema.of("longArrayPropertySchema", ValueType.LONG_ARRAY);
         var longArrayPropertyFilePath = tempDir.resolve("long-array-property-test.csv");
         try (var appender = JacksonFileAppender.of(
             longArrayPropertyFilePath,
@@ -178,7 +178,7 @@ class JacksonFileAppenderTest {
 
     @Test
     void shouldAppendFloatArray() {
-        var floatArrayPropertySchema = PropertySchema.of("floatArrayPropertySchema", ValueType.FLOAT_ARRAY);
+        var floatArrayPropertySchema = NodePropertySchema.of("floatArrayPropertySchema", ValueType.FLOAT_ARRAY);
         var floatArrayPropertyFilePath = tempDir.resolve("float-array-property-test.csv");
         try (var appender = JacksonFileAppender.of(
             floatArrayPropertyFilePath,
@@ -197,10 +197,10 @@ class JacksonFileAppenderTest {
 
     @Test
     void shouldAppendMultipleProperties() {
-        var doublePropertySchema = PropertySchema.of("doublePropertySchema", ValueType.DOUBLE);
-        var nullPropertySchema = PropertySchema.of("earlyPropertySchema", ValueType.LONG);
-        var longArrayPropertySchema = PropertySchema.of("longArrayPropertySchema", ValueType.LONG_ARRAY);
-        var doubleArrayPropertySchema = PropertySchema.of("doubleArrayPropertySchema", ValueType.DOUBLE_ARRAY);
+        var doublePropertySchema = NodePropertySchema.of("doublePropertySchema", ValueType.DOUBLE);
+        var nullPropertySchema = NodePropertySchema.of("earlyPropertySchema", ValueType.LONG);
+        var longArrayPropertySchema = NodePropertySchema.of("longArrayPropertySchema", ValueType.LONG_ARRAY);
+        var doubleArrayPropertySchema = NodePropertySchema.of("doubleArrayPropertySchema", ValueType.DOUBLE_ARRAY);
 
         var multiPropertyFilePath = tempDir.resolve("multi-property-test.csv");
 

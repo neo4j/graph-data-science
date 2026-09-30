@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.file.csv.CsvNodeVisitor;
 import org.neo4j.gds.utils.StringFormatting;
 
@@ -32,10 +32,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record NodeFileHeader(String[] nodeLabels, Set<HeaderProperty> propertyMappings) implements FileHeader<NodeSchema, PropertySchema> {
+public record NodeFileHeader(String[] nodeLabels, Set<HeaderProperty> propertyMappings) implements FileHeader<NodeSchema, NodePropertySchema> {
 
     @Override
-    public Map<String, PropertySchema> schemaForIdentifier(NodeSchema schema) {
+    public Map<String, NodePropertySchema> schemaForIdentifier(NodeSchema schema) {
         var labelStream = Arrays.stream(nodeLabels()).map(NodeLabel::of);
         if (nodeLabels().length == 0) {
             labelStream = Stream.of(NodeLabel.ALL_NODES);

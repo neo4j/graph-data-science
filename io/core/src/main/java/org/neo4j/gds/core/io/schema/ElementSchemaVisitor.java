@@ -22,11 +22,10 @@ package org.neo4j.gds.core.io.schema;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.OptionalInt;
 
-public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter implements PropertySchema {
+public abstract class ElementSchemaVisitor implements InputSchemaVisitor {
 
     private String key;
     private ValueType valueType;
@@ -36,27 +35,22 @@ public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter im
 
     protected abstract void export();
 
-    @Override
     public String key() {
         return key;
     }
 
-    @Override
     public ValueType valueType() {
         return valueType;
     }
 
-    @Override
     public DefaultValue defaultValue() {
         return defaultValue;
     }
 
-    @Override
     public PropertyState state() {
         return state;
     }
 
-    @Override
     public OptionalInt dimension() {
         return dimension;
     }
@@ -103,5 +97,9 @@ public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter im
         defaultValue(null);
         state(null);
         dimension(OptionalInt.empty());
+    }
+
+    @Override
+    public void close() {
     }
 }

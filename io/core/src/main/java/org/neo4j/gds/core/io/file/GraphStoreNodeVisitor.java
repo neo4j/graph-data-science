@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.values.GdsValue;
@@ -45,7 +45,7 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
     private static Map<String, Function<Object, GdsValue>> initPropertyCreators(NodeSchema nodeSchema) {
         Map<String, Function<Object, GdsValue>> propertyCreators = new HashMap<>();
         for (var labelSchema : nodeSchema.entries().entrySet()) {
-            for (PropertySchema propertySchema : labelSchema.getValue()) {
+            for (NodePropertySchema propertySchema : labelSchema.getValue()) {
                 propertyCreators.putIfAbsent(propertySchema.key(), PrimitiveValues.valueCreator(propertySchema.valueType()));
             }
         }

@@ -27,7 +27,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -66,13 +66,13 @@ class NodeSchemaLoaderTest {
 
         assertThat(nodeSchema).isNotNull();
         assertThat(nodeSchema.entries()).isEqualTo(Map.of(
-            NodeLabel.of("A"), List.of(PropertySchema.of(
+            NodeLabel.of("A"), List.of(NodePropertySchema.of(
                 "prop1",
                 ValueType.LONG,
                 DefaultValue.of(42L),
                 PropertyState.PERSISTENT
             )),
-            NodeLabel.of("B"), List.of(PropertySchema.of(
+            NodeLabel.of("B"), List.of(NodePropertySchema.of(
                 "prop2",
                 ValueType.DOUBLE,
                 DefaultValue.of(13.37D),
@@ -125,7 +125,7 @@ class NodeSchemaLoaderTest {
 
         assertThat(nodeSchema).isNotNull();
         assertThat(nodeSchema.entries()).isEqualTo(Map.of(
-            NodeLabel.of("A"), List.of(PropertySchema.of(
+            NodeLabel.of("A"), List.of(NodePropertySchema.of(
                 "prop1",
                 ValueType.LONG,
                 DefaultValue.of(42L),

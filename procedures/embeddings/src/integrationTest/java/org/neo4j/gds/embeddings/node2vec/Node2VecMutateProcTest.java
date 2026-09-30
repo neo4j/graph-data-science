@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -93,7 +93,7 @@ class Node2VecMutateProcTest extends BaseProcTest {
         var propertiesBeforeMutation = graphBeforeMutation.schema()
             .nodeSchema()
             .allProperties().stream()
-            .map(PropertySchema::key)
+            .map(NodePropertySchema::key)
             .toList();
         assertThat(propertiesBeforeMutation).doesNotContain("testProp");
 
@@ -120,7 +120,7 @@ class Node2VecMutateProcTest extends BaseProcTest {
         var propertiesAfterMutation = graphAfterMutation.schema()
             .nodeSchema()
             .allProperties().stream()
-            .map(PropertySchema::key)
+            .map(NodePropertySchema::key)
             .toList();
         assertThat(propertiesAfterMutation).contains("testProp");
 

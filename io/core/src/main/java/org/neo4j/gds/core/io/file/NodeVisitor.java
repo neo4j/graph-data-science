@@ -21,8 +21,8 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.batchimport.api.input.Group;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.internal.id.IdSequence;
 
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class NodeVisitor extends ElementVisitor<PropertySchema> {
+public abstract class NodeVisitor extends ElementVisitor<NodePropertySchema> {
 
     private static final List<String> EMPTY_LABELS = Collections.emptyList();
     protected static final Set<NodeLabel> EMPTY_LABELS_LABEL = Set.of(NodeLabel.ALL_NODES);
@@ -42,7 +42,7 @@ public abstract class NodeVisitor extends ElementVisitor<PropertySchema> {
     private String labelIdentifier;
 
     protected NodeVisitor(NodeSchema nodeSchema) {
-        super(nodeSchema.allProperties().stream().map(PropertySchema::key).toList());
+        super(nodeSchema.allProperties().stream().map(NodePropertySchema::key).toList());
         this.nodeSchema = nodeSchema;
         reset();
     }
@@ -96,7 +96,7 @@ public abstract class NodeVisitor extends ElementVisitor<PropertySchema> {
     }
 
     @Override
-    protected List<PropertySchema> getPropertySchema() {
+    protected List<NodePropertySchema> getPropertySchema() {
         var nodeLabelList = currentLabels.isEmpty()
             ? EMPTY_LABELS_LABEL
             : currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());

@@ -30,10 +30,10 @@ import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 
 import java.util.Map;
 
@@ -68,7 +68,7 @@ public class TopKGraph extends GraphAdapter {
                     Direction.DIRECTED,
                     Map.of(
                         "similarity",
-                        ImmutableRelationshipPropertySchema.of(
+                        RelationshipPropertySchema.of(
                             "similarity",
                             ValueType.DOUBLE,
                             DefaultValue.DEFAULT,

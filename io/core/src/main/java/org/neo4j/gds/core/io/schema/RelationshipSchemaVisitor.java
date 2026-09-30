@@ -23,11 +23,10 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.Aggregation;
 
-public abstract class RelationshipSchemaVisitor extends InputRelationshipSchemaVisitor.Adapter {
+public abstract class RelationshipSchemaVisitor extends ElementSchemaVisitor implements InputRelationshipSchemaVisitor {
 
     private RelationshipType relationshipType;
     private Aggregation aggregation;
-
     private Direction direction;
 
     public RelationshipType relationshipType() {
@@ -38,7 +37,6 @@ public abstract class RelationshipSchemaVisitor extends InputRelationshipSchemaV
         return direction;
     }
 
-    @Override
     public Aggregation aggregation() {
         return aggregation;
     }

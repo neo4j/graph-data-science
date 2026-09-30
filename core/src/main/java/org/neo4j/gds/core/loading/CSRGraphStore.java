@@ -42,8 +42,9 @@ import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -193,7 +194,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
     @Override
     public Set<String> nodePropertyKeys() {
         // nodeProperties might have more entries as schema is label aware but NodePropertyStore is not
-        assert nodeProperties.keySet().containsAll(schema().nodeSchema().allProperties().stream().map(PropertySchema::key).collect(Collectors.toSet()));
+        assert nodeProperties.keySet().containsAll(schema().nodeSchema().allProperties().stream().map(NodePropertySchema::key).collect(Collectors.toSet()));
         return nodeProperties.keySet();
     }
 
@@ -322,7 +323,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
     @Override
     public ValueType relationshipPropertyType(String propertyKey) {
         return Optional.ofNullable(schema().relationshipSchema().unionProperties().get(propertyKey))
-            .map(PropertySchema::valueType)
+            .map(RelationshipPropertySchema::valueType)
             .orElse(ValueType.UNKNOWN);
     }
 
@@ -653,7 +654,7 @@ public final class CSRGraphStore implements GraphStoreWithTopology {
             .allProperties().stream()
             .collect(
                 Collectors.toMap(
-                    PropertySchema::key,
+                    NodePropertySchema::key,
                     (propertySchema) -> nodeProperty(propertySchema.key()).values()
                 )
             );

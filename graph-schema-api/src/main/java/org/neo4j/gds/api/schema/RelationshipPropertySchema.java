@@ -19,38 +19,56 @@
  */
 package org.neo4j.gds.api.schema;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.Aggregation;
 
-import java.util.OptionalInt;
+import java.util.Locale;
 
-@ValueClass
-@SuppressWarnings("immutables:subtype")
-public interface RelationshipPropertySchema extends PropertySchema {
-
-    Aggregation aggregation();
-
-    @Override
-    default OptionalInt dimension() {
-        return OptionalInt.empty();
+public record RelationshipPropertySchema(
+    String key,
+    ValueType valueType,
+    DefaultValue defaultValue,
+    PropertyState state,
+    Aggregation aggregation
+) implements PropertySchema {
+    public RelationshipPropertySchema {
+        aggregation = Aggregation.resolve(aggregation);
     }
 
-    static RelationshipPropertySchema of(String propertyKey, ValueType valueType) {
-        return ImmutableRelationshipPropertySchema.of(
+    public String render() {
+        return String.format(
+            Locale.ENGLISH,
+            "%s (%s, %s, Aggregation.%s)",
+            valueType().cypherName(),
+            defaultValue(),
+            state(),
+            aggregation());
+    }
+
+    public static RelationshipPropertySchema of(String propertyKey, ValueType valueType) {
+        return RelationshipPropertySchema.of(
             propertyKey,
             valueType,
             valueType.fallbackValue(),
             PropertyState.PERSISTENT,
-            Aggregation.DEFAULT
+            Aggregation.NONE
         );
     }
 
-    static RelationshipPropertySchema of(String propertyKey, ValueType valueType, Aggregation aggregation) {
-        return ImmutableRelationshipPropertySchema.of(
+    public static RelationshipPropertySchema of(String propertyKey, ValueType valueType, DefaultValue defaultValue, Aggregation aggregation) {
+        return RelationshipPropertySchema.of(
+            propertyKey,
+            valueType,
+            defaultValue,
+            PropertyState.PERSISTENT,
+            aggregation
+        );
+    }
+
+    public static RelationshipPropertySchema of(String propertyKey, ValueType valueType, Aggregation aggregation) {
+        return RelationshipPropertySchema.of(
             propertyKey,
             valueType,
             valueType.fallbackValue(),
@@ -59,26 +77,13 @@ public interface RelationshipPropertySchema extends PropertySchema {
         );
     }
 
-    static RelationshipPropertySchema of(
+    public static RelationshipPropertySchema of(
         String propertyKey,
         ValueType valueType,
         DefaultValue defaultValue,
         PropertyState propertyState,
         Aggregation aggregation
     ) {
-        return ImmutableRelationshipPropertySchema.of(propertyKey, valueType, defaultValue, propertyState, aggregation);
+        return new RelationshipPropertySchema(propertyKey, valueType, defaultValue, propertyState, aggregation);
     }
-
-    @Value.Check
-    default RelationshipPropertySchema normalize() {
-        if (aggregation() == Aggregation.DEFAULT) {
-            return ImmutableRelationshipPropertySchema
-                .builder()
-                .from(this)
-                .aggregation(Aggregation.resolve(aggregation()))
-                .build();
-        }
-        return this;
-    }
-
 }

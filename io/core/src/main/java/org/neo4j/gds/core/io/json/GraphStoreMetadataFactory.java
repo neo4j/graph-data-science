@@ -131,7 +131,7 @@ public final class GraphStoreMetadataFactory {
                     .collect(Collectors.toMap(
                     PropertySchema::key,
                     (propertySchema ->
-                        new NodePropertySchema(
+                        new org.neo4j.gds.core.io.json.NodePropertySchema(
                             toValueType(propertySchema.valueType()),
                             toDefaultValue(propertySchema.defaultValue()),
                             toPropertyState(propertySchema.state()),

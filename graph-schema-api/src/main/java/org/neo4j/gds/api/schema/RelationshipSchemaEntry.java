@@ -21,10 +21,49 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.RelationshipType;
 
-public interface RelationshipSchemaEntry extends ElementSchemaEntry<MutableRelationshipSchemaEntry, RelationshipType, RelationshipPropertySchema> {
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+
+public interface RelationshipSchemaEntry {
     Direction direction();
 
     boolean isUndirected();
+
+    RelationshipType identifier();
+
+    Map<String, RelationshipPropertySchema> properties();
+
+    RelationshipSchemaEntry union(RelationshipSchemaEntry other);
+
+    Map<String, Object> toMap();
+
+    default Map<String, RelationshipPropertySchema> unionProperties(Map<String, RelationshipPropertySchema> rightProperties) {
+        return Stream
+            .concat(properties().entrySet().stream(), rightProperties.entrySet().stream())
+            .collect(Collectors.toMap(
+                Map.Entry::getKey, Map.Entry::getValue, (leftType, rightType) -> {
+                    if (leftType.valueType() != rightType.valueType()) {
+                        throw new IllegalArgumentException(format(
+                            Locale.ENGLISH,
+                            "Combining schema entries with value type %s and %s is not supported.",
+                            properties()
+                                .entrySet()
+                                .stream()
+                                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType())),
+                            rightProperties
+                                .entrySet()
+                                .stream()
+                                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType()))
+                        ));
+                    }
+                    return leftType;
+                }
+            ));
+    }
 
     static RelationshipSchemaEntry empty(
         RelationshipType relationshipType,

@@ -21,8 +21,8 @@ package org.neo4j.gds.core.io.file.csv;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.file.NodeVisitor;
 import tools.jackson.core.JacksonException;
@@ -139,7 +139,7 @@ public class CsvNodeVisitor extends NodeVisitor {
 
     private JacksonFileAppender fileAppender(Path filePath, UnaryOperator<CsvSchema.Builder> builderUnaryOperator) {
         var propertySchema = getPropertySchema().stream()
-            .sorted(Comparator.comparing(PropertySchema::key))
+            .sorted(Comparator.comparing(NodePropertySchema::key))
             .toList();
         return JacksonFileAppender.of(
             filePath,
@@ -149,7 +149,7 @@ public class CsvNodeVisitor extends NodeVisitor {
     }
 
     @Override
-    protected List<PropertySchema> getPropertySchema() {
+    protected List<NodePropertySchema> getPropertySchema() {
         var nodeLabelList = currentLabels.isEmpty()
             ? EMPTY_LABELS_LABEL
             : currentLabels.stream()

@@ -28,8 +28,8 @@ import org.neo4j.gds.api.properties.relationships.PropertiesBuilder;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
 import org.neo4j.gds.api.properties.relationships.RelationshipPropertyStore;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -141,13 +141,13 @@ abstract class SingleTypeRelationshipsBuilder {
                 .elementCount(relationshipCount)
                 .build();
 
-            var relationshipPropertySchema = ImmutableRelationshipPropertySchema.builder()
-                .key(propertyConfig.propertyKey())
-                .aggregation(propertyConfig.aggregation())
-                .valueType(ValueType.DOUBLE)
-                .defaultValue(propertyConfig.defaultValue())
-                .state(propertyConfig.propertyState())
-                .build();
+            var relationshipPropertySchema = RelationshipPropertySchema.of(
+                propertyConfig.propertyKey(),
+                ValueType.DOUBLE,
+                propertyConfig.defaultValue(),
+                propertyConfig.propertyState(),
+                propertyConfig.aggregation()
+            );
 
             var relationshipProperty = new RelationshipProperty(
                 propertyValues,

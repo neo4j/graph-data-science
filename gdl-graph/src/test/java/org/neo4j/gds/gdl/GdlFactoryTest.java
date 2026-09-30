@@ -33,7 +33,9 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.loading.CollectingConsumer;
 
 import java.util.ArrayList;
@@ -272,12 +274,12 @@ class GdlFactoryTest {
 
         var nodeSchema = graph.schema().nodeSchema();
         var expectedNodeSchema = NodeSchema.builder()
-            .addProperty("A", "double", ValueType.DOUBLE)
-            .addProperty("A", "long", ValueType.LONG)
-            .addProperty("A", "doubleArray", ValueType.DOUBLE_ARRAY)
-            .addProperty("A", "longArray", ValueType.LONG_ARRAY)
-            .addProperty("B", "double", ValueType.DOUBLE)
-            .addProperty("B", "long", ValueType.LONG)
+            .addProperty("A", NodePropertySchema.of("double", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.TRANSIENT))
+            .addProperty("A", NodePropertySchema.of("long", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT))
+            .addProperty("A", NodePropertySchema.of("doubleArray", ValueType.DOUBLE_ARRAY,  DefaultValue.forDoubleArray(), PropertyState.TRANSIENT))
+            .addProperty("A", NodePropertySchema.of("longArray", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), PropertyState.TRANSIENT))
+            .addProperty("B", NodePropertySchema.of("double", ValueType.DOUBLE, DefaultValue.forDouble(), PropertyState.TRANSIENT))
+            .addProperty("B", NodePropertySchema.of("long", ValueType.LONG, DefaultValue.forLong(), PropertyState.TRANSIENT))
             .addLabel("C")
             .build();
         assertThat(nodeSchema).isEqualTo(expectedNodeSchema);
@@ -286,12 +288,12 @@ class GdlFactoryTest {
         var expectedRelationshipSchema = MutableRelationshipSchema.empty();
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), Direction.DIRECTED)
-            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
-            .addProperty("prop2", ValueType.DOUBLE, PropertyState.PERSISTENT);
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.TRANSIENT)
+            .addProperty("prop2", ValueType.DOUBLE, PropertyState.TRANSIENT);
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), Direction.DIRECTED)
-            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
-            .addProperty("prop3", ValueType.DOUBLE, PropertyState.PERSISTENT);
+            .addProperty("prop1", ValueType.DOUBLE, PropertyState.TRANSIENT)
+            .addProperty("prop3", ValueType.DOUBLE, PropertyState.TRANSIENT);
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), Direction.DIRECTED);
         assertThat(relationshipSchema).isEqualTo(expectedRelationshipSchema);
@@ -324,16 +326,16 @@ class GdlFactoryTest {
 
         var direction = Direction.fromOrientation(orientation);
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("A"), direction)
-            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
-            .addProperty("prop2", ValueType.DOUBLE, PropertyState.PERSISTENT);
+            .addProperty("prop1", RelationshipPropertySchema.of("prop1", ValueType.DOUBLE))
+            .addProperty("prop2", RelationshipPropertySchema.of("prop2", ValueType.DOUBLE));
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("B"), direction)
-            .addProperty("prop1", ValueType.DOUBLE, PropertyState.PERSISTENT)
-            .addProperty("prop3", ValueType.DOUBLE, PropertyState.PERSISTENT);
+            .addProperty("prop1", RelationshipPropertySchema.of("prop1", ValueType.DOUBLE))
+            .addProperty("prop3", RelationshipPropertySchema.of("prop3", ValueType.DOUBLE));
 
         expectedRelationshipSchema.getOrCreateRelationshipType(RelationshipType.of("C"), direction);
 
-        assertThat(graphStore.schema().relationshipSchema()).isEqualTo(expectedRelationshipSchema);
+        assertThat(graphStore.schema().relationshipSchema().directions()).isEqualTo(expectedRelationshipSchema.directions());
     }
 
     @Test

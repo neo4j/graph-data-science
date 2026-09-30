@@ -21,12 +21,12 @@ package org.neo4j.gds.api.properties;
 
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.NodePropertySchema;
 
 public interface Property<VALUE extends PropertyValues> {
     VALUE values();
 
-    PropertySchema propertySchema();
+    NodePropertySchema propertySchema();
 
     default String key() {
         return propertySchema().key();

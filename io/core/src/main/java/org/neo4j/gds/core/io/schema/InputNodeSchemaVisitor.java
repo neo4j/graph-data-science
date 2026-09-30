@@ -24,11 +24,4 @@ import org.neo4j.gds.NodeLabel;
 public interface InputNodeSchemaVisitor extends InputSchemaVisitor {
 
     boolean nodeLabel(NodeLabel nodeLabel);
-
-    abstract class Adapter extends ElementSchemaVisitor implements InputNodeSchemaVisitor {
-        @Override
-        public boolean nodeLabel(NodeLabel nodeLabel) {
-            return true;
-        }
-    }
 }
