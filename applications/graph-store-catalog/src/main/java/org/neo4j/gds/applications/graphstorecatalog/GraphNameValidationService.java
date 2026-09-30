@@ -88,13 +88,11 @@ public class GraphNameValidationService {
             throw new IllegalStateException("Yeah that thing above should have thrown an exception");
         }
 
-        if (graphNameOrListOfGraphNames instanceof String) {
-            return List.of(validate((String) graphNameOrListOfGraphNames));
+        if (graphNameOrListOfGraphNames instanceof String graphName) {
+            return List.of(validate(graphName));
         }
 
-        if (graphNameOrListOfGraphNames instanceof Collection<?>) {
-            var listOfGraphNames = (Collection<?>) graphNameOrListOfGraphNames;
-
+        if (graphNameOrListOfGraphNames instanceof Collection<?> listOfGraphNames) {
             var validatedGraphNames = new LinkedList<GraphName>();
             int index = 0;
             for (Object graphName : listOfGraphNames) {
