@@ -48,6 +48,7 @@ import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -158,7 +159,7 @@ class GraphAggregationPhase {
             .nodes(idMap)
             .relationshipType(RelationshipType.of("_IGNORED_"))
             .orientation(direction.toOrientation())
-            .addPropertyConfig(new GraphFactory.PropertyConfig("property", Aggregation.SUM))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig("property", Aggregation.SUM)))
             .executorService(executorService)
             .build();
 

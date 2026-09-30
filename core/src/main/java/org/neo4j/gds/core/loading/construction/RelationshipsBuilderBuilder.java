@@ -25,28 +25,26 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 public final class RelationshipsBuilderBuilder {
     private PartialIdMap nodes;
     private RelationshipType relationshipType;
     private Orientation orientation = Orientation.NATURAL;
-    private final List<GraphFactory.PropertyConfig> propertyConfigs = new ArrayList<>();
-    private Aggregation aggregation = Aggregation.DEFAULT;
+    private List<GraphFactory.PropertyConfig> propertyConfigs = new ArrayList<>();
+    private Aggregation globalAggregation = Aggregation.DEFAULT;
     private boolean skipDanglingRelationships = true;
     private Concurrency concurrency = new Concurrency(1);
     private boolean indexInverse = false;
     private ExecutorService executorService = DefaultPool.INSTANCE;
     private boolean usePooledBuilderProvider = false;
     private int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
-    private Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory = Optional.empty();
 
     RelationshipsBuilderBuilder() {}
 
@@ -68,31 +66,24 @@ public final class RelationshipsBuilderBuilder {
         return this;
     }
 
-    public RelationshipsBuilderBuilder addPropertyConfig(GraphFactory.PropertyConfig element) {
-        this.propertyConfigs.add(Objects.requireNonNull(element));
-        return this;
-    }
-
-    public RelationshipsBuilderBuilder addAllPropertyConfigs(Iterable<? extends GraphFactory.PropertyConfig> elements) {
-        for (var element : elements) {
-            this.propertyConfigs.add(Objects.requireNonNull(element));
-        }
-        return this;
-    }
-
     /**
      * @param propertyConfigs Default is an empty list.
      */
-    public RelationshipsBuilderBuilder propertyConfigs(Iterable<? extends GraphFactory.PropertyConfig> propertyConfigs) {
-        this.propertyConfigs.clear();
-        return addAllPropertyConfigs(propertyConfigs);
+    public RelationshipsBuilderBuilder propertyConfigs(List<? extends GraphFactory.PropertyConfig> propertyConfigs) {
+        this.propertyConfigs = Collections.unmodifiableList(propertyConfigs);
+        return this;
     }
 
     /**
+     * Global aggregation for all properties.<p>
+     * To configure aggregation per property, use {@code propertyConfigs()}.
+     * Global aggregation is only effective if {@code propertyConfigs} is empty.<p>
+     * To set a global aggregation that conflicts with {@code propertyConfigs} is an error.
+     *
      * @param aggregation Default is {@code Aggregation.NONE}.
      */
-    public RelationshipsBuilderBuilder aggregation(Aggregation aggregation) {
-        this.aggregation = Objects.requireNonNull(aggregation);
+    public RelationshipsBuilderBuilder globalAggregation(Aggregation aggregation) {
+        this.globalAggregation = Objects.requireNonNull(aggregation);
         return this;
     }
 
@@ -147,25 +138,17 @@ public final class RelationshipsBuilderBuilder {
         return this;
     }
 
-    /**
-     * @param adjacencyCompressorFactory Default is {@code null}.
-     */
-    public RelationshipsBuilderBuilder adjacencyCompressorFactory(AdjacencyListBehavior.Factory adjacencyCompressorFactory) {
-        this.adjacencyCompressorFactory = Optional.ofNullable(adjacencyCompressorFactory);
-        return this;
-    }
-
     public RelationshipsBuilder build() {
         Objects.requireNonNull(nodes, "nodes must be set");
         Objects.requireNonNull(relationshipType, "relationshipType must be set");
-        if (aggregation != Aggregation.DEFAULT) {
-            var conflictingAggregations = propertyConfigs.stream().filter(it -> it.aggregation() != aggregation).toList();
+        if (globalAggregation != Aggregation.DEFAULT) {
+            var conflictingAggregations = propertyConfigs.stream().filter(it -> it.aggregation() != globalAggregation).toList();
             if (!conflictingAggregations.isEmpty()) {
                 var message = """
                     Both aggregation and propertyConfigs are set, but with conflicting aggregations:
                       PropertyConfigs: %s
                       Aggregation: %s"""
-                    .formatted(conflictingAggregations, aggregation);
+                    .formatted(conflictingAggregations, globalAggregation);
                 throw new IllegalArgumentException(message);
             }
         }
@@ -174,14 +157,13 @@ public final class RelationshipsBuilderBuilder {
             relationshipType,
             orientation,
             List.copyOf(propertyConfigs),
-            aggregation,
+            globalAggregation,
             skipDanglingRelationships,
             concurrency,
             indexInverse,
             executorService,
             usePooledBuilderProvider,
-            bufferSize,
-            adjacencyCompressorFactory
+            bufferSize
         );
     }
 }

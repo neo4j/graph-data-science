@@ -29,6 +29,7 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 
+import java.util.List;
 import java.util.stream.LongStream;
 
 public class SteinerTreeMutateStep implements MutateStep<SteinerTreeResult, RelationshipsWritten> {
@@ -59,7 +60,7 @@ public class SteinerTreeMutateStep implements MutateStep<SteinerTreeResult, Rela
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graph)
             .relationshipType(RelationshipType.of(mutateRelationshipType))
-            .addPropertyConfig(new GraphFactory.PropertyConfig(mutateProperty))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig(mutateProperty)))
             .build();
 
         var parentArray = steinerTreeResult.parentArray();

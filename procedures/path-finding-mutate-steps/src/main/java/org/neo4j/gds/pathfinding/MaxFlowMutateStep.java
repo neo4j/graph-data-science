@@ -28,6 +28,8 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.maxflow.FlowResult;
 
+import java.util.List;
+
 public class MaxFlowMutateStep implements MutateStep<FlowResult, RelationshipsWritten> {
     private final String mutateRelationshipType;
     private final String mutateProperty;
@@ -54,7 +56,7 @@ public class MaxFlowMutateStep implements MutateStep<FlowResult, RelationshipsWr
             .initRelationshipsBuilder()
             .relationshipType(RelationshipType.of(mutateRelationshipType))
             .nodes(graph)
-            .addPropertyConfig(new GraphFactory.PropertyConfig(mutateProperty))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig(mutateProperty)))
             .build();
 
         for(long idx = 0; idx < result.flow().size(); idx++){

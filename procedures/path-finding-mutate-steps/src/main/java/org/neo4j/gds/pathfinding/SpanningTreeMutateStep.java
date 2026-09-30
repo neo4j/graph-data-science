@@ -29,6 +29,8 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
+import java.util.List;
+
 public class SpanningTreeMutateStep implements MutateStep<SpanningTree, RelationshipsWritten> {
     private final String mutateRelationshipType;
     private final String mutateProperty;
@@ -54,7 +56,7 @@ public class SpanningTreeMutateStep implements MutateStep<SpanningTree, Relation
             .initRelationshipsBuilder()
             .relationshipType(RelationshipType.of(mutateRelationshipType))
             .nodes(graph)
-            .addPropertyConfig(new GraphFactory.PropertyConfig(mutateProperty))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig(mutateProperty)))
             .build();
 
 

@@ -44,18 +44,8 @@ public final class NodesBuilderBuilder {
         return this;
     }
 
-    public NodesBuilderBuilder maxOriginalId(Optional<Long> maxOriginalId) {
-        this.maxOriginalId = Objects.requireNonNull(maxOriginalId);
-        return this;
-    }
-
     public NodesBuilderBuilder nodeCount(long nodeCount) {
         this.nodeCount = Optional.of(nodeCount);
-        return this;
-    }
-
-    public NodesBuilderBuilder nodeCount(Optional<Long> nodeCount) {
-        this.nodeCount = Objects.requireNonNull(nodeCount);
         return this;
     }
 

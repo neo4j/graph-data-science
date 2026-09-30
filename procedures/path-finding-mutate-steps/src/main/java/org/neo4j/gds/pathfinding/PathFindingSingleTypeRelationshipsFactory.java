@@ -26,7 +26,9 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
- final class PathFindingSingleTypeRelationshipsFactory {
+import java.util.List;
+
+final class PathFindingSingleTypeRelationshipsFactory {
      private static final String TOTAL_COST_KEY = "totalCost";
 
      private PathFindingSingleTypeRelationshipsFactory() {}
@@ -38,7 +40,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
                 .initRelationshipsBuilder()
                 .relationshipType(RelationshipType.of(mutateRelationshipType))
                 .nodes(graph)
-                .addPropertyConfig(new GraphFactory.PropertyConfig(TOTAL_COST_KEY))
+                .propertyConfigs(List.of(new GraphFactory.PropertyConfig(TOTAL_COST_KEY)))
                 .build();
 
             result.forEachPath(pathResult -> relationshipsBuilder.addFromInternal(

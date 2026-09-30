@@ -25,6 +25,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 
+import java.util.List;
+
 public final class TraversalRelationshipTransformer {
 
     private TraversalRelationshipTransformer() {}
@@ -51,7 +53,7 @@ public final class TraversalRelationshipTransformer {
             .initRelationshipsBuilder()
             .nodes(graph)
             .relationshipType(RelationshipType.of(relType))
-            .addPropertyConfig(new GraphFactory.PropertyConfig(indexProperty))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig(indexProperty)))
             .build();
 
         var source = result.get(0);

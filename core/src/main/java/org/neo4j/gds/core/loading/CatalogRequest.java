@@ -19,73 +19,41 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 
 import java.util.Optional;
 
-@ValueClass
-public abstract class CatalogRequest {
-
-    public final String username() {
-        return usernameOverride().orElseGet(this::requestingUsername);
-    }
-
-    public abstract String databaseName();
-
-    public final boolean restrictSearchToUsernameCatalog() {
-        // admin users are allowed to not have a graph, other users graphs are then searched
-        if (requesterIsAdmin() && usernameOverride().isEmpty()) {
-            return false;
-        }
-        return true;
-    }
-
-    abstract String requestingUsername();
-
-    abstract Optional<String> usernameOverride();
-
-    abstract boolean requesterIsAdmin();
-
-    @Value.Check
-    final void validate() {
-        if (!requesterIsAdmin() && usernameOverride().isPresent()) {
+public record CatalogRequest(
+    String databaseName,
+    String requestingUsername,
+    Optional<String> usernameOverride,
+    boolean requesterIsAdmin
+) {
+    public CatalogRequest{
+        if (!requesterIsAdmin && usernameOverride.isPresent()) {
             throw new IllegalStateException("Cannot override the username as a non-admin");
         }
     }
 
-    public static CatalogRequest of(User user, DatabaseId databaseId) {
-        return of(user, databaseId, Optional.empty());
+    public String username() {
+        return usernameOverride().orElseGet(this::requestingUsername);
     }
 
-    public static CatalogRequest of(User user, DatabaseId databaseId, Optional<String> usernameOverride) {
-        return ImmutableCatalogRequest.of(
-            databaseId.databaseName(),
-            user.getUsername(),
-            usernameOverride,
-            user.isAdmin()
-        );
+    boolean restrictSearchToUsernameCatalog() {
+        // admin users are allowed to not have a graph, other users graphs are then searched
+        return !requesterIsAdmin() || usernameOverride().isPresent();
+    }
+
+    public static CatalogRequest of(User user, DatabaseId databaseId) {
+        return new CatalogRequest(databaseId.databaseName(), user.getUsername(), Optional.empty(), user.isAdmin());
     }
 
     public static CatalogRequest of(String username, String databaseName) {
-        return ImmutableCatalogRequest.of(databaseName, username, Optional.empty(), false);
+        return new CatalogRequest(databaseName, username, Optional.empty(), false);
     }
 
     public static CatalogRequest of(String username, DatabaseId databaseId) {
         return of(username, databaseId.databaseName());
-    }
-
-    public static CatalogRequest ofAdmin(String username, Optional<String> usernameOverride, String databaseName) {
-        return ImmutableCatalogRequest.of(databaseName, username, usernameOverride, true);
-    }
-
-    public static CatalogRequest ofAdmin(String username, DatabaseId databaseId) {
-        return ofAdmin(username, Optional.empty(), databaseId.databaseName());
-    }
-
-    public static CatalogRequest ofAdmin(String username, Optional<String> usernameOverride, DatabaseId databaseId) {
-        return ofAdmin(username, usernameOverride, databaseId.databaseName());
     }
 }

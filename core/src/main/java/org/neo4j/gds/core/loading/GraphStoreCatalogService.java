@@ -112,7 +112,13 @@ public class GraphStoreCatalogService {
         Optional<String> usernameOverride,
         DatabaseId databaseId
     ){
-        return getGraphStoreCatalogEntry(CatalogRequest.of(user, databaseId, usernameOverride), graphName);
+        return getGraphStoreCatalogEntry(
+            new CatalogRequest(
+                databaseId.databaseName(),
+                user.getUsername(),
+                usernameOverride,
+                user.isAdmin()
+            ), graphName);
     }
 
     public GraphResources fetchGraphResources(

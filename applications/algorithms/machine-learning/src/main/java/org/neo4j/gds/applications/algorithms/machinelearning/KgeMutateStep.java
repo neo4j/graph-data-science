@@ -32,6 +32,8 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
+
 class KgeMutateStep implements MutateStep<KGEPredictResult, RelationshipsWritten> {
     private final TerminationFlag terminationFlag;
     private final KGEPredictMutateConfig configuration;
@@ -59,7 +61,7 @@ class KgeMutateStep implements MutateStep<KGEPredictResult, RelationshipsWritten
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graph)
             .relationshipType(mutateRelationshipType)
-            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.mutateProperty(),  Aggregation.NONE))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig(configuration.mutateProperty(),  Aggregation.NONE)))
             .concurrency(concurrency)
             .build();
 

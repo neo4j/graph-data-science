@@ -35,7 +35,7 @@ class GraphSizeOfApplication {
     public GraphSizeOfResult sizeOf(RequestScopedDependencies requestScopedDependencies, GraphName graphName) {
         var catalogRequest = CatalogRequest.of(
             requestScopedDependencies.user().getUsername(),
-            requestScopedDependencies.databaseId().databaseName()
+            requestScopedDependencies.databaseId()
         );
 
         var graphStoreWithConfig = graphStoreCatalogService.getGraphStoreCatalogEntry(catalogRequest, graphName);

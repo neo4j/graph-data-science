@@ -161,10 +161,10 @@ public abstract class EdgeSplitter {
     ) {
         return GraphFactory.initRelationshipsBuilder()
             .relationshipType(relationshipType)
-            .aggregation(Aggregation.SINGLE)
+            .globalAggregation(Aggregation.SINGLE)
             .nodes(rootNodes)
             .orientation(direction.toOrientation())
-            .addAllPropertyConfigs(propertyKey
+            .propertyConfigs(propertyKey
                 .map(key -> List.of(new GraphFactory.PropertyConfig(key, Aggregation.SINGLE)))
                 .orElse(List.of()))
             .build();

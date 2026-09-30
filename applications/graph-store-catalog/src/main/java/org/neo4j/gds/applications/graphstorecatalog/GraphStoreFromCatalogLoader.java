@@ -28,9 +28,9 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 
 public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
     private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
@@ -78,7 +78,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         GraphName graphName,
         BaseConfig config
     ) {
-        var request = ImmutableCatalogRequest.of(
+        var request = new CatalogRequest(
             requestScopedDependencies.databaseId().databaseName(),
             requestScopedDependencies.user().getUsername(),
             config.usernameOverride(),

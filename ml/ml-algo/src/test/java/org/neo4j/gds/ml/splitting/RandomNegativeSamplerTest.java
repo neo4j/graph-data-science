@@ -23,13 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;
 import org.neo4j.gds.Aggregation;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,12 +69,16 @@ class RandomNegativeSamplerTest {
             Optional.of(41L)
         );
 
-        RelationshipsBuilder testBuilder = GraphFactory.initRelationshipsBuilder().nodes(graph).addPropertyConfig(
-            new GraphFactory.PropertyConfig("property", Aggregation.SINGLE)
-        ).relationshipType(RelationshipType.of("TEST")).build();
-        RelationshipsBuilder trainBuilder = GraphFactory.initRelationshipsBuilder().nodes(graph).addPropertyConfig(
-            new GraphFactory.PropertyConfig("property", Aggregation.SINGLE)
-        ).relationshipType(RelationshipType.of("TRAIN")).build();
+        var testBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(graph)
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig("property", Aggregation.SINGLE)))
+            .relationshipType(RelationshipType.of("TEST"))
+            .build();
+        var trainBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(graph)
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig("property", Aggregation.SINGLE)))
+            .relationshipType(RelationshipType.of("TRAIN"))
+            .build();
 
         sampler.produceNegativeSamples(testBuilder, trainBuilder);
 

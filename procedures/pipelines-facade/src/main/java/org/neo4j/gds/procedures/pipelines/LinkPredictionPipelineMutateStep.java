@@ -32,6 +32,8 @@ import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
+
 class LinkPredictionPipelineMutateStep implements MutateStep<LinkPredictionResult, LinkPredictionMutateMetadata> {
     private final Log log;
     private final LinkPredictionPredictPipelineMutateConfig configuration;
@@ -78,7 +80,7 @@ class LinkPredictionPipelineMutateStep implements MutateStep<LinkPredictionResul
             .nodes(filteredGraph)
             .relationshipType(mutateRelationshipType)
             .orientation(Orientation.UNDIRECTED)
-            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.mutateProperty(), Aggregation.NONE))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig(configuration.mutateProperty(), Aggregation.NONE)))
             .concurrency(configuration.concurrency())
             .build();
 

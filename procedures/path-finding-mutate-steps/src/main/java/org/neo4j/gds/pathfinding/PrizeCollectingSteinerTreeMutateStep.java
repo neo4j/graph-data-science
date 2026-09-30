@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 
+import java.util.List;
 import java.util.stream.LongStream;
 
 public class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSteinerTreeResult, RelationshipsWritten> {
@@ -55,7 +56,7 @@ public class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSte
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graph)
             .relationshipType(RelationshipType.of(mutateRelationshipType))
-            .addPropertyConfig(new GraphFactory.PropertyConfig(mutateProperty))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig(mutateProperty)))
             .build();
 
         var parentArray = treeResult.parentArray();

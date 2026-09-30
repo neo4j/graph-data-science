@@ -33,6 +33,8 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 
+import java.util.List;
+
 class LinkPredictionPipelineWriteToResultStoreStep implements WriteStep<LinkPredictionResult, LinkPredictionPredictWriteMetadata> {
     private final Log log;
     private final LinkPredictionPredictPipelineWriteConfig configuration;
@@ -75,7 +77,7 @@ class LinkPredictionPipelineWriteToResultStoreStep implements WriteStep<LinkPred
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(filteredGraph)
             .relationshipType(RelationshipType.of(configuration.writeRelationshipType()))
-            .addPropertyConfig(new GraphFactory.PropertyConfig(configuration.writeProperty(), Aggregation.NONE))
+            .propertyConfigs(List.of(new GraphFactory.PropertyConfig(configuration.writeProperty(), Aggregation.NONE)))
             .concurrency(configuration.concurrency())
             .build();
 
