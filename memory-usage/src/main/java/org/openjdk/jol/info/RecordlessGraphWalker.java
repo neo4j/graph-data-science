@@ -113,6 +113,11 @@ public class RecordlessGraphWalker extends AbstractGraphWalker {
     }
 
     private long sizeOf(Object o) {
+        // Array sizes depend on their length, so they cannot be cached per class.
+        if (o.getClass().isArray()) {
+            return VM.current().sizeOf(o);
+        }
+
         var size = this.sizeCache.get(o.getClass());
         if (size == null) {
             if (o.getClass().isRecord()) {

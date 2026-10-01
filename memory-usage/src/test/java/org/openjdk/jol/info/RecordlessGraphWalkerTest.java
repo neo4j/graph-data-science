@@ -185,6 +185,24 @@ class RecordlessGraphWalkerTest {
         }
     }
 
+    @Nested
+    class TotalSizeTests {
+        @Test
+        void sizeArraysOfSameTypeByLength() {
+            var root = new MyArray(new Object[]{
+                new long[1],
+                new long[1_000],
+                new byte[3],
+                new byte[1_000],
+                new Object[]{new long[10_000]}
+            });
+
+            var expected = new GraphWalker().walk(root).totalSize();
+            var actual = new RecordlessGraphWalker().walk(root).totalSize();
+
+            assertThat(actual).isEqualTo(expected);
+        }
+    }
 
     record MyRecord(
         // We need to have at least one field to trigger jol to fail.
