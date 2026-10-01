@@ -74,7 +74,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Del
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yens;
 
 /**
  * Here is the top level business facade for all your path finding mutate needs.
@@ -324,15 +323,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration.mutateRelationshipType(), mutateRelationshipService);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathYens(
             graphName,
             configuration,
-            Yens,
-            () -> estimationFacade.singlePairShortestPathYens(configuration),
-            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT singlePairShortestPathYensWithPaths(
@@ -343,20 +339,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
 
-        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
-            Optional.empty(),
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathYens(
             graphName,
             configuration,
-            Optional.empty(),
-            Yens,
-            DimensionTransformer.DISABLED,
-            () -> estimationFacade.singlePairShortestPathYens(configuration),
-            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.of(sideEffect),
             new MutateResultRenderer<>(configuration, resultBuilder)
-        );
+        ));
     }
-
 
     public <RESULT> RESULT singleSourceShortestPathDijkstra(
         GraphName graphName,

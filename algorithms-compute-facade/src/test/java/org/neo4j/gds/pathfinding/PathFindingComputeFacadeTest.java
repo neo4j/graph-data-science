@@ -41,7 +41,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
-import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.spanningtree.PrimOperators;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
@@ -180,22 +179,6 @@ class PathFindingComputeFacadeTest {
             graph,
             new PCSTParameters(
                 "prize",
-                new Concurrency(2)
-            ),
-            jobIdMock,
-            true
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
-    @Test
-    void singlePairShortestPathYens() {
-        var future = facade.singlePairShortestPathYens(
-            graph,
-            new YensParameters(
-                idFunction.of("a"),
-                idFunction.of("c"),
-                1,
                 new Concurrency(2)
             ),
             jobIdMock,

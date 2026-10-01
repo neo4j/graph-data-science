@@ -34,6 +34,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteSideEffect;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
@@ -75,7 +76,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Del
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yens;
 
 /**
  * Here is the top level business facade for all your path finding write needs.
@@ -253,14 +253,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ShortestPathAStarWriteConfig configuration,
         ResultBuilder<ShortestPathAStarWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new ShortestPathWriteStep(
-            writeRelationshipService,
-            configuration.writeRelationshipType(),
-            configuration.writeNodeIds(),
-            configuration.writeCosts(),
-            configuration::resolveResultStore,
-            configuration.jobId()
-        );
+        var writeStep = createShortestPathWriteStep(configuration);
 
         return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathAStar(
             graphName,
@@ -275,14 +268,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ShortestPathDijkstraWriteConfig configuration,
         ResultBuilder<ShortestPathDijkstraWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new ShortestPathWriteStep(
-            writeRelationshipService,
-            configuration.writeRelationshipType(),
-            configuration.writeNodeIds(),
-            configuration.writeCosts(),
-            configuration::resolveResultStore,
-            configuration.jobId()
-        );
+        var writeStep = createShortestPathWriteStep(configuration);
 
         return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathDijkstra(
             graphName,
@@ -298,14 +284,14 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ShortestPathYensWriteConfig configuration,
         ResultBuilder<ShortestPathYensWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        return runAlgorithmAndWrite(
+        var writeStep = createShortestPathWriteStep(configuration);
+
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathYens(
             graphName,
             configuration,
-            Yens,
-            () -> estimationFacade.singlePairShortestPathYens(configuration),
-            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT singleSourceShortestPathDijkstra(
@@ -380,14 +366,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         Computation<PathFindingResult> algorithm,
         ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new ShortestPathWriteStep(
-            writeRelationshipService,
-            configuration.writeRelationshipType(),
-            configuration.writeNodeIds(),
-            configuration.writeCosts(),
-            configuration::resolveResultStore,
-            configuration.jobId()
-        );
+        var writeStep = createShortestPathWriteStep(configuration);
 
         return runAlgorithmAndWrite(
             graphName,
@@ -417,6 +396,19 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             algorithm,
             writeStep,
             resultBuilder
+        );
+    }
+
+    private <CONFIGURATION extends JobIdConfig & WriteRelationshipConfig & WritePathOptionsConfig> ShortestPathWriteStep createShortestPathWriteStep(
+        CONFIGURATION configuration
+    ) {
+        return new ShortestPathWriteStep(
+            writeRelationshipService,
+            configuration.writeRelationshipType(),
+            configuration.writeNodeIds(),
+            configuration.writeCosts(),
+            configuration::resolveResultStore,
+            configuration.jobId()
         );
     }
 }

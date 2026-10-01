@@ -48,6 +48,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
@@ -274,6 +275,27 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __, ___) -> algorithms.singlePairShortestPathDijkstra(graph, configuration),
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             AlgorithmLabel.Dijkstra,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> singlePairShortestPathYens(
+        GraphName graphName,
+        ShortestPathYensBaseConfig configuration,
+        Optional<SideEffect<PathFindingResult, METADATA>> sideEffect,
+        ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()));
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.singlePairShortestPathYens(graph, configuration),
+            () -> estimationFacade.singlePairShortestPathYens(configuration),
+            AlgorithmLabel.Yens,
             sideEffect,
             resultRenderer
         );

@@ -35,7 +35,6 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -128,22 +127,6 @@ public class PathFindingAlgorithmsBusinessFacade {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.pcst(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
-    }
-
-    public PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
-
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.yens(graph, configuration.concurrency(), configuration.k()),
-            configuration
-        );
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.singlePairShortestPathYens(
                 graph,
                 configuration.toParameters(),
                 progressTracker,

@@ -44,7 +44,7 @@ import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTStreamConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -60,7 +60,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bel
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yens;
 
 /**
  * Here is the top level business facade for all your path finding stream needs.
@@ -253,18 +252,15 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> singlePairShortestPathYens(
         GraphName graphName,
-        ShortestPathYensStreamConfig configuration,
+        ShortestPathYensBaseConfig configuration,
         StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathYens(
             graphName,
             configuration,
-            Yens,
-            () -> estimation.singlePairShortestPathYens(configuration),
-            (graph, __) -> algorithms.singlePairShortestPathYens(graph, configuration),
-            resultBuilder
-
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> singleSourceShortestPathDijkstra(

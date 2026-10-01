@@ -24,7 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
@@ -38,8 +37,6 @@ import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.yens.YensFactory;
-import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PCSTFast;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
@@ -255,41 +252,6 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             pcstFast::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<PathFindingResult>> singlePairShortestPathYens(
-        Graph graph,
-        YensParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PathFindingResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.yens(graph, parameters.concurrency(), parameters.k()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var yens = YensFactory.create(
-            graph,
-            parameters,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            yens::compute,
             jobId
         );
     }
