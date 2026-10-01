@@ -227,7 +227,6 @@ public final class ApplicationsFacade {
             loggers.log(),
             requestScopedDependencies,
             algorithmEstimationTemplate,
-            algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateRelationshipService,
             writeContext,

@@ -21,39 +21,27 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
-import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN;
-
 public class SimilarityAlgorithmsStreamModeBusinessFacade {
-    private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final SimilarityAlgorithmsBusinessFacade similarityAlgorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final InstrumentedSimilarityAlgorithms instrumentedSimilarityAlgorithms;
     private final Synchroniser synchroniser;
 
     SimilarityAlgorithmsStreamModeBusinessFacade(
-        SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        SimilarityAlgorithmsBusinessFacade similarityAlgorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         InstrumentedSimilarityAlgorithms instrumentedSimilarityAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.estimationFacade = estimationFacade;
-        this.similarityAlgorithms = similarityAlgorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.instrumentedSimilarityAlgorithms = instrumentedSimilarityAlgorithms;
         this.synchroniser = synchroniser;
     }
@@ -86,17 +74,15 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> knn(
         GraphName graphName,
-        KnnStreamConfig configuration,
+        KnnBaseConfig configuration,
         StreamResultBuilder<KnnResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedSimilarityAlgorithms.knn(
             graphName,
             configuration,
-            KNN,
-            () -> estimationFacade.knn(configuration),
-            (graph, __) -> similarityAlgorithms.knn(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> nodeSimilarity(

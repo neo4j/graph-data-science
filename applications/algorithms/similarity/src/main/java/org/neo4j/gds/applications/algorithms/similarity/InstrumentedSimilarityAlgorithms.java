@@ -28,6 +28,8 @@ import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
@@ -101,6 +103,27 @@ public class InstrumentedSimilarityAlgorithms {
             (graph, __, ___) -> algorithms.filteredNodeSimilarity(graph, configuration),
             () -> estimationFacade.filteredNodeSimilarity(configuration),
             AlgorithmLabel.FilteredNodeSimilarity,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> knn(
+        GraphName graphName,
+        KnnBaseConfig configuration,
+        Optional<SideEffect<KnnResult, METADATA>> sideEffect,
+        ResultRenderer<KnnResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new KnnETL(configuration.toParameters().nodePropertiesNames()));
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.knn(graph, configuration),
+            () -> estimationFacade.knn(configuration),
+            AlgorithmLabel.KNN,
             sideEffect,
             resultRenderer
         );

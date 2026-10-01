@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.similarity;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -55,7 +54,6 @@ public final class SimilarityApplications {
         Log log,
         RequestScopedDependencies requestScopedDependencies,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateRelationshipService mutateRelationshipService,
         WriteContext writeContext,
@@ -65,11 +63,6 @@ public final class SimilarityApplications {
         var estimationModeFacade = new SimilarityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var similarityAlgorithms = new SimilarityAlgorithms(requestScopedDependencies.terminationFlag());
 
-        var businessFacade = new SimilarityAlgorithmsBusinessFacade(
-            similarityAlgorithms,
-            progressTrackerCreator
-        );
-
         var trackedAlgorithms = new TrackedSimilarityAlgorithms(similarityAlgorithms, progressTrackerCreator);
         var raw = new InstrumentedSimilarityAlgorithms(
             trackedAlgorithms,
@@ -78,9 +71,6 @@ public final class SimilarityApplications {
         );
 
         var mutateModeFacade = new SimilarityAlgorithmsMutateModeBusinessFacade(
-            estimationModeFacade,
-            businessFacade,
-            algorithmProcessingTemplateConvenience,
             mutateRelationshipService,
             requestScopedDependencies.terminationFlag(),
             raw,
@@ -88,17 +78,11 @@ public final class SimilarityApplications {
         );
 
         var statsModeFacade = new SimilarityAlgorithmsStatsModeBusinessFacade(
-            estimationModeFacade,
-            businessFacade,
-            algorithmProcessingTemplateConvenience,
             raw,
             synchroniser
         );
 
         var streamModeFacade = new SimilarityAlgorithmsStreamModeBusinessFacade(
-            estimationModeFacade,
-            businessFacade,
-            algorithmProcessingTemplateConvenience,
             raw,
             synchroniser
         );
@@ -106,9 +90,6 @@ public final class SimilarityApplications {
         var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies, writeContext);
 
         var writeModeFacade = new SimilarityAlgorithmsWriteModeBusinessFacade(
-            estimationModeFacade,
-            businessFacade,
-            algorithmProcessingTemplateConvenience,
             writeRelationshipService,
             requestScopedDependencies.terminationFlag(),
             raw,
