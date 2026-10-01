@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.validation;
+package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatException;
@@ -32,39 +33,32 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class NodeSimilarityRequirementTest {
-
+class NodeSimilarityETLTest {
     @Test
-    void shouldNotValidateIfNotWccSet(){
+    void shouldNotValidateIfNotWccSet() {
         var graphStore = mock(GraphStore.class);
-        when(graphStore.hasNodeProperty(ArgumentMatchers.anyCollection(),anyString())).thenReturn(false);
-        var  validation = new NodeSimilarityRequirement(
-            false,
-            "p"
-        );
+        when(graphStore.hasNodeProperty(ArgumentMatchers.anyCollection(), anyString())).thenReturn(false);
+        var validation = new NodeSimilarityETL(false, "p");
 
-        assertThatNoException().isThrownBy(() -> validation.validate(
+        assertThatNoException().isThrownBy(() -> validation.onGraphStoreFiltered(
             graphStore,
             Set.of(NodeLabel.of("Node")),
-            null
+            null,
+            Optional.empty()
         ));
     }
 
     @Test
-    void shouldValidateIfNotSet(){
+    void shouldValidateIfNotSet() {
         var graphStore = mock(GraphStore.class);
-        when(graphStore.hasNodeProperty(ArgumentMatchers.anyCollection(),anyString())).thenReturn(false);
-        var  validation = new NodeSimilarityRequirement(
-            true,
-            "p"
-        );
+        when(graphStore.hasNodeProperty(ArgumentMatchers.anyCollection(), anyString())).thenReturn(false);
+        var validation = new NodeSimilarityETL(true, "p");
 
-        assertThatException().isThrownBy(() -> validation.validate(
+        assertThatException().isThrownBy(() -> validation.onGraphStoreFiltered(
             graphStore,
             Set.of(NodeLabel.of("Node")),
-            null
+            null,
+            Optional.empty()
         ));
     }
-
-
 }

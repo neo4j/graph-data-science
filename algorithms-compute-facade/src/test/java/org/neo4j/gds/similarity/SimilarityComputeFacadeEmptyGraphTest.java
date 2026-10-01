@@ -29,7 +29,6 @@ import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.similarity.knn.KnnResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,21 +71,6 @@ class SimilarityComputeFacadeEmptyGraphTest {
         );
         var result = future.join();
         assertThat(result.result()).isEqualTo(KnnResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void nodeSimilarity() {
-        var future = facade.nodeSimilarity(
-            graph,
-            null,
-            jobIdMock,
-            true
-        );
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(NodeSimilarityResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

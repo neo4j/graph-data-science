@@ -38,8 +38,6 @@ import org.neo4j.gds.similarity.knn.K;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnSampler;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityMetric;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -132,41 +130,5 @@ class SimilarityComputeFacadeTest {
         );
         assertThat(results.computeMillis()).isNotNegative();
 
-    }
-
-    @Test
-    void nodeSimilarity() {
-
-        var parameters = new NodeSimilarityParameters(
-            new Concurrency(1),
-            NodeSimilarityMetric.JACCARD,
-            1,
-            Integer.MAX_VALUE,
-            0,
-            1,
-            0,
-            true,
-            true,
-            false,
-            null
-        );
-
-        var future = facade.nodeSimilarity(
-            graph,
-            parameters,
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().streamResult()).containsExactly(
-            new SimilarityResult(
-                graph.toMappedNodeId("a"),
-                graph.toMappedNodeId("b"),
-                2/3.0
-            )
-        );
-        assertThat(results.computeMillis()).isNotNegative();
     }
 }
