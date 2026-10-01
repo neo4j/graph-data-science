@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.model.catalog;
 
+import org.neo4j.gds.api.schema.GraphSchemaRenderer;
 import org.neo4j.gds.core.model.Model;
 
 import java.time.ZoneId;
@@ -62,7 +63,7 @@ public record ModelMetadata(
             model.creator(),
             model.algoType(),
             model.creationTime(),
-            model.graphSchema().toMapOld(),
+            GraphSchemaRenderer.toMapOld(model.graphSchema()),
             model.trainConfig().toMap(),
             model.customInfo().toMap(),
             model.loaded(),
