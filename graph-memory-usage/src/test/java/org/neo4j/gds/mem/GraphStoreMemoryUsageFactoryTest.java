@@ -20,8 +20,15 @@
 package org.neo4j.gds.mem;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.gdl.GdlFactory;
 
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 
 class GraphStoreMemoryUsageFactoryTest {
@@ -33,4 +40,44 @@ class GraphStoreMemoryUsageFactoryTest {
 
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldAccountForAllPagesOfALargeGraph() {
+        var nodeCount = 1_000_000L;
+        var graphStore = RandomGraphGenerator.builder()
+            .nodeCount(nodeCount)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(42)
+            .build()
+            .generateGraphstore(DatabaseId.EMPTY, new Concurrency(4));
+        var relationshipCount = graphStore.relationshipCount();
+
+        var memoryUsage = GraphStoreMemoryUsageFactory.of(graphStore);
+        var details = memoryUsage.detailSizeInBytes();
+        var nodes = (Map<String, Long>) details.get("nodes");
+        var relationships = (Map<String, Long>) details.get("relationships");
+        var adjacencyList = ((Map<String, Map<String, Object>>) details.get("adjacencyLists")).get("REL");
+
+        // the adjacency list must span multiple pages for this test to be meaningful
+        assertThat((long) adjacencyList.get("pages")).isGreaterThan(1L);
+
+        // lower bounds derived from the graph dimensions, not from the walker
+        var minOffsets = Estimate.sizeOfLongArray(nodeCount);
+        var minDegrees = Estimate.sizeOfIntArray(nodeCount);
+        var minForwardMapping = Estimate.sizeOfLongArray(nodeCount);
+        var minBackwardMapping = nodeCount * Long.BYTES;
+        var minTargetIds = relationshipCount; // at least one byte per target id
+
+        assertThat(relationships.get("offsets")).isGreaterThanOrEqualTo(minOffsets);
+        assertThat(relationships.get("degrees")).isGreaterThanOrEqualTo(minDegrees);
+        assertThat(relationships.get("targetIds")).isGreaterThanOrEqualTo(minTargetIds);
+        assertThat(nodes.get("forwardMapping")).isGreaterThanOrEqualTo(minForwardMapping);
+        assertThat(nodes.get("backwardMapping")).isGreaterThanOrEqualTo(minBackwardMapping);
+
+        var minTotal = minOffsets + minDegrees + minTargetIds + minForwardMapping + minBackwardMapping;
+        assertThat(memoryUsage.sizeInBytes()).isGreaterThanOrEqualTo(minTotal);
+        // used by gds.graph.list
+        assertThat(MemoryUsage.sizeOf(graphStore)).isGreaterThanOrEqualTo(minTotal);
+    }
 }
