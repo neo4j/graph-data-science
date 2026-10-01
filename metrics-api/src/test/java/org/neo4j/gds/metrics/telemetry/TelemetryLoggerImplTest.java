@@ -136,8 +136,27 @@ class TelemetryLoggerImplTest {
         ));
     }
 
-    <T> T extractLog(GdsTestLog log, String prefix, Class<T> type) throws JacksonException {
-        var messages = log.getMessages(GdsTestLog.INFO);
+    @Test
+    void shouldLogExportTelemetry() throws JacksonException {
+        var testLog = new GdsTestLog();
+        var telemetryLogger = new TelemetryLoggerImpl(testLog);
+
+        telemetryLogger.logExport("my-graph", new JobId("job-42"), "NODE", 100L, 800L, 1234L, 1337L);
+
+        var entry = extractLog(testLog, "Export Telemetry: ", TelemetryLoggerImpl.ExportLogEntry.class);
+
+        assertThat(entry).isEqualTo(new TelemetryLoggerImpl.ExportLogEntry(
+            "my-graph",
+            "job-42",
+            "NODE",
+            100L,
+            800L,
+            1234L,
+            1337L
+        ));
+    }
+
+    <T> T extractLog(GdsTestLog log, String prefix, Class<T> type) throws JacksonException {        var messages = log.getMessages(GdsTestLog.INFO);
         assertThat(messages).hasSize(1);
 
         var message = messages.getFirst();

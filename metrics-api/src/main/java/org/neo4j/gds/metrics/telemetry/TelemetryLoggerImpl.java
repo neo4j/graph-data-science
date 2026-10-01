@@ -77,6 +77,34 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
         }
     }
 
+    @Override
+    public void logExport(
+        String graphName,
+        JobId jobId,
+        String kind,
+        long exportedRecords,
+        long exportedBytes,
+        long exportMillis,
+        long startTime
+    ) {
+        try {
+            var logEntry = new ExportLogEntry(
+                graphName,
+                jobId.asString(),
+                kind,
+                exportedRecords,
+                exportedBytes,
+                exportMillis,
+                startTime
+            );
+
+            var jsonEntry = OBJECT_MAPPER.writeValueAsString(logEntry);
+            log.info("Export Telemetry: %s", jsonEntry);
+        } catch (Exception e) {
+            log.warn("Failed to log telemetry: %s", e.getMessage());
+        }
+    }
+
     public record GraphLogEntry(
         int graphId,
         long nodeCount,
@@ -100,6 +128,18 @@ public class TelemetryLoggerImpl implements TelemetryLogger {
         long computeMillis,
         List<String> configuredParameters,
         // as jobId can be set by the user we use jobId + startTime. and we dont want to introduce yet another id
+        long startTime
+    ) {
+
+    }
+
+    public record ExportLogEntry(
+        String graphName,
+        String jobId,
+        String kind,
+        long exportedRecords,
+        long exportedBytes,
+        long exportMillis,
         long startTime
     ) {
 

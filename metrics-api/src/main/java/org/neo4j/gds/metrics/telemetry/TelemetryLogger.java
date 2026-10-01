@@ -38,6 +38,16 @@ public interface TelemetryLogger {
 
     void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config, long startTime);
 
+    void logExport(
+        String graphName,
+        JobId jobId,
+        String kind,
+        long exportedRecords,
+        long exportedBytes,
+        long exportMillis,
+        long startTime
+    );
+
     TelemetryLogger DISABLED = new TelemetryLogger() {
         @Override
         public void logGraph(
@@ -49,6 +59,19 @@ public interface TelemetryLogger {
 
         @Override
         public void logAlgorithm(int graphId, JobId jobId, String algorithm, long computeMillis, ToMapConvertible config, long startTime) {
+
+        }
+
+        @Override
+        public void logExport(
+            String graphName,
+            JobId jobId,
+            String kind,
+            long exportedRecords,
+            long exportedBytes,
+            long exportMillis,
+            long startTime
+        ) {
 
         }
     };
