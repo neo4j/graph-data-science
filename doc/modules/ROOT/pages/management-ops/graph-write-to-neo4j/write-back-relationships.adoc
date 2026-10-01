@@ -48,7 +48,7 @@ YIELD
 |===
 | Name                   | Type                  | Default           | Optional | Description
 include::partial$/algorithms/common-configuration/concurrency-entry.adoc[]
-| writeConcurrency       | Integer               | 'concurrency'     | yes | The number of concurrent threads used for writing the relationship properties. Note, this procedure is always running single-threaded.
+| writeConcurrency       | Integer               | 'concurrency'     | yes | The number of concurrent threads used for writing the relationship properties. In a xref:aura-graph-analytics/index.adoc[GDS Session], the relationships are written back using this many concurrent transactions. Otherwise, this procedure is always running single-threaded.
 |===
 
 .Results
@@ -120,7 +120,7 @@ This can be used to write algorithm results (for example from xref:algorithms/no
 
 The relationships to write are specified by a relationship type.
 
-NOTE: Relationships are always written using a single thread.
+NOTE: In a xref:aura-graph-analytics/index.adoc[GDS Session], relationships are written back using `writeConcurrency` concurrent transactions. Otherwise, relationships are always written using a single thread.
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
