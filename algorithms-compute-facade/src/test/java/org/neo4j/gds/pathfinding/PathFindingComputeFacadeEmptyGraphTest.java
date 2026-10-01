@@ -34,7 +34,6 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -165,26 +164,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
         var result = future.join();
 
         assertThat(result.result()).isNotNull().isEqualTo(PrizeSteinerTreeResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void singlePairShortestPathYens() {
-        var future = facade.singlePairShortestPathYens(
-            graph,
-            mock(YensParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result.result())
-            .isNotNull()
-            .extracting(PathFindingResult::pathSet)
-            .asInstanceOf(SET)
-            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
