@@ -106,6 +106,8 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
     }
 
     private static final class PooledProvider extends LocalRelationshipsBuilderProvider {
+        private static final Timeout NO_WAIT = new Timeout(0, TimeUnit.NANOSECONDS);
+
         private final Pool<Slot> pool;
         // The timeout is captured at provider construction; tests that lower
         // GdsFeatureToggles.POOLED_BUILDER_TIMEOUT_SECONDS must do so before
@@ -173,9 +175,18 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
 
         @Override
         LocalRelationshipsBuilderSlot tryAcquire() {
-            var slot = pool.tryClaim();
-            VarHandle.acquireFence();
-            return slot;
+            // Do not use pool.tryClaim(): in stormpot 4.2 it busy-loops on a slot that another
+            // thread holds via its thread-local fast path, allocating a retained node per
+            // iteration until that slot is released (session OOM). A zero-timeout claim polls
+            // the live queue once and returns null instead.
+            try {
+                var slot = pool.claim(NO_WAIT);
+                VarHandle.acquireFence();
+                return slot;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
         }
 
         @Override

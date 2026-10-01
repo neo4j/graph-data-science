@@ -21,10 +21,14 @@ package org.neo4j.gds.core.loading.construction;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -140,6 +144,47 @@ class LocalRelationshipsBuilderProviderTest {
                 slot = provider.tryAcquire();
                 assertThat(slot).isNotNull();
                 slot.release();
+            }
+        }
+
+        @Test
+        @Timeout(value = 30, unit = TimeUnit.SECONDS)
+        void shouldTryAcquireWithoutSpinningWhileAnotherThreadHoldsItsCachedSlot() throws Exception {
+            try (var provider = LocalRelationshipsBuilderProvider.pooled(
+                () -> mock(LocalRelationshipsBuilder.class),
+                new Concurrency(1)
+            )) {
+                var holding = new CountDownLatch(1);
+                var done = new CountDownLatch(1);
+                var holder = new Thread(() -> {
+                    // claim + release once so the slot becomes this thread's cached slot,
+                    // then re-claim it via stormpot's thread-local fast path and keep holding it
+                    provider.acquire().release();
+                    var slot = provider.acquire();
+                    holding.countDown();
+                    try {
+                        done.await();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } finally {
+                        slot.release();
+                    }
+                });
+                holder.start();
+                holding.await();
+
+                try {
+                    var executor = Executors.newSingleThreadExecutor();
+                    try {
+                        var result = executor.submit(provider::tryAcquire);
+                        assertThat(result.get(5, TimeUnit.SECONDS)).isNull();
+                    } finally {
+                        executor.shutdownNow();
+                    }
+                } finally {
+                    done.countDown();
+                    holder.join();
+                }
             }
         }
     }
