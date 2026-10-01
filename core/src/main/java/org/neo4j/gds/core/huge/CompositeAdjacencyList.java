@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.memory.info.ImmutableMemoryInfo;
 import org.neo4j.gds.memory.info.MemoryInfo;
 
 import java.util.ArrayList;
@@ -176,7 +175,7 @@ public final class CompositeAdjacencyList implements AdjacencyList {
             .mapToLong(OptionalLong::getAsLong)
             .reduce(Long::sum);
 
-        return ImmutableMemoryInfo.builder().pages(pages).bytesOnHeap(bytesOnHeap).bytesOffHeap(bytesOffHeap).build();
+        return MemoryInfo.builder().pages(pages).bytesOnHeap(bytesOnHeap).bytesOffHeap(bytesOffHeap).build();
     }
 
 }

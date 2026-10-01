@@ -27,11 +27,10 @@ description = 'Neo4j Graph Data Science :: Memory Info'
 group = 'org.neo4j.gds'
 
 dependencies {
-    annotationProcessor openGds.immutables.value
-
+    annotationProcessor openGds.recordBuilder
     annotationProcessor project(':annotations')
 
-    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.recordBuilder
 
     implementation project(':annotations')
     implementation project(':histogram')
