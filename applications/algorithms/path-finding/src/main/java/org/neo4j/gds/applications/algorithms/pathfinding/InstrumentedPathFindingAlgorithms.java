@@ -31,7 +31,9 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphLoadedETL;
+import org.neo4j.gds.core.loading.validation.NonNegativeWeightsOnlyETL;
 import org.neo4j.gds.core.loading.validation.RelationshipPropertyGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
@@ -41,6 +43,7 @@ import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
@@ -215,6 +218,28 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __, ___) -> algorithms.randomWalk(graph, configuration),
             () -> estimationFacade.randomWalk(configuration),
             AlgorithmLabel.RandomWalk,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> singlePairShortestPathAStar(
+        GraphName graphName,
+        ShortestPathAStarBaseConfig configuration,
+        Optional<SideEffect<PathFindingResult, METADATA>> sideEffect,
+        ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()))
+            .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.singlePairShortestPathAStar(graph, configuration),
+            estimationFacade::singlePairShortestPathAStar,
+            AlgorithmLabel.AStar,
             sideEffect,
             resultRenderer
         );

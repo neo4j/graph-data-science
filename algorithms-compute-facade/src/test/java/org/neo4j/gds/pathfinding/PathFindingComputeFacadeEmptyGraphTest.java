@@ -30,7 +30,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
@@ -166,26 +165,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
         var result = future.join();
 
         assertThat(result.result()).isNotNull().isEqualTo(PrizeSteinerTreeResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void singlePairShortestPathAStar() {
-        var future = facade.singlePairShortestPathAStar(
-            graph,
-            mock(AStarParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result.result())
-            .isNotNull()
-            .extracting(PathFindingResult::pathSet)
-            .asInstanceOf(SET)
-            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

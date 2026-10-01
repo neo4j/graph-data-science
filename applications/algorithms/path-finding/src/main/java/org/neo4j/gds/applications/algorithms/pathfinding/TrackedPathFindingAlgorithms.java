@@ -36,6 +36,7 @@ import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
@@ -185,6 +186,24 @@ public class TrackedPathFindingAlgorithms {
                 progressTracker,
                 requestScopedDependencies.terminationFlag(),
                 DefaultPool.INSTANCE
+            ),
+            progressTracker,
+            false
+        );
+    }
+
+    PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
+        var progressTracker = createProgressTracker(
+            PathFindingAlgorithmTasks.aStar(graph, configuration.concurrency()),
+            configuration
+        );
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.singlePairShortestPathAStar(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
             ),
             progressTracker,
             false

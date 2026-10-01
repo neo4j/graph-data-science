@@ -69,7 +69,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
@@ -277,15 +276,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration.mutateRelationshipType(), mutateRelationshipService);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathAStar(
             graphName,
             configuration,
-            AStar,
-            estimationFacade::singlePairShortestPathAStar,
-            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT singlePairShortestPathDijkstra(

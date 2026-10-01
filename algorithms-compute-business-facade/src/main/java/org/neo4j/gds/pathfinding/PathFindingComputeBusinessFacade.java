@@ -37,7 +37,6 @@ import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.applications.algorithms.pathfinding.RandomWalkGraphValidation;
-import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
@@ -232,38 +231,6 @@ public class PathFindingComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.pcst(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> singlePairShortestPathAStar(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        AStarParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PathFindingResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidation(new SourceNodeTargetNodeRequirement(
-                parameters.sourceNode(),
-                parameters.targetNode()
-            )),
-            true,
-            Optional.of(new RandomWalkGraphValidation(parameters.concurrency(), executorService))
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.singlePairShortestPathAStar(
             graph,
             parameters,
             jobId,

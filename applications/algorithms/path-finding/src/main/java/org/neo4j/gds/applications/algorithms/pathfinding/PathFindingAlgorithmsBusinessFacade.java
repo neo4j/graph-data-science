@@ -30,7 +30,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
-import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
@@ -134,21 +133,6 @@ public class PathFindingAlgorithmsBusinessFacade {
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ), progressTracker, true);
-    }
-
-    public PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.aStar(graph, configuration.concurrency()),
-            configuration
-        );
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.singlePairShortestPathAStar(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, false);
     }
 
     public PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {

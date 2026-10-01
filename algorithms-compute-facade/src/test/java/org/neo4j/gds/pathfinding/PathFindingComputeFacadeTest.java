@@ -38,7 +38,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.paths.astar.AStarParameters;
 import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
@@ -181,23 +180,6 @@ class PathFindingComputeFacadeTest {
             graph,
             new PCSTParameters(
                 "prize",
-                new Concurrency(2)
-            ),
-            jobIdMock,
-            true
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
-    @Test
-    void singlePairShortestPathAStar() {
-        var future = facade.singlePairShortestPathAStar(
-            graph,
-            new AStarParameters(
-                "prize",
-                "prize",
-                idFunction.of("a"),
-                idFunction.of("c"),
                 new Concurrency(2)
             ),
             jobIdMock,

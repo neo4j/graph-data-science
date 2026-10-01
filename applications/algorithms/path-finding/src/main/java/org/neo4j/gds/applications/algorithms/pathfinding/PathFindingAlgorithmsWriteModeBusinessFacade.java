@@ -70,7 +70,6 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
@@ -254,14 +253,21 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ShortestPathAStarWriteConfig configuration,
         ResultBuilder<ShortestPathAStarWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        return runAlgorithmAndWrite(
+        var writeStep = new ShortestPathWriteStep(
+            writeRelationshipService,
+            configuration.writeRelationshipType(),
+            configuration.writeNodeIds(),
+            configuration.writeCosts(),
+            configuration::resolveResultStore,
+            configuration.jobId()
+        );
+
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathAStar(
             graphName,
             configuration,
-            AStar,
-            estimationFacade::singlePairShortestPathAStar,
-            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT singlePairShortestPathDijkstra(

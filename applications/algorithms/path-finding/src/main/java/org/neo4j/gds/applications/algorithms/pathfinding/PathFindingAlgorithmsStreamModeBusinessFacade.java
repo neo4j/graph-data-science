@@ -35,7 +35,7 @@ import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
-import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
@@ -56,7 +56,6 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
@@ -227,17 +226,15 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> singlePairShortestPathAStar(
         GraphName graphName,
-        ShortestPathAStarStreamConfig configuration,
+        ShortestPathAStarBaseConfig configuration,
         StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singlePairShortestPathAStar(
             graphName,
             configuration,
-            AStar,
-            estimation::singlePairShortestPathAStar,
-            (graph, __) -> algorithms.singlePairShortestPathAStar(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> singlePairShortestPathDijkstra(
