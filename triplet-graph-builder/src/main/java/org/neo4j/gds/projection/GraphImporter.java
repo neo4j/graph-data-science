@@ -26,8 +26,8 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchemaBuilder;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compression.api.AdjacencyCompressor;
@@ -82,7 +82,7 @@ public final class GraphImporter {
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final ProgressTracker progressTracker;
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
-    private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
+    private final MutableGraphSchemaBuilder graphSchemaBuilder;
     private final int relationshipBufferSize;
 
     private final Set<ThreadLocalBatches> threadLocalBatches;

@@ -24,7 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
-import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
+import org.neo4j.gds.api.schema.MutableGraphSchemaBuilder;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -61,7 +61,7 @@ public abstract class FileToGraphStoreImporter {
     private final Path importPath;
     private final Concurrency concurrency;
 
-    private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
+    private final MutableGraphSchemaBuilder graphSchemaBuilder;
     private final Log log;
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
@@ -82,7 +82,7 @@ public abstract class FileToGraphStoreImporter {
         this.relationshipVisitorBuilder = new GraphStoreRelationshipVisitor.Builder();
         this.concurrency = concurrency;
         this.importPath = importPath;
-        this.graphSchemaBuilder = ImmutableMutableGraphSchema.builder();
+        this.graphSchemaBuilder = MutableGraphSchemaBuilder.builder();
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
         this.jobId = jobId;
