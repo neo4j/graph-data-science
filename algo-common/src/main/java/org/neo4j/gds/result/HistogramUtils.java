@@ -82,7 +82,7 @@ public final class HistogramUtils {
         );
     }
 
-    static Map<String, Object> failure() {
+    public static Map<String, Object> failure() {
         return Map.of(
             "Error",
             "Unable to create histogram due to range of scores exceeding implementation limits."

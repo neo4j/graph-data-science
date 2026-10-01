@@ -25,19 +25,44 @@ import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.result.HistogramUtils;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class HdrBackedGdsHistogram implements GdsHistogram {
-    private final DoubleHistogram delegate = new ConcurrentDoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
+    private static final String OUT_OF_RANGE_MESSAGE = "is out of bounds for histogram, current covered range";
+    private static final double MIN_RESOLUTION = 1E-6;
+
+    private final DoubleHistogram delegate;
+    private final AtomicBoolean failed = new AtomicBoolean(false);
+
+    HdrBackedGdsHistogram() {
+        this(new ConcurrentDoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT));
+    }
+
+    HdrBackedGdsHistogram(DoubleHistogram delegate) {
+        this.delegate = delegate;
+    }
 
     @Override
     public void onPredictedLink(double value) {
-        //HISTOGRAM_PRECISION_DEFAULT hence numberOfSignificantValueDigits is 1E-5, so it can't separate 0 and 1E-5
-        //Therefore we can floor at 1E-6 and smaller probabilities between 0 and 1E-6 is unnecessary.
-        delegate.recordValue(Math.max(value, 1E-6));
+        if (failed.get()) {
+            return;
+        }
+        try {
+            delegate.recordValue(value < MIN_RESOLUTION ? 0.0 : value);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            if (e.getMessage() != null && e.getMessage().contains(OUT_OF_RANGE_MESSAGE)) {
+                failed.set(true);
+                return;
+            }
+            throw e;
+        }
     }
 
     @Override
     public Map<String, Object> finalise() {
+        if (failed.get()) {
+            return HistogramUtils.failure();
+        }
         return HistogramUtils.similaritySummary(delegate);
     }
 }
