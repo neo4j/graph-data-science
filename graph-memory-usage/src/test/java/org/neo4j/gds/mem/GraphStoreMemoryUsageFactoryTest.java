@@ -62,22 +62,35 @@ class GraphStoreMemoryUsageFactoryTest {
         // the adjacency list must span multiple pages for this test to be meaningful
         assertThat((long) adjacencyList.get("pages")).isGreaterThan(1L);
 
-        // lower bounds derived from the graph dimensions, not from the walker
+        // bounds derived from the graph dimensions, not from the walker
         var minOffsets = Estimate.sizeOfLongArray(nodeCount);
         var minDegrees = Estimate.sizeOfIntArray(nodeCount);
         var minForwardMapping = Estimate.sizeOfLongArray(nodeCount);
         var minBackwardMapping = nodeCount * Long.BYTES;
         var minTargetIds = relationshipCount; // at least one byte per target id
 
-        assertThat(relationships.get("offsets")).isGreaterThanOrEqualTo(minOffsets);
-        assertThat(relationships.get("degrees")).isGreaterThanOrEqualTo(minDegrees);
-        assertThat(relationships.get("targetIds")).isGreaterThanOrEqualTo(minTargetIds);
-        assertThat(nodes.get("forwardMapping")).isGreaterThanOrEqualTo(minForwardMapping);
-        assertThat(nodes.get("backwardMapping")).isGreaterThanOrEqualTo(minBackwardMapping);
+        // single arrays only add their wrapper object
+        var maxOffsets = minOffsets + KIB;
+        var maxDegrees = minDegrees + KIB;
+        var maxForwardMapping = minForwardMapping + KIB;
+        // sparse pages add headers and a partially filled last page
+        var maxBackwardMapping = minBackwardMapping + minBackwardMapping / 20;
+        // compressed target ids must not exceed their uncompressed size
+        var maxTargetIds = relationshipCount * Long.BYTES;
+
+        assertThat(relationships.get("offsets")).isBetween(minOffsets, maxOffsets);
+        assertThat(relationships.get("degrees")).isBetween(minDegrees, maxDegrees);
+        assertThat(relationships.get("targetIds")).isBetween(minTargetIds, maxTargetIds);
+        assertThat(nodes.get("forwardMapping")).isBetween(minForwardMapping, maxForwardMapping);
+        assertThat(nodes.get("backwardMapping")).isBetween(minBackwardMapping, maxBackwardMapping);
 
         var minTotal = minOffsets + minDegrees + minTargetIds + minForwardMapping + minBackwardMapping;
-        assertThat(memoryUsage.sizeInBytes()).isGreaterThanOrEqualTo(minTotal);
+        // allow for schema, labels and other small objects
+        var maxTotal = maxOffsets + maxDegrees + maxTargetIds + maxForwardMapping + maxBackwardMapping + 256 * KIB;
+        assertThat(memoryUsage.sizeInBytes()).isBetween(minTotal, maxTotal);
         // used by gds.graph.list
-        assertThat(MemoryUsage.sizeOf(graphStore)).isGreaterThanOrEqualTo(minTotal);
+        assertThat(MemoryUsage.sizeOf(graphStore)).isBetween(minTotal, maxTotal);
     }
+
+    private static final long KIB = 1024L;
 }
