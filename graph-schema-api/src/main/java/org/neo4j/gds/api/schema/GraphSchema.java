@@ -40,14 +40,14 @@ public interface GraphSchema {
     default Map<String, Object> toMap() {
         return Map.of(
             "nodes", NodeSchemaUtils.toMap(nodeSchema()),
-            "relationships", relationshipSchema().toMap()
+            "relationships", RelationshipSchemaUtils.toMap(relationshipSchema())
         );
     }
 
     default Map<String, Object> toMapOld() {
         return Map.of(
             "nodes", NodeSchemaUtils.toMap(nodeSchema()),
-            "relationships", relationshipSchema().toMapOld()
+            "relationships", RelationshipSchemaUtils.toMapOld(relationshipSchema())
         );
     }
 

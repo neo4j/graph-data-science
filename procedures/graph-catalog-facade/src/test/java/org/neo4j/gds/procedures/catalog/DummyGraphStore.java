@@ -101,11 +101,6 @@ class DummyGraphStore implements GraphStore {
                     }
 
                     @Override
-                    public Object toMapOld() {
-                        return Map.of("REL", Map.of());
-                    }
-
-                    @Override
                     public RelationshipSchema filter(Set<RelationshipType> elementIdentifiersToKeep) {
                         throw new UnsupportedOperationException("TODO");
                     }
