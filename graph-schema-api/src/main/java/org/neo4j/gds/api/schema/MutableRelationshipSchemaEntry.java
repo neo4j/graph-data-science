@@ -27,7 +27,6 @@ import org.neo4j.gds.Aggregation;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -97,21 +96,6 @@ public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
         }
 
         return new MutableRelationshipSchemaEntry(this.identifier(), this.direction, unionProperties(other.properties()));
-    }
-
-    @Override
-    public Map<String, Object> toMap() {
-        return Map.of(
-            "direction", direction.name(),
-            "properties", properties
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        innerEntry -> innerEntry.getValue().render()
-                    )
-                )
-        );
     }
 
     public MutableRelationshipSchemaEntry addProperty(String propertyKey, ValueType valueType, PropertyState propertyState) {

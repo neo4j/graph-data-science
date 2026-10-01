@@ -101,21 +101,6 @@ public class MutableRelationshipSchema implements RelationshipSchema {
             ));
     }
 
-    @Override
-    public Object toMapOld() {
-        return entries()
-            .stream()
-            .collect(Collectors.toMap(e -> e.identifier().name(),
-                e -> e
-                    .properties()
-                    .entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey,
-                        innerEntry -> innerEntry.getValue().render()
-                    ))
-            ));
-    }
-
     public void set(MutableRelationshipSchemaEntry entry) {
         entries.put(entry.identifier(), entry);
     }

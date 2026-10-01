@@ -39,8 +39,6 @@ public interface RelationshipSchemaEntry {
 
     RelationshipSchemaEntry union(RelationshipSchemaEntry other);
 
-    Map<String, Object> toMap();
-
     default Map<String, RelationshipPropertySchema> unionProperties(Map<String, RelationshipPropertySchema> rightProperties) {
         return Stream
             .concat(properties().entrySet().stream(), rightProperties.entrySet().stream())

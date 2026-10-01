@@ -41,9 +41,7 @@ public interface RelationshipSchema {
     // TODO: remove
     Map<RelationshipType, Direction> directions();
 
-    Object toMapOld();
-
-   RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep);
+    RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep);
 
     RelationshipSchema union(RelationshipSchema other);
 
@@ -87,12 +85,6 @@ public interface RelationshipSchema {
             .stream()
             .flatMap(e -> e.properties().entrySet().stream())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (leftSchema, rightSchema) -> leftSchema));
-    }
-
-    default Map<String, Object> toMap() {
-        return entries()
-            .stream()
-            .collect(Collectors.toMap(entry -> entry.identifier().name, RelationshipSchemaEntry::toMap));
     }
 
     default Map<RelationshipType, MutableRelationshipSchemaEntry> unionEntries(RelationshipSchema other) {

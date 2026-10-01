@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.catalog;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.GraphSchemaRenderer;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
@@ -131,8 +132,8 @@ public class GraphInfo {
             graphStore.relationshipCount(),
             graphStore.creationTime(),
             graphStore.modificationTime(),
-            graphStore.schema().toMapOld(),
-            graphStore.schema().toMap()
+            GraphSchemaRenderer.toMapOld(graphStore.schema()),
+            GraphSchemaRenderer.toMap(graphStore.schema())
         );
     }
 }

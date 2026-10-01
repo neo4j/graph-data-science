@@ -24,8 +24,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
-import java.util.Locale;
-
 public record RelationshipPropertySchema(
     String key,
     ValueType valueType,
@@ -35,16 +33,6 @@ public record RelationshipPropertySchema(
 ) implements PropertySchema {
     public RelationshipPropertySchema {
         aggregation = Aggregation.resolve(aggregation);
-    }
-
-    public String render() {
-        return String.format(
-            Locale.ENGLISH,
-            "%s (%s, %s, Aggregation.%s)",
-            valueType().cypherName(),
-            defaultValue(),
-            state(),
-            aggregation());
     }
 
     public static RelationshipPropertySchema of(String propertyKey, ValueType valueType) {

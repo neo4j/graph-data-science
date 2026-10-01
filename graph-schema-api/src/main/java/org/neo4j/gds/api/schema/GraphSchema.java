@@ -22,7 +22,6 @@ package org.neo4j.gds.api.schema;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 
-import java.util.Map;
 import java.util.Set;
 
 public interface GraphSchema {
@@ -36,20 +35,6 @@ public interface GraphSchema {
     GraphSchema filterRelationshipTypes(Set<RelationshipType> relationshipTypesToKeep);
 
     GraphSchema union(GraphSchema other);
-
-    default Map<String, Object> toMap() {
-        return Map.of(
-            "nodes", NodeSchemaUtils.toMap(nodeSchema()),
-            "relationships", relationshipSchema().toMap()
-        );
-    }
-
-    default Map<String, Object> toMapOld() {
-        return Map.of(
-            "nodes", NodeSchemaUtils.toMap(nodeSchema()),
-            "relationships", relationshipSchema().toMapOld()
-        );
-    }
 
     default boolean isUndirected() {
         return relationshipSchema().isUndirected();
