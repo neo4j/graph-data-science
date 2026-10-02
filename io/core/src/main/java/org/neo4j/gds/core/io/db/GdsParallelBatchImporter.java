@@ -305,7 +305,9 @@ public final class GdsParallelBatchImporter {
     ) {
 
         static org.neo4j.batchimport.api.Configuration toBatchImporterConfig(Config config) {
-            return new org.neo4j.batchimport.api.Configuration() {
+            return new org.neo4j.batchimport.api.Configuration.Overridden(
+                org.neo4j.batchimport.api.Configuration.DEFAULT
+            ) {
 
                 @Override
                 public int batchSize() {
