@@ -208,7 +208,7 @@ YIELD
   configuration: Map
 ----
 
-include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+include::partial$/algorithms/common-configuration/common-write-parameters.adoc[]
 
 .General configuration
 [opts="header",cols="1,1,1m,1,4"]

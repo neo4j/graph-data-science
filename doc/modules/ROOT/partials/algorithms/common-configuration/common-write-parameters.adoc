@@ -1,0 +1,8 @@
+// Used by write mode when the configuration map contains mandatory keys, such as `writeProperty`.
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| graphName     | String | n/a     | no       | The name of a graph stored in the catalog.
+| configuration | Map    | n/a     | no       | Configuration for algorithm-specifics and/or graph filtering.
+|===

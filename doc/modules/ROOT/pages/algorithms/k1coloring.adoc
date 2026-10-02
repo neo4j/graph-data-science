@@ -166,7 +166,7 @@ CALL gds.k1coloring.write(graphName: String, configuration: Map)
 YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, preProcessingMillis, computeMillis, writeMillis
 ----
 
-include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+include::partial$/algorithms/common-configuration/common-write-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="1,1,1,1,4"]
