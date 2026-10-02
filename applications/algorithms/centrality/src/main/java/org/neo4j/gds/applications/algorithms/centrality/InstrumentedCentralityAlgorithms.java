@@ -45,6 +45,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
+import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -218,6 +219,39 @@ public final class InstrumentedCentralityAlgorithms {
             (graph, __, ___) -> algorithms.bridges(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.bridges(shouldComputeComponents),
             AlgorithmLabel.Bridges,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> eigenVector(
+        GraphName graphName,
+        EigenvectorConfig configuration,
+        Optional<SideEffect<PageRankResult, METADATA>> sideEffect,
+        ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                new GraphStoreFilteredETL() {
+                    @Override
+                    public void onGraphStoreFiltered(
+                        GraphStore graphStore,
+                        Collection<NodeLabel> selectedLabels,
+                        Collection<RelationshipType> selectedRelationshipTypes,
+                        Optional<String> relationshipProperty
+                    ) {
+                        new SourceNodesRequirement(configuration.sourceNodes().inputNodes());
+                    }
+                }
+            );
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.eigenVector(graph, configuration),
+            estimationFacade::pageRank,
+            AlgorithmLabel.EigenVector,
             sideEffect,
             resultRenderer
         );

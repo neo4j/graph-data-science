@@ -39,7 +39,7 @@ import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
-import org.neo4j.gds.pagerank.EigenvectorStreamConfig;
+import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
@@ -50,7 +50,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bet
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsStreamModeBusinessFacade {
@@ -182,17 +181,15 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> eigenvector(
         GraphName graphName,
-        EigenvectorStreamConfig configuration,
-        StreamResultBuilder<PageRankResult, RESULT> streamResultBuilder
+        EigenvectorConfig configuration,
+        StreamResultBuilder<PageRankResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.eigenVector(
             graphName,
             configuration,
-            EigenVector,
-            estimationFacade::pageRank,
-            (graph, __) -> algorithms.eigenVector(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> harmonicCentrality(

@@ -36,7 +36,6 @@ import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
@@ -147,37 +146,6 @@ public class CentralityComputeBusinessFacade {
         return computeFacade.degree(
             graph,
             parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> eigenVector(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        EigenvectorConfig config,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PageRankResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidation(
-                new SourceNodesRequirement(config.sourceNodes().inputNodes())
-            ),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.eigenVector(
-            graph,
-            config,
             jobId,
             logProgress
         ).thenApply(resultTransformerBuilder.build(graphResources));

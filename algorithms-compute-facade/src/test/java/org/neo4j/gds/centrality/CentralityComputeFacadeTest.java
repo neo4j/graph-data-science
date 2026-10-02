@@ -42,7 +42,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfigImpl;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.pagerank.EigenvectorConfigImpl;
 import org.neo4j.gds.pagerank.PageRankConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -169,23 +168,6 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().nodeCount()).isEqualTo(6L);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void eigenVector() {
-
-        var config = EigenvectorConfigImpl.builder().maxIterations(3).build();
-        var future = facade.eigenVector(
-            graph,
-            config,
-            jobIdMock,
-            true
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().iterations()).isBetween(1, 3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 

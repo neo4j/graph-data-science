@@ -36,7 +36,6 @@ import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.pagerank.EigenvectorConfigImpl;
 import org.neo4j.gds.pagerank.PageRankConfigImpl;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -118,24 +117,6 @@ class CentralityComputeFacadeEmptyGraphTest {
 
         var result = future.join();
         assertThat(result.result()).isEqualTo(ClosenessCentralityResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void eigenVector() {
-        var config =  EigenvectorConfigImpl.builder().maxIterations(3).build();
-
-        var future = facade.eigenVector(
-            graph,
-            config,
-            jobIdMock,
-            true
-        );
-
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(PageRankResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

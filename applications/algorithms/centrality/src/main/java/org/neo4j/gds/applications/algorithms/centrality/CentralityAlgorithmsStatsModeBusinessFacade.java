@@ -37,7 +37,7 @@ import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
-import org.neo4j.gds.pagerank.EigenvectorStatsConfig;
+import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 
@@ -47,7 +47,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bet
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsStatsModeBusinessFacade {
@@ -160,17 +159,15 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT eigenVector(
         GraphName graphName,
-        EigenvectorStatsConfig configuration,
+        EigenvectorConfig configuration,
         StatsResultBuilder<PageRankResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.eigenVector(
             graphName,
             configuration,
-            EigenVector,
-            estimationFacade::pageRank,
-            (graph, __) -> algorithms.eigenVector(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT harmonicCentrality(

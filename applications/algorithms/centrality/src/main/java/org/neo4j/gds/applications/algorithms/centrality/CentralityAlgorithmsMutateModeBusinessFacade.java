@@ -63,7 +63,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bet
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.IndirectExposure;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
@@ -206,15 +205,12 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new GenericRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.eigenVector(
             graphName,
             configuration,
-            EigenVector,
-            estimation::pageRank,
-            (graph, __) -> algorithms.eigenVector(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <CONFIGURATION extends HarmonicCentralityMutateConfig, RESULT> RESULT harmonicCentrality(

@@ -249,15 +249,12 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             EigenVector
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.eigenVector(
             graphName,
             configuration,
-            EigenVector,
-            estimationFacade::pageRank,
-            (graph, __) -> algorithms.eigenVector(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <CONFIGURATION extends HarmonicCentralityWriteConfig, RESULT> RESULT harmonicCentrality(
