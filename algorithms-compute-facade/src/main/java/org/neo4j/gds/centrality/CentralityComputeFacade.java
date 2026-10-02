@@ -22,9 +22,6 @@ package org.neo4j.gds.centrality;
 import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.bridges.BridgeResult;
-import org.neo4j.gds.bridges.Bridges;
-import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.closeness.ClosenessCentrality;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
@@ -72,32 +69,6 @@ public class CentralityComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<BridgeResult>> bridges(
-        Graph graph,
-        BridgesParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(BridgeResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.bridges(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var bridges = Bridges
-            .create(graph, progressTracker, parameters.computeComponents(), terminationFlag);
-
-        return algorithmCaller.run(
-            bridges::compute,
-            jobId
-        );
     }
 
     public CompletableFuture<TimedAlgorithmResult<CELFResult>> celf(

@@ -26,8 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.bridges.BridgeResult;
-import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
@@ -69,23 +67,6 @@ class CentralityComputeFacadeEmptyGraphTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void bridges() {
-
-        var future = facade.bridges(
-            graph,
-            mock(BridgesParameters.class),
-            jobIdMock,
-            true
-        );
-
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(BridgeResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

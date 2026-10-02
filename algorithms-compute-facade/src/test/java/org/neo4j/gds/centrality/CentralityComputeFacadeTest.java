@@ -28,7 +28,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.bridges.BridgesParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -101,23 +100,6 @@ class CentralityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void bridges() {
-
-        var params = new BridgesParameters(new Concurrency(1), false);
-        var future = facade.bridges(
-            graph,
-            params,
-            jobIdMock,
-            true
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().bridges()).hasSize(2); //d-e, e-f are bridges
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test
