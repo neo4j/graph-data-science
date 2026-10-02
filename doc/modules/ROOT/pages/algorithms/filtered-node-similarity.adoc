@@ -22,6 +22,11 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 The Filtered Node Similarity algorithm is an extension to the xref:algorithms/node-similarity.adoc[Node Similarity] algorithm.
 It adds support for filtering on source nodes, target nodes, or both.
 
+[NOTE]
+====
+The results are not deterministic unless running single-threaded (`concurrency = 1`).
+====
+
 
 [[algorithms-filtered-node-similarity-node-filtering]]
 == Node filtering
@@ -57,6 +62,9 @@ The node filter parameters accept one of the following:
 | a single label
 | `sourceNodeFilter: 'Person'`
 |===
+
+An empty list (`[]`) for `sourceNodeFilter` or `targetNodeFilter` is treated as no filter.
+That side of the comparison stays unfiltered, so the algorithm considers every node rather than matching nothing and returning an empty result.
 
 [[algorithms-filtered-node-similarity-syntax]]
 == Syntax
