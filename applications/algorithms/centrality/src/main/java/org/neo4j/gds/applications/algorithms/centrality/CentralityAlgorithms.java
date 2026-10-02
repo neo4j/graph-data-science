@@ -69,7 +69,6 @@ import static org.neo4j.gds.pagerank.PageRankVariant.EIGENVECTOR;
 import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
 
 public class CentralityAlgorithms {
-
     private final TerminationFlag terminationFlag;
 
     public CentralityAlgorithms(TerminationFlag terminationFlag) {
@@ -243,10 +242,7 @@ public class CentralityAlgorithms {
         return pageRank.compute();
     }
 
-    private ArticleRankComputation articleRankComputation(
-        Graph graph,
-        ArticleRankConfig configuration
-    ) {
+    private ArticleRankComputation articleRankComputation(Graph graph, ArticleRankConfig configuration) {
         var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
             graph,
             configuration.hasRelationshipWeightProperty(),

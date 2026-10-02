@@ -36,7 +36,6 @@ import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.pagerank.ArticleRankConfigImpl;
 import org.neo4j.gds.pagerank.EigenvectorConfigImpl;
 import org.neo4j.gds.pagerank.PageRankConfigImpl;
 import org.neo4j.gds.pagerank.PageRankResult;
@@ -71,24 +70,6 @@ class CentralityComputeFacadeEmptyGraphTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void articleRank() {
-        var config =  ArticleRankConfigImpl.builder().maxIterations(3).build();
-
-        var future = facade.articleRank(
-            graph,
-            config,
-            jobIdMock,
-            true
-        );
-
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(PageRankResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

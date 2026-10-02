@@ -42,7 +42,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfigImpl;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.pagerank.ArticleRankConfigImpl;
 import org.neo4j.gds.pagerank.EigenvectorConfigImpl;
 import org.neo4j.gds.pagerank.PageRankConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -103,23 +102,6 @@ class CentralityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void articleRank() {
-
-        var config = ArticleRankConfigImpl.builder().maxIterations(3).build();
-        var future = facade.articleRank(
-            graph,
-            config,
-            jobIdMock,
-            true
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().iterations()).isBetween(1, 3);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

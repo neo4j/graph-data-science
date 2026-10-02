@@ -124,15 +124,12 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             ArticleRank
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.articleRank(
             graphName,
             configuration,
-            ArticleRank,
-            estimationFacade::pageRank,
-            (graph, __) -> algorithms.articleRank(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <CONFIGURATION extends ArticulationPointsWriteConfig, RESULT> RESULT articulationPoints(

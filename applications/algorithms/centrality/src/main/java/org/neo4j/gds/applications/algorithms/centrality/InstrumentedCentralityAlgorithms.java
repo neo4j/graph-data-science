@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -34,13 +37,18 @@ import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
+import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.pagerank.ArticleRankConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -85,6 +93,39 @@ public final class InstrumentedCentralityAlgorithms {
         );
     }
 
+    public <RESULT, METADATA> CompletableFuture<RESULT> articleRank(
+        GraphName graphName,
+        ArticleRankConfig configuration,
+        Optional<SideEffect<PageRankResult, METADATA>> sideEffect,
+        ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                new GraphStoreFilteredETL() {
+                    @Override
+                    public void onGraphStoreFiltered(
+                        GraphStore graphStore,
+                        Collection<NodeLabel> selectedLabels,
+                        Collection<RelationshipType> selectedRelationshipTypes,
+                        Optional<String> relationshipProperty
+                    ) {
+                        new SourceNodesRequirement(configuration.sourceNodes().inputNodes());
+                    }
+                }
+            );
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.articleRank(graph, configuration),
+            estimationFacade::pageRank,
+            AlgorithmLabel.ArticleRank,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
     public <RESULT, METADATA> CompletableFuture<RESULT> articulationPoints(
         GraphName graphName,
         ArticulationPointsBaseConfig configuration,
@@ -94,12 +135,21 @@ public final class InstrumentedCentralityAlgorithms {
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
             .with(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    new UndirectedOnlyRequirement("Articulation Points").validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    )
+                new GraphStoreFilteredETL() {
+                    @Override
+                    public void onGraphStoreFiltered(
+                        GraphStore graphStore,
+                        Collection<NodeLabel> selectedLabels,
+                        Collection<RelationshipType> selectedRelationshipTypes,
+                        Optional<String> relationshipProperty
+                    ) {
+                        new UndirectedOnlyRequirement("Articulation Points").validate(
+                            graphStore,
+                            selectedLabels,
+                            selectedRelationshipTypes
+                        );
+                    }
+                }
             );
 
         return launchConvenience.launchAlgorithm(
@@ -144,12 +194,21 @@ public final class InstrumentedCentralityAlgorithms {
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
             .with(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    new UndirectedOnlyRequirement("Bridges").validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    )
+                new GraphStoreFilteredETL() {
+                    @Override
+                    public void onGraphStoreFiltered(
+                        GraphStore graphStore,
+                        Collection<NodeLabel> selectedLabels,
+                        Collection<RelationshipType> selectedRelationshipTypes,
+                        Optional<String> relationshipProperty
+                    ) {
+                        new UndirectedOnlyRequirement("Bridges").validate(
+                            graphStore,
+                            selectedLabels,
+                            selectedRelationshipTypes
+                        );
+                    }
+                }
             );
 
         return launchConvenience.launchAlgorithm(

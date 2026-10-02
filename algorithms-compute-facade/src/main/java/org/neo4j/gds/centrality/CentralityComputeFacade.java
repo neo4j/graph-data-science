@@ -42,8 +42,6 @@ import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.pagerank.ArticleRankComputation;
-import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.DegreeFunctions;
 import org.neo4j.gds.pagerank.EigenvectorComputation;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
@@ -58,7 +56,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.neo4j.gds.pagerank.PageRankVariant.ARTICLE_RANK;
 import static org.neo4j.gds.pagerank.PageRankVariant.EIGENVECTOR;
 import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
 
@@ -80,69 +77,6 @@ public class CentralityComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<PageRankResult>> articleRank(
-        Graph graph,
-        ArticleRankConfig configuration,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PageRankResult.EMPTY));
-        }
-
-        var articleRankComputation = articleRankComputation(graph, configuration);
-
-        var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.articleRank(graph, configuration),
-            jobId,
-            configuration.concurrency(),
-            logProgress
-        );
-
-        var articleRank = new PageRankAlgorithm(
-            graph,
-            configuration,
-            articleRankComputation,
-            ARTICLE_RANK,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            articleRank::compute,
-            jobId
-        );
-    }
-
-    private ArticleRankComputation articleRankComputation(
-        Graph graph,
-        ArticleRankConfig configuration
-    ) {
-        var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
-            graph,
-            configuration.hasRelationshipWeightProperty(),
-            configuration.concurrency(),
-            terminationFlag
-        );
-
-        var alpha = 1 - configuration.dampingFactor();
-        InitialProbabilityProvider probabilityProvider = InitialProbabilityFactory.create(
-            graph::toMappedNodeId,
-            alpha,
-            configuration.sourceNodes()
-        );
-
-        double avgDegree = DegreeFunctions.averageDegree(graph, configuration.concurrency());
-        return new ArticleRankComputation(
-            configuration,
-            probabilityProvider,
-            degreeFunction,
-            avgDegree
-        );
     }
 
     public CompletableFuture<TimedAlgorithmResult<BridgeResult>> bridges(
