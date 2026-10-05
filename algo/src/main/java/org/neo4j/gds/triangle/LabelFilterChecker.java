@@ -62,10 +62,10 @@ public class LabelFilterChecker {
         // No filters
         return (aLabel.isEmpty() && bLabel.isEmpty() && cLabel.isEmpty())
             // One filter
-            || (bLabel.isEmpty() && cLabel.isEmpty() && (hasLabel.apply(aNodeId, aLabel.get()) || hasLabel.apply(bNodeId, aLabel.get())))
+            || (aLabel.isPresent() && bLabel.isEmpty() && cLabel.isEmpty())
             // Two filters
             || (cLabel.isEmpty() && aLabel.isPresent() && bLabel.isPresent()
-            && (hasLabel.apply(aNodeId, aLabel.get()) || hasLabel.apply(aNodeId, bLabel.get()) || hasLabel.apply(bNodeId, aLabel.get()) && hasLabel.apply(bNodeId, bLabel.get())))
+            && (hasLabel.apply(aNodeId, aLabel.get()) || hasLabel.apply(aNodeId, bLabel.get()) || hasLabel.apply(bNodeId, aLabel.get()) || hasLabel.apply(bNodeId, bLabel.get())))
             // Three filters
             || (aLabel.isPresent() && bLabel.isPresent() && cLabel.isPresent()
             && ((hasLabel.apply(aNodeId, aLabel.get()) && hasLabel.apply(bNodeId, bLabel.get()))
@@ -89,7 +89,7 @@ public class LabelFilterChecker {
             // Three filters
             || (aLabel.isPresent() && bLabel.isPresent() && cLabel.isPresent())
             && ((hasLabel.apply(aNodeId, aLabel.get()) && hasLabel.apply(bNodeId, bLabel.get()) && hasLabel.apply(cNodeId, cLabel.get()))
-            || (hasLabel.apply(aNodeId, aLabel.get()) && hasLabel.apply(cNodeId, aLabel.get()) && hasLabel.apply(bNodeId, cLabel.get()))
+            || (hasLabel.apply(aNodeId, aLabel.get()) && hasLabel.apply(cNodeId, bLabel.get()) && hasLabel.apply(bNodeId, cLabel.get()))
             || (hasLabel.apply(bNodeId, aLabel.get()) && hasLabel.apply(aNodeId, bLabel.get()) && hasLabel.apply(cNodeId, cLabel.get()))
             || (hasLabel.apply(bNodeId, aLabel.get()) && hasLabel.apply(cNodeId, bLabel.get()) && hasLabel.apply(aNodeId, cLabel.get()))
             || (hasLabel.apply(cNodeId, aLabel.get()) && hasLabel.apply(aNodeId, bLabel.get()) && hasLabel.apply(bNodeId, cLabel.get()))
