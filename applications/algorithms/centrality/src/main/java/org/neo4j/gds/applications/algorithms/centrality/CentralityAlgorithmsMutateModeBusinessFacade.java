@@ -64,7 +64,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CEL
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.IndirectExposure;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
@@ -283,14 +282,11 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new GenericRankMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.pageRank(
             graphName,
             configuration,
-            PageRank,
-            estimation::pageRank,
-            (graph, __) -> algorithms.pageRank(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 }

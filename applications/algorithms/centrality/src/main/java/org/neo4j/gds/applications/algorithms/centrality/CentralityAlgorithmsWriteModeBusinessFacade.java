@@ -307,14 +307,11 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             PageRank
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.pageRank(
             graphName,
             configuration,
-            PageRank,
-            estimationFacade::pageRank,
-            (graph, __) -> algorithms.pageRank(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 }

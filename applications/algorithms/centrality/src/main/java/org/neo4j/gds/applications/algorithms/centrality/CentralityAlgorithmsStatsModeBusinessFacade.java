@@ -38,8 +38,8 @@ import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
+import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.PageRankStatsConfig;
 
 import java.util.Optional;
 
@@ -47,7 +47,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bet
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -198,16 +197,14 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT pageRank(
         GraphName graphName,
-        PageRankStatsConfig configuration,
+        PageRankConfig configuration,
         StatsResultBuilder<PageRankResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.pageRank(
             graphName,
             configuration,
-            PageRank,
-            estimationFacade::pageRank,
-            (graph, __) -> algorithms.pageRank(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 }

@@ -41,7 +41,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfigImpl;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.pagerank.PageRankConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.Executors;
@@ -173,23 +172,6 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().iterations()).isBetween(1,3);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void pageRank() {
-
-        var config = PageRankConfigImpl.builder().maxIterations(3).build();
-        var future = facade.pageRank(
-            graph,
-            config,
-            jobIdMock,
-            true
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().iterations()).isBetween(1, 3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 }

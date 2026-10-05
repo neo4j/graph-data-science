@@ -40,8 +40,8 @@ import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
+import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,7 +50,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bet
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -220,16 +219,14 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> pageRank(
         GraphName graphName,
-        PageRankStreamConfig configuration,
-        StreamResultBuilder<PageRankResult, RESULT> streamResultBuilder
+        PageRankConfig configuration,
+        StreamResultBuilder<PageRankResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.pageRank(
             graphName,
             configuration,
-            PageRank,
-            estimationFacade::pageRank,
-            (graph, __) -> algorithms.pageRank(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 }

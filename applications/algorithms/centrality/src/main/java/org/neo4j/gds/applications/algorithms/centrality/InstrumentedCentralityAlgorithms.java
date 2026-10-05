@@ -35,8 +35,8 @@ import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
-import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
+import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
@@ -46,6 +46,7 @@ import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
+import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -293,6 +294,39 @@ public final class InstrumentedCentralityAlgorithms {
             (graph, __, ___) -> algorithms.hits(graph, configuration),
             estimationFacade::hits,
             AlgorithmLabel.HITS,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> pageRank(
+        GraphName graphName,
+        PageRankConfig configuration,
+        Optional<SideEffect<PageRankResult, METADATA>> sideEffect,
+        ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                new GraphStoreFilteredETL() {
+                    @Override
+                    public void onGraphStoreFiltered(
+                        GraphStore graphStore,
+                        Collection<NodeLabel> selectedLabels,
+                        Collection<RelationshipType> selectedRelationshipTypes,
+                        Optional<String> relationshipProperty
+                    ) {
+                        new SourceNodesRequirement(configuration.sourceNodes().inputNodes());
+                    }
+                }
+            );
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.pageRank(graph, configuration),
+            estimationFacade::pageRank,
+            AlgorithmLabel.PageRank,
             sideEffect,
             resultRenderer
         );
