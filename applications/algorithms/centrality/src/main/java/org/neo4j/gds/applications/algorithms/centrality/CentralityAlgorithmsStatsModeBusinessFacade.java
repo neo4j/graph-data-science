@@ -35,7 +35,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
@@ -44,7 +44,6 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 
@@ -113,17 +112,15 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT celf(
         GraphName graphName,
-        InfluenceMaximizationStatsConfig configuration,
+        InfluenceMaximizationBaseConfig configuration,
         StatsResultBuilder<CELFResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.celf(
             graphName,
             configuration,
-            CELF,
-            () -> estimationFacade.celf(configuration),
-            (graph, __) -> algorithms.celf(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT closenessCentrality(

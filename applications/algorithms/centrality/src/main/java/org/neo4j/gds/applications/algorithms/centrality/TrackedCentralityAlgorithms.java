@@ -121,7 +121,7 @@ public class TrackedCentralityAlgorithms {
         );
     }
 
-    public CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
+    CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
         var params = configuration.toParameters();
         var task = CentralityAlgorithmTasks.CELF(graph, params);
 

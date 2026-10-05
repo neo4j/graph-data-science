@@ -46,6 +46,8 @@ import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
+import org.neo4j.gds.influenceMaximization.CELFResult;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
@@ -184,6 +186,24 @@ public final class InstrumentedCentralityAlgorithms {
             (graph, __, ___) -> algorithms.betweennessCentrality(graph, configuration),
             () -> estimationFacade.betweennessCentrality(configuration),
             AlgorithmLabel.BetweennessCentrality,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> celf(
+        GraphName graphName,
+        InfluenceMaximizationBaseConfig configuration,
+        Optional<SideEffect<CELFResult, METADATA>> sideEffect,
+        ResultRenderer<CELFResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> algorithms.celf(graph, configuration),
+            () -> estimationFacade.celf(configuration),
+            AlgorithmLabel.CELF,
             sideEffect,
             resultRenderer
         );
