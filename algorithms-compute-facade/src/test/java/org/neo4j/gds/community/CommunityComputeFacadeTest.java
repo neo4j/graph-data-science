@@ -27,8 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.cliquecounting.CliqueCountingMode;
-import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
@@ -101,25 +99,6 @@ class CommunityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void cliqueCounting(){
-        var future = facade.cliqueCounting(
-            graph,
-            new CliqueCountingParameters(
-              CliqueCountingMode.GloballyOnly,
-                List.of(),
-                new Concurrency(4)
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().globalCount()).containsExactly(1);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

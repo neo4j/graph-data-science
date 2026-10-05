@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultRenderer;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
-import org.neo4j.gds.cliquecounting.CliqueCountingStatsConfig;
+import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanStatsConfig;
@@ -57,7 +57,6 @@ import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HDBScan;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
@@ -93,17 +92,15 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT cliqueCounting(
         GraphName graphName,
-        CliqueCountingStatsConfig configuration,
+        CliqueCountingBaseConfig configuration,
         StatsResultBuilder<CliqueCountingResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.cliqueCounting(
             graphName,
             configuration,
-            CliqueCounting,
-            estimationFacade::cliqueCounting,
-            (graph, __) -> communityAlgorithms.cliqueCounting(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
 

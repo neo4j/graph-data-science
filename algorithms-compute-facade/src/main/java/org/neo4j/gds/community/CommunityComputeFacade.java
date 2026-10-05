@@ -23,9 +23,6 @@ import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.cliqueCounting.CliqueCounting;
-import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
-import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -95,38 +92,6 @@ public class CommunityComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    CompletableFuture<TimedAlgorithmResult<CliqueCountingResult>> cliqueCounting(
-        Graph graph,
-        CliqueCountingParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(CliqueCountingResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.cliqueCounting(graph, parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var algorithm = CliqueCounting.create(
-            graph,
-            parameters,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
     }
 
     CompletableFuture<TimedAlgorithmResult<Labels>> hdbscan(

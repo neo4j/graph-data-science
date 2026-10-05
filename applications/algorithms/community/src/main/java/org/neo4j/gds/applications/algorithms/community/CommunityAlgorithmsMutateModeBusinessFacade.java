@@ -81,7 +81,6 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
@@ -139,15 +138,12 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new CliqueCountingMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.cliqueCounting(
             graphName,
             configuration,
-            CliqueCounting,
-            estimation::cliqueCounting,
-            (graph, __) -> algorithms.cliqueCounting(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT k1Coloring(

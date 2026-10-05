@@ -26,6 +26,8 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceResult;
@@ -56,6 +58,18 @@ public class TrackedCommunityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.approximateMaximumKCut(graph, parameters, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingBaseConfig configuration) {
+        var params = configuration.toParameters();
+        var task = CommunityAlgorithmTasks.cliqueCounting(graph, params);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.cliqueCounting(graph, params, progressTracker),
             progressTracker,
             true
         );

@@ -27,11 +27,14 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
+import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -77,6 +80,34 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.approximateMaximumKCut(graph, configuration),
             () -> estimationFacade.approximateMaximumKCut(configuration),
             AlgorithmLabel.ApproximateMaximumKCut,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> cliqueCounting(
+        GraphName graphName,
+        CliqueCountingBaseConfig configuration,
+        Optional<SideEffect<CliqueCountingResult, METADATA>> sideEffect,
+        ResultRenderer<CliqueCountingResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new UndirectedOnlyRequirement("Clique Counting").validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    )
+            );
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.cliqueCounting(graph, configuration),
+            estimationFacade::cliqueCounting,
+            AlgorithmLabel.CliqueCounting,
             sideEffect,
             resultRenderer
         );
