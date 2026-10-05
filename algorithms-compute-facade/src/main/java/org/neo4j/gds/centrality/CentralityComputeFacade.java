@@ -31,9 +31,6 @@ import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityParameters;
 import org.neo4j.gds.degree.DegreeCentralityResult;
-import org.neo4j.gds.indirectExposure.IndirectExposure;
-import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
-import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
@@ -154,37 +151,6 @@ public class CentralityComputeFacade {
 
         return algorithmCaller.run(
             degree::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<IndirectExposureResult>> indirectExposure(
-        Graph graph,
-        IndirectExposureConfig configuration,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(IndirectExposureResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.indirectExposure(graph, configuration),
-            jobId,
-            configuration.concurrency(),
-            logProgress
-        );
-
-        var indirectExposure = new IndirectExposure(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            indirectExposure::compute,
             jobId
         );
     }

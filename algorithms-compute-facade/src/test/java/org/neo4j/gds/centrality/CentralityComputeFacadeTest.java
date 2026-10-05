@@ -38,7 +38,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.indirectExposure.IndirectExposureConfigImpl;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -149,29 +148,6 @@ class CentralityComputeFacadeTest {
         var results = future.join();
 
         assertThat(results.result().nodeCount()).isEqualTo(6L);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void indirectExposure() {
-
-        var config = IndirectExposureConfigImpl.builder()
-            .sanctionedProperty("prop")
-            .relationshipWeightProperty("w")
-            .maxIterations(3)
-            .concurrency(4)
-            .build();
-
-        var future = facade.indirectExposure(
-            inverseGraph,
-            config,
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().iterations()).isBetween(1,3);
         assertThat(results.computeMillis()).isNotNegative();
     }
 }

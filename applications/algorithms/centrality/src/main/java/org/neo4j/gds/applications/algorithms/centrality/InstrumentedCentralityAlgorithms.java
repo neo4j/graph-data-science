@@ -44,6 +44,8 @@ import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
@@ -294,6 +296,39 @@ public final class InstrumentedCentralityAlgorithms {
             (graph, __, ___) -> algorithms.hits(graph, configuration),
             estimationFacade::hits,
             AlgorithmLabel.HITS,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> indirectExposure(
+        GraphName graphName,
+        IndirectExposureConfig configuration,
+        Optional<SideEffect<IndirectExposureResult, METADATA>> sideEffect,
+        ResultRenderer<IndirectExposureResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                new GraphStoreFilteredETL() {
+                    @Override
+                    public void onGraphStoreFiltered(
+                        GraphStore graphStore,
+                        Collection<NodeLabel> selectedLabels,
+                        Collection<RelationshipType> selectedRelationshipTypes,
+                        Optional<String> relationshipProperty
+                    ) {
+                        new UndirectedOnlyRequirement("Indirect exposure").validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                    }
+                }
+            );
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.indirectExposure(graph, configuration),
+            estimationFacade::indirectExposure,
+            AlgorithmLabel.IndirectExposure,
             sideEffect,
             resultRenderer
         );

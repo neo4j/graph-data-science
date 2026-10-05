@@ -30,8 +30,6 @@ import org.neo4j.gds.closeness.ClosenessCentralityParameters;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
-import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFParameters;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -97,23 +95,6 @@ class CentralityComputeFacadeEmptyGraphTest {
         var result = future.join();
         assertThat(result.result()).isEqualTo(ClosenessCentralityResult.EMPTY);
 
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void indirectExposure(){
-
-        var future = facade.indirectExposure(
-            graph,
-            mock(IndirectExposureConfig.class),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result()).isEqualTo(IndirectExposureResult.EMPTY);
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);
     }
