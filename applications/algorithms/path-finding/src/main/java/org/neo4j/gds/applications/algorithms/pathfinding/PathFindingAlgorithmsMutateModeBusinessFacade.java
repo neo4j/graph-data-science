@@ -311,7 +311,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             Optional.of(sideEffect),
             new MutateResultRenderer<>(configuration, resultBuilder),
-            true
+            false
         ));
     }
 
