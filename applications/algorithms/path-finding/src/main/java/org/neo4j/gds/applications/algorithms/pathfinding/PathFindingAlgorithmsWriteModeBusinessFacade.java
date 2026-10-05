@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
@@ -322,15 +321,12 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration.jobId()
         );
 
-        return runAlgorithmAndWrite(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.spanningTree(
             graphName,
             configuration,
-            AlgorithmLabel.SpanningTree,
-            estimationFacade::spanningTree,
-            (graph, __) -> pathFindingAlgorithms.spanningTree(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT steinerTree(

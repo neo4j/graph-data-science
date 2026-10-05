@@ -38,7 +38,6 @@ import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
-import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 public class PathFindingAlgorithmsBusinessFacade {
@@ -147,20 +146,6 @@ public class PathFindingAlgorithmsBusinessFacade {
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ), progressTracker, false);
-    }
-
-    public SpanningTree spanningTree(Graph graph, SpanningTreeBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.spanningTree(graph, configuration.concurrency()),
-            configuration
-        );
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.spanningTree(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
     }
 
     private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {

@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
@@ -31,11 +34,14 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphLoadedETL;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.NonNegativeWeightsOnlyETL;
 import org.neo4j.gds.core.loading.validation.RelationshipPropertyGraphStoreValidation;
+import org.neo4j.gds.core.loading.validation.SourceNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
+import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -49,10 +55,13 @@ import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.gds.spanningtree.SpanningTree;
+import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -296,6 +305,50 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __, ___) -> algorithms.singlePairShortestPathYens(graph, configuration),
             () -> estimationFacade.singlePairShortestPathYens(configuration),
             AlgorithmLabel.Yens,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> spanningTree(
+        GraphName graphName,
+        SpanningTreeBaseConfig configuration,
+        Optional<SideEffect<SpanningTree, METADATA>> sideEffect,
+        ResultRenderer<SpanningTree, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                new GraphStoreFilteredETL() {
+                    @Override
+                    public void onGraphStoreFiltered(
+                        GraphStore graphStore,
+                        Collection<NodeLabel> selectedLabels,
+                        Collection<RelationshipType> selectedRelationshipTypes,
+                        Optional<String> relationshipProperty
+                    ) {
+                        new SourceNodeRequirement(configuration.sourceNode()).validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                    }
+                }
+            )
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new UndirectedOnlyRequirement("Spanning Tree").validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.spanningTree(graph, configuration),
+            estimationFacade::spanningTree,
+            AlgorithmLabel.SpanningTree,
             sideEffect,
             resultRenderer
         );
