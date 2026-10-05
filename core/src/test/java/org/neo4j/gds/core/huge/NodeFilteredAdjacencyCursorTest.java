@@ -21,6 +21,8 @@ package org.neo4j.gds.core.huge;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.FilteredIdMap;
 
@@ -109,6 +111,22 @@ class NodeFilteredAdjacencyCursorTest {
         assertThat(adjacencyCursor.advance(6L)).isEqualTo(6L);
         assertThat(adjacencyCursor.advance(7L)).isEqualTo(8L);
         assertThat(adjacencyCursor.advance(9L)).isEqualTo(AdjacencyCursor.NOT_FOUND);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0, 30_000, 60_000})
+    void shouldSkipLongRunsOfFilteredNeighbors(int retainedNode) {
+        var inner = new TestAdjacencyCursor(LongStream.range(0, 60_002).boxed().collect(Collectors.toList()));
+        var filteredIdMap = new FilteredDirectIdMap(60_002, node -> node == retainedNode);
+        var cursor = new NodeFilteredAdjacencyCursor(inner, filteredIdMap);
+
+        if (retainedNode >= 0) {
+            assertThat(cursor.hasNextVLong()).isTrue();
+            assertThat(cursor.peekVLong()).isEqualTo(retainedNode);
+            assertThat(cursor.nextVLong()).isEqualTo(retainedNode);
+        }
+        assertThat(cursor.hasNextVLong()).isFalse();
+        assertThat(cursor.peekVLong()).isEqualTo(AdjacencyCursor.NOT_FOUND);
     }
 
     static class FilteredDirectIdMap extends DirectIdMap implements FilteredIdMap {
