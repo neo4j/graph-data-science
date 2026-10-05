@@ -25,8 +25,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
-import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
@@ -62,16 +60,6 @@ public class CommunityAlgorithmsBusinessFacade {
         this.log = log;
         this.algorithms = algorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    public Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.hdbscan(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        var params = configuration.toParameters();
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.hdbscan(graph, params, progressTracker),
-            progressTracker, true);
     }
 
     public K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {

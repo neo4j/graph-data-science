@@ -146,6 +146,21 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         ));
     }
 
+    public <RESULT> RESULT hdbscan(
+        GraphName graphName,
+        HDBScanMutateConfig configuration,
+        ResultBuilder<HDBScanMutateConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new HDBScanMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
+
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.hdbscan(
+            graphName,
+            configuration,
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
     public <RESULT> RESULT k1Coloring(
         GraphName graphName,
         K1ColoringMutateConfig configuration,
@@ -402,24 +417,6 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             Optional.of(new MutateSideEffect<>(mutateStep)),
             new MutateResultRenderer<>(configuration, resultBuilder)
         ));
-    }
-
-    public <RESULT> RESULT hdbscan(
-        GraphName graphName,
-        HDBScanMutateConfig configuration,
-        ResultBuilder<HDBScanMutateConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var mutateStep = new HDBScanMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
-
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
-            graphName,
-            configuration,
-            WCC,
-            () -> estimation.hdbscan(configuration),
-            (graph, __) -> algorithms.hdbscan(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
     }
 
     private static <C extends MutateNodePropertyConfig & SeedConfig & ConsecutiveIdsConfig> StandardCommunityProperties createNodePropertyCalculator(C config){

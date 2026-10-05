@@ -154,6 +154,21 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         ));
     }
 
+    public <RESULT> RESULT hdbscan(
+        GraphName graphName,
+        HDBScanWriteConfig configuration,
+        ResultBuilder<HDBScanWriteConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new HDBScanWriteStep(writeNodePropertyService, configuration);
+
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.hdbscan(
+            graphName,
+            configuration,
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
     public <RESULT> RESULT k1Coloring(
         GraphName graphName,
         K1ColoringWriteConfig configuration,
@@ -380,23 +395,5 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
             new WriteResultRenderer<>(configuration, resultBuilder)
         ));
-    }
-
-    public <RESULT> RESULT hdbscan(
-        GraphName graphName,
-        HDBScanWriteConfig configuration,
-        ResultBuilder<HDBScanWriteConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var writeStep = new HDBScanWriteStep(writeNodePropertyService, configuration);
-
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
-            graphName,
-            configuration,
-            WCC,
-            () -> estimationFacade.hdbscan(configuration),
-            (graph, __) -> algorithms.hdbscan(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
     }
 }

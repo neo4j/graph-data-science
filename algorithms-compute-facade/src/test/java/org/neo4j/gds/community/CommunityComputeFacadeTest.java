@@ -35,7 +35,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kmeans.KmeansParameters;
@@ -99,27 +98,6 @@ class CommunityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void hdbscan(){
-        var future = facade.hdbscan(
-            graph,
-            new HDBScanParameters(
-                new Concurrency(4),
-                2,
-                3,
-                2,
-                "prop2"
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().labels().toArray()).hasSize(3);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

@@ -31,6 +31,8 @@ import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceResult;
+import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
+import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -82,6 +84,18 @@ public class TrackedCommunityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.conductance(graph, conductanceParameters, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
+        var task = CommunityAlgorithmTasks.hdbscan(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var params = configuration.toParameters();
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.hdbscan(graph, params, progressTracker),
             progressTracker,
             true
         );
