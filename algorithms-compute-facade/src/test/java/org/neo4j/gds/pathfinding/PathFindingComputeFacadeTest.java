@@ -43,7 +43,6 @@ import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.spanningtree.PrimOperators;
-import org.neo4j.gds.spanningtree.SpanningTreeParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.WalkParameters;
@@ -192,20 +191,6 @@ class PathFindingComputeFacadeTest {
         var future = facade.singleSourceShortestPathDijkstra(
             graph,
             new DijkstraSingleSourceParameters(idFunction.of("a")),
-            jobIdMock,
-            true
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
-    @Test
-    void spanningTree() {
-        var future = facade.spanningTree(
-            graph,
-            new SpanningTreeParameters(
-                PrimOperators.MIN_OPERATOR,
-                idFunction.of("a")
-            ),
             jobIdMock,
             true
         );
