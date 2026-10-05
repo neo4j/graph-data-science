@@ -35,8 +35,8 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class ValidationRuleFromConfigurationParserTest {
@@ -92,7 +92,7 @@ class ValidationRuleFromConfigurationParserTest {
             graphLoadETLBuilder
         );
 
-        verifyNoInteractions(graphLoadETLBuilder);
+        verify(graphLoadETLBuilder).with(any(GraphStoreFilteredETL.class));
     }
 
     @Test
@@ -115,7 +115,7 @@ class ValidationRuleFromConfigurationParserTest {
             graphLoadETLBuilder
         );
 
-        verify(graphLoadETLBuilder).with(any(GraphStoreFilteredETL.class));
+        verify(graphLoadETLBuilder, times(2)).with(any(GraphStoreFilteredETL.class));
     }
 
     @Test
@@ -138,6 +138,6 @@ class ValidationRuleFromConfigurationParserTest {
             graphLoadETLBuilder
         );
 
-        verify(graphLoadETLBuilder).with(any(GraphStoreFilteredETL.class));
+        verify(graphLoadETLBuilder, times(2)).with(any(GraphStoreFilteredETL.class));
     }
 }
