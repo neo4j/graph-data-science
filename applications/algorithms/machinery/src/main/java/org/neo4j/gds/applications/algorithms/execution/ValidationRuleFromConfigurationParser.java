@@ -44,6 +44,11 @@ class ValidationRuleFromConfigurationParser {
     }
 
     void parse(AlgoBaseConfig configuration, GraphLoadETLBuilder graphLoadETLBuilder) {
+        graphLoadETLBuilder.with(
+            (graphStore, labels, relationshipTypes, __) ->
+                configuration.graphStoreValidation(graphStore, labels, relationshipTypes)
+        );
+
         for (var validationRuleParser : validationRuleParsers) {
             var etlStep = validationRuleParser.parse(configuration);
 
