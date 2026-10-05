@@ -23,6 +23,8 @@ import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceConfigTransformer;
@@ -45,6 +47,18 @@ public class TrackedCommunityAlgorithms {
     public TrackedCommunityAlgorithms(ProgressTrackerCreator progressTrackerCreator, CommunityAlgorithms algorithms) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithms = algorithms;
+    }
+
+    ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+        var task = CommunityAlgorithmTasks.approximateMaximumKCut(graph, parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.approximateMaximumKCut(graph, parameters, progressTracker),
+            progressTracker,
+            true
+        );
     }
 
     ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {

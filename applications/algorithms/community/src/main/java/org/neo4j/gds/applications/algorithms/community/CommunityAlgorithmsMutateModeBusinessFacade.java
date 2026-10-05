@@ -81,7 +81,6 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
@@ -125,15 +124,12 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ApproxMaxKCutMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.approximateMaximumKCut(
             graphName,
             configuration,
-            ApproximateMaximumKCut,
-            () -> estimation.approximateMaximumKCut(configuration),
-            (graph, __) -> algorithms.approximateMaximumKCut(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT cliqueCounting(

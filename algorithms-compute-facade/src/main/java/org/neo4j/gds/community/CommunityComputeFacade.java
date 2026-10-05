@@ -22,9 +22,6 @@ package org.neo4j.gds.community;
 import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.cliqueCounting.CliqueCounting;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
@@ -98,37 +95,6 @@ public class CommunityComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<ApproxMaxKCutResult>> approxMaxKCut(
-        Graph graph,
-        ApproxMaxKCutParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ApproxMaxKCutResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.approximateMaximumKCut(graph, parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var approxMaxKCut = ApproxMaxKCut.create(
-            graph,
-            parameters,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            approxMaxKCut::compute,
-            jobId
-        );
     }
 
     CompletableFuture<TimedAlgorithmResult<CliqueCountingResult>> cliqueCounting(

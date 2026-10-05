@@ -17,30 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.community.validation;
+package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.ValidationRule;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class MinCommunitySizeSumRequirement implements ValidationRule {
+class MinCommunitySizeSumETL implements GraphStoreFilteredETL {
     private final Collection<Long> minCommunitySizes;
 
-    public MinCommunitySizeSumRequirement(Collection<Long> minCommunitySizes) {this.minCommunitySizes = minCommunitySizes;}
+    MinCommunitySizeSumETL(Collection<Long> minCommunitySizes) {
+        this.minCommunitySizes = minCommunitySizes;
+    }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
-        long minCommunitySizesSum = minCommunitySizes.stream().mapToLong(Long::valueOf).sum();
-        long halfNodeCount = graphStore.nodeCount() / 2;
+        var minCommunitySizesSum = minCommunitySizes.stream().mapToLong(Long::valueOf).sum();
+        var halfNodeCount = graphStore.nodeCount() / 2;
+
         if (minCommunitySizesSum > halfNodeCount) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The sum of min community sizes is larger than half of the number of nodes in the graph: %d > %d",
@@ -49,5 +54,4 @@ public class MinCommunitySizeSumRequirement implements ValidationRule {
             ));
         }
     }
-
 }

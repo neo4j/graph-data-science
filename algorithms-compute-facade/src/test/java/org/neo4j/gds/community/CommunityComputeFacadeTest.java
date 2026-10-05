@@ -26,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.cliquecounting.CliqueCountingMode;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
@@ -102,32 +101,6 @@ class CommunityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void maxKCut() {
-        var future = facade.approxMaxKCut(
-            graph,
-            new ApproxMaxKCutParameters(
-                (byte) 2,
-                5,
-                1,
-                new Concurrency(4),
-                10_000,
-                Optional.empty(),
-                List.of(0L,0L),
-                false,
-                false
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().candidateSolution().toArray()).containsOnly(0,1);
-        assertThat(results.computeMillis()).isNotNegative();
-
     }
 
     @Test

@@ -66,7 +66,6 @@ import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
@@ -133,15 +132,12 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new ApproxMaxKCutWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.approximateMaximumKCut(
             graphName,
             configuration,
-            ApproximateMaximumKCut,
-            () -> estimationFacade.approximateMaximumKCut(configuration),
-            (graph, __) -> algorithms.approximateMaximumKCut(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT cliqueCounting(

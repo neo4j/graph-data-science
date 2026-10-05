@@ -25,7 +25,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingStreamConfig;
@@ -63,7 +63,6 @@ import org.neo4j.gds.wcc.WccStreamConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HDBScan;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
@@ -100,17 +99,15 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> approximateMaximumKCut(
         GraphName graphName,
-        ApproxMaxKCutStreamConfig configuration,
-        StreamResultBuilder<ApproxMaxKCutResult, RESULT> streamResultBuilder
+        ApproxMaxKCutBaseConfig configuration,
+        StreamResultBuilder<ApproxMaxKCutResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.approximateMaximumKCut(
             graphName,
             configuration,
-            ApproximateMaximumKCut,
-            () -> estimationFacade.approximateMaximumKCut(configuration),
-            (graph, __) -> algorithms.approximateMaximumKCut(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> cliqueCounting(

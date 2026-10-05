@@ -23,8 +23,6 @@ import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -66,16 +64,6 @@ public class CommunityAlgorithmsBusinessFacade {
         this.log = log;
         this.algorithms = algorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
-        var parameters = configuration.toParameters();
-        var task = CommunityAlgorithmTasks.approximateMaximumKCut(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.approximateMaximumKCut(graph, parameters, progressTracker),
-            progressTracker, true);
     }
 
     public CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingBaseConfig configuration) {

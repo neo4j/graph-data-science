@@ -24,12 +24,9 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.community.validation.MinCommunitySizeSumRequirement;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
@@ -87,36 +84,6 @@ public class CommunityComputeBusinessFacade {
         this.computeFacade = computeFacade;
         this.user = user;
         this.databaseId = databaseId;
-    }
-
-    public <TR> CompletableFuture<TR> approxMaxKCut(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        ApproxMaxKCutParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<ApproxMaxKCutResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidation(new MinCommunitySizeSumRequirement(parameters.minCommunitySizes())),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.approxMaxKCut(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-
-        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> cliqueCounting(

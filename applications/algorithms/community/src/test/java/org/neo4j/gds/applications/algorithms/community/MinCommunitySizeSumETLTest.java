@@ -17,38 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.community.validation;
+package org.neo4j.gds.applications.algorithms.community;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class MinCommunitySizeSumRequirementTest {
-
+class MinCommunitySizeSumETLTest {
     @Test
     void shouldNotThrowIfMinCommunitySizesIsValid(){
-
         var graphStore = mock(GraphStore.class);
         when(graphStore.nodeCount()).thenReturn(202L);
-        var validation = new MinCommunitySizeSumRequirement(List.of(100L));
+        var validation = new org.neo4j.gds.applications.algorithms.community.MinCommunitySizeSumETL(List.of(100L));
 
-        assertThatNoException().isThrownBy(() -> validation.validate(graphStore, null, null));
+        assertThatNoException().isThrownBy(() -> validation.onGraphStoreFiltered(graphStore, null, null, Optional.empty()));
     }
 
     @Test
     void shouldThrowIfMinCommunitySizesIsLarge(){
-
         var graphStore = mock(GraphStore.class);
         when(graphStore.nodeCount()).thenReturn(2L);
-        var validation = new MinCommunitySizeSumRequirement(List.of(100L));
+        var validation = new MinCommunitySizeSumETL(List.of(100L));
 
-        assertThatThrownBy(()-> validation.validate(graphStore, null, null))
+        assertThatThrownBy(()-> validation.onGraphStoreFiltered(graphStore, null, null, Optional.empty()))
             .hasMessageContaining("The sum of min community sizes is larger than half of the number of nodes in the graph: 100 > 1");
     }
 }

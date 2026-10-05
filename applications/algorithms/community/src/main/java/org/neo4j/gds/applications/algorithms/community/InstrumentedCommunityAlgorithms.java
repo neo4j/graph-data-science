@@ -24,6 +24,8 @@ import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
@@ -57,6 +59,27 @@ public class InstrumentedCommunityAlgorithms {
         this.algorithms = algorithms;
         this.estimationFacade = estimationFacade;
         this.launchConvenience = launchConvenience;
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> approximateMaximumKCut(
+        GraphName graphName,
+        ApproxMaxKCutBaseConfig configuration,
+        Optional<SideEffect<ApproxMaxKCutResult, METADATA>> sideEffect,
+        ResultRenderer<ApproxMaxKCutResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new MinCommunitySizeSumETL(configuration.minCommunitySizes()));
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.approximateMaximumKCut(graph, configuration),
+            () -> estimationFacade.approximateMaximumKCut(configuration),
+            AlgorithmLabel.ApproximateMaximumKCut,
+            sideEffect,
+            resultRenderer
+        );
     }
 
     public <RESULT, METADATA> CompletableFuture<RESULT> conductance(
