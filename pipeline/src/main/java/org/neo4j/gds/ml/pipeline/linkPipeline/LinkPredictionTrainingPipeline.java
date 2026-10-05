@@ -20,10 +20,9 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.catalog.ModelMetadata;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
@@ -110,16 +109,31 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
             var existingProperty = (String) config.get(RELATIONSHIP_WEIGHT_PROPERTY);
             return Optional.of(existingProperty);
         } else if (config.containsKey(MODEL_NAME_KEY)) {
-            return Optional.ofNullable(modelCatalog.getUntyped(
-                    username,
-                    ((String) config.get(MODEL_NAME_KEY))
-                ))
-                .map(Model::trainConfig)
-                .filter(trainConfig -> trainConfig instanceof RelationshipWeightConfig)
-                .flatMap(trainConfig -> ((RelationshipWeightConfig) trainConfig).relationshipWeightProperty());
+            var modelName = (String) config.get(MODEL_NAME_KEY);
+            return metadataFor(modelCatalog, username, modelName)
+                .map(ModelMetadata::trainConfig)
+                .map(trainConfig -> trainConfig.get(RELATIONSHIP_WEIGHT_PROPERTY))
+                .filter(String.class::isInstance)
+                .map(String.class::cast);
         }
 
         return Optional.empty();
+    }
+
+    private static Optional<ModelMetadata> metadataFor(
+        ModelCatalog modelCatalog,
+        String username,
+        String modelName
+    ) {
+        return modelCatalog.getAllMetadata(username)
+            .filter(modelMetadata -> modelMetadata.name().equals(modelName))
+            .findFirst()
+            .or(
+                () -> modelCatalog.getAllMetadata()
+                    .filter(modelMetadata -> modelMetadata.name().equals(modelName))
+                    .filter(ModelMetadata::published)
+                    .findFirst()
+            );
     }
 
     public Optional<String> relationshipWeightProperty(ModelCatalog modelCatalog, String username) {

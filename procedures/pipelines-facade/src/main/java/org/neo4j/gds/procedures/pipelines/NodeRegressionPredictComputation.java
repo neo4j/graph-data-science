@@ -61,7 +61,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
-    private final TerminationMonitor terminationMonitor;
     private final User user;
 
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -85,7 +84,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
@@ -105,7 +103,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
-        this.terminationMonitor = terminationMonitor;
         this.user = user;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
@@ -127,7 +124,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
@@ -149,7 +145,6 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
-            terminationMonitor,
             user,
             progressTrackerCreator,
             algorithmsProcedureFacade,
@@ -190,7 +185,7 @@ final class NodeRegressionPredictComputation implements Computation<HugeDoubleAr
             procedureReturnColumns,
             requestCorrelationId,
             taskRegistryFactory,
-            terminationMonitor,
+            TerminationMonitor.wrap(terminationFlag),
             user,
             algorithmsProcedureFacade,
             globallyScopedDependencies.modelCatalog(),

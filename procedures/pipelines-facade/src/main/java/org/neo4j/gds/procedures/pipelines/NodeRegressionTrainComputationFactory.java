@@ -36,7 +36,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineT
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.termination.TerminationMonitor;
 
 class NodeRegressionTrainComputationFactory {
     private final Log log;
@@ -53,7 +52,6 @@ class NodeRegressionTrainComputationFactory {
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
-    private final TerminationMonitor terminationMonitor;
 
     private final ProgressTrackerCreator progressTrackerCreator;
 
@@ -73,7 +71,6 @@ class NodeRegressionTrainComputationFactory {
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        TerminationMonitor terminationMonitor,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
@@ -89,7 +86,6 @@ class NodeRegressionTrainComputationFactory {
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationMonitor = terminationMonitor;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.terminationFlag = terminationFlag;
@@ -110,7 +106,6 @@ class NodeRegressionTrainComputationFactory {
             requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
-            terminationMonitor,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration

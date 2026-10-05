@@ -24,4 +24,11 @@ public interface TerminationMonitor {
     boolean isTerminated();
 
     TerminationMonitor EMPTY = () -> false;
+
+    /**
+     * Creates a monitor that reflects the termination state of the given flag.
+     */
+    static TerminationMonitor wrap(TerminationFlag terminationFlag) {
+        return () -> !terminationFlag.running();
+    }
 }

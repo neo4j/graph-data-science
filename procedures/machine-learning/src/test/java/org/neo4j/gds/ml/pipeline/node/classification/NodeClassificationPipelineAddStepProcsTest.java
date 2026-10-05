@@ -70,7 +70,6 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
             null,
             null,
             null,
-            null,
             null
         ).nodeClassification().createPipeline("myPipeline", null);
     }
@@ -342,7 +341,6 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
                 null,
                 requestScopedDependencies,
                 writeContext,
-                null,
                 null,
                 null,
                 null,

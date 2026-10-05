@@ -63,7 +63,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
-    private final TerminationMonitor terminationMonitor;
     private final ProgressTrackerCreator progressTrackerCreator;
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final NodeClassificationPipelineTrainConfig configuration;
@@ -82,7 +81,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        TerminationMonitor terminationMonitor,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         NodeClassificationPipelineTrainConfig configuration
@@ -99,7 +97,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationMonitor = terminationMonitor;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.configuration = configuration;
@@ -120,7 +117,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        TerminationMonitor terminationMonitor,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         NodeClassificationPipelineTrainConfig configuration
@@ -139,7 +135,6 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
             requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
-            terminationMonitor,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration
@@ -166,7 +161,7 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
             procedureReturnColumns,
             requestCorrelationId,
             taskRegistryFactory,
-            terminationMonitor,
+            TerminationMonitor.wrap(terminationFlag),
             user,
             algorithmsProcedureFacade,
             globallyScopedDependencies.modelCatalog(),

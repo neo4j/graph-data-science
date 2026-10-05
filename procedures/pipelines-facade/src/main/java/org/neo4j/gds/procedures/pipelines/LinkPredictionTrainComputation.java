@@ -59,7 +59,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
-    private final TerminationMonitor terminationMonitor;
     private final User user;
 
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -83,7 +82,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
@@ -103,7 +101,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
-        this.terminationMonitor = terminationMonitor;
         this.user = user;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
@@ -125,7 +122,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        TerminationMonitor terminationMonitor,
         User user,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
@@ -146,7 +142,6 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
             requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
-            terminationMonitor,
             user,
             progressTrackerCreator,
             algorithmsProcedureFacade,
@@ -199,7 +194,7 @@ final class LinkPredictionTrainComputation implements Computation<LinkPrediction
             procedureReturnColumns,
             requestCorrelationId,
             taskRegistryFactory,
-            terminationMonitor,
+            TerminationMonitor.wrap(terminationFlag),
             this.user,
             algorithmsProcedureFacade,
             globallyScopedDependencies.modelCatalog(),

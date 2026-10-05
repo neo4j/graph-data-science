@@ -192,7 +192,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             procedureReturnColumns,
             requestScopedDependencies,
             dependencyResolver,
-            terminationMonitor,
             procedureTransaction,
             writeContext,
             openGraphDataScienceSpecifics.algorithmProcessingTemplateDecorator(),

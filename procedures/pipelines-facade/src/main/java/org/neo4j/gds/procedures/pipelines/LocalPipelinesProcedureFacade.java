@@ -32,9 +32,9 @@ import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
 import org.neo4j.gds.executor.MemoryEstimationContext;
 import org.neo4j.gds.metrics.Metrics;
+import org.neo4j.gds.ml.pipeline.RemoteNodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.termination.TerminationMonitor;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -69,11 +69,46 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
         ProcedureReturnColumns procedureReturnColumns,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
-        TerminationMonitor terminationMonitor,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
+    ) {
+        return create(
+            loggers,
+            globallyScopedDependencies,
+            modelRepository,
+            pipelineRepository,
+            closeableResourceRegistry,
+            memoryEstimationContext,
+            metrics,
+            procedureReturnColumns,
+            requestScopedDependencies,
+            writeContext,
+            progressTrackerCreator,
+            algorithmsProcedureFacade,
+            algorithmEstimationTemplate,
+            algorithmProcessingTemplate,
+            RemoteNodePropertyStepExecutor.EMPTY
+        );
+    }
+
+    public static PipelinesProcedureFacade create(
+        GdsLoggers loggers,
+        GloballyScopedDependencies globallyScopedDependencies,
+        ModelRepository modelRepository,
+        PipelineRepository pipelineRepository,
+        CloseableResourceRegistry closeableResourceRegistry,
+        MemoryEstimationContext memoryEstimationContext,
+        Metrics metrics,
+        ProcedureReturnColumns procedureReturnColumns,
+        RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
+        ProgressTrackerCreator progressTrackerCreator,
+        AlgorithmsProcedureFacade algorithmsProcedureFacade,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        RemoteNodePropertyStepExecutor remoteNodePropertyStepExecutor
     ) {
         var pipelineConfigurationParser = new PipelineConfigurationParser(requestScopedDependencies.user());
 
@@ -86,14 +121,14 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
             memoryEstimationContext,
             metrics,
             procedureReturnColumns,
-            terminationMonitor,
             requestScopedDependencies,
             writeContext,
             pipelineConfigurationParser,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             algorithmEstimationTemplate,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplate,
+            remoteNodePropertyStepExecutor
         );
 
         var linkPredictionFacade = LocalLinkPredictionFacade.create(

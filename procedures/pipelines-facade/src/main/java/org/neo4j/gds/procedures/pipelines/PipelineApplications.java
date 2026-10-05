@@ -52,6 +52,7 @@ import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.RemoteNodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -67,7 +68,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingP
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.termination.TerminationMonitor;
 
 import java.util.Map;
 import java.util.Optional;
@@ -93,7 +93,6 @@ public class PipelineApplications {
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RequestCorrelationId requestCorrelationId;
     private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationMonitor terminationMonitor;
     private final TerminationFlag terminationFlag;
     private final User user;
 
@@ -114,6 +113,8 @@ public class PipelineApplications {
 
     private final NodeRegressionTrainComputationFactory nodeRegressionTrainComputationFactory;
 
+    private final RemoteNodePropertyStepExecutor remoteNodePropertyStepExecutor;
+
     PipelineApplications(
         Log log,
         GloballyScopedDependencies globallyScopedDependencies,
@@ -129,7 +130,6 @@ public class PipelineApplications {
         RelationshipExporterBuilder relationshipExporterBuilder,
         RequestCorrelationId requestCorrelationId,
         TaskRegistryFactory taskRegistryFactory,
-        TerminationMonitor terminationMonitor,
         TerminationFlag terminationFlag,
         User user,
         PipelineConfigurationParser pipelineConfigurationParser,
@@ -142,7 +142,8 @@ public class PipelineApplications {
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         TrainedLPPipelineModel trainedLPPipelineModel,
         TrainedNCPipelineModel trainedNCPipelineModel,
-        NodeRegressionTrainComputationFactory nodeRegressionTrainComputationFactory
+        NodeRegressionTrainComputationFactory nodeRegressionTrainComputationFactory,
+        RemoteNodePropertyStepExecutor remoteNodePropertyStepExecutor
     ) {
         this.log = log;
         this.globallyScopedDependencies = globallyScopedDependencies;
@@ -158,7 +159,6 @@ public class PipelineApplications {
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.requestCorrelationId = requestCorrelationId;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationMonitor = terminationMonitor;
         this.terminationFlag = terminationFlag;
         this.user = user;
         this.pipelineConfigurationParser = pipelineConfigurationParser;
@@ -172,6 +172,7 @@ public class PipelineApplications {
         this.trainedLPPipelineModel = trainedLPPipelineModel;
         this.trainedNCPipelineModel = trainedNCPipelineModel;
         this.nodeRegressionTrainComputationFactory = nodeRegressionTrainComputationFactory;
+        this.remoteNodePropertyStepExecutor = remoteNodePropertyStepExecutor;
     }
 
     static PipelineApplications create(
@@ -183,14 +184,14 @@ public class PipelineApplications {
         MemoryEstimationContext memoryEstimationContext,
         Metrics metrics,
         ProcedureReturnColumns procedureReturnColumns,
-        TerminationMonitor terminationMonitor,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         PipelineConfigurationParser pipelineConfigurationParser,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        RemoteNodePropertyStepExecutor remoteNodePropertyStepExecutor
     ) {
         var mutateNodeProperty = new MutateNodePropertyService(loggers.log());
 
@@ -230,7 +231,6 @@ public class PipelineApplications {
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             requestScopedDependencies.terminationFlag(),
-            terminationMonitor,
             progressTrackerCreator,
             algorithmsProcedureFacade
         );
@@ -250,7 +250,6 @@ public class PipelineApplications {
             writeContext.relationshipExporterBuilder(),
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
-            terminationMonitor,
             requestScopedDependencies.terminationFlag(),
             requestScopedDependencies.user(),
             pipelineConfigurationParser,
@@ -263,7 +262,8 @@ public class PipelineApplications {
             algorithmProcessingTemplate,
             trainedLPPipelineModel,
             trainedNCPipelineModel,
-            nodeRegressionTrainComputationFactory
+            nodeRegressionTrainComputationFactory,
+            remoteNodePropertyStepExecutor
         );
     }
 
@@ -289,7 +289,11 @@ public class PipelineApplications {
         var pipeline = pipelineRepository.getLinkPredictionTrainingPipeline(user, pipelineName);
         validateRelationshipProperty(pipeline, procedureConfig);
 
-        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig);
+        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+            taskName,
+            procedureConfig,
+            remoteNodePropertyStepExecutor
+        );
 
         pipeline.addNodePropertyStep(nodePropertyStep);
 
@@ -303,7 +307,11 @@ public class PipelineApplications {
     ) {
         var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(user, pipelineName);
 
-        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig);
+        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+            taskName,
+            procedureConfig,
+            remoteNodePropertyStepExecutor
+        );
 
         pipeline.addNodePropertyStep(nodePropertyStep);
 
@@ -317,7 +325,11 @@ public class PipelineApplications {
     ) {
         var pipeline = pipelineRepository.getNodeRegressionTrainingPipeline(user, pipelineName);
 
-        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig);
+        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(
+            taskName,
+            procedureConfig,
+            remoteNodePropertyStepExecutor
+        );
 
         pipeline.addNodePropertyStep(nodePropertyStep);
 
@@ -763,7 +775,6 @@ public class PipelineApplications {
             requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
-            terminationMonitor,
             user,
             progressTrackerCreator,
             algorithmsProcedureFacade,
@@ -790,7 +801,6 @@ public class PipelineApplications {
             requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
-            terminationMonitor,
             user,
             progressTrackerCreator,
             algorithmsProcedureFacade,
@@ -816,7 +826,6 @@ public class PipelineApplications {
             requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
-            terminationMonitor,
             user,
             progressTrackerCreator,
             algorithmsProcedureFacade,
@@ -842,7 +851,6 @@ public class PipelineApplications {
             requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
-            terminationMonitor,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration
@@ -866,7 +874,6 @@ public class PipelineApplications {
             requestCorrelationId,
             taskRegistryFactory,
             terminationFlag,
-            terminationMonitor,
             user,
             progressTrackerCreator,
             algorithmsProcedureFacade,

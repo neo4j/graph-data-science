@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.ml.pipeline.RemoteNodePropertyStepExecutor;
 
 import java.util.List;
 
@@ -49,7 +50,6 @@ class NodeClassificationFacadeTest {
             null,
             null,
             null,
-            null,
             new User("me", false),
             null,
             null,
@@ -61,7 +61,8 @@ class NodeClassificationFacadeTest {
             null,
             null,
             null,
-            null
+            null,
+            RemoteNodePropertyStepExecutor.EMPTY
         );
         var facade = new LocalNodeClassificationFacade(null, null, null, applications);
 
@@ -96,7 +97,6 @@ class NodeClassificationFacadeTest {
             null,
             null,
             null,
-            null,
             new User("me", false),
             null,
             null,
@@ -108,7 +108,8 @@ class NodeClassificationFacadeTest {
             null,
             null,
             null,
-            null
+            null,
+            RemoteNodePropertyStepExecutor.EMPTY
         );
         var facade = new LocalNodeClassificationFacade(null, null, null, applications);
 

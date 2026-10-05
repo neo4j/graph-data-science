@@ -40,7 +40,6 @@ import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.termination.TerminationMonitor;
 
 import java.util.List;
 import java.util.Map;
@@ -130,7 +129,6 @@ class NodeClassificationTrainComputationTest {
             requestScopedDependencies.correlationId(),
             requestScopedDependencies.taskRegistryFactory(),
             TerminationFlag.RUNNING_TRUE,
-            TerminationMonitor.EMPTY,
             progressTrackerCreator,
             null,
             configuration

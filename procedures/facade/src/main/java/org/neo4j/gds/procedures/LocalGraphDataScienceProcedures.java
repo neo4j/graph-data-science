@@ -67,7 +67,6 @@ import org.neo4j.gds.procedures.pipelines.LocalPipelinesProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
-import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.transaction.TransactionCloseableResourceRegistry;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -134,7 +133,6 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         ProcedureReturnColumns procedureReturnColumns,
         RequestScopedDependencies requestScopedDependencies,
         DependencyResolver dependencyResolver,
-        TerminationMonitor terminationMonitor,
         Transaction procedureTransaction,
         WriteContext writeContext,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
@@ -252,7 +250,6 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             procedureReturnColumns,
             requestScopedDependencies,
             writeContext,
-            terminationMonitor,
             progressTrackerCreator,
             algorithmsProcedureFacade,
             algorithmEstimationTemplate,

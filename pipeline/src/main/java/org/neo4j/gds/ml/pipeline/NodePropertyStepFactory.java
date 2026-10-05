@@ -48,13 +48,24 @@ public final class NodePropertyStepFactory {
 
     // Procedures that exist as standalone algorithms but are intentionally not supported as pipeline
     // node-property steps. Rejected with a clear error rather than the generic "could not find a procedure".
-    private static final Set<String> UNSUPPORTED_AS_NODE_PROPERTY_STEP = Set.of("gds.fastpath.mutate");
+    private static final Set<String> UNSUPPORTED_AS_NODE_PROPERTY_STEP = Set.of(
+        "gds.fastpath.mutate",
+        "gds.graphsage.supervised.mutate"
+    );
 
     private NodePropertyStepFactory() {}
 
     public static ExecutableNodePropertyStep createNodePropertyStep(
         String taskName,
         Map<String, Object> configMap
+    ) {
+        return createNodePropertyStep(taskName, configMap, RemoteNodePropertyStepExecutor.EMPTY);
+    }
+
+    public static ExecutableNodePropertyStep createNodePropertyStep(
+        String taskName,
+        Map<String, Object> configMap,
+        RemoteNodePropertyStepExecutor remoteExecutor
     ) {
         var procConfigMap = new HashMap<>(configMap);
         var contextNodeLabels = procConfigMap.remove(CONTEXT_NODE_LABELS);
@@ -71,7 +82,8 @@ public final class NodePropertyStepFactory {
             procConfigMap,
             taskName,
             contextConfig.contextNodeLabels(),
-            contextConfig.contextRelationshipTypes()
+            contextConfig.contextRelationshipTypes(),
+            remoteExecutor
         );
     }
 
@@ -85,7 +97,8 @@ public final class NodePropertyStepFactory {
             procConfigMap,
             taskName,
             contextNodeLabels,
-            contextRelationshipTypes
+            contextRelationshipTypes,
+            RemoteNodePropertyStepExecutor.EMPTY
         );
     }
 
@@ -93,8 +106,23 @@ public final class NodePropertyStepFactory {
         Map<String, Object> procConfigMap,
         String taskName,
         List<String> contextNodeLabels,
-        List<String> contextRelationshipTypes
+        List<String> contextRelationshipTypes,
+        RemoteNodePropertyStepExecutor remoteExecutor
     ) {
+        var canonicalName = normalizeName(taskName);
+
+        // remote steps manage their own graph scoping, so reserved-key validation is delegated to the executor
+        if (remoteExecutor.handles(canonicalName)) {
+            remoteExecutor.validate(canonicalName, procConfigMap);
+            return new RemoteNodePropertyStep(
+                canonicalName,
+                procConfigMap,
+                contextNodeLabels,
+                contextRelationshipTypes,
+                remoteExecutor
+            );
+        }
+
         validateReservedConfigKeys(procConfigMap);
 
         var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate();
@@ -109,7 +137,6 @@ public final class NodePropertyStepFactory {
             );
         }
 
-        var canonicalName = normalizeName(taskName);
         if (UNSUPPORTED_AS_NODE_PROPERTY_STEP.contains(canonicalName)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The procedure `%s` is not supported as a node property step in training pipelines.",
