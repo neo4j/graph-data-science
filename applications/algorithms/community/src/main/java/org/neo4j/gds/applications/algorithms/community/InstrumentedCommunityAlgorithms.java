@@ -27,11 +27,16 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
+import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
+import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
+import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
+import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -82,6 +87,34 @@ public class InstrumentedCommunityAlgorithms {
         );
     }
 
+    public <RESULT, METADATA> CompletableFuture<RESULT> cliqueCounting(
+        GraphName graphName,
+        CliqueCountingBaseConfig configuration,
+        Optional<SideEffect<CliqueCountingResult, METADATA>> sideEffect,
+        ResultRenderer<CliqueCountingResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(
+                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
+                    new UndirectedOnlyRequirement("Clique Counting").validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    )
+            );
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.cliqueCounting(graph, configuration),
+            estimationFacade::cliqueCounting,
+            AlgorithmLabel.CliqueCounting,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
     public <RESULT, METADATA> CompletableFuture<RESULT> conductance(
         GraphName graphName,
         ConductanceBaseConfig configuration,
@@ -105,6 +138,32 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.conductance(graph, configuration),
             estimationFacade::conductance,
             AlgorithmLabel.Conductance,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    /**
+     * Interestingly, in de-duplicating, we find that the old code had no special validation,
+     * but the duplicated code had added a `new NodePropertyMustExistOnAnyLabel("nodeProperty")`.
+     * Tests break when applying that validation. The duplicated code had no tests, and was never integrated.
+     * There is a possibility that this validation should be there, can't rule it out.
+     * If so, tests need to change, and hopefully it would not break customers' code.
+     * For now though it will live in Javadoc...
+     */
+    public <RESULT, METADATA> CompletableFuture<RESULT> hdbscan(
+        GraphName graphName,
+        HDBScanBaseConfig configuration,
+        Optional<SideEffect<Labels, METADATA>> sideEffect,
+        ResultRenderer<Labels, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> algorithms.hdbscan(graph, configuration),
+            () -> estimationFacade.hdbscan(configuration),
+            AlgorithmLabel.HDBScan,
             sideEffect,
             resultRenderer
         );

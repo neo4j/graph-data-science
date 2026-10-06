@@ -23,12 +23,8 @@ import org.neo4j.gds.CommunityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
-import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
-import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
@@ -64,26 +60,6 @@ public class CommunityAlgorithmsBusinessFacade {
         this.log = log;
         this.algorithms = algorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    public CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingBaseConfig configuration) {
-        var params = configuration.toParameters();
-        var task = CommunityAlgorithmTasks.cliqueCounting(graph, params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.cliqueCounting(graph, params, progressTracker),
-            progressTracker, true);
-    }
-
-    public Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.hdbscan(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        var params = configuration.toParameters();
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.hdbscan(graph, params, progressTracker),
-            progressTracker, true);
     }
 
     public K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {

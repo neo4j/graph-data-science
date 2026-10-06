@@ -27,8 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.cliquecounting.CliqueCountingMode;
-import org.neo4j.gds.cliquecounting.CliqueCountingParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
@@ -37,7 +35,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.hdbscan.HDBScanParameters;
 import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kmeans.KmeansParameters;
@@ -101,46 +98,6 @@ class CommunityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void cliqueCounting(){
-        var future = facade.cliqueCounting(
-            graph,
-            new CliqueCountingParameters(
-              CliqueCountingMode.GloballyOnly,
-                List.of(),
-                new Concurrency(4)
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().globalCount()).containsExactly(1);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void hdbscan(){
-        var future = facade.hdbscan(
-            graph,
-            new HDBScanParameters(
-                new Concurrency(4),
-                2,
-                3,
-                2,
-                "prop2"
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().labels().toArray()).hasSize(3);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

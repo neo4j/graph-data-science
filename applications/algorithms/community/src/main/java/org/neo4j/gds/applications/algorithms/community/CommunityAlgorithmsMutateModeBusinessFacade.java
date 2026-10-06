@@ -81,7 +81,6 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CliqueCounting;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
@@ -139,15 +138,27 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new CliqueCountingMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.cliqueCounting(
             graphName,
             configuration,
-            CliqueCounting,
-            estimation::cliqueCounting,
-            (graph, __) -> algorithms.cliqueCounting(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
+    public <RESULT> RESULT hdbscan(
+        GraphName graphName,
+        HDBScanMutateConfig configuration,
+        ResultBuilder<HDBScanMutateConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new HDBScanMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
+
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.hdbscan(
+            graphName,
+            configuration,
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT k1Coloring(
@@ -406,24 +417,6 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             Optional.of(new MutateSideEffect<>(mutateStep)),
             new MutateResultRenderer<>(configuration, resultBuilder)
         ));
-    }
-
-    public <RESULT> RESULT hdbscan(
-        GraphName graphName,
-        HDBScanMutateConfig configuration,
-        ResultBuilder<HDBScanMutateConfig, Labels, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var mutateStep = new HDBScanMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
-
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
-            graphName,
-            configuration,
-            WCC,
-            () -> estimation.hdbscan(configuration),
-            (graph, __) -> algorithms.hdbscan(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
     }
 
     private static <C extends MutateNodePropertyConfig & SeedConfig & ConsecutiveIdsConfig> StandardCommunityProperties createNodePropertyCalculator(C config){
