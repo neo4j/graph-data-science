@@ -50,6 +50,8 @@ import static org.neo4j.internal.kernel.api.procs.FieldSignature.inputField;
 
 public class CypherAggregation implements CallableUserAggregationFunction {
 
+    private static final String PARALLEL_RUNTIME = "parallel";
+
     // NOTE: keep in sync with `procedureSyntax`
     public static final QualifiedName FUNCTION_NAME = new QualifiedName(
         new String[]{"gds", "graph"},
@@ -129,11 +131,23 @@ public class CypherAggregation implements CallableUserAggregationFunction {
                 databaseId,
                 extractNodeId
             );
-            ctx.internalTransaction().registerCloseableResource(aggregationReducer);
+            // The reducer's close() is the failure cleanup: it fails the progress task when the
+            // query ends without a result. Resources registered here are bound to the calling
+            // thread's execution context, which on the parallel runtime is a worker context that
+            // Neo4j may complete while the query is still running. Closing the reducer then would
+            // fail the task of a projection that later succeeds, so there we rely on the updaters
+            // to fail the task when an update throws.
+            if (!runsOnParallelRuntime(ctx)) {
+                ctx.internalTransaction().registerCloseableResource(aggregationReducer);
+            }
             return aggregationReducer;
         } catch (Throwable T) {
             throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), T);
         }
+    }
+
+    private static boolean runsOnParallelRuntime(Context ctx) {
+        return PARALLEL_RUNTIME.equalsIgnoreCase(ctx.procedureCallContext().cypherRuntimeName());
     }
 
     protected CypherAggregationReducer newReducer(
