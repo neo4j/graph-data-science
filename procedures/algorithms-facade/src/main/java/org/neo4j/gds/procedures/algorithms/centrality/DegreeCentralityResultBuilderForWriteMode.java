@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DegreeCentralityResultBuilderForWriteMode implements ResultBuilder<DegreeCentralityWriteConfig, CentralityAlgorithmResult, Stream<CentralityWriteResult>, NodePropertiesWritten> {
+class DegreeCentralityResultBuilderForWriteMode implements ResultBuilder<DegreeCentralityWriteConfig, DegreeCentralityResult, Stream<CentralityWriteResult>, NodePropertiesWritten> {
     private final GenericCentralityResultBuilderForWriteMode genericResultBuilder = new GenericCentralityResultBuilderForWriteMode();
 
     private final boolean shouldComputeCentralityDistribution;
@@ -42,7 +42,7 @@ class DegreeCentralityResultBuilderForWriteMode implements ResultBuilder<DegreeC
     public Stream<CentralityWriteResult> build(
         Graph graph,
         DegreeCentralityWriteConfig configuration,
-        Optional<CentralityAlgorithmResult> result,
+        Optional<DegreeCentralityResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {

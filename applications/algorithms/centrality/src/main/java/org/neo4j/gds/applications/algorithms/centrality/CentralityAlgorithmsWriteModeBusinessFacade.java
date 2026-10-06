@@ -44,6 +44,7 @@ import org.neo4j.gds.centrality.HarmonicCentralityWriteStep;
 import org.neo4j.gds.centrality.HitsWriteStep;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
@@ -60,7 +61,6 @@ import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
@@ -214,19 +214,16 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT degreeCentrality(
         GraphName graphName,
         DegreeCentralityWriteConfig configuration,
-        ResultBuilder<DegreeCentralityWriteConfig, CentralityAlgorithmResult, RESULT, NodePropertiesWritten> resultBuilder
+        ResultBuilder<DegreeCentralityWriteConfig, DegreeCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
         var writeStep = new DegreeCentralityWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.degreeCentrality(
             graphName,
             configuration,
-            DegreeCentrality,
-            () -> estimationFacade.degreeCentrality(configuration),
-            (graph, __) -> algorithms.degreeCentrality(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT eigenvector(

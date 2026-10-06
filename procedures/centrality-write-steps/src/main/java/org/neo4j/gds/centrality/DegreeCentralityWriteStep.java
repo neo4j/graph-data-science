@@ -28,9 +28,10 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 
-public class DegreeCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
+public class DegreeCentralityWriteStep implements WriteStep<DegreeCentralityResult, NodePropertiesWritten> {
     private final GenericCentralityWriteStep<CentralityAlgorithmResult> writeStep;
 
     public DegreeCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, DegreeCentralityWriteConfig configuration) {
@@ -48,7 +49,7 @@ public class DegreeCentralityWriteStep implements WriteStep<CentralityAlgorithmR
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        CentralityAlgorithmResult result,
+        DegreeCentralityResult result,
         JobId jobId
     ) {
         return writeStep.execute(graph,graphStore,resultStore,result,jobId);

@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DegreeCentralityResultBuilderForStatsMode implements StatsResultBuilder<CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
+class DegreeCentralityResultBuilderForStatsMode implements StatsResultBuilder<DegreeCentralityResult, Stream<CentralityStatsResult>> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
     private final DegreeCentralityStatsConfig configuration;
@@ -45,7 +45,7 @@ class DegreeCentralityResultBuilderForStatsMode implements StatsResultBuilder<Ce
     @Override
     public Stream<CentralityStatsResult> build(
         Graph graph,
-        Optional<CentralityAlgorithmResult> result,
+        Optional<DegreeCentralityResult> result,
         AlgorithmProcessingTimings timings
     ) {
         var centralityStatsResult = genericResultBuilder.build(

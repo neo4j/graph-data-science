@@ -43,6 +43,8 @@ import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
+import org.neo4j.gds.degree.DegreeCentralityConfig;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.HitsConfig;
@@ -262,6 +264,24 @@ public final class InstrumentedCentralityAlgorithms {
             (graph, __, ___) -> algorithms.closenessCentrality(graph, configuration),
             estimationFacade::closenessCentrality,
             AlgorithmLabel.ClosenessCentrality,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> degreeCentrality(
+        GraphName graphName,
+        DegreeCentralityConfig configuration,
+        Optional<SideEffect<DegreeCentralityResult, METADATA>> sideEffect,
+        ResultRenderer<DegreeCentralityResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> algorithms.degreeCentrality(graph, configuration),
+            () -> estimationFacade.degreeCentrality(configuration),
+            AlgorithmLabel.DegreeCentrality,
             sideEffect,
             resultRenderer
         );
