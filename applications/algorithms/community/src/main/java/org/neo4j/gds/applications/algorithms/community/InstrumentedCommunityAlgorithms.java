@@ -145,7 +145,7 @@ public class InstrumentedCommunityAlgorithms {
         ResultRenderer<PregelResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new PregelPropertiesRequirement(configuration.writeProperty()));
+            .with(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()));
 
         return launchConvenience.launchAlgorithm(
             graphName,

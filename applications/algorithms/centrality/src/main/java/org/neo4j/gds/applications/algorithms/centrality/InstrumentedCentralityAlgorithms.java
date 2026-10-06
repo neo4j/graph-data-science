@@ -306,7 +306,7 @@ public final class InstrumentedCentralityAlgorithms {
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
             .with(hitsHookGenerator.generate(configuration)) // the hook creates inverse indexes
-            .with(new PregelPropertiesRequirement(configuration.writeProperty()))
+            .with(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()))
             .with(new DirectedOnlyRequirement("Hits"));
 
         return launchConvenience.launchAlgorithm(

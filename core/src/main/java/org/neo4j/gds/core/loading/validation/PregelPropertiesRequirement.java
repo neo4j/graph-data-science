@@ -28,9 +28,11 @@ import java.util.Optional;
 
 public class PregelPropertiesRequirement implements GraphStoreFilteredETL {
    private final String writeProperty;
+   private final boolean writeToResultStore;
 
-    public PregelPropertiesRequirement(String writeProperty) {
+    public PregelPropertiesRequirement(String writeProperty, boolean writeToResultStore) {
         this.writeProperty = writeProperty;
+        this.writeToResultStore = writeToResultStore;
     }
 
     @Override
@@ -46,7 +48,7 @@ public class PregelPropertiesRequirement implements GraphStoreFilteredETL {
         }
 
         if (!graphStore.capabilities().canWriteToLocalDatabase() && !graphStore.capabilities()
-            .canWriteToRemoteDatabase()) { //skip result store  ¯\\_(ツ)_/¯
+            .canWriteToRemoteDatabase() && !writeToResultStore) {
             throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
         }
     }
