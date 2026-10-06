@@ -27,13 +27,14 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-public class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
+public class ClosenessCentralityWriteStep implements WriteStep<ClosenessCentralityResult, NodePropertiesWritten> {
     private final GenericCentralityWriteStep<CentralityAlgorithmResult> writeStep;
 
     public ClosenessCentralityWriteStep(
@@ -56,9 +57,9 @@ public class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorit
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        CentralityAlgorithmResult result,
+        ClosenessCentralityResult result,
         JobId jobId
     ) {
-        return writeStep.execute(graph,graphStore,resultStore,result,jobId);
+        return writeStep.execute(graph, graphStore, resultStore, result, jobId);
     }
 }

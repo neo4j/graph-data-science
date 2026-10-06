@@ -29,7 +29,8 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
-import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
@@ -44,7 +45,6 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 
 public final class CentralityAlgorithmsStatsModeBusinessFacade {
@@ -125,17 +125,15 @@ public final class CentralityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT closenessCentrality(
         GraphName graphName,
-        ClosenessCentralityStatsConfig configuration,
-        StatsResultBuilder<CentralityAlgorithmResult, RESULT> resultBuilder
+        ClosenessCentralityBaseConfig configuration,
+        StatsResultBuilder<ClosenessCentralityResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.closenessCentrality(
             graphName,
             configuration,
-            ClosenessCentrality,
-            estimationFacade::closenessCentrality,
-            (graph, __) -> algorithms.closenessCentrality(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT degreeCentrality(

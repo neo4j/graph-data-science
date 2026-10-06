@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BetaClosenessCentralityResultBuilderForWriteMode implements ResultBuilder<ClosenessCentralityWriteConfig, CentralityAlgorithmResult, Stream<BetaClosenessCentralityWriteResult>, NodePropertiesWritten> {
+class BetaClosenessCentralityResultBuilderForWriteMode implements ResultBuilder<ClosenessCentralityWriteConfig, ClosenessCentralityResult, Stream<BetaClosenessCentralityWriteResult>, NodePropertiesWritten> {
     private final GenericCentralityResultBuilderForWriteMode genericResultBuilder = new GenericCentralityResultBuilderForWriteMode();
 
     private final boolean shouldComputeCentralityDistribution;
@@ -42,7 +42,7 @@ class BetaClosenessCentralityResultBuilderForWriteMode implements ResultBuilder<
     public Stream<BetaClosenessCentralityWriteResult> build(
         Graph graph,
         ClosenessCentralityWriteConfig configuration,
-        Optional<CentralityAlgorithmResult> result,
+        Optional<ClosenessCentralityResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {

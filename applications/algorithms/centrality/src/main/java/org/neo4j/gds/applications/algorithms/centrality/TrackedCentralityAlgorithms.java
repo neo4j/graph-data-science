@@ -134,7 +134,7 @@ public class TrackedCentralityAlgorithms {
         );
     }
 
-    public ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
+    ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
         var params = configuration.toParameters();
         var task = CentralityAlgorithmTasks.closenessCentrality(graph, configuration.concurrency());
 

@@ -35,6 +35,8 @@ import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
@@ -191,24 +193,6 @@ public final class InstrumentedCentralityAlgorithms {
         );
     }
 
-    public <RESULT, METADATA> CompletableFuture<RESULT> celf(
-        GraphName graphName,
-        InfluenceMaximizationBaseConfig configuration,
-        Optional<SideEffect<CELFResult, METADATA>> sideEffect,
-        ResultRenderer<CELFResult, RESULT, METADATA> resultRenderer
-    ) {
-        return launchConvenience.launchAlgorithm(
-            graphName,
-            configuration,
-            GraphLoadETLBuilder.empty(),
-            (graph, __, ___) -> algorithms.celf(graph, configuration),
-            () -> estimationFacade.celf(configuration),
-            AlgorithmLabel.CELF,
-            sideEffect,
-            resultRenderer
-        );
-    }
-
     public <RESULT, METADATA> CompletableFuture<RESULT> bridges(
         GraphName graphName,
         BridgesStreamConfig configuration,
@@ -242,6 +226,42 @@ public final class InstrumentedCentralityAlgorithms {
             (graph, __, ___) -> algorithms.bridges(graph, configuration, shouldComputeComponents),
             () -> estimationFacade.bridges(shouldComputeComponents),
             AlgorithmLabel.Bridges,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> celf(
+        GraphName graphName,
+        InfluenceMaximizationBaseConfig configuration,
+        Optional<SideEffect<CELFResult, METADATA>> sideEffect,
+        ResultRenderer<CELFResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> algorithms.celf(graph, configuration),
+            () -> estimationFacade.celf(configuration),
+            AlgorithmLabel.CELF,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> closenessCentrality(
+        GraphName graphName,
+        ClosenessCentralityBaseConfig configuration,
+        Optional<SideEffect<ClosenessCentralityResult, METADATA>> sideEffect,
+        ResultRenderer<ClosenessCentralityResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> algorithms.closenessCentrality(graph, configuration),
+            estimationFacade::closenessCentrality,
+            AlgorithmLabel.ClosenessCentrality,
             sideEffect,
             resultRenderer
         );

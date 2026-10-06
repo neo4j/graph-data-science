@@ -31,7 +31,8 @@ import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
-import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
@@ -47,7 +48,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 
 public final class CentralityAlgorithmsStreamModeBusinessFacade {
@@ -147,17 +147,15 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> closenessCentrality(
         GraphName graphName,
-        ClosenessCentralityStreamConfig configuration,
-        StreamResultBuilder<CentralityAlgorithmResult, RESULT> streamResultBuilder
+        ClosenessCentralityBaseConfig configuration,
+        StreamResultBuilder<ClosenessCentralityResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.closenessCentrality(
             graphName,
             configuration,
-            ClosenessCentrality,
-            estimationFacade::closenessCentrality,
-            (graph, __) -> algorithms.closenessCentrality(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> degreeCentrality(

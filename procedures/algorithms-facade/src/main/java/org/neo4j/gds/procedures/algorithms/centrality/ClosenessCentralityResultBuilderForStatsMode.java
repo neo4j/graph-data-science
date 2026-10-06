@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ClosenessCentralityResultBuilderForStatsMode implements StatsResultBuilder<CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
+class ClosenessCentralityResultBuilderForStatsMode implements StatsResultBuilder<ClosenessCentralityResult, Stream<CentralityStatsResult>> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
     private final ClosenessCentralityStatsConfig configuration;
@@ -45,7 +45,7 @@ class ClosenessCentralityResultBuilderForStatsMode implements StatsResultBuilder
     @Override
     public Stream<CentralityStatsResult> build(
         Graph graph,
-        Optional<CentralityAlgorithmResult> result,
+        Optional<ClosenessCentralityResult> result,
         AlgorithmProcessingTimings timings
     ) {
         var centralityStatsResult = genericResultBuilder.build(

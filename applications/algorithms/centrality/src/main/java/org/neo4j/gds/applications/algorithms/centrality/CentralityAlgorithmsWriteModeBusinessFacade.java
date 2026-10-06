@@ -42,6 +42,7 @@ import org.neo4j.gds.centrality.DegreeCentralityWriteStep;
 import org.neo4j.gds.centrality.GenericRankWriteStep;
 import org.neo4j.gds.centrality.HarmonicCentralityWriteStep;
 import org.neo4j.gds.centrality.HitsWriteStep;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
@@ -59,7 +60,6 @@ import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
@@ -194,7 +194,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT closenessCentrality(
         GraphName graphName,
         ClosenessCentralityWriteConfig configuration,
-        ResultBuilder<ClosenessCentralityWriteConfig, CentralityAlgorithmResult, RESULT, NodePropertiesWritten> resultBuilder
+        ResultBuilder<ClosenessCentralityWriteConfig, ClosenessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
         var writeStep = new ClosenessCentralityWriteStep(
             writeNodePropertyService,
@@ -203,15 +203,12 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration::resolveResultStore
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.closenessCentrality(
             graphName,
             configuration,
-            ClosenessCentrality,
-            estimationFacade::closenessCentrality,
-            (graph, __) -> algorithms.closenessCentrality(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT degreeCentrality(

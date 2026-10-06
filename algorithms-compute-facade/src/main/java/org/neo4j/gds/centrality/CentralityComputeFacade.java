@@ -22,9 +22,6 @@ package org.neo4j.gds.centrality;
 import org.neo4j.gds.CentralityAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.closeness.ClosenessCentrality;
-import org.neo4j.gds.closeness.ClosenessCentralityParameters;
-import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
@@ -54,37 +51,6 @@ public class CentralityComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<ClosenessCentralityResult>> closeness(
-        Graph graph,
-        ClosenessCentralityParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ClosenessCentralityResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CentralityAlgorithmTasks.closenessCentrality(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var closeness = ClosenessCentrality.create(
-            graph,
-            parameters,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            closeness::compute,
-            jobId
-        );
     }
 
     public CompletableFuture<TimedAlgorithmResult<DegreeCentralityResult>> degree(

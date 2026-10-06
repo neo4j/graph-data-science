@@ -60,7 +60,6 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
@@ -163,15 +162,12 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ClosenessCentralityMutateStep(mutateNodePropertyService, configuration.mutateProperty(), configuration.nodeLabels());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.closenessCentrality(
             graphName,
             configuration,
-            ClosenessCentrality,
-            estimation::closenessCentrality,
-            (graph, __) -> algorithms.closenessCentrality(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT degreeCentrality(
