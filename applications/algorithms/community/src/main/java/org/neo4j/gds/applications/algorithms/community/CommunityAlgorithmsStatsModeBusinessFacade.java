@@ -31,8 +31,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.Labels;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
-import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
@@ -57,7 +57,6 @@ import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
@@ -105,17 +104,15 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT k1Coloring(
         GraphName graphName,
-        K1ColoringStatsConfig configuration,
+        K1ColoringBaseConfig configuration,
         StatsResultBuilder<K1ColoringResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.k1Coloring(
             graphName,
             configuration,
-            K1Coloring,
-            estimationFacade::k1Coloring,
-            (graph, __) -> communityAlgorithms.k1Coloring(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT kCore(

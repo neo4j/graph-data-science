@@ -28,8 +28,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.k1coloring.K1ColoringParameters;
-import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.KmeansParameters;
@@ -76,23 +74,6 @@ class CommunityComputeFacadeEmptyGraphTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void k1Coloring(){
-
-        var future = facade.k1Coloring(
-            graph,
-            mock(K1ColoringParameters.class),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result()).isEqualTo(K1ColoringResult.EMPTY);
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

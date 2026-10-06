@@ -30,9 +30,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.gds.k1coloring.K1Coloring;
-import org.neo4j.gds.k1coloring.K1ColoringParameters;
-import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecomposition;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
@@ -89,38 +86,6 @@ public class CommunityComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    CompletableFuture<TimedAlgorithmResult<K1ColoringResult>> k1Coloring(
-        Graph graph,
-        K1ColoringParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(K1ColoringResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.k1Coloring(graph, parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var algorithm = new K1Coloring(
-            graph,
-            parameters,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
     }
 
     CompletableFuture<TimedAlgorithmResult<KCoreDecompositionResult>> kCore(

@@ -37,6 +37,8 @@ import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.Labels;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -164,6 +166,24 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.hdbscan(graph, configuration),
             () -> estimationFacade.hdbscan(configuration),
             AlgorithmLabel.HDBScan,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> k1Coloring(
+        GraphName graphName,
+        K1ColoringBaseConfig configuration,
+        Optional<SideEffect<K1ColoringResult, METADATA>> sideEffect,
+        ResultRenderer<K1ColoringResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> algorithms.k1Coloring(graph, configuration),
+            estimationFacade::k1Coloring,
+            AlgorithmLabel.K1Coloring,
             sideEffect,
             resultRenderer
         );

@@ -81,7 +81,6 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
@@ -168,15 +167,12 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new K1ColoringMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.k1Coloring(
             graphName,
             configuration,
-            K1Coloring,
-            estimation::k1Coloring,
-            (graph, __) -> algorithms.k1Coloring(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT kCore(

@@ -35,8 +35,8 @@ import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.Labels;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
-import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
@@ -63,7 +63,6 @@ import org.neo4j.gds.wcc.WccStreamConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
@@ -149,17 +148,15 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> k1Coloring(
         GraphName graphName,
-        K1ColoringStreamConfig configuration,
-        StreamResultBuilder<K1ColoringResult, RESULT> streamResultBuilder
+        K1ColoringBaseConfig configuration,
+        StreamResultBuilder<K1ColoringResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.k1Coloring(
             graphName,
             configuration,
-            K1Coloring,
-            estimationFacade::k1Coloring,
-            (graph, __) -> algorithms.k1Coloring(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> kCore(

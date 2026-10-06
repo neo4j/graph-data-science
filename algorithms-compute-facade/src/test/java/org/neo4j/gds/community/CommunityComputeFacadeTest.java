@@ -35,7 +35,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.k1coloring.K1ColoringParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kmeans.KmeansParameters;
 import org.neo4j.gds.kmeans.SamplerType;
@@ -98,25 +97,6 @@ class CommunityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void k1Coloring(){
-        var future = facade.k1Coloring(
-            graph,
-            new K1ColoringParameters(
-                new Concurrency(4),
-                1,
-                10_000
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().ranIterations()).isGreaterThan(0);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

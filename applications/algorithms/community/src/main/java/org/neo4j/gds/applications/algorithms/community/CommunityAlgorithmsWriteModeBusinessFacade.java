@@ -66,7 +66,6 @@ import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
@@ -176,15 +175,12 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new K1ColoringWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.k1Coloring(
             graphName,
             configuration,
-            K1Coloring,
-            estimationFacade::k1Coloring,
-            (graph, __) -> algorithms.k1Coloring(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT kCore(

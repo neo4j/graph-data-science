@@ -34,8 +34,6 @@ import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
 import org.neo4j.gds.core.loading.validation.OptionalNodePropertyGraphStoreRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.k1coloring.K1ColoringParameters;
-import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionParameters;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.KmeansParameters;
@@ -79,35 +77,6 @@ public class CommunityComputeBusinessFacade {
         this.computeFacade = computeFacade;
         this.user = user;
         this.databaseId = databaseId;
-    }
-
-    public <TR> CompletableFuture<TR> k1Coloring(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        K1ColoringParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<K1ColoringResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            GraphStoreValidation.DISABLED,
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.k1Coloring(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-
-        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> kCoreDecomposition(
