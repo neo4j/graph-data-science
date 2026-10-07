@@ -49,17 +49,17 @@ import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 
 /**
- * Instrumented - we really mean we added progress tracker on top.
+ * Tracked - we mean we added progress tracker on top of the algorithm.
  * Progress tracking is intrinsic, so coupled directly.
  * Other instrumentation is more generic - think timings - and those sits in the execution machinery.
  */
-public class TrackedCentralityAlgorithms {
+class TrackedCentralityAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final CentralityAlgorithms algorithms;
     private final ProgressTrackerCreator progressTrackerCreator;
 
-    public TrackedCentralityAlgorithms(
+    TrackedCentralityAlgorithms(
         CentralityAlgorithms algorithms,
         ProgressTrackerCreator progressTrackerCreator
     ) {
@@ -171,12 +171,7 @@ public class TrackedCentralityAlgorithms {
         );
     }
 
-    /**
-     * Any execution of harmonic centrality must use this method.
-     * This is where we create its progress tracker, which is intrinsic.
-     * If ever we did _not_ singularly use this method, it would be duplication.
-     */
-    public HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
+    HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
         var params = configuration.toParameters();
         var task = CentralityAlgorithmTasks.harmonicCentrality(configuration.concurrency());
 
@@ -211,7 +206,7 @@ public class TrackedCentralityAlgorithms {
         );
     }
 
-    public PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
+    PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
         var task = CentralityAlgorithmTasks.pageRank(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 

@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -59,54 +58,29 @@ public final class CentralityApplications {
         WriteContext writeContext,
         AlgorithmEstimationTemplate estimationTemplate,
         LaunchConvenience launchConvenience,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodePropertyService,
         Synchroniser synchroniser
     ) {
-        var algorithms = new CentralityAlgorithms(requestScopedDependencies.terminationFlag());
-        var trackedAlgorithms = new TrackedCentralityAlgorithms(algorithms, progressTrackerCreator);
         var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
+
         var raw = InstrumentedCentralityAlgorithms.create(
-            trackedAlgorithms,
             estimation,
             launchConvenience,
             progressTrackerCreator,
             requestScopedDependencies.terminationFlag()
         );
 
-        var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
-            estimation,
-            trackedAlgorithms,
-            algorithmProcessingTemplateConvenience,
-            mutateNodePropertyService,
-            raw,
-            synchroniser
-        );
+        var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(mutateNodePropertyService, raw, synchroniser);
 
-        var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
-            estimation,
-            trackedAlgorithms,
-            algorithmProcessingTemplateConvenience,
-            raw,
-            synchroniser
-        );
+        var stats = new CentralityAlgorithmsStatsModeBusinessFacade(raw, synchroniser);
 
-        var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
-            estimation,
-            trackedAlgorithms,
-            algorithmProcessingTemplateConvenience,
-            raw,
-            synchroniser
-        );
+        var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(raw, synchroniser);
 
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
             loggers.log(),
             requestScopedDependencies,
             writeContext,
-            estimation,
-            trackedAlgorithms,
-            algorithmProcessingTemplateConvenience,
             raw,
             synchroniser
         );

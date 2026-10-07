@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -34,6 +32,7 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.centrality.ArticulationPointsWriteStep;
 import org.neo4j.gds.centrality.BetweennessCentralityWriteStep;
 import org.neo4j.gds.centrality.CelfWriteStep;
@@ -60,29 +59,19 @@ import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
-    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final TrackedCentralityAlgorithms algorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteNodePropertyService writeNodePropertyService;
     private final InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms;
     private final Synchroniser synchroniser;
 
     private CentralityAlgorithmsWriteModeBusinessFacade(
-        CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        TrackedCentralityAlgorithms algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteNodePropertyService writeNodePropertyService,
         InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.estimationFacade = estimationFacade;
-        this.algorithms = algorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeNodePropertyService = writeNodePropertyService;
         this.instrumentedCentralityAlgorithms = instrumentedCentralityAlgorithms;
         this.synchroniser = synchroniser;
@@ -92,18 +81,12 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         Log log,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
-        CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        TrackedCentralityAlgorithms algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms,
         Synchroniser synchroniser
     ) {
         var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
         return new CentralityAlgorithmsWriteModeBusinessFacade(
-            estimationFacade,
-            algorithms,
-            algorithmProcessingTemplateConvenience,
             writeToDatabase,
             instrumentedCentralityAlgorithms,
             synchroniser
@@ -156,19 +139,16 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT betweennessCentrality(
         GraphName graphName,
         BetweennessCentralityWriteConfig configuration,
-        ResultBuilder<BetweennessCentralityWriteConfig, CentralityAlgorithmResult, RESULT, NodePropertiesWritten> resultBuilder
+        ResultBuilder<BetweennessCentralityWriteConfig, BetwennessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
         var writeStep = new BetweennessCentralityWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.betweennessCentrality(
             graphName,
             configuration,
-            BetweennessCentrality,
-            () -> estimationFacade.betweennessCentrality(configuration),
-            (graph, __) -> algorithms.betweennessCentrality(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <CONFIGURATION extends InfluenceMaximizationWriteConfig, RESULT> RESULT celf(

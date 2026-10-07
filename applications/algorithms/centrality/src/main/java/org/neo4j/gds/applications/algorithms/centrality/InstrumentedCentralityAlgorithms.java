@@ -87,16 +87,18 @@ public final class InstrumentedCentralityAlgorithms {
     }
 
     public static InstrumentedCentralityAlgorithms create(
-        TrackedCentralityAlgorithms algorithms,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         TerminationFlag terminationFlag
     ) {
+        var algorithms = new CentralityAlgorithms(terminationFlag);
+        var trackedAlgorithms = new TrackedCentralityAlgorithms(algorithms, progressTrackerCreator);
+
         var hitsHookGenerator = new HitsHookGenerator(progressTrackerCreator, terminationFlag);
 
         return new InstrumentedCentralityAlgorithms(
-            algorithms,
+            trackedAlgorithms,
             estimationFacade,
             launchConvenience,
             hitsHookGenerator
