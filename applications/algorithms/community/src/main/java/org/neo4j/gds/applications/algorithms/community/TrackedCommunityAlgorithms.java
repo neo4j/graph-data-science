@@ -44,6 +44,8 @@ import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
@@ -153,6 +155,18 @@ public class TrackedCommunityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.labelPropagation(graph, parameters, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    LocalClusteringCoefficientResult localClusteringCoefficient(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+        var task = CommunityAlgorithmTasks.lcc(graph, parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.lcc(graph, parameters, progressTracker),
             progressTracker,
             true
         );

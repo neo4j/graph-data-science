@@ -81,7 +81,6 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
@@ -231,15 +230,12 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new LccMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.localClusteringCoefficient(
             graphName,
             configuration,
-            LCC,
-            () -> estimation.lcc(configuration),
-            (graph, __) -> algorithms.lcc(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT leiden(

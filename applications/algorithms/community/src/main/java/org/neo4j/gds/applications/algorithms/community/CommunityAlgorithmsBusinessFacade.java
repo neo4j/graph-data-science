@@ -33,8 +33,6 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 public class CommunityAlgorithmsBusinessFacade {
@@ -52,16 +50,6 @@ public class CommunityAlgorithmsBusinessFacade {
         this.log = log;
         this.algorithms = algorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
-        var parameters = configuration.toParameters();
-        var task = CommunityAlgorithmTasks.lcc(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.lcc(graph, parameters, progressTracker),
-            progressTracker, true);
     }
 
     public LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {

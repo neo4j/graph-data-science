@@ -40,8 +40,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.scc.SccParameters;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.Optional;
@@ -67,38 +65,6 @@ public class CommunityComputeBusinessFacade {
         this.computeFacade = computeFacade;
         this.user = user;
         this.databaseId = databaseId;
-    }
-
-    public <TR> CompletableFuture<TR> lcc(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        LocalClusteringCoefficientParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<LocalClusteringCoefficientResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidationBuilder()
-                .withValidationRule(new UndirectedOnlyRequirement("LocalClusteringCoefficient"))
-                .withValidationRule(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty())))
-                .build(),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.lcc(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-
-        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> leiden(

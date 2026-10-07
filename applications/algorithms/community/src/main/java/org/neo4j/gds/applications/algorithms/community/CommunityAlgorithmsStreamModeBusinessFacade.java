@@ -53,8 +53,8 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
@@ -63,7 +63,6 @@ import org.neo4j.gds.wcc.WccStreamConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
@@ -197,17 +196,15 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> lcc(
         GraphName graphName,
-        LocalClusteringCoefficientStreamConfig configuration,
-        StreamResultBuilder<LocalClusteringCoefficientResult, RESULT> streamResultBuilder
+        LocalClusteringCoefficientBaseConfig configuration,
+        StreamResultBuilder<LocalClusteringCoefficientResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.localClusteringCoefficient(
             graphName,
             configuration,
-            LCC,
-            () -> estimationFacade.lcc(configuration),
-            (graph, __) -> algorithms.lcc(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> leiden(

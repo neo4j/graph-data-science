@@ -41,7 +41,6 @@ import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.Optional;
@@ -91,25 +90,6 @@ class CommunityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void lcc(){
-        var future = facade.lcc(
-            graph,
-            new LocalClusteringCoefficientParameters(
-                new Concurrency(4),
-                100,
-                null
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().averageClusteringCoefficient()).isGreaterThan(0d);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

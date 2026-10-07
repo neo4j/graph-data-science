@@ -44,9 +44,6 @@ import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.triangle.LocalClusteringCoefficient;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccParameters;
 
@@ -71,39 +68,6 @@ public class CommunityComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    CompletableFuture<TimedAlgorithmResult<LocalClusteringCoefficientResult>> lcc(
-        Graph graph,
-        LocalClusteringCoefficientParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(LocalClusteringCoefficientResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.lcc(graph, parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var algorithm = new LocalClusteringCoefficient(
-            graph,
-            parameters.concurrency(),
-            parameters.maxDegree(),
-            parameters.seedProperty(),
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
     }
 
     CompletableFuture<TimedAlgorithmResult<LeidenResult>> leiden(

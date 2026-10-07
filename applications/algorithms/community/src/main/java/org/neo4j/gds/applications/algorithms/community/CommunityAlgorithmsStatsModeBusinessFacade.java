@@ -49,15 +49,14 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
@@ -153,17 +152,15 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT lcc(
         GraphName graphName,
-        LocalClusteringCoefficientStatsConfig configuration,
+        LocalClusteringCoefficientBaseConfig configuration,
         StatsResultBuilder<LocalClusteringCoefficientResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.localClusteringCoefficient(
             graphName,
             configuration,
-            LCC,
-            () -> estimationFacade.lcc(configuration),
-            (graph, __) -> communityAlgorithms.lcc(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT leiden(

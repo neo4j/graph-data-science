@@ -54,6 +54,8 @@ import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
@@ -286,6 +288,53 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.labelPropagation(graph, configuration),
             estimationFacade::labelPropagation,
             AlgorithmLabel.LabelPropagation,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> localClusteringCoefficient(
+        GraphName graphName,
+        LocalClusteringCoefficientBaseConfig configuration,
+        Optional<SideEffect<LocalClusteringCoefficientResult, METADATA>> sideEffect,
+        ResultRenderer<LocalClusteringCoefficientResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            })
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new UndirectedOnlyRequirement("LocalClusteringCoefficient").validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    );
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.localClusteringCoefficient(graph, configuration),
+            () -> estimationFacade.lcc(configuration),
+            AlgorithmLabel.LCC,
             sideEffect,
             resultRenderer
         );
