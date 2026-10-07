@@ -25,8 +25,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
-import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.logging.Log;
@@ -54,16 +52,6 @@ public class CommunityAlgorithmsBusinessFacade {
         this.log = log;
         this.algorithms = algorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
-        var parameters = configuration.toParameters();
-        var task = CommunityAlgorithmTasks.labelPropagation(graph.relationshipCount(), parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.labelPropagation(graph, parameters, progressTracker),
-            progressTracker, true);
     }
 
     LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
