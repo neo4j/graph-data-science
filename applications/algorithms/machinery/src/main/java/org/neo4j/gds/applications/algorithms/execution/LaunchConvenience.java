@@ -41,7 +41,7 @@ import java.util.function.Supplier;
  * This object is request scoped, so that it can carry all the implicit parameters relating to the request.
  */
 public class LaunchConvenience {
-    private final ValidationRuleFromConfigurationParser validationRuleFromConfigurationParser = ValidationRuleFromConfigurationParser.create();
+    private final GraphLoadETLFromConfigurationParser graphLoadETLFromConfigurationParser = GraphLoadETLFromConfigurationParser.create();
 
     private final AlgorithmProcessingFacade algorithmProcessingFacade;
     private final RequestScopedDependencies requestScopedDependencies;
@@ -109,14 +109,14 @@ public class LaunchConvenience {
         var relationshipProperty = extractRelationshipProperty(configuration);
 
         // some cross-cutting stuff
-        validationRuleFromConfigurationParser.parse(configuration, graphLoadETLBuilder);
+        graphLoadETLFromConfigurationParser.parse(configuration, graphLoadETLBuilder);
 
         // now we finally have all validations captured, we can finalise the ETL pipeline
         var graphLoadETL = graphLoadETLBuilder.build();
 
         var secondGraphLoadETL = secondGraphLoadETLBuilder.map(
             builder -> {
-                validationRuleFromConfigurationParser.parse(configuration, builder);
+                graphLoadETLFromConfigurationParser.parse(configuration, builder);
 
                 return builder.build();
             }

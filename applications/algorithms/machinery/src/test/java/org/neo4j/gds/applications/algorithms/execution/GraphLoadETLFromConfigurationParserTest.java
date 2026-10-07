@@ -39,17 +39,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class ValidationRuleFromConfigurationParserTest {
+class GraphLoadETLFromConfigurationParserTest {
     @Test
     void shouldParseAndPopulateBuilder() {
-        var parser1 = mock(ValidationRuleParser.class);
-        var parser2 = mock(ValidationRuleParser.class);
-        var parser3 = mock(ValidationRuleParser.class);
-        var parsers = new HashSet<ValidationRuleParser>();
+        var parser1 = mock(GraphStoreFilteredETLParser.class);
+        var parser2 = mock(GraphStoreFilteredETLParser.class);
+        var parser3 = mock(GraphStoreFilteredETLParser.class);
+        var parsers = new HashSet<GraphStoreFilteredETLParser>();
         parsers.add(parser1);
         parsers.add(parser2);
         parsers.add(parser3);
-        var parser = new ValidationRuleFromConfigurationParser(parsers);
+        var parser = new GraphLoadETLFromConfigurationParser(parsers);
 
         var configuration = new AlgoBaseConfig() {
             @Override
@@ -79,7 +79,7 @@ class ValidationRuleFromConfigurationParserTest {
 
     @Test
     void shouldParseUninterestingConfiguration() {
-        var parser = ValidationRuleFromConfigurationParser.create();
+        var parser = GraphLoadETLFromConfigurationParser.create();
 
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         parser.parse(
@@ -97,7 +97,7 @@ class ValidationRuleFromConfigurationParserTest {
 
     @Test
     void shouldParseNodePropertyNonExistenceRequirement() {
-        var parser = ValidationRuleFromConfigurationParser.create();
+        var parser = GraphLoadETLFromConfigurationParser.create();
 
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         parser.parse(
@@ -120,7 +120,7 @@ class ValidationRuleFromConfigurationParserTest {
 
     @Test
     void shouldParseRelationshipTypeNonExistenceRequirement() {
-        var parser = ValidationRuleFromConfigurationParser.create();
+        var parser = GraphLoadETLFromConfigurationParser.create();
 
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         parser.parse(

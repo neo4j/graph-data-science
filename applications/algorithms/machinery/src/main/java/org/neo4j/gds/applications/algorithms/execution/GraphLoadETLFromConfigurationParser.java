@@ -24,33 +24,29 @@ import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 
 import java.util.Set;
 
-class ValidationRuleFromConfigurationParser {
-    private final Set<ValidationRuleParser> validationRuleParsers;
+class GraphLoadETLFromConfigurationParser {
+    private final Set<GraphStoreFilteredETLParser> graphStoreFilteredETLParsers;
 
-    ValidationRuleFromConfigurationParser(Set<ValidationRuleParser> validationRuleParsers) {
-        this.validationRuleParsers = validationRuleParsers;
+    GraphLoadETLFromConfigurationParser(Set<GraphStoreFilteredETLParser> graphStoreFilteredETLParsers) {
+        this.graphStoreFilteredETLParsers = graphStoreFilteredETLParsers;
     }
 
     /**
      * @return the parser configured with the full complement of production business rules
      */
-    static ValidationRuleFromConfigurationParser create() {
-        return new ValidationRuleFromConfigurationParser(
+    static GraphLoadETLFromConfigurationParser create() {
+        return new GraphLoadETLFromConfigurationParser(
             Set.of(
-                new MutateNodePropertyConfigValidationRuleParser(),
-                new MutateRelationshipConfigValidationRuleParser()
+                new InherentGraphStoreFilteredETLParser(),
+                new MutateNodePropertyConfigGraphStoreFilteredETLParser(),
+                new MutateRelationshipConfigGraphStoreFilteredETLParser()
             )
         );
     }
 
     void parse(AlgoBaseConfig configuration, GraphLoadETLBuilder graphLoadETLBuilder) {
-        graphLoadETLBuilder.with(
-            (graphStore, labels, relationshipTypes, __) ->
-                configuration.graphStoreValidation(graphStore, labels, relationshipTypes)
-        );
-
-        for (var validationRuleParser : validationRuleParsers) {
-            var etlStep = validationRuleParser.parse(configuration);
+        for (var parser : graphStoreFilteredETLParsers) {
+            var etlStep = parser.parse(configuration);
 
             etlStep.ifPresent(graphLoadETLBuilder::with);
         }

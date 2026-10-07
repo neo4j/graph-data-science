@@ -19,11 +19,30 @@
  */
 package org.neo4j.gds.applications.algorithms.execution;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 
+import java.util.Collection;
 import java.util.Optional;
 
-interface ValidationRuleParser {
-    <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(CONFIGURATION configuration);
+class InherentGraphStoreFilteredETLParser implements GraphStoreFilteredETLParser {
+    @Override
+    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(CONFIGURATION configuration) {
+        var etlStep = new GraphStoreFilteredETL() {
+            @Override
+            public void onGraphStoreFiltered(
+                GraphStore graphStore,
+                Collection<NodeLabel> selectedLabels,
+                Collection<RelationshipType> selectedRelationshipTypes,
+                Optional<String> relationshipProperty
+            ) {
+                configuration.graphStoreValidation(graphStore, selectedLabels, selectedRelationshipTypes);
+            }
+        };
+
+        return Optional.of(etlStep);
+    }
 }
