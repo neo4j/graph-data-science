@@ -135,6 +135,10 @@ public final class GdsParallelBatchImporter {
         this.databaseConfig = configBuilder.build();
     }
 
+    boolean supportsVectorData() {
+        return StorageEngineFactory.selectStorageEngine(databaseConfig).supportsVectorData();
+    }
+
     public void writeDatabase(Input input, boolean startDatabase) {
         log.info("Database import started");
 

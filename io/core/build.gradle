@@ -27,6 +27,7 @@ dependencies {
     compileOnly(neo4j.kernel.api) { transitive = false }
     compileOnly(neo4j.layout) { transitive = false }
     compileOnly(neo4j.logging) { transitive = false }
+    compileOnly(neo4j.values) { transitive = false }
 
     implementation project(':annotations')
     implementation project(':config-api')
