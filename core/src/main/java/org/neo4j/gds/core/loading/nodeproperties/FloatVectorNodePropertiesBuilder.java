@@ -28,13 +28,14 @@ import org.neo4j.gds.utils.GdsNeo4jValueConversion;
 import org.neo4j.gds.values.GdsValue;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FloatVectorNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
     private final HugeSparseFloatArrayArray.Builder builder;
     private final float[] defaultValue;
     private final Concurrency concurrency;
-    private int dimension;
+    private final AtomicInteger dimension;
 
     public FloatVectorNodePropertiesBuilder(
         DefaultValue defaultValue,
@@ -45,17 +46,17 @@ public class FloatVectorNodePropertiesBuilder implements InnerNodePropertiesBuil
         this.builder = HugeSparseFloatArrayArray.builder(
             this.defaultValue
         );
-        this.dimension = this.defaultValue != null ? this.defaultValue.length : -1;
+        this.dimension = new AtomicInteger(this.defaultValue != null ? this.defaultValue.length : -1);
     }
 
     public void set(long neoNodeId, float[] value) {
-        builder.set(neoNodeId, value);
         if (value != null) {
-            if (this.dimension != -1 && value.length != this.dimension) {
-                throw new IllegalArgumentException("Vector dimension mismatch. Expected " + this.dimension + ", got " + value.length);
+            var expectedDimension = dimension.compareAndExchange(-1, value.length);
+            if (expectedDimension != -1 && value.length != expectedDimension) {
+                throw new IllegalArgumentException("Vector dimension mismatch. Expected " + expectedDimension + ", got " + value.length);
             }
-            this.dimension = value.length;
         }
+        builder.set(neoNodeId, value);
     }
 
     @Override
@@ -73,7 +74,7 @@ public class FloatVectorNodePropertiesBuilder implements InnerNodePropertiesBuil
     }
 
     private FloatVectorStoreNodePropertyValues buildWithoutMapping(long size) {
-        return new FloatVectorStoreNodePropertyValues(builder.build(), size, this.dimension);
+        return new FloatVectorStoreNodePropertyValues(builder.build(), size, this.dimension.get());
     }
 
     private FloatVectorStoreNodePropertyValues buildWithMapping(
@@ -92,7 +93,7 @@ public class FloatVectorNodePropertiesBuilder implements InnerNodePropertiesBuil
             concurrency
         );
 
-        return new FloatVectorStoreNodePropertyValues(propertiesByMappedIdsBuilder.build(), size, this.dimension);
+        return new FloatVectorStoreNodePropertyValues(propertiesByMappedIdsBuilder.build(), size, this.dimension.get());
     }
 
     static class FloatVectorStoreNodePropertyValues implements FloatVectorNodePropertyValues {

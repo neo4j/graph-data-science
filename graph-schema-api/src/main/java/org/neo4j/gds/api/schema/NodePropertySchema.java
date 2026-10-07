@@ -57,6 +57,17 @@ public record NodePropertySchema(
                 dimension.getAsInt()
             ));
         }
+        if (dimension.isPresent()) {
+            var defaultVector = defaultValue.doubleArrayValue();
+            if (defaultVector != null && defaultVector.length != dimension.getAsInt()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Property `%s` has dimension %d, but its default value has %d elements.",
+                    key,
+                    dimension.getAsInt(),
+                    defaultVector.length
+                ));
+            }
+        }
     }
 
     public static NodePropertySchema of(String propertyKey, ValueType valueType) {

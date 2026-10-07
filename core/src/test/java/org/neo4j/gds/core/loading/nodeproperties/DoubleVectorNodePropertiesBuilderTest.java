@@ -51,4 +51,12 @@ class DoubleVectorNodePropertiesBuilderTest {
         assertThatThrownBy(() -> builder.set(0, new double[]{1.0, 2.0})).isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    void doesNotStoreValueWithDifferentDimension() {
+        DoubleVectorNodePropertiesBuilder builder = new DoubleVectorNodePropertiesBuilder(DefaultValue.forDoubleArray(), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
+        builder.set(0, new double[]{1.0, 2.0, 3.0});
+        assertThatThrownBy(() -> builder.set(1, new double[]{1.0, 2.0})).isInstanceOf(IllegalArgumentException.class);
+        DoubleVectorNodePropertyValues values = builder.build(2, NodeIdMapper.IDENTITY, 1);
+        assertThat(values.doubleArrayValue(1)).isNull();
+    }
 }
