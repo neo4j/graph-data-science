@@ -60,10 +60,10 @@ public final class GdsNeo4jValueConverter {
             case VectorValue vectorValue -> {
                 switch (vectorValue) {
                     case org.neo4j.values.storable.Float64Vector float64Vector -> {
-                        return PrimitiveValues.doubleArray(GdsNeo4jVectorValuesCollector.collectFloat64(float64Vector));
+                        return PrimitiveValues.doubleVector(GdsNeo4jVectorValuesCollector.collectFloat64(float64Vector));
                     }
                     case org.neo4j.values.storable.Float32Vector float32Vector -> {
-                        return PrimitiveValues.floatArray(GdsNeo4jVectorValuesCollector.collectFloat32(float32Vector));
+                        return PrimitiveValues.floatVector(GdsNeo4jVectorValuesCollector.collectFloat32(float32Vector));
                     }
                     case org.neo4j.values.storable.Int64Vector int64Vector -> {
                         return PrimitiveValues.longArray(GdsNeo4jVectorValuesCollector.collectInt64(int64Vector));
