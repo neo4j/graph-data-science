@@ -41,6 +41,8 @@ import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.LeidenBaseConfig;
+import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -167,6 +169,18 @@ public class TrackedCommunityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.localClusteringCoefficient(graph, parameters, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+        var task = CommunityAlgorithmTasks.leiden(graph, parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.leiden(graph, parameters, progressTracker),
             progressTracker,
             true
         );

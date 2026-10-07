@@ -51,6 +51,8 @@ import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.LeidenBaseConfig;
+import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -335,6 +337,53 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.localClusteringCoefficient(graph, configuration),
             () -> estimationFacade.localClusteringCoefficient(configuration),
             AlgorithmLabel.LocalClusteringCoefficient,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> leiden(
+        GraphName graphName,
+        LeidenBaseConfig configuration,
+        Optional<SideEffect<LeidenResult, METADATA>> sideEffect,
+        ResultRenderer<LeidenResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            })
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new UndirectedOnlyRequirement("Leiden").validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    );
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.leiden(graph, configuration),
+            () -> estimationFacade.leiden(configuration),
+            AlgorithmLabel.Leiden,
             sideEffect,
             resultRenderer
         );

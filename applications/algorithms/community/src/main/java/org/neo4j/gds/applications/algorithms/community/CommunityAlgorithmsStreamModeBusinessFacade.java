@@ -43,8 +43,8 @@ import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
-import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
@@ -63,7 +63,6 @@ import org.neo4j.gds.wcc.WccStreamConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
@@ -209,17 +208,15 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> leiden(
         GraphName graphName,
-        LeidenStreamConfig configuration,
-        StreamResultBuilder<LeidenResult, RESULT> streamResultBuilder
+        LeidenBaseConfig configuration,
+        StreamResultBuilder<LeidenResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.leiden(
             graphName,
             configuration,
-            Leiden,
-            () -> estimationFacade.leiden(configuration),
-            (graph, __) -> algorithms.leiden(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> louvain(

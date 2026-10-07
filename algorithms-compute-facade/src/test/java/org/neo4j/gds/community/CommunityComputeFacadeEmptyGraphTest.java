@@ -28,7 +28,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
@@ -66,23 +65,6 @@ class CommunityComputeFacadeEmptyGraphTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void leiden(){
-
-        var future = facade.leiden(
-            graph,
-            null,
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result()).isEqualTo(LeidenResult.EMPTY);
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

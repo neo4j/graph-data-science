@@ -25,8 +25,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.leiden.LeidenBaseConfig;
-import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -50,16 +48,6 @@ public class CommunityAlgorithmsBusinessFacade {
         this.log = log;
         this.algorithms = algorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    public LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
-        var parameters = configuration.toParameters();
-        var task = CommunityAlgorithmTasks.leiden(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.leiden(graph, parameters, progressTracker),
-            progressTracker, true);
     }
 
     LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {

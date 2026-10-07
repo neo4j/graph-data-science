@@ -66,7 +66,6 @@ import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
@@ -246,15 +245,12 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new LeidenWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.leiden(
             graphName,
             configuration,
-            Leiden,
-            () -> estimationFacade.leiden(configuration),
-            (graph, __) -> algorithms.leiden(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT louvain(

@@ -35,7 +35,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
@@ -90,30 +89,6 @@ class CommunityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void leiden(){
-        var future = facade.leiden(
-            graph,
-            new LeidenParameters(
-               new Concurrency(4),
-                0,
-                null,
-                10,
-                1,
-                1,
-                false,
-                Optional.empty()
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().ranLevels()).isGreaterThan(0);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

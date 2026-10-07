@@ -39,8 +39,8 @@ import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
-import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
@@ -57,7 +57,6 @@ import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
@@ -165,17 +164,15 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT leiden(
         GraphName graphName,
-        LeidenStatsConfig configuration,
+        LeidenBaseConfig configuration,
         StatsResultBuilder<LeidenResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.leiden(
             graphName,
             configuration,
-            Leiden,
-            () -> estimationFacade.leiden(configuration),
-            (graph, __) -> communityAlgorithms.leiden(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT louvain(

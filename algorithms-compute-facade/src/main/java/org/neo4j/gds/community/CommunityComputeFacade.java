@@ -30,9 +30,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.gds.leiden.Leiden;
-import org.neo4j.gds.leiden.LeidenParameters;
-import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -47,7 +44,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccParameters;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class CommunityComputeFacade {
@@ -68,42 +64,6 @@ public class CommunityComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    CompletableFuture<TimedAlgorithmResult<LeidenResult>> leiden(
-        Graph graph,
-        LeidenParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(LeidenResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.leiden(graph, parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var seedValues = Optional.ofNullable(parameters.seedProperty())
-            .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
-            .orElse(null);
-
-        var algorithm = new Leiden(
-            graph,
-            parameters,
-            seedValues,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
     }
 
     CompletableFuture<TimedAlgorithmResult<LouvainResult>> louvain(

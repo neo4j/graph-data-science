@@ -26,13 +26,9 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.OptionalNodePropertyGraphStoreRequirement;
-import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.leiden.LeidenParameters;
-import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
@@ -65,39 +61,6 @@ public class CommunityComputeBusinessFacade {
         this.computeFacade = computeFacade;
         this.user = user;
         this.databaseId = databaseId;
-    }
-
-    public <TR> CompletableFuture<TR> leiden(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        LeidenParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<LeidenResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidationBuilder()
-                .withValidationRule(new UndirectedOnlyRequirement("Leiden"))
-                .withValidationRule(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(parameters.seedProperty())))
-                .build(),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.leiden(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-
-        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> louvain(
