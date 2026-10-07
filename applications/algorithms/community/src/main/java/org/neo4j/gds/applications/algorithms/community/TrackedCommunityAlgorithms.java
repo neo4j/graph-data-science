@@ -47,6 +47,8 @@ import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
@@ -202,6 +204,18 @@ public class TrackedCommunityAlgorithms {
 
     ModularityResult modularity(Graph graph, ModularityBaseConfig configuration) {
         return algorithms.modularity(graph, configuration.toParameters());
+    }
+
+    ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+        var task = CommunityAlgorithmTasks.modularityOptimization(graph, parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.modularityOptimization(graph, parameters, progressTracker),
+            progressTracker,
+            true
+        );
     }
 
     PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {

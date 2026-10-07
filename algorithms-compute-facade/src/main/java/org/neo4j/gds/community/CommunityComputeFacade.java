@@ -20,7 +20,6 @@
 package org.neo4j.gds.community;
 
 import org.neo4j.gds.CommunityAlgorithmTasks;
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -30,9 +29,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.gds.modularityoptimization.ModularityOptimization;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.scc.Scc;
@@ -61,46 +57,6 @@ public class CommunityComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    CompletableFuture<TimedAlgorithmResult<ModularityOptimizationResult>> modularityOptimization(
-        Graph graph,
-        ModularityOptimizationParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ModularityOptimizationResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.modularityOptimization(graph, parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var seedPropertyValues = parameters.seedProperty()
-            .map(seedProperty -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedProperty))
-            .orElse(null);
-
-        var algorithm = new ModularityOptimization(
-            graph,
-            parameters.maxIterations(),
-            parameters.tolerance(),
-            seedPropertyValues,
-            parameters.concurrency(),
-            parameters.batchSize(),
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
     }
 
     CompletableFuture<TimedAlgorithmResult<HugeLongArray>> scc(

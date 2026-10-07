@@ -26,8 +26,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -46,16 +44,6 @@ public class CommunityAlgorithmsBusinessFacade {
         this.log = log;
         this.algorithms = algorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
-        var parameters = configuration.toParameters();
-        var task = CommunityAlgorithmTasks.modularityOptimization(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.modularityOptimization(graph, parameters, progressTracker),
-            progressTracker, true);
     }
 
     HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {

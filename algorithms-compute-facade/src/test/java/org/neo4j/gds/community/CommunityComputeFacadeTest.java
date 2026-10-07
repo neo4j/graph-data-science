@@ -36,7 +36,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.WccParameters;
@@ -88,27 +87,6 @@ class CommunityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void modularityOptimization(){
-        var future = facade.modularityOptimization(
-            graph,
-            new ModularityOptimizationParameters(
-                new Concurrency(4),
-                10,
-                10_000,
-                0,
-                Optional.empty()
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().ranIterations()).isGreaterThan(0);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

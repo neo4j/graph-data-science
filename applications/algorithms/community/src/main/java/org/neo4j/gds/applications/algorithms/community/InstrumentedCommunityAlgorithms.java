@@ -57,6 +57,8 @@ import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
@@ -439,6 +441,38 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.modularity(graph, configuration),
             estimationFacade::modularity,
             AlgorithmLabel.Modularity,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> modularityOptimization(
+        GraphName graphName,
+        ModularityOptimizationBaseConfig configuration,
+        Optional<SideEffect<ModularityOptimizationResult, METADATA>> sideEffect,
+        ResultRenderer<ModularityOptimizationResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.modularityOptimization(graph, configuration),
+            estimationFacade::modularityOptimization,
+            AlgorithmLabel.ModularityOptimization,
             sideEffect,
             resultRenderer
         );
