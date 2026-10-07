@@ -23,7 +23,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
@@ -33,7 +32,6 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
-import org.neo4j.gds.core.loading.validation.GraphLoadedETL;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.NonNegativeWeightsOnlyETL;
 import org.neo4j.gds.core.loading.validation.RelationshipPropertyGraphStoreValidation;
@@ -199,7 +197,6 @@ public class InstrumentedPathFindingAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            false,
             graphLoadETLBuilder,
             configuration.costProperty(),
             Optional.of(secondGraphLoadETLBuilder),
@@ -218,8 +215,22 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<Stream<long[]>, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with((graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) -> new SourceNodesRequirement(configuration.sourceNodes()).validate(graphStore, selectedLabels, selectedRelationshipTypes))
-            .with((GraphLoadedETL) graph -> new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE).validate(graph));
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new SourceNodesRequirement(configuration.sourceNodes()).validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    );
+                }
+            })
+            .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -259,25 +270,15 @@ public class InstrumentedPathFindingAlgorithms {
         GraphName graphName,
         DijkstraSourceTargetsBaseConfig configuration,
         Optional<SideEffect<PathFindingResult, METADATA>> sideEffect,
-        ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer,
-        boolean skipRelationshipProperty
+        ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetsList())
-            )
-            .with(new GraphLoadedETL() {
-                @Override
-                public void onGraphLoaded(Graph graph) {
-                    // rename this, it is clearly generic
-                    new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE).validate(graph);
-                }
-            });
+            .with(new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetsList()))
+            .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            skipRelationshipProperty,
             graphLoadETLBuilder,
             Optional.empty(),
             Optional.empty(),

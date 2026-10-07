@@ -244,8 +244,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             Optional.empty(),
-            new StreamResultRenderer<>(resultBuilder),
-            false
+            new StreamResultRenderer<>(resultBuilder)
         ));
     }
 

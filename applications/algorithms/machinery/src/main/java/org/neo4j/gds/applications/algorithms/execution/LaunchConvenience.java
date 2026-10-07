@@ -70,7 +70,6 @@ public class LaunchConvenience {
         return launchAlgorithm(
             graphName,
             configuration,
-            false,
             graphLoadETLBuilder,
             Optional.empty(),
             Optional.empty(),
@@ -98,7 +97,6 @@ public class LaunchConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT, METADATA, RENDERING> CompletableFuture<RENDERING> launchAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
-        boolean skipRelationshipProperty,
         GraphLoadETLBuilder graphLoadETLBuilder,
         Optional<String> secondRelationshipProperty,
         Optional<GraphLoadETLBuilder> secondGraphLoadETLBuilder,
@@ -108,7 +106,7 @@ public class LaunchConvenience {
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, RENDERING, METADATA> resultRenderer
     ) {
-        var relationshipProperty = extractRelationshipProperty(configuration, skipRelationshipProperty);
+        var relationshipProperty = extractRelationshipProperty(configuration);
 
         // some cross-cutting stuff
         validationRuleFromConfigurationParser.parse(configuration, graphLoadETLBuilder);
@@ -145,12 +143,7 @@ public class LaunchConvenience {
         );
     }
 
-    private <CONFIGURATION extends AlgoBaseConfig> Optional<String> extractRelationshipProperty(
-        CONFIGURATION configuration,
-        boolean skipRelationshipProperty
-    ) {
-        if (skipRelationshipProperty) return Optional.empty();
-
+    private <CONFIGURATION extends AlgoBaseConfig> Optional<String> extractRelationshipProperty(CONFIGURATION configuration) {
         if (configuration instanceof RelationshipWeightConfig relationshipWeightConfig)
             return relationshipWeightConfig.relationshipWeightProperty();
 

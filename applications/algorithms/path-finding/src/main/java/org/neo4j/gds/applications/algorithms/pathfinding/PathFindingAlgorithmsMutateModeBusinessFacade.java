@@ -293,8 +293,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),
-            new MutateResultRenderer<>(configuration, resultBuilder),
-            false
+            new MutateResultRenderer<>(configuration, resultBuilder)
         ));
     }
 
@@ -310,8 +309,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             Optional.of(sideEffect),
-            new MutateResultRenderer<>(configuration, resultBuilder),
-            false
+            new MutateResultRenderer<>(configuration, resultBuilder)
         ));
     }
 

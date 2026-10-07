@@ -273,8 +273,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
-            new WriteResultRenderer<>(configuration, resultBuilder),
-            false
+            new WriteResultRenderer<>(configuration, resultBuilder)
         ));
     }
 
