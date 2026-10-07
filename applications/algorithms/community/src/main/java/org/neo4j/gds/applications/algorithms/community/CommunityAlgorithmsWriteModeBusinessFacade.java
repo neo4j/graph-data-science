@@ -66,7 +66,6 @@ import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
@@ -204,15 +203,12 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new KMeansWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.kMeans(
             graphName,
             configuration,
-            KMeans,
-            () -> estimationFacade.kMeans(configuration),
-            (graph, __) -> algorithms.kMeans(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT labelPropagation(
