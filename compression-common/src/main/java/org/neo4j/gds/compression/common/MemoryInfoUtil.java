@@ -21,14 +21,15 @@ package org.neo4j.gds.compression.common;
 
 import org.neo4j.gds.compression.api.BlockStatistics;
 import org.neo4j.gds.compression.api.MemoryTracker;
-import org.neo4j.gds.memory.info.ImmutableMemoryInfo;
+import org.neo4j.gds.memory.info.MemoryInfo;
+import org.neo4j.gds.memory.info.MemoryInfoBuilder;
 
 import java.util.Optional;
 
 public final class MemoryInfoUtil {
 
-    public static ImmutableMemoryInfo.Builder builder(MemoryTracker memoryTracker, Optional<BlockStatistics> blockStatistics) {
-        var builder = ImmutableMemoryInfo.builder()
+    public static MemoryInfoBuilder builder(MemoryTracker memoryTracker, Optional<BlockStatistics> blockStatistics) {
+        var builder = MemoryInfo.builder()
             .heapAllocations(memoryTracker.heapAllocations())
             .nativeAllocations(memoryTracker.nativeAllocations())
             .pageSizes(memoryTracker.pageSizes())

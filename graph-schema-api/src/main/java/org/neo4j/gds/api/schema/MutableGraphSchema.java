@@ -21,63 +21,48 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 
 import java.util.Set;
 
-@ValueClass
-@SuppressWarnings({"immutables:subtype", "immutables:from"})
-public interface MutableGraphSchema extends GraphSchema {
-    @Override
-    NodeSchema nodeSchema();
+@GenerateBuilder
+public record MutableGraphSchema(NodeSchema nodeSchema, MutableRelationshipSchema relationshipSchema) implements GraphSchema {
 
-    @Override
-    MutableRelationshipSchema relationshipSchema();
-
-    @Override
-    default MutableGraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep) {
+    public MutableGraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep) {
         return of(nodeSchema().filter(labelsToKeep), relationshipSchema());
     }
 
-    @Override
-    default MutableGraphSchema filterRelationshipTypes(Set<RelationshipType> relationshipTypesToKeep) {
+    public MutableGraphSchema filterRelationshipTypes(Set<RelationshipType> relationshipTypesToKeep) {
         return of(nodeSchema(), relationshipSchema().filter(relationshipTypesToKeep));
     }
 
-    @Override
-    default MutableGraphSchema union(GraphSchema other) {
+    public MutableGraphSchema union(GraphSchema other) {
         return MutableGraphSchema.of(
             nodeSchema().union(other.nodeSchema()),
             relationshipSchema().union(other.relationshipSchema())
         );
     }
 
-    static MutableGraphSchema empty() {
+    public static MutableGraphSchema empty() {
         return of(NodeSchema.empty(), MutableRelationshipSchema.empty());
     }
 
-    static MutableGraphSchema from(GraphSchema from) {
+    public static MutableGraphSchema from(GraphSchema from) {
         return of(
             from.nodeSchema(),
             MutableRelationshipSchema.from(from.relationshipSchema())
         );
     }
 
-    static MutableGraphSchema of(
-        NodeSchema nodeSchema,
-        MutableRelationshipSchema relationshipSchema
-    ) {
-        return ImmutableMutableGraphSchema.builder()
-            .nodeSchema(nodeSchema)
-            .relationshipSchema(relationshipSchema)
-            .build();
+    public static MutableGraphSchema of(NodeSchema nodeSchema, MutableRelationshipSchema relationshipSchema) {
+        return new MutableGraphSchema(nodeSchema, relationshipSchema);
     }
 
-    static ImmutableMutableGraphSchema.Builder builder() {
-        return ImmutableMutableGraphSchema.builder();
+    public static MutableGraphSchemaBuilder builder() {
+        return MutableGraphSchemaBuilder.builder();
     }
 
-    static ImmutableMutableGraphSchema.Builder builderFrom(GraphSchema parent) {
+    public static MutableGraphSchemaBuilder builderFrom(GraphSchema parent) {
         return builder()
             .nodeSchema(parent.nodeSchema())
             .relationshipSchema(MutableRelationshipSchema.from(parent.relationshipSchema()));

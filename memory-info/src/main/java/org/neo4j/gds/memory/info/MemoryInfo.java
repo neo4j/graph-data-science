@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.memory.info;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.histogram.ImmutableHistogram;
 
 import java.util.Optional;
@@ -27,10 +27,122 @@ import java.util.OptionalLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-@ValueClass
-public interface MemoryInfo {
+@GenerateBuilder
+public record MemoryInfo(
+    /**
+     * The number of pages this adjacency list occupies.
+     */
+    long pages,
 
-    MemoryInfo EMPTY = ImmutableMemoryInfo.builder()
+    /**
+     * Number of bytes this adjacency list occupies on heap.
+     *
+     * @return Number of bytes or empty if not accessible.
+     */
+    OptionalLong bytesOnHeap,
+
+    /**
+     * Number of bytes this adjacency list occupies off heap.
+     *
+     * @return Number of bytes or empty if not accessible.
+     */
+    OptionalLong bytesOffHeap,
+
+    /**
+     * Histogram that tracks heap allocations sizes during adjacency list construction.
+     * Each allocation is the number of bytes allocated for a single adjacency list.
+     */
+    ImmutableHistogram heapAllocations,
+
+    /**
+     * Histogram that tracks native allocations sizes during adjacency list construction.
+     * Each allocation is the number of bytes allocated for a single adjacency list.
+     */
+    ImmutableHistogram nativeAllocations,
+
+    /**
+     * Histogram that tracks pages sizes of an adjacency list.
+     */
+    ImmutableHistogram pageSizes,
+
+    /**
+     * Histogram that tracks the number of bits used to encode a block of target ids.
+     */
+    ImmutableHistogram headerBits,
+
+    /**
+     * Histogram that tracks the number of bytes used to store header information for
+     * a single adjacency list. That allocation is included in either {@link #heapAllocations()} or {@link #nativeAllocations()}.
+     */
+    ImmutableHistogram headerAllocations,
+
+    /**
+     * Tracks the number of blocks in the adjacency list.
+     */
+    OptionalLong blockCount,
+
+    /**
+     * Tracks the standard deviation of the number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> stdDevBits,
+
+    /**
+     * Tracks the mean of the number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> meanBits,
+
+    /**
+     * Tracks the median of the number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> medianBits,
+
+    /**
+     * Tracks the block lengths.
+     */
+    Optional<ImmutableHistogram> blockLengths,
+
+    /**
+     * Tracks the maximum number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> maxBits,
+
+    /**
+     * Tracks the minimum number of bits used to encode a block of target ids.
+     */
+    Optional<ImmutableHistogram> minBits,
+
+    /**
+     * Tracks the index of the min value within a block of target ids.
+     */
+    Optional<ImmutableHistogram> indexOfMinValue,
+
+    /**
+     * Tracks the index of the max value within a block of target ids.
+     */
+    Optional<ImmutableHistogram> indexOfMaxValue,
+
+    /**
+     * Tracks the absolute difference between the number of bits required
+     * to encode the head value and the average number of bits required for the tail values.
+     */
+    Optional<ImmutableHistogram> headTailDiffBits,
+
+    /**
+     * Tracks the difference between the lowest and highest number of bits to encode any value in a block.
+     */
+    Optional<ImmutableHistogram> bestMaxDiffBits,
+
+    /**
+     * Tracks the number of exceptions within a block according to the PFOR heuristic.
+     */
+    Optional<ImmutableHistogram> pforExceptions
+) {
+
+    public static MemoryInfoBuilder builder() {
+        return MemoryInfoBuilder.builder();
+    }
+
+    public static MemoryInfo EMPTY = MemoryInfo.builder()
         .pages(0)
         .heapAllocations(ImmutableHistogram.EMPTY)
         .nativeAllocations(ImmutableHistogram.EMPTY)
@@ -43,7 +155,7 @@ public interface MemoryInfo {
      * Returns the total number of bytes occupied by this adjacency list,
      * including both, on heap and off heap.
      */
-    default OptionalLong bytesTotal() {
+    public OptionalLong bytesTotal() {
         return Stream
             .of(bytesOnHeap(), bytesOffHeap())
             .filter(OptionalLong::isPresent)
@@ -51,116 +163,9 @@ public interface MemoryInfo {
             .reduce(Long::sum);
     }
 
-    /**
-     * The number of pages this adjacency list occupies.
-     */
-    long pages();
 
-    /**
-     * Number of bytes this adjacency list occupies on heap.
-     *
-     * @return Number of bytes or empty if not accessible.
-     */
-    OptionalLong bytesOnHeap();
-
-    /**
-     * Number of bytes this adjacency list occupies off heap.
-     *
-     * @return Number of bytes or empty if not accessible.
-     */
-    OptionalLong bytesOffHeap();
-
-    /**
-     * Histogram that tracks heap allocations sizes during adjacency list construction.
-     * Each allocation is the number of bytes allocated for a single adjacency list.
-     */
-    ImmutableHistogram heapAllocations();
-
-    /**
-     * Histogram that tracks native allocations sizes during adjacency list construction.
-     * Each allocation is the number of bytes allocated for a single adjacency list.
-     */
-    ImmutableHistogram nativeAllocations();
-
-    /**
-     * Histogram that tracks pages sizes of an adjacency list.
-     */
-    ImmutableHistogram pageSizes();
-
-    /**
-     * Histogram that tracks the number of bits used to encode a block of target ids.
-     */
-    ImmutableHistogram headerBits();
-
-    /**
-     * Histogram that tracks the number of bytes used to store header information for
-     * a single adjacency list. That allocation is included in either {@link #heapAllocations()} or {@link #nativeAllocations()}.
-     */
-    ImmutableHistogram headerAllocations();
-
-    /**
-     * Tracks the number of blocks in the adjacency list.
-     */
-    OptionalLong blockCount();
-
-    /**
-     * Tracks the standard deviation of the number of bits used to encode a block of target ids.
-     */
-    Optional<ImmutableHistogram> stdDevBits();
-
-    /**
-     * Tracks the mean of the number of bits used to encode a block of target ids.
-     */
-    Optional<ImmutableHistogram> meanBits();
-
-    /**
-     * Tracks the median of the number of bits used to encode a block of target ids.
-     */
-    Optional<ImmutableHistogram> medianBits();
-
-    /**
-     * Tracks the block lengths.
-     */
-    Optional<ImmutableHistogram> blockLengths();
-
-    /**
-     * Tracks the maximum number of bits used to encode a block of target ids.
-     */
-    Optional<ImmutableHistogram> maxBits();
-
-    /**
-     * Tracks the minimum number of bits used to encode a block of target ids.
-     */
-    Optional<ImmutableHistogram> minBits();
-
-    /**
-     * Tracks the index of the min value within a block of target ids.
-     */
-    Optional<ImmutableHistogram> indexOfMinValue();
-
-    /**
-     * Tracks the index of the max value within a block of target ids.
-     */
-    Optional<ImmutableHistogram> indexOfMaxValue();
-
-    /**
-     * Tracks the absolute difference between the number of bits required
-     * to encode the head value and the average number of bits required for the tail values.
-     */
-    Optional<ImmutableHistogram> headTailDiffBits();
-
-    /**
-     * Tracks the difference between the lowest and highest number of bits to encode any value in a block.
-     */
-    Optional<ImmutableHistogram> bestMaxDiffBits();
-
-    /**
-     * Tracks the number of exceptions within a block according to the PFOR heuristic.
-     */
-    Optional<ImmutableHistogram> pforExceptions();
-
-    default MemoryInfo merge(MemoryInfo other) {
-        return ImmutableMemoryInfo.builder()
+    public MemoryInfo merge(MemoryInfo other) {
+        return MemoryInfo.builder()
             .pages(pages() + other.pages())
             .bytesOnHeap(LongStream.concat(bytesOnHeap().stream(), other.bytesOnHeap().stream()).reduce(Long::sum))
             .bytesOffHeap(LongStream.concat(bytesOffHeap().stream(), other.bytesOffHeap().stream())

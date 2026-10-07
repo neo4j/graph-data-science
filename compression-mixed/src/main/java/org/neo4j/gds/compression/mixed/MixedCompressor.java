@@ -34,7 +34,6 @@ import org.neo4j.gds.compression.packed.AdjacencyPacking;
 import org.neo4j.gds.compression.packed.PackedCompressor;
 import org.neo4j.gds.compression.varlong.DeltaVarLongCompressor;
 import org.neo4j.gds.memory.access.Address;
-import org.neo4j.gds.memory.info.ImmutableMemoryInfo;
 import org.neo4j.gds.memory.info.MemoryInfo;
 
 import java.util.ArrayList;
@@ -200,7 +199,7 @@ public final class MixedCompressor implements AdjacencyCompressor {
             MemoryInfo packed,
             MemoryInfo vlong
         ) {
-            return ImmutableMemoryInfo.builder()
+            return MemoryInfo.builder()
                 .pages(packed.pages() + vlong.pages())
                 .pageSizes(vlong.pageSizes().merge(packed.pageSizes()))
                 // We use the vlong on heap data structures (pages, offsets and degrees),
