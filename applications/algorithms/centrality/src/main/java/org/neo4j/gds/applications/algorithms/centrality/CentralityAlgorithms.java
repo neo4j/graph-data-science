@@ -101,7 +101,7 @@ public class CentralityAlgorithms {
             .compute();
     }
 
-    public BetwennessCentralityResult betweennessCentrality(
+    BetwennessCentralityResult betweennessCentrality(
         Graph graph,
         BetweennessCentralityParameters parameters,
         ProgressTracker progressTracker
@@ -118,7 +118,7 @@ public class CentralityAlgorithms {
             .compute();
     }
 
-    public CELFResult celf(Graph graph, CELFParameters parameters, ProgressTracker progressTracker) {
+    CELFResult celf(Graph graph, CELFParameters parameters, ProgressTracker progressTracker) {
         return new CELF(
             graph,
             parameters,

@@ -105,7 +105,7 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    public CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingParameters parameters, ProgressTracker progressTracker) {
+    CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingParameters parameters, ProgressTracker progressTracker) {
         return CliqueCounting.create(
             graph,
             parameters,
@@ -127,7 +127,7 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    public Labels hdbscan(Graph graph, HDBScanParameters parameters, ProgressTracker progressTracker) {
+    Labels hdbscan(Graph graph, HDBScanParameters parameters, ProgressTracker progressTracker) {
         return new HDBScan(
             graph,
             graph.nodeProperties(parameters.nodeProperty()),
@@ -137,7 +137,7 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    public K1ColoringResult k1Coloring(Graph graph, K1ColoringParameters parameters, ProgressTracker progressTracker) {
+    K1ColoringResult k1Coloring(Graph graph, K1ColoringParameters parameters, ProgressTracker progressTracker) {
         var k1ColoringStub = new K1ColoringStub();
         return k1ColoringStub.k1Coloring(
             graph,
@@ -160,7 +160,7 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    public KmeansResult kMeans(Graph graph, KmeansParameters parameters, ProgressTracker progressTracker) {
+    KmeansResult kMeans(Graph graph, KmeansParameters parameters, ProgressTracker progressTracker) {
         return Kmeans.createKmeans(
             log,
             graph,
@@ -199,7 +199,7 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    public LeidenResult leiden(Graph graph, LeidenParameters parameters, ProgressTracker progressTracker) {
+    LeidenResult leiden(Graph graph, LeidenParameters parameters, ProgressTracker progressTracker) {
         var seedValues = Optional.ofNullable(parameters.seedProperty())
             .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
             .orElse(null);
@@ -287,7 +287,7 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    public DisjointSetStruct wcc(Graph graph, WccParameters parameters, ProgressTracker progressTracker) {
+    DisjointSetStruct wcc(Graph graph, WccParameters parameters, ProgressTracker progressTracker) {
         var wccStub = new WccStub(terminationFlag);
         return wccStub.wcc(graph, parameters, progressTracker);
     }

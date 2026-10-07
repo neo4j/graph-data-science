@@ -60,7 +60,7 @@ public class SimilarityAlgorithms {
         return algorithm.compute();
     }
 
-    public NodeSimilarityResult filteredNodeSimilarity(
+    NodeSimilarityResult filteredNodeSimilarity(
         Graph graph,
         FilteredNodeSimilarityParameters  params,
         ProgressTracker progressTracker
