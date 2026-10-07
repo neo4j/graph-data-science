@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.similarity;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
@@ -32,16 +33,17 @@ import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class InstrumentedSimilarityAlgorithms {
+public final class InstrumentedSimilarityAlgorithms {
     private final TrackedSimilarityAlgorithms algorithms;
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
 
-    public InstrumentedSimilarityAlgorithms(
+    private InstrumentedSimilarityAlgorithms(
         TrackedSimilarityAlgorithms algorithms,
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience
@@ -49,6 +51,18 @@ public class InstrumentedSimilarityAlgorithms {
         this.algorithms = algorithms;
         this.estimationFacade = estimationFacade;
         this.launchConvenience = launchConvenience;
+    }
+
+    public static InstrumentedSimilarityAlgorithms create(
+        SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
+        LaunchConvenience launchConvenience,
+        ProgressTrackerCreator progressTrackerCreator,
+        TerminationFlag terminationFlag
+    ) {
+        var similarityAlgorithms = new SimilarityAlgorithms(terminationFlag);
+        var trackedAlgorithms = new TrackedSimilarityAlgorithms(similarityAlgorithms, progressTrackerCreator);
+
+        return new InstrumentedSimilarityAlgorithms(trackedAlgorithms, estimationFacade, launchConvenience);
     }
 
     public <RESULT, METADATA> CompletableFuture<RESULT> filteredKnn(
