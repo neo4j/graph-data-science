@@ -86,7 +86,7 @@ public final class CommunityAlgorithmTasks {
     }
 
     public static Task kCore(Graph graph, Concurrency concurrency) {
-        return Tasks.leaf(AlgorithmLabel.KCore.asString(), concurrency, graph.nodeCount());
+        return Tasks.leaf(AlgorithmLabel.KCoreDecomposition.asString(), concurrency, graph.nodeCount());
     }
 
     public static Task kMeans(Graph graph, KmeansParameters parameters) {

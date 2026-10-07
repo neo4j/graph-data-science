@@ -115,7 +115,7 @@ class StubbyHolder {
             case HDBScan -> new HDBScanStub();
             case IndexInverse -> new IndexInverseStub();
             case K1Coloring -> new K1ColoringStub();
-            case KCore -> new KCoreStub();
+            case KCoreDecomposition -> new KCoreStub();
             case KGE -> new KgeStub();
             case KMeans -> new KMeansStub();
             case KNN -> new KnnStub();

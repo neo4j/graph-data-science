@@ -114,7 +114,7 @@ public class ConfigurationParsersForMutateMode {
             case HDBScan -> null;
             case IndexInverse -> InverseRelationshipsConfig::of;
             case K1Coloring -> K1ColoringMutateConfig::of;
-            case KCore -> KCoreDecompositionMutateConfig::of;
+            case KCoreDecomposition -> KCoreDecompositionMutateConfig::of;
             case KGE -> KGEPredictMutateConfig::of;
             case KMeans -> KmeansMutateConfig::of;
             case KNN -> KnnMutateConfig::of;

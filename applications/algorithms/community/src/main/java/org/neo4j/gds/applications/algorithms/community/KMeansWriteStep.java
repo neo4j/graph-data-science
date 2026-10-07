@@ -30,7 +30,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCoreDecomposition;
 
 class KMeansWriteStep implements WriteStep<KmeansResult, NodePropertiesWritten> {
     private final WriteNodePropertyService writeNodePropertyService;
@@ -54,7 +54,7 @@ class KMeansWriteStep implements WriteStep<KmeansResult, NodePropertiesWritten> 
             graphStore,
             resultStore,
             configuration,
-            KCore,
+            KCoreDecomposition,
             jobId,
             NodePropertyValuesAdapter.adapt(result.communities())
         );

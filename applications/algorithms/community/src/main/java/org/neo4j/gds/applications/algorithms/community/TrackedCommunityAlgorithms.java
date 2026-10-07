@@ -35,6 +35,8 @@ import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -111,6 +113,18 @@ public class TrackedCommunityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.k1Coloring(graph, params, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    KCoreDecompositionResult kCoreDecomposition(Graph graph, KCoreDecompositionBaseConfig configuration) {
+        var task = CommunityAlgorithmTasks.kCore(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var params = configuration.toParameters();
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.kCoreDecomposition(graph, params, progressTracker),
             progressTracker,
             true
         );

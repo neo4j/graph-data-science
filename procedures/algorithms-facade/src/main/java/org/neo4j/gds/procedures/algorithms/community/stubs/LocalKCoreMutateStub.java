@@ -57,7 +57,7 @@ public class LocalKCoreMutateStub implements
         return genericStub.getMemoryEstimation(
             configuration,
             KCoreDecompositionMutateConfig::of,
-            __ -> estimationModeBusinessFacade.kCore()
+            __ -> estimationModeBusinessFacade.kCoreDecomposition()
         );
     }
 
@@ -67,7 +67,7 @@ public class LocalKCoreMutateStub implements
             graphName,
             configuration,
             KCoreDecompositionMutateConfig::of,
-            __ -> estimationModeBusinessFacade.kCore()
+            __ -> estimationModeBusinessFacade.kCoreDecomposition()
         );
     }
 

@@ -147,7 +147,7 @@ public class CommunityAlgorithms {
         );
     }
     
-    KCoreDecompositionResult kCore(
+    KCoreDecompositionResult kCoreDecomposition(
         Graph graph,
         KCoreDecompositionParameters parameters,
         ProgressTracker progressTracker

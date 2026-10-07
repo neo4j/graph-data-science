@@ -525,7 +525,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             algorithmConfiguration,
             KCoreDecompositionStatsConfig::of
         );
-        return Stream.of(estimationModeBusinessFacade.kCore(configuration, graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.kCoreDecomposition(configuration, graphNameOrConfiguration));
     }
 
     @Override
@@ -548,7 +548,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             algorithmConfiguration,
             KCoreDecompositionStreamConfig::of
         );
-        return Stream.of(estimationModeBusinessFacade.kCore(configuration, graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.kCoreDecomposition(configuration, graphNameOrConfiguration));
     }
 
     @Override
@@ -571,7 +571,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             algorithmConfiguration,
             KCoreDecompositionWriteConfig::of
         );
-        return Stream.of(estimationModeBusinessFacade.kCore(configuration, graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.kCoreDecomposition(configuration, graphNameOrConfiguration));
     }
 
     @Override

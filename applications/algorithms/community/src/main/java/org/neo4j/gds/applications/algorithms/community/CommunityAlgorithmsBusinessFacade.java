@@ -25,8 +25,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
-import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
@@ -58,15 +56,6 @@ public class CommunityAlgorithmsBusinessFacade {
         this.log = log;
         this.algorithms = algorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    KCoreDecompositionResult kCore(Graph graph, KCoreDecompositionBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.kCore(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        var params = configuration.toParameters();
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.kCore(graph, params, progressTracker),
-            progressTracker, true);
     }
 
     public KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {

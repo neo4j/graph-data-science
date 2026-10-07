@@ -54,7 +54,7 @@ public enum AlgorithmLabel implements Label {
     IndexInverse("IndexInverse"),
     IndirectExposure("IndirectExposure"),
     K1Coloring("K1Coloring"),
-    KCore("KCoreDecomposition"),
+    KCoreDecomposition("KCoreDecomposition"),
     KGE("KGE"),
     KMeans("K-Means"),
     KNN("Knn"),
@@ -127,7 +127,7 @@ public enum AlgorithmLabel implements Label {
             case Algorithm.HDBScan -> HDBScan;
             case Algorithm.IndexInverse -> IndexInverse;
             case Algorithm.K1Coloring -> K1Coloring;
-            case Algorithm.KCore -> KCore;
+            case Algorithm.KCoreDecomposition -> KCoreDecomposition;
             case Algorithm.KGE -> KGE;
             case Algorithm.KMeans -> KMeans;
             case Algorithm.KNN -> KNN;

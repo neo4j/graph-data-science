@@ -58,7 +58,7 @@ public enum Algorithm {
     HDBScan,
     IndexInverse,
     K1Coloring,
-    KCore,
+    KCoreDecomposition,
     KGE,
     KMeans,
     KNN,

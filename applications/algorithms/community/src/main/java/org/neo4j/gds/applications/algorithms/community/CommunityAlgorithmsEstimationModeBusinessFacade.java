@@ -114,12 +114,12 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         );
     }
 
-    public MemoryEstimation kCore() {
+    public MemoryEstimation kCoreDecomposition() {
         return new KCoreDecompositionMemoryEstimateDefinition().memoryEstimation();
     }
 
-    public MemoryEstimateResult kCore(KCoreDecompositionBaseConfig configuration, Object graphNameOrConfiguration) {
-        var memoryEstimation = kCore();
+    public MemoryEstimateResult kCoreDecomposition(KCoreDecompositionBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = kCoreDecomposition();
 
         return algorithmEstimationTemplate.estimate(
             configuration,
