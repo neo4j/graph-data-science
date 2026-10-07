@@ -30,17 +30,9 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.gds.kmeans.Kmeans;
-import org.neo4j.gds.kmeans.KmeansContext;
-import org.neo4j.gds.kmeans.KmeansParameters;
-import org.neo4j.gds.kmeans.KmeansResult;
-import org.neo4j.gds.labelpropagation.LabelPropagation;
-import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
-import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.Leiden;
 import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.leiden.LeidenResult;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -62,8 +54,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class CommunityComputeFacade {
-    private final Log log;
-
     // Global dependencies
     // This is created with its own ExecutorService workerPool,
     // which determines how many algorithms can run in parallel.
@@ -74,79 +64,13 @@ public class CommunityComputeFacade {
     private final TerminationFlag terminationFlag;
 
     public CommunityComputeFacade(
-        Log log,
         AsyncAlgorithmCaller algorithmCaller,
         ProgressTrackerFactory progressTrackerFactory,
         TerminationFlag terminationFlag
     ) {
-        this.log = log;
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    CompletableFuture<TimedAlgorithmResult<KmeansResult>> kMeans(
-        Graph graph,
-        KmeansParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(KmeansResult.empty(parameters.k())));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.kMeans(graph, parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var algorithm = Kmeans.createKmeans(
-            log,
-            graph,
-            parameters,
-            new KmeansContext(DefaultPool.INSTANCE, progressTracker),
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
-    }
-
-    CompletableFuture<TimedAlgorithmResult<LabelPropagationResult>> labelPropagation(
-        Graph graph,
-        LabelPropagationParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(LabelPropagationResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            CommunityAlgorithmTasks.labelPropagation(graph.relationshipCount(), parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var algorithm = new LabelPropagation(
-            graph,
-            parameters,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            algorithm::compute,
-            jobId
-        );
     }
 
     CompletableFuture<TimedAlgorithmResult<LocalClusteringCoefficientResult>> lcc(

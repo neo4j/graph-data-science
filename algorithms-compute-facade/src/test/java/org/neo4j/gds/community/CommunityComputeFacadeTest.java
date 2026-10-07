@@ -35,9 +35,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.kmeans.KmeansParameters;
-import org.neo4j.gds.kmeans.SamplerType;
-import org.neo4j.gds.labelpropagation.LabelPropagationParameters;
 import org.neo4j.gds.leiden.LeidenParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainParameters;
@@ -47,7 +44,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientParameters;
 import org.neo4j.gds.wcc.WccParameters;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
@@ -91,57 +87,10 @@ class CommunityComputeFacadeTest {
             .thenReturn(progressTrackerMock);
 
         facade = new CommunityComputeFacade(
-            Log.noOpLog(),
             new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock),
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void kMeans(){
-        var future = facade.kMeans(
-            graph,
-            new KmeansParameters(
-                3,
-                10,
-                0.5,
-                1,
-                false,
-                new Concurrency(4),
-                "prop2",
-                SamplerType.UNIFORM,
-                List.of(),
-                Optional.empty()
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().communities().toArray()).hasSize(3);
-        assertThat(results.computeMillis()).isNotNegative();
-    }
-
-    @Test
-    void labelPropagation(){
-        var future = facade.labelPropagation(
-            graph,
-            new LabelPropagationParameters(
-                new Concurrency(4),
-                10,
-                null,
-                null
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().ranIterations()).isGreaterThan(0);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

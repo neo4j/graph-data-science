@@ -104,7 +104,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public BellmanFordResult bellmanFord(
+    BellmanFordResult bellmanFord(
         Graph graph,
         BellmanFordParameters parameters,
         ProgressTracker progressTracker,
@@ -150,7 +150,7 @@ public class PathFindingAlgorithms {
         return bfs.compute();
     }
 
-    public PathFindingResult deltaStepping(
+    PathFindingResult deltaStepping(
         Graph graph,
         DeltaSteppingParameters parameters,
         ProgressTracker progressTracker,
@@ -184,7 +184,7 @@ public class PathFindingAlgorithms {
         return dfs.compute();
     }
 
-    public SpanningTree kSpanningTree(
+    SpanningTree kSpanningTree(
         Graph graph,
         KSpanningTreeParameters parameters,
         ProgressTracker progressTracker,
@@ -202,7 +202,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public PathFindingResult longestPath(
+    PathFindingResult longestPath(
         Graph graph,
         DagLongestPathParameters parameters,
         ProgressTracker progressTracker,
@@ -218,7 +218,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public FlowResult maxFlow(
+    FlowResult maxFlow(
         Graph graph,
         MaxFlowParameters parameters,
         ProgressTracker progressTracker,
@@ -252,7 +252,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public Stream<long[]> randomWalk(
+    Stream<long[]> randomWalk(
         Graph graph,
         RandomWalkParameters parameters,
         ProgressTracker progressTracker,
@@ -314,7 +314,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public PathFindingResult singlePairShortestPathAStar(
+    PathFindingResult singlePairShortestPathAStar(
         Graph graph,
         AStarParameters parameters,
         ProgressTracker progressTracker,
@@ -351,7 +351,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public PathFindingResult singlePairShortestPathYens(
+    PathFindingResult singlePairShortestPathYens(
         Graph graph,
         YensParameters parameters,
         ProgressTracker progressTracker,
@@ -386,7 +386,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public SpanningTree spanningTree(
+    SpanningTree spanningTree(
         Graph graph,
         SpanningTreeParameters parameters,
         ProgressTracker progressTracker,
@@ -403,7 +403,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public SteinerTreeResult steinerTree(
+    SteinerTreeResult steinerTree(
         Graph graph,
         SteinerTreeParameters parameters,
         ProgressTracker progressTracker,
@@ -431,7 +431,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    public TopologicalSortResult topologicalSort(
+    TopologicalSortResult topologicalSort(
         Graph graph,
         TopologicalSortParameters parameters,
         ProgressTracker progressTracker,

@@ -36,7 +36,9 @@ import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
+import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
+import org.neo4j.gds.core.loading.validation.OptionalNodePropertyGraphStoreRequirement;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
@@ -45,6 +47,10 @@ import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -215,6 +221,71 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.kCoreDecomposition(graph, configuration),
             estimationFacade::kCoreDecomposition,
             AlgorithmLabel.KCoreDecomposition,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    /**
+     * In the duplicated code, someone had inserted a `new NodePropertyTypeRequirement("nodeProperty",List.of(ValueType.DOUBLE_ARRAY, ValueType.FLOAT_ARRAY, ValueType.DOUBLE))` clause.
+     * When applying it here, it breaks some tests. So I have left it out.
+     * The duplicated code after all was never run, so seems illegitimate.
+     */
+    public <RESULT, METADATA> CompletableFuture<RESULT> kMeans(
+        GraphName graphName,
+        KmeansBaseConfig configuration,
+        Optional<SideEffect<KmeansResult, METADATA>> sideEffect,
+        ResultRenderer<KmeansResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> algorithms.kMeans(graph, configuration),
+            () -> estimationFacade.kMeans(configuration),
+            AlgorithmLabel.KMeans,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> labelPropagation(
+        GraphName graphName,
+        LabelPropagationBaseConfig configuration,
+        Optional<SideEffect<LabelPropagationResult, METADATA>> sideEffect,
+        ResultRenderer<LabelPropagationResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())).validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            })
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new NodePropertyMustExistOnAllLabels(configuration.nodeWeightProperty()).validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.labelPropagation(graph, configuration),
+            estimationFacade::labelPropagation,
+            AlgorithmLabel.LabelPropagation,
             sideEffect,
             resultRenderer
         );

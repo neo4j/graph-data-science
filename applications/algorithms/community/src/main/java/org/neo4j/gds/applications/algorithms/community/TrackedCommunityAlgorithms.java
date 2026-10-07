@@ -37,6 +37,10 @@ import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -125,6 +129,30 @@ public class TrackedCommunityAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.kCoreDecomposition(graph, params, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+        var task = CommunityAlgorithmTasks.kMeans(graph, parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.kMeans(graph, parameters, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+        var task = CommunityAlgorithmTasks.labelPropagation(graph.relationshipCount(), parameters);
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.labelPropagation(graph, parameters, progressTracker),
             progressTracker,
             true
         );

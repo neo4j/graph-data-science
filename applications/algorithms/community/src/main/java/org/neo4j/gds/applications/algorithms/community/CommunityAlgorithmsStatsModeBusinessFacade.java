@@ -35,10 +35,10 @@ import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
-import org.neo4j.gds.kmeans.KmeansStatsConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
-import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -57,9 +57,7 @@ import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
@@ -129,32 +127,28 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT kMeans(
         GraphName graphName,
-        KmeansStatsConfig configuration,
+        KmeansBaseConfig configuration,
         StatsResultBuilder<KmeansResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.kMeans(
             graphName,
             configuration,
-            KMeans,
-            () -> estimationFacade.kMeans(configuration),
-            (graph, __) -> communityAlgorithms.kMeans(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT labelPropagation(
         GraphName graphName,
-        LabelPropagationStatsConfig configuration,
+        LabelPropagationBaseConfig configuration,
         StatsResultBuilder<LabelPropagationResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.labelPropagation(
             graphName,
             configuration,
-            LabelPropagation,
-            estimationFacade::labelPropagation,
-            (graph, __) -> communityAlgorithms.labelPropagation(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT lcc(
