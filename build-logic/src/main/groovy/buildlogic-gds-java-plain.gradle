@@ -44,10 +44,10 @@ tasks.withType(Jar).configureEach {
 //https://docs.gradle.org/current/userguide/dependency_constraints.html
 dependencies {
     constraints {
-        implementation("com.fasterxml.jackson.core:jackson-databind:2.21.5") {
+        implementation("com.fasterxml.jackson.core:jackson-databind:2.21.7") {
             because "overriding vulnerable version 2.21.0 from arrow-vector"
         }
-        implementation("com.fasterxml.jackson.core:jackson-core:2.21.5") {
+        implementation("com.fasterxml.jackson.core:jackson-core:2.21.7") {
             because "overriding vulnerable version 2.21.0 from arrow-vector"
         }
 
