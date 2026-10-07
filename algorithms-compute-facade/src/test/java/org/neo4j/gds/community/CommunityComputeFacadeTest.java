@@ -36,7 +36,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.louvain.LouvainParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.scc.SccParameters;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -89,28 +88,6 @@ class CommunityComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void louvain(){
-        var future = facade.louvain(
-            graph,
-            new LouvainParameters(
-                new Concurrency(4),
-                10,
-                0,
-                10,
-                false,
-                null
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result().ranLevels()).isGreaterThan(0);
-        assertThat(results.computeMillis()).isNotNegative();
     }
 
     @Test

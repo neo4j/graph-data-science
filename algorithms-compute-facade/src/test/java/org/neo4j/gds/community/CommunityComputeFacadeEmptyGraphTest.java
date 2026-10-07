@@ -28,8 +28,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.louvain.LouvainParameters;
-import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationParameters;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccParameters;
@@ -65,23 +63,6 @@ class CommunityComputeFacadeEmptyGraphTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void louvain(){
-
-        var future = facade.louvain(
-            graph,
-            mock(LouvainParameters.class),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-
-        assertThat(results.result()).isEqualTo(LouvainResult.EMPTY);
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

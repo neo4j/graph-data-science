@@ -53,6 +53,8 @@ import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -384,6 +386,38 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.leiden(graph, configuration),
             () -> estimationFacade.leiden(configuration),
             AlgorithmLabel.Leiden,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> louvain(
+        GraphName graphName,
+        LouvainBaseConfig configuration,
+        Optional<SideEffect<LouvainResult, METADATA>> sideEffect,
+        ResultRenderer<LouvainResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.louvain(graph, configuration),
+            () -> estimationFacade.louvain(configuration),
+            AlgorithmLabel.Louvain,
             sideEffect,
             resultRenderer
         );
