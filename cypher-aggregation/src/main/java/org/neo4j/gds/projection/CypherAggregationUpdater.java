@@ -87,6 +87,9 @@ public class CypherAggregationUpdater implements UserAggregationUpdater, AutoClo
                 mappedInput[5]
             );
         } catch (Throwable t) {
+            // a failed update fails the query; fail the progress task right away, since on the
+            // parallel runtime the reducer is not closed by Neo4j (see CypherAggregation#createReducer)
+            lazyGraphImporter.close();
             throw ProcedureException.invocationFailed("function", FUNCTION_NAME.toString(), t);
         }
     }

@@ -125,8 +125,9 @@ public class LazyGraphImporter implements AutoCloseable {
 
     /**
      * Failure cleanup: marks the progress task as failed and releases it.
-     * Called once per aggregation updater on the error path; the guard makes
-     * sure the tracker's failure handling runs only once.
+     * Called by an updater whose update failed, and once per aggregation updater
+     * when the reducer is closed on the error path; the guard makes sure the
+     * tracker's failure handling runs only once.
      */
     @Override
     public void close() {
