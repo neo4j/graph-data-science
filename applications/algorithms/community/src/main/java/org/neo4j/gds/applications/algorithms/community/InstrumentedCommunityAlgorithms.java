@@ -333,8 +333,8 @@ public class InstrumentedCommunityAlgorithms {
             configuration,
             graphLoadETLBuilder,
             (graph, __, ___) -> algorithms.localClusteringCoefficient(graph, configuration),
-            () -> estimationFacade.lcc(configuration),
-            AlgorithmLabel.LCC,
+            () -> estimationFacade.localClusteringCoefficient(configuration),
+            AlgorithmLabel.LocalClusteringCoefficient,
             sideEffect,
             resultRenderer
         );

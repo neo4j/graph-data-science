@@ -184,7 +184,7 @@ public class CommunityAlgorithms {
         ).compute();
     }
 
-    LocalClusteringCoefficientResult lcc(
+    LocalClusteringCoefficientResult localClusteringCoefficient(
         Graph graph,
         LocalClusteringCoefficientParameters parameters,
         ProgressTracker progressTracker

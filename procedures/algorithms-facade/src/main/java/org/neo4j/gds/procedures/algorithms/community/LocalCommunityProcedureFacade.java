@@ -790,7 +790,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             algorithmConfiguration,
             LocalClusteringCoefficientStatsConfig::of
         );
-        return Stream.of(estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.localClusteringCoefficient(configuration, graphNameOrConfiguration));
     }
 
     @Override
@@ -815,7 +815,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             algorithmConfiguration,
             LocalClusteringCoefficientStreamConfig::of
         );
-        return Stream.of(estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.localClusteringCoefficient(configuration, graphNameOrConfiguration));
     }
 
     @Override
@@ -840,7 +840,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             algorithmConfiguration,
             LocalClusteringCoefficientWriteConfig::of
         );
-        return Stream.of(estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration));
+        return Stream.of(estimationModeBusinessFacade.localClusteringCoefficient(configuration, graphNameOrConfiguration));
     }
 
 

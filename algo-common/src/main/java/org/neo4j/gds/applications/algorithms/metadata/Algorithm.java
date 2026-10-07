@@ -64,7 +64,7 @@ public enum Algorithm {
     KNN,
     KSpanningTree,
     LabelPropagation,
-    LCC,
+    localClusteringCoefficient,
     Leiden,
     Louvain,
     LongestPath,

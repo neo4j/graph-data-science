@@ -159,15 +159,15 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         );
     }
 
-    public MemoryEstimation lcc(LocalClusteringCoefficientBaseConfig configuration) {
+    public MemoryEstimation localClusteringCoefficient(LocalClusteringCoefficientBaseConfig configuration) {
         return new LocalClusteringCoefficientMemoryEstimateDefinition(configuration.seedProperty()).memoryEstimation();
     }
 
-    public MemoryEstimateResult lcc(
+    public MemoryEstimateResult localClusteringCoefficient(
         LocalClusteringCoefficientBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = lcc(configuration);
+        var memoryEstimation = localClusteringCoefficient(configuration);
 
         return algorithmEstimationTemplate.estimate(
             configuration,

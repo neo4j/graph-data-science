@@ -162,11 +162,11 @@ public class TrackedCommunityAlgorithms {
 
     LocalClusteringCoefficientResult localClusteringCoefficient(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
         var parameters = configuration.toParameters();
-        var task = CommunityAlgorithmTasks.lcc(graph, parameters);
+        var task = CommunityAlgorithmTasks.localClusteringCoefficient(graph, parameters);
         var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.lcc(graph, parameters, progressTracker),
+            () -> algorithms.localClusteringCoefficient(graph, parameters, progressTracker),
             progressTracker,
             true
         );

@@ -107,13 +107,13 @@ public final class CommunityAlgorithmTasks {
         );
     }
 
-    public static Task lcc(Graph graph, LocalClusteringCoefficientParameters parameters) {
+    public static Task localClusteringCoefficient(Graph graph, LocalClusteringCoefficientParameters parameters) {
         var tasks = new ArrayList<Task>();
         if (parameters.seedProperty() == null) {
             tasks.add(TriangleCountTask.create(parameters.concurrency(), graph.nodeCount()));
         }
         tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", parameters.concurrency(), graph.nodeCount()));
-        return Tasks.task(AlgorithmLabel.LCC.asString(), parameters.concurrency(), tasks);
+        return Tasks.task(AlgorithmLabel.LocalClusteringCoefficient.asString(), parameters.concurrency(), tasks);
     }
 
     public static Task leiden(Graph graph, LeidenParameters parameters) {

@@ -60,7 +60,7 @@ public enum AlgorithmLabel implements Label {
     KNN("Knn"),
     KSpanningTree("K Spanning Tree"),
     LabelPropagation("Label Propagation"),
-    LCC("LocalClusteringCoefficient"),
+    LocalClusteringCoefficient("LocalClusteringCoefficient"),
     Leiden("Leiden"),
     Louvain("Louvain"),
     LongestPath("LongestPath"),
@@ -133,7 +133,7 @@ public enum AlgorithmLabel implements Label {
             case Algorithm.KNN -> KNN;
             case Algorithm.KSpanningTree -> KSpanningTree;
             case Algorithm.LabelPropagation -> LabelPropagation;
-            case Algorithm.LCC -> LCC;
+            case Algorithm.localClusteringCoefficient -> LocalClusteringCoefficient;
             case Algorithm.Leiden -> Leiden;
             case Algorithm.Louvain -> Louvain;
             case Algorithm.LongestPath -> LongestPath;

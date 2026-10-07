@@ -121,7 +121,7 @@ class StubbyHolder {
             case KNN -> new KnnStub();
             case KSpanningTree -> null;
             case LabelPropagation -> new LabelPropagationStub();
-            case LCC -> new LccStub();
+            case localClusteringCoefficient -> new LccStub();
             case Leiden -> new LeidenStub();
             case Louvain -> new LouvainStub();
             case LongestPath -> null;

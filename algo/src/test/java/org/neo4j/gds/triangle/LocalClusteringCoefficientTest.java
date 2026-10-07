@@ -336,7 +336,7 @@ class LocalClusteringCoefficientTest {
             var concurrency = new Concurrency(4);
             var parameters = new LocalClusteringCoefficientParameters(concurrency, Long.MAX_VALUE, null);
             var progressTrackerWithLog = TestProgressTrackerHelper.create(
-                CommunityAlgorithmTasks.lcc(graph, parameters),
+                CommunityAlgorithmTasks.localClusteringCoefficient(graph, parameters),
                 concurrency
             );
 
@@ -394,7 +394,7 @@ class LocalClusteringCoefficientTest {
             var concurrency = new Concurrency(4);
             var parameters = new LocalClusteringCoefficientParameters(concurrency, Long.MAX_VALUE, "triangles");
             var progressTrackerWithLog = TestProgressTrackerHelper.create(
-                CommunityAlgorithmTasks.lcc(graph, parameters),
+                CommunityAlgorithmTasks.localClusteringCoefficient(graph, parameters),
                 concurrency
             );
 

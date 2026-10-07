@@ -94,7 +94,7 @@ final class MutateModeAlgorithmLibrary {
             case KNN -> CanonicalProcedureName.parse("gds.knn");
             case KSpanningTree -> null;
             case LabelPropagation -> CanonicalProcedureName.parse("gds.labelPropagation");
-            case LCC -> CanonicalProcedureName.parse("gds.localClusteringCoefficient");
+            case localClusteringCoefficient -> CanonicalProcedureName.parse("gds.localClusteringCoefficient");
             case Leiden -> CanonicalProcedureName.parse("gds.leiden");
             case Louvain -> CanonicalProcedureName.parse("gds.louvain");
             case LongestPath -> null;

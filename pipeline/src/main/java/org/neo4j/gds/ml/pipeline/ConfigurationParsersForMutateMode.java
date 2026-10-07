@@ -120,7 +120,7 @@ public class ConfigurationParsersForMutateMode {
             case KNN -> KnnMutateConfig::of;
             case KSpanningTree -> null;
             case LabelPropagation -> LabelPropagationMutateConfig::of;
-            case LCC -> LocalClusteringCoefficientMutateConfig::of;
+            case localClusteringCoefficient -> LocalClusteringCoefficientMutateConfig::of;
             case Leiden -> LeidenMutateConfig::of;
             case Louvain -> LouvainMutateConfig::of;
             case LongestPath -> null;

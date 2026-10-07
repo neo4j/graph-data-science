@@ -56,7 +56,7 @@ public class LocalLccMutateStub implements LccMutateStub {
         return genericStub.getMemoryEstimation(
             configuration,
             LocalClusteringCoefficientMutateConfig::of,
-            estimationModeBusinessFacade::lcc
+            estimationModeBusinessFacade::localClusteringCoefficient
         );
     }
 
@@ -66,7 +66,7 @@ public class LocalLccMutateStub implements LccMutateStub {
             graphName,
             configuration,
             LocalClusteringCoefficientMutateConfig::of,
-            estimationModeBusinessFacade::lcc
+            estimationModeBusinessFacade::localClusteringCoefficient
         );
     }
 
