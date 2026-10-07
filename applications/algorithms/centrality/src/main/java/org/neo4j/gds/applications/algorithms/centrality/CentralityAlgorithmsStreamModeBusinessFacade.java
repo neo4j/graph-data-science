@@ -19,16 +19,15 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
 import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
+import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
@@ -48,25 +47,14 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
-
 public final class CentralityAlgorithmsStreamModeBusinessFacade {
-    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final TrackedCentralityAlgorithms algorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms;
     private final Synchroniser synchroniser;
 
     CentralityAlgorithmsStreamModeBusinessFacade(
-        CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        TrackedCentralityAlgorithms algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         InstrumentedCentralityAlgorithms instrumentedCentralityAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.estimationFacade = estimationFacade;
-        this.algorithms = algorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.instrumentedCentralityAlgorithms = instrumentedCentralityAlgorithms;
         this.synchroniser = synchroniser;
     }
@@ -104,17 +92,15 @@ public final class CentralityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> betweennessCentrality(
         GraphName graphName,
-        BetweennessCentralityStreamConfig configuration,
-        StreamResultBuilder<CentralityAlgorithmResult, RESULT> streamResultBuilder
+        BetweennessCentralityBaseConfig configuration,
+        StreamResultBuilder<BetwennessCentralityResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedCentralityAlgorithms.betweennessCentrality(
             graphName,
             configuration,
-            BetweennessCentrality,
-            () -> estimationFacade.betweennessCentrality(configuration),
-            (graph, __) -> algorithms.betweennessCentrality(graph, configuration),
-            streamResultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> bridges(

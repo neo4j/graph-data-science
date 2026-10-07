@@ -28,9 +28,10 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.core.JobId;
 
-public class BetweennessCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
+public class BetweennessCentralityWriteStep implements WriteStep<BetwennessCentralityResult, NodePropertiesWritten> {
     private final GenericCentralityWriteStep<CentralityAlgorithmResult> writeStep;
 
     public BetweennessCentralityWriteStep(WriteNodePropertyService writeNodePropertyService, BetweennessCentralityWriteConfig configuration) {
@@ -48,7 +49,7 @@ public class BetweennessCentralityWriteStep implements WriteStep<CentralityAlgor
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        CentralityAlgorithmResult result,
+        BetwennessCentralityResult result,
         JobId jobId
     ) {
         return writeStep.execute(graph,graphStore,resultStore,result,jobId);

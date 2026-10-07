@@ -61,13 +61,12 @@ public final class SimilarityApplications {
         Synchroniser synchroniser
     ) {
         var estimationModeFacade = new SimilarityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
-        var similarityAlgorithms = new SimilarityAlgorithms(requestScopedDependencies.terminationFlag());
 
-        var trackedAlgorithms = new TrackedSimilarityAlgorithms(similarityAlgorithms, progressTrackerCreator);
-        var raw = new InstrumentedSimilarityAlgorithms(
-            trackedAlgorithms,
+        var raw = InstrumentedSimilarityAlgorithms.create(
             estimationModeFacade,
-            launchConvenience
+            launchConvenience,
+            progressTrackerCreator,
+            requestScopedDependencies.terminationFlag()
         );
 
         var mutateModeFacade = new SimilarityAlgorithmsMutateModeBusinessFacade(

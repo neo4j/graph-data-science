@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BetweennessCentralityResultBuilderForStatsMode implements StatsResultBuilder<CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
+class BetweennessCentralityResultBuilderForStatsMode implements StatsResultBuilder<BetwennessCentralityResult, Stream<CentralityStatsResult>> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
     private final BetweennessCentralityStatsConfig configuration;
@@ -45,7 +45,7 @@ class BetweennessCentralityResultBuilderForStatsMode implements StatsResultBuild
     @Override
     public Stream<CentralityStatsResult> build(
         Graph graph,
-        Optional<CentralityAlgorithmResult> result,
+        Optional<BetwennessCentralityResult> result,
         AlgorithmProcessingTimings timings
     ) {
         var centralityStatsResult = genericResultBuilder.build(

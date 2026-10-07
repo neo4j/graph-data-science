@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BetweennessCentralityResultBuilderForWriteMode implements ResultBuilder<BetweennessCentralityWriteConfig, CentralityAlgorithmResult, Stream<CentralityWriteResult>, NodePropertiesWritten> {
+class BetweennessCentralityResultBuilderForWriteMode implements ResultBuilder<BetweennessCentralityWriteConfig, BetwennessCentralityResult, Stream<CentralityWriteResult>, NodePropertiesWritten> {
     private final GenericCentralityResultBuilderForWriteMode genericResultBuilder = new GenericCentralityResultBuilderForWriteMode();
 
     private final boolean shouldComputeCentralityDistribution;
@@ -42,7 +42,7 @@ class BetweennessCentralityResultBuilderForWriteMode implements ResultBuilder<Be
     public Stream<CentralityWriteResult> build(
         Graph graph,
         BetweennessCentralityWriteConfig configuration,
-        Optional<CentralityAlgorithmResult> result,
+        Optional<BetwennessCentralityResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
