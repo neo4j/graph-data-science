@@ -124,14 +124,7 @@ public class InstrumentedCommunityAlgorithms {
         ResultRenderer<ConductanceResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()).validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    )
-            );
+            .with(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -196,14 +189,7 @@ public class InstrumentedCommunityAlgorithms {
         ResultRenderer<ModularityResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()).validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    )
-            );
+            .with(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,

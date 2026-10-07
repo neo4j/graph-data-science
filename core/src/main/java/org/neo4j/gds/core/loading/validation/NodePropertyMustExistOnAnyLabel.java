@@ -25,20 +25,23 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class NodePropertyMustExistOnAnyLabel implements ValidationRule {
-
+public class NodePropertyMustExistOnAnyLabel implements GraphStoreFilteredETL {
     private final String nodeProperty;
 
-    public NodePropertyMustExistOnAnyLabel(String nodeProperty) {this.nodeProperty = nodeProperty;}
+    public NodePropertyMustExistOnAnyLabel(String nodeProperty) {
+        this.nodeProperty = nodeProperty;
+    }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
         validatePropertyExists(graphStore, selectedLabels);
     }
