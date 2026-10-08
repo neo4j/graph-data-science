@@ -30,7 +30,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.progress.tasks.IterativeTask;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -38,7 +37,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
@@ -54,11 +52,6 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,28 +94,6 @@ class PathFindingComputeFacadeTest {
             TerminationFlag.RUNNING_TRUE,
             progressTrackerFactoryMock
         );
-    }
-
-    @Test
-    void bellmanFord() {
-        var future = facade.bellmanFord(
-            graph,
-            new BellmanFordParameters(
-                idFunction.of("a"),
-                false,
-                true,
-                new Concurrency(4)
-            ),
-            jobIdMock,
-            false
-        );
-
-        var result = future.join();
-        assertThat(result.result()).isNotNull();
-
-        verify(progressTrackerFactoryMock, times(1))
-            .create(isA(IterativeTask.class), eq(jobIdMock), eq(new Concurrency(4)), eq(false));
-        verifyNoMoreInteractions(progressTrackerFactoryMock);
     }
 
     @Test

@@ -35,7 +35,7 @@ import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
-import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -55,7 +55,6 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
@@ -101,17 +100,15 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> bellmanFord(
         GraphName graphName,
-        AllShortestPathsBellmanFordStreamConfig configuration,
+        AllShortestPathsBellmanFordBaseConfig configuration,
         StreamResultBuilder<BellmanFordResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.bellmanFord(
             graphName,
             configuration,
-            BellmanFord,
-            () -> estimation.bellmanFord(configuration),
-            (graph, __) -> algorithms.bellmanFord(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> breadthFirstSearch(

@@ -70,7 +70,6 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
@@ -129,15 +128,12 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration.jobId()
         );
 
-        return runAlgorithmAndWrite(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.bellmanFord(
             graphName,
             configuration,
-            BellmanFord,
-            () -> estimationFacade.bellmanFord(configuration),
-            (graph, __) -> pathFindingAlgorithms.bellmanFord(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT deltaStepping(

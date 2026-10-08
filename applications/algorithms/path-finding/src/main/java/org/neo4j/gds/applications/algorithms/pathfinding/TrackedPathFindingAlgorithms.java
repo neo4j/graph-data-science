@@ -37,6 +37,8 @@ import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
@@ -84,6 +86,23 @@ public class TrackedPathFindingAlgorithms {
             ),
             progressTracker,
             true
+        );
+    }
+
+    BellmanFordResult bellmanFord(Graph graph, AllShortestPathsBellmanFordBaseConfig configuration) {
+        var task = PathFindingAlgorithmTasks.bellmanFord(configuration.concurrency());
+        var progressTracker = createProgressTracker(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.bellmanFord(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                DefaultPool.INSTANCE,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            false
         );
     }
 

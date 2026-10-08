@@ -48,6 +48,8 @@ import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
@@ -92,6 +94,24 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __, ___) -> algorithms.allShortestPaths(graph, configuration),
             () -> estimationFacade.allShortestPaths(configuration),
             AlgorithmLabel.AllShortestPaths,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> bellmanFord(
+        GraphName graphName,
+        AllShortestPathsBellmanFordBaseConfig configuration,
+        Optional<SideEffect<BellmanFordResult, METADATA>> sideEffect,
+        ResultRenderer<BellmanFordResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> algorithms.bellmanFord(graph, configuration),
+            () -> estimationFacade.bellmanFord(configuration),
+            AlgorithmLabel.BellmanFord,
             sideEffect,
             resultRenderer
         );

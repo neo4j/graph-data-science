@@ -30,7 +30,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -71,32 +70,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
             TerminationFlag.RUNNING_TRUE,
             progressTrackerFactoryMock
         );
-    }
-
-    @Test
-    void bellmanFord() {
-        var future = facade.bellmanFord(
-            graph,
-            mock(BellmanFordParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result).isNotNull();
-        assertThat(result.result().shortestPaths())
-            .extracting(PathFindingResult::pathSet)
-            .asInstanceOf(SET)
-            .isEmpty();
-        assertThat(result.result().negativeCycles())
-            .extracting(PathFindingResult::pathSet)
-            .asInstanceOf(SET)
-            .isEmpty();
-        assertThat(result.result().containsNegativeCycle()).isFalse();
-        assertThat(result.computeMillis()).isZero();
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

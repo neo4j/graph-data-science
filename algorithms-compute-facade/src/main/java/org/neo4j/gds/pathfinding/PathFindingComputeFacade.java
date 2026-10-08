@@ -28,9 +28,6 @@ import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.paths.bellmanford.BellmanFord;
-import org.neo4j.gds.paths.bellmanford.BellmanFordParameters;
-import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.delta.DeltaSteppingResult;
@@ -73,44 +70,6 @@ public class PathFindingComputeFacade {
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
         this.progressTrackerFactory = progressTrackerFactory;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<BellmanFordResult>> bellmanFord(
-        Graph graph,
-        BellmanFordParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(BellmanFordResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.bellmanFord(parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var bellmanFord = new BellmanFord(
-            graph,
-            progressTracker,
-            graph.toMappedNodeId(parameters.sourceNode()),
-            parameters.trackNegativeCycles(),
-            parameters.trackPaths(),
-            parameters.concurrency(),
-            executorService,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            bellmanFord::compute,
-            jobId
-        );
     }
 
     public CompletableFuture<TimedAlgorithmResult<DeltaSteppingResult>> deltaStepping(
