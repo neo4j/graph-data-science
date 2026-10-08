@@ -150,7 +150,6 @@ public final class ApplicationsFacade {
             writeContext,
             algorithmEstimationTemplate,
             launchConvenience,
-            algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty,
             synchroniser

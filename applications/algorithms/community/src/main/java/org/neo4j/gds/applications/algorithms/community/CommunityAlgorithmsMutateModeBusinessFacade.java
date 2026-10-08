@@ -23,7 +23,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.MutateSideEffect;
@@ -82,24 +81,15 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 import java.util.Optional;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimation;
-    private final CommunityAlgorithmsBusinessFacade algorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms;
     private final Synchroniser synchroniser;
 
     public CommunityAlgorithmsMutateModeBusinessFacade(
-        CommunityAlgorithmsEstimationModeBusinessFacade estimation,
-        CommunityAlgorithmsBusinessFacade algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodePropertyService,
         InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.estimation = estimation;
-        this.algorithms = algorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.instrumentedCommunityAlgorithms = instrumentedCommunityAlgorithms;
         this.synchroniser = synchroniser;

@@ -1427,7 +1427,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             SpeakerListenerLPAConfig::of
         );
 
-        return streamModeBusinessFacade.sllpa(
+        return streamModeBusinessFacade.speakerListenerLPA(
             GraphName.parse(graphName),
             parsedConfiguration,
             resultBuilder
@@ -1460,7 +1460,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
 
         var resultBuilder = new SpeakerListenerLPAResultBuilderForStatsMode(parsedConfiguration);
 
-        return statsModeBusinessFacade.sllpa(
+        return statsModeBusinessFacade.speakerListenerLPA(
             GraphName.parse(graphName),
             parsedConfiguration,
             resultBuilder
@@ -1510,7 +1510,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         var resultBuilder = new SpeakerListenerLPAResultBuilderForWriteMode();
 
 
-        return writeModeBusinessFacade.sllpa(
+        return writeModeBusinessFacade.speakerListenerLPA(
             GraphName.parse(graphName),
             parsedConfiguration,
             resultBuilder

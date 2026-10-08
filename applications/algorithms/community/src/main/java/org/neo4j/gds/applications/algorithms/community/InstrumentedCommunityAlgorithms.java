@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
@@ -55,6 +56,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
@@ -63,6 +65,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
@@ -78,12 +81,12 @@ import java.util.stream.Stream;
 /**
  * Community algorithms in all modes need to go through here, lest we have duplication.
  */
-public class InstrumentedCommunityAlgorithms {
+public final class InstrumentedCommunityAlgorithms {
     private final TrackedCommunityAlgorithms algorithms;
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
 
-    public InstrumentedCommunityAlgorithms(
+    private InstrumentedCommunityAlgorithms(
         TrackedCommunityAlgorithms algorithms,
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience
@@ -91,6 +94,19 @@ public class InstrumentedCommunityAlgorithms {
         this.algorithms = algorithms;
         this.estimationFacade = estimationFacade;
         this.launchConvenience = launchConvenience;
+    }
+
+    public static InstrumentedCommunityAlgorithms create(
+        Log log,
+        ProgressTrackerCreator progressTrackerCreator,
+        TerminationFlag terminationFlag,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
+        LaunchConvenience launchConvenience
+    ) {
+        var algorithms = new CommunityAlgorithms(log, terminationFlag);
+        var trackedCommunityAlgorithms = new TrackedCommunityAlgorithms(log, progressTrackerCreator, algorithms);
+
+        return new InstrumentedCommunityAlgorithms(trackedCommunityAlgorithms, estimationFacade, launchConvenience);
     }
 
     public <RESULT, METADATA> CompletableFuture<RESULT> approximateMaximumKCut(

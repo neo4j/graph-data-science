@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
@@ -64,22 +63,13 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CommunityAlgorithmsBusinessFacade algorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms;
     private final Synchroniser synchroniser;
 
     CommunityAlgorithmsStreamModeBusinessFacade(
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CommunityAlgorithmsBusinessFacade algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.estimationFacade = estimationFacade;
-        this.algorithms = algorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.instrumentedCommunityAlgorithms = instrumentedCommunityAlgorithms;
         this.synchroniser = synchroniser;
     }
@@ -266,7 +256,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ));
     }
 
-    public <RESULT> Stream<RESULT> sllpa(
+    public <RESULT> Stream<RESULT> speakerListenerLPA(
         GraphName graphName,
         SpeakerListenerLPAConfig configuration,
         StreamResultBuilder<PregelResult, RESULT> resultBuilder

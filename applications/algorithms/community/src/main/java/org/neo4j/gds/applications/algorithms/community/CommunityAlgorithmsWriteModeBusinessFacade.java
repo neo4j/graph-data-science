@@ -23,7 +23,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -69,24 +68,15 @@ import java.util.Optional;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CommunityAlgorithmsBusinessFacade algorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteNodePropertyService writeNodePropertyService;
     private final InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms;
     private final Synchroniser synchroniser;
 
     private CommunityAlgorithmsWriteModeBusinessFacade(
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CommunityAlgorithmsBusinessFacade algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteNodePropertyService writeNodePropertyService,
         InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.estimationFacade = estimationFacade;
-        this.algorithms = algorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeNodePropertyService = writeNodePropertyService;
         this.instrumentedCommunityAlgorithms = instrumentedCommunityAlgorithms;
         this.synchroniser = synchroniser;
@@ -96,18 +86,12 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         Log log,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimation,
-        CommunityAlgorithmsBusinessFacade algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         InstrumentedCommunityAlgorithms raw,
         Synchroniser synchroniser
     ) {
         var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
         return new CommunityAlgorithmsWriteModeBusinessFacade(
-            estimation,
-            algorithms,
-            algorithmProcessingTemplateConvenience,
             writeToDatabase,
             raw,
             synchroniser
@@ -309,7 +293,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         ));
     }
 
-    public <RESULT> RESULT sllpa(
+    public <RESULT> RESULT speakerListenerLPA(
         GraphName graphName,
         SpeakerListenerLPAConfig configuration,
         ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder

@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -59,60 +58,34 @@ public final class CommunityApplications {
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         LaunchConvenience launchConvenience,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodePropertyService,
         Synchroniser synchroniser
     ) {
         var estimation = new CommunityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
-        var algorithms = new CommunityAlgorithms(log, requestScopedDependencies.terminationFlag());
-        var algorithmsBusinessFacade = new CommunityAlgorithmsBusinessFacade(
-            log,
-            algorithms,
-            progressTrackerCreator
-        );
-        var trackedCommunityAlgorithms = new TrackedCommunityAlgorithms(
+
+        var raw = InstrumentedCommunityAlgorithms.create(
             log,
             progressTrackerCreator,
-            algorithms
-        );
-        var raw = new InstrumentedCommunityAlgorithms(
-            trackedCommunityAlgorithms,
+            requestScopedDependencies.terminationFlag(),
             estimation,
             launchConvenience
         );
-        var mutation = new CommunityAlgorithmsMutateModeBusinessFacade(
-            estimation,
-            algorithmsBusinessFacade,
-            algorithmProcessingTemplateConvenience,
-            mutateNodePropertyService,
-            raw,
-            synchroniser
-        );
-        var stats = new CommunityAlgorithmsStatsModeBusinessFacade(
-            estimation,
-            algorithmsBusinessFacade,
-            algorithmProcessingTemplateConvenience,
-            raw,
-            synchroniser
-        );
-        var stream = new CommunityAlgorithmsStreamModeBusinessFacade(
-            estimation,
-            algorithmsBusinessFacade,
-            algorithmProcessingTemplateConvenience,
-            raw,
-            synchroniser
-        );
+
+        var mutation = new CommunityAlgorithmsMutateModeBusinessFacade(mutateNodePropertyService, raw, synchroniser);
+
+        var stats = new CommunityAlgorithmsStatsModeBusinessFacade(raw, synchroniser);
+
+        var stream = new CommunityAlgorithmsStreamModeBusinessFacade(raw, synchroniser);
+
         var write = CommunityAlgorithmsWriteModeBusinessFacade.create(
             log,
             requestScopedDependencies,
             writeContext,
-            estimation,
-            algorithmsBusinessFacade,
-            algorithmProcessingTemplateConvenience,
             raw,
             synchroniser
         );
+
         return new CommunityApplications(estimation, mutation, raw, stats, stream, write);
     }
 

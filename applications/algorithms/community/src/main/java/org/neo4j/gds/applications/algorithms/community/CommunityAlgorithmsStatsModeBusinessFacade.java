@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultRenderer;
 import org.neo4j.gds.beta.pregel.PregelResult;
@@ -58,22 +57,13 @@ import org.neo4j.gds.wcc.WccBaseConfig;
 import java.util.Optional;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final CommunityAlgorithmsBusinessFacade communityAlgorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms;
     private final Synchroniser synchroniser;
 
     CommunityAlgorithmsStatsModeBusinessFacade(
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        CommunityAlgorithmsBusinessFacade communityAlgorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         InstrumentedCommunityAlgorithms instrumentedCommunityAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.estimationFacade = estimationFacade;
-        this.communityAlgorithms = communityAlgorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.instrumentedCommunityAlgorithms = instrumentedCommunityAlgorithms;
         this.synchroniser = synchroniser;
     }
@@ -234,6 +224,19 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ));
     }
 
+    public <RESULT> RESULT speakerListenerLPA(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        StatsResultBuilder<PregelResult, RESULT> resultBuilder
+    ) {
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+            graphName,
+            configuration,
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
+    }
+
     public <RESULT> RESULT triangleCount(
         GraphName graphName,
         TriangleCountBaseConfig configuration,
@@ -253,19 +256,6 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         StatsResultBuilder<DisjointSetStruct, RESULT> resultBuilder
     ) {
         return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.wcc(
-            graphName,
-            configuration,
-            Optional.empty(),
-            new StatsResultRenderer<>(resultBuilder)
-        ));
-    }
-
-    public <RESULT> RESULT sllpa(
-        GraphName graphName,
-        SpeakerListenerLPAConfig configuration,
-        StatsResultBuilder<PregelResult, RESULT> resultBuilder
-    ) {
-        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
             graphName,
             configuration,
             Optional.empty(),

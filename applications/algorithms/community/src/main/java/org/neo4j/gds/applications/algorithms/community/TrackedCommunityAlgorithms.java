@@ -63,14 +63,14 @@ import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.stream.Stream;
 
-public class TrackedCommunityAlgorithms {
+class TrackedCommunityAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final Log log;
     private final ProgressTrackerCreator progressTrackerCreator;
     private final CommunityAlgorithms algorithms;
 
-    public TrackedCommunityAlgorithms(
+    TrackedCommunityAlgorithms(
         Log log,
         ProgressTrackerCreator progressTrackerCreator,
         CommunityAlgorithms algorithms
