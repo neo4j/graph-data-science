@@ -19,18 +19,11 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.annotation.ValueClass;
-
 import java.io.Serializable;
 
-@ValueClass
-public interface ModelData extends Serializable {
+public record ModelData(Layer[] layers, FeatureFunction featureFunction) implements Serializable {
 
-    Layer[] layers();
-
-    FeatureFunction featureFunction();
-
-    static ModelData of(Layer[] layers, FeatureFunction featureFunction) {
-        return ImmutableModelData.of(layers, featureFunction);
+    public static ModelData of(Layer[] layers, FeatureFunction featureFunction) {
+        return new ModelData(layers, featureFunction);
     }
 }
