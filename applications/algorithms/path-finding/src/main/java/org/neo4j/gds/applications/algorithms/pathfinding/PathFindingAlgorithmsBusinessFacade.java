@@ -30,7 +30,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
@@ -54,19 +53,6 @@ public class PathFindingAlgorithmsBusinessFacade {
         this.algorithms = algorithms;
         this.requestScopedDependencies = requestScopedDependencies;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    public PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
-        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.deltaStepping(configuration.concurrency()), configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.deltaStepping(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                DefaultPool.INSTANCE,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
     }
 
     public SpanningTree kSpanningTree(Graph graph, KSpanningTreeBaseConfig configuration) {

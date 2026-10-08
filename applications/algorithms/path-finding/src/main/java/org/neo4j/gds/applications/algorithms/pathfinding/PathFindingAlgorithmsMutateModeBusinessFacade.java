@@ -68,7 +68,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -136,7 +135,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration.mutateRelationshipType()
         );
 
-        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.bfs(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.breadthFirstSearch(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),
@@ -151,15 +150,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration.mutateRelationshipType(), mutateRelationshipService);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.deltaStepping(
             graphName,
             configuration,
-            DeltaStepping,
-            estimationFacade::deltaStepping,
-            (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT depthFirstSearch(
@@ -172,7 +168,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration.mutateRelationshipType()
         );
 
-        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.dfs(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.depthFirstSearch(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),
@@ -389,18 +385,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
 
-        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
-            Optional.empty(),
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.deltaStepping(
             graphName,
             configuration,
-            Optional.empty(),
-            DeltaStepping,
-            DimensionTransformer.DISABLED,
-            estimationFacade::deltaStepping,
-            (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.of(sideEffect),
             new MutateResultRenderer<>(configuration, resultBuilder)
-        );
+        ));
     }
 
 

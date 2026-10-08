@@ -28,9 +28,6 @@ import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.paths.delta.DeltaStepping;
-import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
-import org.neo4j.gds.paths.delta.DeltaSteppingResult;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -70,36 +67,6 @@ public class PathFindingComputeFacade {
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
         this.progressTrackerFactory = progressTrackerFactory;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<DeltaSteppingResult>> deltaStepping(
-        Graph graph,
-        DeltaSteppingParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(DeltaSteppingResult.empty()));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.deltaStepping(parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var deltaStepping = DeltaStepping.of(graph, parameters, executorService, progressTracker, terminationFlag);
-
-        // Submit the algorithm for async computation
-
-        return algorithmCaller.run(
-            deltaStepping::compute,
-            jobId
-        );
     }
 
     public CompletableFuture<TimedAlgorithmResult<SpanningTree>> kSpanningTree(

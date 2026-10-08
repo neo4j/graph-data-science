@@ -31,7 +31,7 @@ import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.pcst.PCSTStatsConfig;
@@ -45,7 +45,6 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
@@ -88,7 +87,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         BfsBaseConfig configuration,
         StatsResultBuilder<HugeLongArray, RESULT> resultBuilder
     ) {
-        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.bfs(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.breadthFirstSearch(
             graphName,
             configuration,
             Optional.empty(),
@@ -98,17 +97,15 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT deltaStepping(
         GraphName graphName,
-        AllShortestPathsDeltaStatsConfig configuration,
+        AllShortestPathsDeltaBaseConfig configuration,
         StatsResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.deltaStepping(
             graphName,
             configuration,
-            DeltaStepping,
-            estimationFacade::deltaStepping,
-            (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT maxFlow(

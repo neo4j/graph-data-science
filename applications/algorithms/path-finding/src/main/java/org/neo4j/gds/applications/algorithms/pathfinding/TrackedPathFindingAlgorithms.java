@@ -39,6 +39,7 @@ import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
@@ -106,7 +107,7 @@ public class TrackedPathFindingAlgorithms {
         );
     }
 
-    HugeLongArray bfs(Graph graph, BfsBaseConfig configuration) {
+    HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
         var progressTracker = createProgressTracker(
             PathFindingAlgorithmTasks.bfs(configuration.concurrency()),
             configuration
@@ -124,7 +125,23 @@ public class TrackedPathFindingAlgorithms {
         );
     }
 
-    HugeLongArray dfs(Graph graph, DfsBaseConfig configuration) {
+    PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
+        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.deltaStepping(configuration.concurrency()), configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.deltaStepping(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                DefaultPool.INSTANCE,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            true
+        );
+    }
+
+    HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {
         var progressTracker = createProgressTracker(
             PathFindingAlgorithmTasks.dfs(configuration.concurrency()),
             configuration

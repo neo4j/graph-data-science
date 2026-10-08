@@ -30,7 +30,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
-import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.pcst.PCSTParameters;
@@ -70,26 +69,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
             TerminationFlag.RUNNING_TRUE,
             progressTrackerFactoryMock
         );
-    }
-
-    @Test
-    void deltaStepping() {
-        var future = facade.deltaStepping(
-            graph,
-            mock(DeltaSteppingParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result.result())
-            .isNotNull()
-            .extracting((deltaSteppingResult -> deltaSteppingResult.pathFindingResult().pathSet()))
-            .asInstanceOf(SET)
-            .isEmpty();
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

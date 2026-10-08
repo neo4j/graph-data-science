@@ -70,7 +70,6 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
@@ -141,14 +140,14 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         AllShortestPathsDeltaWriteConfig configuration,
         ResultBuilder<AllShortestPathsDeltaWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        return runAlgorithmAndWrite(
+        var writeStep = createShortestPathWriteStep(configuration);
+
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.deltaStepping(
             graphName,
             configuration,
-            DeltaStepping,
-            estimationFacade::deltaStepping,
-            (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT kSpanningTree(

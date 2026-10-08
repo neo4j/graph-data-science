@@ -37,7 +37,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.paths.delta.DeltaSteppingParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.spanningtree.PrimOperators;
@@ -94,20 +93,6 @@ class PathFindingComputeFacadeTest {
             TerminationFlag.RUNNING_TRUE,
             progressTrackerFactoryMock
         );
-    }
-
-    @Test
-    void deltaStepping() {
-        var future = facade.deltaStepping(
-            graph,
-            DeltaSteppingParameters.withDefaultDelta(
-                idFunction.of("a"),
-                new Concurrency(2)
-            ),
-            jobIdMock,
-            false
-        );
-        assertThat(future.join()).isNotNull();
     }
 
     @Test

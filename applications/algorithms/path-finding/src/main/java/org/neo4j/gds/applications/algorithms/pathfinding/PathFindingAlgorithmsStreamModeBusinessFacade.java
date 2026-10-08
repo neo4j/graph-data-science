@@ -37,7 +37,7 @@ import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
@@ -55,7 +55,6 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 
@@ -116,7 +115,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         BfsBaseConfig configuration,
         StreamResultBuilder<HugeLongArray, RESULT> resultBuilder
     ) {
-        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.bfs(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.breadthFirstSearch(
             graphName,
             configuration,
             Optional.empty(),
@@ -126,17 +125,15 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> deltaStepping(
         GraphName graphName,
-        AllShortestPathsDeltaStreamConfig configuration,
+        AllShortestPathsDeltaBaseConfig configuration,
         StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.deltaStepping(
             graphName,
             configuration,
-            DeltaStepping,
-            estimation::deltaStepping,
-            (graph, __) -> algorithms.deltaStepping(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> depthFirstSearch(
@@ -144,7 +141,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         DfsBaseConfig configuration,
         StreamResultBuilder<HugeLongArray, RESULT> resultBuilder
     ) {
-        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.dfs(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.depthFirstSearch(
             graphName,
             configuration,
             Optional.empty(),

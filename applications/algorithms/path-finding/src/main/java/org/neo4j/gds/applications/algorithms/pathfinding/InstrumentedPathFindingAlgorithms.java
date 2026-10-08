@@ -50,6 +50,7 @@ import org.neo4j.gds.mcmf.MCMFBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
@@ -117,7 +118,7 @@ public class InstrumentedPathFindingAlgorithms {
         );
     }
 
-    public <RESULT, METADATA> CompletableFuture<RESULT> bfs(
+    public <RESULT, METADATA> CompletableFuture<RESULT> breadthFirstSearch(
         GraphName graphName,
         BfsBaseConfig configuration,
         Optional<SideEffect<HugeLongArray, METADATA>> sideEffect,
@@ -132,7 +133,7 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             graphLoadETLBuilder,
-            (graph, __, ___) -> algorithms.bfs(graph, configuration),
+            (graph, __, ___) -> algorithms.breadthFirstSearch(graph, configuration),
             estimationFacade::breadthFirstSearch,
             AlgorithmLabel.BFS,
             sideEffect,
@@ -140,7 +141,39 @@ public class InstrumentedPathFindingAlgorithms {
         );
     }
 
-    public <RESULT, METADATA> CompletableFuture<RESULT> dfs(
+    public <RESULT, METADATA> CompletableFuture<RESULT> deltaStepping(
+        GraphName graphName,
+        AllShortestPathsDeltaBaseConfig configuration,
+        Optional<SideEffect<PathFindingResult, METADATA>> sideEffect,
+        ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new SourceNodeRequirement(configuration.sourceNode())
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.deltaStepping(graph, configuration),
+            estimationFacade::deltaStepping,
+            AlgorithmLabel.DeltaStepping,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> depthFirstSearch(
         GraphName graphName,
         DfsBaseConfig configuration,
         Optional<SideEffect<HugeLongArray, METADATA>> sideEffect,
@@ -155,7 +188,7 @@ public class InstrumentedPathFindingAlgorithms {
             graphName,
             configuration,
             graphLoadETLBuilder,
-            (graph, __, ___) -> algorithms.dfs(graph, configuration),
+            (graph, __, ___) -> algorithms.depthFirstSearch(graph, configuration),
             estimationFacade::depthFirstSearch,
             AlgorithmLabel.DFS,
             sideEffect,
