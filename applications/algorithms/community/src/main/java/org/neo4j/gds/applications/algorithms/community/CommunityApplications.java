@@ -72,6 +72,7 @@ public final class CommunityApplications {
             progressTrackerCreator
         );
         var trackedCommunityAlgorithms = new TrackedCommunityAlgorithms(
+            log,
             progressTrackerCreator,
             algorithms
         );

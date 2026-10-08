@@ -53,11 +53,9 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.wcc.WccStatsConfig;
+import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.Optional;
-
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -93,6 +91,18 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ));
     }
 
+    public <RESULT> RESULT hdbscan(
+        GraphName graphName,
+        HDBScanBaseConfig configuration,
+        StatsResultBuilder<Labels, RESULT> resultBuilder
+    ) {
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.hdbscan(
+            graphName,
+            configuration,
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
+    }
 
     public <RESULT> RESULT k1Coloring(
         GraphName graphName,
@@ -239,17 +249,15 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT wcc(
         GraphName graphName,
-        WccStatsConfig configuration,
+        WccBaseConfig configuration,
         StatsResultBuilder<DisjointSetStruct, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.wcc(
             graphName,
             configuration,
-            WCC,
-            () -> estimationFacade.wcc(configuration),
-            (graph, __) -> communityAlgorithms.wcc(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT sllpa(
@@ -258,19 +266,6 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         StatsResultBuilder<PregelResult, RESULT> resultBuilder
     ) {
         return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
-            graphName,
-            configuration,
-            Optional.empty(),
-            new StatsResultRenderer<>(resultBuilder)
-        ));
-    }
-
-    public <RESULT> RESULT hdbscan(
-        GraphName graphName,
-        HDBScanBaseConfig configuration,
-        StatsResultBuilder<Labels, RESULT> resultBuilder
-    ) {
-        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.hdbscan(
             graphName,
             configuration,
             Optional.empty(),

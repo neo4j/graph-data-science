@@ -44,16 +44,4 @@ public class CommunityAlgorithmsBusinessFacade {
         this.progressTrackerCreator = progressTrackerCreator;
     }
 
-    public DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
-        var task = CommunityAlgorithmTasks.wcc(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-
-        if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
-            log.warn("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
-        }
-        var params = configuration.toParameters();
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.wcc(graph, params, progressTracker),
-            progressTracker, true);
-    }
 }

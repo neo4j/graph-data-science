@@ -81,8 +81,6 @@ import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
-
 public class CommunityAlgorithmsMutateModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CommunityAlgorithmsBusinessFacade algorithms;
@@ -324,6 +322,21 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         ));
     }
 
+    public <RESULT> RESULT speakerListenerLPA(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new SpeakerListenerLPAMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
+
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+            graphName,
+            configuration,
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
     public <RESULT> RESULT triangleCount(
         GraphName graphName,
         TriangleCountMutateConfig configuration,
@@ -357,25 +370,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             standardCommunitiesProperties
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
-            graphName,
-            configuration,
-            WCC,
-            () -> estimation.wcc(configuration),
-            (graph, __) -> algorithms.wcc(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT speakerListenerLPA(
-        GraphName graphName,
-        SpeakerListenerLPAConfig configuration,
-        ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var mutateStep = new SpeakerListenerLPAMutateStep(mutateNodePropertyService, configuration.nodeLabels(),configuration.mutateProperty());
-
-        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.wcc(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),

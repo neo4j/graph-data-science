@@ -32,6 +32,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceResult;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
@@ -44,6 +45,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
@@ -57,16 +59,23 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
+import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.stream.Stream;
 
 public class TrackedCommunityAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
+    private final Log log;
     private final ProgressTrackerCreator progressTrackerCreator;
     private final CommunityAlgorithms algorithms;
 
-    public TrackedCommunityAlgorithms(ProgressTrackerCreator progressTrackerCreator, CommunityAlgorithms algorithms) {
+    public TrackedCommunityAlgorithms(
+        Log log,
+        ProgressTrackerCreator progressTrackerCreator,
+        CommunityAlgorithms algorithms
+    ) {
+        this.log = log;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithms = algorithms;
     }
@@ -256,5 +265,22 @@ public class TrackedCommunityAlgorithms {
 
     Stream<TriangleResult> triangles(Graph graph, TriangleCountBaseConfig configuration) {
         return algorithms.triangles(graph, configuration.toParameters());
+    }
+
+    DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
+        var task = CommunityAlgorithmTasks.wcc(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+
+        if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
+            log.warn("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
+        }
+
+        var params = configuration.toParameters();
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.wcc(graph, params, progressTracker),
+            progressTracker,
+            true
+        );
     }
 }

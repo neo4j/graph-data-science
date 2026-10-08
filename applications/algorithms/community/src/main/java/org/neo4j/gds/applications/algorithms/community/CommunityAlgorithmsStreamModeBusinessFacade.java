@@ -51,7 +51,6 @@ import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
-import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
@@ -59,12 +58,10 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
-import org.neo4j.gds.wcc.WccStreamConfig;
+import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -269,6 +266,19 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ));
     }
 
+    public <RESULT> Stream<RESULT> sllpa(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        StreamResultBuilder<PregelResult, RESULT> resultBuilder
+    ) {
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+            graphName,
+            configuration,
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
+    }
+
     public <RESULT> Stream<RESULT> triangleCount(
         GraphName graphName,
         TriangleCountBaseConfig configuration,
@@ -297,25 +307,10 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> wcc(
         GraphName graphName,
-        WccStreamConfig configuration,
-        StreamResultBuilder<DisjointSetStruct, RESULT> streamResultBuilder
+        WccBaseConfig configuration,
+        StreamResultBuilder<DisjointSetStruct, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
-            graphName,
-            configuration,
-            WCC,
-            () -> estimationFacade.wcc(configuration),
-            (graph, __) -> algorithms.wcc(graph, configuration),
-            streamResultBuilder
-        );
-    }
-
-    public <RESULT> Stream<RESULT> sllpa(
-        GraphName graphName,
-        SpeakerListenerLPAConfig configuration,
-        StreamResultBuilder<PregelResult, RESULT> resultBuilder
-    ) {
-        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.wcc(
             graphName,
             configuration,
             Optional.empty(),

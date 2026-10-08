@@ -42,6 +42,7 @@ import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.core.loading.validation.OptionalNodePropertyGraphStoreRequirement;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
 import org.neo4j.gds.hdbscan.Labels;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
@@ -67,6 +68,7 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
+import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -556,6 +558,38 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.triangleCount(graph, configuration),
             estimationFacade::triangleCount,
             AlgorithmLabel.TriangleCount,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> wcc(
+        GraphName graphName,
+        WccBaseConfig configuration,
+        Optional<SideEffect<DisjointSetStruct, METADATA>> sideEffect,
+        ResultRenderer<DisjointSetStruct, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.wcc(graph, configuration),
+            () -> estimationFacade.wcc(configuration),
+            AlgorithmLabel.WCC,
             sideEffect,
             resultRenderer
         );

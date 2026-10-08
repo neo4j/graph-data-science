@@ -67,7 +67,6 @@ import org.neo4j.gds.wcc.WccWriteConfig;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -310,6 +309,21 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         ));
     }
 
+    public <RESULT> RESULT sllpa(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new SpeakerListenerLPAWriteStep(writeNodePropertyService, configuration, SLLPA);
+
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+            graphName,
+            configuration,
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
     public <RESULT> RESULT triangleCount(
         GraphName graphName,
         TriangleCountWriteConfig configuration,
@@ -332,25 +346,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new WccWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
-            graphName,
-            configuration,
-            WCC,
-            () -> estimationFacade.wcc(configuration),
-            (graph, __) -> algorithms.wcc(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT sllpa(
-        GraphName graphName,
-        SpeakerListenerLPAConfig configuration,
-        ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var writeStep = new SpeakerListenerLPAWriteStep(writeNodePropertyService, configuration, SLLPA);
-
-        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.wcc(
             graphName,
             configuration,
             Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
