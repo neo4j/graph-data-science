@@ -32,6 +32,7 @@ import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
@@ -59,6 +60,7 @@ import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
+import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
@@ -473,6 +475,24 @@ public class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.modularityOptimization(graph, configuration),
             estimationFacade::modularityOptimization,
             AlgorithmLabel.ModularityOptimization,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> scc(
+        GraphName graphName,
+        SccCommonBaseConfig configuration,
+        Optional<SideEffect<HugeLongArray, METADATA>> sideEffect,
+        ResultRenderer<HugeLongArray, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> algorithms.scc(graph, configuration),
+            estimationFacade::scc,
+            AlgorithmLabel.SCC,
             sideEffect,
             resultRenderer
         );
