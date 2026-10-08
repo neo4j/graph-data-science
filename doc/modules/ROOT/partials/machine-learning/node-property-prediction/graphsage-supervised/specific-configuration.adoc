@@ -1,0 +1,7 @@
+| batchSize         | Integer        | n/a                  | yes      |
+| featureProperties | List of String | n/a                  | no       |
+| jobId             | String         | Generated internally | yes      |
+| modelName         | String         | n/a                  | no       |
+| nodeLabels        | List of String | ["*"]                | yes      |
+| randomSeed        | String         | n/a                  | yes      |
+| relationshipTypes | List of String | ["*"]                | yes      |

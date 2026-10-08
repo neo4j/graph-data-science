@@ -2,9 +2,19 @@
 = Node property prediction
 :description: This chapter provides explanations and examples for the node property prediction pipelines in the Neo4j Graph Data Science library.
 
+Node property prediction can be used for predicting either discrete labels or numerical values for nodes with supervised machine learning.
+The Neo4j Graph Data Science library offers node property prediction both as standalone algorithms and as pipelines for end-to-end workflows.
 
-Node property prediction pipelines provide an end-to-end workflow for predicting either discrete labels or numerical values for nodes with supervised machine learning.
-The Neo4j Graph Data Science library support the following node property prediction pipelines:
+== Algorithms
+
+The Neo4j Graph Data Science library contains the following node property prediction algorithms:
+
+* Aura Graph Analytics
+** xref:machine-learning/node-property-prediction/graphsage-supervised.adoc[GraphSAGE supervised]
+
+== Pipelines
+
+The Neo4j Graph Data Science library supports and end-to-end workflow for node property prediction through the following pipelines:
 
 * Beta
 ** xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node classification pipelines]

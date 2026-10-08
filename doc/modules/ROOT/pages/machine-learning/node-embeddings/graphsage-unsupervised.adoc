@@ -1,0 +1,179 @@
+[[graphsage-unsupervised]]
+[.preview]
+= GraphSAGE unsupervised
+:description: This section describes the GraphSAGE unsupervised algorithm in Neo4j Graph Data Science, available in Aura Graph Analytics.
+:entity: node
+:result: embedding
+:algorithm: GraphSAGE unsupervised
+
+include::partial$/product-limitations/only-in-serverless.adoc[]
+
+:directed:
+:undirected:
+:heterogeneous-nodes:
+:node-properties:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+This section covers the syntax used to execute the {algorithm} algorithm.
+
+.GraphSAGE unsupervised syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-train]
+======
+.Run GraphSAGE unsupervised in train mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.graphSage.unsupervised.train(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  trainMillis: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name                  | Type           | Default              | Optional | Description
+| activationFunction    | String         | "relu"               | yes      |
+| aggregator            | String         | "mean"               | yes      |
+| batchSize             | Integer        | n/a                  | yes      |
+| dropout               | Float          | 0.1                  | yes      |
+| embeddingDimension    | Integer        | 256                  | yes      |
+| epochs                | Integer        | n/a                  | no       |
+| featureProperties     | List of String | n/a                  | no       |
+| jobId                 | String         | Generated internally | yes      |
+| layerNormalization    | Boolean        | true                 | yes      |
+| learningRate          | Float          | 0.001                | yes      |
+| modelName             | String         | n/a                  | no       |
+| negativeSamplingRatio | Float          | 1.0                  | yes      |
+| nodeLabels            | List of String | ["*"]                | yes      |
+| numNeighbors          | List           | [20 10]              | yes      |
+| numWalks              | Integer        | 10                   | yes      |
+| randomSeed            | String         | n/a                  | yes      |
+| relationshipTypes     | List of String | ["*"]                | yes      |
+| walkDepth             | Integer        | 3                    | yes      |
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name                | Type    | Description
+| preProcessingMillis | Integer |
+| trainMillis         | Integer |
+|===
+======
+
+[.include-with-stream]
+======
+.Run GraphSAGE unsupervised in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.graphSage.unsupervised.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  embedding: List,
+  nodeId: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/machine-learning/node-embeddings/graphsage-unsupervised/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name      | Type    | Description
+| embedding | List    |
+| nodeId    | Integer |
+|===
+======
+
+[.include-with-mutate]
+======
+.Run GraphSAGE unsupervised in mutate mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.graphSage.unsupervised.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/machine-learning/node-embeddings/graphsage-unsupervised/specific-configuration.adoc[]
+| mutateProperty | String | n/a     | no       |
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name                  | Type    | Description
+| computeMillis         | Integer |
+| mutateMillis          | Integer |
+| nodePropertiesWritten | Integer |
+| preProcessingMillis   | Integer |
+|===
+======
+
+[.include-with-write]
+======
+.Run GraphSAGE unsupervised in write mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.graphSage.unsupervised.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  computeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  writeMillis: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/machine-learning/node-embeddings/graphsage-unsupervised/specific-configuration.adoc[]
+| writeConcurrency | String | Value of 'concurrency' | yes      |
+| writeProperty    | String | n/a                    | no       |
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name                  | Type    | Description
+| computeMillis         | Integer |
+| nodePropertiesWritten | Integer |
+| preProcessingMillis   | Integer |
+| writeMillis           | Integer |
+|===
+======
+====
