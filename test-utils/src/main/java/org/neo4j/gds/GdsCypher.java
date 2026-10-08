@@ -30,7 +30,6 @@ import org.neo4j.cypherdsl.core.SymbolicName;
 import org.neo4j.cypherdsl.core.renderer.Configuration;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.neo4j.gds.PropertyMapping.Key;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -693,63 +692,54 @@ public abstract class GdsCypher {
         return Cypher.mapOf(entries.toArray());
     }
 
-    @ValueClass
-    @Value.Immutable(singleton = true)
-    interface MinimalObject {
-        Optional<String> string();
+    public static class MinimalObject {
+        private final Optional<String> string;
+        private final Optional<Map<String, Object>> map;
 
-        Optional<Map<String, Object>> map();
-
-        default boolean isEmpty() {
-            return string().isEmpty() && map().isEmpty();
+        MinimalObject(Optional<String> string, Optional<Map<String, Object>> map) {
+            if (string.isPresent() && map.isPresent()) {
+                throw new IllegalStateException("Cannot be both string and map");
+            }
+            this.string = string;
+            this.map = map;
         }
 
-        default MinimalObject map(
-            Function<String, MinimalObject> string,
-            Function<Map<String, Object>, MinimalObject> map
-        ) {
-            return fold(string, map).orElse(empty());
+        Optional<Map<String, Object>> map() {
+            return map;
         }
 
-        default MinimalObject map(Function<Map<String, Object>, MinimalObject> map) {
+        public boolean isEmpty() {
+            return string.isEmpty() && map.isEmpty();
+        }
+
+        public MinimalObject map(Function<Map<String, Object>, MinimalObject> map) {
             return fold(MinimalObject::string, map).orElse(empty());
         }
 
-        default Optional<Object> toObject() {
+        Optional<Object> toObject() {
             return fold(s -> s, m -> m);
         }
 
-        default <R> Optional<R> fold(
+        private <R> Optional<R> fold(
             Function<String, R> stringFunc,
             Function<Map<String, Object>, R> mapFunc
         ) {
-            return string().map(stringFunc).or(() -> map().map(mapFunc));
+            return string.map(stringFunc).or(() -> map.map(mapFunc));
         }
 
-        @Value.Check
-        default void validate() {
-            if (string().isPresent() && map().isPresent()) {
-                throw new IllegalStateException("Cannot be both string and map");
-            }
+        public static MinimalObject string(String value) {
+            return new MinimalObject(Optional.of(value), Optional.empty());
         }
 
-        static MinimalObject string(String value) {
-            return ImmutableMinimalObject.builder().string(value).build();
-        }
-
-        static MinimalObject map(Map<String, Object> value) {
+        public static MinimalObject map(Map<String, Object> value) {
             if (value.isEmpty()) {
                 return empty();
             }
-            return ImmutableMinimalObject.builder().map(value).build();
+            return new MinimalObject(Optional.empty(), Optional.of(value));
         }
 
-        static MinimalObject map(String key, Object value) {
-            return map(Map.of(key, value));
-        }
-
-        static MinimalObject empty() {
-            return ImmutableMinimalObject.of();
+        public static MinimalObject empty() {
+            return new MinimalObject(Optional.empty(), Optional.empty());
         }
     }
 
@@ -768,7 +758,7 @@ public abstract class GdsCypher {
                 return MinimalObject.string(PROJECT_ALL);
             }
             MinimalObject projectionObject = toMinimalObject(projection, identifier);
-            return projectionObject.map(m -> MinimalObject.map(identifier.name, m));
+            return projectionObject.map(m -> MinimalObject.map(Map.of(identifier.name, m)));
         }
         Map<String, Object> value = new LinkedHashMap<>();
         projections.forEach((identifier, projection) ->
@@ -898,6 +888,6 @@ public abstract class GdsCypher {
         if (allowStringShortcut && value.size() == 1 && propertyKey.equals(propertyMapping.externalPropertyKey())) {
             return MinimalObject.string(propertyKey);
         }
-        return MinimalObject.map(propertyKey, value);
+        return MinimalObject.map(Map.of(propertyKey, value));
     }
 }
