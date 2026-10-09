@@ -102,7 +102,7 @@ include::partial$/machine-learning/node-property-prediction/graphsage-supervised
 .Results
 [opts="header",cols="2,1,6"]
 |===
-| Name                   | Type    | Description
+| Name                   | Type          | Description
 | nodeId                 | Integer       | Node ID.
 | predictedClass         | Integer       | Predicted class for this node.
 | predictedProbabilities | List of Float | Probabilities for all classes, for this node.
@@ -130,7 +130,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
-| Name          | Type   | Default | Optional | Description
+| Name                         | Type   | Default | Optional | Description
 include::partial$/machine-learning/node-property-prediction/graphsage-supervised/specific-configuration.adoc[]
 | mutateProperty               | String | n/a     | no       | The node property in the GDS graph to which the embedding is written.
 | predictedProbabilityProperty | String | n/a     | yes      | The node property in which the class probability list is stored. If omitted, the probability list is discarded.
@@ -168,7 +168,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
-| Name          | Type   | Default | Optional | Description
+| Name                         | Type   | Default       | Optional | Description
 include::partial$/machine-learning/node-property-prediction/graphsage-supervised/specific-configuration.adoc[]
 | predictedProbabilityProperty | String | n/a           | yes      | The node property in which the class probability list is stored. If omitted, the probability list is discarded.
 | writeConcurrency             | String | 'concurrency' | yes      | The number of concurrent threads used for writing the node properties.

@@ -100,7 +100,7 @@ include::partial$/machine-learning/node-embeddings/graphsage-unsupervised/specif
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name      | Type    | Description
+| Name      | Type           | Description
 | embedding | List of Float  | The computed node embedding.
 | nodeId    | Integer        | Node ID.
 |===
@@ -127,7 +127,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
-| Name          | Type   | Default | Optional | Description
+| Name           | Type   | Default | Optional | Description
 include::partial$/machine-learning/node-embeddings/graphsage-unsupervised/specific-configuration.adoc[]
 | mutateProperty | String | n/a     | no       | The node property in the GDS graph to which the embedding is written.
 |===
@@ -164,7 +164,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
-| Name          | Type   | Default | Optional | Description
+| Name             | Type   | Default       | Optional | Description
 include::partial$/machine-learning/node-embeddings/graphsage-unsupervised/specific-configuration.adoc[]
 | writeConcurrency | String | 'concurrency' | yes      | The number of concurrent threads used for writing the node properties.
 | writeProperty    | String | n/a           | no       | The node property in the Neo4j database to which the embedding is written
