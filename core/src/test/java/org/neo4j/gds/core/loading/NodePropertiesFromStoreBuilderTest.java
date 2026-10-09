@@ -34,6 +34,7 @@ import org.neo4j.gds.api.properties.nodes.VectorNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
+import org.neo4j.gds.values.GdsNoValue;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 
@@ -47,6 +48,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -401,6 +403,146 @@ final class NodePropertiesFromStoreBuilderTest {
         );
 
         assertThat(properties.valueType()).isEqualTo(ValueType.FLOAT_VECTOR);
+    }
+
+    private static Stream<Arguments> vectorsAndArrays() {
+        return Stream.of(
+            Arguments.of(
+                PrimitiveValues.floatVector(new float[]{1F, 2F, 3F}),
+                PrimitiveValues.floatVector(new float[]{1F, 2F}),
+                PrimitiveValues.floatArray(new float[]{4F, 5F, 6F}),
+                PrimitiveValues.floatArray(new float[]{4F, 5F}),
+                ValueType.FLOAT_VECTOR,
+                ValueType.FLOAT_ARRAY
+            ),
+            Arguments.of(
+                PrimitiveValues.doubleVector(new double[]{1D, 2D, 3D}),
+                PrimitiveValues.doubleVector(new double[]{1D, 2D}),
+                PrimitiveValues.doubleArray(new double[]{4D, 5D, 6D}),
+                PrimitiveValues.doubleArray(new double[]{4D, 5D}),
+                ValueType.DOUBLE_VECTOR,
+                ValueType.DOUBLE_ARRAY
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("vectorsAndArrays")
+    void nullsBeforeTheFirstVectorDoNotFixTheDimension(
+        GdsValue vector,
+        GdsValue shorterVector,
+        GdsValue array,
+        GdsValue shorterArray,
+        ValueType vectorType,
+        ValueType arrayType
+    ) {
+        var properties = createNodeProperties(4, DefaultValue.DEFAULT, builder -> {
+            builder.set(0, null);
+            builder.set(1, GdsNoValue.NO_VALUE);
+            builder.set(2, vector);
+        });
+
+        assertThat(properties.valueType()).isEqualTo(vectorType);
+        assertThat(((VectorNodePropertyValues) properties).vectorDimension()).isEqualTo(3);
+        assertThat(properties.hasValue(0)).isFalse();
+        assertThat(properties.hasValue(1)).isFalse();
+        assertThat(properties.hasValue(2)).isTrue();
+        assertThat(properties.hasValue(3)).isFalse();
+    }
+
+    @ParameterizedTest
+    @MethodSource("vectorsAndArrays")
+    void aVectorOfAnotherDimensionAfterNullsIsRejected(
+        GdsValue vector,
+        GdsValue shorterVector,
+        GdsValue array,
+        GdsValue shorterArray,
+        ValueType vectorType,
+        ValueType arrayType
+    ) {
+        var builder = NodePropertiesFromStoreBuilder.of(DefaultValue.DEFAULT, new Concurrency(1));
+        builder.set(0, null);
+        builder.set(1, vector);
+
+        assertThatThrownBy(() -> builder.set(2, shorterVector))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Vector dimension mismatch. Expected 3, got 2");
+    }
+
+    @ParameterizedTest
+    @MethodSource("vectorsAndArrays")
+    void anArrayOfTheSameLengthAfterAVectorIsAccepted(
+        GdsValue vector,
+        GdsValue shorterVector,
+        GdsValue array,
+        GdsValue shorterArray,
+        ValueType vectorType,
+        ValueType arrayType
+    ) {
+        var properties = createNodeProperties(4, DefaultValue.DEFAULT, builder -> {
+            builder.set(0, vector);
+            builder.set(1, null);
+            builder.set(2, array);
+        });
+
+        assertThat(properties.valueType()).isEqualTo(vectorType);
+        assertThat(((VectorNodePropertyValues) properties).vectorDimension()).isEqualTo(3);
+        assertThat(properties.hasValue(0)).isTrue();
+        assertThat(properties.hasValue(1)).isFalse();
+        assertThat(properties.hasValue(2)).isTrue();
+    }
+
+    @ParameterizedTest
+    @MethodSource("vectorsAndArrays")
+    void anArrayOfAnotherLengthAfterAVectorIsRejected(
+        GdsValue vector,
+        GdsValue shorterVector,
+        GdsValue array,
+        GdsValue shorterArray,
+        ValueType vectorType,
+        ValueType arrayType
+    ) {
+        var builder = NodePropertiesFromStoreBuilder.of(DefaultValue.DEFAULT, new Concurrency(1));
+        builder.set(0, vector);
+
+        assertThatThrownBy(() -> builder.set(1, shorterArray))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Vector dimension mismatch. Expected 3, got 2");
+    }
+
+    @ParameterizedTest
+    @MethodSource("vectorsAndArrays")
+    void aVectorOfAnotherLengthAfterAnArrayIsAccepted(
+        GdsValue vector,
+        GdsValue shorterVector,
+        GdsValue array,
+        GdsValue shorterArray,
+        ValueType vectorType,
+        ValueType arrayType
+    ) {
+        var properties = createNodeProperties(4, DefaultValue.DEFAULT, builder -> {
+            builder.set(0, null);
+            builder.set(1, array);
+            builder.set(2, GdsNoValue.NO_VALUE);
+            builder.set(3, shorterVector);
+        });
+
+        assertThat(properties.valueType()).isEqualTo(arrayType);
+        assertThat(properties.hasValue(0)).isFalse();
+        assertThat(properties.hasValue(1)).isTrue();
+        assertThat(properties.hasValue(2)).isFalse();
+        assertThat(properties.hasValue(3)).isTrue();
+    }
+
+    @Test
+    void aPropertyWithOnlyNullsAndAVectorDefaultIsAnArray() {
+        var properties = createNodeProperties(3, DefaultValue.of(new double[]{1D, 2D, 3D}), builder -> {
+            builder.set(0, null);
+            builder.set(1, GdsNoValue.NO_VALUE);
+        });
+
+        assertThat(properties.valueType()).isEqualTo(ValueType.DOUBLE_ARRAY);
+        assertThat(properties.dimension()).contains(3);
     }
 
     private static NodePropertyValues buildProperties(

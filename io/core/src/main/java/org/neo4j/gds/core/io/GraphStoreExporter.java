@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.core.io;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.common.Validator;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.io.IOException;
@@ -108,12 +110,17 @@ public abstract class GraphStoreExporter {
 
     protected abstract IdMappingType idMappingType();
 
+    protected @Nullable Object nodePropertyValue(NodePropertyValues values, long nodeId) {
+        return values.getObject(nodeId);
+    }
+
     public ExportedProperties run() {
         var metaDataStore = MetaDataStore.of(graphStore);
         var nodeStore = NodeStore.of(
             graphStore,
             neoNodeProperties,
-            nodeLabelMapping
+            nodeLabelMapping,
+            this::nodePropertyValue
         );
         var relationshipStore = RelationshipStore.of(graphStore, defaultRelationshipType, relationshipTypeMapping);
 

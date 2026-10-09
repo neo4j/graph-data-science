@@ -94,15 +94,15 @@ class GdsNeo4jValueConverterTest {
     @Test
     void shouldConvertFloat64Vector() {
         assertThat(GdsNeo4jValueConverter.toValue(Values.float64Vector(1D, -1D, Double.MAX_VALUE, Double.MIN_VALUE, Double.MAX_VALUE-1, Double.MIN_VALUE+1)))
-            .isInstanceOf(DoubleArray.class)
-            .isEqualTo(PrimitiveValues.doubleArray(new double[]{1D, -1D, Double.MAX_VALUE, Double.MIN_VALUE, Double.MAX_VALUE-1, Double.MIN_VALUE+1}));
+            .isInstanceOf(DoubleVector.class)
+            .isEqualTo(PrimitiveValues.doubleVector(new double[]{1D, -1D, Double.MAX_VALUE, Double.MIN_VALUE, Double.MAX_VALUE-1, Double.MIN_VALUE+1}));
     }
 
     @Test
     void shouldConvertFloat32Vector() {
         assertThat(GdsNeo4jValueConverter.toValue(Values.float32Vector(1F, -1F, Float.MAX_VALUE, Float.MIN_VALUE, Float.MAX_VALUE-1, Float.MIN_VALUE+1)))
-            .isInstanceOf(FloatArray.class)
-            .isEqualTo(PrimitiveValues.floatArray(new float[]{1F, -1F, Float.MAX_VALUE, Float.MIN_VALUE, Float.MAX_VALUE-1, Float.MIN_VALUE+1}));
+            .isInstanceOf(FloatVector.class)
+            .isEqualTo(PrimitiveValues.floatVector(new float[]{1F, -1F, Float.MAX_VALUE, Float.MIN_VALUE, Float.MAX_VALUE-1, Float.MIN_VALUE+1}));
     }
 
     @Test

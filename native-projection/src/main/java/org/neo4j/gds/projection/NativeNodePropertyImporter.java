@@ -45,6 +45,7 @@ import org.neo4j.values.storable.FloatingPointValue;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.VectorValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -165,7 +166,8 @@ public final class NativeNodePropertyImporter {
                 value instanceof FloatingPointValue ||
                 value instanceof LongArray ||
                 value instanceof DoubleArray ||
-                value instanceof FloatArray
+                value instanceof FloatArray ||
+                value instanceof VectorValue
         )) {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Loading of values of type %s is currently not supported",

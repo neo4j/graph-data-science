@@ -370,7 +370,7 @@ public final class GraphStoreInput {
                     return;
                 }
 
-                var property = properties.getObject(id);
+                var property = nodeStore.nodePropertyValueReader.read(properties, id);
                 if (property != null) {
                     propertyProducers.put(propertyKey, properties);
                     visitor.property(propertyKey, property, false);

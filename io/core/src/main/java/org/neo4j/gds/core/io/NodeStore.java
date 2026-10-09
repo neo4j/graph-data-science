@@ -52,6 +52,13 @@ public final class NodeStore {
 
     private final IdentifierMapper<NodeLabel> nodeLabelMapping;
 
+    final NodePropertyValueReader nodePropertyValueReader;
+
+    @FunctionalInterface
+    interface NodePropertyValueReader {
+        @Nullable Object read(NodePropertyValues values, long nodeId);
+    }
+
     private NodeStore(
         long nodeCount,
         HugeIntArray labelCounts,
@@ -59,7 +66,8 @@ public final class NodeStore {
         boolean hasLabels,
         @Nullable Map<String, Map<String, NodePropertyValues>> nodeProperties,
         Map<String, LongFunction<Object>> additionalProperties,
-        IdentifierMapper<NodeLabel> nodeLabelMapping
+        IdentifierMapper<NodeLabel> nodeLabelMapping,
+        NodePropertyValueReader nodePropertyValueReader
     ) {
         this.nodeCount = nodeCount;
         this.labelCounts = labelCounts;
@@ -69,6 +77,7 @@ public final class NodeStore {
         this.availableNodeLabels = idMap.availableNodeLabels();
         this.additionalProperties = additionalProperties;
         this.nodeLabelMapping = nodeLabelMapping;
+        this.nodePropertyValueReader = nodePropertyValueReader;
     }
 
     boolean hasLabels() {
@@ -82,7 +91,8 @@ public final class NodeStore {
     static NodeStore of(
         GraphStore graphStore,
         Map<String, LongFunction<Object>> additionalProperties,
-        IdentifierMapper<NodeLabel> nodeLabelMapping
+        IdentifierMapper<NodeLabel> nodeLabelMapping,
+        NodePropertyValueReader nodePropertyValueReader
     ) {
         HugeIntArray labelCounts = HugeIntArray.of();
 
@@ -118,7 +128,8 @@ public final class NodeStore {
             hasNodeLabels,
             nodeProperties.isEmpty() ? null : nodeProperties,
             additionalProperties,
-            nodeLabelMapping
+            nodeLabelMapping,
+            nodePropertyValueReader
         );
     }
 

@@ -20,6 +20,9 @@
 package org.neo4j.gds.api.schema;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
@@ -63,6 +66,22 @@ class PropertySchemaDimensionTest {
             .hasMessageContaining("positive dimension");
     }
 
+    @ParameterizedTest
+    @EnumSource(value = ValueType.class, names = {"FLOAT_VECTOR", "DOUBLE_VECTOR"})
+    void acceptsADefaultValueMatchingTheDimension(ValueType valueType) {
+        var schema = vectorWithDefault(valueType, DefaultValue.of(new double[]{1.0, 2.0, 3.0}), 3);
+
+        assertThat(schema.defaultValue().doubleArrayValue()).containsExactly(1.0, 2.0, 3.0);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ValueType.class, names = {"FLOAT_VECTOR", "DOUBLE_VECTOR"})
+    void rejectsADefaultValueNotMatchingTheDimension(ValueType valueType) {
+        assertThatThrownBy(() -> vectorWithDefault(valueType, DefaultValue.of(new float[]{1.0F, 2.0F}), 3))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("has dimension 3, but its default value has 2 elements.");
+    }
+
     @Test
     void dimensionParticipatesInEquality() {
         assertThat(vector(ValueType.FLOAT_VECTOR, 128)).isNotEqualTo(vector(ValueType.FLOAT_VECTOR, 64));
@@ -70,10 +89,14 @@ class PropertySchemaDimensionTest {
     }
 
     private static NodePropertySchema vector(ValueType valueType, int dimension) {
+        return vectorWithDefault(valueType, valueType.fallbackValue(), dimension);
+    }
+
+    private static NodePropertySchema vectorWithDefault(ValueType valueType, DefaultValue defaultValue, int dimension) {
         return NodePropertySchema.of(
             "embedding",
             valueType,
-            valueType.fallbackValue(),
+            defaultValue,
             PropertyState.PERSISTENT,
             OptionalInt.of(dimension)
         );

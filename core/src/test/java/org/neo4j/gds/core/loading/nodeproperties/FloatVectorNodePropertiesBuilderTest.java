@@ -51,4 +51,12 @@ class FloatVectorNodePropertiesBuilderTest {
         assertThatThrownBy(() -> builder.set(0, new float[]{1.0f, 2.0f})).isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    void doesNotStoreValueWithDifferentDimension() {
+        FloatVectorNodePropertiesBuilder builder = new FloatVectorNodePropertiesBuilder(DefaultValue.forFloatArray(), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
+        builder.set(0, new float[]{1.0f, 2.0f, 3.0f});
+        assertThatThrownBy(() -> builder.set(1, new float[]{1.0f, 2.0f})).isInstanceOf(IllegalArgumentException.class);
+        FloatVectorNodePropertyValues values = builder.build(2, NodeIdMapper.IDENTITY, 1);
+        assertThat(values.floatArrayValue(1)).isNull();
+    }
 }
