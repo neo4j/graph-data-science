@@ -35,7 +35,8 @@ CALL gds.graphSage.supervised.train(
 )
 YIELD
   preProcessingMillis: Integer,
-  trainMillis: Integer
+  trainMillis: Integer,
+  configuration: Map
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -72,6 +73,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | Name                | Type    | Description
 | preProcessingMillis | Integer | Milliseconds for preprocessing the graph.
 | trainMillis         | Integer | Milliseconds to train the model.
+| configuration       | Map     | The configuration used for running the algorithm.
 |===
 ======
 
@@ -122,7 +124,8 @@ YIELD
   computeMillis: Integer,
   mutateMillis: Integer,
   nodePropertiesWritten: Integer,
-  preProcessingMillis: Integer
+  preProcessingMillis: Integer,
+  configuration: Map
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -144,6 +147,7 @@ include::partial$/machine-learning/node-property-prediction/graphsage-supervised
 | mutateMillis          | Integer | Milliseconds for adding properties to the projected graph.
 | nodePropertiesWritten | Integer | Number of properties added to the projected graph.
 | preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
+| configuration         | Map     | The configuration used for running the algorithm.
 |===
 ======
 
@@ -160,7 +164,8 @@ YIELD
   computeMillis: Integer,
   nodePropertiesWritten: Integer,
   preProcessingMillis: Integer,
-  writeMillis: Integer
+  writeMillis: Integer,
+  configuration: Map
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -183,6 +188,7 @@ include::partial$/machine-learning/node-property-prediction/graphsage-supervised
 | nodePropertiesWritten | Integer | Number of properties added to the projected graph.
 | preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
 | writeMillis           | Integer | Milliseconds for writing result data back.
+| configuration         | Map     | The configuration used for running the algorithm.
 |===
 ======
 ====
