@@ -41,32 +41,32 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                  | Type           | Default              | Optional | Description
-| activationFunction    | String         | "relu"               | yes      |
-| aggregator            | String         | "mean"               | yes      |
-| batchSize             | Integer        | n/a                  | yes      |
-| dropout               | Float          | 0.1                  | yes      |
-| embeddingDimension    | Integer        | 256                  | yes      |
-| epochs                | Integer        | n/a                  | no       |
-| featureProperties     | List of String | n/a                  | no       |
-| jobId                 | String         | Generated internally | yes      |
-| layerNormalization    | Boolean        | true                 | yes      |
-| learningRate          | Float          | 0.001                | yes      |
-| modelName             | String         | n/a                  | no       |
-| negativeSamplingRatio | Float          | 1.0                  | yes      |
-| nodeLabels            | List of String | ["*"]                | yes      |
-| numNeighbors          | List           | [20 10]              | yes      |
-| numWalks              | Integer        | 10                   | yes      |
-| randomSeed            | String         | n/a                  | yes      |
-| relationshipTypes     | List of String | ["*"]                | yes      |
-| walkDepth             | Integer        | 3                    | yes      |
+| activationFunction    | String         | "relu"               | yes      | The activation function to use. Valid values are "relu" and "sigmoid"
+| aggregator            | String         | "mean"               | yes      | The neighborhood embedding aggregator to use. Valid values are "mean" and "max"
+| batchSize             | Integer        | n/a                  | yes      | The number of target nodes to train on in each batch. If not provided, the algorithm will automatically infer the maximally allowed batch size within the constraints of available memory
+| dropout               | Float          | 0.1                  | yes      | The dropout probability for each layer. Must be a value >= 0.0 and < 1.0
+| embeddingDimension    | Integer        | 256                  | yes      | The node embedding dimension of the model layers' outputs
+| epochs                | Integer        | n/a                  | no       | The number of epochs to train the model
+| featureProperties     | List of String | n/a                  | no       | The names of the node properties that should be used as input features. All property names must exist in the projected graph and be of type Float or List of Float.
+| jobId                 | String         | Generated internally | yes      | An ID to more easily track the algorithm’s progress.
+| layerNormalization    | Boolean        | true                 | yes      | Whether to apply layer normalization between the model layers
+| learningRate          | Float          | 0.001                | yes      | The learning rate for the optimizer
+| modelName             | String         | n/a                  | no       | The name of the model to train (must be unique)
+| negativeSamplingRatio | Float          | 1.0                  | yes      | The ratio of negative to positive samples to sample for training
+| nodeLabels            | List of String | ["*"]                | yes      | Filter the named graph using the given node labels. Nodes with any of the given labels will be included.
+| numNeighbors          | List           | [20 10]              | yes      | The number of neighbors to sample for each layer. Note that this also determines the number of layers
+| numWalks              | Integer        | 10                   | yes      | The number of random walks to perform for each node in the graph
+| randomSeed            | String         | n/a                  | yes      | A number used to seed all randomness of the computation
+| relationshipTypes     | List of String | ["*"]                | yes      | Filter the named graph using the given relationship types. Relationships with any of the given types will be included.
+| walkDepth             | Integer        | 3                    | yes      | The number of steps in every random walk
 |===
 
 .Results
 [opts="header",cols="2,1,6"]
 |===
 | Name                | Type    | Description
-| preProcessingMillis | Integer |
-| trainMillis         | Integer |
+| preProcessingMillis | Integer | Milliseconds for preprocessing the graph.
+| trainMillis         | Integer | Milliseconds to train the model.
 |===
 ======
 
@@ -97,8 +97,8 @@ include::partial$/machine-learning/node-embeddings/graphsage-unsupervised/specif
 [opts="header",cols="1,1,6"]
 |===
 | Name      | Type    | Description
-| embedding | List    |
-| nodeId    | Integer |
+| embedding | List of Float  | The computed node embedding.
+| nodeId    | Integer        | Node ID.
 |===
 ======
 
@@ -125,17 +125,17 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/machine-learning/node-embeddings/graphsage-unsupervised/specific-configuration.adoc[]
-| mutateProperty | String | n/a     | no       |
+| mutateProperty | String | n/a     | no       | The node property in the GDS graph to which the embedding is written.
 |===
 
 .Results
 [opts="header",cols="2,1,6"]
 |===
 | Name                  | Type    | Description
-| computeMillis         | Integer |
-| mutateMillis          | Integer |
-| nodePropertiesWritten | Integer |
-| preProcessingMillis   | Integer |
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| mutateMillis          | Integer | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten | Integer | Number of properties added to the projected graph.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
 |===
 ======
 
@@ -162,18 +162,18 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/machine-learning/node-embeddings/graphsage-unsupervised/specific-configuration.adoc[]
-| writeConcurrency | String | Value of 'concurrency' | yes      |
-| writeProperty    | String | n/a                    | no       |
+| writeConcurrency | String | 'concurrency' | yes      | The number of concurrent threads used for writing the node properties.
+| writeProperty    | String | n/a           | no       | The node property in the Neo4j database to which the embedding is written
 |===
 
 .Results
 [opts="header",cols="2,1,6"]
 |===
 | Name                  | Type    | Description
-| computeMillis         | Integer |
-| nodePropertiesWritten | Integer |
-| preProcessingMillis   | Integer |
-| writeMillis           | Integer |
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| nodePropertiesWritten | Integer | Number of properties added to the projected graph.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
+| writeMillis           | Integer | Milliseconds for writing result data back.
 |===
 ======
 ====
