@@ -14,8 +14,12 @@ include::partial$/product-limitations/only-in-serverless.adoc[]
 :node-properties:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+[[algorithms-graphsage-unsupervised-intro]]
+== Introduction
 
-This section covers the syntax used to execute the {algorithm} algorithm.
+GraphSAGE is a graph neural network (GNN) architecture outlined in the paper https://arxiv.org/pdf/1706.02216.pdf[_Inductive Representation Learning on Large Graphs_] by Hamilton et al. (2017).
+
+This section covers the syntax used to execute the {algorithm} algorithm to generate embeddings for nodes in a graph.
 
 .GraphSAGE unsupervised syntax per mode
 [.tabbed-example, caption = ]
