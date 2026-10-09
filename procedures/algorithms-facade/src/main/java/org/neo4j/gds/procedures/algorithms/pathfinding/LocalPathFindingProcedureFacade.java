@@ -863,7 +863,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         var config = configurationParser.parseConfiguration(configuration, PCSTStatsConfig::of);
         var resultBuilder  = new PrizeCollectingSteinerTreeResultBuilderForStatsMode(config);
 
-        return statsModeBusinessFacade.pcst(
+        return statsModeBusinessFacade.prizeCollectingSteinerTree(
             GraphName.parse(graphName),
             config,
             resultBuilder

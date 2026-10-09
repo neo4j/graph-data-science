@@ -100,9 +100,6 @@ public final class PathFindingApplications {
         );
 
         var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
-            algorithmProcessingTemplateConvenience,
-            estimationModeFacade,
-            pathFindingAlgorithms,
             raw,
             synchroniser
         );

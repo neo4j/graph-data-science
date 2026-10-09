@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultRenderer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -46,23 +45,13 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
     private final InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms;
     private final Synchroniser synchroniser;
 
     PathFindingAlgorithmsStatsModeBusinessFacade(
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms,
         InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.estimationFacade = estimationFacade;
-        this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.instrumentedPathFindingAlgorithms = instrumentedPathFindingAlgorithms;
         this.synchroniser = synchroniser;
     }
@@ -132,7 +121,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         ));
     }
 
-    public <RESULT> RESULT pcst(
+    public <RESULT> RESULT prizeCollectingSteinerTree(
         GraphName graphName,
         PCSTBaseConfig configuration,
         StatsResultBuilder<PrizeCollectingSteinerTreeResult, RESULT> resultBuilder
