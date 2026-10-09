@@ -23,7 +23,6 @@ import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -39,7 +38,7 @@ import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
@@ -55,30 +54,18 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
-
 /**
  * Here is the top level business facade for all your path finding stream needs.
  * It will have all pathfinding algorithms on it, in stream mode.
  */
 public class PathFindingAlgorithmsStreamModeBusinessFacade {
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimation;
-    private final PathFindingAlgorithmsBusinessFacade algorithms;
-
-    private final AlgorithmProcessingTemplateConvenience convenience;
     private final InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms;
     private final Synchroniser synchroniser;
 
     PathFindingAlgorithmsStreamModeBusinessFacade(
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimation,
-        PathFindingAlgorithmsBusinessFacade algorithms,
-        AlgorithmProcessingTemplateConvenience convenience,
         InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.convenience = convenience;
-        this.algorithms = algorithms;
-        this.estimation = estimation;
         this.instrumentedPathFindingAlgorithms = instrumentedPathFindingAlgorithms;
         this.synchroniser = synchroniser;
     }
@@ -254,17 +241,15 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> singleSourceShortestPathDijkstra(
         GraphName graphName,
-        AllShortestPathsDijkstraStreamConfig configuration,
+        DijkstraBaseConfig configuration,
         StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singleSourceShortestPathDijkstra(
             graphName,
             configuration,
-            SingleSourceDijkstra,
-            () -> estimation.singleSourceShortestPathDijkstra(configuration),
-            (graph, __) -> algorithms.singleSourceShortestPathDijkstra(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> spanningTree(

@@ -21,14 +21,13 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.MutateSideEffect;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -69,7 +68,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 
 /**
  * Here is the top level business facade for all your path finding mutate needs.
@@ -79,7 +77,6 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
     private final MutateNodePropertyService mutateNodeProperty;
     private final MutateRelationshipService mutateRelationshipService;
     private final InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms;
@@ -89,7 +86,6 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
         MutateNodePropertyService mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService,
         InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms,
@@ -98,7 +94,6 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.estimationFacade = estimationFacade;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.mutateNodeProperty = mutateNodeProperty;
         this.mutateRelationshipService = mutateRelationshipService;
         this.instrumentedPathFindingAlgorithms = instrumentedPathFindingAlgorithms;
@@ -153,6 +148,22 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
+    public <RESULT> RESULT deltaSteppingWithPaths(
+        GraphName graphName,
+        AllShortestPathsDeltaMutateConfig configuration,
+        Map<String, Stream<PathUsingInternalNodeIds>> pathStore,
+        ResultBuilder<AllShortestPathsDeltaMutateConfig, PathFindingResult, RESULT, Void> resultBuilder
+    ) {
+        var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
+
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.deltaStepping(
+            graphName,
+            configuration,
+            Optional.of(sideEffect),
             new MutateResultRenderer<>(configuration, resultBuilder)
         ));
     }
@@ -339,13 +350,10 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration.mutateRelationshipType(), mutateRelationshipService);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return singleSourceShortestPathDijkstra(
             graphName,
             configuration,
-            SingleSourceDijkstra,
-            () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
-            (graph, __) -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
-            mutateStep,
+            new MutateSideEffect<>(mutateStep),
             resultBuilder
         );
     }
@@ -358,37 +366,8 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
 
-        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
-            Optional.empty(),
-            graphName,
-            configuration,
-            Optional.empty(),
-            SingleSourceDijkstra,
-            DimensionTransformer.DISABLED,
-            () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
-            (graph, __) -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
-            Optional.of(sideEffect),
-            new MutateResultRenderer<>(configuration, resultBuilder)
-        );
+        return singleSourceShortestPathDijkstra(graphName, configuration, sideEffect, resultBuilder);
     }
-
-
-    public <RESULT> RESULT deltaSteppingWithPaths(
-        GraphName graphName,
-        AllShortestPathsDeltaMutateConfig configuration,
-        Map<String, Stream<PathUsingInternalNodeIds>> pathStore,
-        ResultBuilder<AllShortestPathsDeltaMutateConfig, PathFindingResult, RESULT, Void> resultBuilder
-    ) {
-        var sideEffect = new StorePathsSideEffect(pathStore, configuration.mutateRelationshipType());
-
-        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.deltaStepping(
-            graphName,
-            configuration,
-            Optional.of(sideEffect),
-            new MutateResultRenderer<>(configuration, resultBuilder)
-        ));
-    }
-
 
     public <RESULT> RESULT spanningTree(
         GraphName graphName,
@@ -425,6 +404,19 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
+    private <METADATA, RESULT> RESULT singleSourceShortestPathDijkstra(
+        GraphName graphName,
+        AllShortestPathsDijkstraMutateConfig configuration,
+        SideEffect<PathFindingResult, METADATA> sideEffect, ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT, METADATA> resultBuilder
+    ) {
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singleSourceShortestPathDijkstra(
+            graphName,
+            configuration,
+            Optional.of(sideEffect),
             new MutateResultRenderer<>(configuration, resultBuilder)
         ));
     }

@@ -29,8 +29,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 public class PathFindingAlgorithmsBusinessFacade {
@@ -65,21 +63,6 @@ public class PathFindingAlgorithmsBusinessFacade {
                 requestScopedDependencies.terminationFlag(),
                 DefaultPool.INSTANCE
             ), progressTracker, true);
-    }
-
-    PathFindingResult singleSourceShortestPathDijkstra(Graph graph, DijkstraBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.singleSourceDijkstra(graph, configuration.concurrency()),
-            configuration
-        );
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.singleSourceShortestPathDijkstra(
-                graph,
-                configuration.sourceNode(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, false);
     }
 
     private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {

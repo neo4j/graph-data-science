@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
@@ -68,7 +67,6 @@ public final class PathFindingApplications {
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService,
@@ -92,7 +90,6 @@ public final class PathFindingApplications {
             estimationModeFacade,
             pathFindingAlgorithms,
             algorithmProcessingTemplateConvenience,
-            algorithmProcessingTemplate,
             mutateNodeProperty,
             mutateRelationshipService,
             raw,
@@ -105,21 +102,15 @@ public final class PathFindingApplications {
         );
 
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
-            estimationModeFacade,
-            pathFindingAlgorithms,
-            algorithmProcessingTemplateConvenience,
             raw,
             synchroniser
         );
 
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
             log,
-            algorithmProcessingTemplateConvenience,
             requestScopedDependencies,
             writeContext,
             writeRelationshipService,
-            estimationModeFacade,
-            pathFindingAlgorithms,
             raw,
             synchroniser
         );
