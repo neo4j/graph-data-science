@@ -175,16 +175,16 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimateResult pcst(
+    public MemoryEstimateResult prizeCollectingSteinerTree(
         PCSTBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = pcst();
+        var memoryEstimation = prizeCollectingSteinerTree();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation pcst() {
+    public MemoryEstimation prizeCollectingSteinerTree() {
         return new PrizeSteinerTreeMemoryEstimateDefinition().memoryEstimation();
     }
 

@@ -26,12 +26,12 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 
 import java.util.List;
 import java.util.stream.LongStream;
 
-public class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSteinerTreeResult, RelationshipsWritten> {
+public class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeCollectingSteinerTreeResult, RelationshipsWritten> {
     private final String mutateRelationshipType;
     private final String mutateProperty;
     private final MutateRelationshipService mutateRelationshipService;
@@ -50,7 +50,7 @@ public class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSte
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        PrizeSteinerTreeResult treeResult
+        PrizeCollectingSteinerTreeResult treeResult
     ) {
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
@@ -62,8 +62,8 @@ public class PrizeCollectingSteinerTreeMutateStep implements MutateStep<PrizeSte
         var parentArray = treeResult.parentArray();
         var costArray = treeResult.relationshipToParentCost();
         LongStream.range(0, graph.nodeCount())
-            .filter(nodeId -> parentArray.get(nodeId) != PrizeSteinerTreeResult.PRUNED)
-            .filter(nodeId -> parentArray.get(nodeId) != PrizeSteinerTreeResult.ROOT)
+            .filter(nodeId -> parentArray.get(nodeId) != PrizeCollectingSteinerTreeResult.PRUNED)
+            .filter(nodeId -> parentArray.get(nodeId) != PrizeCollectingSteinerTreeResult.ROOT)
             .forEach(nodeId -> {
                 var parentId = parentArray.get(nodeId);
                 relationshipsBuilder.addFromInternal(parentId, nodeId, costArray.get(nodeId));

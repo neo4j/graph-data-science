@@ -31,8 +31,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.pcst.PCSTParameters;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 
@@ -81,22 +79,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
 
         assertThat(result).isNotNull();
         assertThat(result.result().size()).isZero();
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void pcst() {
-        var future = facade.pcst(
-            graph,
-            mock(PCSTParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result.result()).isNotNull().isEqualTo(PrizeSteinerTreeResult.EMPTY);
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

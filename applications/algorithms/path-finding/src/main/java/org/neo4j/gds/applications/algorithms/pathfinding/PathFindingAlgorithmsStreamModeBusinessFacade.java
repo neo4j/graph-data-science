@@ -44,8 +44,8 @@ import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
-import org.neo4j.gds.pcst.PCSTStreamConfig;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pcst.PCSTBaseConfig;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
@@ -55,7 +55,6 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 
 /**
@@ -188,19 +187,17 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ));
     }
 
-    public <RESULT> Stream<RESULT> pcst(
+    public <RESULT> Stream<RESULT> prizeCollectingSteinerTree(
         GraphName graphName,
-        PCSTStreamConfig configuration,
-        StreamResultBuilder<PrizeSteinerTreeResult, RESULT> resultBuilder
+        PCSTBaseConfig configuration,
+        StreamResultBuilder<PrizeCollectingSteinerTreeResult, RESULT> resultBuilder
     ) {
-        return convenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.prizeCollectingSteinerTree(
             graphName,
             configuration,
-            PCST,
-            estimation::pcst,
-            (graph, __) -> algorithms.pcst(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> randomWalk(

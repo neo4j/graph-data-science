@@ -56,7 +56,7 @@ public class LocalPrizeCollectingSteinerTreeMutateStub implements
         return genericStub.getMemoryEstimation(
             configuration,
             PCSTMutateConfig::of,
-            __ -> estimationModeBusinessFacade.pcst()
+            __ -> estimationModeBusinessFacade.prizeCollectingSteinerTree()
         );
     }
 
@@ -66,7 +66,7 @@ public class LocalPrizeCollectingSteinerTreeMutateStub implements
             graphName,
             configuration,
             PCSTMutateConfig::of,
-            __ -> estimationModeBusinessFacade.pcst()
+            __ -> estimationModeBusinessFacade.prizeCollectingSteinerTree()
         );
     }
 
@@ -78,7 +78,7 @@ public class LocalPrizeCollectingSteinerTreeMutateStub implements
             graphName,
             configuration,
             PCSTMutateConfig::of,
-            mutateModeBusinessFacade::pcst,
+            mutateModeBusinessFacade::prizeCollectingSteinerTree,
             resultBuilder
         );
     }

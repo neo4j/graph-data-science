@@ -46,6 +46,8 @@ import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.gds.pcst.PCSTBaseConfig;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -225,6 +227,24 @@ public class TrackedPathFindingAlgorithms {
                 graphOfFlows,
                 graphOfCosts,
                 configuration.toMCMFParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            true
+        );
+    }
+
+    PrizeCollectingSteinerTreeResult prizeCollectingSteinerTree(Graph graph, PCSTBaseConfig configuration) {
+        var progressTracker = createProgressTracker(
+            PathFindingAlgorithmTasks.prizeCollectingSteinerTree(graph, configuration.concurrency()),
+            configuration
+        );
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.prizeCollectingSteinerTree(
+                graph,
+                configuration.toParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ),

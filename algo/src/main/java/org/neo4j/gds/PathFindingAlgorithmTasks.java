@@ -83,7 +83,7 @@ public final class PathFindingAlgorithmTasks {
         return RandomWalkCountingNodeVisitsProgressTaskFactory.create(graph, concurrency);
     }
 
-    public static Task pcst(Graph graph, Concurrency concurrency) {
+    public static Task prizeCollectingSteinerTree(Graph graph, Concurrency concurrency) {
         return PCSTProgressTrackerTaskCreator.progressTask(concurrency, graph.nodeCount(), graph.relationshipCount());
     }
 

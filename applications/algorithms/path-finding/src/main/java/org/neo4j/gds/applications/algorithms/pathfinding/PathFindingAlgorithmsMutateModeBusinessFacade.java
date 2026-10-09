@@ -57,7 +57,7 @@ import org.neo4j.gds.paths.traverse.BfsMutateConfig;
 import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.pcst.PCSTMutateConfig;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
@@ -70,7 +70,6 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 
 /**
  * Here is the top level business facade for all your path finding mutate needs.
@@ -214,10 +213,10 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         ));
     }
 
-    public <RESULT> RESULT pcst(
+    public <RESULT> RESULT prizeCollectingSteinerTree(
         GraphName graphName,
         PCSTMutateConfig configuration,
-        ResultBuilder<PCSTMutateConfig, PrizeSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
+        ResultBuilder<PCSTMutateConfig, PrizeCollectingSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new PrizeCollectingSteinerTreeMutateStep(
             configuration.mutateRelationshipType(),
@@ -225,15 +224,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             mutateRelationshipService
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.prizeCollectingSteinerTree(
             graphName,
             configuration,
-            SteinerTree,
-            estimationFacade::pcst,
-            (graph, __) -> pathFindingAlgorithms.pcst(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT randomWalk(

@@ -34,8 +34,8 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
-import org.neo4j.gds.pcst.PCSTStatsConfig;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pcst.PCSTBaseConfig;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
@@ -44,8 +44,6 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
@@ -136,17 +134,15 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT pcst(
         GraphName graphName,
-        PCSTStatsConfig configuration,
-        StatsResultBuilder<PrizeSteinerTreeResult, RESULT> resultBuilder
+        PCSTBaseConfig configuration,
+        StatsResultBuilder<PrizeCollectingSteinerTreeResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.prizeCollectingSteinerTree(
             graphName,
             configuration,
-            PCST,
-            estimationFacade::pcst,
-            (graph, __) -> pathFindingAlgorithms.pcst(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT randomWalk(

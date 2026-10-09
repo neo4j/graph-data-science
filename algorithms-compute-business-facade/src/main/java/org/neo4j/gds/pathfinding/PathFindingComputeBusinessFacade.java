@@ -23,27 +23,19 @@ import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidationBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
-import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
-import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.applications.algorithms.pathfinding.RandomWalkGraphValidation;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.pcst.PCSTParameters;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -95,43 +87,6 @@ public class PathFindingComputeBusinessFacade {
         var graph = graphResources.graph();
 
         return computeFacade.randomWalkCountingNodeVisits(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
-    }
-
-    public <TR> CompletableFuture<TR> pcst(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        PCSTParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<PrizeSteinerTreeResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidationBuilder()
-                .withValidationRule(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
-                .withValidationRule(new NodePropertyMustExistOnAllLabels(parameters.prizeProperty()))
-                .withValidationRule(new NodePropertyTypeRequirement(
-                    parameters.prizeProperty(),
-                    List.of(ValueType.DOUBLE)
-                ))
-                .build(),
-            true,
-            Optional.empty()
-        );
-
-        var graph = graphResources.graph();
-
-        return computeFacade.pcst(
             graph,
             parameters,
             jobId,

@@ -26,14 +26,14 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-public class PrizeCollectingSteinerTreeWriteStep implements WriteStep<PrizeSteinerTreeResult, RelationshipsWritten> {
+public class PrizeCollectingSteinerTreeWriteStep implements WriteStep<PrizeCollectingSteinerTreeResult, RelationshipsWritten> {
     private final WriteRelationshipService writeRelationshipService;
     private final String writeRelationshipType;
     private final String writeProperty;
@@ -60,7 +60,7 @@ public class PrizeCollectingSteinerTreeWriteStep implements WriteStep<PrizeStein
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        PrizeSteinerTreeResult steinerTreeResult,
+        PrizeCollectingSteinerTreeResult steinerTreeResult,
         JobId jobId
     ) {
 

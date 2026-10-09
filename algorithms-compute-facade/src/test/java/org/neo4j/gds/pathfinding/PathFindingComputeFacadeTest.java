@@ -37,7 +37,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
-import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.WalkParameters;
@@ -102,20 +101,6 @@ class PathFindingComputeFacadeTest {
                 WalkParameters.DEFAULTS,
                 1000,
                 Optional.of(19L),
-                new Concurrency(2)
-            ),
-            jobIdMock,
-            true
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
-    @Test
-    void pcst() {
-        var future = facade.pcst(
-            graph,
-            new PCSTParameters(
-                "prize",
                 new Concurrency(2)
             ),
             jobIdMock,

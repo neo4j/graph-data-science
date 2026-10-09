@@ -38,7 +38,7 @@ public class PCSTProgressTrackerTaskCreator {
 
         var treeTask = Tasks.leaf("Tree Creation", concurrency, nodeCount);
         var pruningTasks= Tasks.leaf("Pruning Phase", concurrency, nodeCount);
-        return Tasks.task(AlgorithmLabel.PCST.asString(), concurrency, List.of(growthTask,treeTask,pruningTasks));
+        return Tasks.task(AlgorithmLabel.PrizeCollectingSteinerTree.asString(), concurrency, List.of(growthTask,treeTask,pruningTasks));
     }
 
 }

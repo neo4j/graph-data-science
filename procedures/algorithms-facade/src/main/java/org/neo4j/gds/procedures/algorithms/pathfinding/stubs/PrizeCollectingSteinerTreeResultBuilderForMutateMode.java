@@ -24,18 +24,18 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.pcst.PCSTMutateConfig;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PrizeCollectingSteinerTreeMutateResult;
 
 import java.util.Optional;
 
-class PrizeCollectingSteinerTreeResultBuilderForMutateMode implements ResultBuilder<PCSTMutateConfig,PrizeSteinerTreeResult, PrizeCollectingSteinerTreeMutateResult, RelationshipsWritten> {
+class PrizeCollectingSteinerTreeResultBuilderForMutateMode implements ResultBuilder<PCSTMutateConfig, PrizeCollectingSteinerTreeResult, PrizeCollectingSteinerTreeMutateResult, RelationshipsWritten> {
 
     @Override
     public PrizeCollectingSteinerTreeMutateResult build(
         Graph graph,
         PCSTMutateConfig configuration,
-        Optional<PrizeSteinerTreeResult> result,
+        Optional<PrizeCollectingSteinerTreeResult> result,
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> relationshipsWritten
     ) {

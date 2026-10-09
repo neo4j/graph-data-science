@@ -26,7 +26,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 
-public class PCSTFast implements Algorithm<PrizeSteinerTreeResult> {
+public class PCSTFast implements Algorithm<PrizeCollectingSteinerTreeResult> {
 
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
@@ -41,7 +41,7 @@ public class PCSTFast implements Algorithm<PrizeSteinerTreeResult> {
     }
 
     @Override
-    public PrizeSteinerTreeResult compute() {
+    public PrizeCollectingSteinerTreeResult compute() {
         progressTracker.beginSubTask(/*PrizeCollectingSteinerTree*/);
         var growthResult = growthPhase();
         var treeStructure = TreeProducer.createTree(growthResult, graph.nodeCount(),graph.rootIdMap(),progressTracker);

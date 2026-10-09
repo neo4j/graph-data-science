@@ -816,9 +816,9 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         String graphName,
         Map<String, Object> configuration
     ) {
-
         var resultBuilder  = new PrizeCollectingSteinerTreeResultBuilderForStreamMode();
-        return streamModeBusinessFacade.pcst(
+
+        return streamModeBusinessFacade.prizeCollectingSteinerTree(
             GraphName.parse(graphName),
             configurationParser.parseConfiguration(configuration, PCSTStreamConfig::of),
             resultBuilder
@@ -848,7 +848,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     ) {
         return
             Stream.of(
-                estimationModeBusinessFacade.pcst(
+                estimationModeBusinessFacade.prizeCollectingSteinerTree(
                     configurationParser.parseConfiguration(algorithmConfiguration, PCSTStreamConfig::of),
                     graphNameOrConfiguration
                 )
@@ -877,7 +877,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     ) {
         return
             Stream.of(
-                estimationModeBusinessFacade.pcst(
+                estimationModeBusinessFacade.prizeCollectingSteinerTree(
                     configurationParser.parseConfiguration(algorithmConfiguration, PCSTStatsConfig::of),
                     graphNameOrConfiguration
                 )
@@ -908,7 +908,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     ) {
         return
             Stream.of(
-                estimationModeBusinessFacade.pcst(
+                estimationModeBusinessFacade.prizeCollectingSteinerTree(
                     configurationParser.parseConfiguration(algorithmConfiguration, PCSTWriteConfig::of),
                     graphNameOrConfiguration
                 )

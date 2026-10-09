@@ -24,17 +24,17 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.pcst.PCSTWriteConfig;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 
 import java.util.Optional;
 
-class PrizeCollectingSteinerTreeResultBuilderForWriteMode implements ResultBuilder<PCSTWriteConfig,PrizeSteinerTreeResult, PrizeCollectingSteinerTreeWriteResult, RelationshipsWritten> {
+class PrizeCollectingSteinerTreeResultBuilderForWriteMode implements ResultBuilder<PCSTWriteConfig, PrizeCollectingSteinerTreeResult, PrizeCollectingSteinerTreeWriteResult, RelationshipsWritten> {
 
     @Override
     public PrizeCollectingSteinerTreeWriteResult build(
         Graph graph,
         PCSTWriteConfig configuration,
-        Optional<PrizeSteinerTreeResult> result,
+        Optional<PrizeCollectingSteinerTreeResult> result,
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> relationshipsWritten
     ) {

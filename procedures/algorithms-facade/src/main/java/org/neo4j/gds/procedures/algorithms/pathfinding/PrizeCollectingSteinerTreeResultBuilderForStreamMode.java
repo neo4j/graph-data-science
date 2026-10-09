@@ -23,19 +23,19 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class PrizeCollectingSteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<PrizeSteinerTreeResult, SpanningTreeStreamResult> {
+class PrizeCollectingSteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<PrizeCollectingSteinerTreeResult, SpanningTreeStreamResult> {
 
     @Override
     public Stream<SpanningTreeStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        Optional<PrizeSteinerTreeResult> result
+        Optional<PrizeCollectingSteinerTreeResult> result
     ) {
         if (result.isEmpty()) return Stream.of();
 
@@ -45,7 +45,7 @@ class PrizeCollectingSteinerTreeResultBuilderForStreamMode implements StreamResu
         var costs = steinerTreeResult.relationshipToParentCost();
 
         return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-            .filter(nodeId -> parents.get(nodeId) != PrizeSteinerTreeResult.PRUNED && parents.get(nodeId) != PrizeSteinerTreeResult.ROOT )
+            .filter(nodeId -> parents.get(nodeId) != PrizeCollectingSteinerTreeResult.PRUNED && parents.get(nodeId) != PrizeCollectingSteinerTreeResult.ROOT )
             .mapToObj(nodeId -> {
                     var originalNodeId = graph.toOriginalNodeId(nodeId);
                     var parentNodeId = graph.toOriginalNodeId(parents.get(nodeId));

@@ -61,7 +61,7 @@ import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.pcst.PCSTWriteConfig;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -70,7 +70,6 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 
 /**
@@ -217,7 +216,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT pcst(
         GraphName graphName,
         PCSTWriteConfig configuration,
-        ResultBuilder<PCSTWriteConfig, PrizeSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
+        ResultBuilder<PCSTWriteConfig, PrizeCollectingSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new PrizeCollectingSteinerTreeWriteStep(
             writeRelationshipService,
@@ -227,15 +226,12 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration.jobId()
         );
 
-        return runAlgorithmAndWrite(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.prizeCollectingSteinerTree(
             graphName,
             configuration,
-            PCST,
-            estimationFacade::pcst,
-            (graph, __) -> pathFindingAlgorithms.pcst(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT singlePairShortestPathAStar(

@@ -73,13 +73,13 @@ class PCSTFastTest {
 
             var parentArray = result.parentArray();
 
-            assertThat(parentArray.get(graph.toMappedNodeId("a1"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(parentArray.get(graph.toMappedNodeId("a4"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parentArray.get(graph.toMappedNodeId("a1"))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(parentArray.get(graph.toMappedNodeId("a4"))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
 
             boolean par1 = (parentArray.get(graph.toMappedNodeId("a2")) == graph.toMappedNodeId("a3")) && (parentArray.get(
-                graph.toMappedNodeId("a3")) == PrizeSteinerTreeResult.ROOT);
+                graph.toMappedNodeId("a3")) == PrizeCollectingSteinerTreeResult.ROOT);
             boolean par2 = (parentArray.get(graph.toMappedNodeId("a3")) == graph.toMappedNodeId("a2")) && (parentArray.get(
-                graph.toMappedNodeId("a2")) == PrizeSteinerTreeResult.ROOT);
+                graph.toMappedNodeId("a2")) == PrizeCollectingSteinerTreeResult.ROOT);
             assertThat(par1 ^ par2).isTrue();
 
 
@@ -170,15 +170,15 @@ class PCSTFastTest {
 
             var parents =result.parentArray();
 
-            boolean case1 =   parents.get(a0) == a1 &&  parents.get(a1) == PrizeSteinerTreeResult.ROOT;
-            boolean case2 =   parents.get(a1) == a0 &&  parents.get(a0) == PrizeSteinerTreeResult.ROOT;
+            boolean case1 =   parents.get(a0) == a1 &&  parents.get(a1) == PrizeCollectingSteinerTreeResult.ROOT;
+            boolean case2 =   parents.get(a1) == a0 &&  parents.get(a0) == PrizeCollectingSteinerTreeResult.ROOT;
 
             assertThat(
                 LongStream
                     .range(0, graph.nodeCount())
                     .filter(v -> v != a0 && v != a1)
                     .map(parents::get)
-                    .filter(v -> v != PrizeSteinerTreeResult.PRUNED)
+                    .filter(v -> v != PrizeCollectingSteinerTreeResult.PRUNED)
                     .count())
                 .isEqualTo(0L);
 
@@ -222,7 +222,7 @@ class PCSTFastTest {
             assertThat(parents.get(a3)).isEqualTo(a0);
             assertThat(parents.get(a2)).isEqualTo(a1);
             assertThat(parents.get(a1)).isEqualTo(a0);
-            assertThat(parents.get(a0)).isEqualTo(PrizeSteinerTreeResult.ROOT);
+            assertThat(parents.get(a0)).isEqualTo(PrizeCollectingSteinerTreeResult.ROOT);
             var costs = result.relationshipToParentCost();
             assertThat(costs.get(a3)).isEqualTo(-10);
             assertThat(costs.get(a2)).isEqualTo(-20);
@@ -274,16 +274,16 @@ class PCSTFastTest {
             var parents = result.parentArray();
 
             for (int i=0;i<6;++i){
-                assertThat(parents.get(graph.toMappedNodeId("a"+i))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+                assertThat(parents.get(graph.toMappedNodeId("a"+i))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
             }
             assertThat(parents).satisfiesAnyOf(
                 pars-> {
                     assertThat(pars.get(a6)).isEqualTo(a7);
-                    assertThat(pars.get(a7)).isEqualTo(PrizeSteinerTreeResult.ROOT);
+                    assertThat(pars.get(a7)).isEqualTo(PrizeCollectingSteinerTreeResult.ROOT);
                 },
                 pars-> {
                     assertThat(pars.get(a7)).isEqualTo(a6);
-                    assertThat(pars.get(a6)).isEqualTo(PrizeSteinerTreeResult.ROOT);
+                    assertThat(pars.get(a6)).isEqualTo(PrizeCollectingSteinerTreeResult.ROOT);
                 }
             );
             var costs = result.relationshipToParentCost();

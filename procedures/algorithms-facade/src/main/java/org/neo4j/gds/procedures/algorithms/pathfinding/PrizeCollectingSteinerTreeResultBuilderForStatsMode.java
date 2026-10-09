@@ -23,12 +23,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.pcst.PCSTStatsConfig;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class PrizeCollectingSteinerTreeResultBuilderForStatsMode implements StatsResultBuilder<PrizeSteinerTreeResult, Stream<PrizeCollectingSteinerTreeStatsResult>> {
+class PrizeCollectingSteinerTreeResultBuilderForStatsMode implements StatsResultBuilder<PrizeCollectingSteinerTreeResult, Stream<PrizeCollectingSteinerTreeStatsResult>> {
     private final PCSTStatsConfig configuration;
 
     PrizeCollectingSteinerTreeResultBuilderForStatsMode(PCSTStatsConfig configuration) {
@@ -38,7 +38,7 @@ class PrizeCollectingSteinerTreeResultBuilderForStatsMode implements StatsResult
     @Override
     public Stream<PrizeCollectingSteinerTreeStatsResult> build(
         Graph graph,
-        Optional<PrizeSteinerTreeResult> result,
+        Optional<PrizeCollectingSteinerTreeResult> result,
         AlgorithmProcessingTimings timings
     ) {
 

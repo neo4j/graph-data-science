@@ -22,7 +22,7 @@ package org.neo4j.gds.pricesteiner;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-public record PrizeSteinerTreeResult(
+public record PrizeCollectingSteinerTreeResult(
     HugeLongArray parentArray,
     HugeDoubleArray relationshipToParentCost,
     long effectiveNodeCount,
@@ -32,7 +32,7 @@ public record PrizeSteinerTreeResult(
     public static final long  PRUNED=-2;
     public static final long  ROOT=-1;
 
-    public static final PrizeSteinerTreeResult EMPTY = new PrizeSteinerTreeResult(
+    public static final PrizeCollectingSteinerTreeResult EMPTY = new PrizeCollectingSteinerTreeResult(
         HugeLongArray.newArray(0),
         HugeDoubleArray.newArray(0),
         0,

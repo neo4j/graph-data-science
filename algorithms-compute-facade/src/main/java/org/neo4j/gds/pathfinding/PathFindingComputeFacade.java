@@ -29,9 +29,6 @@ import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.pcst.PCSTParameters;
-import org.neo4j.gds.pricesteiner.PCSTFast;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
@@ -102,41 +99,6 @@ public class PathFindingComputeFacade {
         // Submit the algorithm for async computation
         return algorithmCaller.run(
             randomWalkCountingNodeVisits::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<PrizeSteinerTreeResult>> pcst(
-        Graph graph,
-        PCSTParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(PrizeSteinerTreeResult.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.pcst(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var prizeProperty = graph.nodeProperties(parameters.prizeProperty());
-        var pcstFast = new PCSTFast(
-            graph,
-            (v) -> Math.max(prizeProperty.doubleValue(v), 0),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            pcstFast::compute,
             jobId
         );
     }

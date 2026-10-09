@@ -55,7 +55,7 @@ public class StrongPruning {
         this.parentCostArray = HugeDoubleArray.newArray(treeStructure.originalNodeCount());
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
-        parentArray.fill(PrizeSteinerTreeResult.PRUNED);
+        parentArray.fill(PrizeCollectingSteinerTreeResult.PRUNED);
         effectiveNodeCount = activeOriginalNodes.cardinality();
     }
 
@@ -64,7 +64,7 @@ public class StrongPruning {
         progressTracker.beginSubTask(/*Pruning Phase*/);
         if (activeOriginalNodes.cardinality() == 1){
             var singleActiveNode = activeOriginalNodes.nextSetBit(0);
-            parentArray.set(singleActiveNode, PrizeSteinerTreeResult.ROOT);
+            parentArray.set(singleActiveNode, PrizeCollectingSteinerTreeResult.ROOT);
             effectiveNodeCount=1;
             sumOfPrizes = prizes.applyAsDouble(singleActiveNode);
         }
@@ -106,7 +106,7 @@ public class StrongPruning {
 
                 var actualParent = parent.get();
 
-                parentArray.set(nextLeaf, PrizeSteinerTreeResult.ROOT);
+                parentArray.set(nextLeaf, PrizeCollectingSteinerTreeResult.ROOT);
 
                 if (bestSolutionIndex == -1 || Double.compare(dp.get(bestSolutionIndex), dp.get(nextLeaf)) < 0 ){
                     bestSolutionIndex = nextLeaf;
@@ -141,13 +141,13 @@ public class StrongPruning {
 
     void pruneUnnecessarySubTrees(long bestSolutionIndex, HugeLongArray helpingArray, HugeLongArray parentArray){
         for (long u=0;u<treeStructure.tree().nodeCount();++u){
-            if (parentArray.get(u) == PrizeSteinerTreeResult.ROOT  && u!= bestSolutionIndex){
+            if (parentArray.get(u) == PrizeCollectingSteinerTreeResult.ROOT  && u!= bestSolutionIndex){
                 pruneSubtree(u,helpingArray,parentArray);
             }
         }
     }
-    PrizeSteinerTreeResult resultTree(){
-        return new PrizeSteinerTreeResult(parentArray,
+    PrizeCollectingSteinerTreeResult resultTree(){
+        return new PrizeCollectingSteinerTreeResult(parentArray,
                 parentCostArray,
                 effectiveNodeCount,
                 totalWeight,
@@ -166,7 +166,7 @@ public class StrongPruning {
             var currentNode = helpingArray.get(currentPosition++);
             progressTracker.onProgress();
 
-            parents.set(currentNode, PrizeSteinerTreeResult.PRUNED);
+            parents.set(currentNode, PrizeCollectingSteinerTreeResult.PRUNED);
             effectiveNodeCount--;
             sumOfPrizes -= prizes.applyAsDouble(currentNode);
 

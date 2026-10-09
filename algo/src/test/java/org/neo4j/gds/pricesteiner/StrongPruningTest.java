@@ -96,26 +96,26 @@ class StrongPruningTest {
 
             var parents=HugeLongArray.newArray(graph.nodeCount());
             Function<Integer,Long> a =  (v) -> graph.toMappedNodeId("a"+v);
-            parents.set(a.apply(2), PrizeSteinerTreeResult.ROOT);
+            parents.set(a.apply(2), PrizeCollectingSteinerTreeResult.ROOT);
             parents.set(a.apply(4),a.apply(2));
             parents.set(a.apply(6),a.apply(4));
-            parents.set(a.apply(7), PrizeSteinerTreeResult.ROOT);
-            parents.set(a.apply(1), PrizeSteinerTreeResult.ROOT);
+            parents.set(a.apply(7), PrizeCollectingSteinerTreeResult.ROOT);
+            parents.set(a.apply(1), PrizeCollectingSteinerTreeResult.ROOT);
             parents.set(a.apply(3),a.apply(1));
-            parents.set(a.apply(5), PrizeSteinerTreeResult.ROOT);
+            parents.set(a.apply(5), PrizeCollectingSteinerTreeResult.ROOT);
             parents.set(a.apply(8),a.apply(5));
-            parents.set(a.apply(9), PrizeSteinerTreeResult.ROOT);
+            parents.set(a.apply(9), PrizeCollectingSteinerTreeResult.ROOT);
 
             strongPruning.pruneUnnecessarySubTrees(a.apply(5),HugeLongArray.newArray(graph.nodeCount()),parents);
-            assertThat(parents.get(a.apply(1))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(2))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(3))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(4))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(5))).isEqualTo(PrizeSteinerTreeResult.ROOT);
-            assertThat(parents.get(a.apply(6))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(7))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(1))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(2))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(3))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(4))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(5))).isEqualTo(PrizeCollectingSteinerTreeResult.ROOT);
+            assertThat(parents.get(a.apply(6))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(7))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
             assertThat(parents.get(a.apply(8))).isEqualTo(a.apply(5));
-            assertThat(parents.get(a.apply(9))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(9))).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
 
         }
 
@@ -156,10 +156,14 @@ class StrongPruningTest {
             assertThat(resultTree.relationshipToParentCost().get(graph.toMappedNodeId("a6"))).isEqualTo(3);
             assertThat(resultTree.relationshipToParentCost().get(graph.toMappedNodeId("a7"))).isEqualTo(4);
 
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a5"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a8"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a9"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a3"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a5"))).isEqualTo(
+                PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a8"))).isEqualTo(
+                PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a9"))).isEqualTo(
+                PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a3"))).isEqualTo(
+                PrizeCollectingSteinerTreeResult.PRUNED);
 
             assertThat(resultTree.effectiveNodeCount()).isEqualTo(5);
             assertThat(resultTree.sumOfPrizes()).isEqualTo(28.0);
@@ -268,7 +272,7 @@ class StrongPruningTest {
 
           var sp=strongPruning.resultTree();
 
-          assertThat(sp.parentArray().get(graph.toMappedNodeId("a0"))).isEqualTo(PrizeSteinerTreeResult.ROOT);
+          assertThat(sp.parentArray().get(graph.toMappedNodeId("a0"))).isEqualTo(PrizeCollectingSteinerTreeResult.ROOT);
         }
 
     }
@@ -329,16 +333,16 @@ class StrongPruningTest {
             var parents = sp.parentArray();
             var costs = sp.relationshipToParentCost();
             LongToDoubleFunction costSupplier =  e -> {
-                if (parents.get(e) == PrizeSteinerTreeResult.ROOT )
+                if (parents.get(e) == PrizeCollectingSteinerTreeResult.ROOT )
                     return  0;
-                if (parents.get(e) == PrizeSteinerTreeResult.PRUNED)
+                if (parents.get(e) == PrizeCollectingSteinerTreeResult.PRUNED)
                     return  Long.MIN_VALUE;
                 return costs.get(e);
             };
 
-            assertThat(parents.get(a0)).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a2)).isEqualTo(PrizeSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a3)).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a0)).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a2)).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a3)).isEqualTo(PrizeCollectingSteinerTreeResult.PRUNED);
 
             double sum=costSupplier.applyAsDouble(a1) +costSupplier.applyAsDouble(a4);
             assertThat(sum).isEqualTo(54);

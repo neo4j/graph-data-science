@@ -31,8 +31,6 @@ import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
-import org.neo4j.gds.pcst.PCSTBaseConfig;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 public class PathFindingAlgorithmsBusinessFacade {
@@ -66,22 +64,6 @@ public class PathFindingAlgorithmsBusinessFacade {
                 progressTracker,
                 requestScopedDependencies.terminationFlag(),
                 DefaultPool.INSTANCE
-            ), progressTracker, true);
-    }
-
-    PrizeSteinerTreeResult pcst(Graph graph, PCSTBaseConfig configuration) {
-
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.pcst(graph, configuration.concurrency()),
-            configuration
-        );
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.pcst(
-                graph,
-                configuration.toParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
             ), progressTracker, true);
     }
 

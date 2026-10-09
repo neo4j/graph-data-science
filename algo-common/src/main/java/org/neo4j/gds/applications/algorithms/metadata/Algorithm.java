@@ -75,7 +75,7 @@ public enum Algorithm {
     NodeSimilarity,
     Node2Vec,
     PageRank,
-    PCST,
+    PrizeCollectingSteinerTree,
     RandomWalk,
     ScaleProperties,
     SCC,

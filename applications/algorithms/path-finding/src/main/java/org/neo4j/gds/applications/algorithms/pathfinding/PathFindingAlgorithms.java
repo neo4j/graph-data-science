@@ -57,7 +57,7 @@ import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.YensParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PCSTFast;
-import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
+import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
@@ -275,7 +275,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    PrizeSteinerTreeResult pcst(
+    PrizeCollectingSteinerTreeResult prizeCollectingSteinerTree(
         Graph graph,
         PCSTParameters parameters,
         ProgressTracker progressTracker,
