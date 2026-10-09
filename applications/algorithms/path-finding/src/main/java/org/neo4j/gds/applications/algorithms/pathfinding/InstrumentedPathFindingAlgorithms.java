@@ -43,6 +43,7 @@ import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
@@ -191,6 +192,50 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __, ___) -> algorithms.depthFirstSearch(graph, configuration),
             estimationFacade::depthFirstSearch,
             AlgorithmLabel.DFS,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> kSpanningTree(
+        GraphName graphName,
+        KSpanningTreeBaseConfig configuration,
+        Optional<SideEffect<SpanningTree, METADATA>> sideEffect,
+        ResultRenderer<SpanningTree, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new SourceNodeRequirement(configuration.sourceNode())
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            })
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new UndirectedOnlyRequirement("K-Spanning Tree")
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.kSpanningTree(graph, configuration),
+            estimationFacade::kSpanningTree,
+            AlgorithmLabel.KSpanningTree,
             sideEffect,
             resultRenderer
         );

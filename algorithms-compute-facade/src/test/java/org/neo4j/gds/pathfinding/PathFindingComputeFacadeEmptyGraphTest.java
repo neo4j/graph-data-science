@@ -29,12 +29,10 @@ import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
-import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 
@@ -69,22 +67,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
             TerminationFlag.RUNNING_TRUE,
             progressTrackerFactoryMock
         );
-    }
-
-    @Test
-    void kSpanningTree() {
-        var future = facade.kSpanningTree(
-            graph,
-            mock(KSpanningTreeParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result.result()).isNotNull().isEqualTo(SpanningTree.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

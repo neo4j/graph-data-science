@@ -70,7 +70,6 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 
@@ -165,15 +164,12 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration.writeConcurrency()
         );
 
-        return runAlgorithmAndWrite(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.kSpanningTree(
             graphName,
             configuration,
-            KSpanningTree,
-            estimationFacade::kSpanningTree,
-            (graph, __) -> pathFindingAlgorithms.kSpanningTree(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT maxFlow(

@@ -26,8 +26,6 @@ import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.kspanningtree.KSpanningTree;
-import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -35,7 +33,6 @@ import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PCSTFast;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
-import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
 import org.neo4j.gds.traversal.RandomWalkParameters;
@@ -67,42 +64,6 @@ public class PathFindingComputeFacade {
         this.executorService = executorService;
         this.terminationFlag = terminationFlag;
         this.progressTrackerFactory = progressTrackerFactory;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<SpanningTree>> kSpanningTree(
-        Graph graph,
-        KSpanningTreeParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        // If the input graph is empty return a completed future with empty result
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SpanningTree.EMPTY));
-        }
-
-        // Create ProgressTracker
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.kSpanningTree(graph, parameters.concurrency()),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        // Create the algorithm
-        var kSpanningTree = new KSpanningTree(
-            graph,
-            parameters.objective(),
-            graph.toMappedNodeId(parameters.sourceNode()),
-            parameters.k(),
-            progressTracker,
-            terminationFlag
-        );
-
-        // Submit the algorithm for async computation
-        return algorithmCaller.run(
-            kSpanningTree::compute,
-            jobId
-        );
     }
 
     public CompletableFuture<TimedAlgorithmResult<HugeAtomicLongArray>> randomWalkCountingNodeVisits(

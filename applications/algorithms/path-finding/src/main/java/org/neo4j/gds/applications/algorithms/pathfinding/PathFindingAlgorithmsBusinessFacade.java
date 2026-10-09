@@ -29,12 +29,10 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
-import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
-import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 public class PathFindingAlgorithmsBusinessFacade {
@@ -53,21 +51,6 @@ public class PathFindingAlgorithmsBusinessFacade {
         this.algorithms = algorithms;
         this.requestScopedDependencies = requestScopedDependencies;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    public SpanningTree kSpanningTree(Graph graph, KSpanningTreeBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.kSpanningTree(graph, configuration.concurrency()),
-            configuration
-        );
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.kSpanningTree(
-                graph,
-                configuration.toKSpanningTreeParameters(),
-                progressTracker,
-                requestScopedDependencies.terminationFlag()
-            ), progressTracker, true);
     }
 
     HugeAtomicLongArray randomWalkCountingNodeVisits(Graph graph, RandomWalkBaseConfig configuration) {

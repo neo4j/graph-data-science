@@ -34,7 +34,6 @@ import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodeRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
-import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.applications.algorithms.pathfinding.RandomWalkGraphValidation;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -42,7 +41,6 @@ import org.neo4j.gds.pcst.PCSTParameters;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
-import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 
 import java.util.List;
@@ -73,38 +71,6 @@ public class PathFindingComputeBusinessFacade {
         this.executorService = executorService;
         this.user = user;
         this.databaseId = databaseId;
-    }
-
-    public <TR> CompletableFuture<TR> kSpanningTree(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        Optional<String> relationshipProperty,
-        KSpanningTreeParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<SpanningTree>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            relationshipProperty,
-            new GraphStoreValidationBuilder()
-                .withValidationRule(new SourceNodeRequirement(parameters.sourceNode()))
-                .withValidationRule(new UndirectedOnlyRequirement("K-Spanning Tree"))
-                .build(),
-            true,
-            Optional.empty()
-        );
-        var graph = graphResources.graph();
-
-        return computeFacade.kSpanningTree(
-            graph,
-            parameters,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> randomWalkCountingNodeVisits(

@@ -35,11 +35,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.kspanningtree.KSpanningTreeParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.pcst.PCSTParameters;
-import org.neo4j.gds.spanningtree.PrimOperators;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.WalkParameters;
@@ -93,22 +91,6 @@ class PathFindingComputeFacadeTest {
             TerminationFlag.RUNNING_TRUE,
             progressTrackerFactoryMock
         );
-    }
-
-    @Test
-    void kSpanningTree() {
-        var future = facade.kSpanningTree(
-            graph,
-            new KSpanningTreeParameters(
-                PrimOperators.MIN_OPERATOR,
-                idFunction.of("a"),
-                2L,
-                new Concurrency(2)
-            ),
-            jobIdMock,
-            false
-        );
-        assertThat(future.join()).isNotNull();
     }
 
     @Test

@@ -32,6 +32,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
 import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowBaseConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
@@ -151,6 +152,24 @@ public class TrackedPathFindingAlgorithms {
             () -> algorithms.depthFirstSearch(
                 graph,
                 configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag()
+            ),
+            progressTracker,
+            true
+        );
+    }
+
+    SpanningTree kSpanningTree(Graph graph, KSpanningTreeBaseConfig configuration) {
+        var progressTracker = createProgressTracker(
+            PathFindingAlgorithmTasks.kSpanningTree(graph, configuration.concurrency()),
+            configuration
+        );
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.kSpanningTree(
+                graph,
+                configuration.toKSpanningTreeParameters(),
                 progressTracker,
                 requestScopedDependencies.terminationFlag()
             ),
