@@ -56,6 +56,7 @@ import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
@@ -468,6 +469,38 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __, ___) -> algorithms.singlePairShortestPathYens(graph, configuration),
             () -> estimationFacade.singlePairShortestPathYens(configuration),
             AlgorithmLabel.Yens,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> singleSourceShortestPathDijkstra(
+        GraphName graphName,
+        DijkstraBaseConfig configuration,
+        Optional<SideEffect<PathFindingResult, METADATA>> sideEffect,
+        ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new SourceNodeRequirement(configuration.sourceNode())
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.singleSourceShortestPathDijkstra(graph, configuration),
+            () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
+            AlgorithmLabel.SingleSourceDijkstra,
             sideEffect,
             resultRenderer
         );

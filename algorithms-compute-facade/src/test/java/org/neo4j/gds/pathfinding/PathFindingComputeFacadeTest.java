@@ -36,7 +36,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 import org.neo4j.gds.traversal.WalkParameters;
@@ -103,17 +102,6 @@ class PathFindingComputeFacadeTest {
                 Optional.of(19L),
                 new Concurrency(2)
             ),
-            jobIdMock,
-            true
-        );
-        assertThat(future.join()).isNotNull();
-    }
-
-    @Test
-    void singleSourceShortestPathDijkstra() {
-        var future = facade.singleSourceShortestPathDijkstra(
-            graph,
-            new DijkstraSingleSourceParameters(idFunction.of("a")),
             jobIdMock,
             true
         );

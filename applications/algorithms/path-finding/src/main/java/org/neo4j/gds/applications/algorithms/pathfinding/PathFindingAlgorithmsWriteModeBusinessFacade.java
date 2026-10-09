@@ -21,20 +21,14 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.Computation;
-import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.WriteSideEffect;
-import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.JobIdConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
@@ -42,7 +36,6 @@ import org.neo4j.gds.maxflow.FlowResult;
 import org.neo4j.gds.maxflow.MaxFlowWriteConfig;
 import org.neo4j.gds.mcmf.CostFlowResult;
 import org.neo4j.gds.mcmf.MCMFWriteConfig;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pathfinding.BellmanFordWriteStep;
 import org.neo4j.gds.pathfinding.KSpanningTreeWriteStep;
 import org.neo4j.gds.pathfinding.MCMFWriteStep;
@@ -68,9 +61,6 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
 import java.util.Optional;
-import java.util.function.Supplier;
-
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 
 /**
  * Here is the top level business facade for all your path finding write needs.
@@ -79,33 +69,24 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Sin
 public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final Log log;
 
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final RequestScopedDependencies requestScopedDependencies;
     private final WriteContext writeContext;
     private final WriteRelationshipService writeRelationshipService;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
     private final InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms;
     private final Synchroniser synchroniser;
 
     PathFindingAlgorithmsWriteModeBusinessFacade(
         Log log,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         WriteRelationshipService writeRelationshipService,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms,
         InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms,
         Synchroniser synchroniser
     ) {
         this.log = log;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.requestScopedDependencies = requestScopedDependencies;
         this.writeContext = writeContext;
         this.writeRelationshipService = writeRelationshipService;
-        this.estimationFacade = estimationFacade;
-        this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.instrumentedPathFindingAlgorithms = instrumentedPathFindingAlgorithms;
         this.synchroniser = synchroniser;
     }
@@ -213,7 +194,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ));
     }
 
-    public <RESULT> RESULT pcst(
+    public <RESULT> RESULT prizeCollectingSteinerTree(
         GraphName graphName,
         PCSTWriteConfig configuration,
         ResultBuilder<PCSTWriteConfig, PrizeCollectingSteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
@@ -284,14 +265,14 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         AllShortestPathsDijkstraWriteConfig configuration,
         ResultBuilder<AllShortestPathsDijkstraWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        return runAlgorithmAndWrite(
+        var writeStep = createShortestPathWriteStep(configuration);
+
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.singleSourceShortestPathDijkstra(
             graphName,
             configuration,
-            SingleSourceDijkstra,
-            () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
-            (graph, __) -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT spanningTree(
@@ -335,50 +316,6 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
             new WriteResultRenderer<>(configuration, resultBuilder)
         ));
-    }
-
-    /**
-     * A*, Dijkstra and Yens use the same variant of write step
-     */
-    private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig & WriteRelationshipConfig & WritePathOptionsConfig, RESULT_TO_CALLER> RESULT_TO_CALLER runAlgorithmAndWrite(
-        GraphName graphName,
-        CONFIGURATION configuration,
-        Label label,
-        Supplier<MemoryEstimation> memoryEstimation,
-        Computation<PathFindingResult> algorithm,
-        ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER, RelationshipsWritten> resultBuilder
-    ) {
-        var writeStep = createShortestPathWriteStep(configuration);
-
-        return runAlgorithmAndWrite(
-            graphName,
-            configuration,
-            label,
-            memoryEstimation,
-            algorithm,
-            writeStep,
-            resultBuilder
-        );
-    }
-
-    private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithmAndWrite(
-        GraphName graphName,
-        CONFIGURATION configuration,
-        Label label,
-        Supplier<MemoryEstimation> memoryEstimation,
-        Computation<RESULT_FROM_ALGORITHM> algorithm,
-        WriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> writeStep,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
-    ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
-            graphName,
-            configuration,
-            label,
-            memoryEstimation,
-            algorithm,
-            writeStep,
-            resultBuilder
-        );
     }
 
     private <CONFIGURATION extends JobIdConfig & WriteRelationshipConfig & WritePathOptionsConfig> ShortestPathWriteStep createShortestPathWriteStep(

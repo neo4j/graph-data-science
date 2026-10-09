@@ -29,13 +29,10 @@ import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.paths.dijkstra.DijkstraSingleSourceParameters;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkParameters;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.SET;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -79,26 +76,6 @@ class PathFindingComputeFacadeEmptyGraphTest {
 
         assertThat(result).isNotNull();
         assertThat(result.result().size()).isZero();
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void singleSourceShortestPathDijkstra() {
-        var future = facade.singleSourceShortestPathDijkstra(
-            graph,
-            mock(DijkstraSingleSourceParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-
-        assertThat(result.result())
-            .isNotNull()
-            .extracting(PathFindingResult::pathSet)
-            .asInstanceOf(SET)
-            .isEmpty();
 
         verifyNoInteractions(progressTrackerFactoryMock);
         verifyNoInteractions(algorithmCallerMock);

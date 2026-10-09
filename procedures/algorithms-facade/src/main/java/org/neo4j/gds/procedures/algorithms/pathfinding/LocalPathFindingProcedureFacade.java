@@ -893,7 +893,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         var resultBuilder  = new PrizeCollectingSteinerTreeResultBuilderForWriteMode();
 
         return  Stream.of(
-                writeModeBusinessFacade.pcst(
+                writeModeBusinessFacade.prizeCollectingSteinerTree(
                 GraphName.parse(graphName),
                 config,
                 resultBuilder
