@@ -468,7 +468,6 @@ The following algorithms are not supported:
 - xref:algorithms/hits.adoc[]
 - xref:algorithms/dag/topological-sort.adoc[]
 - xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-triangles-listing[Triangles listing]
-- xref:machine-learning/node-embeddings/graph-sage.adoc[]
 
 
 === Other procedures and functions

@@ -1,6 +1,6 @@
 [[graph-sage]]
 [.beta]
-= GraphSAGE
+= GraphSAGE (plugin)
 :description: This section describes the GraphSAGE node embedding algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: embedding
@@ -22,11 +22,6 @@ GraphSAGE is using node feature information to generate node embeddings on unsee
 Instead of training individual embeddings for each node, the algorithm learns a function that generates embeddings by sampling and aggregating features from a node's local neighborhood.
 
 NOTE: The algorithm is defined for UNDIRECTED graphs.
-
-For more information on this algorithm see:
-
-* https://arxiv.org/pdf/1706.02216.pdf[William L. Hamilton, Rex Ying, and Jure Leskovec. "Inductive Representation Learning on Large Graphs." 2018.^]
-* https://arxiv.org/pdf/1911.10232.pdf[Amit Pande, Kai Ni and Venkataramani Kini. "SWAG: Item Recommendations using Convolutions on Weighted Graphs." 2019.^]
 
 
 [[algorithms-embeddings-graph-sage-considerations]]
@@ -692,7 +687,7 @@ NOTE: Due to the random initialisation of the weight variables the results may v
 [[graph-sage-trained-model-example-mutate]]
 === Mutate
 
-The xref:machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to the in-memory graph using the `mutate` mode of the procedure.
+The xref:machine-learning/node-embeddings/graphsage/graphsage-plugin.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to the in-memory graph using the `mutate` mode of the procedure.
 Below is an example of how to achieve this.
 
 --
@@ -721,7 +716,7 @@ CALL gds.beta.graphSage.mutate(
 [[graph-sage-trained-model-example-write]]
 === Write
 
-The xref:machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to Neo4j.
+The xref:machine-learning/node-embeddings/graphsage/graphsage-plugin.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to Neo4j.
 Below is an example of how to achieve this.
 
 --

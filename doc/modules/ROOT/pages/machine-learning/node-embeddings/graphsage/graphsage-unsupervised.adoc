@@ -1,7 +1,7 @@
 [[graphsage-unsupervised]]
 [.preview]
 = GraphSAGE unsupervised
-:description: This section describes the GraphSAGE unsupervised algorithm in Neo4j Graph Data Science, available in Aura Graph Analytics.
+:description: This section describes the GraphSAGE unsupervised algorithm available in Aura Graph Analytics.
 :entity: node
 :result: embedding
 :algorithm: GraphSAGE unsupervised
@@ -20,6 +20,8 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 GraphSAGE is a graph neural network (GNN) architecture outlined in the paper https://arxiv.org/pdf/1706.02216.pdf[_Inductive Representation Learning on Large Graphs_] by Hamilton et al. (2017).
 
 This section covers the syntax used to execute the {algorithm} algorithm to generate embeddings for nodes in a graph.
+
+NOTE: For node classification, see xref:machine-learning/node-property-prediction/graphsage-supervised.adoc[GraphSAGE supervised].
 
 .GraphSAGE unsupervised syntax per mode
 [.tabbed-example, caption = ]
