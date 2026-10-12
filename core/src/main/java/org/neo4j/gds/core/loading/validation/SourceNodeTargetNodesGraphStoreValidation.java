@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class SourceNodeTargetNodesGraphStoreValidation implements GraphStoreFilteredETL {
-
     private final SourceNodeRequirement sourceNodeValidation;
     private final TargetNodesRequirement targetNodesValidation;
 
@@ -51,6 +50,6 @@ public class SourceNodeTargetNodesGraphStoreValidation implements GraphStoreFilt
         sourceNodeValidation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
 
         // validate the target nodes
-        targetNodesValidation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
+        targetNodesValidation.onGraphStoreFiltered(graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty);
     }
 }

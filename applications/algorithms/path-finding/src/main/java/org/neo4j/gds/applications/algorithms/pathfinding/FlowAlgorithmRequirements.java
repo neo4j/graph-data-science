@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.CompoundValidationRule;
+import org.neo4j.gds.core.loading.validation.CompoundGraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.OptionalNodePropertyGraphStoreRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
@@ -63,7 +63,7 @@ public class FlowAlgorithmRequirements implements GraphStoreFilteredETL {
         Collection<RelationshipType> selectedRelationshipTypes,
         Optional<String> relationshipProperty
     ) {
-        var validationRule = new CompoundValidationRule(
+        var compoundETL = new CompoundGraphStoreFilteredETL(
             List.of(
                 sourceNodes,
                 targetNodes,
@@ -71,6 +71,6 @@ public class FlowAlgorithmRequirements implements GraphStoreFilteredETL {
             )
         );
 
-        validationRule.validate(graphStore, selectedLabels, selectedRelationshipTypes);
+        compoundETL.onGraphStoreFiltered(graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty);
     }
 }

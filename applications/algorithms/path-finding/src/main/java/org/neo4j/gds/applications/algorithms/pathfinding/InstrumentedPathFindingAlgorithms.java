@@ -413,21 +413,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<Stream<long[]>, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodesRequirement(configuration.sourceNodes()).validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    );
-                }
-            })
+            .with(new SourceNodesRequirement(configuration.sourceNodes()))
             .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
@@ -456,21 +442,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<HugeAtomicLongArray, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodesRequirement(configuration.sourceNodes()).validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    );
-                }
-            })
+            .with(new SourceNodesRequirement(configuration.sourceNodes()))
             .with(new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(

@@ -24,22 +24,27 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
+import java.util.Optional;
 
-public final class CompoundValidationRule implements ValidationRule {
-    private final Collection<ValidationRule> validationRules;
+public final class CompoundGraphStoreFilteredETL implements GraphStoreFilteredETL {
+    private final Collection<GraphStoreFilteredETL> etlSteps;
 
-    public CompoundValidationRule(Collection<ValidationRule> validationRules) {
-        this.validationRules = validationRules;
+    public CompoundGraphStoreFilteredETL(Collection<GraphStoreFilteredETL> etlSteps) {
+        this.etlSteps = etlSteps;
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
-        for (var validationRule : validationRules) {
-            validationRule.validate(graphStore, selectedLabels, selectedRelationshipTypes);
-        }
+        etlSteps.forEach(etl -> etl.onGraphStoreFiltered(
+            graphStore,
+            selectedLabels,
+            selectedRelationshipTypes,
+            relationshipProperty
+        ));
     }
 }
