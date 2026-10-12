@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -36,6 +39,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.core.loading.validation.DirectedOnlyRequirement;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.PregelPropertiesRequirement;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
@@ -54,6 +58,7 @@ import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -107,19 +112,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                new GraphStoreFilteredETL() {
-                    @Override
-                    public void onGraphStoreFiltered(
-                        GraphStore graphStore,
-                        Collection<NodeLabel> selectedLabels,
-                        Collection<RelationshipType> selectedRelationshipTypes,
-                        Optional<String> relationshipProperty
-                    ) {
-                        new SourceNodesRequirement(configuration.sourceNodes().inputNodes());
-                    }
-                }
-            );
+            .withGraphStoreFilteredETL(new SourceNodesRequirement(configuration.sourceNodes().inputNodes()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -141,7 +134,7 @@ public final class InstrumentedCentralityAlgorithms {
         boolean shouldComputeComponents
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new UndirectedOnlyRequirement("Articulation Points"));
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Articulation Points"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -162,7 +155,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<BetwennessCentralityResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new BetweennessCentralityRequirements());
+            .withGraphStoreFilteredETL(new BetweennessCentralityRequirements());
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -184,7 +177,7 @@ public final class InstrumentedCentralityAlgorithms {
         boolean shouldComputeComponents
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new UndirectedOnlyRequirement("Bridges"));
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Bridges"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -259,7 +252,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new GraphStoreFilteredETL() {
                     @Override
                     public void onGraphStoreFiltered(
@@ -310,9 +303,9 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<PregelResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(hitsHookGenerator.generate(configuration)) // the hook creates inverse indexes
-            .with(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()))
-            .with(new DirectedOnlyRequirement("Hits"));
+            .withGraphStoreLoadedETL(hitsHookGenerator.generate(configuration)) // the hook creates inverse indexes
+            .withGraphStoreFilteredETL(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()))
+            .withGraphStoreFilteredETL(new DirectedOnlyRequirement("Hits"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -333,7 +326,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<IndirectExposureResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new UndirectedOnlyRequirement("Indirect exposure"));
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Indirect exposure"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -354,7 +347,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new GraphStoreFilteredETL() {
                     @Override
                     public void onGraphStoreFiltered(

@@ -111,7 +111,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<ApproxMaxKCutResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new MinCommunitySizeSumETL(configuration.minCommunitySizes()));
+            .withGraphStoreFilteredETL(new MinCommunitySizeSumETL(configuration.minCommunitySizes()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -132,7 +132,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<CliqueCountingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new UndirectedOnlyRequirement("Clique Counting"));
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Clique Counting"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -153,7 +153,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<ConductanceResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
+            .withGraphStoreFilteredETL(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -218,7 +218,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<KCoreDecompositionResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new UndirectedOnlyRequirement("K-Core-Decomposition"));
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("K-Core-Decomposition"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -262,8 +262,8 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<LabelPropagationResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
-            .with(new NodePropertyMustExistOnAllLabels(configuration.nodeWeightProperty()));
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
+            .withGraphStoreFilteredETL(new NodePropertyMustExistOnAllLabels(configuration.nodeWeightProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -284,8 +284,8 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<LocalClusteringCoefficientResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
-            .with(new UndirectedOnlyRequirement("LocalClusteringCoefficient"));
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("LocalClusteringCoefficient"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -306,8 +306,8 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<LeidenResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
-            .with(new UndirectedOnlyRequirement("Leiden"));
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Leiden"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -328,7 +328,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<LouvainResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())));
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -349,7 +349,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<ModularityResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
+            .withGraphStoreFilteredETL(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -370,7 +370,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<ModularityOptimizationResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())));
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -409,7 +409,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<PregelResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()));
+            .withGraphStoreFilteredETL(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -430,7 +430,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<Stream<TriangleResult>, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
+            .withGraphStoreFilteredETL(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -451,7 +451,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<TriangleCountResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
+            .withGraphStoreFilteredETL(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -472,7 +472,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<DisjointSetStruct, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())));
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())));
 
         return launchConvenience.launchAlgorithm(
             graphName,

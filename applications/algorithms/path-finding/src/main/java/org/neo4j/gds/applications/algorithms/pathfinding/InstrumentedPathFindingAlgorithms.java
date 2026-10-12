@@ -163,7 +163,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<HugeLongArray, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetNodes())
             );
 
@@ -186,7 +186,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeRequirement(configuration.sourceNode()));
+            .withGraphStoreFilteredETL(new SourceNodeRequirement(configuration.sourceNode()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -207,7 +207,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<HugeLongArray, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetNodes())
             );
 
@@ -230,8 +230,8 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<SpanningTree, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeRequirement(configuration.sourceNode()))
-            .with(new UndirectedOnlyRequirement("K-Spanning Tree"));
+            .withGraphStoreFilteredETL(new SourceNodeRequirement(configuration.sourceNode()))
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("K-Spanning Tree"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -270,7 +270,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<FlowResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
+            .withGraphStoreFilteredETL(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -291,10 +291,10 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<CostFlowResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
+            .withGraphStoreFilteredETL(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
 
         var secondGraphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new RelationshipPropertyGraphStoreValidation(configuration.costProperty(), "costProperty"));
+            .withGraphStoreFilteredETL(new RelationshipPropertyGraphStoreValidation(configuration.costProperty(), "costProperty"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -317,9 +317,9 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PrizeCollectingSteinerTreeResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
-            .with(new NodePropertyMustExistOnAllLabels(configuration.prizeProperty()))
-            .with(new NodePropertyTypeRequirement(configuration.prizeProperty(), List.of(ValueType.DOUBLE)));
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
+            .withGraphStoreFilteredETL(new NodePropertyMustExistOnAllLabels(configuration.prizeProperty()))
+            .withGraphStoreFilteredETL(new NodePropertyTypeRequirement(configuration.prizeProperty(), List.of(ValueType.DOUBLE)));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -340,8 +340,8 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<Stream<long[]>, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodesRequirement(configuration.sourceNodes()))
-            .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
+            .withGraphStoreFilteredETL(new SourceNodesRequirement(configuration.sourceNodes()))
+            .withGraphLoadedETL(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -369,8 +369,8 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<HugeAtomicLongArray, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodesRequirement(configuration.sourceNodes()))
-            .with(new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE));
+            .withGraphStoreFilteredETL(new SourceNodesRequirement(configuration.sourceNodes()))
+            .withGraphLoadedETL(new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -391,8 +391,8 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()))
-            .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
+            .withGraphStoreFilteredETL(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()))
+            .withGraphLoadedETL(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -413,8 +413,8 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetsList()))
-            .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
+            .withGraphStoreFilteredETL(new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetsList()))
+            .withGraphLoadedETL(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -437,7 +437,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()));
+            .withGraphStoreFilteredETL(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -458,7 +458,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeRequirement(configuration.sourceNode()));
+            .withGraphStoreFilteredETL(new SourceNodeRequirement(configuration.sourceNode()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -479,8 +479,8 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<SpanningTree, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeRequirement(configuration.sourceNode()))
-            .with(new UndirectedOnlyRequirement("Spanning Tree"));
+            .withGraphStoreFilteredETL(new SourceNodeRequirement(configuration.sourceNode()))
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Spanning Tree"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -501,7 +501,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<SteinerTreeResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetNodes())
             );
 

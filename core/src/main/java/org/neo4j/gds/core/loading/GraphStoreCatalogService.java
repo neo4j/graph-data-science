@@ -86,12 +86,12 @@ public class GraphStoreCatalogService {
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder();
 
-        graphLoadETLBuilder.with(graphStoreValidation::validate);
+        graphLoadETLBuilder.withGraphStoreFilteredETL(graphStoreValidation::validate);
         postGraphStoreLoadValidationHooks.ifPresent(
             postLoadValidationHooks -> postLoadValidationHooks.forEach(
                 postLoadValidationHook -> {
-                    graphLoadETLBuilder.with(postLoadValidationHook::onGraphStoreLoaded);
-                    graphLoadETLBuilder.with(postLoadValidationHook::onGraphLoaded);
+                    graphLoadETLBuilder.withGraphStoreLoadedETL(postLoadValidationHook::onGraphStoreLoaded);
+                    graphLoadETLBuilder.withGraphLoadedETL(postLoadValidationHook::onGraphLoaded);
                 })
         );
         var graphLoadETL = graphLoadETLBuilder.build();
@@ -133,8 +133,8 @@ public class GraphStoreCatalogService {
     ) {
         // this will fall away once we have de-duplicated
         var graphLoadETLBuilder = new GraphLoadETLBuilder();
-        graphLoadETLBuilder.with(graphStoreValidation::validate);
-        graphValidation.ifPresent(hook -> graphLoadETLBuilder.with(hook::validate));
+        graphLoadETLBuilder.withGraphStoreFilteredETL(graphStoreValidation::validate);
+        graphValidation.ifPresent(hook -> graphLoadETLBuilder.withGraphLoadedETL(hook::validate));
         var graphLoadETL = graphLoadETLBuilder.build();
 
         return loadGraphResources(
