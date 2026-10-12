@@ -27,15 +27,16 @@ import java.util.Collection;
 import java.util.Optional;
 
 public final class OptionalNodePropertyGraphStoreRequirement implements GraphStoreFilteredETL {
-    private final ValidationRule validation;
+    private final Optional<NodePropertyMustExistOnAllLabels> etl;
 
-    private OptionalNodePropertyGraphStoreRequirement(ValidationRule validation) {this.validation = validation;}
+    private OptionalNodePropertyGraphStoreRequirement(Optional<NodePropertyMustExistOnAllLabels> etl) {
+        this.etl = etl;
+    }
 
     public static OptionalNodePropertyGraphStoreRequirement create(Optional<String> seedProperty) {
-        return seedProperty
-            .map(NodePropertyMustExistOnAllLabels::new)
-            .map(OptionalNodePropertyGraphStoreRequirement::new)
-            .orElseGet(() -> new OptionalNodePropertyGraphStoreRequirement(ValidationRule.EMPTY));
+        var etl = seedProperty.map(NodePropertyMustExistOnAllLabels::new);
+
+        return new OptionalNodePropertyGraphStoreRequirement(etl);
     }
 
     @Override
@@ -45,6 +46,13 @@ public final class OptionalNodePropertyGraphStoreRequirement implements GraphSto
         Collection<RelationshipType> selectedRelationshipTypes,
         Optional<String> relationshipProperty
     ) {
-        validation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
+        etl.ifPresent(
+            etl -> etl.onGraphStoreFiltered(
+                graphStore,
+                selectedLabels,
+                selectedRelationshipTypes,
+                relationshipProperty
+            )
+        );
     }
 }
