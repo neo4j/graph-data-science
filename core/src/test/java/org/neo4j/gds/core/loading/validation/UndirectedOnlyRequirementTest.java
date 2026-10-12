@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,7 +34,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class UndirectedOnlyRequirementTest {
-
     @Test
     void shouldNotThrowForUndirectedSchema() {
         var graphStore = mock(GraphStore.class);
@@ -43,13 +43,13 @@ class UndirectedOnlyRequirementTest {
         when(graphStore.schema()).thenReturn(schema);
         when(schema.filterRelationshipTypes(anySet())).thenReturn(schema2);
 
-        var validation = new UndirectedOnlyRequirement("foo");
-        assertThatNoException().isThrownBy(() -> validation.validate(
+        var etl = new UndirectedOnlyRequirement("foo");
+        assertThatNoException().isThrownBy(() -> etl.onGraphStoreFiltered(
             graphStore,
             null,
-            List.of(RelationshipType.of("REL1"))
+            List.of(RelationshipType.of("REL1")),
+            Optional.empty()
         ));
-
     }
 
     @Test
@@ -61,12 +61,9 @@ class UndirectedOnlyRequirementTest {
         when(graphStore.schema()).thenReturn(schema);
         when(schema.filterRelationshipTypes(anySet())).thenReturn(schema2);
 
-
-        var validation = new UndirectedOnlyRequirement("foo");
-        assertThatThrownBy(() -> validation.validate(graphStore, null, List.of(RelationshipType.of("REL1"))))
+        var etl = new UndirectedOnlyRequirement("foo");
+        assertThatThrownBy(() -> etl.onGraphStoreFiltered(graphStore, null, List.of(RelationshipType.of("REL1")), Optional.empty()))
             .hasMessageContaining("The foo algorithm requires relationship projections to be UNDIRECTED. " +
                 "Selected relationships `[REL1]` are not all undirected");
-
     }
-
 }
