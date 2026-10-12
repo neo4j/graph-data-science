@@ -22,14 +22,14 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.loading.validation.GraphValidation;
+import org.neo4j.gds.core.loading.validation.GraphLoadedETL;
 import org.neo4j.gds.core.loading.validation.RelationshipValidator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-public class RandomWalkGraphValidation implements GraphValidation {
+public class RandomWalkGraphValidation implements GraphLoadedETL {
     private final Concurrency concurrency;
     private final ExecutorService executorService;
 
@@ -39,7 +39,7 @@ public class RandomWalkGraphValidation implements GraphValidation {
     }
 
     @Override
-    public void validate(Graph graph) {
+    public void onGraphLoaded(Graph graph) {
         if (graph.hasRelationshipProperty()) {
             var tasks = PartitionUtils.degreePartition(
                 graph,

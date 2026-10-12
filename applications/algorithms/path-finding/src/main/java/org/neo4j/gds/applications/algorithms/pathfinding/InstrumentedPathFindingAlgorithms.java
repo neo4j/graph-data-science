@@ -23,7 +23,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -35,7 +34,6 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
-import org.neo4j.gds.core.loading.validation.GraphLoadedETL;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
@@ -439,12 +437,7 @@ public class InstrumentedPathFindingAlgorithms {
                     );
                 }
             })
-            .with(new GraphLoadedETL() {
-                @Override
-                public void onGraphLoaded(Graph graph) {
-                    new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE).validate(graph);
-                }
-            });
+            .with(new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
