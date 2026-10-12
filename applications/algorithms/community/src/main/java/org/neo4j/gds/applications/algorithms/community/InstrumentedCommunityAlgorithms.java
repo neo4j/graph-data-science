@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -37,7 +34,6 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
-import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.core.loading.validation.OptionalNodePropertyGraphStoreRequirement;
@@ -73,7 +69,6 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -137,14 +132,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<CliqueCountingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    new UndirectedOnlyRequirement("Clique Counting").validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    )
-            );
+            .with(new UndirectedOnlyRequirement("Clique Counting"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -230,17 +218,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<KCoreDecompositionResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("K-Core-Decomposition").validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .with(new UndirectedOnlyRequirement("K-Core-Decomposition"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -307,21 +285,7 @@ public final class InstrumentedCommunityAlgorithms {
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
             .with(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("LocalClusteringCoefficient").validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    );
-                }
-            });
+            .with(new UndirectedOnlyRequirement("LocalClusteringCoefficient"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -343,21 +307,7 @@ public final class InstrumentedCommunityAlgorithms {
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
             .with(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("Leiden").validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    );
-                }
-            });
+            .with(new UndirectedOnlyRequirement("Leiden"));
 
         return launchConvenience.launchAlgorithm(
             graphName,

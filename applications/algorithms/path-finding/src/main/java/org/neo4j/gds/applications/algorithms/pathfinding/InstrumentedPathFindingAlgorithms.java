@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
@@ -36,7 +33,6 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
-import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
 import org.neo4j.gds.core.loading.validation.NonNegativeWeightsOnlyETL;
@@ -74,7 +70,6 @@ import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -236,18 +231,7 @@ public final class InstrumentedPathFindingAlgorithms {
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
             .with(new SourceNodeRequirement(configuration.sourceNode()))
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("K-Spanning Tree")
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .with(new UndirectedOnlyRequirement("K-Spanning Tree"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -333,18 +317,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PrizeCollectingSteinerTreeResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("Prize-collecting Steiner Tree")
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            })
+            .with(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
             .with(new NodePropertyMustExistOnAllLabels(configuration.prizeProperty()))
             .with(new NodePropertyTypeRequirement(configuration.prizeProperty(), List.of(ValueType.DOUBLE)));
 
@@ -507,17 +480,7 @@ public final class InstrumentedPathFindingAlgorithms {
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
             .with(new SourceNodeRequirement(configuration.sourceNode()))
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("Spanning Tree").validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .with(new UndirectedOnlyRequirement("Spanning Tree"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
