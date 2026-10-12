@@ -43,9 +43,19 @@ public class SourceNodeTargetNodeGraphStoreValidation implements GraphStoreFilte
         Optional<String> relationshipProperty
     ) {
         // validate the source node
-        sourceNodeValidation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
+        sourceNodeValidation.onGraphStoreFiltered(
+            graphStore,
+            selectedLabels,
+            selectedRelationshipTypes,
+            relationshipProperty
+        );
 
         // validate the target node
-        targetNodeValidation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
+        targetNodeValidation.onGraphStoreFiltered(
+            graphStore,
+            selectedLabels,
+            selectedRelationshipTypes,
+            relationshipProperty
+        );
     }
 }
