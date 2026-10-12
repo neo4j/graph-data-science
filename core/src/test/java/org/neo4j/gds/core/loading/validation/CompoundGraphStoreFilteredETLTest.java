@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,20 +32,29 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-class CompoundValidationRuleTest {
+class CompoundGraphStoreFilteredETLTest {
     @Test
-    void shouldWorkWithMultipleValidations() {
-        var goodValidation1 = mock(ValidationRule.class);
-        var badValidation = mock(ValidationRule.class);
-        var goodValidation2 = mock(ValidationRule.class);
+    void shouldWorkWithMultipleSteps() {
+        var goodETL1 = mock(GraphStoreFilteredETL.class);
+        var badETL = mock(GraphStoreFilteredETL.class);
+        var goodETL2 = mock(GraphStoreFilteredETL.class);
 
-        doThrow(new RuntimeException("OOPS")).when(badValidation).validate(any(GraphStore.class), anySet(), anySet());
-        var validations = new CompoundValidationRule(List.of(
-            goodValidation1,
-            badValidation,
-            goodValidation2
-        ));
+        doThrow(new RuntimeException("OOPS")).when(badETL).onGraphStoreFiltered(
+            any(GraphStore.class),
+            anySet(),
+            anySet(),
+            any(Optional.class)
+        );
+        var compoundETL = new CompoundGraphStoreFilteredETL(
+            List.of(
+                goodETL1,
+                badETL,
+                goodETL2
+            )
+        );
 
-        assertThatThrownBy(() -> validations.validate(mock(GraphStore.class), Set.of(), Set.of())).hasMessageContaining("OOPS");
+        assertThatThrownBy(
+            () -> compoundETL.onGraphStoreFiltered(mock(GraphStore.class), Set.of(), Set.of(), Optional.empty())
+        ).hasMessageContaining("OOPS");
     }
 }

@@ -41,12 +41,12 @@ class GraphLoadETLAndBuilderTest {
         var graphLoadedETL1 = mock(GraphLoadedETL.class);
         var graphLoadedETL2 = mock(GraphLoadedETL.class);
         var graphLoadETL = new GraphLoadETLBuilder()
-            .with(graphStoreLoadedETL1)
-            .with(graphStoreLoadedETL2)
-            .with(graphStoreFilteredETL1)
-            .with(graphStoreFilteredETL2)
-            .with(graphLoadedETL1)
-            .with(graphLoadedETL2)
+            .withGraphStoreLoadedETL(graphStoreLoadedETL1)
+            .withGraphStoreLoadedETL(graphStoreLoadedETL2)
+            .withGraphStoreFilteredETL(graphStoreFilteredETL1)
+            .withGraphStoreFilteredETL(graphStoreFilteredETL2)
+            .withGraphLoadedETL(graphLoadedETL1)
+            .withGraphLoadedETL(graphLoadedETL2)
             .build();
 
         var graphStore = mock(GraphStore.class);

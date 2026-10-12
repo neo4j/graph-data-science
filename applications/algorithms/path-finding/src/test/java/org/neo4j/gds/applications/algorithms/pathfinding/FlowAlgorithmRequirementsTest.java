@@ -54,8 +54,23 @@ class FlowAlgorithmRequirementsTest {
             Optional.empty()
         );
 
-        verify(sources, times(1)).validate(eq(graphStore), eq(nodeLabels), eq(relTypes));
-        verify(targets, times(1)).validate(eq(graphStore), eq(nodeLabels), eq(relTypes));
-        verify(nodeCapacity, times(1)).validate(eq(graphStore), eq(nodeLabels), eq(relTypes));
+        verify(sources, times(1)).onGraphStoreFiltered(
+            eq(graphStore),
+            eq(nodeLabels),
+            eq(relTypes),
+            eq(Optional.empty())
+        );
+        verify(targets, times(1)).onGraphStoreFiltered(
+            eq(graphStore),
+            eq(nodeLabels),
+            eq(relTypes),
+            eq(Optional.empty())
+        );
+        verify(nodeCapacity, times(1)).onGraphStoreFiltered(
+            eq(graphStore),
+            eq(nodeLabels),
+            eq(relTypes),
+            eq(Optional.empty())
+        );
     }
 }

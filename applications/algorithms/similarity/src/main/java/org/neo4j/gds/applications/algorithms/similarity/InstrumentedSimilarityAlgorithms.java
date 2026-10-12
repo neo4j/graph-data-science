@@ -74,8 +74,8 @@ public final class InstrumentedSimilarityAlgorithms {
         var filteredKnnParameters = configuration.toFilteredKnnParameters();
 
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new KnnETL(filteredKnnParameters.knnParametersSansNodeCount().nodePropertiesNames()))
-            .with(new NodeFilterETL(
+            .withGraphStoreFilteredETL(new KnnETL(filteredKnnParameters.knnParametersSansNodeCount().nodePropertiesNames()))
+            .withGraphStoreFilteredETL(new NodeFilterETL(
                 filteredKnnParameters.filteringParameters().sourceFilter(),
                 filteredKnnParameters.filteringParameters().targetFilter()
             ));
@@ -101,11 +101,11 @@ public final class InstrumentedSimilarityAlgorithms {
         var filteredParameters = configuration.toFilteredParameters();
 
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new NodeFilterETL(
+            .withGraphStoreFilteredETL(new NodeFilterETL(
                 filteredParameters.filteringParameters().sourceFilter(),
                 filteredParameters.filteringParameters().targetFilter()
             ))
-            .with(new NodeSimilarityETL(
+            .withGraphStoreFilteredETL(new NodeSimilarityETL(
                 filteredParameters.nodeSimilarityParameters().useComponents(),
                 filteredParameters.nodeSimilarityParameters().componentProperty()
             ));
@@ -129,7 +129,7 @@ public final class InstrumentedSimilarityAlgorithms {
         ResultRenderer<KnnResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new KnnETL(configuration.toParameters().nodePropertiesNames()));
+            .withGraphStoreFilteredETL(new KnnETL(configuration.toParameters().nodePropertiesNames()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -152,7 +152,7 @@ public final class InstrumentedSimilarityAlgorithms {
         var parameters = configuration.toParameters();
 
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new NodeSimilarityETL(parameters.useComponents(), parameters.componentProperty()));
+            .withGraphStoreFilteredETL(new NodeSimilarityETL(parameters.useComponents(), parameters.componentProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,

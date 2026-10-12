@@ -48,7 +48,7 @@ class GraphLoadETLFromConfigurationParser {
         for (var parser : graphStoreFilteredETLParsers) {
             var etlStep = parser.parse(configuration);
 
-            etlStep.ifPresent(graphLoadETLBuilder::with);
+            etlStep.ifPresent(graphLoadETLBuilder::withGraphStoreFilteredETL);
         }
     }
 }

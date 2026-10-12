@@ -82,10 +82,10 @@ import java.util.stream.Stream;
  * where you _use_ the results computed here, and ETL them.
  * Associated mode-specific validation is also done in layers above.
  */
-public class PathFindingAlgorithms {
+class PathFindingAlgorithms {
     private final Log log;
 
-    public PathFindingAlgorithms(Log log) {this.log = log;}
+    PathFindingAlgorithms(Log log) {this.log = log;}
 
     Stream<AllShortestPathsStreamResult> allShortestPaths(
         Graph graph,

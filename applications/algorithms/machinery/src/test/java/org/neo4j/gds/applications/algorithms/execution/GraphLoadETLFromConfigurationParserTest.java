@@ -74,7 +74,7 @@ class GraphLoadETLFromConfigurationParserTest {
         when(parser3.parse(configuration)).thenReturn(Optional.empty());
         parser.parse(configuration, graphLoadETLBuilder);
 
-        verify(graphLoadETLBuilder).with(etlStep);
+        verify(graphLoadETLBuilder).withGraphStoreFilteredETL(etlStep);
     }
 
     @Test
@@ -92,7 +92,7 @@ class GraphLoadETLFromConfigurationParserTest {
             graphLoadETLBuilder
         );
 
-        verify(graphLoadETLBuilder).with(any(GraphStoreFilteredETL.class));
+        verify(graphLoadETLBuilder).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
     }
 
     @Test
@@ -115,7 +115,7 @@ class GraphLoadETLFromConfigurationParserTest {
             graphLoadETLBuilder
         );
 
-        verify(graphLoadETLBuilder, times(2)).with(any(GraphStoreFilteredETL.class));
+        verify(graphLoadETLBuilder, times(2)).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
     }
 
     @Test
@@ -138,6 +138,6 @@ class GraphLoadETLFromConfigurationParserTest {
             graphLoadETLBuilder
         );
 
-        verify(graphLoadETLBuilder, times(2)).with(any(GraphStoreFilteredETL.class));
+        verify(graphLoadETLBuilder, times(2)).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
     }
 }

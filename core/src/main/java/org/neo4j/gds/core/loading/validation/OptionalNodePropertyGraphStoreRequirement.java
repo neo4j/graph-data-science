@@ -26,25 +26,33 @@ import org.neo4j.gds.api.GraphStore;
 import java.util.Collection;
 import java.util.Optional;
 
-public final class OptionalNodePropertyGraphStoreRequirement implements ValidationRule {
+public final class OptionalNodePropertyGraphStoreRequirement implements GraphStoreFilteredETL {
+    private final Optional<NodePropertyMustExistOnAllLabels> etl;
 
-    private final ValidationRule validation;
-
-    private OptionalNodePropertyGraphStoreRequirement(ValidationRule validation) {this.validation = validation;}
+    private OptionalNodePropertyGraphStoreRequirement(Optional<NodePropertyMustExistOnAllLabels> etl) {
+        this.etl = etl;
+    }
 
     public static OptionalNodePropertyGraphStoreRequirement create(Optional<String> seedProperty) {
-        return seedProperty
-            .map(NodePropertyMustExistOnAllLabels::new)
-            .map(OptionalNodePropertyGraphStoreRequirement::new)
-            .orElseGet(() -> new OptionalNodePropertyGraphStoreRequirement(ValidationRule.EMPTY));
+        var etl = seedProperty.map(NodePropertyMustExistOnAllLabels::new);
+
+        return new OptionalNodePropertyGraphStoreRequirement(etl);
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
-        validation.validate(graphStore, selectedLabels, selectedRelationshipTypes);
+        etl.ifPresent(
+            etl -> etl.onGraphStoreFiltered(
+                graphStore,
+                selectedLabels,
+                selectedRelationshipTypes,
+                relationshipProperty
+            )
+        );
     }
 }

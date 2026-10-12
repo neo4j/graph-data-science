@@ -112,19 +112,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                new GraphStoreFilteredETL() {
-                    @Override
-                    public void onGraphStoreFiltered(
-                        GraphStore graphStore,
-                        Collection<NodeLabel> selectedLabels,
-                        Collection<RelationshipType> selectedRelationshipTypes,
-                        Optional<String> relationshipProperty
-                    ) {
-                        new SourceNodesRequirement(configuration.sourceNodes().inputNodes());
-                    }
-                }
-            );
+            .withGraphStoreFilteredETL(new SourceNodesRequirement(configuration.sourceNodes().inputNodes()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -146,23 +134,7 @@ public final class InstrumentedCentralityAlgorithms {
         boolean shouldComputeComponents
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                new GraphStoreFilteredETL() {
-                    @Override
-                    public void onGraphStoreFiltered(
-                        GraphStore graphStore,
-                        Collection<NodeLabel> selectedLabels,
-                        Collection<RelationshipType> selectedRelationshipTypes,
-                        Optional<String> relationshipProperty
-                    ) {
-                        new UndirectedOnlyRequirement("Articulation Points").validate(
-                            graphStore,
-                            selectedLabels,
-                            selectedRelationshipTypes
-                        );
-                    }
-                }
-            );
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Articulation Points"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -183,7 +155,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<BetwennessCentralityResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new BetweennessCentralityRequirements());
+            .withGraphStoreFilteredETL(new BetweennessCentralityRequirements());
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -205,23 +177,7 @@ public final class InstrumentedCentralityAlgorithms {
         boolean shouldComputeComponents
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                new GraphStoreFilteredETL() {
-                    @Override
-                    public void onGraphStoreFiltered(
-                        GraphStore graphStore,
-                        Collection<NodeLabel> selectedLabels,
-                        Collection<RelationshipType> selectedRelationshipTypes,
-                        Optional<String> relationshipProperty
-                    ) {
-                        new UndirectedOnlyRequirement("Bridges").validate(
-                            graphStore,
-                            selectedLabels,
-                            selectedRelationshipTypes
-                        );
-                    }
-                }
-            );
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Bridges"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -296,7 +252,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new GraphStoreFilteredETL() {
                     @Override
                     public void onGraphStoreFiltered(
@@ -347,9 +303,9 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<PregelResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(hitsHookGenerator.generate(configuration)) // the hook creates inverse indexes
-            .with(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()))
-            .with(new DirectedOnlyRequirement("Hits"));
+            .withGraphStoreLoadedETL(hitsHookGenerator.generate(configuration)) // the hook creates inverse indexes
+            .withGraphStoreFilteredETL(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()))
+            .withGraphStoreFilteredETL(new DirectedOnlyRequirement("Hits"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -370,19 +326,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<IndirectExposureResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                new GraphStoreFilteredETL() {
-                    @Override
-                    public void onGraphStoreFiltered(
-                        GraphStore graphStore,
-                        Collection<NodeLabel> selectedLabels,
-                        Collection<RelationshipType> selectedRelationshipTypes,
-                        Optional<String> relationshipProperty
-                    ) {
-                        new UndirectedOnlyRequirement("Indirect exposure").validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                    }
-                }
-            );
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Indirect exposure"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -403,7 +347,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new GraphStoreFilteredETL() {
                     @Override
                     public void onGraphStoreFiltered(

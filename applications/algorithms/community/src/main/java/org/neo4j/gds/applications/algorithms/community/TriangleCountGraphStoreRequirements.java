@@ -57,10 +57,11 @@ public final class TriangleCountGraphStoreRequirements implements GraphStoreFilt
         Collection<RelationshipType> selectedRelationshipTypes,
         Optional<String> relationshipProperty
     ) {
-        undirectedOnlyGraphStoreValidation.validate(
+        undirectedOnlyGraphStoreValidation.onGraphStoreFiltered(
             graphStore,
             selectedLabels,
-            selectedRelationshipTypes
+            selectedRelationshipTypes,
+            relationshipProperty
         );
         validateLabelsExist(selectedLabels);
     }

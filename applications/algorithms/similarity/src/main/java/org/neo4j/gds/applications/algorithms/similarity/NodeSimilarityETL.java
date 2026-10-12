@@ -47,7 +47,7 @@ class NodeSimilarityETL implements GraphStoreFilteredETL {
         if (useComponents && componentProperty != null) {
             new NodePropertyMustExistOnAllLabels(
                 componentProperty
-            ).validate(graphStore, selectedLabels, selectedRelationshipTypes);
+            ).onGraphStoreFiltered(graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty);
         }
     }
 }

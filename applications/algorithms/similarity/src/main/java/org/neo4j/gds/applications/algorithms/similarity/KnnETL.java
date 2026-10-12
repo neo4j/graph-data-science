@@ -43,13 +43,12 @@ class KnnETL implements GraphStoreFilteredETL {
         Optional<String> relationshipProperty
     ) {
         nodeProperties.forEach(
-            nodeProperty -> {
-                new NodePropertyMustExistOnAllLabels(nodeProperty).validate(
-                    graphStore,
-                    selectedLabels,
-                    selectedRelationshipTypes
-                );
-            }
+            nodeProperty -> new NodePropertyMustExistOnAllLabels(nodeProperty).onGraphStoreFiltered(
+                graphStore,
+                selectedLabels,
+                selectedRelationshipTypes,
+                relationshipProperty
+            )
         );
     }
 }

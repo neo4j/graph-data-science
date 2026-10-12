@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -37,7 +34,6 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
-import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAnyLabel;
 import org.neo4j.gds.core.loading.validation.OptionalNodePropertyGraphStoreRequirement;
@@ -73,7 +69,6 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -116,7 +111,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<ApproxMaxKCutResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new MinCommunitySizeSumETL(configuration.minCommunitySizes()));
+            .withGraphStoreFilteredETL(new MinCommunitySizeSumETL(configuration.minCommunitySizes()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -137,14 +132,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<CliqueCountingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                (graphStore, selectedLabels, selectedRelationshipTypes, relationshipProperty) ->
-                    new UndirectedOnlyRequirement("Clique Counting").validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    )
-            );
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Clique Counting"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -165,7 +153,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<ConductanceResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
+            .withGraphStoreFilteredETL(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -230,17 +218,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<KCoreDecompositionResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("K-Core-Decomposition").validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("K-Core-Decomposition"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -284,28 +262,8 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<LabelPropagationResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())).validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            })
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new NodePropertyMustExistOnAllLabels(configuration.nodeWeightProperty()).validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
+            .withGraphStoreFilteredETL(new NodePropertyMustExistOnAllLabels(configuration.nodeWeightProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -326,33 +284,8 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<LocalClusteringCoefficientResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            })
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("LocalClusteringCoefficient").validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    );
-                }
-            });
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("LocalClusteringCoefficient"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -373,33 +306,8 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<LeidenResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            })
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("Leiden").validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    );
-                }
-            });
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Leiden"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -420,18 +328,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<LouvainResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -452,7 +349,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<ModularityResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
+            .withGraphStoreFilteredETL(new NodePropertyMustExistOnAnyLabel(configuration.communityProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -473,18 +370,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<ModularityOptimizationResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -523,7 +409,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<PregelResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()));
+            .withGraphStoreFilteredETL(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -544,7 +430,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<Stream<TriangleResult>, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
+            .withGraphStoreFilteredETL(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -565,7 +451,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<TriangleCountResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
+            .withGraphStoreFilteredETL(TriangleCountGraphStoreRequirements.create(configuration.labelFilter()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -586,18 +472,7 @@ public final class InstrumentedCommunityAlgorithms {
         ResultRenderer<DisjointSetStruct, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty()))
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())));
 
         return launchConvenience.launchAlgorithm(
             graphName,

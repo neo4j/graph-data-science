@@ -25,11 +25,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ConfigNodesValidations;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
-public class TargetNodesRequirement implements ValidationRule {
-
+public class TargetNodesRequirement implements GraphStoreFilteredETL {
     private static final String TARGET_NODES_KEY = "targetNodes";
 
     private final Collection<Long> targetNodes;
@@ -39,10 +39,11 @@ public class TargetNodesRequirement implements ValidationRule {
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
         nodesNotNegative(targetNodes, TARGET_NODES_KEY);
         ConfigNodesValidations.nodesExistInGraph(
@@ -52,5 +53,4 @@ public class TargetNodesRequirement implements ValidationRule {
             TARGET_NODES_KEY
         );
     }
-
 }

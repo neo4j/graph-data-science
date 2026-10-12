@@ -19,22 +19,20 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
-import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
 import org.neo4j.gds.core.loading.validation.NonNegativeWeightsOnlyETL;
@@ -44,6 +42,7 @@ import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValid
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -64,24 +63,24 @@ import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public class InstrumentedPathFindingAlgorithms {
+public final class InstrumentedPathFindingAlgorithms {
     private final TrackedPathFindingAlgorithms algorithms;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
 
-    public InstrumentedPathFindingAlgorithms(
+    private InstrumentedPathFindingAlgorithms(
         TrackedPathFindingAlgorithms algorithms,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience
@@ -89,6 +88,36 @@ public class InstrumentedPathFindingAlgorithms {
         this.algorithms = algorithms;
         this.estimationFacade = estimationFacade;
         this.launchConvenience = launchConvenience;
+    }
+
+    public static InstrumentedPathFindingAlgorithms create(
+        GdsLoggers loggers,
+        RequestScopedDependencies requestScopedDependencies,
+        ProgressTrackerCreator progressTrackerCreator,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
+        LaunchConvenience launchConvenience
+    ) {
+        var algorithms = new PathFindingAlgorithms(loggers.log());
+
+        var progressTrackerFactory = new ProgressTrackerFactory(
+            loggers.log(),
+            loggers.loggerForProgressTracking(),
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory()
+        );
+
+        var trackedPathFindingAlgorithms = new TrackedPathFindingAlgorithms(
+            algorithms,
+            requestScopedDependencies,
+            progressTrackerCreator,
+            progressTrackerFactory
+        );
+
+        return new InstrumentedPathFindingAlgorithms(
+            trackedPathFindingAlgorithms,
+            estimationFacade,
+            launchConvenience
+        );
     }
 
     public <RESULT, METADATA> CompletableFuture<RESULT> allShortestPaths(
@@ -134,7 +163,7 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<HugeLongArray, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetNodes())
             );
 
@@ -157,18 +186,7 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodeRequirement(configuration.sourceNode())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(new SourceNodeRequirement(configuration.sourceNode()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -189,7 +207,7 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<HugeLongArray, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetNodes())
             );
 
@@ -212,30 +230,8 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<SpanningTree, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodeRequirement(configuration.sourceNode())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            })
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("K-Spanning Tree")
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(new SourceNodeRequirement(configuration.sourceNode()))
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("K-Spanning Tree"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -274,7 +270,7 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<FlowResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
+            .withGraphStoreFilteredETL(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -295,10 +291,10 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<CostFlowResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
+            .withGraphStoreFilteredETL(FlowAlgorithmRequirements.create(configuration.toMaxFlowParameters()));
 
         var secondGraphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new RelationshipPropertyGraphStoreValidation(configuration.costProperty(), "costProperty"));
+            .withGraphStoreFilteredETL(new RelationshipPropertyGraphStoreValidation(configuration.costProperty(), "costProperty"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -321,44 +317,9 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PrizeCollectingSteinerTreeResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("Prize-collecting Steiner Tree")
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            })
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new NodePropertyMustExistOnAllLabels(configuration.prizeProperty())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            })
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new NodePropertyTypeRequirement(
-                        configuration.prizeProperty(),
-                        List.of(ValueType.DOUBLE)
-                    ).validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Prize-collecting Steiner Tree"))
+            .withGraphStoreFilteredETL(new NodePropertyMustExistOnAllLabels(configuration.prizeProperty()))
+            .withGraphStoreFilteredETL(new NodePropertyTypeRequirement(configuration.prizeProperty(), List.of(ValueType.DOUBLE)));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -379,22 +340,8 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<Stream<long[]>, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodesRequirement(configuration.sourceNodes()).validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    );
-                }
-            })
-            .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
+            .withGraphStoreFilteredETL(new SourceNodesRequirement(configuration.sourceNodes()))
+            .withGraphLoadedETL(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -422,22 +369,8 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<HugeAtomicLongArray, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodesRequirement(configuration.sourceNodes()).validate(
-                        graphStore,
-                        selectedLabels,
-                        selectedRelationshipTypes
-                    );
-                }
-            })
-            .with(new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE));
+            .withGraphStoreFilteredETL(new SourceNodesRequirement(configuration.sourceNodes()))
+            .withGraphLoadedETL(new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -458,8 +391,8 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()))
-            .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
+            .withGraphStoreFilteredETL(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()))
+            .withGraphLoadedETL(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -480,8 +413,8 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetsList()))
-            .with(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
+            .withGraphStoreFilteredETL(new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetsList()))
+            .withGraphLoadedETL(new NonNegativeWeightsOnlyETL(configuration.concurrency(), DefaultPool.INSTANCE));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -504,7 +437,7 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()));
+            .withGraphStoreFilteredETL(new SourceNodeTargetNodeGraphStoreValidation(configuration.sourceNode(), configuration.targetNode()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -525,18 +458,7 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodeRequirement(configuration.sourceNode())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(new SourceNodeRequirement(configuration.sourceNode()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -557,30 +479,8 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<SpanningTree, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                new GraphStoreFilteredETL() {
-                    @Override
-                    public void onGraphStoreFiltered(
-                        GraphStore graphStore,
-                        Collection<NodeLabel> selectedLabels,
-                        Collection<RelationshipType> selectedRelationshipTypes,
-                        Optional<String> relationshipProperty
-                    ) {
-                        new SourceNodeRequirement(configuration.sourceNode()).validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                    }
-                }
-            )
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new UndirectedOnlyRequirement("Spanning Tree").validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(new SourceNodeRequirement(configuration.sourceNode()))
+            .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Spanning Tree"));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -601,7 +501,7 @@ public class InstrumentedPathFindingAlgorithms {
         ResultRenderer<SteinerTreeResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
+            .withGraphStoreFilteredETL(
                 new SourceNodeTargetNodesGraphStoreValidation(configuration.sourceNode(), configuration.targetNodes())
             );
 

@@ -34,17 +34,17 @@ public class GraphLoadETLBuilder {
         return new GraphLoadETLBuilder();
     }
 
-    public GraphLoadETLBuilder with(GraphStoreLoadedETL hook) {
+    public GraphLoadETLBuilder withGraphStoreLoadedETL(GraphStoreLoadedETL hook) {
         graphStoreLoadedHooks.add(hook);
         return this;
     }
 
-    public GraphLoadETLBuilder with(GraphStoreFilteredETL hook) {
+    public GraphLoadETLBuilder withGraphStoreFilteredETL(GraphStoreFilteredETL hook) {
         graphStoreFilteredHooks.add(hook);
         return this;
     }
 
-    public GraphLoadETLBuilder with(GraphLoadedETL hook) {
+    public GraphLoadETLBuilder withGraphLoadedETL(GraphLoadedETL hook) {
         graphLoadedHooks.add(hook);
         return this;
     }

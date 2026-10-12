@@ -31,13 +31,13 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
-public class TrackedSimilarityAlgorithms {
+class TrackedSimilarityAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final SimilarityAlgorithms similarityAlgorithms;
     private final ProgressTrackerCreator progressTrackerCreator;
 
-    public TrackedSimilarityAlgorithms(
+    TrackedSimilarityAlgorithms(
         SimilarityAlgorithms similarityAlgorithms,
         ProgressTrackerCreator progressTrackerCreator
     ) {

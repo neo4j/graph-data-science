@@ -24,27 +24,24 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class UndirectedOnlyRequirement implements ValidationRule {
-
+public final class UndirectedOnlyRequirement implements GraphStoreFilteredETL {
     private final String algorithm;
 
     public UndirectedOnlyRequirement(String algorithm) {this.algorithm = algorithm;}
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
-        validateOnlyUndirected(graphStore, selectedRelationshipTypes);
-    }
-
-    void validateOnlyUndirected(GraphStore graphStore, Collection<RelationshipType> selectedRelationshipTypes) {
         if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The %s algorithm requires relationship projections to be UNDIRECTED. " +
@@ -54,5 +51,4 @@ public final class UndirectedOnlyRequirement implements ValidationRule {
             ));
         }
     }
-
 }

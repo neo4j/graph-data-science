@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -30,7 +29,6 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 
 /**
  * The facade over path finding applications
@@ -67,37 +65,24 @@ public final class PathFindingApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService,
         LaunchConvenience launchConvenience,
         Synchroniser synchroniser
     ) {
-        var algorithms = new PathFindingAlgorithms(loggers.log());
-        var pathFindingAlgorithms = new PathFindingAlgorithmsBusinessFacade(algorithms, requestScopedDependencies, progressTrackerCreator);
-
         var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var writeRelationshipService = new WriteRelationshipService(loggers.log(), requestScopedDependencies, writeContext);
 
-        var progressTrackerFactory = new ProgressTrackerFactory(
-            loggers.log(),
-            loggers.loggerForProgressTracking(),
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
-        );
-        var trackedAlgorithms = new TrackedPathFindingAlgorithms(
-            algorithms,
+        var raw = InstrumentedPathFindingAlgorithms.create(
+            loggers,
             requestScopedDependencies,
             progressTrackerCreator,
-            progressTrackerFactory
+            estimationModeFacade,
+            launchConvenience
         );
-        var raw = new InstrumentedPathFindingAlgorithms(trackedAlgorithms, estimationModeFacade, launchConvenience);
 
         var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
-            estimationModeFacade,
-            pathFindingAlgorithms,
-            algorithmProcessingTemplateConvenience,
             mutateNodeProperty,
             mutateRelationshipService,
             raw,

@@ -28,8 +28,9 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
-public class NodePropertyTypeRequirement implements ValidationRule {
+public class NodePropertyTypeRequirement implements GraphStoreFilteredETL {
     private final String nodeProperty;
     private final List<ValueType> allowedValueTypes;
 
@@ -39,13 +40,13 @@ public class NodePropertyTypeRequirement implements ValidationRule {
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
         validatePropertyType(graphStore);
-
     }
 
     void validatePropertyType(GraphStore graphStore) {
