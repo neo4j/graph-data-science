@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
@@ -67,33 +66,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
-
 /**
  * Here is the top level business facade for all your path finding mutate needs.
  * It will have all pathfinding algorithms on it, in mutate mode.
  */
 public class PathFindingAlgorithmsMutateModeBusinessFacade {
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodeProperty;
     private final MutateRelationshipService mutateRelationshipService;
     private final InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms;
     private final Synchroniser synchroniser;
 
     public PathFindingAlgorithmsMutateModeBusinessFacade(
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithmsBusinessFacade pathFindingAlgorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodeProperty,
         MutateRelationshipService mutateRelationshipService,
         InstrumentedPathFindingAlgorithms instrumentedPathFindingAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.pathFindingAlgorithms = pathFindingAlgorithms;
-        this.estimationFacade = estimationFacade;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodeProperty = mutateNodeProperty;
         this.mutateRelationshipService = mutateRelationshipService;
         this.instrumentedPathFindingAlgorithms = instrumentedPathFindingAlgorithms;
@@ -254,16 +242,12 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             mutateNodeProperty
         );
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedPathFindingAlgorithms.randomWalkCountingNodeVisits(
             graphName,
             configuration,
-            RandomWalk,
-            // TODO: maybe have different memory estimation
-            () -> estimationFacade.randomWalk(configuration),
-            (graph, __) -> pathFindingAlgorithms.randomWalkCountingNodeVisits(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT singlePairShortestPathAStar(

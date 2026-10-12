@@ -28,6 +28,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -44,6 +46,7 @@ import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodeGraphStoreValid
 import org.neo4j.gds.core.loading.validation.SourceNodeTargetNodesGraphStoreValidation;
 import org.neo4j.gds.core.loading.validation.SourceNodesRequirement;
 import org.neo4j.gds.core.loading.validation.UndirectedOnlyRequirement;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -64,6 +67,7 @@ import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
@@ -76,12 +80,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public class InstrumentedPathFindingAlgorithms {
+public final class InstrumentedPathFindingAlgorithms {
     private final TrackedPathFindingAlgorithms algorithms;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final LaunchConvenience launchConvenience;
 
-    public InstrumentedPathFindingAlgorithms(
+    private InstrumentedPathFindingAlgorithms(
         TrackedPathFindingAlgorithms algorithms,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         LaunchConvenience launchConvenience
@@ -89,6 +93,36 @@ public class InstrumentedPathFindingAlgorithms {
         this.algorithms = algorithms;
         this.estimationFacade = estimationFacade;
         this.launchConvenience = launchConvenience;
+    }
+
+    public static InstrumentedPathFindingAlgorithms create(
+        GdsLoggers loggers,
+        RequestScopedDependencies requestScopedDependencies,
+        ProgressTrackerCreator progressTrackerCreator,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
+        LaunchConvenience launchConvenience
+    ) {
+        var algorithms = new PathFindingAlgorithms(loggers.log());
+
+        var progressTrackerFactory = new ProgressTrackerFactory(
+            loggers.log(),
+            loggers.loggerForProgressTracking(),
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory()
+        );
+
+        var trackedPathFindingAlgorithms = new TrackedPathFindingAlgorithms(
+            algorithms,
+            requestScopedDependencies,
+            progressTrackerCreator,
+            progressTrackerFactory
+        );
+
+        return new InstrumentedPathFindingAlgorithms(
+            trackedPathFindingAlgorithms,
+            estimationFacade,
+            launchConvenience
+        );
     }
 
     public <RESULT, METADATA> CompletableFuture<RESULT> allShortestPaths(

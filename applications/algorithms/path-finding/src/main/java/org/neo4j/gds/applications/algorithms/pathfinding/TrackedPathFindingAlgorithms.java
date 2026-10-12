@@ -61,7 +61,7 @@ import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.stream.Stream;
 
-public class TrackedPathFindingAlgorithms {
+class TrackedPathFindingAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final PathFindingAlgorithms algorithms;
@@ -71,7 +71,7 @@ public class TrackedPathFindingAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
     private final ProgressTrackerFactory progressTrackerFactory;
 
-    public TrackedPathFindingAlgorithms(
+    TrackedPathFindingAlgorithms(
         PathFindingAlgorithms algorithms,
         RequestScopedDependencies requestScopedDependencies,
         ProgressTrackerCreator progressTrackerCreator,
