@@ -23,6 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -31,8 +32,10 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
+import org.neo4j.gds.core.loading.validation.GraphLoadedETL;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustExistOnAllLabels;
 import org.neo4j.gds.core.loading.validation.NodePropertyTypeRequirement;
@@ -402,6 +405,54 @@ public class InstrumentedPathFindingAlgorithms {
             (graph, __, ___) -> algorithms.randomWalk(graph, configuration),
             () -> estimationFacade.randomWalk(configuration),
             AlgorithmLabel.RandomWalk,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    /**
+     * Here we have a variant of RandomWalk where, for unknown reasons, we did not reuse the original RandomWalk code.
+     * We might have copied it and made a few changes to satisfy the "CountingNodeVisits" bit. But looking at it today,
+     * it is not obvious to me how to de-duplicate this. So I am leaving it as an exercise for the next person.
+     * Also, it was never used so perhaps better to scrap it?
+     * Anyway, it might have been built for a reason, so here it is.
+     */
+    public <RESULT, METADATA> CompletableFuture<RESULT> randomWalkCountingNodeVisits(
+        GraphName graphName,
+        RandomWalkBaseConfig configuration,
+        Optional<SideEffect<HugeAtomicLongArray, METADATA>> sideEffect,
+        ResultRenderer<HugeAtomicLongArray, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .with(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new SourceNodesRequirement(configuration.sourceNodes()).validate(
+                        graphStore,
+                        selectedLabels,
+                        selectedRelationshipTypes
+                    );
+                }
+            })
+            .with(new GraphLoadedETL() {
+                @Override
+                public void onGraphLoaded(Graph graph) {
+                    new RandomWalkGraphValidation(configuration.concurrency(), DefaultPool.INSTANCE).validate(graph);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.randomWalkCountingNodeVisits(graph, configuration),
+            () -> estimationFacade.randomWalkCountingVisits(configuration),
+            AlgorithmLabel.RandomWalk, // nope, they didn't create a new label
             sideEffect,
             resultRenderer
         );

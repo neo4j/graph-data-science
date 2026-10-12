@@ -29,7 +29,8 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteRelationshipService;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.core.utils.logging.GdsLoggers;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 
 /**
  * The facade over path finding applications
@@ -62,7 +63,7 @@ public final class PathFindingApplications {
      * Here we hide dull and boring structure
      */
     public static PathFindingApplications create(
-        Log log,
+        GdsLoggers loggers,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
@@ -73,16 +74,23 @@ public final class PathFindingApplications {
         LaunchConvenience launchConvenience,
         Synchroniser synchroniser
     ) {
-        var algorithms = new PathFindingAlgorithms(log);
+        var algorithms = new PathFindingAlgorithms(loggers.log());
         var pathFindingAlgorithms = new PathFindingAlgorithmsBusinessFacade(algorithms, requestScopedDependencies, progressTrackerCreator);
 
         var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
-        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies, writeContext);
+        var writeRelationshipService = new WriteRelationshipService(loggers.log(), requestScopedDependencies, writeContext);
 
+        var progressTrackerFactory = new ProgressTrackerFactory(
+            loggers.log(),
+            loggers.loggerForProgressTracking(),
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory()
+        );
         var trackedAlgorithms = new TrackedPathFindingAlgorithms(
             algorithms,
             requestScopedDependencies,
-            progressTrackerCreator
+            progressTrackerCreator,
+            progressTrackerFactory
         );
         var raw = new InstrumentedPathFindingAlgorithms(trackedAlgorithms, estimationModeFacade, launchConvenience);
 
@@ -107,7 +115,7 @@ public final class PathFindingApplications {
         );
 
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
-            log,
+            loggers.log(),
             requestScopedDependencies,
             writeContext,
             writeRelationshipService,

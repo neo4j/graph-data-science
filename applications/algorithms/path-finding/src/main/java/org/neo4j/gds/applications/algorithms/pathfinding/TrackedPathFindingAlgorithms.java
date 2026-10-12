@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
@@ -51,6 +52,7 @@ import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
@@ -67,15 +69,18 @@ public class TrackedPathFindingAlgorithms {
     // request scoped parameters
     private final RequestScopedDependencies requestScopedDependencies;
     private final ProgressTrackerCreator progressTrackerCreator;
+    private final ProgressTrackerFactory progressTrackerFactory;
 
     public TrackedPathFindingAlgorithms(
         PathFindingAlgorithms algorithms,
         RequestScopedDependencies requestScopedDependencies,
-        ProgressTrackerCreator progressTrackerCreator
+        ProgressTrackerCreator progressTrackerCreator,
+        ProgressTrackerFactory progressTrackerFactory
     ) {
         this.algorithms = algorithms;
         this.requestScopedDependencies = requestScopedDependencies;
         this.progressTrackerCreator = progressTrackerCreator;
+        this.progressTrackerFactory = progressTrackerFactory;
     }
 
     Stream<AllShortestPathsStreamResult> allShortestPaths(Graph graph, AllShortestPathsConfig configuration) {
@@ -268,6 +273,27 @@ public class TrackedPathFindingAlgorithms {
             ),
             progressTracker,
             false
+        );
+    }
+
+    HugeAtomicLongArray randomWalkCountingNodeVisits(Graph graph, RandomWalkBaseConfig configuration) {
+        var progressTracker = progressTrackerFactory.create(
+            PathFindingAlgorithmTasks.randomWalkCountingVisits(graph, configuration.concurrency()),
+            configuration.jobId(),
+            configuration.concurrency(),
+            configuration.logProgress()
+        );
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.randomWalkCountingNodeVisits(
+                graph,
+                configuration.toParameters(),
+                progressTracker,
+                requestScopedDependencies.terminationFlag(),
+                DefaultPool.INSTANCE
+            ),
+            progressTracker,
+            false // I mean it is a tossup; unused, duplicated code gives no indication, but original had false here, so...
         );
     }
 

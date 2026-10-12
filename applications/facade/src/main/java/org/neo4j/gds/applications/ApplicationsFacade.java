@@ -208,7 +208,7 @@ public final class ApplicationsFacade {
         var operationsApplications = OperationsApplications.create(featureTogglesRepository, requestScopedDependencies);
 
         var pathFindingApplications = PathFindingApplications.create(
-            loggers.log(),
+            loggers,
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
