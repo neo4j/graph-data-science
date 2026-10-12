@@ -191,18 +191,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodeRequirement(configuration.sourceNode())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .with(new SourceNodeRequirement(configuration.sourceNode()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -246,18 +235,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<SpanningTree, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodeRequirement(configuration.sourceNode())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            })
+            .with(new SourceNodeRequirement(configuration.sourceNode()))
             .with(new GraphStoreFilteredETL() {
                 @Override
                 public void onGraphStoreFiltered(
@@ -507,18 +485,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<PathFindingResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new SourceNodeRequirement(configuration.sourceNode())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .with(new SourceNodeRequirement(configuration.sourceNode()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -539,19 +506,7 @@ public final class InstrumentedPathFindingAlgorithms {
         ResultRenderer<SpanningTree, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .with(
-                new GraphStoreFilteredETL() {
-                    @Override
-                    public void onGraphStoreFiltered(
-                        GraphStore graphStore,
-                        Collection<NodeLabel> selectedLabels,
-                        Collection<RelationshipType> selectedRelationshipTypes,
-                        Optional<String> relationshipProperty
-                    ) {
-                        new SourceNodeRequirement(configuration.sourceNode()).validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                    }
-                }
-            )
+            .with(new SourceNodeRequirement(configuration.sourceNode()))
             .with(new GraphStoreFilteredETL() {
                 @Override
                 public void onGraphStoreFiltered(
