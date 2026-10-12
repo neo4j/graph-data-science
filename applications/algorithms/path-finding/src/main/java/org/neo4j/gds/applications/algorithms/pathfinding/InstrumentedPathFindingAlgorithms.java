@@ -367,18 +367,7 @@ public final class InstrumentedPathFindingAlgorithms {
                         .validate(graphStore, selectedLabels, selectedRelationshipTypes);
                 }
             })
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new NodePropertyMustExistOnAllLabels(configuration.prizeProperty())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            })
+            .with(new NodePropertyMustExistOnAllLabels(configuration.prizeProperty()))
             .with(new GraphStoreFilteredETL() {
                 @Override
                 public void onGraphStoreFiltered(

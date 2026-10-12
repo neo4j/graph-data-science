@@ -285,17 +285,7 @@ public final class InstrumentedCommunityAlgorithms {
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
             .with(OptionalNodePropertyGraphStoreRequirement.create(Optional.ofNullable(configuration.seedProperty())))
-            .with(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new NodePropertyMustExistOnAllLabels(configuration.nodeWeightProperty()).validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .with(new NodePropertyMustExistOnAllLabels(configuration.nodeWeightProperty()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
