@@ -20,69 +20,39 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.progress.tasks.Task;
-import org.neo4j.gds.progress.tracking.TaskProgressTracker;
-import org.neo4j.gds.progress.tracking.TaskTreeProgressTracker;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.tasks.Task;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
+import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 
 /**
- * Just some convenience, address this one day when we attack ProgressTracker
+ * Just some convenience on top of the more basic factory.
  */
-public class ProgressTrackerCreator {
-    private final Log log;
-    private final LoggerForProgressTracking loggerForProgressTracking;
-    private final RequestScopedDependencies requestScopedDependencies;
+public final class ProgressTrackerCreator {
+    private final ProgressTrackerFactory delegate;
 
-    public ProgressTrackerCreator(
+    private ProgressTrackerCreator(ProgressTrackerFactory delegate) {
+        this.delegate = delegate;
+    }
+
+    public static ProgressTrackerCreator construct(
         Log log,
         LoggerForProgressTracking loggerForProgressTracking,
-        RequestScopedDependencies requestScopedDependencies
+        RequestCorrelationId correlationId,
+        TaskRegistryFactory taskRegistryFactory
     ) {
-        this.log = log;
-        this.loggerForProgressTracking = loggerForProgressTracking;
-        this.requestScopedDependencies = requestScopedDependencies;
+        var factory = new ProgressTrackerFactory(log, loggerForProgressTracking, correlationId, taskRegistryFactory);
+
+        return new ProgressTrackerCreator(factory);
     }
 
-    public ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {
-        return createProgressTracker(
-                task,
-                configuration.jobId(),
-                configuration.concurrency(),
-                configuration.logProgress()
-        );
-    }
-
-    public ProgressTracker createProgressTracker(
-        Task task,
-        JobId jobId,
-        Concurrency concurrency,
-        boolean logProgress
-    ) {
-        if (logProgress) {
-            var taskRegistry = requestScopedDependencies.taskRegistryFactory().newInstance(jobId);
-
-            return TaskProgressTracker.create(
-                log,
-                loggerForProgressTracking,
-                task,
-                concurrency,
-                requestScopedDependencies.correlationId(),
-                taskRegistry
-            );
-        }
-
-        return TaskTreeProgressTracker.create(
-            log,
-            loggerForProgressTracking,
-            task,
-            concurrency,
-            jobId,
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
-        );
+    /**
+     * Convenience, using domain concepts
+     */
+    public ProgressTracker create(Task task, AlgoBaseConfig configuration) {
+        return delegate.create(task, configuration.jobId(), configuration.concurrency(), configuration.logProgress());
     }
 }

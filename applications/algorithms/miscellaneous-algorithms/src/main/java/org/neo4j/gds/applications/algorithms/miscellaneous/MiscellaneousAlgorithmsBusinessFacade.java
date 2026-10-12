@@ -61,34 +61,39 @@ public class MiscellaneousAlgorithmsBusinessFacade {
         GraphStore graphStore,
         InverseRelationshipsConfig configuration
     ) {
-
         var params = InverseRelationshipsParamsTransformer.toParameters(graphStore, configuration);
-        var task = MiscellaneousAlgorithmsTasks.inverseIndex(idMap.nodeCount(), params);
 
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var task = MiscellaneousAlgorithmsTasks.inverseIndex(idMap.nodeCount(), params);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
+
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> miscellaneousAlgorithms.indexInverse(graphStore, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
         var params = configuration.toParameters();
+
         var task = MiscellaneousAlgorithmsTasks.scaleProperties(graph, params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> miscellaneousAlgorithms.scaleProperties(graph, params, progressTracker),
-            progressTracker, true);
-
+            progressTracker,
+            true
+        );
     }
 
     public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
-        var params = configuration.toParameters();
         var task = MiscellaneousAlgorithmsTasks.toUndirected(graphStore, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> miscellaneousAlgorithms.toUndirected(graphStore, params, progressTracker),
-            progressTracker, true);
+            () -> miscellaneousAlgorithms.toUndirected(graphStore, configuration.toParameters(), progressTracker),
+            progressTracker,
+            true
+        );
     }
 }

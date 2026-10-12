@@ -65,10 +65,11 @@ class HitsETLHookTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .build();
 
-        var progressTrackerCreator = new ProgressTrackerCreator(
+        var progressTrackerCreator = ProgressTrackerCreator.construct(
             Log.noOpLog(),
             LoggerForProgressTracking.noOpLog(),
-            requestScopedDependencies
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         var hitsConfig = HitsConfigImpl

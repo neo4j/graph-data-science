@@ -56,33 +56,41 @@ public class NodeEmbeddingBusinessAlgorithms {
 
     public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
         var params = FastRPConfigTransformer.toParameters(configuration);
+
         var task = NodeEmbeddingsAlgorithmTasks.fastRP(graph, params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.fastRP(graph, params, progressTracker),
-            progressTracker, true);
-
+            progressTracker,
+            true
+        );
     }
 
     Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
         var params = Node2VecConfigTransformer.toParameters(configuration);
+
         var task = NodeEmbeddingsAlgorithmTasks.node2Vec(graph, params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.node2Vec(graph, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
         var params = HashGNNConfigTransformer.toParameters(configuration);
+
         var task = NodeEmbeddingsAlgorithmTasks.hashGNN(graph, params, configuration.relationshipTypes());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.hashGnn(graph, params, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
@@ -90,22 +98,25 @@ public class NodeEmbeddingBusinessAlgorithms {
         GraphSageTrainConfig configuration
     ) {
         var params = TrainConfigTransformer.toParameters(configuration);
+
         var task = NodeEmbeddingsAlgorithmTasks.graphSageTrain(graph, params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.graphSageTrain(graph, params, configuration, progressTracker),
-            progressTracker, true);
+            progressTracker,
+            true
+        );
     }
 
     public GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
-
-        var params = configuration.toParameters();
         var task = NodeEmbeddingsAlgorithmTasks.graphSage(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.graphSage(graph, params, progressTracker),
-            progressTracker, true);
+            () -> algorithms.graphSage(graph, configuration.toParameters(), progressTracker),
+            progressTracker,
+            true
+        );
     }
 }

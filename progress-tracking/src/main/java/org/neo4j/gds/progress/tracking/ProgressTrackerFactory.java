@@ -22,17 +22,20 @@ package org.neo4j.gds.progress.tracking;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
-import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
-import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.logging.LoggerForProgressTracking;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.progress.tasks.Task;
 
+/**
+ * Here we encapsulate some creation logic.
+ * Using only basic dependencies.
+ */
 public class ProgressTrackerFactory {
     private final Log log;
     private final LoggerForProgressTracking loggerForProgressTracking;
     private final RequestCorrelationId correlationId;
     private final TaskRegistryFactory taskRegistryFactory;
-
 
     public ProgressTrackerFactory(
         Log log,
@@ -52,28 +55,23 @@ public class ProgressTrackerFactory {
         Concurrency concurrency,
         boolean logProgress
     ) {
-        ProgressTracker progressTracker;
-        if (logProgress) {
-            progressTracker = TaskProgressTracker.create(
-                log,
-                loggerForProgressTracking,
-                task,
-                concurrency,
-                correlationId,
-                taskRegistryFactory.newInstance(jobId)
-            );
-        } else {
-            progressTracker = TaskTreeProgressTracker.create(
-                log,
-                loggerForProgressTracking,
-                task,
-                concurrency,
-                jobId,
-                correlationId,
-                taskRegistryFactory
-            );
-        }
+        if (logProgress) return TaskProgressTracker.create(
+            log,
+            loggerForProgressTracking,
+            task,
+            concurrency,
+            correlationId,
+            taskRegistryFactory.newInstance(jobId)
+        );
 
-        return progressTracker;
+        return TaskTreeProgressTracker.create(
+            log,
+            loggerForProgressTracking,
+            task,
+            concurrency,
+            jobId,
+            correlationId,
+            taskRegistryFactory
+        );
     }
 }

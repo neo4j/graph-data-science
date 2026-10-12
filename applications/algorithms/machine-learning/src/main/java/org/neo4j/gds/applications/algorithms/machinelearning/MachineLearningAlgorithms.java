@@ -48,12 +48,8 @@ public class MachineLearningAlgorithms {
     }
 
     KGEPredictResult kge(Graph graph, KGEPredictBaseConfig configuration) {
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            Tasks.leaf(AlgorithmLabel.KGE.asString(), configuration.concurrency()),
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
+        var task = Tasks.leaf(AlgorithmLabel.KGE.asString(), configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return kge(graph, configuration, progressTracker);
     }

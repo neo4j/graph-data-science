@@ -28,7 +28,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.dag.longestPath.DagLongestPathBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
@@ -50,9 +49,7 @@ import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
-import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
-import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
@@ -65,22 +62,17 @@ class TrackedPathFindingAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
 
     private final PathFindingAlgorithms algorithms;
-
-    // request scoped parameters
     private final RequestScopedDependencies requestScopedDependencies;
     private final ProgressTrackerCreator progressTrackerCreator;
-    private final ProgressTrackerFactory progressTrackerFactory;
 
     TrackedPathFindingAlgorithms(
         PathFindingAlgorithms algorithms,
         RequestScopedDependencies requestScopedDependencies,
-        ProgressTrackerCreator progressTrackerCreator,
-        ProgressTrackerFactory progressTrackerFactory
+        ProgressTrackerCreator progressTrackerCreator
     ) {
         this.algorithms = algorithms;
         this.requestScopedDependencies = requestScopedDependencies;
         this.progressTrackerCreator = progressTrackerCreator;
-        this.progressTrackerFactory = progressTrackerFactory;
     }
 
     Stream<AllShortestPathsStreamResult> allShortestPaths(Graph graph, AllShortestPathsConfig configuration) {
@@ -101,7 +93,7 @@ class TrackedPathFindingAlgorithms {
 
     BellmanFordResult bellmanFord(Graph graph, AllShortestPathsBellmanFordBaseConfig configuration) {
         var task = PathFindingAlgorithmTasks.bellmanFord(configuration.concurrency());
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.bellmanFord(
@@ -117,10 +109,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.bfs(configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.bfs(configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.breadthFirstSearch(
@@ -135,7 +125,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
-        var progressTracker = createProgressTracker(PathFindingAlgorithmTasks.deltaStepping(configuration.concurrency()), configuration);
+        var task = PathFindingAlgorithmTasks.deltaStepping(configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.deltaStepping(
@@ -151,10 +142,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.dfs(configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.dfs(configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.depthFirstSearch(
@@ -169,10 +158,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     SpanningTree kSpanningTree(Graph graph, KSpanningTreeBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.kSpanningTree(graph, configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.kSpanningTree(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.kSpanningTree(
@@ -187,10 +174,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     PathFindingResult longestPath(Graph graph, DagLongestPathBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.longestPath(graph, configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.longestPath(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.longestPath(
@@ -205,10 +190,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     FlowResult maxFlow(Graph graph, MaxFlowBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.maxFlow(configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.maxFlow(configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.maxFlow(
@@ -223,10 +206,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     CostFlowResult minCostMaxFlow(Graph graphOfFlows, Graph graphOfCosts, MCMFBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.minCostMaxFlow(configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.minCostMaxFlow(configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.minCostMaxFlow(
@@ -242,10 +223,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     PrizeCollectingSteinerTreeResult prizeCollectingSteinerTree(Graph graph, PCSTBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.prizeCollectingSteinerTree(graph, configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.prizeCollectingSteinerTree(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.prizeCollectingSteinerTree(
@@ -261,7 +240,7 @@ class TrackedPathFindingAlgorithms {
 
     Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration) {
         var task = PathFindingAlgorithmTasks.randomWalk(graph, configuration.concurrency());
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.randomWalk(
@@ -277,12 +256,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     HugeAtomicLongArray randomWalkCountingNodeVisits(Graph graph, RandomWalkBaseConfig configuration) {
-        var progressTracker = progressTrackerFactory.create(
-            PathFindingAlgorithmTasks.randomWalkCountingVisits(graph, configuration.concurrency()),
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
+        var task = PathFindingAlgorithmTasks.randomWalkCountingVisits(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.randomWalkCountingNodeVisits(
@@ -298,10 +273,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.aStar(graph, configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.aStar(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.singlePairShortestPathAStar(
@@ -316,10 +289,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     PathFindingResult singlePairShortestPathDijkstra(Graph graph, DijkstraSourceTargetsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.dijkstra(graph, configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.dijkstra(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.singlePairShortestPathDijkstra(
@@ -334,10 +305,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.yens(graph, configuration.concurrency(), configuration.k()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.yens(graph, configuration.concurrency(), configuration.k());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.singlePairShortestPathYens(
@@ -352,10 +321,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     PathFindingResult singleSourceShortestPathDijkstra(Graph graph, DijkstraBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.singleSourceDijkstra(graph, configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.singleSourceDijkstra(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.singleSourceShortestPathDijkstra(
@@ -370,10 +337,8 @@ class TrackedPathFindingAlgorithms {
     }
 
     public SpanningTree spanningTree(Graph graph, SpanningTreeBaseConfig configuration) {
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.spanningTree(graph, configuration.concurrency()),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.spanningTree(graph, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.spanningTree(
@@ -390,15 +355,13 @@ class TrackedPathFindingAlgorithms {
     public SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {
         var parameters = configuration.toParameters();
 
-        var progressTracker = createProgressTracker(
-            PathFindingAlgorithmTasks.steinerTree(parameters, graph),
-            configuration
-        );
+        var task = PathFindingAlgorithmTasks.steinerTree(parameters, graph);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.steinerTree(
                 graph,
-                configuration.toParameters(),
+                parameters,
                 progressTracker,
                 requestScopedDependencies.terminationFlag(),
                 DefaultPool.INSTANCE
@@ -410,7 +373,7 @@ class TrackedPathFindingAlgorithms {
 
     public TopologicalSortResult topologicalSort(Graph graph, TopologicalSortBaseConfig configuration) {
         var task = PathFindingAlgorithmTasks.topologicalSort(graph, configuration.concurrency());
-        var progressTracker = createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.topologicalSort(
@@ -420,15 +383,7 @@ class TrackedPathFindingAlgorithms {
                 requestScopedDependencies.terminationFlag()
             ),
             progressTracker,
-            true);
-    }
-
-    private ProgressTracker createProgressTracker(Task task, AlgoBaseConfig configuration) {
-        return progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
+            true
         );
     }
 }

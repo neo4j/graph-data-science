@@ -26,12 +26,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
+import org.neo4j.gds.beta.pregel.PregelConfigImpl;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -68,12 +68,13 @@ class PregelCompanionTest {
     @MethodSource("relTypeCombinations")
     void shouldGenerateInverseIndexes(List<RelationshipType> relTypes) {
         PregelCompanion.ensureInverseIndexesExist(
-            graphStore,
-            relTypes,
-            new Concurrency(4),
             Log.noOpLog(),
+            graphStore,
             TaskRegistryFactory.empty(),
-            true
+            PregelConfigImpl.builder()
+                .maxIterations(42)
+                .build(),
+            relTypes
         );
         assertThat(graphStore.inverseIndexedRelationshipTypes()).containsExactlyElementsOf(relTypes);
     }

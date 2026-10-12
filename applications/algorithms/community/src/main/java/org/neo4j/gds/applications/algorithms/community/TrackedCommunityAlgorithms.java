@@ -82,8 +82,9 @@ class TrackedCommunityAlgorithms {
 
     ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
         var parameters = configuration.toParameters();
+
         var task = CommunityAlgorithmTasks.approximateMaximumKCut(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.approximateMaximumKCut(graph, parameters, progressTracker),
@@ -94,8 +95,9 @@ class TrackedCommunityAlgorithms {
 
     CliqueCountingResult cliqueCounting(Graph graph, CliqueCountingBaseConfig configuration) {
         var params = configuration.toParameters();
+
         var task = CommunityAlgorithmTasks.cliqueCounting(graph, params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.cliqueCounting(graph, params, progressTracker),
@@ -106,7 +108,8 @@ class TrackedCommunityAlgorithms {
 
     ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
         var task = CommunityAlgorithmTasks.conductance(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
+
         var conductanceParameters = ConductanceConfigTransformer.toParameters(configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
@@ -118,11 +121,10 @@ class TrackedCommunityAlgorithms {
 
     Labels hdbscan(Graph graph, HDBScanBaseConfig configuration) {
         var task = CommunityAlgorithmTasks.hdbscan(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        var params = configuration.toParameters();
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.hdbscan(graph, params, progressTracker),
+            () -> algorithms.hdbscan(graph, configuration.toParameters(), progressTracker),
             progressTracker,
             true
         );
@@ -132,7 +134,7 @@ class TrackedCommunityAlgorithms {
         var params = configuration.toParameters();
 
         var task = CommunityAlgorithmTasks.k1Coloring(graph, params);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.k1Coloring(graph, params, progressTracker),
@@ -143,11 +145,10 @@ class TrackedCommunityAlgorithms {
 
     KCoreDecompositionResult kCoreDecomposition(Graph graph, KCoreDecompositionBaseConfig configuration) {
         var task = CommunityAlgorithmTasks.kCore(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        var params = configuration.toParameters();
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.kCoreDecomposition(graph, params, progressTracker),
+            () -> algorithms.kCoreDecomposition(graph, configuration.toParameters(), progressTracker),
             progressTracker,
             true
         );
@@ -155,8 +156,9 @@ class TrackedCommunityAlgorithms {
 
     KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
         var parameters = configuration.toParameters();
+
         var task = CommunityAlgorithmTasks.kMeans(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.kMeans(graph, parameters, progressTracker),
@@ -167,8 +169,9 @@ class TrackedCommunityAlgorithms {
 
     LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
         var parameters = configuration.toParameters();
+
         var task = CommunityAlgorithmTasks.labelPropagation(graph.relationshipCount(), parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.labelPropagation(graph, parameters, progressTracker),
@@ -179,8 +182,9 @@ class TrackedCommunityAlgorithms {
 
     LocalClusteringCoefficientResult localClusteringCoefficient(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
         var parameters = configuration.toParameters();
+
         var task = CommunityAlgorithmTasks.localClusteringCoefficient(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.localClusteringCoefficient(graph, parameters, progressTracker),
@@ -191,8 +195,9 @@ class TrackedCommunityAlgorithms {
 
     LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
         var parameters = configuration.toParameters();
+
         var task = CommunityAlgorithmTasks.leiden(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.leiden(graph, parameters, progressTracker),
@@ -203,8 +208,9 @@ class TrackedCommunityAlgorithms {
 
     LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {
         var parameters = configuration.toParameters();
+
         var task = CommunityAlgorithmTasks.louvain(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.louvain(graph, parameters, progressTracker),
@@ -219,8 +225,9 @@ class TrackedCommunityAlgorithms {
 
     ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
         var parameters = configuration.toParameters();
+
         var task = CommunityAlgorithmTasks.modularityOptimization(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.modularityOptimization(graph, parameters, progressTracker),
@@ -231,7 +238,7 @@ class TrackedCommunityAlgorithms {
 
     HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {
         var task = CommunityAlgorithmTasks.scc(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.scc(graph, progressTracker),
@@ -242,7 +249,7 @@ class TrackedCommunityAlgorithms {
 
     PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration) {
         var task = CommunityAlgorithmTasks.speakerListenerLPA(graph, configuration);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.speakerListenerLPA(graph, configuration, progressTracker),
@@ -253,11 +260,10 @@ class TrackedCommunityAlgorithms {
 
     TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
         var task = CommunityAlgorithmTasks.triangleCount(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
-        var params = configuration.toParameters();
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.triangleCount(graph, params, progressTracker),
+            () -> algorithms.triangleCount(graph, configuration.toParameters(), progressTracker),
             progressTracker,
             true
         );
@@ -269,16 +275,14 @@ class TrackedCommunityAlgorithms {
 
     DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
         var task = CommunityAlgorithmTasks.wcc(graph, configuration.concurrency());
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
             log.warn("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
         }
 
-        var params = configuration.toParameters();
-
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.wcc(graph, params, progressTracker),
+            () -> algorithms.wcc(graph, configuration.toParameters(), progressTracker),
             progressTracker,
             true
         );

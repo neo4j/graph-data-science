@@ -165,12 +165,7 @@ final class NodeClassificationPredictComputation implements Computation<NodeClas
             nodeClassificationPipeline,
             graphStore
         );
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            configuration.jobId(),
-            configuration.concurrency(),
-            configuration.logProgress()
-        );
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         // this is the literal worst. packing up request things, with application deps,
         // and shipping it blindly.

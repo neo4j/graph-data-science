@@ -91,12 +91,7 @@ class HitsETLHook implements GraphStoreLoadedETL {
             graphStore.nodeCount(),
             parameters
         );
-        var progressTracker = progressTrackerCreator.createProgressTracker(
-            task,
-            inverseConfig.jobId(),
-            inverseConfig.concurrency(),
-            inverseConfig.logProgress()
-        );
+        var progressTracker = progressTrackerCreator.create(task, inverseConfig);
 
         return new InverseRelationships(
             graphStore,

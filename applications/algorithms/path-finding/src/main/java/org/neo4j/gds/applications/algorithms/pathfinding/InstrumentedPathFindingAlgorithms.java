@@ -63,7 +63,6 @@ import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
-import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
@@ -99,18 +98,10 @@ public final class InstrumentedPathFindingAlgorithms {
     ) {
         var algorithms = new PathFindingAlgorithms(loggers.log());
 
-        var progressTrackerFactory = new ProgressTrackerFactory(
-            loggers.log(),
-            loggers.loggerForProgressTracking(),
-            requestScopedDependencies.correlationId(),
-            requestScopedDependencies.taskRegistryFactory()
-        );
-
         var trackedPathFindingAlgorithms = new TrackedPathFindingAlgorithms(
             algorithms,
             requestScopedDependencies,
-            progressTrackerCreator,
-            progressTrackerFactory
+            progressTrackerCreator
         );
 
         return new InstrumentedPathFindingAlgorithms(
@@ -362,7 +353,7 @@ public final class InstrumentedPathFindingAlgorithms {
      * Also, it was never used so perhaps better to scrap it?
      * Anyway, it might have been built for a reason, so here it is.
      */
-    public <RESULT, METADATA> CompletableFuture<RESULT> randomWalkCountingNodeVisits(
+    <RESULT, METADATA> CompletableFuture<RESULT> randomWalkCountingNodeVisits(
         GraphName graphName,
         RandomWalkBaseConfig configuration,
         Optional<SideEffect<HugeAtomicLongArray, METADATA>> sideEffect,

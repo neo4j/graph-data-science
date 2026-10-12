@@ -27,16 +27,13 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousAlgorithms;
 import org.neo4j.gds.beta.pregel.Element;
 import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
@@ -64,15 +61,15 @@ public final class PregelCompanion {
             @Override
             public List<AfterLoadValidation<CONFIG>> afterLoadValidations() {
                 return List.of(
-                    (graphStore, graphProjectConfig, config) -> ensureDirectedRelationships(
+                    (graphStore, __, config) -> ensureDirectedRelationships(
                         graphStore, config.internalRelationshipTypes(graphStore)
                     ),
-                    (graphStore, graphProjectConfig, config) -> ensureInverseIndexesExist(graphStore,
-                        config.internalRelationshipTypes(graphStore),
-                        config.concurrency(),
+                    (graphStore, __, config) -> ensureInverseIndexesExist(
                         log,
+                        graphStore,
                         taskRegistryFactory,
-                        config.logProgress()
+                        config,
+                        config.internalRelationshipTypes(graphStore)
                     )
                 );
             }
@@ -80,12 +77,11 @@ public final class PregelCompanion {
     }
 
     static void ensureInverseIndexesExist(
-        GraphStore graphStore,
-        Collection<RelationshipType> relationshipTypes,
-        Concurrency concurrency,
         Log log,
+        GraphStore graphStore,
         TaskRegistryFactory taskRegistryFactory,
-        boolean logProgress
+        PregelConfig configuration,
+        Collection<RelationshipType> relationshipTypes
     ) {
         var relationshipTypesWithoutIndex = relationshipTypes
             .stream()
@@ -93,35 +89,27 @@ public final class PregelCompanion {
             .map(RelationshipType::name)
             .collect(Collectors.toList());
 
-        if (relationshipTypesWithoutIndex.isEmpty()) {
-            return;
-        }
+        if (relationshipTypesWithoutIndex.isEmpty()) return;
 
-        var  params = InverseRelationshipsParamsTransformer.toParameters(
+        var params = InverseRelationshipsParamsTransformer.toParameters(
             graphStore,
-            concurrency,
+            configuration.concurrency(),
             relationshipTypesWithoutIndex
         );
 
-        var progressTrackerCreator = new ProgressTrackerCreator(
+        var progressTrackerCreator = ProgressTrackerCreator.construct(
             log,
             new LoggerForProgressTrackingAdapter(log),
-            RequestScopedDependencies.builder()
-                .correlationId(PlainSimpleRequestCorrelationId.create())
-                .taskRegistryFactory(taskRegistryFactory)
-                .build()
+            PlainSimpleRequestCorrelationId.create(),
+            taskRegistryFactory
         );
 
-        var task = InverseRelationshipsTask.progressTask(concurrency, graphStore.nodeCount(), params);
+        var task = InverseRelationshipsTask.progressTask(configuration.concurrency(), graphStore.nodeCount(), params);
 
-        var progressTracker = progressTrackerCreator.createProgressTracker(task,
-            new JobId(),
-            params.concurrency(),
-            logProgress
-        );
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         new MiscellaneousAlgorithms(TerminationFlag.RUNNING_TRUE)
-            .indexInverse(graphStore,params,progressTracker)
+            .indexInverse(graphStore, params, progressTracker)
             .forEach((relationshipType, inverseIndex) -> graphStore.addInverseIndex(
                 relationshipType,
                 inverseIndex.topology(),

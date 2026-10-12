@@ -179,10 +179,11 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             requestScopedDependencies
         );
 
-        var progressTrackerCreator = new ProgressTrackerCreator(
+        var progressTrackerCreator = ProgressTrackerCreator.construct(
             loggers.log(),
             loggers.loggerForProgressTracking(),
-            requestScopedDependencies
+            requestScopedDependencies.correlationId(),
+            requestScopedDependencies.taskRegistryFactory()
         );
 
         var applicationsFacade = ApplicationsFacade.create(

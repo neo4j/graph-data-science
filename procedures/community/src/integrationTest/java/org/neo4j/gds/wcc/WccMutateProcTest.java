@@ -668,10 +668,11 @@ class WccMutateProcTest extends BaseProcTest {
             null,
             null,
             null,
-            new ProgressTrackerCreator(
+            ProgressTrackerCreator.construct(
                 logMock,
                 new LoggerForProgressTrackingAdapter(logMock),
-                requestScopedDependencies
+                requestScopedDependencies.correlationId(),
+                requestScopedDependencies.taskRegistryFactory()
             ),
             null,
             algorithmProcessingFacade,

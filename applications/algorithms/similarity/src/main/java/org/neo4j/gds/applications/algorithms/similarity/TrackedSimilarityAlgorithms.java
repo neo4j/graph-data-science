@@ -47,8 +47,9 @@ class TrackedSimilarityAlgorithms {
 
     FilteredKnnResult filteredKnn(Graph graph, FilteredKnnBaseConfig configuration) {
         var parameters = configuration.toFilteredKnnParameters().finalize(graph.nodeCount());
+
         var task = SimilarityAlgorithmTasks.filteredKnn(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> similarityAlgorithms.filteredKnn(graph, parameters, progressTracker),
@@ -59,8 +60,9 @@ class TrackedSimilarityAlgorithms {
 
     public NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
         var parameters = configuration.toFilteredParameters();
+
         var task = SimilarityAlgorithmTasks.filteredNodeSimilarity(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> similarityAlgorithms.filteredNodeSimilarity(graph, parameters, progressTracker),
@@ -71,8 +73,9 @@ class TrackedSimilarityAlgorithms {
 
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {
         var parameters = configuration.toParameters().finalize(graph.nodeCount());
+
         var task = SimilarityAlgorithmTasks.knn(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> similarityAlgorithms.knn(graph, parameters, progressTracker),
@@ -83,8 +86,9 @@ class TrackedSimilarityAlgorithms {
 
     public NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
         var parameters = configuration.toParameters();
+
         var task = SimilarityAlgorithmTasks.nodeSimilarity(graph, parameters);
-        var progressTracker = progressTrackerCreator.createProgressTracker(task, configuration);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> similarityAlgorithms.nodeSimilarity(graph, parameters, progressTracker),
