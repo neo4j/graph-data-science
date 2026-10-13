@@ -20,20 +20,14 @@
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.MiscellaneousAlgorithmsTasks;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
-import org.neo4j.gds.indexInverse.InverseRelationshipsParamsTransformer;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
-
-import java.util.Map;
 
 public class MiscellaneousAlgorithmsBusinessFacade {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
@@ -47,23 +41,6 @@ public class MiscellaneousAlgorithmsBusinessFacade {
     ) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.miscellaneousAlgorithms = miscellaneousAlgorithms;
-    }
-
-    Map<RelationshipType, SingleTypeRelationships> indexInverse(
-        IdMap idMap,
-        GraphStore graphStore,
-        InverseRelationshipsConfig configuration
-    ) {
-        var params = InverseRelationshipsParamsTransformer.toParameters(graphStore, configuration);
-
-        var task = MiscellaneousAlgorithmsTasks.inverseIndex(idMap.nodeCount(), params);
-        var progressTracker = progressTrackerCreator.create(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> miscellaneousAlgorithms.indexInverse(graphStore, params, progressTracker),
-            progressTracker,
-            true
-        );
     }
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {

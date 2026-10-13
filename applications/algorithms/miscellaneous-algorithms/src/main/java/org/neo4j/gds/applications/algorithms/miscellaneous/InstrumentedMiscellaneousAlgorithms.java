@@ -19,15 +19,19 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
+import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.walking.CollapsePathConfig;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -49,9 +53,10 @@ final class InstrumentedMiscellaneousAlgorithms {
     static InstrumentedMiscellaneousAlgorithms create(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
         MiscellaneousAlgorithms algorithms,
-        LaunchConvenience launchConvenience
+        LaunchConvenience launchConvenience,
+        ProgressTrackerCreator progressTrackerCreator
     ) {
-        var trackedAlgorithms = new TrackedMiscellaneousAlgorithms(algorithms);
+        var trackedAlgorithms = new TrackedMiscellaneousAlgorithms(algorithms, progressTrackerCreator);
 
         return new InstrumentedMiscellaneousAlgorithms(estimation, trackedAlgorithms, launchConvenience);
     }
@@ -69,6 +74,24 @@ final class InstrumentedMiscellaneousAlgorithms {
             (__, ___, graphStore) -> trackedAlgorithms.collapsePath(graphStore, configuration),
             estimations::collapsePath,
             AlgorithmLabel.CollapsePath,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> indexInverse(
+        GraphName graphName,
+        InverseRelationshipsConfig configuration,
+        Optional<SideEffect<Map<RelationshipType, SingleTypeRelationships>, METADATA>> sideEffect,
+        ResultRenderer<Map<RelationshipType, SingleTypeRelationships>, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, graphStore) -> trackedAlgorithms.indexInverse(graph, graphStore, configuration),
+            () -> estimations.indexInverse(configuration),
+            AlgorithmLabel.IndexInverse,
             sideEffect,
             resultRenderer
         );

@@ -40,7 +40,6 @@ import org.neo4j.gds.walking.CollapsePathConfig;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.IndexInverse;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ScaleProperties;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ToUndirected;
 
@@ -93,15 +92,12 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new IndexInverseMutateStep();
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedMiscellaneousAlgorithms.indexInverse(
             graphName,
             configuration,
-            IndexInverse,
-            () -> estimation.indexInverse(configuration),
-            (graph, graphStore) -> algorithms.indexInverse(graph, graphStore, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT scaleProperties(

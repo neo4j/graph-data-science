@@ -70,7 +70,12 @@ public final class MiscellaneousApplications {
 
         var estimation = new MiscellaneousApplicationsEstimationModeBusinessFacade(algorithmEstimationTemplate);
 
-        var raw = InstrumentedMiscellaneousAlgorithms.create(estimation, algorithms, launchConvenience);
+        var raw = InstrumentedMiscellaneousAlgorithms.create(
+            estimation,
+            algorithms,
+            launchConvenience,
+            progressTrackerCreator
+        );
 
         var mutation = new MiscellaneousApplicationsMutateModeBusinessFacade(
             estimation,

@@ -19,21 +19,54 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.MiscellaneousAlgorithmsTasks;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
+import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
+import org.neo4j.gds.indexInverse.InverseRelationshipsParamsTransformer;
 import org.neo4j.gds.walking.CollapsePathConfig;
 import org.neo4j.gds.walking.CollapsePathParamsTransformer;
 
-class TrackedMiscellaneousAlgorithms {
-    private final MiscellaneousAlgorithms miscellaneousAlgorithms;
+import java.util.Map;
 
-    TrackedMiscellaneousAlgorithms(MiscellaneousAlgorithms miscellaneousAlgorithms) {
+class TrackedMiscellaneousAlgorithms {
+    private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
+
+    private final MiscellaneousAlgorithms miscellaneousAlgorithms;
+    private final ProgressTrackerCreator progressTrackerCreator;
+
+    TrackedMiscellaneousAlgorithms(
+        MiscellaneousAlgorithms miscellaneousAlgorithms,
+        ProgressTrackerCreator progressTrackerCreator
+    ) {
         this.miscellaneousAlgorithms = miscellaneousAlgorithms;
+        this.progressTrackerCreator = progressTrackerCreator;
     }
 
     SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathConfig configuration) {
         var params = CollapsePathParamsTransformer.create(configuration, graphStore);
 
         return miscellaneousAlgorithms.collapsePath(graphStore, params);
+    }
+
+    Map<RelationshipType, SingleTypeRelationships> indexInverse(
+        NodeTranslator nodeTranslator,
+        GraphStore graphStore,
+        InverseRelationshipsConfig configuration
+    ) {
+        var params = InverseRelationshipsParamsTransformer.toParameters(graphStore, configuration);
+
+        var task = MiscellaneousAlgorithmsTasks.inverseIndex(nodeTranslator.nodeCount(), params);
+        var progressTracker = progressTrackerCreator.create(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> miscellaneousAlgorithms.indexInverse(graphStore, params, progressTracker),
+            progressTracker,
+            true
+        );
     }
 }
