@@ -40,7 +40,6 @@ import org.neo4j.gds.walking.CollapsePathConfig;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ScaleProperties;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ToUndirected;
 
 public class MiscellaneousApplicationsMutateModeBusinessFacade {
@@ -49,7 +48,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateRelationshipService mutateRelationshipService;
-    private final InstrumentedMiscellaneousAlgorithms instrumentedMiscellaneousAlgorithms;
+    private final InstrumentedMiscellaneousAlgorithms instrumentedAlgorithms;
     private final Synchroniser synchroniser;
 
     MiscellaneousApplicationsMutateModeBusinessFacade(
@@ -58,7 +57,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodePropertyService,
         MutateRelationshipService mutateRelationshipService,
-        InstrumentedMiscellaneousAlgorithms instrumentedMiscellaneousAlgorithms,
+        InstrumentedMiscellaneousAlgorithms instrumentedAlgorithms,
         Synchroniser synchroniser
     ) {
         this.estimation = estimation;
@@ -66,7 +65,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.mutateRelationshipService = mutateRelationshipService;
-        this.instrumentedMiscellaneousAlgorithms = instrumentedMiscellaneousAlgorithms;
+        this.instrumentedAlgorithms = instrumentedAlgorithms;
         this.synchroniser = synchroniser;
     }
 
@@ -77,7 +76,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new CollapsePathMutateStep(mutateRelationshipService);
 
-        return synchroniser.synchronise(() -> instrumentedMiscellaneousAlgorithms.collapsePath(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.collapsePath(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),
@@ -92,7 +91,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new IndexInverseMutateStep();
 
-        return synchroniser.synchronise(() -> instrumentedMiscellaneousAlgorithms.indexInverse(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.indexInverse(
             graphName,
             configuration,
             Optional.of(new MutateSideEffect<>(mutateStep)),
@@ -107,15 +106,12 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ScalePropertiesMutateStep(mutateNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.scaleProperties(
             graphName,
             configuration,
-            ScaleProperties,
-            () -> estimation.scaleProperties(configuration),
-            (graph, __) -> algorithms.scaleProperties(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT toUndirected(

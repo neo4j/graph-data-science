@@ -29,10 +29,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
-import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.undirected.ToUndirectedParameters;
 
@@ -70,35 +67,6 @@ public class MiscellaneousComputeFacadeEmptyGraphTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void inverseIndex() {
-        var future = facade.indexInverse(
-            graphStore,
-            mock(InverseRelationshipsParameters.class),
-            jobIdMock,
-            false
-        );
-        var result = future.join();
-        assertThat(result.result()).isEmpty();
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
-    }
-
-    @Test
-    void scaleProperties() {
-        var future = facade.scaleProperties(
-            graph,
-            mock(ScalePropertiesParameters.class),
-            jobIdMock,
-            true
-        );
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(ScalePropertiesResult.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

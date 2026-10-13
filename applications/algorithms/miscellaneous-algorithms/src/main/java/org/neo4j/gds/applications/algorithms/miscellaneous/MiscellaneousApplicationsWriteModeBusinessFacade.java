@@ -20,31 +20,30 @@
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.WriteResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.WriteSideEffect;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ScaleProperties;
+import java.util.Optional;
 
 public class MiscellaneousApplicationsWriteModeBusinessFacade {
-    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade;
-    private final MiscellaneousAlgorithmsBusinessFacade miscellaneousAlgorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteNodePropertyService writeNodePropertyService;
+    private final InstrumentedMiscellaneousAlgorithms instrumentedAlgorithms;
+    private final Synchroniser synchroniser;
 
     MiscellaneousApplicationsWriteModeBusinessFacade(
-        MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade,
-        MiscellaneousAlgorithmsBusinessFacade miscellaneousAlgorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteNodePropertyService writeNodePropertyService
+        WriteNodePropertyService writeNodePropertyService,
+        InstrumentedMiscellaneousAlgorithms instrumentedAlgorithms,
+        Synchroniser synchroniser
     ) {
-        this.estimationFacade = estimationFacade;
-        this.miscellaneousAlgorithms = miscellaneousAlgorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeNodePropertyService = writeNodePropertyService;
+        this.instrumentedAlgorithms = instrumentedAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT scaleProperties(
@@ -54,14 +53,11 @@ public class MiscellaneousApplicationsWriteModeBusinessFacade {
     ) {
         var writeStep = new ScalePropertiesWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.scaleProperties(
             graphName,
             configuration,
-            ScaleProperties,
-            () -> estimationFacade.scaleProperties(configuration),
-            (graph, __) -> miscellaneousAlgorithms.scaleProperties(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 }

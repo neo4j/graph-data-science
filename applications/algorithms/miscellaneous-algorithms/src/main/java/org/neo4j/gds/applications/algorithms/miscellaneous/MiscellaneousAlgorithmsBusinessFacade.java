@@ -20,13 +20,10 @@
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.MiscellaneousAlgorithmsTasks;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
-import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
 
 public class MiscellaneousAlgorithmsBusinessFacade {
@@ -41,19 +38,6 @@ public class MiscellaneousAlgorithmsBusinessFacade {
     ) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.miscellaneousAlgorithms = miscellaneousAlgorithms;
-    }
-
-    ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
-        var params = configuration.toParameters();
-
-        var task = MiscellaneousAlgorithmsTasks.scaleProperties(graph, params);
-        var progressTracker = progressTrackerCreator.create(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> miscellaneousAlgorithms.scaleProperties(graph, params, progressTracker),
-            progressTracker,
-            true
-        );
     }
 
     public SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {

@@ -88,24 +88,21 @@ public final class MiscellaneousApplications {
         );
 
         var stats = new MiscellaneousApplicationsStatsModeBusinessFacade(
-            estimation,
-            business,
-            algorithmProcessingTemplateConvenience
+            raw,
+            synchroniser
         );
 
         var stream = new MiscellaneousApplicationsStreamModeBusinessFacade(
-            estimation,
-            business,
-            algorithmProcessingTemplateConvenience
+            raw,
+            synchroniser
         );
 
         var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
         var write = new MiscellaneousApplicationsWriteModeBusinessFacade(
-            estimation,
-            business,
-            algorithmProcessingTemplateConvenience,
-            writeToDatabase
+            writeToDatabase,
+            raw,
+            synchroniser
         );
 
         return new MiscellaneousApplications(estimation, mutation, stats, stream, write);

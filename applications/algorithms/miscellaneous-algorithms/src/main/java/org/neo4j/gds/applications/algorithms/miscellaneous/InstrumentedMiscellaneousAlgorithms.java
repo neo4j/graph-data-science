@@ -29,6 +29,8 @@ import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.walking.CollapsePathConfig;
 
 import java.util.Map;
@@ -92,6 +94,24 @@ final class InstrumentedMiscellaneousAlgorithms {
             (graph, __, graphStore) -> trackedAlgorithms.indexInverse(graph, graphStore, configuration),
             () -> estimations.indexInverse(configuration),
             AlgorithmLabel.IndexInverse,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> scaleProperties(
+        GraphName graphName,
+        ScalePropertiesBaseConfig configuration,
+        Optional<SideEffect<ScalePropertiesResult, METADATA>> sideEffect,
+        ResultRenderer<ScalePropertiesResult, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (graph, __, ___) -> trackedAlgorithms.scaleProperties(graph, configuration),
+            () -> estimations.scaleProperties(configuration),
+            AlgorithmLabel.ScaleProperties,
             sideEffect,
             resultRenderer
         );

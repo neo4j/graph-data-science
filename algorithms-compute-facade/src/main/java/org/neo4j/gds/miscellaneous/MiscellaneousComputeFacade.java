@@ -20,25 +20,16 @@
 package org.neo4j.gds.miscellaneous;
 
 import org.neo4j.gds.MiscellaneousAlgorithmsTasks;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.indexInverse.InverseRelationships;
-import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
 import org.neo4j.gds.result.TimedAlgorithmResult;
-import org.neo4j.gds.scaleproperties.ScaleProperties;
-import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
-import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.undirected.ToUndirected;
 import org.neo4j.gds.undirected.ToUndirectedParameters;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class MiscellaneousComputeFacade {
@@ -60,67 +51,6 @@ public class MiscellaneousComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<Map<RelationshipType, SingleTypeRelationships>>> indexInverse(
-        GraphStore graphStore,
-        InverseRelationshipsParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-
-        if (graphStore.nodeCount() == 0) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(Map.of()));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            MiscellaneousAlgorithmsTasks.inverseIndex(graphStore.nodeCount(), parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var inverseRelationships = new InverseRelationships(
-            graphStore,
-            parameters,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmCaller.run(
-            inverseRelationships::compute,
-            jobId
-        );
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<ScalePropertiesResult>> scaleProperties(
-        Graph graph,
-        ScalePropertiesParameters parameters,
-        JobId jobId,
-        boolean logProgress
-    ) {
-        if (graph.isEmpty()) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(ScalePropertiesResult.EMPTY));
-        }
-
-        var progressTracker = progressTrackerFactory.create(
-            MiscellaneousAlgorithmsTasks.scaleProperties(graph, parameters),
-            jobId,
-            parameters.concurrency(),
-            logProgress
-        );
-
-        var scaleProperties = new ScaleProperties(
-            graph,
-            parameters,
-            progressTracker,
-            DefaultPool.INSTANCE,
-            terminationFlag
-        );
-        return algorithmCaller.run(
-            scaleProperties::compute,
-            jobId
-        );
     }
 
     public CompletableFuture<TimedAlgorithmResult<SingleTypeRelationships>> toUndirected(

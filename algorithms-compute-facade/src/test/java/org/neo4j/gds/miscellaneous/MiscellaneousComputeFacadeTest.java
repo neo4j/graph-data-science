@@ -34,20 +34,13 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tracking.ProgressTrackerFactory;
-import org.neo4j.gds.scaleproperties.ScalePropertiesParameters;
-import org.neo4j.gds.scaling.ScalerFactory;
-import org.neo4j.gds.scaling.ScalerType;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.undirected.ToUndirectedParameters;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,48 +87,6 @@ class MiscellaneousComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void inverseIndex(){
-        var future = facade.indexInverse(
-            graphStore,
-            new InverseRelationshipsParameters(
-                new Concurrency(1),
-                Set.of(RelationshipType.of("REL"))
-            ),
-            jobIdMock,
-            false
-        );
-        var results = future.join();
-        var result = results.result();
-        assertThat(result).isNotNull();
-        assertThat(result).containsKey(RelationshipType.of("REL"));
-
-    }
-
-    @Test
-    void scaleProperties() {
-        var future = facade.scaleProperties(
-            graph,
-            new ScalePropertiesParameters(
-                new Concurrency(1),
-                List.of("prop"),
-                ScalerFactory.of(ScalerType.Mean)
-            ),
-            jobIdMock,
-            false
-        );
-
-        var results = future.join();
-        var result = results.result();
-
-        assertThat(result.scaledProperties().size()).isEqualTo(2);
-        
-        var aList =  new ArrayList<Double>();
-        aList.add(result.scaledProperties().get(0)[0]);
-        aList.add(result.scaledProperties().get(1)[0]);
-        assertThat(aList).contains(-0.5, 0.5);
     }
 
     @Test

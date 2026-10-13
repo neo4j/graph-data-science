@@ -20,42 +20,37 @@
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
+import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
-import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ScaleProperties;
-
 public class MiscellaneousApplicationsStreamModeBusinessFacade {
-    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade;
-    private final MiscellaneousAlgorithmsBusinessFacade miscellaneousAlgorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
+    private final InstrumentedMiscellaneousAlgorithms instrumentedAlgorithms;
+    private final Synchroniser synchroniser;
 
     MiscellaneousApplicationsStreamModeBusinessFacade(
-        MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade,
-        MiscellaneousAlgorithmsBusinessFacade miscellaneousAlgorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        InstrumentedMiscellaneousAlgorithms instrumentedAlgorithms,
+        Synchroniser synchroniser
     ) {
-        this.estimationFacade = estimationFacade;
-        this.miscellaneousAlgorithms = miscellaneousAlgorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
+        this.instrumentedAlgorithms = instrumentedAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> Stream<RESULT> scaleProperties(
         GraphName graphName,
-        ScalePropertiesStreamConfig configuration,
+        ScalePropertiesBaseConfig configuration,
         StreamResultBuilder<ScalePropertiesResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.scaleProperties(
             graphName,
             configuration,
-            ScaleProperties,
-            () -> estimationFacade.scaleProperties(configuration),
-            (graph, __) -> miscellaneousAlgorithms.scaleProperties(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 }
