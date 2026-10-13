@@ -1,11 +1,16 @@
 [[graph-sage]]
 [.beta]
-= GraphSAGE (plugin)
+= GraphSAGE
 :description: This section describes the GraphSAGE node embedding algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: embedding
 :modelType: GraphSAGE
 :algorithm: GraphSAGE
+
+[NOTE]
+====
+For users of xref:aura-graph-analytics/index.adoc[Aura Graph Analytics], we recommend using xref:machine-learning/node-embeddings/graphsage/graphsage-unsupervised.adoc[GraphSAGE unsupervised] due to its improved training speed.
+====
 
 include::partial$/operations-reference/beta-note.adoc[]
 
@@ -20,9 +25,6 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 GraphSAGE is an _inductive_ algorithm for computing node embeddings.
 GraphSAGE is using node feature information to generate node embeddings on unseen nodes or graphs.
 Instead of training individual embeddings for each node, the algorithm learns a function that generates embeddings by sampling and aggregating features from a node's local neighborhood.
-
-NOTE: The algorithm is defined for UNDIRECTED graphs.
-
 
 [[algorithms-embeddings-graph-sage-considerations]]
 == Considerations

@@ -1,9 +1,9 @@
 [[graphsage-supervised]]
 [.preview]
-= GraphSAGE supervised
+= GraphSAGE supervised (AGA-only)
 :description: This section describes the GraphSAGE supervised algorithm available in Aura Graph Analytics.
 :entity: node
-:algorithm: GraphSAGE supervised
+:algorithm: GraphSAGE
 
 include::partial$/product-limitations/only-in-serverless.adoc[]
 
@@ -18,7 +18,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 GraphSAGE is a graph neural network (GNN) architecture outlined in the paper https://arxiv.org/pdf/1706.02216.pdf[_Inductive Representation Learning on Large Graphs_] by Hamilton et al. (2017).
 
-This section covers the syntax used to execute the {algorithm} algorithm to predict labels of nodes in a graph.
+This section covers the syntax used to execute the {algorithm} algorithm supervised to predict labels of nodes in a graph.
 
 NOTE: For node embeddings, see xref:machine-learning/node-embeddings/graphsage/graphsage-unsupervised.adoc[GraphSAGE unsupervised].
 

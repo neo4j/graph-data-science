@@ -5,22 +5,23 @@ GraphSAGE is an _inductive_ algorithm for computing node embeddings.
 GraphSAGE makes use of node feature information to generate node embeddings on unseen nodes or graphs.
 Instead of training individual embeddings for each node, the algorithm learns a function that generates embeddings by sampling and aggregating features from a node's local neighborhood.
 
+NOTE: The algorithm is defined for UNDIRECTED graphs.
+
 == Node embeddings
 
 The Neo4j Graph Data Science library contains two implementations of GraphSAGE for generating node embeddings.
 
+xref:machine-learning/node-embeddings/graphsage/graphsage-plugin.adoc[GraphSAGE]
+- The first implementation, available in the plugin as well as Aura Graph Analytics.
+
 xref:machine-learning/node-embeddings/graphsage/graphsage-unsupervised.adoc[GraphSAGE unsupervised]
-- The more recent implementation which offers greatly improved training speed. Only available on Aura Graph Analytics.
-
-
-xref:machine-learning/node-embeddings/graphsage/graphsage-plugin.adoc[GraphSAGE (plugin)]
-- The second implementation, available in the plugin as well as Aura Graph Analytics.
+- The more recent implementation which offers greatly improved training speed. Only available on xref:aura-graph-analytics/index.adoc[Aura Graph Analytics].
 
 == Node classification
 
 xref:machine-learning/node-property-prediction/graphsage-supervised.adoc[GraphSAGE supervised]
 - GraphSAGE can also be used as a supervised algorithm for node classification.
-This feature is available on Aura Graph Analytics.
+Only available on xref:aura-graph-analytics/index.adoc[Aura Graph Analytics].
 
 
 == Reference
