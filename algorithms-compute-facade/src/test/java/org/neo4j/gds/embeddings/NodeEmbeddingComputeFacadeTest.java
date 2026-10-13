@@ -29,7 +29,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.hashgnn.BinarizeParameters;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
 import org.neo4j.gds.embeddings.node2vec.EmbeddingInitializer;
@@ -83,54 +82,6 @@ class NodeEmbeddingComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Nested
-    @GdlExtension
-    class FastRPTest {
-
-        @GdlGraph(graphNamePrefix = "fastRp")
-        private static final String FAST_RP =
-            "CREATE" +
-                "  (a:Node1 {f: [0.4, 1.3, 1.4]})" +
-                ", (b:Node1 {f: [2.1, 0.5, 1.8]})" +
-                ", (c:Node2 {f: [-0.3, 0.8, 2.8]})" +
-                ", (d:Isolated {f: [2.5, 8.1, 1.3]})" +
-                ", (e:Isolated {f: [0.6, 0.5, 5.2]})" +
-                ", (a)-[:REL {weight: 2.0}]->(b)" +
-                ", (b)-[:REL {weight: 1.0}]->(a)" +
-                ", (a)-[:REL {weight: 1.0}]->(c)" +
-                ", (c)-[:REL {weight: 1.0}]->(a)" +
-                ", (b)-[:REL {weight: 1.0}]->(c)" +
-                ", (c)-[:REL {weight: 1.0}]->(b)";
-
-
-        @Inject
-        private Graph fastRpGraph;
-
-        private static final int DEFAULT_EMBEDDING_DIMENSION = 128;
-
-        @Test
-        void fastRP() {
-
-            var parameters = new FastRPParameters(
-                List.of("f"),
-                List.of(1.0D),
-                DEFAULT_EMBEDDING_DIMENSION,
-                0.0,
-                Optional.empty(),
-                0.0F,
-                0,
-                new Concurrency(4),
-                Optional.of(42L)
-            );
-
-            var timedAlgorithmResult = facade.fastRP(fastRpGraph, parameters, jobIdMock, true).join();
-
-            assertThat(timedAlgorithmResult.computeMillis()).isNotNegative();
-
-            assertThat(timedAlgorithmResult.result().embeddings().size()).isEqualTo(fastRpGraph.nodeCount());
-        }
     }
 
     @Nested

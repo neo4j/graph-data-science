@@ -78,23 +78,13 @@ public final class MiscellaneousApplications {
             synchroniser
         );
 
-        var stats = new MiscellaneousApplicationsStatsModeBusinessFacade(
-            raw,
-            synchroniser
-        );
+        var stats = new MiscellaneousApplicationsStatsModeBusinessFacade(raw, synchroniser);
 
-        var stream = new MiscellaneousApplicationsStreamModeBusinessFacade(
-            raw,
-            synchroniser
-        );
+        var stream = new MiscellaneousApplicationsStreamModeBusinessFacade(raw, synchroniser);
 
         var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
-        var write = new MiscellaneousApplicationsWriteModeBusinessFacade(
-            writeToDatabase,
-            raw,
-            synchroniser
-        );
+        var write = new MiscellaneousApplicationsWriteModeBusinessFacade(writeToDatabase, raw, synchroniser);
 
         return new MiscellaneousApplications(estimation, mutation, stats, stream, write);
     }

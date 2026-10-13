@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.applications.algorithms.embeddings;
 
+import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
@@ -62,7 +64,8 @@ public final class NodeEmbeddingApplications {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodePropertyService,
-        ModelRepository modelRepository
+        ModelRepository modelRepository,
+        Synchroniser synchroniser, LaunchConvenience launchConvenience
     ) {
         var graphSageModelCatalog = new GraphSageModelCatalog(globallyScopedDependencies.modelCatalog());
 
@@ -84,25 +87,34 @@ public final class NodeEmbeddingApplications {
 
         var businessFacade = new NodeEmbeddingBusinessAlgorithms(algorithms, progressTrackerCreator);
 
+        var raw = InstrumentedNodeEmbeddingAlgorithms.create(
+            estimationMode,
+            algorithms,
+            progressTrackerCreator,
+            launchConvenience
+        );
 
         var mutateMode = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
             estimationMode,
             businessFacade,
             algorithmProcessingTemplateConvenience,
             mutateNodePropertyService,
-            graphSageAlgorithmProcessing
+            graphSageAlgorithmProcessing,
+            raw,
+            synchroniser
         );
-        var statsMode = new NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
-            estimationMode,
-            businessFacade,
-            algorithmProcessingTemplateConvenience
-        );
+
+        var statsMode = new NodeEmbeddingAlgorithmsStatsModeBusinessFacade(raw, synchroniser);
+
         var streamMode = new NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
             estimationMode,
             businessFacade,
             algorithmProcessingTemplateConvenience,
-            graphSageAlgorithmProcessing
+            graphSageAlgorithmProcessing,
+            raw,
+            synchroniser
         );
+
         var trainMode = new NodeEmbeddingAlgorithmsTrainModeBusinessFacade(
             graphSageModelCatalog,
             modelRepository,
@@ -118,7 +130,9 @@ public final class NodeEmbeddingApplications {
             estimationMode,
             businessFacade,
             algorithmProcessingTemplateConvenience,
-            graphSageAlgorithmProcessing
+            graphSageAlgorithmProcessing,
+            raw,
+            synchroniser
         );
 
         return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode, streamMode, trainMode, writeMode);

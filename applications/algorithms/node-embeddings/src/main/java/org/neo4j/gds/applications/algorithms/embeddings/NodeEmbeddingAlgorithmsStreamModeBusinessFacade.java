@@ -20,10 +20,12 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultRenderer;
+import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
-import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
@@ -35,7 +37,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FastRP;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HashGNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Node2Vec;
@@ -45,32 +46,36 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     private final NodeEmbeddingBusinessAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
+    private final InstrumentedNodeEmbeddingAlgorithms instrumentedAlgorithms;
+    private final Synchroniser synchroniser;
 
     NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
+        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing,
+        InstrumentedNodeEmbeddingAlgorithms instrumentedAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.graphSageAlgorithmProcessing = graphSageAlgorithmProcessing;
+        this.instrumentedAlgorithms = instrumentedAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> Stream<RESULT> fastRP(
         GraphName graphName,
-        FastRPStreamConfig configuration,
+        FastRPBaseConfig configuration,
         StreamResultBuilder<FastRPResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.fastRP(
             graphName,
             configuration,
-            FastRP,
-            () -> estimationFacade.fastRP(configuration),
-            (graph, __) -> algorithms.fastRP(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> graphSage(

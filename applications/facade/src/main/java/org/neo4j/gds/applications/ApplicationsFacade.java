@@ -203,7 +203,9 @@ public final class ApplicationsFacade {
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty,
-            modelRepository
+            modelRepository,
+            synchroniser,
+            launchConvenience
         );
 
         var operationsApplications = OperationsApplications.create(featureTogglesRepository, requestScopedDependencies);

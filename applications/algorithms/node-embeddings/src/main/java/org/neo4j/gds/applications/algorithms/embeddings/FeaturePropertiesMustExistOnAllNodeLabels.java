@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.validation;
+package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FeaturePropertiesMustExistOnAllNodeLabels implements ValidationRule {
-
     private final List<String> featureProperties;
 
     public FeaturePropertiesMustExistOnAllNodeLabels(List<String> featureProperties) {
@@ -45,7 +44,6 @@ public class FeaturePropertiesMustExistOnAllNodeLabels implements ValidationRule
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-
         var missingProperties = featureProperties
             .stream()
             .filter(featureProperty -> !graphStore.hasNodeProperty(selectedLabels, featureProperty))

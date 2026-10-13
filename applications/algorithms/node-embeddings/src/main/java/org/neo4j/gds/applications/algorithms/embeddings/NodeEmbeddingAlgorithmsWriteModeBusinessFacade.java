@@ -20,11 +20,14 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.WriteResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.WriteSideEffect;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
@@ -39,7 +42,6 @@ import org.neo4j.gds.logging.Log;
 import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FastRP;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HashGNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Node2Vec;
@@ -50,18 +52,24 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteNodePropertyService writeNodePropertyService;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
+    private final InstrumentedNodeEmbeddingAlgorithms instrumentedAlgorithms;
+    private final Synchroniser synchroniser;
 
     NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteNodePropertyService writeNodePropertyService, GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
+        WriteNodePropertyService writeNodePropertyService, GraphSageAlgorithmProcessing graphSageAlgorithmProcessing,
+        InstrumentedNodeEmbeddingAlgorithms instrumentedAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeNodePropertyService = writeNodePropertyService;
         this.graphSageAlgorithmProcessing = graphSageAlgorithmProcessing;
+        this.instrumentedAlgorithms = instrumentedAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public static NodeEmbeddingAlgorithmsWriteModeBusinessFacade create(
@@ -71,7 +79,9 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
+        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing,
+        InstrumentedNodeEmbeddingAlgorithms instrumentedAlgorithms,
+        Synchroniser synchroniser
     ) {
         var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
@@ -80,7 +90,9 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
             algorithms,
             algorithmProcessingTemplateConvenience,
             writeToDatabase,
-            graphSageAlgorithmProcessing
+            graphSageAlgorithmProcessing,
+            instrumentedAlgorithms,
+            synchroniser
         );
     }
 
@@ -91,15 +103,12 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new FastRPWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.fastRP(
             graphName,
             configuration,
-            FastRP,
-            () -> estimationFacade.fastRP(configuration),
-            (graph, __) -> algorithms.fastRP(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT graphSage(

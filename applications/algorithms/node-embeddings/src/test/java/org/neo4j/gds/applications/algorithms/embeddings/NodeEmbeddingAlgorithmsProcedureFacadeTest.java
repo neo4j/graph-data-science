@@ -37,7 +37,15 @@ class NodeEmbeddingAlgorithmsProcedureFacadeTest {
     @Test
     void shouldValidateNode2VecDataSizeInMutateMode() {
         var processingTemplate = mock(AlgorithmProcessingTemplateConvenience.class);
-        var facade = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(null, null, processingTemplate, null, null);
+        var facade = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
+            null,
+            null,
+            processingTemplate,
+            null,
+            null,
+            null,
+            null
+        );
 
         facade.node2Vec(null, mock(Node2VecMutateConfig.class), null);
 
@@ -49,7 +57,14 @@ class NodeEmbeddingAlgorithmsProcedureFacadeTest {
     @Test
     void shouldValidateNode2VecDataSizeInStreamMode() {
         var processingTemplate = mock(AlgorithmProcessingTemplateConvenience.class);
-        var facade = new NodeEmbeddingAlgorithmsStreamModeBusinessFacade(null, null, processingTemplate, null);
+        var facade = new NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
+            null,
+            null,
+            processingTemplate,
+            null,
+            null,
+            null
+        );
 
         facade.node2Vec(null, null, null);
 
@@ -68,7 +83,15 @@ class NodeEmbeddingAlgorithmsProcedureFacadeTest {
     @Test
     void shouldValidateNode2VecDataSizeInWriteMode() {
         var processingTemplate = mock(AlgorithmProcessingTemplateConvenience.class);
-        var facade = new NodeEmbeddingAlgorithmsWriteModeBusinessFacade(null, null, processingTemplate, null, null);
+        var facade = new NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
+            null,
+            null,
+            processingTemplate,
+            null,
+            null,
+            null,
+            null
+        );
 
         facade.node2Vec(null, null, null);
 

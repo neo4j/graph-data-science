@@ -24,9 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPConfigTransformer;
-import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
@@ -52,19 +49,6 @@ public class NodeEmbeddingBusinessAlgorithms {
     ) {
         this.algorithms = algorithms;
         this.progressTrackerCreator = progressTrackerCreator;
-    }
-
-    public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
-        var params = FastRPConfigTransformer.toParameters(configuration);
-
-        var task = NodeEmbeddingsAlgorithmTasks.fastRP(graph, params);
-        var progressTracker = progressTrackerCreator.create(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.fastRP(graph, params, progressTracker),
-            progressTracker,
-            true
-        );
     }
 
     Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {

@@ -21,8 +21,11 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
 
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.MutateSideEffect;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.FastRPMutateStep;
@@ -41,7 +44,6 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FastRP;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HashGNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Node2Vec;
@@ -52,18 +54,25 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
+    private final InstrumentedNodeEmbeddingAlgorithms instrumentedAlgorithms;
+    private final Synchroniser synchroniser;
 
     public NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
         NodeEmbeddingBusinessAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodePropertyService,
-        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing) {
+        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing,
+        InstrumentedNodeEmbeddingAlgorithms instrumentedAlgorithms,
+        Synchroniser synchroniser
+    ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.graphSageAlgorithmProcessing = graphSageAlgorithmProcessing;
+        this.instrumentedAlgorithms = instrumentedAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT fastRP(
@@ -73,15 +82,12 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new FastRPMutateStep(mutateNodePropertyService, configuration.mutateProperty(),configuration.nodeLabels());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.fastRP(
             graphName,
             configuration,
-            FastRP,
-            () -> estimation.fastRP(configuration),
-            (graph, __) -> algorithms.fastRP(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT graphSage(

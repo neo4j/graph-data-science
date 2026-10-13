@@ -20,40 +20,36 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultRenderer;
+import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
-import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FastRP;
+import java.util.Optional;
 
 public class NodeEmbeddingAlgorithmsStatsModeBusinessFacade {
-    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final NodeEmbeddingBusinessAlgorithms algorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
+    private final InstrumentedNodeEmbeddingAlgorithms instrumentedAlgorithms;
+    private final Synchroniser synchroniser;
 
     NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
-        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        NodeEmbeddingBusinessAlgorithms algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        InstrumentedNodeEmbeddingAlgorithms instrumentedAlgorithms,
+        Synchroniser synchroniser
     ) {
-        this.estimationFacade = estimationFacade;
-        this.algorithms = algorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
+        this.instrumentedAlgorithms = instrumentedAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT fastRP(
         GraphName graphName,
-        FastRPStatsConfig configuration,
+        FastRPBaseConfig configuration,
         StatsResultBuilder<FastRPResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.fastRP(
             graphName,
             configuration,
-            FastRP,
-            () -> estimationFacade.fastRP(configuration),
-            (graph, __) -> algorithms.fastRP(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StatsResultRenderer<>(resultBuilder)
+        ));
     }
 }
