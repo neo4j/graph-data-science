@@ -27,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.indexinverse.InverseRelationshipsParameters;
@@ -71,20 +70,6 @@ public class MiscellaneousComputeFacadeEmptyGraphTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void collapsePath() {
-        var future = facade.collapsePath(
-            graphStore,
-            mock(CollapsePathParameters.class),
-            jobIdMock
-        );
-        var result = future.join();
-        assertThat(result.result()).isEqualTo(SingleTypeRelationships.EMPTY);
-
-        verifyNoInteractions(progressTrackerFactoryMock);
-        verifyNoInteractions(algorithmCallerMock);
     }
 
     @Test

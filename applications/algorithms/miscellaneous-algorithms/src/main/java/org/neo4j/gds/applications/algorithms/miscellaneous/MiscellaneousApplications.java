@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
@@ -58,32 +60,40 @@ public final class MiscellaneousApplications {
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodePropertyService,
-        MutateRelationshipService mutateRelationshipService
+        MutateRelationshipService mutateRelationshipService,
+        Synchroniser synchroniser,
+        LaunchConvenience launchConvenience
     ) {
-        var algorithms = new MiscellaneousAlgorithms(
-            requestScopedDependencies.terminationFlag()
-        );
+        var algorithms = new MiscellaneousAlgorithms(requestScopedDependencies.terminationFlag());
 
         var business = new MiscellaneousAlgorithmsBusinessFacade(algorithms,progressTrackerCreator);
 
         var estimation = new MiscellaneousApplicationsEstimationModeBusinessFacade(algorithmEstimationTemplate);
+
+        var raw = InstrumentedMiscellaneousAlgorithms.create(estimation, algorithms, launchConvenience);
+
         var mutation = new MiscellaneousApplicationsMutateModeBusinessFacade(
             estimation,
             business,
             algorithmProcessingTemplateConvenience,
             mutateNodePropertyService,
-            mutateRelationshipService
+            mutateRelationshipService,
+            raw,
+            synchroniser
         );
+
         var stats = new MiscellaneousApplicationsStatsModeBusinessFacade(
             estimation,
             business,
             algorithmProcessingTemplateConvenience
         );
+
         var stream = new MiscellaneousApplicationsStreamModeBusinessFacade(
             estimation,
             business,
             algorithmProcessingTemplateConvenience
         );
+
         var writeToDatabase = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
         var write = new MiscellaneousApplicationsWriteModeBusinessFacade(

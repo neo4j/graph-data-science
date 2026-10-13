@@ -21,9 +21,12 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
+import org.neo4j.gds.applications.algorithms.machinery.MutateSideEffect;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -35,8 +38,8 @@ import org.neo4j.gds.undirected.ToUndirectedConfig;
 import org.neo4j.gds.walking.CollapsePathConfig;
 
 import java.util.Map;
+import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CollapsePath;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.IndexInverse;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ScaleProperties;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ToUndirected;
@@ -47,19 +50,25 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateRelationshipService mutateRelationshipService;
+    private final InstrumentedMiscellaneousAlgorithms instrumentedMiscellaneousAlgorithms;
+    private final Synchroniser synchroniser;
 
     MiscellaneousApplicationsMutateModeBusinessFacade(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
         MiscellaneousAlgorithmsBusinessFacade algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodePropertyService,
-        MutateRelationshipService mutateRelationshipService
+        MutateRelationshipService mutateRelationshipService,
+        InstrumentedMiscellaneousAlgorithms instrumentedMiscellaneousAlgorithms,
+        Synchroniser synchroniser
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.mutateRelationshipService = mutateRelationshipService;
+        this.instrumentedMiscellaneousAlgorithms = instrumentedMiscellaneousAlgorithms;
+        this.synchroniser = synchroniser;
     }
 
     public <RESULT> RESULT collapsePath(
@@ -69,15 +78,12 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new CollapsePathMutateStep(mutateRelationshipService);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedMiscellaneousAlgorithms.collapsePath(
             graphName,
             configuration,
-            CollapsePath,
-            estimation::collapsePath,
-            (__, graphStore) -> algorithms.collapsePath(graphStore, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT indexInverse(

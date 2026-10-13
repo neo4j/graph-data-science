@@ -184,7 +184,9 @@ public final class ApplicationsFacade {
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty,
-            mutateRelationshipService
+            mutateRelationshipService,
+            synchroniser,
+            launchConvenience
         );
 
         var modelCatalogApplications = createModelCatalogApplications(

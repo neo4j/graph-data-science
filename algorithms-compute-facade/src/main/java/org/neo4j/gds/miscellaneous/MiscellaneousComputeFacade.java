@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -38,7 +37,6 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.undirected.ToUndirected;
 import org.neo4j.gds.undirected.ToUndirectedParameters;
-import org.neo4j.gds.walking.CollapsePath;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -62,23 +60,6 @@ public class MiscellaneousComputeFacade {
         this.algorithmCaller = algorithmCaller;
         this.progressTrackerFactory = progressTrackerFactory;
         this.terminationFlag = terminationFlag;
-    }
-
-    public CompletableFuture<TimedAlgorithmResult<SingleTypeRelationships>> collapsePath(
-        GraphStore graphStore,
-        CollapsePathParameters parameters,
-        JobId jobId
-    ) {
-        if (graphStore.nodeCount() == 0) {
-            return CompletableFuture.completedFuture(TimedAlgorithmResult.empty(SingleTypeRelationships.EMPTY));
-        }
-
-        var collapsePath =  CollapsePath.create(graphStore, parameters);
-
-        return algorithmCaller.run(
-            collapsePath::compute,
-            jobId
-        );
     }
 
     public CompletableFuture<TimedAlgorithmResult<Map<RelationshipType, SingleTypeRelationships>>> indexInverse(

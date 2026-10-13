@@ -24,12 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
-import org.neo4j.gds.collapsepath.CollapsePathParameters;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
@@ -96,26 +94,6 @@ class MiscellaneousComputeFacadeTest {
             progressTrackerFactoryMock,
             TerminationFlag.RUNNING_TRUE
         );
-    }
-
-    @Test
-    void collapsePath(){
-        var future = facade.collapsePath(
-            graphStore,
-            new CollapsePathParameters(
-                new Concurrency(1),
-                List.of(List.of("REL")),
-                Set.of(NodeLabel.of("Node")),
-                false,
-                "F"
-            ),
-            jobIdMock
-        );
-        var results = future.join();
-        var result = results.result();
-        assertThat(result).isNotNull();
-        assertThat(result.count()).isEqualTo(1);
-
     }
 
     @Test
