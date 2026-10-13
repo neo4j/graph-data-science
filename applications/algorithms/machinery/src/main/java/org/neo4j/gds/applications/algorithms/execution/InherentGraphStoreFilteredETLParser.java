@@ -30,7 +30,10 @@ import java.util.Optional;
 
 class InherentGraphStoreFilteredETLParser implements GraphStoreFilteredETLParser {
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(CONFIGURATION configuration) {
+    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(
+        CONFIGURATION configuration,
+        boolean disableRelationshipTypeTest
+    ) {
         var etlStep = new GraphStoreFilteredETL() {
             @Override
             public void onGraphStoreFiltered(

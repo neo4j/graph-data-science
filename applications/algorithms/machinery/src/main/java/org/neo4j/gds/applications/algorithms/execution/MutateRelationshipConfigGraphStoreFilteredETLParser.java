@@ -28,7 +28,12 @@ import java.util.Optional;
 
 class MutateRelationshipConfigGraphStoreFilteredETLParser implements GraphStoreFilteredETLParser {
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(CONFIGURATION configuration) {
+    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(
+        CONFIGURATION configuration,
+        boolean disableRelationshipTypeTest
+    ) {
+        if (disableRelationshipTypeTest) return Optional.empty();
+
         if (configuration instanceof MutateRelationshipConfig mutateRelationshipConfig) {
             return Optional.of(new RelationshipTypeMustNotExist(mutateRelationshipConfig.mutateRelationshipType()));
         }

@@ -71,6 +71,7 @@ public class LaunchConvenience {
             graphName,
             configuration,
             graphLoadETLBuilder,
+            false,
             Optional.empty(),
             Optional.empty(),
             constructAndRun,
@@ -98,6 +99,7 @@ public class LaunchConvenience {
         GraphName graphName,
         CONFIGURATION configuration,
         GraphLoadETLBuilder graphLoadETLBuilder,
+        boolean disableRelationshipTypeTest,
         Optional<String> secondRelationshipProperty,
         Optional<GraphLoadETLBuilder> secondGraphLoadETLBuilder,
         ConstructAndRun<RESULT> constructAndRun,
@@ -109,14 +111,22 @@ public class LaunchConvenience {
         var relationshipProperty = extractRelationshipProperty(configuration);
 
         // some cross-cutting stuff
-        graphLoadETLFromConfigurationParser.parse(configuration, graphLoadETLBuilder);
+        graphLoadETLFromConfigurationParser.parse(
+            configuration,
+            graphLoadETLBuilder,
+            disableRelationshipTypeTest
+        );
 
         // now we finally have all validations captured, we can finalise the ETL pipeline
         var graphLoadETL = graphLoadETLBuilder.build();
 
         var secondGraphLoadETL = secondGraphLoadETLBuilder.map(
             builder -> {
-                graphLoadETLFromConfigurationParser.parse(configuration, builder);
+                graphLoadETLFromConfigurationParser.parse(
+                    configuration,
+                    builder,
+                    disableRelationshipTypeTest
+                );
 
                 return builder.build();
             }

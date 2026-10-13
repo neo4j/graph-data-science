@@ -28,7 +28,10 @@ import java.util.Optional;
 
 class MutateNodePropertyConfigGraphStoreFilteredETLParser implements GraphStoreFilteredETLParser {
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(CONFIGURATION configuration) {
+    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(
+        CONFIGURATION configuration,
+        boolean disableRelationshipTypeTest
+    ) {
         if (configuration instanceof MutateNodePropertyConfig mutateNodePropertyConfig) {
             return Optional.of(new NodePropertyMustNotExistOnAnyLabels(mutateNodePropertyConfig.mutateProperty()));
         }

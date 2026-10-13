@@ -58,7 +58,7 @@ class GraphLoadETLFromConfigurationParserTest {
             }
         };
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
-        when(parser1.parse(configuration)).thenReturn(Optional.empty());
+        when(parser1.parse(configuration, false)).thenReturn(Optional.empty());
         var etlStep = new GraphStoreFilteredETL() {
             @Override
             public void onGraphStoreFiltered(
@@ -70,9 +70,9 @@ class GraphLoadETLFromConfigurationParserTest {
                 // do nothing
             }
         };
-        when(parser2.parse(configuration)).thenReturn(Optional.of(etlStep));
-        when(parser3.parse(configuration)).thenReturn(Optional.empty());
-        parser.parse(configuration, graphLoadETLBuilder);
+        when(parser2.parse(configuration, false)).thenReturn(Optional.of(etlStep));
+        when(parser3.parse(configuration, false)).thenReturn(Optional.empty());
+        parser.parse(configuration, graphLoadETLBuilder, false);
 
         verify(graphLoadETLBuilder).withGraphStoreFilteredETL(etlStep);
     }
@@ -89,7 +89,8 @@ class GraphLoadETLFromConfigurationParserTest {
                     throw new UnsupportedOperationException("TODO");
                 }
             },
-            graphLoadETLBuilder
+            graphLoadETLBuilder,
+            false
         );
 
         verify(graphLoadETLBuilder).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
@@ -112,7 +113,8 @@ class GraphLoadETLFromConfigurationParserTest {
                     throw new UnsupportedOperationException("TODO");
                 }
             },
-            graphLoadETLBuilder
+            graphLoadETLBuilder,
+            false
         );
 
         verify(graphLoadETLBuilder, times(2)).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
@@ -135,7 +137,8 @@ class GraphLoadETLFromConfigurationParserTest {
                     throw new UnsupportedOperationException("TODO");
                 }
             },
-            graphLoadETLBuilder
+            graphLoadETLBuilder,
+            false
         );
 
         verify(graphLoadETLBuilder, times(2)).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));

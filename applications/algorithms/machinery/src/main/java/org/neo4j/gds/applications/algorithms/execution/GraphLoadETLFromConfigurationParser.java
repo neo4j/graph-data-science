@@ -44,9 +44,13 @@ class GraphLoadETLFromConfigurationParser {
         );
     }
 
-    void parse(AlgoBaseConfig configuration, GraphLoadETLBuilder graphLoadETLBuilder) {
+    void parse(
+        AlgoBaseConfig configuration,
+        GraphLoadETLBuilder graphLoadETLBuilder,
+        boolean disableRelationshipTypeTest
+    ) {
         for (var parser : graphStoreFilteredETLParsers) {
-            var etlStep = parser.parse(configuration);
+            var etlStep = parser.parse(configuration, disableRelationshipTypeTest);
 
             etlStep.ifPresent(graphLoadETLBuilder::withGraphStoreFilteredETL);
         }
