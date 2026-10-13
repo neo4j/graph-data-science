@@ -61,7 +61,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | modelName             | String         | n/a                  | no       | The name of the model to train (must be unique)
 | negativeSamplingRatio | Float          | 1.0                  | yes      | The ratio of negative to positive samples to sample for training
 | nodeLabels            | List of String | ["*"]                | yes      | Filter the named graph using the given node labels. Nodes with any of the given labels will be included.
-| numNeighbors          | List           | [20 10]              | yes      | The number of neighbors to sample for each layer. Note that this also determines the number of layers
+| numNeighbors          | List           | [20, 10]             | yes      | The number of neighbors to sample for each layer. Note that this also determines the number of layers
 | numWalks              | Integer        | 10                   | yes      | The number of random walks to perform for each node in the graph
 | randomSeed            | String         | n/a                  | yes      | A number used to seed all randomness of the computation
 | relationshipTypes     | List of String | ["*"]                | yes      | Filter the named graph using the given relationship types. Relationships with any of the given types will be included.

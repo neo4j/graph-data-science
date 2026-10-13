@@ -61,7 +61,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | learningRate       | Float          | 0.001                                  | yes      | The learning rate for the optimizer
 | modelName          | String         | n/a                                    | no       | The name of the model to train (must be unique)
 | nodeLabels         | List of String | ["*"]                                  | yes      | Filter the named graph using the given node labels.
-| numNeighbors       | List           | [20 10]                                | yes      | The number of neighbors to sample for each layer. Note that this also determines the number of layers
+| numNeighbors       | List           | [20, 10]                               | yes      | The number of neighbors to sample for each layer. Note that this also determines the number of layers
 | randomSeed         | String         | n/a                                    | yes      | A number used to seed all randomness of the computation
 | relationshipTypes  | List of String | ["*"]                                  | yes      | Filter the named graph using the given relationship types.
 | splitRatios        | Map            | {"TRAIN" 0.6, "TEST" 0.2, "VALID" 0.2} | yes      | The ratios as a map to split the target nodes of the input graph into training, test, and validation sets. The keys must be "TRAIN", "TEST" and "VALID". The sum of the values must be 1.0
