@@ -31,6 +31,8 @@ import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.undirected.ToUndirectedConfig;
 import org.neo4j.gds.walking.CollapsePathConfig;
 
 import java.util.Map;
@@ -54,10 +56,12 @@ final class InstrumentedMiscellaneousAlgorithms {
 
     static InstrumentedMiscellaneousAlgorithms create(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
-        MiscellaneousAlgorithms algorithms,
         LaunchConvenience launchConvenience,
-        ProgressTrackerCreator progressTrackerCreator
+        ProgressTrackerCreator progressTrackerCreator,
+        TerminationFlag terminationFlag
     ) {
+        var algorithms = new MiscellaneousAlgorithms(terminationFlag);
+
         var trackedAlgorithms = new TrackedMiscellaneousAlgorithms(algorithms, progressTrackerCreator);
 
         return new InstrumentedMiscellaneousAlgorithms(estimation, trackedAlgorithms, launchConvenience);
@@ -112,6 +116,24 @@ final class InstrumentedMiscellaneousAlgorithms {
             (graph, __, ___) -> trackedAlgorithms.scaleProperties(graph, configuration),
             () -> estimations.scaleProperties(configuration),
             AlgorithmLabel.ScaleProperties,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> toUndirected(
+        GraphName graphName,
+        ToUndirectedConfig configuration,
+        Optional<SideEffect<SingleTypeRelationships, METADATA>> sideEffect,
+        ResultRenderer<SingleTypeRelationships, RESULT, METADATA> resultRenderer
+    ) {
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            GraphLoadETLBuilder.empty(),
+            (__, ___, graphStore) -> trackedAlgorithms.toUndirected(graphStore, configuration),
+            () -> estimations.toUndirected(configuration),
+            AlgorithmLabel.ToUndirected,
             sideEffect,
             resultRenderer
         );

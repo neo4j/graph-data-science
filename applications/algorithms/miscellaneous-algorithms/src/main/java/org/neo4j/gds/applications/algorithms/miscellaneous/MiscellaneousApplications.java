@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -57,30 +56,22 @@ public final class MiscellaneousApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodePropertyService mutateNodePropertyService,
         MutateRelationshipService mutateRelationshipService,
         Synchroniser synchroniser,
         LaunchConvenience launchConvenience
     ) {
-        var algorithms = new MiscellaneousAlgorithms(requestScopedDependencies.terminationFlag());
-
-        var business = new MiscellaneousAlgorithmsBusinessFacade(algorithms,progressTrackerCreator);
-
         var estimation = new MiscellaneousApplicationsEstimationModeBusinessFacade(algorithmEstimationTemplate);
 
         var raw = InstrumentedMiscellaneousAlgorithms.create(
             estimation,
-            algorithms,
             launchConvenience,
-            progressTrackerCreator
+            progressTrackerCreator,
+            requestScopedDependencies.terminationFlag()
         );
 
         var mutation = new MiscellaneousApplicationsMutateModeBusinessFacade(
-            estimation,
-            business,
-            algorithmProcessingTemplateConvenience,
             mutateNodePropertyService,
             mutateRelationshipService,
             raw,

@@ -31,6 +31,7 @@ import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.indexInverse.InverseRelationshipsParamsTransformer;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.undirected.ToUndirectedConfig;
 import org.neo4j.gds.walking.CollapsePathConfig;
 import org.neo4j.gds.walking.CollapsePathParamsTransformer;
 
@@ -81,6 +82,17 @@ class TrackedMiscellaneousAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> miscellaneousAlgorithms.scaleProperties(graph, params, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
+        var task = MiscellaneousAlgorithmsTasks.toUndirected(graphStore, configuration.concurrency());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> miscellaneousAlgorithms.toUndirected(graphStore, configuration.toParameters(), progressTracker),
             progressTracker,
             true
         );

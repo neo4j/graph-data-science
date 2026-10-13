@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.execution.machinery.Synchroniser;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.MutateResultRenderer;
@@ -40,29 +39,18 @@ import org.neo4j.gds.walking.CollapsePathConfig;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ToUndirected;
-
 public class MiscellaneousApplicationsMutateModeBusinessFacade {
-    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimation;
-    private final MiscellaneousAlgorithmsBusinessFacade algorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final MutateRelationshipService mutateRelationshipService;
     private final InstrumentedMiscellaneousAlgorithms instrumentedAlgorithms;
     private final Synchroniser synchroniser;
 
     MiscellaneousApplicationsMutateModeBusinessFacade(
-        MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
-        MiscellaneousAlgorithmsBusinessFacade algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodePropertyService mutateNodePropertyService,
         MutateRelationshipService mutateRelationshipService,
         InstrumentedMiscellaneousAlgorithms instrumentedAlgorithms,
         Synchroniser synchroniser
     ) {
-        this.estimation = estimation;
-        this.algorithms = algorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.mutateRelationshipService = mutateRelationshipService;
         this.instrumentedAlgorithms = instrumentedAlgorithms;
@@ -121,14 +109,11 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ToUndirectedMutateStep(mutateRelationshipService);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.toUndirected(
             graphName,
             configuration,
-            ToUndirected,
-            () -> estimation.toUndirected(configuration),
-            (__, graphStore) -> algorithms.toUndirected(graphStore, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 }
