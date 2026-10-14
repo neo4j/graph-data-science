@@ -19,9 +19,10 @@
  */
 package org.neo4j.gds.async;
 
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.JobId;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.result.TimedAlgorithmResult;
 
 import java.util.concurrent.CompletableFuture;
@@ -31,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class AsyncAlgorithmCaller {
 
     private final ExecutorService workerPool;
+
     private final Log log;
 
     public AsyncAlgorithmCaller(ExecutorService workerPool, Log log) {
@@ -40,7 +42,9 @@ public final class AsyncAlgorithmCaller {
 
     public <R> CompletableFuture<TimedAlgorithmResult<R>> run(
         AlgorithmCallable<R> algorithm,
-        JobId jobId
+        JobId jobId,
+        ProgressTracker progressTracker, //FIXME: This is a quick fix
+        boolean releaseProgressTracker  //FIXME:  This is a quick fix
     ) {
         return CompletableFuture
             .supplyAsync(
@@ -54,8 +58,16 @@ public final class AsyncAlgorithmCaller {
                     return new TimedAlgorithmResult<>(result, computeMillis.get());
                 },
                 workerPool
-            ).whenComplete((r, e) -> {
+            ).exceptionally(throwable -> {
+                log.error("Job: `%s` - Failed", jobId, throwable);
+                progressTracker.endSubTaskWithFailure();
+                return null;
+            })
+            .whenComplete((r, e) -> {
                 log.debug("Job: `%s` - Complete", jobId);
+                if (releaseProgressTracker) {
+                    progressTracker.release();
+                }
             });
     }
 }

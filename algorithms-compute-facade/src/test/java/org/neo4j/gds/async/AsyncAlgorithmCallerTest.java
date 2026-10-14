@@ -25,12 +25,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -54,7 +56,8 @@ class AsyncAlgorithmCallerTest {
 
         var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock);
 
-        var future = algorithmCaller.run(algorithmCallableMock, jobIdMock);
+        var progressTrackerMock = mock(ProgressTracker.class);
+        var future = algorithmCaller.run(algorithmCallableMock, jobIdMock, progressTrackerMock, true);
 
         await()
             .atMost(3, TimeUnit.SECONDS)
@@ -63,27 +66,58 @@ class AsyncAlgorithmCallerTest {
         verify(logMock, times(1)).debug("Job: `%s` - Starting", jobIdMock);
         verify(logMock, times(1)).debug("Job: `%s` - Complete", jobIdMock);
         verifyNoMoreInteractions(logMock);
+
+        verify(progressTrackerMock).release();
+        verifyNoMoreInteractions(progressTrackerMock);
     }
 
     @Test
-    void algorithmComputesWithException() {
-        when(algorithmCallableMock.call())
-            .thenThrow(new RuntimeException("Algorithm failed to compute."));
+    void algorithmComputesSuccessfullyWithoutRelease() {
+        when(algorithmCallableMock.call()).thenReturn("Hello world!");
 
         var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock);
 
-        var future = algorithmCaller.run(algorithmCallableMock, jobIdMock);
+        var progressTrackerMock = mock(ProgressTracker.class);
+        var future = algorithmCaller.run(algorithmCallableMock, jobIdMock, progressTrackerMock, false);
 
         await()
             .atMost(3, TimeUnit.SECONDS)
-            .untilAsserted(() -> assertThat(future).isCompletedExceptionally());
-
-        assertThat(future.exceptionNow())
-            .isExactlyInstanceOf(RuntimeException.class)
-            .hasMessage("Algorithm failed to compute.");
+            .untilAsserted(() -> assertThat(future).isCompleted());
 
         verify(logMock, times(1)).debug("Job: `%s` - Starting", jobIdMock);
         verify(logMock, times(1)).debug("Job: `%s` - Complete", jobIdMock);
         verifyNoMoreInteractions(logMock);
+
+        verifyNoMoreInteractions(progressTrackerMock);
+    }
+
+    @Test
+    void algorithmComputesWithException() {
+        var exception = new RuntimeException("Algorithm failed to compute.");
+        when(algorithmCallableMock.call()).thenThrow(exception);
+
+        var algorithmCaller = new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock);
+
+        var progressTrackerMock = mock(ProgressTracker.class);
+        var future = algorithmCaller.run(algorithmCallableMock, jobIdMock, progressTrackerMock, true);
+
+        await()
+            .atMost(3, TimeUnit.SECONDS)
+            .untilAsserted(() -> assertThat(future).isCompleted());
+
+        assertThat(future.join()).isNull();
+
+        verify(logMock, times(1)).debug("Job: `%s` - Starting", jobIdMock);
+        verify(logMock, times(1)).error(
+            org.mockito.ArgumentMatchers.eq("Job: `%s` - Failed"),
+            org.mockito.ArgumentMatchers.eq(jobIdMock),
+            org.mockito.ArgumentMatchers.argThat(t -> t instanceof java.util.concurrent.CompletionException && ((java.util.concurrent.CompletionException) t).getCause() == exception)
+        );
+        verify(logMock, times(1)).debug("Job: `%s` - Complete", jobIdMock);
+        verifyNoMoreInteractions(logMock);
+
+        verify(progressTrackerMock).endSubTaskWithFailure();
+        verify(progressTrackerMock).release();
+        verifyNoMoreInteractions(progressTrackerMock);
     }
 }

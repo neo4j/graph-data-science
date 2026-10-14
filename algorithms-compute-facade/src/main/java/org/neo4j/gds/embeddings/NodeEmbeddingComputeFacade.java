@@ -82,7 +82,9 @@ public class NodeEmbeddingComputeFacade {
 
         return algorithmCaller.run(
             node2Vec::compute,
-            jobId
+            jobId,
+            progressTracker,
+            true
         );
     }
 }
