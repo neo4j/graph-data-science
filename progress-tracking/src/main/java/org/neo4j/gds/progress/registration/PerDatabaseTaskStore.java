@@ -25,12 +25,11 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Task;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,19 +75,26 @@ public final class PerDatabaseTaskStore implements TaskStore {
         var taskContainer = getTaskContainer(user, jobId);
 
         var tasks = taskContainer.markAllCompleted();
-        Collection<Task> workingTasks;
 
-        if (listeners.size() > 1){ //Avoid being smart if there's just one listener
-            workingTasks = new ArrayList<>(tasks);
-        } else {
-            workingTasks = tasks;
+        AtomicReference<TaskStoreListener> cleanListenerRef = new AtomicReference<>(null);
+
+        listeners.forEach(listener ->
+        {
+            if (listener instanceof TaskStoreCleaner) {
+                cleanListenerRef.set(listener);
+            } else {
+                tasks.forEach(task -> {
+                    var storedTask = new StoredTask(user, jobId, task);
+                    listener.onTaskCompleted(storedTask);
+                });
+            }
+        });
+
+        if (cleanListenerRef.get() != null) {
+            var listener = cleanListenerRef.get();
+            tasks.forEach(task -> listener.onTaskCompleted(new StoredTask(user, jobId, task)));
         }
 
-        listeners.forEach(listener -> workingTasks.forEach(task -> {
-            var storedTask = new StoredTask(user, jobId, task);
-            System.out.println("Marking completed: " + storedTask+" "+ listener);
-            listener.onTaskCompleted(storedTask);
-        }));
     }
 
     @Override
