@@ -26,6 +26,9 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPConfigTransformer;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNConfigTransformer;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 
 class TrackedNodeEmbeddingAlgorithms {
     private final ProgressTrackerManager progressTrackerManager = new ProgressTrackerManager();
@@ -46,6 +49,19 @@ class TrackedNodeEmbeddingAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.fastRP(graph, params, progressTracker),
+            progressTracker,
+            true
+        );
+    }
+
+    HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
+        var params = HashGNNConfigTransformer.toParameters(configuration);
+
+        var task = NodeEmbeddingsAlgorithmTasks.hashGNN(graph, params, configuration.relationshipTypes());
+        var progressTracker = progressTrackerCreator.create(task, configuration);
+
+        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
+            () -> algorithms.hashGnn(graph, params, progressTracker),
             progressTracker,
             true
         );

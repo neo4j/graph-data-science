@@ -28,8 +28,8 @@ import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 
@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HashGNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Node2Vec;
 
 public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
@@ -99,17 +98,15 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> hashGnn(
         GraphName graphName,
-        HashGNNStreamConfig configuration,
+        HashGNNConfig configuration,
         StreamResultBuilder<HashGNNResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.hashGnn(
             graphName,
             configuration,
-            HashGNN,
-            () -> estimationFacade.hashGnn(configuration),
-            (graph, __) -> algorithms.hashGnn(graph, configuration),
-            resultBuilder
-        );
+            Optional.empty(),
+            new StreamResultRenderer<>(resultBuilder)
+        ));
     }
 
     public <RESULT> Stream<RESULT> node2Vec(

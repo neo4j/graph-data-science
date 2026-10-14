@@ -23,12 +23,9 @@ import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.embeddings.FeaturePropertiesMustExistOnAllNodeLabels;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecParameters;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.validation.Node2VecGraphValidation;
@@ -36,7 +33,6 @@ import org.neo4j.gds.result.TimedAlgorithmResult;
 import org.neo4j.gds.results.ResultTransformerBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -46,50 +42,12 @@ public class NodeEmbeddingComputeBusinessFacade {
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final NodeEmbeddingComputeFacade computeFacade;
 
-    // Request scope dependencies
-    private final User user;
-    private final DatabaseId databaseId;
-
     public NodeEmbeddingComputeBusinessFacade(
         GraphStoreCatalogService graphStoreCatalogService,
-        NodeEmbeddingComputeFacade computeFacade,
-        User user,
-        DatabaseId databaseId
+        NodeEmbeddingComputeFacade computeFacade
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.computeFacade = computeFacade;
-        this.user = user;
-        this.databaseId = databaseId;
-    }
-
-    public <TR> CompletableFuture<TR> hashGnn(
-        GraphName graphName,
-        GraphParameters graphParameters,
-        // FIXME: `relationshipTypes` is only used to create progress tracker tasks, and in there only the count...
-        List<String> relationshipTypes,
-        HashGNNParameters parameters,
-        JobId jobId,
-        boolean logProgress,
-        ResultTransformerBuilder<TimedAlgorithmResult<HashGNNResult>, TR> resultTransformerBuilder
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            databaseId,
-            graphName,
-            user,
-            graphParameters,
-            Optional.empty(),
-            new GraphStoreValidation(new FeaturePropertiesMustExistOnAllNodeLabels(parameters.featureProperties())),
-            true,
-            Optional.empty()
-        );
-
-        return computeFacade.hashGnn(
-            graphResources.graph(),
-            parameters,
-            relationshipTypes,
-            jobId,
-            logProgress
-        ).thenApply(resultTransformerBuilder.build(graphResources));
     }
 
     public <TR> CompletableFuture<TR> node2Vec(

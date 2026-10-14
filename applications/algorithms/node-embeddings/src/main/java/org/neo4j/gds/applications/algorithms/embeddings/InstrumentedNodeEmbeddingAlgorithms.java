@@ -32,6 +32,8 @@ import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -90,6 +92,38 @@ public final class InstrumentedNodeEmbeddingAlgorithms {
             (graph, __, ___) -> trackedAlgorithms.fastRP(graph, configuration),
             () -> estimation.fastRP(configuration),
             AlgorithmLabel.FastRP,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    <RESULT, METADATA> CompletableFuture<RESULT> hashGnn(
+        GraphName graphName,
+        HashGNNConfig configuration,
+        Optional<SideEffect<HashGNNResult, METADATA>> sideEffect,
+        ResultRenderer<HashGNNResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+            .withGraphStoreFilteredETL(new GraphStoreFilteredETL() {
+                @Override
+                public void onGraphStoreFiltered(
+                    GraphStore graphStore,
+                    Collection<NodeLabel> selectedLabels,
+                    Collection<RelationshipType> selectedRelationshipTypes,
+                    Optional<String> relationshipProperty
+                ) {
+                    new FeaturePropertiesMustExistOnAllNodeLabels(configuration.featureProperties())
+                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
+                }
+            });
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> trackedAlgorithms.hashGnn(graph, configuration),
+            () -> estimation.hashGnn(configuration),
+            AlgorithmLabel.HashGNN,
             sideEffect,
             resultRenderer
         );

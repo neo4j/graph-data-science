@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HashGNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Node2Vec;
 
 public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
@@ -118,15 +117,12 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new HashGnnMutateStep(mutateNodePropertyService, configuration.mutateProperty(),configuration.nodeLabels());
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.hashGnn(
             graphName,
             configuration,
-            HashGNN,
-            () -> estimation.hashGnn(configuration),
-            (graph, __) -> algorithms.hashGnn(graph, configuration),
-            mutateStep,
-            resultBuilder
-        );
+            Optional.of(new MutateSideEffect<>(mutateStep)),
+            new MutateResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT node2Vec(

@@ -29,8 +29,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.async.AsyncAlgorithmCaller;
 import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.embeddings.hashgnn.BinarizeParameters;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNParameters;
 import org.neo4j.gds.embeddings.node2vec.EmbeddingInitializer;
 import org.neo4j.gds.embeddings.node2vec.Node2VecParameters;
 import org.neo4j.gds.embeddings.node2vec.SamplingWalkParameters;
@@ -79,50 +77,8 @@ class NodeEmbeddingComputeFacadeTest {
         facade = new NodeEmbeddingComputeFacade(
             Log.noOpLog(),
             new AsyncAlgorithmCaller(Executors.newSingleThreadExecutor(), logMock),
-            progressTrackerFactoryMock,
-            TerminationFlag.RUNNING_TRUE
+            progressTrackerFactoryMock
         );
-    }
-
-    @Nested
-    @GdlExtension
-    class HashGnnTest {
-
-        @GdlGraph(graphNamePrefix = "hashGnn")
-        private static final String HASH_GNN =
-            "CREATE" +
-                "  (a:N {f1: 1.1, f2: [1.3, 2.0]})" +
-                ", (b:N {f1: 1.5, f2: [-3.1, 1.6]})" +
-                ", (c:N {f1: -0.6, f2: [0.0, -1.0]})" +
-                ", (b)-[:R]->(a)" +
-                ", (b)-[:R]->(c)";
-
-        @Inject
-        private Graph hashGnnGraph;
-
-        @Test
-        void hashGnn() {
-            int embeddingDensity = 100;
-            int binarizationDimension = 8;
-
-            var parameters = new HashGNNParameters(
-                new Concurrency(4),
-                1,
-                embeddingDensity,
-                0.0,
-                List.of("f1", "f2"),
-                false,
-                Optional.empty(),
-                Optional.of(new BinarizeParameters(binarizationDimension, 0.0d)),
-                Optional.empty(),
-                Optional.of(42L)
-            );
-
-            var timedAlgorithmResult = facade.hashGnn(hashGnnGraph, parameters, List.of("R"), jobIdMock, true).join();
-
-            assertThat(timedAlgorithmResult.computeMillis()).isNotNegative();
-            assertThat(timedAlgorithmResult.result().embeddings().nodeCount()).isEqualTo(hashGnnGraph.nodeCount());
-        }
     }
 
     @Nested

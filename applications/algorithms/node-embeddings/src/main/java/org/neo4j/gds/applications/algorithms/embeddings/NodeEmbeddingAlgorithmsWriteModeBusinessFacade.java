@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HashGNN;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Node2Vec;
 
 public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
@@ -138,15 +137,12 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new HashGnnWriteStep(writeNodePropertyService, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+        return synchroniser.synchronise(() -> instrumentedAlgorithms.hashGnn(
             graphName,
             configuration,
-            HashGNN,
-            () -> estimationFacade.hashGnn(configuration),
-            (graph, __) -> algorithms.hashGnn(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
     }
 
     public <RESULT> RESULT node2Vec(

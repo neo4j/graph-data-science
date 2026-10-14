@@ -30,9 +30,6 @@ import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNConfigTransformer;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecConfigTransformer;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
@@ -59,19 +56,6 @@ public class NodeEmbeddingBusinessAlgorithms {
 
         return progressTrackerManager.runAlgorithmAndManageProgressTracker(
             () -> algorithms.node2Vec(graph, params, progressTracker),
-            progressTracker,
-            true
-        );
-    }
-
-    HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
-        var params = HashGNNConfigTransformer.toParameters(configuration);
-
-        var task = NodeEmbeddingsAlgorithmTasks.hashGNN(graph, params, configuration.relationshipTypes());
-        var progressTracker = progressTrackerCreator.create(task, configuration);
-
-        return progressTrackerManager.runAlgorithmAndManageProgressTracker(
-            () -> algorithms.hashGnn(graph, params, progressTracker),
             progressTracker,
             true
         );
