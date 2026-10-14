@@ -109,33 +109,6 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     }
 
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> RESULT_TO_CALLER processAlgorithmForStats(
-        Optional<String> relationshipWeightOverride,
-        GraphName graphName,
-        CONFIGURATION configuration,
-        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Label label,
-        Supplier<MemoryEstimation> estimationSupplier,
-        Computation<RESULT_FROM_ALGORITHM> computation,
-        StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
-    ) {
-        var resultRenderer = new StatsResultRenderer<>(resultBuilder);
-
-        return processAlgorithmAndAnySideEffects(
-            relationshipWeightOverride,
-            graphName,
-            configuration,
-            postGraphStoreLoadValidationHooks,
-            label,
-            DimensionTransformer.DISABLED,
-            estimationSupplier,
-            computation,
-            Optional.empty(),
-            resultRenderer
-        );
-    }
-
-    @Override
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processAlgorithmForStream(
         Optional<String> relationshipWeightOverride,
         GraphName graphName,

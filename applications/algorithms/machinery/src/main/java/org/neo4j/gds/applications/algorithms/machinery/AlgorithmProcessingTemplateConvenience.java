@@ -136,29 +136,6 @@ public class AlgorithmProcessingTemplateConvenience {
         );
     }
 
-    /**
-     * No relationship weight override, no validation hooks, no mutate or write step
-     */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> RESULT_TO_CALLER processRegularAlgorithmInStatsMode(
-        GraphName graphName,
-        CONFIGURATION configuration,
-        Label label,
-        Supplier<MemoryEstimation> estimationFactory,
-        Computation<RESULT_FROM_ALGORITHM> computation,
-        StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
-    ) {
-        return algorithmProcessingTemplate.processAlgorithmForStats(
-            Optional.empty(),
-            graphName,
-            configuration,
-            Optional.empty(),
-            label,
-            estimationFactory,
-            computation,
-            resultBuilder
-        );
-    }
-
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processAlgorithmInStreamMode(
         GraphName graphName,
         CONFIGURATION configuration,
