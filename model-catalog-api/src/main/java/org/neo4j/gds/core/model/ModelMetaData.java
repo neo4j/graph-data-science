@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.model.ModelConfig;
@@ -30,29 +29,19 @@ import java.util.List;
 
 import static org.neo4j.gds.core.model.Model.ALL_USERS;
 
-@ValueClass
-public interface ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo> {
-
-    String creator();
-
-    List<String> sharedWith();
-
-    String name();
-
-    String algoType();
-
-    GraphSchema graphSchema();
-
-    CONFIG trainConfig();
-
-    ZonedDateTime creationTime();
-
-    INFO customInfo();
-
-    String gdsVersion();
-
-    @Value.Derived
-    default boolean isPublished() {
+@GenerateBuilder
+public record ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo>(
+    String creator,
+    List<String> sharedWith,
+    String name,
+    String algoType,
+    GraphSchema graphSchema,
+    CONFIG trainConfig,
+    ZonedDateTime creationTime,
+    INFO customInfo,
+    String gdsVersion
+) {
+    public boolean isPublished() {
         return sharedWith().contains(ALL_USERS);
     }
 }

@@ -10,9 +10,11 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor openGds.immutables.value
     annotationProcessor neo4j.annotations
+    annotationProcessor openGds.recordBuilder
 
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
+    compileOnly openGds.recordBuilder
 
     // Neo4j dependencies
     compileOnly(neo4j.annotations) { transitive = false }
