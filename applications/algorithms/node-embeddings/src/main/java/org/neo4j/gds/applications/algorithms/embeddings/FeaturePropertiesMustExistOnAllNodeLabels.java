@@ -22,27 +22,29 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.loading.validation.ValidationRule;
+import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class FeaturePropertiesMustExistOnAllNodeLabels implements ValidationRule {
+public class FeaturePropertiesMustExistOnAllNodeLabels implements GraphStoreFilteredETL {
     private final List<String> featureProperties;
 
-    public FeaturePropertiesMustExistOnAllNodeLabels(List<String> featureProperties) {
+    FeaturePropertiesMustExistOnAllNodeLabels(List<String> featureProperties) {
         this.featureProperties = featureProperties;
     }
 
     @Override
-    public void validate(
+    public void onGraphStoreFiltered(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
     ) {
         var missingProperties = featureProperties
             .stream()

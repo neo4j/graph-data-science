@@ -19,23 +19,18 @@
  */
 package org.neo4j.gds.applications.algorithms.embeddings;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.execution.LaunchConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
-import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -72,18 +67,7 @@ public final class InstrumentedNodeEmbeddingAlgorithms {
         ResultRenderer<FastRPResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .withGraphStoreFilteredETL(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new FeaturePropertiesMustExistOnAllNodeLabels(configuration.featureProperties())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(new FeaturePropertiesMustExistOnAllNodeLabels(configuration.featureProperties()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
@@ -104,18 +88,7 @@ public final class InstrumentedNodeEmbeddingAlgorithms {
         ResultRenderer<HashGNNResult, RESULT, METADATA> resultRenderer
     ) {
         var graphLoadETLBuilder = new GraphLoadETLBuilder()
-            .withGraphStoreFilteredETL(new GraphStoreFilteredETL() {
-                @Override
-                public void onGraphStoreFiltered(
-                    GraphStore graphStore,
-                    Collection<NodeLabel> selectedLabels,
-                    Collection<RelationshipType> selectedRelationshipTypes,
-                    Optional<String> relationshipProperty
-                ) {
-                    new FeaturePropertiesMustExistOnAllNodeLabels(configuration.featureProperties())
-                        .validate(graphStore, selectedLabels, selectedRelationshipTypes);
-                }
-            });
+            .withGraphStoreFilteredETL(new FeaturePropertiesMustExistOnAllNodeLabels(configuration.featureProperties()));
 
         return launchConvenience.launchAlgorithm(
             graphName,
