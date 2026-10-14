@@ -64,10 +64,12 @@ public final class MemoryTracker implements TaskStoreListener, GraphStoreAddedEv
         JobId jobId,
         long memoryEstimate
     ) throws MemoryGuardException {
+
         if (memoryEstimate > initialMemory) {
             throw new TotalMemoryReservationExceededException(taskName, memoryEstimate, initialMemory);
         }
         var availableMemory = availableMemory();
+        log.debug("Trying to track %s:  %s bytes. Available memory: %s bytes", jobId.asString(), memoryEstimate, availableMemory);
         if (memoryEstimate > availableMemory) {
             throw new AvailableMemoryReservationExceededException(taskName, memoryEstimate, availableMemory);
         }
