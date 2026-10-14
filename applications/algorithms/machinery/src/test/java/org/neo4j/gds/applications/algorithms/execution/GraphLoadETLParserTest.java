@@ -35,11 +35,11 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-class GraphLoadETLFromConfigurationParserTest {
+class GraphLoadETLParserTest {
     @Test
     void shouldParseAndPopulateBuilder() {
         var parser1 = mock(GraphStoreFilteredETLParser.class);
@@ -49,7 +49,7 @@ class GraphLoadETLFromConfigurationParserTest {
         parsers.add(parser1);
         parsers.add(parser2);
         parsers.add(parser3);
-        var parser = new GraphLoadETLFromConfigurationParser(parsers);
+        var parser = new GraphLoadETLParser(parsers);
 
         var configuration = new AlgoBaseConfig() {
             @Override
@@ -59,7 +59,7 @@ class GraphLoadETLFromConfigurationParserTest {
         };
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         when(parser1.parse(configuration, false)).thenReturn(Optional.empty());
-        var etlStep = new GraphStoreFilteredETL() {
+        var parsedEtlStep = new GraphStoreFilteredETL() {
             @Override
             public void onGraphStoreFiltered(
                 GraphStore graphStore,
@@ -70,16 +70,16 @@ class GraphLoadETLFromConfigurationParserTest {
                 // do nothing
             }
         };
-        when(parser2.parse(configuration, false)).thenReturn(Optional.of(etlStep));
+        when(parser2.parse(configuration, false)).thenReturn(Optional.of(parsedEtlStep));
         when(parser3.parse(configuration, false)).thenReturn(Optional.empty());
         parser.parse(configuration, graphLoadETLBuilder, false);
 
-        verify(graphLoadETLBuilder).withGraphStoreFilteredETL(etlStep);
+        verify(graphLoadETLBuilder).withGraphStoreFilteredETL(parsedEtlStep);
     }
 
     @Test
     void shouldParseUninterestingConfiguration() {
-        var parser = GraphLoadETLFromConfigurationParser.create();
+        var parser = GraphLoadETLParser.create();
 
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         parser.parse(
@@ -93,12 +93,12 @@ class GraphLoadETLFromConfigurationParserTest {
             false
         );
 
-        verify(graphLoadETLBuilder).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
+        verifyNoInteractions(graphLoadETLBuilder);
     }
 
     @Test
     void shouldParseNodePropertyNonExistenceRequirement() {
-        var parser = GraphLoadETLFromConfigurationParser.create();
+        var parser = GraphLoadETLParser.create();
 
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         parser.parse(
@@ -117,12 +117,12 @@ class GraphLoadETLFromConfigurationParserTest {
             false
         );
 
-        verify(graphLoadETLBuilder, times(2)).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
+        verify(graphLoadETLBuilder).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
     }
 
     @Test
     void shouldParseRelationshipTypeNonExistenceRequirement() {
-        var parser = GraphLoadETLFromConfigurationParser.create();
+        var parser = GraphLoadETLParser.create();
 
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         parser.parse(
@@ -141,6 +141,6 @@ class GraphLoadETLFromConfigurationParserTest {
             false
         );
 
-        verify(graphLoadETLBuilder, times(2)).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
+        verify(graphLoadETLBuilder).withGraphStoreFilteredETL(any(GraphStoreFilteredETL.class));
     }
 }

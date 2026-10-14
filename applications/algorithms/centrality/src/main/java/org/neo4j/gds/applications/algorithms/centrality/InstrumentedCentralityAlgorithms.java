@@ -106,7 +106,7 @@ public final class InstrumentedCentralityAlgorithms {
         Optional<SideEffect<PageRankResult, METADATA>> sideEffect,
         ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new SourceNodesRequirement(configuration.sourceNodes().inputNodes()));
 
         return launchConvenience.launchAlgorithm(
@@ -128,7 +128,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<ArticulationPointsResult, RESULT, METADATA> resultRenderer,
         boolean shouldComputeComponents
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Articulation Points"));
 
         return launchConvenience.launchAlgorithm(
@@ -149,7 +149,7 @@ public final class InstrumentedCentralityAlgorithms {
         Optional<SideEffect<BetwennessCentralityResult, METADATA>> sideEffect,
         ResultRenderer<BetwennessCentralityResult, RESULT, METADATA> resultRenderer
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new BetweennessCentralityRequirements());
 
         return launchConvenience.launchAlgorithm(
@@ -171,7 +171,7 @@ public final class InstrumentedCentralityAlgorithms {
         ResultRenderer<BridgeResult, RESULT, METADATA> resultRenderer,
         boolean shouldComputeComponents
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Bridges"));
 
         return launchConvenience.launchAlgorithm(
@@ -195,7 +195,7 @@ public final class InstrumentedCentralityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            GraphLoadETLBuilder.empty(),
+            GraphLoadETLBuilder.from(configuration),
             (graph, __, ___) -> algorithms.celf(graph, configuration),
             () -> estimationFacade.celf(configuration),
             AlgorithmLabel.CELF,
@@ -213,7 +213,7 @@ public final class InstrumentedCentralityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            GraphLoadETLBuilder.empty(),
+            GraphLoadETLBuilder.from(configuration),
             (graph, __, ___) -> algorithms.closenessCentrality(graph, configuration),
             estimationFacade::closenessCentrality,
             AlgorithmLabel.ClosenessCentrality,
@@ -231,7 +231,7 @@ public final class InstrumentedCentralityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            GraphLoadETLBuilder.empty(),
+            GraphLoadETLBuilder.from(configuration),
             (graph, __, ___) -> algorithms.degreeCentrality(graph, configuration),
             () -> estimationFacade.degreeCentrality(configuration),
             AlgorithmLabel.DegreeCentrality,
@@ -246,7 +246,7 @@ public final class InstrumentedCentralityAlgorithms {
         Optional<SideEffect<PageRankResult, METADATA>> sideEffect,
         ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new SourceNodesRequirement(configuration.sourceNodes().inputNodes()));
 
         return launchConvenience.launchAlgorithm(
@@ -270,7 +270,7 @@ public final class InstrumentedCentralityAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            GraphLoadETLBuilder.empty(),
+            GraphLoadETLBuilder.from(configuration),
             (graph, __, ___) -> algorithms.harmonicCentrality(graph, configuration),
             estimationFacade::harmonicCentrality,
             AlgorithmLabel.HarmonicCentrality,
@@ -285,7 +285,7 @@ public final class InstrumentedCentralityAlgorithms {
         Optional<SideEffect<PregelResult, METADATA>> sideEffect,
         ResultRenderer<PregelResult, RESULT, METADATA> resultRenderer
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreLoadedETL(hitsHookGenerator.generate(configuration)) // the hook creates inverse indexes
             .withGraphStoreFilteredETL(new PregelPropertiesRequirement(configuration.writeProperty(), configuration.writeToResultStore()))
             .withGraphStoreFilteredETL(new DirectedOnlyRequirement("Hits"));
@@ -302,13 +302,13 @@ public final class InstrumentedCentralityAlgorithms {
         );
     }
 
-    public <RESULT, METADATA> CompletableFuture<RESULT> indirectExposure(
+    <RESULT, METADATA> CompletableFuture<RESULT> indirectExposure(
         GraphName graphName,
         IndirectExposureConfig configuration,
         Optional<SideEffect<IndirectExposureResult, METADATA>> sideEffect,
         ResultRenderer<IndirectExposureResult, RESULT, METADATA> resultRenderer
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new UndirectedOnlyRequirement("Indirect exposure"));
 
         return launchConvenience.launchAlgorithm(
@@ -329,7 +329,7 @@ public final class InstrumentedCentralityAlgorithms {
         Optional<SideEffect<PageRankResult, METADATA>> sideEffect,
         ResultRenderer<PageRankResult, RESULT, METADATA> resultRenderer
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new SourceNodesRequirement(configuration.sourceNodes().inputNodes()));
 
         return launchConvenience.launchAlgorithm(

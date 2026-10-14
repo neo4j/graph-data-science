@@ -41,7 +41,7 @@ import java.util.function.Supplier;
  * This object is request scoped, so that it can carry all the implicit parameters relating to the request.
  */
 public class LaunchConvenience {
-    private final GraphLoadETLFromConfigurationParser graphLoadETLFromConfigurationParser = GraphLoadETLFromConfigurationParser.create();
+    private final GraphLoadETLParser etlParser = GraphLoadETLParser.create();
 
     private final AlgorithmProcessingFacade algorithmProcessingFacade;
     private final RequestScopedDependencies requestScopedDependencies;
@@ -111,7 +111,7 @@ public class LaunchConvenience {
         var relationshipProperty = extractRelationshipProperty(configuration);
 
         // some cross-cutting stuff
-        graphLoadETLFromConfigurationParser.parse(
+        etlParser.parse(
             configuration,
             graphLoadETLBuilder,
             disableRelationshipTypeTest
@@ -122,7 +122,7 @@ public class LaunchConvenience {
 
         var secondGraphLoadETL = secondGraphLoadETLBuilder.map(
             builder -> {
-                graphLoadETLFromConfigurationParser.parse(
+                etlParser.parse(
                     configuration,
                     builder,
                     disableRelationshipTypeTest

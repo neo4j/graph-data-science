@@ -24,20 +24,19 @@ import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 
 import java.util.Set;
 
-class GraphLoadETLFromConfigurationParser {
+class GraphLoadETLParser {
     private final Set<GraphStoreFilteredETLParser> graphStoreFilteredETLParsers;
 
-    GraphLoadETLFromConfigurationParser(Set<GraphStoreFilteredETLParser> graphStoreFilteredETLParsers) {
+    GraphLoadETLParser(Set<GraphStoreFilteredETLParser> graphStoreFilteredETLParsers) {
         this.graphStoreFilteredETLParsers = graphStoreFilteredETLParsers;
     }
 
     /**
      * @return the parser configured with the full complement of production business rules
      */
-    static GraphLoadETLFromConfigurationParser create() {
-        return new GraphLoadETLFromConfigurationParser(
+    static GraphLoadETLParser create() {
+        return new GraphLoadETLParser(
             Set.of(
-                new InherentGraphStoreFilteredETLParser(),
                 new MutateNodePropertyConfigGraphStoreFilteredETLParser(),
                 new MutateRelationshipConfigGraphStoreFilteredETLParser()
             )

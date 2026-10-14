@@ -17,35 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.execution;
+package org.neo4j.gds.core.loading.validation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 
 import java.util.Collection;
 import java.util.Optional;
 
-class InherentGraphStoreFilteredETLParser implements GraphStoreFilteredETLParser {
-    @Override
-    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(
-        CONFIGURATION configuration,
-        boolean disableRelationshipTypeTest
-    ) {
-        var etlStep = new GraphStoreFilteredETL() {
-            @Override
-            public void onGraphStoreFiltered(
-                GraphStore graphStore,
-                Collection<NodeLabel> selectedLabels,
-                Collection<RelationshipType> selectedRelationshipTypes,
-                Optional<String> relationshipProperty
-            ) {
-                configuration.graphStoreValidation(graphStore, selectedLabels, selectedRelationshipTypes);
-            }
-        };
+class GraphStoreFilteredETLFromConfiguration implements GraphStoreFilteredETL {
+    private final AlgoBaseConfig configuration;
 
-        return Optional.of(etlStep);
+    GraphStoreFilteredETLFromConfiguration(AlgoBaseConfig configuration) {
+        this.configuration = configuration;
+    }
+
+    @Override
+    public void onGraphStoreFiltered(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes,
+        Optional<String> relationshipProperty
+    ) {
+        configuration.graphStoreValidation(graphStore, selectedLabels, selectedRelationshipTypes);
     }
 }

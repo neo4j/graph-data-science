@@ -84,7 +84,7 @@ public class GraphStoreCatalogService {
         User user,
         DatabaseId databaseId
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder();
+        var graphLoadETLBuilder = GraphLoadETLBuilder.fromNothing();
 
         graphLoadETLBuilder.withGraphStoreFilteredETL(graphStoreValidation::validate);
         postGraphStoreLoadValidationHooks.ifPresent(
@@ -132,7 +132,7 @@ public class GraphStoreCatalogService {
         Optional<GraphValidation> graphValidation
     ) {
         // this will fall away once we have de-duplicated
-        var graphLoadETLBuilder = new GraphLoadETLBuilder();
+        var graphLoadETLBuilder = GraphLoadETLBuilder.fromNothing();
         graphLoadETLBuilder.withGraphStoreFilteredETL(graphStoreValidation::validate);
         graphValidation.ifPresent(hook -> graphLoadETLBuilder.withGraphLoadedETL(hook::validate));
         var graphLoadETL = graphLoadETLBuilder.build();

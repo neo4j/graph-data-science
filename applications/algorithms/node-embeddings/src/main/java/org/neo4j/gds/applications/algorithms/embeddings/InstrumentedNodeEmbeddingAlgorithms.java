@@ -66,7 +66,7 @@ public final class InstrumentedNodeEmbeddingAlgorithms {
         Optional<SideEffect<FastRPResult, METADATA>> sideEffect,
         ResultRenderer<FastRPResult, RESULT, METADATA> resultRenderer
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new FeaturePropertiesMustExistOnAllNodeLabels(configuration.featureProperties()));
 
         return launchConvenience.launchAlgorithm(
@@ -87,7 +87,7 @@ public final class InstrumentedNodeEmbeddingAlgorithms {
         Optional<SideEffect<HashGNNResult, METADATA>> sideEffect,
         ResultRenderer<HashGNNResult, RESULT, METADATA> resultRenderer
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new FeaturePropertiesMustExistOnAllNodeLabels(configuration.featureProperties()));
 
         return launchConvenience.launchAlgorithm(

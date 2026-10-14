@@ -76,7 +76,7 @@ final class InstrumentedMiscellaneousAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            GraphLoadETLBuilder.empty(),
+            GraphLoadETLBuilder.from(configuration),
             (__, ___, graphStore) -> trackedAlgorithms.collapsePath(graphStore, configuration),
             estimations::collapsePath,
             AlgorithmLabel.CollapsePath,
@@ -94,7 +94,7 @@ final class InstrumentedMiscellaneousAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            GraphLoadETLBuilder.empty(),
+            GraphLoadETLBuilder.from(configuration),
             (graph, __, graphStore) -> trackedAlgorithms.indexInverse(graph, graphStore, configuration),
             () -> estimations.indexInverse(configuration),
             AlgorithmLabel.IndexInverse,
@@ -112,7 +112,7 @@ final class InstrumentedMiscellaneousAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            GraphLoadETLBuilder.empty(),
+            GraphLoadETLBuilder.from(configuration),
             (graph, __, ___) -> trackedAlgorithms.scaleProperties(graph, configuration),
             () -> estimations.scaleProperties(configuration),
             AlgorithmLabel.ScaleProperties,
@@ -130,7 +130,7 @@ final class InstrumentedMiscellaneousAlgorithms {
         return launchConvenience.launchAlgorithm(
             graphName,
             configuration,
-            GraphLoadETLBuilder.empty(),
+            GraphLoadETLBuilder.from(configuration),
             true,
             Optional.empty(),
             Optional.empty(),

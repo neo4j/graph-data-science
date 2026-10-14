@@ -73,7 +73,7 @@ public final class InstrumentedSimilarityAlgorithms {
     ) {
         var filteredKnnParameters = configuration.toFilteredKnnParameters();
 
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new KnnETL(filteredKnnParameters.knnParametersSansNodeCount().nodePropertiesNames()))
             .withGraphStoreFilteredETL(new NodeFilterETL(
                 filteredKnnParameters.filteringParameters().sourceFilter(),
@@ -100,7 +100,7 @@ public final class InstrumentedSimilarityAlgorithms {
     ) {
         var filteredParameters = configuration.toFilteredParameters();
 
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new NodeFilterETL(
                 filteredParameters.filteringParameters().sourceFilter(),
                 filteredParameters.filteringParameters().targetFilter()
@@ -128,7 +128,7 @@ public final class InstrumentedSimilarityAlgorithms {
         Optional<SideEffect<KnnResult, METADATA>> sideEffect,
         ResultRenderer<KnnResult, RESULT, METADATA> resultRenderer
     ) {
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new KnnETL(configuration.toParameters().nodePropertiesNames()));
 
         return launchConvenience.launchAlgorithm(
@@ -151,7 +151,7 @@ public final class InstrumentedSimilarityAlgorithms {
     ) {
         var parameters = configuration.toParameters();
 
-        var graphLoadETLBuilder = new GraphLoadETLBuilder()
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration)
             .withGraphStoreFilteredETL(new NodeSimilarityETL(parameters.useComponents(), parameters.componentProperty()));
 
         return launchConvenience.launchAlgorithm(

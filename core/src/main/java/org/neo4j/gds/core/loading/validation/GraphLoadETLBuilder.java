@@ -19,18 +19,35 @@
  */
 package org.neo4j.gds.core.loading.validation;
 
+import org.neo4j.gds.config.AlgoBaseConfig;
+
 import java.util.LinkedList;
 import java.util.List;
 
-public class GraphLoadETLBuilder {
+public final class GraphLoadETLBuilder {
     private final List<GraphStoreLoadedETL> graphStoreLoadedHooks = new LinkedList<>();
     private final List<GraphStoreFilteredETL> graphStoreFilteredHooks = new LinkedList<>();
     private final List<GraphLoadedETL> graphLoadedHooks = new LinkedList<>();
 
+    private GraphLoadETLBuilder() {
+
+    }
+
     /**
-     * Makes for readable code
+     * This is the only way into this class.
+     * It helps us remember to include the behaviour that sits on the configuration class.
      */
-    public static GraphLoadETLBuilder empty() {
+    public static GraphLoadETLBuilder from(AlgoBaseConfig configuration) {
+        var etlStep = new GraphStoreFilteredETLFromConfiguration(configuration);
+
+        return new GraphLoadETLBuilder().withGraphStoreFilteredETL(etlStep);
+    }
+
+    /**
+     * @deprecated short term shunt, don't use it
+     */
+    @Deprecated
+    public static GraphLoadETLBuilder fromNothing() {
         return new GraphLoadETLBuilder();
     }
 
