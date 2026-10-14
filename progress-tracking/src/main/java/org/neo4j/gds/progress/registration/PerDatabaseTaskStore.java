@@ -25,6 +25,8 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.progress.tasks.Task;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -74,10 +76,17 @@ public final class PerDatabaseTaskStore implements TaskStore {
         var taskContainer = getTaskContainer(user, jobId);
 
         var tasks = taskContainer.markAllCompleted();
+        Collection<Task> workingTasks;
 
-        listeners.forEach(listener -> tasks.forEach(task -> {
+        if (listeners.size() > 1){ //Avoid being smart if there's just one listener
+            workingTasks = new ArrayList<>(tasks);
+        } else {
+            workingTasks = tasks;
+        }
+
+        listeners.forEach(listener -> workingTasks.forEach(task -> {
             var storedTask = new StoredTask(user, jobId, task);
-
+            System.out.println("Marking completed: " + storedTask+" "+ listener);
             listener.onTaskCompleted(storedTask);
         }));
     }
