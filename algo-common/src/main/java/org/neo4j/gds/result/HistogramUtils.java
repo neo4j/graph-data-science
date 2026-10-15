@@ -72,7 +72,8 @@ public final class HistogramUtils {
         return Map.of(
             "min", histogram.getMinValue(),
             "mean", histogram.getMean(),
-            "max", histogram.getMaxValue(),
+            // An all-zero DoubleHistogram reports a nonzero upper bucket bound as its maximum.
+            "max", histogram.getCountAtValue(0.0) == histogram.getTotalCount() ? 0.0 : histogram.getMaxValue(),
             "p50", histogram.getValueAtPercentile(50),
             "p75", histogram.getValueAtPercentile(75),
             "p90", histogram.getValueAtPercentile(90),
