@@ -51,6 +51,7 @@ public final class RelationshipsBuilderBuilder {
 
     public RelationshipsBuilderBuilder nodes(IdMap nodes) {
         Objects.requireNonNull(nodes);
+        // the id map can be filtered, relationships are sized for the root id map
         this.nodes = PartialIdMap.of(nodes::toMappedNodeId, nodes.rootIdMap().nodeCount());
         return this;
     }

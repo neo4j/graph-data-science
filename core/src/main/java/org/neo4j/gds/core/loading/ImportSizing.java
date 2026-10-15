@@ -58,7 +58,7 @@ public final class ImportSizing {
      */
     public static ImportSizing fromPartialIdMap(Concurrency concurrency, PartialIdMap idMap) {
         return idMap.isFinalized()
-            ? determineBestThreadSize(idMap.rootNodeCount(), concurrency.value())
+            ? determineBestThreadSize(idMap.nodeCount(), concurrency.value())
             : determineBestThreadSizeWhenNodeCountIsUnknown(concurrency.value());
     }
 

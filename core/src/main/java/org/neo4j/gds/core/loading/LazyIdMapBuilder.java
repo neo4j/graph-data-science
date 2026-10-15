@@ -118,7 +118,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     @Override
-    public long rootNodeCount() {
+    public long nodeCount() {
         return isEmpty.getAcquire()
             ? 0
             : this.nodesBuilder.importedNodes();

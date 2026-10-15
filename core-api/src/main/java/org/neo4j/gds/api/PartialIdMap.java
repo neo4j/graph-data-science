@@ -41,15 +41,14 @@ public interface PartialIdMap {
     long toMappedNodeId(long originalNodeId);
 
     /**
-     * Number of mapped node ids in the root mapping.
-     * This is necessary for nested (filtered) id mappings.
+     * Number of nodes, used to size the loaded relationships.
      * May return 0 if the PartialIdMap has not yet been finalized.
      * If this matters, use {@code isFinalized()} to check.
      */
-    long rootNodeCount();
+    long nodeCount();
 
     /**
-     * Whether the PartialIdMap has been finalized such that the {@code rootNodeCount()} is reliable.
+     * Whether the PartialIdMap has been finalized such that the {@code nodeCount()} is reliable.
      * Most implementations are finalized, only the LazyIdMapBuilder implementation may be not finalized.
      */
     default boolean isFinalized() {
@@ -57,15 +56,14 @@ public interface PartialIdMap {
     }
 
     /**
-     * Creates a finalized PartialIdMap from a node id mapper and a fixed root node count.
+     * Creates a finalized PartialIdMap from a node id mapper and a fixed node count.
      * This is used to load relationships against a complete id map.
      *
-     * @param mapper        maps original node ids into the space of the innermost mapping,
-     *                      see {@link #toMappedNodeId(long)}
-     * @param rootNodeCount number of mapped node ids in the root mapping, which may differ
-     *                      from the node count of a nested (filtered) id map
+     * @param mapper    maps original node ids into the space of the innermost mapping,
+     *                  see {@link #toMappedNodeId(long)}
+     * @param nodeCount number of nodes, see {@link #nodeCount()}
      */
-    static PartialIdMap of(NodeIdMapper mapper, long rootNodeCount) {
+    static PartialIdMap of(NodeIdMapper mapper, long nodeCount) {
         return new PartialIdMap() {
             @Override
             public long toMappedNodeId(long originalNodeId) {
@@ -73,8 +71,8 @@ public interface PartialIdMap {
             }
 
             @Override
-            public long rootNodeCount() {
-                return rootNodeCount;
+            public long nodeCount() {
+                return nodeCount;
             }
         };
     }
