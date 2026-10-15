@@ -35,7 +35,8 @@ public final class ExitAndAggregation {
         // target node given; terminate if target is reached
         if (parameters.hasTargetNodes()) {
             List<Long> mappedTargets = parameters.targetNodes().stream()
-                .map(graph::safeToMappedNodeId)
+                .filter(graph::containsOriginalId)
+                .map(graph::toMappedNodeId)
                 .collect(Collectors.toList());
             exitFunction = new TargetExitPredicate(mappedTargets);
             aggregatorFunction = Aggregator.NO_AGGREGATION;

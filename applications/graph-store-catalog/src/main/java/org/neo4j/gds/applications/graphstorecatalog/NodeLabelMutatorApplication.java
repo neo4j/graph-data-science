@@ -60,7 +60,7 @@ public class NodeLabelMutatorApplication {
             idMap.forEachNode(
                 nodeId -> {
                     var originalNodeId = idMap.toOriginalNodeId(nodeId);
-                    var mappedNodeId = graphStore.nodes().safeToMappedNodeId(originalNodeId);
+                    var mappedNodeId = graphStore.nodes().toMappedNodeId(originalNodeId);
                     graphStore.nodes().addNodeIdToLabel(mappedNodeId, nodeLabelToMutate);
                     nodeCounter.increment();
                     return true;

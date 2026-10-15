@@ -43,7 +43,7 @@ class TargetNodeConfigTest {
         var graphStore = mock(GraphStore.class);
         var idMap = mock(IdMap.class);
         when(graphStore.nodes()).thenReturn(idMap);
-        when(idMap.safeToMappedNodeId(anyLong())).thenReturn(IdMap.NOT_FOUND);
+        when(idMap.containsOriginalId(anyLong())).thenReturn(false);
 
         doCallRealMethod().when(config).validateTargetNode(graphStore, List.of(NodeLabel.of("Node")), List.of());
         assertThatThrownBy(() -> config.validateTargetNode(
@@ -62,7 +62,8 @@ class TargetNodeConfigTest {
         var graphStore = mock(GraphStore.class);
         var idMap = mock(IdMap.class);
         when(graphStore.nodes()).thenReturn(idMap);
-        when(idMap.safeToMappedNodeId(anyLong())).thenReturn(0L);
+        when(idMap.containsOriginalId(anyLong())).thenReturn(true);
+        when(idMap.toMappedNodeId(anyLong())).thenReturn(0L);
         when(idMap.nodeLabels(anyLong())).thenReturn(List.of(NodeLabel.of("Node")));
 
 
