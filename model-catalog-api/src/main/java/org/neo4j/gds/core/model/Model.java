@@ -19,68 +19,92 @@
  */
 package org.neo4j.gds.core.model;
 
-import io.soabase.recordbuilder.core.RecordBuilder;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.configuration.Config;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.io.Serializable;
 import java.nio.file.Path;
-import java.time.Clock;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@RecordBuilder
-public record Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.CustomInfo>(
-    String creator,
-    String name,
-    ModelType algoType,
-    GraphSchema graphSchema,
+/**
+ * A Model can be created in three ways.
+ * 1. It can be the product of training. In this case it has Metadata and Data but no FileLocation.
+ * 2. It can be retrieved from the ModelCatalog. In this case it may be retrieved with or without Data.
+ *    It may also be stored and have a FileLocation.
+ * 3. It may be read from storage. In this case it will have MetaData and FileLocation.
+ *    It may be retrieved with or without Data.
+ */
+public record Model<DATA, CONFIG extends ModelConfig, INFO extends Model.CustomInfo>(
+    ModelMetaData<CONFIG, INFO> metaData,
     @Nullable DATA data,
-    CONFIG trainConfig,
-    String gdsVersion,
-    INFO customInfo,
-    Optional<Path> fileLocation,
-    List<String> sharedWith,
-    ZonedDateTime creationTime
+    Optional<Path> fileLocation
 ) {
-    public Model {
-        if (sharedWith == null) sharedWith = Collections.emptyList();
-        if (creationTime == null) creationTime = now();
-    }
-    public static final String ALL_USERS = "*";
     public static final String PUBLIC_MODEL_SUFFIX = "_public";
 
-    private static ZonedDateTime now() {
-        var zoneId = Config.EMPTY.get(GraphDatabaseSettings.db_temporal_timezone);
-        return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
+    public static <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> trained(
+        ModelMetaData<C, I> metaData,
+        D data
+    ) {
+        return new Model<>(metaData, data, Optional.empty());
     }
 
-    public boolean loaded() {
-        return data() != null;
-    }
-    public boolean stored() {
-        return fileLocation().isPresent();
-    }
-    public boolean isPublished() {
-        return sharedWith().contains(ALL_USERS);
-    }
-    public ModelHash hash() {
-        return new ModelHash(creator, name, creationTime());
+    public static <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> stored(
+        ModelMetaData<C, I> metaData,
+        D data,
+        Path fileLocation
+    ) {
+        return new Model<>(metaData, data, Optional.of(fileLocation));
     }
 
-    public <D, C extends ModelConfig & BaseConfig, I extends Model.CustomInfo> Model<D, C, I> cast(
+    public static <C extends ModelConfig, I extends CustomInfo> Model<Object, C, I> stored(
+        ModelMetaData<C, I> metaData,
+        Path fileLocation
+    ) {
+        return new Model<>(metaData, null, Optional.of(fileLocation));
+    }
+
+    public static <C extends ModelConfig, I extends CustomInfo> Model<Object, C, I> metadataOnly(
+        ModelMetaData<C, I> metaData
+    ) {
+        return new Model<>(metaData, null, Optional.empty());
+    }
+
+    public <D> Model<D, CONFIG, INFO> withData(@Nullable D data) {
+        return new Model<>(metaData, data, fileLocation);
+    }
+
+    public Model<DATA, CONFIG, INFO> withFileLocation(Optional<Path> fileLocation) {
+        return new Model<>(metaData, data, fileLocation);
+    }
+
+    public boolean loaded() { return data != null; }
+    public boolean stored() { return fileLocation.isPresent(); }
+
+    public Model<DATA, CONFIG, INFO> publish() {
+        return new Model<>(metaData.publish(), data, fileLocation);
+    }
+
+    public String creator()              { return metaData.creator(); }
+    public String name()                 { return metaData.name(); }
+    public ModelType algoType()          { return metaData.algoType(); }
+    public GraphSchema graphSchema()     { return metaData.graphSchema(); }
+    public CONFIG trainConfig()          { return metaData.trainConfig(); }
+    public INFO customInfo()             { return metaData.customInfo(); }
+    public String gdsVersion()           { return metaData.gdsVersion(); }
+    public List<String> sharedWith()     { return metaData.sharedWith(); }
+    public ZonedDateTime creationTime()  { return metaData.creationTime(); }
+    public boolean isPublished()         { return metaData.isPublished(); }
+    public ModelHash hash()              { return metaData.hash(); }
+
+    public <D, C extends ModelConfig, I extends Model.CustomInfo> Model<D, C, I> cast(
         Class<D> dataClass,
         Class<C> configClass,
         Class<I> infoClass
@@ -103,8 +127,6 @@ public record Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends 
                 configClass.getName()
             ));
         }
-
-
         if (!infoClass.isInstance(customInfo())) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The model `%s` has a customInfo with different types than expected. " +
@@ -117,39 +139,22 @@ public record Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends 
         return (Model<D, C, I>) this;
     }
 
-    public static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
-        String gdsVersion,
-        ModelType algoType,
-        GraphSchema graphSchema,
-        D modelData,
-        C trainConfig,
-        INFO customInfo
-    ) {
-        return ModelBuilder.<D, C, INFO>builder()
-            .creator(trainConfig.username())
-            .name(trainConfig.modelName())
-            .gdsVersion(gdsVersion)
-            .algoType(algoType)
-            .graphSchema(graphSchema)
-            .data(modelData)
-            .trainConfig(trainConfig)
-            .customInfo(customInfo)
-            .build();
+    public interface CustomInfo extends ToMapConvertible, Serializable {
+        default Optional<TrainingMethod> optionalTrainerMethod() {return Optional.empty();}
     }
 
     @TestOnly
-    public static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
+    public static <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> of(
         ModelType algoType,
         GraphSchema graphSchema,
-        D modelData,
+        D data,
         C trainConfig,
-        INFO customInfo
+        I customInfo
     ) {
-        return of("default", algoType, graphSchema, modelData, trainConfig, customInfo);
-    }
-
-
-    public interface CustomInfo extends ToMapConvertible, Serializable{
-        default Optional<TrainingMethod> optionalTrainerMethod() { return Optional.empty(); }
+        return new Model<>(
+            ModelMetaData.of("default", algoType, graphSchema, trainConfig, customInfo),
+            data,
+            Optional.empty()
+        );
     }
 }

@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelMetaData;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -84,13 +85,13 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
         progressTracker.endSubTask(/*GraphSageTrain*/);
 
-        return Model.of(
+        var metadata = ModelMetaData.of(
             gdsVersion,
             GraphSage.MODEL_TYPE,
             graph.schema(),
-            ModelData.of(trainResult.layers(), new SingleLabelFeatureFunction()),
             config,
             trainResult.metrics()
         );
+        return Model.trained(metadata, ModelData.of(trainResult.layers(), new SingleLabelFeatureFunction()));
     }
 }

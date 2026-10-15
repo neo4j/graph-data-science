@@ -32,8 +32,8 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelBuilder;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelMetaData;
 import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.model.TestCustomInfo;
@@ -56,7 +56,6 @@ import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.model.catalog.TestTrainConfigImpl;
-import org.neo4j.gds.model.catalog.TestWeightedTrainConfig;
 import org.neo4j.gds.model.catalog.TestWeightedTrainConfigImpl;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
@@ -64,6 +63,7 @@ import org.neo4j.gds.termination.TerminationMonitor;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -258,22 +258,21 @@ class LinkPredictionTrainingPipelineTest {
     void deriveRelationshipWeightPropertyFromPublishedModel() {
         var modelCatalog = new OpenModelCatalog();
 
-        String modelName = "myModel";
-        var model = Model.of(
+        var modelName = "myModel";
+        var modelUser = "otherUser";
+        var config = TestWeightedTrainConfigImpl.builder()
+            .modelUser(modelUser)
+            .modelName(modelName)
+            .relationshipWeightProperty("derivedWeight").build();
+        var metaData = ModelMetaData.of(
+            "default",
             new ModelType("myAlgo"),
             GraphSchema.empty(),
-            1L,
-            TestWeightedTrainConfigImpl.builder()
-                .modelUser("otherUser")
-                .modelName(modelName)
-                .relationshipWeightProperty("derivedWeight").build(),
+            config,
             new TestCustomInfo()
-        );
-        modelCatalog.set(
-            ModelBuilder.<Long, TestWeightedTrainConfig, TestCustomInfo>builder(model)
-                .sharedWith(List.of(Model.ALL_USERS))
-                .build()
-        );
+        ).publish();
+        var model = new Model<>(metaData, 1L, Optional.empty());
+        modelCatalog.set(model);
 
         var executionContext = new ExecutionContext(
             CloseableResourceRegistry.EMPTY,

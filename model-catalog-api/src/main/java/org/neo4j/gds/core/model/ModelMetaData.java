@@ -19,15 +19,18 @@
  */
 package org.neo4j.gds.core.model;
 
+import org.neo4j.configuration.Config;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.time.Clock;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
-
-import static org.neo4j.gds.core.model.Model.ALL_USERS;
+import java.util.Objects;
 
 @GenerateBuilder
 public record ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo>(
@@ -41,7 +44,52 @@ public record ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo>
     INFO customInfo,
     String gdsVersion
 ) {
+    public ModelMetaData {
+        sharedWith = List.copyOf(sharedWith);
+        Objects.requireNonNull(creationTime);
+    }
+
+    private static final String ALL_USERS = "*";
+
+    public static <C extends ModelConfig, I extends CustomInfo> ModelMetaData<C, I> of(
+        String gdsVersion,
+        ModelType algoType,
+        GraphSchema graphSchema,
+        C trainConfig,
+        I customInfo
+    ) {
+        return new ModelMetaData<>(
+            trainConfig.username(),
+            List.of(),
+            trainConfig.modelName(),
+            algoType,
+            graphSchema,
+            trainConfig,
+            now(),
+            customInfo,
+            gdsVersion
+        );
+    }
+
+    public ModelMetaData<CONFIG, INFO> withCreationTime(ZonedDateTime creationTime) {
+        return new ModelMetaData<>(creator, sharedWith, name, algoType, graphSchema, trainConfig, creationTime, customInfo, gdsVersion);
+    }
+
+    public ModelMetaData<CONFIG, INFO> publish() {
+        var name = name() + Model.PUBLIC_MODEL_SUFFIX;
+        return new ModelMetaData<>(creator, List.of(ALL_USERS), name, algoType, graphSchema, trainConfig, creationTime, customInfo, gdsVersion);
+    }
+
     public boolean isPublished() {
-        return sharedWith().contains(ALL_USERS);
+        return sharedWith.contains(ALL_USERS);
+    }
+
+    public ModelHash hash() {
+        return new ModelHash(creator, name, creationTime);
+    }
+
+    private static ZonedDateTime now() {
+        var zoneId = Config.EMPTY.get(GraphDatabaseSettings.db_temporal_timezone);
+        return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
     }
 }

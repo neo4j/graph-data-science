@@ -26,6 +26,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.CatalogModelContainer;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelMetaData;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tasks.Tasks;
@@ -203,11 +204,10 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             terminationFlag
         ).compute();
 
-        var model = Model.of(
+        var metadata = ModelMetaData.of(
             GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion(),
             MODEL_TYPE,
             schemaBeforeSteps,
-            trainResult.classifier().data(),
             config,
             LinkPredictionModelInfo.of(
                 trainResult.trainingStatistics().winningModelTestMetrics(),
@@ -216,7 +216,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
                 LinkPredictionPredictPipeline.from(pipeline)
             )
         );
-
+        var model = Model.trained(metadata, trainResult.classifier().data());
 
         return new LinkPredictionTrainPipelineResult(model, trainResult.trainingStatistics());
     }
