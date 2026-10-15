@@ -34,6 +34,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelBuilder;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
@@ -216,7 +217,7 @@ class LinkPredictionTrainingPipelineTest {
 
         String modelName = "myModel";
         modelCatalog.set(Model.of(
-            "myAlgo",
+            new ModelType("myAlgo"),
             GraphSchema.empty(),
             1L,
             TestWeightedTrainConfigImpl.builder()
@@ -259,7 +260,7 @@ class LinkPredictionTrainingPipelineTest {
 
         String modelName = "myModel";
         var model = Model.of(
-            "myAlgo",
+            new ModelType("myAlgo"),
             GraphSchema.empty(),
             1L,
             TestWeightedTrainConfigImpl.builder()
@@ -303,7 +304,7 @@ class LinkPredictionTrainingPipelineTest {
 
         String modelName = "myModel";
         modelCatalog.set(Model.of(
-            "myAlgo",
+            new ModelType("myAlgo"),
             GraphSchema.empty(),
             1L,
             TestWeightedTrainConfigImpl.builder()
@@ -342,7 +343,7 @@ class LinkPredictionTrainingPipelineTest {
 
         String modelName = "myModel";
         modelCatalog.set(Model.of(
-            "myAlgo",
+            new ModelType("myAlgo"),
             GraphSchema.empty(),
             1L,
             TestTrainConfigImpl.builder()

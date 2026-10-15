@@ -27,7 +27,7 @@ public final class ModelTransformer {
     public static ModelCatalogResult toModelCatalogResult(ModelMetadata metadata) {
         return new ModelCatalogResult(
             metadata.name(),
-            metadata.modelType(),
+            metadata.modelType().value(),
             metadata.modelInfo(),
             metadata.creationTime(),
             metadata.trainConfig(),

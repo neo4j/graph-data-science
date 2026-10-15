@@ -48,7 +48,7 @@ class OpenModelCatalogTest {
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().schema();
 
     private static final Model<String, TestTrainConfig, CustomInfo> TEST_MODEL = Model.of(
-        "testAlgo",
+        new ModelType("testAlgo"),
         GRAPH_SCHEMA,
         "modelData",
         TestTrainConfig.of(USERNAME, "testModel"),
@@ -66,7 +66,7 @@ class OpenModelCatalogTest {
             int modelIndex = i;
             assertDoesNotThrow(() -> {
                 modelCatalog.set(Model.of(
-                    "testAlgo",
+                    new ModelType("testAlgo"),
                     GRAPH_SCHEMA,
                     1337L,
                     TestTrainConfig.of(USERNAME, "testModel_" + modelIndex),
@@ -76,7 +76,7 @@ class OpenModelCatalogTest {
         }
 
         var tippingModel = Model.of(
-            "testAlgo",
+            new ModelType("testAlgo"),
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(USERNAME, "testModel_" + (allowedModelsCount + 1)),
@@ -96,14 +96,14 @@ class OpenModelCatalogTest {
     @Test
     void shouldStoreModelsPerType() {
         var model = Model.of(
-            "testAlgo",
+            new ModelType("testAlgo"),
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of(USERNAME, "testModel"),
             new TestCustomInfo()
         );
         var model2 = Model.of(
-            "testAlgo2",
+            new ModelType("testAlgo2"),
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(USERNAME, "testModel2"),
@@ -144,7 +144,7 @@ class OpenModelCatalogTest {
         });
 
         var model = Model.of(
-            "testAlgo",
+            new ModelType("testAlgo"),
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of(USERNAME, "testModel"),
@@ -174,14 +174,14 @@ class OpenModelCatalogTest {
     @Test
     void shouldStoreModels() {
         var model = Model.of(
-            "testAlgo",
+            new ModelType("testAlgo"),
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of("user1", "testModel"),
             new TestCustomInfo()
         );
         var model2 = Model.of(
-            "testAlgo",
+            new ModelType("testAlgo"),
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of("user2", "testModel2"),
@@ -204,7 +204,7 @@ class OpenModelCatalogTest {
     @Test
     void shouldCountModels() {
         var model1 = Model.of(
-            "testAlgo1",
+            new ModelType("testAlgo1"),
             GRAPH_SCHEMA,
             "modelData1",
             TestTrainConfig.of(USERNAME, "testModel1"),
@@ -212,7 +212,7 @@ class OpenModelCatalogTest {
         );
 
         var model2 = Model.of(
-            "testAlgo2",
+            new ModelType("testAlgo2"),
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(USERNAME, "testModel2"),
@@ -220,7 +220,7 @@ class OpenModelCatalogTest {
         );
 
         var publicModel = Model.of(
-            "testAlgo2",
+            new ModelType("testAlgo2"),
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of("anotherUser", "testModel2"),

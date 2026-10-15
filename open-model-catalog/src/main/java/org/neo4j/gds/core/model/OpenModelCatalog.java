@@ -167,7 +167,7 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public void verifyModelCanBeStored(String username, String modelName, String modelType) {
+    public void verifyModelCanBeStored(String username, String modelName, ModelType modelType) {
         getUserCatalog(username).verifyModelCanBeStored(modelName, modelType);
     }
 

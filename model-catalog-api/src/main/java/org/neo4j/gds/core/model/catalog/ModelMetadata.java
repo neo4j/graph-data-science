@@ -21,6 +21,7 @@ package org.neo4j.gds.core.model.catalog;
 
 import org.neo4j.gds.api.schema.GraphSchemaRenderer;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelType;
 
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -35,7 +36,7 @@ import java.util.Map;
 public record ModelMetadata(
     String name,
     String creator,
-    String modelType,
+    ModelType modelType,
     ZonedDateTime creationTime,
     Map<String, Object> graphSchema,
     Map<String, Object> trainConfig,

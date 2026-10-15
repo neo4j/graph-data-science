@@ -20,13 +20,15 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
 
 public class NodeRegressionTrainingPipeline extends NodePropertyTrainingPipeline {
 
     public static final String PIPELINE_TYPE = "Node regression training pipeline";
-    public static final String MODEL_TYPE = "NodeRegression";
+    // This guy does not appear to be supported for persistence. He get's to hold his own ModelType.
+    public static final ModelType MODEL_TYPE = new ModelType("NodeRegression");
 
     public NodeRegressionTrainingPipeline() {
         super(TrainingType.REGRESSION);

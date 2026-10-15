@@ -49,13 +49,13 @@ public interface UserCatalog {
 
     boolean exists(String modelName);
 
-    Optional<String> type(String modelName);
+    Optional<ModelType> type(String modelName);
 
     Model<?, ?, ?> drop(String modelName, boolean failOnMissing);
 
     void removeAllLoadedModels();
 
-    void verifyModelCanBeStored(String modelName, String modelType);
+    void verifyModelCanBeStored(String modelName, ModelType modelType);
 
     long size();
 }

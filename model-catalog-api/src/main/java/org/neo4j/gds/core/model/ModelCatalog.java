@@ -69,7 +69,7 @@ public interface ModelCatalog {
 
     void removeAllLoadedModels();
 
-    void verifyModelCanBeStored(String username, String modelName, String modelType);
+    void verifyModelCanBeStored(String username, String modelName, ModelType modelType);
 
     ModelCatalog EMPTY = new ModelCatalog() {
         @Override
@@ -152,7 +152,7 @@ public interface ModelCatalog {
         }
 
         @Override
-        public void verifyModelCanBeStored(String username, String modelName, String modelType) {
+        public void verifyModelCanBeStored(String username, String modelName, ModelType modelType) {
 
         }
     };

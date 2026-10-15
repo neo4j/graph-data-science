@@ -90,7 +90,7 @@ class OpenUserCatalog implements UserCatalog {
     }
 
     @Override
-    public Optional<String> type(String modelName) {
+    public Optional<ModelType> type(String modelName) {
         return Optional.ofNullable(userModels.get(modelName)).map(Model::algoType);
     }
 
@@ -115,7 +115,7 @@ class OpenUserCatalog implements UserCatalog {
     }
 
     @Override
-    public void verifyModelCanBeStored(String modelName, String modelType) {
+    public void verifyModelCanBeStored(String modelName, ModelType modelType) {
         verifyModelNameIsUnique(modelName);
         verifyModelsLimit(modelType);
     }
@@ -178,7 +178,7 @@ class OpenUserCatalog implements UserCatalog {
         }
     }
 
-    private void verifyModelsLimit(String modelType) {
+    private void verifyModelsLimit(ModelType modelType) {
         if (!canStoreModel(modelType)) {
             throw new IllegalStateException(
                 formatWithLocale(
@@ -191,11 +191,11 @@ class OpenUserCatalog implements UserCatalog {
         }
     }
 
-    private boolean canStoreModel(String modelType) {
+    private boolean canStoreModel(ModelType modelType) {
         return modelsPerType(modelType) < ALLOWED_MODELS_COUNT;
     }
 
-    private long modelsPerType(String modelType) {
+    private long modelsPerType(ModelType modelType) {
         return userModels.values()
             .stream()
             .filter(model -> model.algoType().equals(modelType))

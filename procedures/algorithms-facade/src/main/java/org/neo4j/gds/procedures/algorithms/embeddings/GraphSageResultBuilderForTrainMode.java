@@ -50,7 +50,7 @@ class GraphSageResultBuilderForTrainMode implements ResultBuilder<GraphSageTrain
     ) {
         var modelInfo = new HashMap<String, Object>();
         modelInfo.put(ModelConfig.MODEL_NAME_KEY, trainedModel.name());
-        modelInfo.put(ModelConfig.MODEL_TYPE_KEY, trainedModel.algoType());
+        modelInfo.put(ModelConfig.MODEL_TYPE_KEY, trainedModel.algoType().value());
         modelInfo.putAll(trainedModel.customInfo().toMap());
 
         var configurationMap = trainedModel.trainConfig().toMap();

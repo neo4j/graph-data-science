@@ -34,7 +34,7 @@ public record ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo>
     String creator,
     List<String> sharedWith,
     String name,
-    String algoType,
+    ModelType algoType,
     GraphSchema graphSchema,
     CONFIG trainConfig,
     ZonedDateTime creationTime,

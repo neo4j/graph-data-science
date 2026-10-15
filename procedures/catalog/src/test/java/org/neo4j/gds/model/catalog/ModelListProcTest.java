@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -54,14 +55,14 @@ class ModelListProcTest extends ModelProcBaseTest {
     @ValueSource(strings = {"gds.model.list()", "gds.model.list(null)"})
     void listsModel(String query) {
         var model1 = Model.of(
-            "testAlgo1",
+            new ModelType("testAlgo1"),
             GRAPH_SCHEMA,
             "testData",
             TestTrainConfig.of(getUsername(), "testModel1"),
             new TestCustomInfo(Map.of("foo", "bar"))
         );
         var model2 = Model.of(
-            "testAlgo2",
+            new ModelType("testAlgo2"),
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(getUsername(), "testModel2"),
@@ -69,7 +70,7 @@ class ModelListProcTest extends ModelProcBaseTest {
         );
 
         var otherUserModel = Model.of(
-            "testAlgo1337",
+            new ModelType("testAlgo1337"),
             GRAPH_SCHEMA,
             3435L,
             TestTrainConfig.of("anotheruser", "testModel"),
@@ -117,7 +118,7 @@ class ModelListProcTest extends ModelProcBaseTest {
     @Test
     void betaProcWithOldColumns() {
         var model = Model.of(
-            "testAlgo1",
+            new ModelType("testAlgo1"),
             GRAPH_SCHEMA,
             "testData",
             TestTrainConfig.of(getUsername(), "testModel1"),
@@ -157,7 +158,7 @@ class ModelListProcTest extends ModelProcBaseTest {
     @Test
     void returnSpecificModel() {
         var model1 = Model.of(
-            "testAlgo1",
+            new ModelType("testAlgo1"),
             GRAPH_SCHEMA,
             "testData",
             TestTrainConfig.of(getUsername(), "testModel1"),
@@ -165,7 +166,7 @@ class ModelListProcTest extends ModelProcBaseTest {
         );
 
         var model2 = Model.of(
-            "testAlgo2",
+            new ModelType("testAlgo2"),
             GRAPH_SCHEMA,
             1337L,
             TestTrainConfig.of(getUsername(), "testModel2"),

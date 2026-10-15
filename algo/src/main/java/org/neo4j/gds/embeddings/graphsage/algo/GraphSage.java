@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
@@ -39,7 +40,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingl
 
 public class GraphSage implements Algorithm<GraphSageResult> {
 
-    public static final String MODEL_TYPE = "graphSage";
+    public static final ModelType MODEL_TYPE = ModelType.GraphSage;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 

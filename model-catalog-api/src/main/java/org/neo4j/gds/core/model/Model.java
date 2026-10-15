@@ -45,7 +45,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public record Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.CustomInfo>(
     String creator,
     String name,
-    String algoType,
+    ModelType algoType,
     GraphSchema graphSchema,
     @Nullable DATA data,
     CONFIG trainConfig,
@@ -116,7 +116,7 @@ public record Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends 
 
     public static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
         String gdsVersion,
-        String algoType,
+        ModelType algoType,
         GraphSchema graphSchema,
         D modelData,
         C trainConfig,
@@ -136,7 +136,7 @@ public record Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends 
 
     @TestOnly
     public static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
-        String algoType,
+        ModelType algoType,
         GraphSchema graphSchema,
         D modelData,
         C trainConfig,

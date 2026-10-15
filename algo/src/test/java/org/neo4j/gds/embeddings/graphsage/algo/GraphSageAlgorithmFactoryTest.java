@@ -33,6 +33,7 @@ import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -431,7 +432,7 @@ class GraphSageAlgorithmFactoryTest {
                                             .build();
 
                                         var model = Model.of(
-                                            "graphSage",
+                                            ModelType.GraphSage,
                                             GraphSchema.empty(),
                                             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
                                             trainConfig,

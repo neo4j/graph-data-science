@@ -54,7 +54,7 @@ public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFa
 
         var result = applicationsFacade.modelCatalog()
             .exists(modelName)
-            .map(model -> new ModelExistsResult(model.name(), model.algoType(), true))
+            .map(model -> new ModelExistsResult(model.name(), model.algoType().value(), true))
             .orElseGet(() -> new ModelExistsResult(modelNameAsString, "n/a", false));
 
         return Stream.of(result);

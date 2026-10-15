@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -49,7 +50,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
     @Test
     void dropsModel() {
         var modelName = "testModel";
-        var modelType = "testAlgo";
+        var modelType = new ModelType("testAlgo");
 
         var trainConfig = TestTrainConfig.of(getUsername(), modelName);
         modelCatalog.set(Model.of(modelType, GRAPH_SCHEMA, "testData", trainConfig, new TestCustomInfo()));
@@ -60,7 +61,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
             singletonList(
                 Map.of(
                     "modelName", modelName,
-                    "modelType", modelType,
+                    "modelType", modelType.value(),
                     "modelInfo", Map.of(),
                     "trainConfig", trainConfig.toMap(),
                     "loaded", true,
@@ -76,7 +77,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
     @Test
     void betaProcWithOldColumns() {
         String existingModel = "testModel";
-        String testModelType = "testAlgo";
+        var testModelType = new ModelType("testAlgo");
 
         var trainConfig = TestTrainConfig.of(getUsername(), existingModel);
         modelCatalog.set(Model.of(testModelType, GRAPH_SCHEMA, "testData", trainConfig, new TestCustomInfo()));
@@ -86,7 +87,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
             Map.of("modelName", existingModel),
             singletonList(
                 Map.of(
-                    "modelInfo", Map.of("modelName", existingModel, "modelType", testModelType),
+                    "modelInfo", Map.of("modelName", existingModel, "modelType", testModelType.value()),
                     "trainConfig", trainConfig.toMap(),
                     "loaded", true,
                     "stored", false,

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.core.model.catalog.ModelMetadata;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
@@ -38,7 +39,7 @@ import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeatureStep> {
 
     public static final String PIPELINE_TYPE = "Link prediction training pipeline";
-    public static final String MODEL_TYPE = "LinkPrediction";
+    public static final ModelType MODEL_TYPE = ModelType.LinkPrediction;
 
     private LinkPredictionSplitConfig splitConfig;
 

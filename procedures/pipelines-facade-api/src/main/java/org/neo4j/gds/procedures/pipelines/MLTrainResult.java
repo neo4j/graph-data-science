@@ -35,7 +35,7 @@ public interface MLTrainResult {
         return Stream.concat(
                 Map.of(
                         ModelConfig.MODEL_NAME_KEY, trainedModel.name(),
-                        ModelConfig.MODEL_TYPE_KEY, trainedModel.algoType()
+                        ModelConfig.MODEL_TYPE_KEY, trainedModel.algoType().value()
                 ).entrySet().stream(),
                 trainedModel.customInfo().toMap().entrySet().stream()
         ).collect(Collectors.toMap(
