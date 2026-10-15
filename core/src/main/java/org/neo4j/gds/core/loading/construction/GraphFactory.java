@@ -212,10 +212,10 @@ public final class GraphFactory {
         );
 
         int bufferSize = requestedBufferSize;
-        if (nodes.rootNodeCount() > 0 && nodes.rootNodeCount() < bufferSize) {
-            bufferSize = (int) nodes.rootNodeCount();
+        if (nodes.nodeCount() > 0 && nodes.nodeCount() < bufferSize) {
+            bufferSize = (int) nodes.nodeCount();
         }
-        LongSupplier nodeCountSupplier = nodes::rootNodeCount;
+        LongSupplier nodeCountSupplier = nodes::nodeCount;
         var singleTypeRelationshipImporter = SingleTypeRelationshipImporter.of(importMetaData, nodeCountSupplier, importSizing);
 
         SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;

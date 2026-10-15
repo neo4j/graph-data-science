@@ -23,6 +23,7 @@ import org.neo4j.gds.Aggregation;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
@@ -47,6 +48,13 @@ public final class RelationshipsBuilderBuilder {
     private int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
 
     RelationshipsBuilderBuilder() {}
+
+    public RelationshipsBuilderBuilder nodes(IdMap nodes) {
+        Objects.requireNonNull(nodes);
+        // the id map can be filtered, relationships are sized for the root id map
+        this.nodes = PartialIdMap.of(nodes::toMappedNodeId, nodes.rootIdMap().nodeCount());
+        return this;
+    }
 
     public RelationshipsBuilderBuilder nodes(PartialIdMap nodes) {
         this.nodes = Objects.requireNonNull(nodes);

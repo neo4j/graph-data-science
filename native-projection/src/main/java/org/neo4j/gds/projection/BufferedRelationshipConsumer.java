@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.storageengine.api.Reference;
 
@@ -32,27 +32,27 @@ public final class BufferedRelationshipConsumer implements StoreScanner.RecordCo
 
     private final RelationshipsBatchBuffer<Reference> buffer;
 
-    private final PartialIdMap idMap;
+    private final NodeIdMapper toMappedNodeId;
     private final int type;
     private final boolean skipDanglingRelationships;
 
-    static BufferedRelationshipConsumer of(PartialIdMap idMap, int type, int capacity) {
-        return of(idMap, type, capacity, true);
+    static BufferedRelationshipConsumer of(NodeIdMapper toMappedNodeId, int type, int capacity) {
+        return of(toMappedNodeId, type, capacity, true);
     }
 
-    static BufferedRelationshipConsumer of(PartialIdMap idMap, int type, int capacity, boolean skipDanglingRelationships) {
+    static BufferedRelationshipConsumer of(NodeIdMapper toMappedNodeId, int type, int capacity, boolean skipDanglingRelationships) {
         var buffer = RelationshipsBatchBuffer.of(capacity, Reference.class);
-        return new BufferedRelationshipConsumer(buffer, idMap, type, skipDanglingRelationships);
+        return new BufferedRelationshipConsumer(buffer, toMappedNodeId, type, skipDanglingRelationships);
     }
 
     private BufferedRelationshipConsumer(
         RelationshipsBatchBuffer<Reference> buffer,
-        PartialIdMap idMap,
+        NodeIdMapper toMappedNodeId,
         int type,
         boolean skipDanglingRelationships
     ) {
         this.buffer = buffer;
-        this.idMap = idMap;
+        this.toMappedNodeId = toMappedNodeId;
         this.type = type;
         this.skipDanglingRelationships = skipDanglingRelationships;
     }
@@ -67,8 +67,8 @@ public final class BufferedRelationshipConsumer implements StoreScanner.RecordCo
             return false;
         }
         if ((type == ANY_RELATIONSHIP_TYPE) || (type == record.typeTokenId())) {
-            long source = idMap.toMappedNodeId(record.sourceNodeReference());
-            long target = idMap.toMappedNodeId(record.targetNodeReference());
+            long source = toMappedNodeId.map(record.sourceNodeReference());
+            long target = toMappedNodeId.map(record.targetNodeReference());
 
             if (source == NOT_FOUND || target == NOT_FOUND) {
                 if (skipDanglingRelationships) {

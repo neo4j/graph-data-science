@@ -84,11 +84,6 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public long rootNodeCount() {
-        return first.rootNodeCount();
-    }
-
-    @Override
     public long highestOriginalId() {
         return first.highestOriginalId();
     }

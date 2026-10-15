@@ -139,9 +139,6 @@ public final class FilteredIdMaps {
         public boolean containsRootNodeId(long rootNodeId) {return filteredTranslator.containsOriginalId(rootNodeId);}
 
         @Override
-        public long rootNodeCount() {return rootIdMap.rootNodeCount();}
-
-        @Override
         public IdMap rootIdMap() {return rootIdMap;}
 
         @Override

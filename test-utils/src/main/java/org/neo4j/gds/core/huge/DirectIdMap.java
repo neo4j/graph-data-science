@@ -82,11 +82,6 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public long rootNodeCount() {
-        return nodeCount;
-    }
-
-    @Override
     public List<NodeLabel> nodeLabels(long mappedNodeId) {
         return List.of();
     }

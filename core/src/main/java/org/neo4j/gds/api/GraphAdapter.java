@@ -123,11 +123,6 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public long rootNodeCount() {
-        return graph.rootNodeCount();
-    }
-
-    @Override
     public long highestOriginalId() {
         return graph.highestOriginalId();
     }
