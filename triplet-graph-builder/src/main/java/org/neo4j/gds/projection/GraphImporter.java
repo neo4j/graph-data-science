@@ -25,6 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchemaBuilder;
@@ -106,7 +107,6 @@ public final class GraphImporter {
         GraphProjectConfig config,
         List<String> undirectedRelationshipTypes,
         List<String> inverseIndexedRelationshipTypes,
-        LazyIdMapBuilder idMapBuilder,
         Capabilities.WriteMode writeMode,
         String query,
         GraphStoreCatalogService graphStoreCatalogService,
@@ -117,7 +117,6 @@ public final class GraphImporter {
             config,
             undirectedRelationshipTypes,
             inverseIndexedRelationshipTypes,
-            idMapBuilder,
             writeMode,
             query,
             graphStoreCatalogService,
@@ -135,7 +134,6 @@ public final class GraphImporter {
         GraphProjectConfig config,
         List<String> undirectedRelationshipTypes,
         List<String> inverseIndexedRelationshipTypes,
-        LazyIdMapBuilder idMapBuilder,
         Capabilities.WriteMode writeMode,
         String query,
         GraphStoreCatalogService graphStoreCatalogService,
@@ -146,7 +144,12 @@ public final class GraphImporter {
         this.config = config;
         this.undirectedRelationshipTypes = undirectedRelationshipTypes;
         this.inverseIndexedRelationshipTypes = inverseIndexedRelationshipTypes;
-        this.idMapBuilder = idMapBuilder;
+        this.idMapBuilder = new LazyIdMapBuilder(
+            config.readConcurrency(),
+            true,
+            true,
+            propertyState(writeMode)
+        );
         this.writeMode = writeMode;
         this.query = query;
         this.graphStoreCatalogService = graphStoreCatalogService;
@@ -158,6 +161,12 @@ public final class GraphImporter {
 
         progressTracker.beginSubTask(/*Graph aggregation*/);
         progressTracker.beginSubTask(/*Update aggregation*/);
+    }
+
+    private static PropertyState propertyState(Capabilities.WriteMode writeMode) {
+        return writeMode == Capabilities.WriteMode.REMOTE
+            ? PropertyState.REMOTE
+            : PropertyState.PERSISTENT;
     }
 
     public ThreadLocalBatches newThreadLocalBatches() {

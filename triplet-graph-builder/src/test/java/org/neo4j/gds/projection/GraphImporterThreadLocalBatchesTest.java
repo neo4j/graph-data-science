@@ -26,14 +26,11 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphCatalogConfigImpl;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
@@ -79,7 +76,6 @@ class GraphImporterThreadLocalBatchesTest {
                 .build(),
             List.of(),
             List.of(),
-            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             "",
             graphStoreCatalogService,

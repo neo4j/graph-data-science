@@ -21,16 +21,13 @@ package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.RequestCorrelationId;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.progress.registration.TaskRegistryFactory;
@@ -156,8 +153,6 @@ public class LazyGraphImporter implements AutoCloseable {
         );
         ConfigKeyValidation.requireOnlyKeysFrom(config.configKeys(), configMapValue.keySet());
 
-        var idMapBuilder = idMapBuilder(config.readConcurrency());
-
         var taskVolume = queryEstimator.estimateRows(query);
 
         var taskRegistryFactory = TaskRegistryFactory.local(log, taskStore, new User(username, false));
@@ -178,7 +173,6 @@ public class LazyGraphImporter implements AutoCloseable {
             config,
             config.undirectedRelationshipTypes(),
             config.inverseIndexedRelationshipTypes(),
-            idMapBuilder,
             writeMode,
             query,
             graphStoreCatalogService,
@@ -191,9 +185,5 @@ public class LazyGraphImporter implements AutoCloseable {
         if (GraphStoreCatalog.exists(username, databaseId, graphName)) {
             throw new IllegalArgumentException("Graph " + graphName + " already exists");
         }
-    }
-
-    private static LazyIdMapBuilder idMapBuilder(Concurrency readConcurrency) {
-        return new LazyIdMapBuilder(readConcurrency, true, true, PropertyState.PERSISTENT);
     }
 }
