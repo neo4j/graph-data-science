@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuardExceptionTransformer;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -56,7 +57,16 @@ class MemoryChecker {
         CONFIGURATION configuration,
         ConstructAndRun<RESULT> constructAndRun
     ) {
-        checkMemory(graphResources, estimationSupplier, dimensionTransformer, user, label, configuration);
+        // this is to eventually replace configuration in this layer
+        // have to sort out telemetry first tho
+        var requestConfiguration = new RequestConfiguration(
+            configuration.concurrency(),
+            configuration.jobId(),
+            configuration.relationshipTypesFilter(),
+            configuration.sudo()
+        );
+
+        checkMemory(graphResources, estimationSupplier, dimensionTransformer, user, label, requestConfiguration);
 
         var graphId = GraphId.from(graphResources.graph());
 
@@ -72,26 +82,23 @@ class MemoryChecker {
         );
     }
 
-    private <CONFIGURATION extends AlgoBaseConfig> void checkMemory(
+    private void checkMemory(
         GraphResources graphResources,
         Supplier<MemoryEstimation> estimationSupplier,
         DimensionTransformer dimensionTransformer,
         User user,
         Label label,
-        CONFIGURATION configuration
+        RequestConfiguration requestConfiguration
     ) {
         try {
             memoryGuard.assertAlgorithmCanRun(
                 graphResources.graph(),
                 graphResources.graphStore(),
-                configuration.relationshipTypesFilter(),
-                configuration.concurrency(),
                 estimationSupplier,
                 label,
                 dimensionTransformer,
                 user,
-                configuration.jobId(),
-                configuration.sudo()
+                requestConfiguration
             );
         } catch (MemoryGuardException e) {
             MemoryGuardExceptionTransformer.throwAsIllegalStateException(e);

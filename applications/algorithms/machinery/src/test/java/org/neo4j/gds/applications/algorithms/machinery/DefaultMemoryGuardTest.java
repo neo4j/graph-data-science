@@ -107,14 +107,11 @@ class DefaultMemoryGuardTest {
         memoryGuard.assertAlgorithmCanRun(
             graphMock,
             graphStoreMock,
-            Set.of(),
-            CONCURRENCY,
             () -> memoryEstimation,
             new StandardLabel("labels everywhere"),
             DimensionTransformer.DISABLED,
             new User("Mark", false),
-            jobIdMock,
-            false
+            new RequestConfiguration(CONCURRENCY, jobIdMock, Set.of(), false)
         );
     }
 
@@ -142,14 +139,11 @@ class DefaultMemoryGuardTest {
             () -> memoryGuard.assertAlgorithmCanRun(
                 graphMock,
                 graphStoreMock,
-                Set.of(),
-                CONCURRENCY,
                 () -> memoryEstimation,
                 new StandardLabel("some other label"),
                 DimensionTransformer.DISABLED,
                 new User("Alice", false),
-                jobIdMock,
-                false
+                new RequestConfiguration(CONCURRENCY, jobIdMock, Set.of(), false)
             )
         )
             .isSameAs(memoryGuardException);
@@ -179,14 +173,11 @@ class DefaultMemoryGuardTest {
             () -> memoryGuard.assertAlgorithmCanRun(
                 graphMock,
                 graphStoreMock,
-                Set.of(),
-                CONCURRENCY,
                 () -> memoryEstimation,
                 new StandardLabel("yet another label"),
                 DimensionTransformer.DISABLED,
                 new User("Bob", false),
-                jobIdMock,
-                false
+                new RequestConfiguration(CONCURRENCY, jobIdMock, Set.of(), false)
             )
         )
             .isSameAs(memoryGuardException);
@@ -208,14 +199,11 @@ class DefaultMemoryGuardTest {
         assertDoesNotThrow(() -> memoryGuard.assertAlgorithmCanRun(
             graphMock,
             graphStoreMock,
-            Set.of(),
-            CONCURRENCY,
             () -> memoryEstimation,
             new StandardLabel("labels galore"),
             DimensionTransformer.DISABLED,
             new User("Eve", false),
-            jobIdMock,
-            true
+            new RequestConfiguration(CONCURRENCY, jobIdMock, Set.of(), true)
         ));
 
         verify(memoryTracker).track("Eve", "labels galore", jobIdMock, 43L);

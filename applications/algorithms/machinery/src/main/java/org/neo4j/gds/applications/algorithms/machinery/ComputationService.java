@@ -63,18 +63,25 @@ class ComputationService {
         Computation<RESULT_FROM_ALGORITHM> computation,
         DimensionTransformer dimensionTransformer
     ) {
+        // this is to eventually replace configuration in this layer
+        // have to sort out telemetry first tho
+        // either that, or this goes away because this is the old machinery after all
+        var requestConfiguration = new RequestConfiguration(
+            configuration.concurrency(),
+            configuration.jobId(),
+            configuration.relationshipTypesFilter(),
+            configuration.sudo()
+        );
+
         try {
             memoryGuard.assertAlgorithmCanRun(
                 graphResources.graph(),
                 graphResources.graphStore(),
-                configuration.relationshipTypesFilter(),
-                configuration.concurrency(),
                 estimationSupplier,
                 label,
                 dimensionTransformer,
                 user,
-                configuration.jobId(),
-                configuration.sudo()
+                requestConfiguration
             );
         } catch (MemoryGuardException e) {
             MemoryGuardExceptionTransformer.throwAsIllegalStateException(e);

@@ -19,19 +19,15 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.memory.tracking.MemoryGuardException;
 import org.neo4j.gds.memory.tracking.MemoryTracker;
 
-import java.util.Collection;
 import java.util.function.Supplier;
 
 public final class DefaultMemoryGuard implements MemoryGuard {
@@ -66,36 +62,31 @@ public final class DefaultMemoryGuard implements MemoryGuard {
     public synchronized void assertAlgorithmCanRun(
         Graph graph,
         GraphStore graphStore,
-        Collection<RelationshipType> relationshipTypesFilter,
-        Concurrency concurrency,
         Supplier<MemoryEstimation> estimationFactory,
         Label label,
         DimensionTransformer dimensionTransformer,
         User user,
-        JobId jobId,
-        boolean bypassMemoryEstimation
+        RequestConfiguration requestConfiguration
     ) throws MemoryGuardException {
-
         try {
             var memoryRequirement = MemoryRequirement.create(
                 estimationFactory.get(),
-                graphDimensionFactory.graphDimensions(graphStore,graph, relationshipTypesFilter),
+                graphDimensionFactory.graphDimensions(graphStore, graph, requestConfiguration.relationshipTypeFilter()),
                 dimensionTransformer,
-                concurrency,
+                requestConfiguration.concurrency(),
                 useMaxMemoryEstimation
             );
 
             var bytesToReserve = memoryRequirement.requiredMemory();
-            if (bypassMemoryEstimation) {
-                memoryTracker.track(user.getUsername(),label.asString(), jobId, bytesToReserve);
+            if (requestConfiguration.sudo()) {
+                memoryTracker.track(user.getUsername(), label.asString(), requestConfiguration.jobId(), bytesToReserve);
                 return;
             }
 
-            memoryTracker.tryToTrack(user.getUsername(), label.asString(), jobId, bytesToReserve);
+            memoryTracker.tryToTrack(user.getUsername(), label.asString(), requestConfiguration.jobId(), bytesToReserve);
 
         } catch (MemoryEstimationNotImplementedException e) {
             log.info("Memory usage estimate not available for " + label + ", skipping guard");
         }
     }
-
 }

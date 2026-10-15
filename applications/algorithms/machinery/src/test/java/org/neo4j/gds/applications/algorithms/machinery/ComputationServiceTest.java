@@ -29,8 +29,6 @@ import org.neo4j.gds.memory.tracking.AvailableMemoryReservationExceededException
 import org.neo4j.gds.memory.tracking.MemoryGuardException;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -47,14 +45,11 @@ class ComputationServiceTest {
         doThrow(exception).when(guard).assertAlgorithmCanRun(
             any(),
             any(),
-            anyCollection(),
             any(),
             any(),
             any(),
             any(),
-            any(),
-            any(),
-            anyBoolean()
+            any()
         );
 
         var computationService = new ComputationService(Log.noOpLog(), null, guard, null, new User("foo", false));

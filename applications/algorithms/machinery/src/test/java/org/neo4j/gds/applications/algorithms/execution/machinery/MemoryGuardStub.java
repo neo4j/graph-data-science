@@ -19,19 +19,16 @@
  */
 package org.neo4j.gds.applications.algorithms.execution.machinery;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
-import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.memory.tracking.MemoryGuardException;
 
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -51,14 +48,11 @@ class MemoryGuardStub implements MemoryGuard {
     public void assertAlgorithmCanRun(
         Graph graph,
         GraphStore graphStore,
-        Collection<RelationshipType> relationshipTypesFilter,
-        Concurrency concurrency,
         Supplier<MemoryEstimation> estimationFactory,
         Label label,
         DimensionTransformer dimensionTransformer,
         User user,
-        JobId jobId,
-        boolean bypassMemoryEstimation
+        RequestConfiguration requestConfiguration
     ) throws MemoryGuardException {
         if (memoryGuardException != null) throw memoryGuardException;
 
