@@ -135,7 +135,8 @@ class NodeEmbeddingComputeFacadeTest {
                 samplingWalkParameters,
                 trainParameters,
                 new Concurrency(4),
-                NO_RANDOM_SEED
+                NO_RANDOM_SEED,
+                false
             );
 
             var timedAlgorithmResult = facade.node2Vec(

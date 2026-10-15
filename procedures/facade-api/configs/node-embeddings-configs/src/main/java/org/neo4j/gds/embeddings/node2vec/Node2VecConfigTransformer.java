@@ -49,7 +49,8 @@ public final class Node2VecConfigTransformer {
             samplingWalkParameters,
             trainParameters,
             config.concurrency(),
-            config.randomSeed()
+            config.randomSeed(),
+            config.hasRelationshipWeightProperty()
         );
     }
 

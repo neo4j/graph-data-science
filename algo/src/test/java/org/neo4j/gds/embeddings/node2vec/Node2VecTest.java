@@ -48,7 +48,6 @@ import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.Intersections;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -56,6 +55,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
@@ -135,7 +135,8 @@ class Node2VecTest {
                 samplingWalkParameters,
                 trainParameters,
                 new Concurrency(4),
-                NO_RANDOM_SEED
+                NO_RANDOM_SEED,
+                false
             ),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -176,7 +177,7 @@ class Node2VecTest {
         var node2Vec = Node2Vec.create(
             Log.noOpLog(),
             negativeGraph,
-            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), NO_RANDOM_SEED),
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), NO_RANDOM_SEED,false),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
@@ -219,7 +220,7 @@ class Node2VecTest {
         var firstRunEmbeddings = Node2Vec.create(
             Log.noOpLog(),
             graph,
-            new Node2VecParameters(walkParameters, trainParameters, concurrency, Optional.of(1337L)),
+            new Node2VecParameters(walkParameters, trainParameters, concurrency, Optional.of(1337L),false),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -227,7 +228,7 @@ class Node2VecTest {
         var secondRunEmbedding = Node2Vec.create(
             Log.noOpLog(),
             graph,
-            new Node2VecParameters(walkParameters, trainParameters, concurrency, Optional.of(1337L)),
+            new Node2VecParameters(walkParameters, trainParameters, concurrency, Optional.of(1337L),false),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -269,7 +270,7 @@ class Node2VecTest {
         var firstRunEmbeddings = Node2Vec.create(
             Log.noOpLog(),
             graph,
-            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(concurrency), Optional.of(1337L)),
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(concurrency), Optional.of(1337L),false),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -277,7 +278,7 @@ class Node2VecTest {
         var secondRunEmbedding = Node2Vec.create(
             Log.noOpLog(),
             graph,
-            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(concurrency), Optional.of(1337L)),
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(concurrency), Optional.of(1337L),false),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -331,7 +332,7 @@ class Node2VecTest {
         var firstRunEmbeddings = Node2Vec.create(
             Log.noOpLog(),
             graph,
-            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), Optional.of(1337L)),
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), Optional.of(1337L),false),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -339,7 +340,7 @@ class Node2VecTest {
         var secondRunEmbedding = Node2Vec.create(
             Log.noOpLog(),
             graph,
-            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(8), Optional.of(1337L)),
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(8), Optional.of(1337L),false),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -463,7 +464,7 @@ class Node2VecTest {
         var firstEmbeddings = Node2Vec.create(
             Log.noOpLog(),
             firstGraph,
-            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), Optional.of(1337L)),
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), Optional.of(1337L),false),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -471,7 +472,7 @@ class Node2VecTest {
         var secondEmbeddings = Node2Vec.create(
             Log.noOpLog(),
             secondGraph,
-            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), Optional.of(1337L)),
+            new Node2VecParameters(walkParameters, trainParameters, new Concurrency(4), Optional.of(1337L),false),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
@@ -518,7 +519,8 @@ class Node2VecTest {
             walkParameters,
             trainParameters,
             new Concurrency(4),
-            Optional.empty()
+            Optional.empty(),
+            false
         );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
@@ -578,7 +580,8 @@ class Node2VecTest {
             walkParameters,
             trainParameters,
             new Concurrency(4),
-            Optional.empty()
+            Optional.empty(),
+            false
         );
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
@@ -639,7 +642,8 @@ class Node2VecTest {
             samplingWalkParameters,
             trainParameters,
             new Concurrency(4),
-            Optional.of(42L)
+            Optional.of(42L),
+            false
         );
 
         var probabilitiesBuilder = new RandomWalkProbabilitiesBuilder(
@@ -693,13 +697,15 @@ class Node2VecTest {
             samplingWalkParameters,
             trainParameters,
             new Concurrency(1),
-            Optional.of(42L)
+            Optional.of(42L),
+            false
         );
         var params2 = new Node2VecParameters(
             samplingWalkParameters,
             trainParameters,
             new Concurrency(1),
-            Optional.of(1337L)
+            Optional.of(1337L),
+            false
         );
 
         var probabilitiesBuilder = new RandomWalkProbabilitiesBuilder(

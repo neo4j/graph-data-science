@@ -58,10 +58,10 @@ class CompressedRandomWalks {
 
         for (int i = 0; i < walk.length; i++) {
             var delta = walk[i] - currentLastValue;
-            var compressedValue = zigZag(delta);
+            var compressedValue = zigZag(delta); //If you change zig-zag, make sure to update `memoryEstimation`
             currentLastValue = walk[i];
             walk[i] = compressedValue;
-            requiredBytes += encodedVLongSize(compressedValue);
+            requiredBytes += encodedVLongSize(compressedValue); //If you change encoding, make sure to update `memoryEstimation`
         }
 
         var compressedData = new byte[requiredBytes];
