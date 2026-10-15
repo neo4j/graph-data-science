@@ -41,7 +41,6 @@ import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collection;
@@ -232,11 +231,6 @@ public class HugeGraph implements CSRGraph {
     @Override
     public long relationshipCount() {
         return relationshipCount;
-    }
-
-    @Override
-    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
-        return idMap.batchIterables(batchSize);
     }
 
     @Override

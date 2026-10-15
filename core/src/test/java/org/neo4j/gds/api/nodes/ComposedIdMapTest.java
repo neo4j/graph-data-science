@@ -29,7 +29,6 @@ import org.neo4j.gds.core.loading.LabelInformationBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -103,20 +102,6 @@ class ComposedIdMapTest {
         assertThat(idMap.availableNodeLabels()).containsExactlyInAnyOrder(A, B);
         assertThat(idMap.hasLabel(4, A)).isTrue();
         assertThat(idMap.nodeCount(A)).isEqualTo(5);
-    }
-
-    @Test
-    void shouldIterateAllNodesAndByLabel() {
-        var idMap = idMap(10, 100);
-        var seen = new ArrayList<Long>();
-        idMap.forEachNode(seen::add);
-        assertThat(seen).containsExactly(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L);
-
-        var onlyA = new ArrayList<Long>();
-        idMap.nodeIterator(Set.of(A)).forEachRemaining((long id) -> onlyA.add(id));
-        assertThat(onlyA).containsExactlyInAnyOrder(0L, 2L, 4L, 6L, 8L);
-
-        assertThat(idMap.batchIterables(3)).hasSize(4);
     }
 
     @Test

@@ -20,7 +20,6 @@
 package org.neo4j.gds.api.nodes;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.NodeIterator;
 import org.neo4j.gds.api.PartialIdMap;
@@ -33,7 +32,7 @@ import java.util.Optional;
  * Usually the IdMap is used to map between neo4j
  * node ids and consecutive mapped node ids.
  */
-public interface IdMap extends NodeTranslator, NodeLabels, PartialIdMap, NodeIterator, BatchNodeIterable {
+public interface IdMap extends NodeTranslator, NodeLabels, PartialIdMap, NodeIterator {
 
     /**
      * Defines the lower bound of mapped ids

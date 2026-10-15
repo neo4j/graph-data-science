@@ -20,11 +20,10 @@
 package org.neo4j.gds.api.nodes;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.FilteredIdMap;
-import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.FilteredIdMaps;
-import org.neo4j.gds.core.utils.LazyBatchCollection;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -125,17 +124,12 @@ public final class ComposedIdMap implements IdMap {
 
     @Override
     public PrimitiveIterator.OfLong nodeIterator() {
-        return new IdIterator(nodeCount());
+        return new BatchNodeIterable.IdIterator(nodeCount());
     }
 
     @Override
     public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
         return this.labelInformation.nodeIterator(labels, nodeCount());
-    }
-
-    @Override
-    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
-        return LazyBatchCollection.of(nodeCount(), batchSize, IdIterable::new);
     }
 
     // IdMap root / filter

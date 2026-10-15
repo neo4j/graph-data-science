@@ -29,7 +29,6 @@ import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collection;
@@ -71,11 +70,6 @@ public abstract class GraphAdapter implements Graph {
     @Override
     public Optional<FilteredIdMap> asNodeFilteredGraph() {
         return graph.asNodeFilteredGraph();
-    }
-
-    @Override
-    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
-        return graph.batchIterables(batchSize);
     }
 
     @Override

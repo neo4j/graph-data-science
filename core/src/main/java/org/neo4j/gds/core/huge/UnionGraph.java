@@ -26,8 +26,8 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.Topology;
+import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -35,7 +35,6 @@ import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -115,11 +114,6 @@ public final class UnionGraph implements CSRGraph {
     @Override
     public long relationshipCount() {
         return graphs.stream().mapToLong(Graph::relationshipCount).sum();
-    }
-
-    @Override
-    public Collection<PrimitiveLongIterable> batchIterables(final long batchSize) {
-        return first.batchIterables(batchSize);
     }
 
     @Override

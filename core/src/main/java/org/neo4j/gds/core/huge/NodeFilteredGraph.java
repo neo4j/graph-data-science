@@ -35,7 +35,6 @@ import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.ha.HugeIntArray;
-import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -106,11 +105,6 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     @Override
     public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
         return filteredIdMap.nodeIterator(labels);
-    }
-
-    @Override
-    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
-        return filteredIdMap.batchIterables(batchSize);
     }
 
     @Override

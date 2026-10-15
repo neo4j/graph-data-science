@@ -20,15 +20,14 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.nodes.FilterableNodeTranslator;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.api.nodes.NodeTranslator;
-import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.LazyBatchCollection;
 
 import java.util.Collection;
 import java.util.List;
@@ -187,16 +186,11 @@ public final class FilteredIdMaps {
         }
 
         @Override
-        public PrimitiveIterator.OfLong nodeIterator() {return new IdIterator(nodeCount());}
+        public PrimitiveIterator.OfLong nodeIterator() {return new BatchNodeIterable.IdIterator(nodeCount());}
 
         @Override
         public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
             return filteredLabelInformation.nodeIterator(labels, nodeCount());
-        }
-
-        @Override
-        public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
-            return LazyBatchCollection.of(nodeCount(), batchSize, IdIterable::new);
         }
     }
 }
