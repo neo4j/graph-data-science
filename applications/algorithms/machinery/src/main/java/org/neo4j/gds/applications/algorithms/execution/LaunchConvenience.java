@@ -24,10 +24,13 @@ import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProces
 import org.neo4j.gds.applications.algorithms.execution.machinery.ConstructAndRun;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -110,9 +113,25 @@ public class LaunchConvenience {
     ) {
         var relationshipProperty = extractRelationshipProperty(configuration);
 
+        // note to self: encapsulate this mess
+        var mutateNodeProperty = configuration instanceof MutateNodePropertyConfig foo
+            ? Optional.of(foo.mutateProperty())
+            : Optional.<String>empty();
+        var mutateRelationshipType = configuration instanceof MutateRelationshipConfig bar
+            ? Optional.of(bar.mutateRelationshipType())
+            : Optional.<String>empty();
+        var requestConfiguration = new RequestConfiguration(
+            configuration.concurrency(),
+            configuration.jobId(),
+            mutateNodeProperty,
+            mutateRelationshipType,
+            configuration.relationshipTypesFilter(),
+            configuration.sudo()
+        );
+
         // some cross-cutting stuff
         etlParser.parse(
-            configuration,
+            requestConfiguration,
             graphLoadETLBuilder,
             disableRelationshipTypeTest
         );
@@ -123,7 +142,7 @@ public class LaunchConvenience {
         var secondGraphLoadETL = secondGraphLoadETLBuilder.map(
             builder -> {
                 etlParser.parse(
-                    configuration,
+                    requestConfiguration,
                     builder,
                     disableRelationshipTypeTest
                 );
@@ -142,12 +161,12 @@ public class LaunchConvenience {
             graphLoadETL,
             secondRelationshipProperty,
             secondGraphLoadETL,
-            constructAndRun,
-            configuration,
-            requestScopedDependencies.terminationFlag(),
-            DimensionTransformer.DISABLED, // simple basic convenience here
             memoryEstimationSupplier,
+            DimensionTransformer.DISABLED, // simple basic convenience here
             label,
+            requestConfiguration,
+            configuration,
+            constructAndRun,
             sideEffect,
             resultRenderer
         );

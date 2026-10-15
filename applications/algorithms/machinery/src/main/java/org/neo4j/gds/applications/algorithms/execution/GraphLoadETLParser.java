@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.execution;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 
 import java.util.Set;
@@ -44,12 +44,12 @@ class GraphLoadETLParser {
     }
 
     void parse(
-        AlgoBaseConfig configuration,
+        RequestConfiguration requestConfiguration,
         GraphLoadETLBuilder graphLoadETLBuilder,
         boolean disableRelationshipTypeTest
     ) {
         for (var parser : graphStoreFilteredETLParsers) {
-            var etlStep = parser.parse(configuration, disableRelationshipTypeTest);
+            var etlStep = parser.parse(requestConfiguration, disableRelationshipTypeTest);
 
             etlStep.ifPresent(graphLoadETLBuilder::withGraphStoreFilteredETL);
         }

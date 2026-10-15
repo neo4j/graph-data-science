@@ -39,6 +39,7 @@ import org.neo4j.gds.memory.tracking.MemoryGuardException;
 import org.neo4j.gds.memory.tracking.MemoryTracker;
 import org.neo4j.gds.memory.tracking.TotalMemoryReservationExceededException;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -111,7 +112,7 @@ class DefaultMemoryGuardTest {
             new StandardLabel("labels everywhere"),
             DimensionTransformer.DISABLED,
             new User("Mark", false),
-            new RequestConfiguration(CONCURRENCY, jobIdMock, Set.of(), false)
+            new RequestConfiguration(CONCURRENCY, jobIdMock, Optional.empty(), Optional.empty(), Set.of(), false)
         );
     }
 
@@ -143,7 +144,7 @@ class DefaultMemoryGuardTest {
                 new StandardLabel("some other label"),
                 DimensionTransformer.DISABLED,
                 new User("Alice", false),
-                new RequestConfiguration(CONCURRENCY, jobIdMock, Set.of(), false)
+                new RequestConfiguration(CONCURRENCY, jobIdMock, Optional.empty(), Optional.empty(), Set.of(), false)
             )
         )
             .isSameAs(memoryGuardException);
@@ -177,7 +178,7 @@ class DefaultMemoryGuardTest {
                 new StandardLabel("yet another label"),
                 DimensionTransformer.DISABLED,
                 new User("Bob", false),
-                new RequestConfiguration(CONCURRENCY, jobIdMock, Set.of(), false)
+                new RequestConfiguration(CONCURRENCY, jobIdMock, Optional.empty(), Optional.empty(), Set.of(), false)
             )
         )
             .isSameAs(memoryGuardException);
@@ -203,7 +204,7 @@ class DefaultMemoryGuardTest {
             new StandardLabel("labels galore"),
             DimensionTransformer.DISABLED,
             new User("Eve", false),
-            new RequestConfiguration(CONCURRENCY, jobIdMock, Set.of(), true)
+            new RequestConfiguration(CONCURRENCY, jobIdMock, Optional.empty(), Optional.empty(), Set.of(), true)
         ));
 
         verify(memoryTracker).track("Eve", "labels galore", jobIdMock, 43L);

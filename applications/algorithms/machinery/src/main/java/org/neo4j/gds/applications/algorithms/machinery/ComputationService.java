@@ -21,6 +21,8 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
@@ -29,6 +31,7 @@ import org.neo4j.gds.memory.tracking.MemoryGuardException;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -66,9 +69,17 @@ class ComputationService {
         // this is to eventually replace configuration in this layer
         // have to sort out telemetry first tho
         // either that, or this goes away because this is the old machinery after all
+        var mutateNodeProperty = configuration instanceof MutateNodePropertyConfig foo
+            ? Optional.of(foo.mutateProperty())
+            : Optional.<String>empty();
+        var mutateRelationshipType = configuration instanceof MutateRelationshipConfig bar
+            ? Optional.of(bar.mutateRelationshipType())
+            : Optional.<String>empty();
         var requestConfiguration = new RequestConfiguration(
             configuration.concurrency(),
             configuration.jobId(),
+            mutateNodeProperty,
+            mutateRelationshipType,
             configuration.relationshipTypesFilter(),
             configuration.sudo()
         );

@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.execution;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.NodePropertyMustNotExistOnAnyLabels;
 
@@ -28,14 +27,10 @@ import java.util.Optional;
 
 class MutateNodePropertyConfigGraphStoreFilteredETLParser implements GraphStoreFilteredETLParser {
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(
-        CONFIGURATION configuration,
+    public Optional<GraphStoreFilteredETL> parse(
+        RequestConfiguration requestConfiguration,
         boolean disableRelationshipTypeTest
     ) {
-        if (configuration instanceof MutateNodePropertyConfig mutateNodePropertyConfig) {
-            return Optional.of(new NodePropertyMustNotExistOnAnyLabels(mutateNodePropertyConfig.mutateProperty()));
-        }
-
-        return Optional.empty();
+        return requestConfiguration.mutateNodeProperty().map(NodePropertyMustNotExistOnAnyLabels::new);
     }
 }

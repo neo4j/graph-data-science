@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.applications.algorithms.execution;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 
 import java.util.Optional;
 
 interface GraphStoreFilteredETLParser {
-    <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(
-        CONFIGURATION configuration,
+    Optional<GraphStoreFilteredETL> parse(
+        RequestConfiguration requestConfiguration,
         boolean disableRelationshipTypeTest
     );
 }

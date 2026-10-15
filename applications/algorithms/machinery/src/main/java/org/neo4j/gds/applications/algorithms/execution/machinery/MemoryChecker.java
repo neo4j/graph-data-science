@@ -54,18 +54,10 @@ class MemoryChecker {
         DimensionTransformer dimensionTransformer,
         User user,
         Label label,
+        RequestConfiguration requestConfiguration,
         CONFIGURATION configuration,
         ConstructAndRun<RESULT> constructAndRun
     ) {
-        // this is to eventually replace configuration in this layer
-        // have to sort out telemetry first tho
-        var requestConfiguration = new RequestConfiguration(
-            configuration.concurrency(),
-            configuration.jobId(),
-            configuration.relationshipTypesFilter(),
-            configuration.sudo()
-        );
-
         checkMemory(graphResources, estimationSupplier, dimensionTransformer, user, label, requestConfiguration);
 
         var graphId = GraphId.from(graphResources.graph());

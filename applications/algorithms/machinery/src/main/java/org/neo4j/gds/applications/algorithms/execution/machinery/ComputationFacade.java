@@ -23,6 +23,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimingsBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedLog;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
@@ -68,12 +69,13 @@ final class ComputationFacade {
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphResources graphResources,
         Optional<GraphResources> secondGraphResources,
-        User user,
-        ConstructAndRun<RESULT> constructAndRun,
-        CONFIGURATION configuration,
-        DimensionTransformer dimensionTransformer,
         Supplier<MemoryEstimation> estimationSupplier,
+        DimensionTransformer dimensionTransformer,
+        User user,
         Label label,
+        RequestConfiguration requestConfiguration,
+        CONFIGURATION configuration,
+        ConstructAndRun<RESULT> constructAndRun,
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, TRANSFORMED_RESULT, METADATA> resultRenderer
     ) {
@@ -82,12 +84,13 @@ final class ComputationFacade {
             timingsBuilder,
             graphResources,
             secondGraphResources,
-            user,
-            constructAndRun,
-            configuration,
-            dimensionTransformer,
             estimationSupplier,
-            label
+            dimensionTransformer,
+            user,
+            label,
+            requestConfiguration,
+            configuration,
+            constructAndRun
         );
 
         requestScopedLog.onProcessingResult();
@@ -105,12 +108,13 @@ final class ComputationFacade {
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphResources graphResources,
         Optional<GraphResources> secondGraphResources,
-        User user,
-        ConstructAndRun<RESULT> constructAndRun,
-        CONFIGURATION configuration,
-        DimensionTransformer dimensionTransformer,
         Supplier<MemoryEstimation> estimationSupplier,
-        Label label
+        DimensionTransformer dimensionTransformer,
+        User user,
+        Label label,
+        RequestConfiguration requestConfiguration,
+        CONFIGURATION configuration,
+        ConstructAndRun<RESULT> constructAndRun
     ) {
         if (graphResources.graph().isEmpty()) return Optional.empty();
 
@@ -125,6 +129,7 @@ final class ComputationFacade {
             dimensionTransformer,
             user,
             label,
+            requestConfiguration,
             configuration,
             constructAndRun
         );

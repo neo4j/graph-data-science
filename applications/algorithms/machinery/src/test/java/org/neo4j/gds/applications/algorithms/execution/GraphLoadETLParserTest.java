@@ -23,9 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.core.loading.validation.GraphLoadETLBuilder;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 
@@ -51,14 +49,9 @@ class GraphLoadETLParserTest {
         parsers.add(parser3);
         var parser = new GraphLoadETLParser(parsers);
 
-        var configuration = new AlgoBaseConfig() {
-            @Override
-            public Optional<String> usernameOverride() {
-                throw new UnsupportedOperationException("TODO");
-            }
-        };
+        var requestConfiguration = mock(RequestConfiguration.class);
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
-        when(parser1.parse(configuration, false)).thenReturn(Optional.empty());
+        when(parser1.parse(requestConfiguration, false)).thenReturn(Optional.empty());
         var parsedEtlStep = new GraphStoreFilteredETL() {
             @Override
             public void onGraphStoreFiltered(
@@ -70,9 +63,9 @@ class GraphLoadETLParserTest {
                 // do nothing
             }
         };
-        when(parser2.parse(configuration, false)).thenReturn(Optional.of(parsedEtlStep));
-        when(parser3.parse(configuration, false)).thenReturn(Optional.empty());
-        parser.parse(configuration, graphLoadETLBuilder, false);
+        when(parser2.parse(requestConfiguration, false)).thenReturn(Optional.of(parsedEtlStep));
+        when(parser3.parse(requestConfiguration, false)).thenReturn(Optional.empty());
+        parser.parse(requestConfiguration, graphLoadETLBuilder, false);
 
         verify(graphLoadETLBuilder).withGraphStoreFilteredETL(parsedEtlStep);
     }
@@ -83,12 +76,7 @@ class GraphLoadETLParserTest {
 
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         parser.parse(
-            new AlgoBaseConfig() {
-                @Override
-                public Optional<String> usernameOverride() {
-                    throw new UnsupportedOperationException("TODO");
-                }
-            },
+            mock(RequestConfiguration.class),
             graphLoadETLBuilder,
             false
         );
@@ -100,19 +88,11 @@ class GraphLoadETLParserTest {
     void shouldParseNodePropertyNonExistenceRequirement() {
         var parser = GraphLoadETLParser.create();
 
+        var requestConfiguration = mock(RequestConfiguration.class);
+        when(requestConfiguration.mutateNodeProperty()).thenReturn(Optional.of("my property"));
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         parser.parse(
-            new MutateNodePropertyConfig() {
-                @Override
-                public String mutateProperty() {
-                    return "anything goes";
-                }
-
-                @Override
-                public Optional<String> usernameOverride() {
-                    throw new UnsupportedOperationException("TODO");
-                }
-            },
+            requestConfiguration,
             graphLoadETLBuilder,
             false
         );
@@ -124,19 +104,11 @@ class GraphLoadETLParserTest {
     void shouldParseRelationshipTypeNonExistenceRequirement() {
         var parser = GraphLoadETLParser.create();
 
+        var requestConfiguration = mock(RequestConfiguration.class);
+        when(requestConfiguration.mutateRelationshipType()).thenReturn(Optional.of("my relationship"));
         var graphLoadETLBuilder = mock(GraphLoadETLBuilder.class);
         parser.parse(
-            new MutateRelationshipConfig() {
-                @Override
-                public String mutateRelationshipType() {
-                    return "go anywhere";
-                }
-
-                @Override
-                public Optional<String> usernameOverride() {
-                    throw new UnsupportedOperationException("TODO");
-                }
-            },
+            requestConfiguration,
             graphLoadETLBuilder,
             false
         );

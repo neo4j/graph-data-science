@@ -24,6 +24,7 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Configurations have two halves basically: the algorithm parameters, and the request configuration.
@@ -36,6 +37,8 @@ import java.util.Collection;
 public record RequestConfiguration(
     Concurrency concurrency,
     JobId jobId,
+    Optional<String> mutateNodeProperty,
+    Optional<String> mutateRelationshipType,
     Collection<RelationshipType> relationshipTypeFilter,
     boolean sudo
 ) {

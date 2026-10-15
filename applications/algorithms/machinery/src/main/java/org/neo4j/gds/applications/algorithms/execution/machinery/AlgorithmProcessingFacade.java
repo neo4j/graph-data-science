@@ -25,13 +25,13 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.loading.validation.GraphLoadETL;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -68,12 +68,12 @@ public interface AlgorithmProcessingFacade {
         GraphLoadETL graphLoadETL,
         Optional<String> secondRelationshipProperty,
         Optional<GraphLoadETL> secondGraphLoadETL,
-        ConstructAndRun<RESULT> constructAndRun,
-        CONFIGURATION configuration,
-        TerminationFlag terminationFlag,
-        DimensionTransformer dimensionTransformer,
         Supplier<MemoryEstimation> estimationSupplier,
+        DimensionTransformer dimensionTransformer,
         Label label,
+        RequestConfiguration requestConfiguration,
+        CONFIGURATION configuration,
+        ConstructAndRun<RESULT> constructAndRun,
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, TRANSFORMED_RESULT, METADATA> resultRenderer
     );

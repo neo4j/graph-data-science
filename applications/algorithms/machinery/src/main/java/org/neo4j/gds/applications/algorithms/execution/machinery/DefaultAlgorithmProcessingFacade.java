@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedLog;
 import org.neo4j.gds.applications.algorithms.machinery.ResultRenderer;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
@@ -40,7 +41,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.telemetry.TelemetryLogger;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -91,12 +91,12 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
         GraphLoadETL graphLoadETL,
         Optional<String> secondRelationshipProperty,
         Optional<GraphLoadETL> secondGraphLoadETL,
-        ConstructAndRun<RESULT> constructAndRun,
-        CONFIGURATION configuration,
-        TerminationFlag terminationFlag,
-        DimensionTransformer dimensionTransformer,
         Supplier<MemoryEstimation> estimationSupplier,
+        DimensionTransformer dimensionTransformer,
         Label label,
+        RequestConfiguration requestConfiguration,
+        CONFIGURATION configuration,
+        ConstructAndRun<RESULT> constructAndRun,
         Optional<SideEffect<RESULT, METADATA>> sideEffect,
         ResultRenderer<RESULT, TRANSFORMED_RESULT, METADATA> resultRenderer
     ) {
@@ -129,12 +129,13 @@ public final class DefaultAlgorithmProcessingFacade implements AlgorithmProcessi
                 timingsBuilder,
                 graphResources,
                 secondGraphResources,
-                user,
-                constructAndRun,
-                configuration,
-                dimensionTransformer,
                 estimationSupplier,
+                dimensionTransformer,
+                user,
                 label,
+                requestConfiguration,
+                configuration,
+                constructAndRun,
                 sideEffect,
                 resultRenderer
             );

@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimingsBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.DimensionTransformer;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
@@ -75,6 +76,7 @@ class MemoryCheckerTest {
             DimensionTransformer.DISABLED,
             User.DEFAULT,
             label,
+            mock(RequestConfiguration.class),
             configuration,
             algorithm
         );
@@ -107,6 +109,7 @@ class MemoryCheckerTest {
                 DimensionTransformer.DISABLED,
                 User.DEFAULT,
                 label,
+                mock(RequestConfiguration.class),
                 configuration,
                 null
             );

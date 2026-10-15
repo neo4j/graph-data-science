@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.execution;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.applications.algorithms.machinery.RequestConfiguration;
 import org.neo4j.gds.core.loading.validation.GraphStoreFilteredETL;
 import org.neo4j.gds.core.loading.validation.RelationshipTypeMustNotExist;
 
@@ -28,16 +27,12 @@ import java.util.Optional;
 
 class MutateRelationshipConfigGraphStoreFilteredETLParser implements GraphStoreFilteredETLParser {
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig> Optional<GraphStoreFilteredETL> parse(
-        CONFIGURATION configuration,
+    public Optional<GraphStoreFilteredETL> parse(
+        RequestConfiguration requestConfiguration,
         boolean disableRelationshipTypeTest
     ) {
         if (disableRelationshipTypeTest) return Optional.empty();
 
-        if (configuration instanceof MutateRelationshipConfig mutateRelationshipConfig) {
-            return Optional.of(new RelationshipTypeMustNotExist(mutateRelationshipConfig.mutateRelationshipType()));
-        }
-
-        return Optional.empty();
+        return requestConfiguration.mutateRelationshipType().map(RelationshipTypeMustNotExist::new);
     }
 }
