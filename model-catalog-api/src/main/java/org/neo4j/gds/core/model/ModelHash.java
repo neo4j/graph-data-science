@@ -19,25 +19,11 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.neo4j.gds.model.ModelConfig;
-
 import java.time.ZonedDateTime;
 
-public record ModelHash(String user, String name, ZonedDateTime timestamp) {
+public record ModelHash(String user, String name, ZonedDateTime withTimestamp) {
 
-    public static ModelHash of(ModelMetaData<? extends ModelConfig, ?> modelMetaData) {
-        return new ModelHash(modelMetaData.creator(), modelMetaData.name(), modelMetaData.creationTime());
-    }
-
-    public static ModelHash of(Model<?, ?, ?> model) {
-        return new ModelHash(model.creator(), model.name(), model.creationTime());
-    }
-
-    public static ModelHash from(ModelHash other) {
-        return new ModelHash(other.user, other.name, other.timestamp);
-    }
-
-    public ModelHash timestamp(ZonedDateTime timestamp) {
+    public ModelHash withTimestamp(ZonedDateTime timestamp) {
         return new ModelHash(user, name, timestamp);
     }
 }

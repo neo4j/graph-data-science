@@ -76,6 +76,9 @@ public record Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends 
     public boolean isPublished() {
         return sharedWith().contains(ALL_USERS);
     }
+    public ModelHash hash() {
+        return new ModelHash(creator, name, creationTime());
+    }
 
     public <D, C extends ModelConfig & BaseConfig, I extends Model.CustomInfo> Model<D, C, I> cast(
         Class<D> dataClass,
