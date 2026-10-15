@@ -51,7 +51,7 @@ public final class RelationshipsBuilderBuilder {
 
     public RelationshipsBuilderBuilder nodes(IdMap nodes) {
         Objects.requireNonNull(nodes);
-        this.nodes = PartialIdMap.of(nodes::toMappedNodeId, nodes.rootNodeCount());
+        this.nodes = PartialIdMap.of(nodes::toMappedNodeId, nodes.rootIdMap().nodeCount());
         return this;
     }
 

@@ -61,10 +61,6 @@ public interface IdMap extends NodeTranslator, NodeLabels, NodeIterator {
      */
     IdMap rootIdMap();
 
-    default long rootNodeCount() {
-        return rootIdMap().nodeCount();
-    }
-
     /**
      * Returns an id map that maps between this id map's id space (the root
      * id space) and a compact id space containing only the nodes that have

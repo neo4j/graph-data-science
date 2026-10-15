@@ -170,11 +170,6 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public long rootNodeCount() {
-        return filteredIdMap.rootNodeCount();
-    }
-
-    @Override
     public long relationshipCount() {
         if (relationshipCount == -1) {
             doCount();

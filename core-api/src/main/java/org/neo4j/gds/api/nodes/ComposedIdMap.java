@@ -78,11 +78,6 @@ public final class ComposedIdMap implements IdMap {
         return this.nodeTranslator.containsOriginalId(originalNodeId);
     }
 
-    @Override
-    public long rootNodeCount() {
-        return this.nodeTranslator.nodeCount();
-    }
-
     // NodeLabels
 
     @Override

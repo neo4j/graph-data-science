@@ -198,11 +198,6 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public long rootNodeCount() {
-        return idMap.rootNodeCount();
-    }
-
-    @Override
     public long highestOriginalId() {
         return idMap.highestOriginalId();
     }
