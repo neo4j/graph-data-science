@@ -72,7 +72,8 @@ class KmeansStreamConfigTest {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> streamConfig.graphStoreValidation(graphStoreMock, List.of(), List.of()))
             .withMessageContaining("Unsupported node property value type")
-            .withMessageContaining("Value type required: [DOUBLE], [DOUBLE_ARRAY] or [FLOAT_ARRAY].");
+            .withMessageContaining(
+                "Value type required: [DOUBLE], [DOUBLE_ARRAY], [FLOAT_ARRAY], [FLOAT_VECTOR], [DOUBLE_VECTOR].");
     }
 
     @ParameterizedTest
@@ -94,13 +95,19 @@ class KmeansStreamConfigTest {
         return Stream.of(
             Arguments.of(ValueType.DOUBLE_ARRAY),
             Arguments.of(ValueType.FLOAT_ARRAY),
-            Arguments.of(ValueType.DOUBLE)
+            Arguments.of(ValueType.DOUBLE),
+            Arguments.of(ValueType.FLOAT_VECTOR),
+            Arguments.of(ValueType.DOUBLE_VECTOR)
         );
     }
 
     static Stream<Arguments> invalidNodePropertyValueTypes() {
         return Arrays.stream(ValueType.values())
-            .filter(t -> t != ValueType.DOUBLE_ARRAY && t != ValueType.FLOAT_ARRAY && t != ValueType.DOUBLE)
+            .filter(t -> t != ValueType.DOUBLE_ARRAY
+                && t != ValueType.FLOAT_ARRAY
+                && t != ValueType.DOUBLE
+                && t != ValueType.FLOAT_VECTOR
+                && t != ValueType.DOUBLE_VECTOR)
             .map(Arguments::of);
     }
 
@@ -115,5 +122,5 @@ class KmeansStreamConfigTest {
         var userInput = CypherMapWrapper.create(Map.of("nodeProperty", "foo", "initialSampler", "kmEanS++"));
         assertThatNoException().isThrownBy(() -> KmeansStreamConfig.of(userInput));
     }
-    
+
 }

@@ -29,6 +29,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.utils.StringFormatting;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
@@ -69,16 +70,21 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         var valueType = graphStore.nodeProperty(nodeProperty()).valueType();
-        if (valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.FLOAT_ARRAY || valueType == ValueType.DOUBLE) {
+        var supportedTypes = List.of(
+            ValueType.DOUBLE,
+            ValueType.DOUBLE_ARRAY,
+            ValueType.FLOAT_ARRAY,
+            ValueType.FLOAT_VECTOR,
+            ValueType.DOUBLE_VECTOR
+        );
+        if (supportedTypes.contains(valueType)) {
             return;
         }
         throw new IllegalArgumentException(
             StringFormatting.formatWithLocale(
-                "Unsupported node property value type [%s]. Value type required: [%s], [%s] or [%s].",
+                "Unsupported node property value type [%s]. Value type required: %s.",
                 valueType,
-                ValueType.DOUBLE,
-                ValueType.DOUBLE_ARRAY,
-                ValueType.FLOAT_ARRAY
+                StringJoining.joinInGivenOrder(supportedTypes.stream().map(type -> "[" + type + "]"), ", ")
             )
         );
     }
