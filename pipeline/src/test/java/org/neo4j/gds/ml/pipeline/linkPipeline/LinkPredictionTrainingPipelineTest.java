@@ -31,8 +31,8 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.model.ImmutableModel;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelBuilder;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.model.TestCustomInfo;
@@ -269,8 +269,7 @@ class LinkPredictionTrainingPipelineTest {
             new TestCustomInfo()
         );
         modelCatalog.set(
-            ImmutableModel.<Long, TestWeightedTrainConfig, TestCustomInfo>builder()
-                .from(model)
+            ModelBuilder.<Long, TestWeightedTrainConfig, TestCustomInfo>builder(model)
                 .sharedWith(List.of(Model.ALL_USERS))
                 .build()
         );

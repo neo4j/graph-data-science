@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.immutables.value.Value;
+import io.soabase.recordbuilder.core.RecordBuilder;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
@@ -36,66 +35,49 @@ import java.nio.file.Path;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
-public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.CustomInfo> {
+@RecordBuilder
+public record Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends Model.CustomInfo>(
+    String creator,
+    String name,
+    String algoType,
+    GraphSchema graphSchema,
+    @Nullable DATA data,
+    CONFIG trainConfig,
+    String gdsVersion,
+    INFO customInfo,
+    Optional<Path> fileLocation,
+    List<String> sharedWith,
+    ZonedDateTime creationTime
+) {
+    public Model {
+        if (sharedWith == null) sharedWith = Collections.emptyList();
+        if (creationTime == null) creationTime = now();
+    }
+    public static final String ALL_USERS = "*";
+    public static final String PUBLIC_MODEL_SUFFIX = "_public";
 
     private static ZonedDateTime now() {
         var zoneId = Config.EMPTY.get(GraphDatabaseSettings.db_temporal_timezone);
         return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
     }
 
-    String ALL_USERS = "*";
-    String PUBLIC_MODEL_SUFFIX = "_public";
-
-    String creator();
-
-    @Value.Default
-    default List<String> sharedWith() {
-        return List.of();
-    }
-
-    String name();
-
-    String algoType();
-
-    GraphSchema graphSchema();
-
-    @Nullable DATA data();
-
-    CONFIG trainConfig();
-
-    @Value.Default
-    default ZonedDateTime creationTime() {
-        return now();
-    }
-
-    String gdsVersion();
-
-    INFO customInfo();
-
-    Optional<Path> fileLocation();
-
-    @Value.Derived
-    default boolean loaded() {
+    public boolean loaded() {
         return data() != null;
     }
-
-    @Value.Derived
-    default boolean stored() {
+    public boolean stored() {
         return fileLocation().isPresent();
     }
-
-    @Value.Derived
-    default boolean isPublished() {
+    public boolean isPublished() {
         return sharedWith().contains(ALL_USERS);
     }
 
-    default <D, C extends ModelConfig & BaseConfig, I extends Model.CustomInfo> Model<D, C, I> cast(
+    public <D, C extends ModelConfig & BaseConfig, I extends Model.CustomInfo> Model<D, C, I> cast(
         Class<D> dataClass,
         Class<C> configClass,
         Class<I> infoClass
@@ -132,7 +114,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         return (Model<D, C, I>) this;
     }
 
-    static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
+    public static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
         String gdsVersion,
         String algoType,
         GraphSchema graphSchema,
@@ -140,7 +122,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         C trainConfig,
         INFO customInfo
     ) {
-        return ImmutableModel.<D, C, INFO>builder()
+        return ModelBuilder.<D, C, INFO>builder()
             .creator(trainConfig.username())
             .name(trainConfig.modelName())
             .gdsVersion(gdsVersion)
@@ -153,7 +135,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
     }
 
     @TestOnly
-    static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
+    public static <D, C extends ModelConfig & BaseConfig, INFO extends CustomInfo> Model<D, C, INFO> of(
         String algoType,
         GraphSchema graphSchema,
         D modelData,
@@ -164,7 +146,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
     }
 
 
-    interface CustomInfo extends ToMapConvertible, Serializable{
+    public interface CustomInfo extends ToMapConvertible, Serializable{
         default Optional<TrainingMethod> optionalTrainerMethod() { return Optional.empty(); }
     }
 }
