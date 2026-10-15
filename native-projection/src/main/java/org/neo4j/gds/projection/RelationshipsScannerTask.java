@@ -146,7 +146,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
             var importers = this.singleTypeRelationshipImporters.stream()
                 .map(importer -> {
                     var buffer = BufferedRelationshipConsumer.of(
-                        idMap,
+                        idMap::toMappedNodeId,
                         importer.typeId(),
                         scanner.bufferSize(),
                         importer.skipDanglingRelationships()

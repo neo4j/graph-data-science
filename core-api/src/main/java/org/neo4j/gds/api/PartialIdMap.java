@@ -20,10 +20,11 @@
 package org.neo4j.gds.api;
 
 /**
- * This interface exposes the relevant parts of {@link org.neo4j.gds.api.nodes.IdMap} used
- * for relationship loading. It helps implementations that are only used for relationship
- * loading to avoid implementing unnecessary methods. It is also used for deferred node
- * building completion, to start loading relationships before node loading is finalized.
+ * This interface describes the id mapping needed for relationship loading. It is separate
+ * from {@link org.neo4j.gds.api.nodes.IdMap}, so implementations that are only used for
+ * relationship loading do not need to implement the full id map. A complete id map can be
+ * adapted via {@link #of(NodeIdMapper, long)}. It is also used for deferred node building
+ * completion, to start loading relationships before node loading is finalized.
  * For this reason, the node count from a PartialIdMap may not be reliable for all use
  * cases. When doing node and relationship loading at the same time, caller should check
  * whether the PartialIdMap is finalized and interpret the node count accordingly.
@@ -53,5 +54,28 @@ public interface PartialIdMap {
      */
     default boolean isFinalized() {
         return true;
+    }
+
+    /**
+     * Creates a finalized PartialIdMap from a node id mapper and a fixed root node count.
+     * This is used to load relationships against a complete id map.
+     *
+     * @param mapper        maps original node ids into the space of the innermost mapping,
+     *                      see {@link #toMappedNodeId(long)}
+     * @param rootNodeCount number of mapped node ids in the root mapping, which may differ
+     *                      from the node count of a nested (filtered) id map
+     */
+    static PartialIdMap of(NodeIdMapper mapper, long rootNodeCount) {
+        return new PartialIdMap() {
+            @Override
+            public long toMappedNodeId(long originalNodeId) {
+                return mapper.map(originalNodeId);
+            }
+
+            @Override
+            public long rootNodeCount() {
+                return rootNodeCount;
+            }
+        };
     }
 }
