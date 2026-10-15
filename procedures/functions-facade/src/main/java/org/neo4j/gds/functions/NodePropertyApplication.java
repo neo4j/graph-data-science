@@ -73,11 +73,11 @@ class NodePropertyApplication {
 
         var neoNodeId = NodeIdParser.parseToSingleNodeId(nodeId, "nodeId");
 
-        var internalId = graphStore.nodes().safeToMappedNodeId(neoNodeId);
 
-        if (internalId == -1) {
+        if (!graphStore.nodes().containsOriginalId(neoNodeId)) {
             throw new IllegalArgumentException(formatWithLocale("Node id %d does not exist.", neoNodeId));
         }
+        var internalId = graphStore.nodes().toMappedNodeId(neoNodeId);
 
         if (!projectAll && !graphStore.nodes().hasLabel(internalId, nodeLabelType)) {
             return null;

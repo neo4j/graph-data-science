@@ -68,13 +68,4 @@ public interface NodeTranslator {
      * A unique identifier for this type of IdMap.
      */
     String typeId();
-
-    /**
-     * Map original nodeId to mapped nodeId
-     *
-     * Returns org.neo4j.gds.api.nodes.IdMap#NOT_FOUND if the nodeId is not mapped.
-     */
-    default long safeToMappedNodeId(long originalNodeId) {
-        return highestOriginalId() < originalNodeId ? NOT_FOUND : toMappedNodeId(originalNodeId);
-    }
 }

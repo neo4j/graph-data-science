@@ -64,7 +64,7 @@ public final class ConfigNodesValidations {
     ) {
         var missingNodes = nodes
             .stream()
-            .filter(targetNode -> labelFilteredGraphNotContainsNode(
+            .filter(targetNode -> isMissingNode(
                 filteredNodeLabels,
                 graphStore.nodes(),
                 targetNode
@@ -88,7 +88,7 @@ public final class ConfigNodesValidations {
         long node,
         String parameterKey
     ) {
-        var nodeIsMissing = labelFilteredGraphNotContainsNode(
+        var nodeIsMissing = isMissingNode(
             filteredNodeLabels,
             graphStore.nodes(),
             node
@@ -119,14 +119,13 @@ public final class ConfigNodesValidations {
         ));
     }
 
-    private static boolean labelFilteredGraphNotContainsNode(
+    private static boolean isMissingNode(
         Collection<NodeLabel> filteredNodeLabels,
         IdMap idMap,
         long neoNodeId
     ) {
-        var internalNodeId = idMap.safeToMappedNodeId(neoNodeId);
-        return internalNodeId == IdMap.NOT_FOUND || idMap
-            .nodeLabels(internalNodeId)
+        return !idMap.containsOriginalId(neoNodeId) || idMap
+            .nodeLabels(idMap.toMappedNodeId(neoNodeId))
             .stream()
             .noneMatch(filteredNodeLabels::contains);
     }

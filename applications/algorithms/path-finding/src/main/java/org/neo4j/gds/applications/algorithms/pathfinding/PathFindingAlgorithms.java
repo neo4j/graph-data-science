@@ -413,7 +413,8 @@ class PathFindingAlgorithms {
         var mappedSourceNodeId = graph.toMappedNodeId(parameters.sourceNode());
         var mappedTargetNodeIds = parameters.targetNodes()
             .stream()
-            .map(graph::safeToMappedNodeId)
+            .filter(graph::containsOriginalId)
+            .map(graph::toMappedNodeId)
             .toList();
 
         var algorithm = new ShortestPathsSteinerAlgorithm(
