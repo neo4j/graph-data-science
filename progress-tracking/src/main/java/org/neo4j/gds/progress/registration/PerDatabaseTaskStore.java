@@ -29,6 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,11 +76,25 @@ public final class PerDatabaseTaskStore implements TaskStore {
 
         var tasks = taskContainer.markAllCompleted();
 
-        listeners.forEach(listener -> tasks.forEach(task -> {
-            var storedTask = new StoredTask(user, jobId, task);
+        AtomicReference<TaskStoreListener> cleanListenerRef = new AtomicReference<>(null);
 
-            listener.onTaskCompleted(storedTask);
-        }));
+        listeners.forEach(listener ->
+        {
+            if (listener instanceof TaskStoreCleaner) {
+                cleanListenerRef.set(listener);
+            } else {
+                tasks.forEach(task -> {
+                    var storedTask = new StoredTask(user, jobId, task);
+                    listener.onTaskCompleted(storedTask);
+                });
+            }
+        });
+
+        if (cleanListenerRef.get() != null) {
+            var listener = cleanListenerRef.get();
+            tasks.forEach(task -> listener.onTaskCompleted(new StoredTask(user, jobId, task)));
+        }
+
     }
 
     @Override

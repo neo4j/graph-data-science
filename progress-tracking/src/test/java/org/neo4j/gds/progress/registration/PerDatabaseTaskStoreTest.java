@@ -34,6 +34,32 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 class PerDatabaseTaskStoreTest {
 
     @Test
+    void  markCompleteShouldNotifyManyListeners(){
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
+        var listener = new TaskStoreListener(){
+            public int val = 0;
+            @Override
+            public void onTaskAdded(StoredTask storedTask) {
+
+            }
+
+            @Override
+            public void  onTaskCompleted(StoredTask storedTask) {
+                val++;
+            }
+        };
+        taskStore.addListener(listener);
+
+        JobId jobId = new JobId();
+        taskStore.store(User.DEFAULT, jobId, Tasks.leaf("leaf", new Concurrency(1)));
+
+        taskStore.markCompleted(User.DEFAULT, jobId);
+
+        assertThat(listener.val).isEqualTo(1);
+
+    }
+
+    @Test
     void shouldBeIdempotentOnRemove() {
         var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
         var jobId = new JobId();
