@@ -32,6 +32,8 @@ public interface LabelInformation {
 
     boolean isEmpty();
 
+    long nodeCount();
+
     void forEach(LabelInformationConsumer consumer);
 
     /**
@@ -41,7 +43,7 @@ public interface LabelInformation {
      */
     LabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, NodeIdMapper toFilteredNodeId);
 
-    BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount);
+    BitSet unionBitSet(Collection<NodeLabel> nodeLabels);
 
     BitSet bitSetForLabel(NodeLabel nodeLabel);
 
@@ -57,7 +59,7 @@ public interface LabelInformation {
 
     void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels);
 
-    PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels, long nodeCount);
+    PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels);
 
     void addLabel(NodeLabel nodeLabel);
 

@@ -52,8 +52,8 @@ public interface NodeLabels {
         labelInformation().forEachNodeLabel(mappedNodeId, consumer);
     }
 
-    default PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels, long nodeCount) {
-        return labelInformation().nodeIterator(labels, nodeCount);
+    default PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
+        return labelInformation().nodeIterator(labels);
     }
 
     /**

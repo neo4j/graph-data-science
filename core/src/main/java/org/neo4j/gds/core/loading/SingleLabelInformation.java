@@ -54,6 +54,11 @@ final class SingleLabelInformation implements LabelInformation {
     }
 
     @Override
+    public long nodeCount() {
+        return nodeCount;
+    }
+
+    @Override
     public void forEach(LabelInformationConsumer consumer) {
         throw new UnsupportedOperationException("There are not BitSets in empty label information");
     }
@@ -64,7 +69,7 @@ final class SingleLabelInformation implements LabelInformation {
     }
 
     @Override
-    public BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount) {
+    public BitSet unionBitSet(Collection<NodeLabel> nodeLabels) {
        throw new UnsupportedOperationException("Union with empty label information is not supported");
     }
 
@@ -117,11 +122,9 @@ final class SingleLabelInformation implements LabelInformation {
     }
 
     @Override
-    public PrimitiveIterator.OfLong nodeIterator(
-        Collection<NodeLabel> labels, long nodeCount
-    ) {
+    public PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels) {
         if (labels.size() == 1 && (labels.contains(label) || labels.contains(NodeLabel.ALL_NODES))) {
-            return new BatchNodeIterable.IdIterator(nodeCount);
+            return new BatchNodeIterable.IdIterator(this.nodeCount);
         } else {
             throw new IllegalArgumentException(formatWithLocale(
                 "Unknown labels: %s",

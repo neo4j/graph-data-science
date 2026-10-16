@@ -177,7 +177,7 @@ class SingleLabelInformationTest {
             .build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
-            .isThrownBy(() -> labelInformation.unionBitSet(List.of(), 1337));
+            .isThrownBy(() -> labelInformation.unionBitSet(List.of()));
     }
 
     @Test
@@ -193,10 +193,11 @@ class SingleLabelInformationTest {
 
     @Test
     void nodeIteratorShouldWorkForTheCorrectLabel() {
+        var nodeCount = 2L;
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, NodeIdMapper.IDENTITY);
+            .build(nodeCount, NodeIdMapper.IDENTITY);
 
-        var nodeIterator = labelInformation.nodeIterator(List.of(LABEL_A), 2);
+        var nodeIterator = labelInformation.nodeIterator(List.of(LABEL_A));
 
         assertThat(nodeIterator)
             .isNotNull()
@@ -205,15 +206,16 @@ class SingleLabelInformationTest {
         var idCounter = new LongAdder();
         nodeIterator.forEachRemaining((LongConsumer) __ -> idCounter.increment());
 
-        assertThat(idCounter.longValue()).isEqualTo(2L);
+        assertThat(idCounter.longValue()).isEqualTo(nodeCount);
     }
 
     @Test
     void nodeIteratorShouldWorkForAllNodesLabel() {
+        var nodeCount = 2L;
         var labelInformation = new SingleLabelInformation.Builder(LABEL_A)
-            .build(1, NodeIdMapper.IDENTITY);
+            .build(nodeCount, NodeIdMapper.IDENTITY);
 
-        var nodeIterator = labelInformation.nodeIterator(List.of(NodeLabel.ALL_NODES), 2);
+        var nodeIterator = labelInformation.nodeIterator(List.of(NodeLabel.ALL_NODES));
 
         assertThat(nodeIterator)
             .isNotNull()
@@ -222,7 +224,7 @@ class SingleLabelInformationTest {
         var idCounter = new LongAdder();
         nodeIterator.forEachRemaining((LongConsumer) __ -> idCounter.increment());
 
-        assertThat(idCounter.longValue()).isEqualTo(2L);
+        assertThat(idCounter.longValue()).isEqualTo(nodeCount);
     }
 
     @Test
@@ -231,7 +233,7 @@ class SingleLabelInformationTest {
             .build(1, NodeIdMapper.IDENTITY);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> labelInformation.nodeIterator(List.of(NodeLabel.of("NotLabelA")), 1));
+            .isThrownBy(() -> labelInformation.nodeIterator(List.of(NodeLabel.of("NotLabelA"))));
     }
 
     @Test
@@ -245,8 +247,7 @@ class SingleLabelInformationTest {
                     List.of(
                         LABEL_A,
                         NodeLabel.ALL_NODES
-                    ),
-                    1
+                    )
                 ));
     }
 

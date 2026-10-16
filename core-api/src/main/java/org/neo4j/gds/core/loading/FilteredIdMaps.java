@@ -49,20 +49,20 @@ public final class FilteredIdMaps {
             );
         }
 
-        var labelInformation = rootIdMap.labelInformation();
-        labelInformation.validateNodeLabelFilter(nodeLabels);
+        var rootLabelInformation = rootIdMap.labelInformation();
+        rootLabelInformation.validateNodeLabelFilter(nodeLabels);
 
-        if (labelInformation.isEmpty()) {
+        if (rootLabelInformation.isEmpty()) {
             return Optional.empty();
         }
 
-        if (nodeLabels.containsAll(labelInformation.availableNodeLabels())) {
+        if (nodeLabels.containsAll(rootLabelInformation.availableNodeLabels())) {
             return Optional.empty();
         }
 
-        var unionBitSet = labelInformation.unionBitSet(nodeLabels, rootIdMap.nodeCount());
+        var unionBitSet = rootLabelInformation.unionBitSet(nodeLabels);
         var filteredTranslator = filterable.filteredNodeTranslator(unionBitSet, concurrency);
-        var filteredLabelInformation = labelInformation.filter(
+        var filteredLabelInformation = rootLabelInformation.filter(
             nodeLabels,
             filteredTranslator.nodeCount(),
             filteredTranslator::toMappedNodeId

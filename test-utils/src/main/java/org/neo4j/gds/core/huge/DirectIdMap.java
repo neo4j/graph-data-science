@@ -134,6 +134,11 @@ public class DirectIdMap implements IdMap {
         }
 
         @Override
+        public long nodeCount() {
+            return 0;
+        }
+
+        @Override
         public void forEach(LabelInformationConsumer consumer) {
         }
 
@@ -143,8 +148,8 @@ public class DirectIdMap implements IdMap {
         }
 
         @Override
-        public BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount) {
-            return new BitSet(nodeCount);
+        public BitSet unionBitSet(Collection<NodeLabel> nodeLabels) {
+            return new BitSet(0);
         }
 
         @Override
@@ -181,7 +186,7 @@ public class DirectIdMap implements IdMap {
         }
 
         @Override
-        public PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels, long nodeCount) {
+        public PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels) {
             return new PrimitiveIterator.OfLong() {
                 @Override
                 public boolean hasNext() {
