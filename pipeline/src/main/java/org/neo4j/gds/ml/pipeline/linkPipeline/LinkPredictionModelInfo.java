@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.model.Model.CustomInfo;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;

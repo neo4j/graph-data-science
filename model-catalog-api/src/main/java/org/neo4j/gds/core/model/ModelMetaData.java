@@ -22,7 +22,6 @@ package org.neo4j.gds.core.model;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.time.Clock;

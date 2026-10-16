@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
@@ -48,7 +48,7 @@ final class NodeClassificationPredictConfigPreProcessor {
             (String) userInput.get("modelName"),
             BaseModelData.class,
             NodeClassificationPipelineTrainConfig.class,
-            Model.CustomInfo.class
+            CustomInfo.class
         );
 
         userInput.putIfAbsent("targetNodeLabels", model.trainConfig().targetNodeLabels());

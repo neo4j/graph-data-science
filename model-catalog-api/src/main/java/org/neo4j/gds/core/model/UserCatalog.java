@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collection;

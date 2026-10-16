@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
@@ -48,7 +48,7 @@ public class NodeRegressionPredictConfigPreProcessor {
                     (String) modelName,
                     BaseModelData.class,
                     NodePropertyPipelineBaseTrainConfig.class,
-                    Model.CustomInfo.class
+                    CustomInfo.class
                 );
 
                 var combinedTargetNodeLabels = Optional.ofNullable(userInput.get("targetNodeLabels"))

@@ -22,11 +22,8 @@ package org.neo4j.gds.core.model;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.model.ModelConfig;
 
-import java.io.Serializable;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -42,7 +39,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * 3. It may be read from storage. In this case it will have MetaData and FileLocation.
  *    It may be retrieved with or without Data.
  */
-public record Model<DATA, CONFIG extends ModelConfig, INFO extends Model.CustomInfo>(
+public record Model<DATA, CONFIG extends ModelConfig, INFO extends CustomInfo>(
     ModelMetaData<CONFIG, INFO> metaData,
     @Nullable DATA data,
     Optional<Path> fileLocation
@@ -102,7 +99,7 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends Model.CustomI
     public boolean isPublished()         { return metaData.isPublished(); }
     public ModelHash hash()              { return metaData.hash(); }
 
-    public <D, C extends ModelConfig, I extends Model.CustomInfo> Model<D, C, I> cast(
+    public <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> cast(
         Class<D> dataClass,
         Class<C> configClass,
         Class<I> infoClass
@@ -135,10 +132,6 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends Model.CustomI
             ));
         }
         return (Model<D, C, I>) this;
-    }
-
-    public interface CustomInfo extends ToMapConvertible, Serializable {
-        default Optional<TrainingMethod> optionalTrainerMethod() {return Optional.empty();}
     }
 
     @TestOnly

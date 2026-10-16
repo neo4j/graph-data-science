@@ -21,7 +21,6 @@ package org.neo4j.gds.core.model;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.model.catalog.ModelMetadata;
 import org.neo4j.gds.model.ModelConfig;
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
@@ -34,7 +34,7 @@ public record NodeRegressionPipelineModelInfo(
     Map<Metric, Double> outerTrainMetrics,
     ModelCandidateStats bestCandidate,
     NodePropertyPredictPipeline pipeline
-) implements ToMapConvertible, Model.CustomInfo {
+) implements ToMapConvertible, CustomInfo {
 
     @Override
     public Map<String, Object> toMap() {

@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
@@ -39,7 +39,7 @@ public record NodeClassificationPipelineModelInfo(
     Map<String, Object> metrics,
     NodePropertyPredictPipeline pipeline,
     List<Long> classes
-) implements ToMapConvertible, Model.CustomInfo {
+) implements ToMapConvertible, CustomInfo {
 
     /**
      * The distinct values of the target property which represent the

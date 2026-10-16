@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.node;
 
-import org.neo4j.gds.core.model.Model.CustomInfo;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
