@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -65,19 +64,6 @@ public class AlgorithmEstimationTemplate {
         this.requestScopedDependencies = requestScopedDependencies;
     }
 
-    public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult estimate(
-        CONFIGURATION configuration,
-        Object graphNameOrConfiguration,
-        MemoryEstimation memoryEstimation
-    ) {
-        return estimate(
-            configuration.toGraphParameters(),
-            graphNameOrConfiguration,
-            memoryEstimation,
-            configuration.concurrency(), DimensionTransformer.DISABLED
-        );
-    }
-
     public MemoryEstimateResult estimate(
         GraphParameters graphParameters,
         Object graphNameOrConfiguration,
@@ -88,7 +74,8 @@ public class AlgorithmEstimationTemplate {
             graphParameters,
             graphNameOrConfiguration,
             memoryEstimation,
-            concurrency, DimensionTransformer.DISABLED
+            concurrency,
+            DimensionTransformer.DISABLED
         );
     }
 

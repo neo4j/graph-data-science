@@ -60,9 +60,10 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = fastRP(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -78,9 +79,10 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = graphSage(configuration, false);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -98,9 +100,10 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = graphSageTrain(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -118,9 +121,10 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = hashGnn(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -132,9 +136,10 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = node2Vec(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 }

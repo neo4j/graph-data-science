@@ -46,9 +46,10 @@ public class SimilarityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = filteredKnn(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -63,9 +64,10 @@ public class SimilarityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = filteredNodeSimilarity(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -77,9 +79,10 @@ public class SimilarityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = knn(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -94,9 +97,10 @@ public class SimilarityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = nodeSimilarity(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 }

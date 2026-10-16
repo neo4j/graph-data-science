@@ -300,9 +300,10 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         MemoryEstimation memoryEstimation
     ) {
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 }

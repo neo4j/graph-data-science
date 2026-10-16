@@ -51,9 +51,10 @@ public class MachineLearningAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = splitRelationships(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 }

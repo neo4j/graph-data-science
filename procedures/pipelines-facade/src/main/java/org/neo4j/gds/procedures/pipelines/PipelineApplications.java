@@ -40,7 +40,6 @@ import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
-import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.domain.services.GloballyScopedDependencies;
@@ -67,6 +66,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.progress.registration.TaskRegistryFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
@@ -539,7 +539,12 @@ public class PipelineApplications {
             .add("Pipeline executor", estimate)
             .build();
 
-        return algorithmEstimationTemplate.estimate(configuration, graphNameOrConfiguration, memoryEstimation);
+        return algorithmEstimationTemplate.estimate(
+            configuration.toGraphParameters(),
+            graphNameOrConfiguration,
+            memoryEstimation,
+            configuration.concurrency()
+        );
     }
 
     PredictMutateResult nodeClassificationPredictMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
@@ -636,7 +641,12 @@ public class PipelineApplications {
     ) {
         var memoryEstimation = nodeClassificationTrainEstimation(configuration);
 
-        return algorithmEstimationTemplate.estimate(configuration, graphNameOrConfiguration, memoryEstimation);
+        return algorithmEstimationTemplate.estimate(
+            configuration.toGraphParameters(),
+            graphNameOrConfiguration,
+            memoryEstimation,
+            configuration.concurrency()
+        );
     }
 
     Stream<NodeRegressionStreamResult> nodeRegressionPredictStream(

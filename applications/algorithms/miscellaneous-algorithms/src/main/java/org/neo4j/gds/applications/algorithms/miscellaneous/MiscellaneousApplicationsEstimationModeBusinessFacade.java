@@ -53,9 +53,10 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
         var memoryEstimation = indexInverse(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -70,9 +71,10 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
         var memoryEstimation = scaleProperties(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -89,9 +91,10 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
         var memoryEstimation = toUndirected(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 }

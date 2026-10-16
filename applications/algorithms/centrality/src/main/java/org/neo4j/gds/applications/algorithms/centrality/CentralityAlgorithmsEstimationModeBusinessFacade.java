@@ -62,9 +62,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = articulationPoints(shouldComputeComponents);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -80,9 +81,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = betweennessCentrality(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
      MemoryEstimation bridges(boolean shouldComputeComponents) {
@@ -93,9 +95,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = bridges(true);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -107,9 +110,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = celf(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -124,9 +128,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = closenessCentrality();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -141,9 +146,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = degreeCentrality(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -158,9 +164,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = harmonicCentrality();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -172,9 +179,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = pageRank();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -189,9 +197,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = hits();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
