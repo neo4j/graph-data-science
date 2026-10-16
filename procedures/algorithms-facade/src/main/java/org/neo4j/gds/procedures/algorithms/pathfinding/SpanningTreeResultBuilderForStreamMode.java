@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
@@ -40,7 +40,7 @@ class SpanningTreeResultBuilderForStreamMode implements StreamResultBuilder<Span
 
     @Override
     public Stream<SpanningTreeStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<SpanningTree> result
     ) {
@@ -49,13 +49,13 @@ class SpanningTreeResultBuilderForStreamMode implements StreamResultBuilder<Span
         var spanningTree = result.get();
 
         var sourceNode = configuration.sourceNode();
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-            .filter(nodeId -> spanningTree.parent(nodeId) >= 0 || sourceNode == graph.toOriginalNodeId(nodeId))
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
+            .filter(nodeId -> spanningTree.parent(nodeId) >= 0 || sourceNode == nodeTranslator.toOriginalNodeId(nodeId))
             .mapToObj(nodeId -> {
-                var originalId = graph.toOriginalNodeId(nodeId);
+                var originalId = nodeTranslator.toOriginalNodeId(nodeId);
                 return new SpanningTreeStreamResult(
                     originalId,
-                    (sourceNode == originalId) ? sourceNode : graph.toOriginalNodeId(spanningTree.parent(nodeId)),
+                    (sourceNode == originalId) ? sourceNode : nodeTranslator.toOriginalNodeId(spanningTree.parent(nodeId)),
                     spanningTree.costToParent(nodeId)
                 );
             });

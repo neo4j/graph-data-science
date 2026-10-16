@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 
@@ -32,7 +32,7 @@ class CelfResultBuilderForStreamMode implements StreamResultBuilder<CELFResult, 
 
     @Override
     public Stream<CELFStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<CELFResult> result
     ) {
@@ -45,7 +45,7 @@ class CelfResultBuilderForStreamMode implements StreamResultBuilder<CELFResult, 
 
         return LongStream.of(keys)
             .mapToObj(nodeId -> new CELFStreamResult(
-                graph.toOriginalNodeId(nodeId),
+                nodeTranslator.toOriginalNodeId(nodeId),
                 seedSet.getOrDefault(nodeId, 0)
             ));
     }

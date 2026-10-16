@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -41,7 +41,7 @@ class LouvainResultBuilderForStreamMode implements StreamResultBuilder<LouvainRe
 
     @Override
     public Stream<LouvainStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<LouvainResult> result
     ) {
@@ -56,7 +56,7 @@ class LouvainResultBuilderForStreamMode implements StreamResultBuilder<LouvainRe
             configuration.concurrency()
         );
 
-        return LongStream.range(0, graph.nodeCount())
+        return LongStream.range(0, nodeTranslator.nodeCount())
             .boxed()
             .filter(nodePropertyValues::hasValue)
             .map(nodeId -> {
@@ -64,7 +64,7 @@ class LouvainResultBuilderForStreamMode implements StreamResultBuilder<LouvainRe
                     ? louvainResult.intermediateCommunities(nodeId)
                     : null;
                 var communityId = nodePropertyValues.longValue(nodeId);
-                return LouvainStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);
+                return LouvainStreamResult.create(nodeTranslator.toOriginalNodeId(nodeId), communities, communityId);
             });
     }
 }

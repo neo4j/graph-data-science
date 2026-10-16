@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.beta.pregel.PregelResult;
 
@@ -36,7 +36,7 @@ class SpeakerListenerLPAResultBuilderForStreamMode implements StreamResultBuilde
 
     @Override
     public Stream<SpeakerListenerLPAStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<PregelResult> result
     ) {
@@ -44,11 +44,11 @@ class SpeakerListenerLPAResultBuilderForStreamMode implements StreamResultBuilde
         if (result.isEmpty()) return Stream.empty();
         var labels = result.get().nodeValues().longArrayProperties(LABELS_PROPERTY);
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .mapToObj(nodeId -> {
                 // for every schema element
                 var values = labels.get(nodeId);
-                return new SpeakerListenerLPAStreamResult(graph.toOriginalNodeId(nodeId), Map.of(LABELS_PROPERTY, values));
+                return new SpeakerListenerLPAStreamResult(nodeTranslator.toOriginalNodeId(nodeId), Map.of(LABELS_PROPERTY, values));
             });
     }
 

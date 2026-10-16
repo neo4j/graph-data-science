@@ -20,9 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -42,7 +42,7 @@ class SccResultBuilderForStreamMode implements StreamResultBuilder<HugeLongArray
 
     @Override
     public Stream<SccStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<HugeLongArray> result
     ) {
@@ -56,10 +56,10 @@ class SccResultBuilderForStreamMode implements StreamResultBuilder<HugeLongArray
             Optional.empty(),
             configuration.concurrency()
         );
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .filter(nodePropertyValues::hasValue)
             .mapToObj(i -> new SccStreamResult(
-                graph.toOriginalNodeId(i),
+                nodeTranslator.toOriginalNodeId(i),
                 nodePropertyValues.longValue(i)
             ));
     }

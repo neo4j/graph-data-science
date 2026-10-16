@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 class SimilarityResultStreamMapper {
-    Stream<SimilarityStreamResult> process(Graph graph, Optional<NodeSimilarityResult> result) {
+    Stream<SimilarityStreamResult> process(NodeTranslator nodeTranslator, Optional<NodeSimilarityResult> result) {
         if (result.isEmpty()) return Stream.empty();
 
         return result.get()
             .streamResult()
             .map(sr ->
                 new SimilarityStreamResult(
-                    graph.toOriginalNodeId(sr.node1),
-                    graph.toOriginalNodeId(sr.node2),
+                    nodeTranslator.toOriginalNodeId(sr.node1),
+                    nodeTranslator.toOriginalNodeId(sr.node2),
                     sr.similarity
                 )
             );

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.hdbscan.Labels;
 
@@ -36,7 +36,7 @@ class HDBScanResultBuilderForStreamMode implements StreamResultBuilder<Labels, H
 
     @Override
     public Stream<HDBScanStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<Labels> result
     ) {
@@ -45,9 +45,9 @@ class HDBScanResultBuilderForStreamMode implements StreamResultBuilder<Labels, H
         var labels = result.get().labels();
 
         return LongStream
-            .range(IdMap.START_NODE_ID, graph.nodeCount())
+            .range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .mapToObj(nodeId -> new HDBScanStreamResult(
-                    graph.toOriginalNodeId(nodeId),
+                    nodeTranslator.toOriginalNodeId(nodeId),
                     labels.get(nodeId)
                 )
             );

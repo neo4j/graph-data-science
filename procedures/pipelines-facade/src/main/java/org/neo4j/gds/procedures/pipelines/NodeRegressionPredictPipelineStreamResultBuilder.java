@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 class NodeRegressionPredictPipelineStreamResultBuilder implements StreamResultBuilder<HugeDoubleArray, NodeRegressionStreamResult> {
     @Override
     public Stream<NodeRegressionStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<HugeDoubleArray> result
     ) {
@@ -41,10 +41,10 @@ class NodeRegressionPredictPipelineStreamResultBuilder implements StreamResultBu
 
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.get());
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .filter(nodePropertyValues::hasValue)
             .mapToObj(nodeId -> new NodeRegressionStreamResult(
-                graph.toOriginalNodeId(nodeId),
+                nodeTranslator.toOriginalNodeId(nodeId),
                 nodePropertyValues.doubleValue(nodeId)
             ));
     }

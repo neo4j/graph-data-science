@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.traverse.DfsStreamConfig;
@@ -45,7 +45,7 @@ class DfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, Trave
 
     @Override
     public Stream<TraversalStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<HugeLongArray> result
     ) {
@@ -55,7 +55,7 @@ class DfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, Trave
         return TraverseStreamComputationResultConsumer.consume(
             configuration.sourceNode(),
             result.get(),
-            graph::toOriginalNodeId,
+            nodeTranslator::toOriginalNodeId,
             TraversalStreamResult::new,
             PathFactoryFacade.create(pathRequested, nodeLookup, graphStore.capabilities().canWriteToLocalDatabase()),
             RelationshipType.withName(RELATIONSHIP_TYPE_NAME)

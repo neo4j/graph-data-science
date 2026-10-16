@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.kmeans.KmeansResult;
 
@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 class KMeansResultBuilderForStreamMode implements StreamResultBuilder<KmeansResult, KMeansStreamResult> {
     @Override
     public Stream<KMeansStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<KmeansResult> result
     ) {
@@ -44,9 +44,9 @@ class KMeansResultBuilderForStreamMode implements StreamResultBuilder<KmeansResu
         var distances = kmeansResult.distanceFromCenter();
         var silhouette = kmeansResult.silhouette();
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .mapToObj(nodeId -> new KMeansStreamResult(
-                graph.toOriginalNodeId(nodeId),
+                nodeTranslator.toOriginalNodeId(nodeId),
                 communities.get(nodeId),
                 distances.get(nodeId),
                 silhouette == null ? -1 : silhouette.get(nodeId)

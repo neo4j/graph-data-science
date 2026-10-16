@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.conductance.ConductanceResult;
 
@@ -32,7 +32,7 @@ class ConductanceResultBuilderForStreamMode implements StreamResultBuilder<Condu
 
     @Override
     public Stream<ConductanceStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<ConductanceResult> result
     ) {

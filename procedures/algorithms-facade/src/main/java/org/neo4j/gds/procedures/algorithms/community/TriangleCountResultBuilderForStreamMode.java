@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.triangle.TriangleCountResult;
 
@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 class TriangleCountResultBuilderForStreamMode implements StreamResultBuilder<TriangleCountResult, TriangleCountStreamResult> {
     @Override
     public Stream<TriangleCountStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<TriangleCountResult> result
     ) {
@@ -39,9 +39,9 @@ class TriangleCountResultBuilderForStreamMode implements StreamResultBuilder<Tri
 
         var triangleCountResult = result.get();
 
-        return LongStream.range(0, graph.nodeCount())
+        return LongStream.range(0, nodeTranslator.nodeCount())
             .mapToObj(i -> new TriangleCountStreamResult(
-                graph.toOriginalNodeId(i),
+                nodeTranslator.toOriginalNodeId(i),
                 triangleCountResult.localTriangles().get(i)
             ));
     }

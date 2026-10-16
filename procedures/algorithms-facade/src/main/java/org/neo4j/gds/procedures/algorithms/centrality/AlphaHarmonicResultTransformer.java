@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
@@ -31,16 +32,16 @@ import java.util.stream.Stream;
  * with slight modifications; leave it, it will wither and die one day
  */
 class AlphaHarmonicResultTransformer {
-    Stream<AlphaHarmonicStreamResult> transform(IdMap graph, Optional<HarmonicResult> result) {
+    Stream<AlphaHarmonicStreamResult> transform(NodeTranslator nodeTranslator, Optional<HarmonicResult> result) {
         if (result.isEmpty()) return Stream.empty();
 
         var harmonicResult = result.get();
         var nodePropertyValues = harmonicResult.nodePropertyValues();
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .filter(nodePropertyValues::hasValue)
             .mapToObj(nodeId -> new AlphaHarmonicStreamResult(
-                graph.toOriginalNodeId(nodeId),
+                nodeTranslator.toOriginalNodeId(nodeId),
                 nodePropertyValues.doubleValue(nodeId)
             ));
     }

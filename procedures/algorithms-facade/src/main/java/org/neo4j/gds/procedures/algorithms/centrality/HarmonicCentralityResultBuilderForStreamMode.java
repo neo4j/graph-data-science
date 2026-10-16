@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.harmonic.HarmonicResult;
 
@@ -32,10 +32,10 @@ public class HarmonicCentralityResultBuilderForStreamMode implements StreamResul
 
     @Override
     public Stream<CentralityStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<HarmonicResult> result
     ) {
-        return transformer.transform(graph, result);
+        return transformer.transform(nodeTranslator, result);
     }
 }

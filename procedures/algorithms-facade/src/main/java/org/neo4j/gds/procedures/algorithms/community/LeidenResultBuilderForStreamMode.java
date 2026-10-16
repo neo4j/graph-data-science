@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.leiden.LeidenResult;
@@ -41,7 +41,7 @@ class LeidenResultBuilderForStreamMode implements StreamResultBuilder<LeidenResu
 
     @Override
     public Stream<LeidenStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<LeidenResult> result
     ) {
@@ -56,7 +56,7 @@ class LeidenResultBuilderForStreamMode implements StreamResultBuilder<LeidenResu
             configuration.concurrency()
         );
 
-        return LongStream.range(0, graph.nodeCount())
+        return LongStream.range(0, nodeTranslator.nodeCount())
             .boxed()
             .filter(nodePropertyValues::hasValue)
             .map(nodeId -> {
@@ -64,7 +64,7 @@ class LeidenResultBuilderForStreamMode implements StreamResultBuilder<LeidenResu
                     ? leidenResult.intermediateCommunities(nodeId)
                     : null;
                 var communityId = nodePropertyValues.longValue(nodeId);
-                return LeidenStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);
+                return LeidenStreamResult.create(nodeTranslator.toOriginalNodeId(nodeId), communities, communityId);
             });
     }
 }

@@ -20,9 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
@@ -41,7 +41,7 @@ class ModularityOptimizationResultBuilderForStreamMode implements StreamResultBu
 
     @Override
     public Stream<ModularityOptimizationStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<ModularityOptimizationResult> result
     ) {
@@ -57,10 +57,10 @@ class ModularityOptimizationResultBuilderForStreamMode implements StreamResultBu
         );
 
         return LongStream
-            .range(IdMap.START_NODE_ID, graph.nodeCount())
+            .range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .filter(nodePropertyValues::hasValue)
             .mapToObj(nodeId -> new ModularityOptimizationStreamResult(
-                graph.toOriginalNodeId(nodeId),
+                nodeTranslator.toOriginalNodeId(nodeId),
                 nodePropertyValues.longValue(nodeId)
             ));
     }

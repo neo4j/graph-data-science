@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
@@ -34,7 +34,7 @@ class FastRPResultBuilderForStreamMode implements StreamResultBuilder<FastRPResu
 
     @Override
     public Stream<DefaultNodeEmbeddingsStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<FastRPResult> result
     ) {
@@ -47,7 +47,7 @@ class FastRPResultBuilderForStreamMode implements StreamResultBuilder<FastRPResu
             .range(IdMap.START_NODE_ID, nodePropertyValues.nodeCount())
             .filter(nodePropertyValues::hasValue)
             .mapToObj(nodeId -> DefaultNodeEmbeddingsStreamResult.create(
-                graph.toOriginalNodeId(nodeId),
+                nodeTranslator.toOriginalNodeId(nodeId),
                 nodePropertyValues.floatArrayValue(nodeId)
             ));
     }

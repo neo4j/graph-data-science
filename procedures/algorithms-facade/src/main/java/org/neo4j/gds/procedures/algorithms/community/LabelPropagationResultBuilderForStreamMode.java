@@ -20,9 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
@@ -42,7 +42,7 @@ class LabelPropagationResultBuilderForStreamMode implements StreamResultBuilder<
 
     @Override
     public Stream<LabelPropagationStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<LabelPropagationResult> result
     ) {
@@ -57,10 +57,10 @@ class LabelPropagationResultBuilderForStreamMode implements StreamResultBuilder<
             configuration.concurrency()
         );
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .filter(nodePropertyValues::hasValue)
             .mapToObj(nodeId -> new LabelPropagationStreamResult(
-                graph.toOriginalNodeId(nodeId),
+                nodeTranslator.toOriginalNodeId(nodeId),
                 nodePropertyValues.longValue(nodeId)
             ));
     }

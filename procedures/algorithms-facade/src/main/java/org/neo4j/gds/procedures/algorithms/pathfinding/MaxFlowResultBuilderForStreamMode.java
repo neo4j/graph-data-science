@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.maxflow.FlowResult;
 
@@ -31,15 +31,15 @@ import java.util.stream.Stream;
 public class MaxFlowResultBuilderForStreamMode implements StreamResultBuilder<FlowResult, MaxFlowStreamResult> {
 
     @Override
-    public Stream<MaxFlowStreamResult> build(Graph graph, GraphStore graphStore, Optional<FlowResult> flowResult) {
+    public Stream<MaxFlowStreamResult> build(NodeTranslator nodeTranslator, GraphStore graphStore, Optional<FlowResult> flowResult) {
         return flowResult.map(flowResult1 -> {
             var result = flowResult1.flow();
             var size = result.size();
             return LongStream.range(0, size).mapToObj(i -> {
                 var flowRelationship = result.get(i);
                 return new MaxFlowStreamResult(
-                    graph.toOriginalNodeId(flowRelationship.sourceId()),
-                    graph.toOriginalNodeId(flowRelationship.targetId()),
+                    nodeTranslator.toOriginalNodeId(flowRelationship.sourceId()),
+                    nodeTranslator.toOriginalNodeId(flowRelationship.targetId()),
                     flowRelationship.flow()
                 );
             });

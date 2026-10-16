@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
@@ -32,10 +32,10 @@ class FilteredNodeSimilarityResultBuilderForStreamMode implements StreamResultBu
 
     @Override
     public Stream<SimilarityStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<NodeSimilarityResult> result
     ) {
-        return similarityResultStreamMapper.process(graph, result);
+        return similarityResultStreamMapper.process(nodeTranslator, result);
     }
 }

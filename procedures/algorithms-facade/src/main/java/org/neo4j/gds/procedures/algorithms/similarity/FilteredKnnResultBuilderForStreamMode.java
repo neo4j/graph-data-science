@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 
@@ -31,7 +31,7 @@ class FilteredKnnResultBuilderForStreamMode implements StreamResultBuilder<Filte
 
     @Override
     public Stream<SimilarityStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<FilteredKnnResult> result
     ) {
@@ -41,8 +41,8 @@ class FilteredKnnResultBuilderForStreamMode implements StreamResultBuilder<Filte
             .similarityResultStream()
             .map(sr ->
                 new SimilarityStreamResult(
-                    graph.toOriginalNodeId(sr.node1),
-                    graph.toOriginalNodeId(sr.node2),
+                    nodeTranslator.toOriginalNodeId(sr.node1),
+                    nodeTranslator.toOriginalNodeId(sr.node2),
                     sr.similarity
                 )
             );

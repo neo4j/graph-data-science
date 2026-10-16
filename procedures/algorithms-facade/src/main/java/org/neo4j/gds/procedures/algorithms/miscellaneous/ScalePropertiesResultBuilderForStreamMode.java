@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.algorithms.misc.ScaledPropertiesNodePropertyValues;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 
@@ -33,7 +33,7 @@ class ScalePropertiesResultBuilderForStreamMode implements StreamResultBuilder<S
 
     @Override
     public Stream<ScalePropertiesStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<ScalePropertiesResult> result
     ) {
@@ -42,14 +42,14 @@ class ScalePropertiesResultBuilderForStreamMode implements StreamResultBuilder<S
         var scalePropertiesResult = result.get();
 
         var nodeProperties = new ScaledPropertiesNodePropertyValues(
-            graph.nodeCount(),
+            nodeTranslator.nodeCount(),
             scalePropertiesResult.scaledProperties()
         );
 
         return LongStream
-            .range(0, graph.nodeCount())
+            .range(0, nodeTranslator.nodeCount())
             .mapToObj(nodeId ->  ScalePropertiesStreamResult.create(
-                graph.toOriginalNodeId(nodeId),
+                nodeTranslator.toOriginalNodeId(nodeId),
                 nodeProperties.doubleArrayValue(nodeId)
             ));
     }

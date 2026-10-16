@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 
@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 class LccResultBuilderForStreamMode implements StreamResultBuilder<LocalClusteringCoefficientResult, LocalClusteringCoefficientStreamResult> {
     @Override
     public Stream<LocalClusteringCoefficientStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<LocalClusteringCoefficientResult> result
     ) {
@@ -41,9 +41,9 @@ class LccResultBuilderForStreamMode implements StreamResultBuilder<LocalClusteri
 
         var localClusteringCoefficients = localClusteringCoefficientResult.localClusteringCoefficients();
 
-        return LongStream.range(0, graph.nodeCount())
+        return LongStream.range(0, nodeTranslator.nodeCount())
             .mapToObj(i -> new LocalClusteringCoefficientStreamResult(
-                graph.toOriginalNodeId(i),
+                nodeTranslator.toOriginalNodeId(i),
                 localClusteringCoefficients.get(i)
             ));
     }

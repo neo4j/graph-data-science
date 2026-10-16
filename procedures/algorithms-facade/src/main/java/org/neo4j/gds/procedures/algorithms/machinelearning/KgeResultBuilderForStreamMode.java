@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.machinelearning;
 
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 
 import java.util.Optional;
@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 class KgeResultBuilderForStreamMode implements StreamResultBuilder<KGEPredictResult, KGEStreamResult> {
     @Override
     public Stream<KGEStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<KGEPredictResult> result
     ) {
@@ -40,8 +40,8 @@ class KgeResultBuilderForStreamMode implements StreamResultBuilder<KGEPredictRes
 
         return kgePredictResult.topKMap().stream(
             (node1, node2, similarity) -> new KGEStreamResult(
-                graph.toOriginalNodeId(node1),
-                graph.toOriginalNodeId(node2),
+                nodeTranslator.toOriginalNodeId(node1),
+                nodeTranslator.toOriginalNodeId(node2),
                 similarity
             )
         );

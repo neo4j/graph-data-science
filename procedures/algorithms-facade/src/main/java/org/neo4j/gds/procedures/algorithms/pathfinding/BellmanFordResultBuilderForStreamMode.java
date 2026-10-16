@@ -20,10 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -57,7 +56,7 @@ class BellmanFordResultBuilderForStreamMode implements StreamResultBuilder<Bellm
 
     @Override
     public Stream<BellmanFordStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<BellmanFordResult> result
     ) {
@@ -74,7 +73,7 @@ class BellmanFordResultBuilderForStreamMode implements StreamResultBuilder<Bellm
 
         var resultStream = algorithmResult.mapPaths(route -> mapRoute(
             route,
-            graph,
+            nodeTranslator,
             bellmanFordResult.containsNegativeCycle(),
             pathFactoryFacade
         ));
@@ -84,10 +83,10 @@ class BellmanFordResultBuilderForStreamMode implements StreamResultBuilder<Bellm
         return resultStream;
     }
 
-    private BellmanFordStreamResult mapRoute(PathResult pathResult, IdMap idMap, boolean negativeCycle,PathFactoryFacade pathFactoryFacade){
+    private BellmanFordStreamResult mapRoute(PathResult pathResult, NodeTranslator nodeTranslator, boolean negativeCycle,PathFactoryFacade pathFactoryFacade){
         var nodeIds = pathResult.nodeIds();
         for (int i = 0; i < nodeIds.length; i++) {
-            nodeIds[i] = idMap.toOriginalNodeId(nodeIds[i]);
+            nodeIds[i] = nodeTranslator.toOriginalNodeId(nodeIds[i]);
         }
         var relationshipType = RelationshipType.withName(formatWithLocale(RELATIONSHIP_TYPE_TEMPLATE, pathResult.index()));
 
@@ -102,8 +101,8 @@ class BellmanFordResultBuilderForStreamMode implements StreamResultBuilder<Bellm
 
         return new BellmanFordStreamResult(
             pathResult.index(),
-            idMap.toOriginalNodeId(pathResult.sourceNode()),
-            idMap.toOriginalNodeId(pathResult.targetNode()),
+            nodeTranslator.toOriginalNodeId(pathResult.sourceNode()),
+            nodeTranslator.toOriginalNodeId(pathResult.targetNode()),
             pathResult.totalCost(),
             // 😿
             Arrays.stream(nodeIds).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(nodeIds.length))),

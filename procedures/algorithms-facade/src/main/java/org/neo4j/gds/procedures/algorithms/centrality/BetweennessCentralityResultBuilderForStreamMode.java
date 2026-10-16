@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 
@@ -32,11 +32,11 @@ class BetweennessCentralityResultBuilderForStreamMode implements StreamResultBui
 
     @Override
     public Stream<CentralityStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<BetwennessCentralityResult> result
     ) {
-        return transformer.transform(graph, result);
+        return transformer.transform(nodeTranslator, result);
 
     }
 }

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.mcmf.CostFlowResult;
 
@@ -30,8 +30,8 @@ import java.util.stream.Stream;
 public class MCMFResultBuilderForStreamMode implements StreamResultBuilder<CostFlowResult, MaxFlowStreamResult> {
 
     @Override
-    public Stream<MaxFlowStreamResult> build(Graph graph, GraphStore graphStore, Optional<CostFlowResult> flowResult) {
-        return flowResult.map(flowResult1 -> new MaxFlowResultBuilderForStreamMode().build(graph,graphStore,Optional.of(flowResult1.flowResult())))
+    public Stream<MaxFlowStreamResult> build(NodeTranslator nodeTranslator, GraphStore graphStore, Optional<CostFlowResult> flowResult) {
+        return flowResult.map(flowResult1 -> new MaxFlowResultBuilderForStreamMode().build(nodeTranslator,graphStore,Optional.of(flowResult1.flowResult())))
             .orElse(Stream.empty());
     }
 }

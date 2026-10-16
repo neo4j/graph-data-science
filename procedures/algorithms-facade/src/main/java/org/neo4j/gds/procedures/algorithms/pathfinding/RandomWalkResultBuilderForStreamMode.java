@@ -20,10 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -51,7 +50,7 @@ class RandomWalkResultBuilderForStreamMode implements StreamResultBuilder<Stream
 
     @Override
     public Stream<RandomWalkStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<Stream<long[]>> result
     ) {
@@ -65,7 +64,7 @@ class RandomWalkResultBuilderForStreamMode implements StreamResultBuilder<Stream
         var streamOfLongArrays = result.get();
 
         var resultStream = streamOfLongArrays.map(nodes -> {
-            var translatedNodes = translateInternalToNeoIds(nodes, graph);
+            var translatedNodes = translateInternalToNeoIds(nodes, nodeTranslator);
             var path = pathFactoryFacade.createPath(translatedNodes, RelationshipType.withName(RELATIONSHIP_TYPE_NAME));
             return new RandomWalkStreamResult(translatedNodes, path);
         });
@@ -75,10 +74,10 @@ class RandomWalkResultBuilderForStreamMode implements StreamResultBuilder<Stream
         return resultStream;
     }
 
-    private List<Long> translateInternalToNeoIds(long[] nodes, IdMap idMap) {
+    private List<Long> translateInternalToNeoIds(long[] nodes, NodeTranslator nodeTranslator) {
         var translatedNodes = new ArrayList<Long>(nodes.length);
         for (int i = 0; i < nodes.length; i++) {
-            translatedNodes.add(i, idMap.toOriginalNodeId(nodes[i]));
+            translatedNodes.add(i, nodeTranslator.toOriginalNodeId(nodes[i]));
         }
         return translatedNodes;
     }

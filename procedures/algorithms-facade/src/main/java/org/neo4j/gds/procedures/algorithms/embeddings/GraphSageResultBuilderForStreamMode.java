@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 
@@ -33,7 +33,7 @@ class GraphSageResultBuilderForStreamMode implements StreamResultBuilder<GraphSa
 
     @Override
     public Stream<DefaultNodeEmbeddingsStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<GraphSageResult> result
     ) {
@@ -43,9 +43,9 @@ class GraphSageResultBuilderForStreamMode implements StreamResultBuilder<GraphSa
 
         var embeddings = graphSageResult.embeddings();
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .mapToObj(internalNodeId -> DefaultNodeEmbeddingsStreamResult.create(
-                graph.toOriginalNodeId(internalNodeId),
+                nodeTranslator.toOriginalNodeId(internalNodeId),
                 embeddings.get(internalNodeId)
             ));
     }

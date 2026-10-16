@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.articulationpoints.ArticulationPointsResult;
 import org.neo4j.gds.articulationpoints.SubtreeTracker;
@@ -34,7 +34,7 @@ class ArticulationPointsResultBuilderForStreamMode implements StreamResultBuilde
 
     @Override
     public Stream<ArticulationPointStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<ArticulationPointsResult> result
     ) {
@@ -43,10 +43,10 @@ class ArticulationPointsResultBuilderForStreamMode implements StreamResultBuilde
         var articulationPoints = result.get().articulationPoints();
         var subtreeTracker = result.get().subtreeTracker();
 
-        var nodeCount = graph.nodeCount();
+        var nodeCount = nodeTranslator.nodeCount();
         return LongStream.range(0, nodeCount)
             .filter(articulationPoints::get)
-            .mapToObj( v -> createResult(v, graph.toOriginalNodeId(v),subtreeTracker));
+            .mapToObj( v -> createResult(v, nodeTranslator.toOriginalNodeId(v),subtreeTracker));
     }
 
     private  ArticulationPointStreamResult createResult(long node, long originalId, Optional<SubtreeTracker> subtreeTracker){

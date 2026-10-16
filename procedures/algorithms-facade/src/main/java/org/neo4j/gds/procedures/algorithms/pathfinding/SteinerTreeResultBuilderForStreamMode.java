@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -41,7 +41,7 @@ class SteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<Stein
 
     @Override
     public Stream<SpanningTreeStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<SteinerTreeResult> result
     ) {
@@ -53,13 +53,13 @@ class SteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<Stein
         var parents = steinerTreeResult.parentArray();
         var costs = steinerTreeResult.relationshipToParentCost();
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .filter(nodeId -> parents.get(nodeId) != ShortestPathsSteinerAlgorithm.PRUNED)
             .mapToObj(nodeId -> {
-                    var originalNodeId = graph.toOriginalNodeId(nodeId);
+                    var originalNodeId = nodeTranslator.toOriginalNodeId(nodeId);
                     var parentNodeId = (sourceNodeId == originalNodeId)
                         ? sourceNodeId
-                        : graph.toOriginalNodeId(parents.get(nodeId));
+                        : nodeTranslator.toOriginalNodeId(parents.get(nodeId));
                     var cost = costs.get(nodeId);
 
                     return new SpanningTreeStreamResult(originalNodeId, parentNodeId, cost);

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.hits.HitsConfig;
@@ -39,18 +39,19 @@ class HitsResultBuilderForStreamMode implements StreamResultBuilder<PregelResult
         this.configuration = configuration;
     }
     @Override
-    public Stream<HitsStreamResult> build(Graph graph, GraphStore graphStore, Optional<PregelResult> result) {
+    public Stream<HitsStreamResult> build(NodeTranslator nodeTranslator, GraphStore graphStore, Optional<PregelResult> result) {
         if (result.isEmpty()) return Stream.empty();
 
         var auth = result.get().nodeValues().doubleProperties(configuration.authProperty());
         var hub = result.get().nodeValues().doubleProperties(configuration.hubProperty());
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .mapToObj(nodeId -> {
                 // for every schema element
                 var authValue = auth.get(nodeId);
                 var hubValue = hub.get(nodeId);
-                return new HitsStreamResult(graph.toOriginalNodeId(nodeId), Map.of(
+                return new HitsStreamResult(
+                    nodeTranslator.toOriginalNodeId(nodeId), Map.of(
                     configuration.authProperty(),authValue,
                     configuration.hubProperty(),hubValue)
                 );

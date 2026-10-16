@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 
@@ -33,7 +33,7 @@ class HashGnnResultBuilderForStreamMode implements StreamResultBuilder<HashGNNRe
 
     @Override
     public Stream<DefaultNodeEmbeddingsStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<HashGNNResult> result
     ) {
@@ -42,9 +42,9 @@ class HashGnnResultBuilderForStreamMode implements StreamResultBuilder<HashGNNRe
         var hashGNNResult = result.get();
 
         return LongStream
-            .range(IdMap.START_NODE_ID, graph.nodeCount())
+            .range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .mapToObj(i ->  DefaultNodeEmbeddingsStreamResult.create(
-                graph.toOriginalNodeId(i),
+                nodeTranslator.toOriginalNodeId(i),
                 hashGNNResult.embeddings().doubleArrayValue(i)
             ));
     }

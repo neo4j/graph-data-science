@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.triangle.TriangleResult;
 
@@ -37,7 +37,7 @@ class TrianglesResultBuilderForStreamMode implements StreamResultBuilder<Stream<
 
     @Override
     public Stream<TriangleStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<Stream<TriangleResult>> result
     ) {

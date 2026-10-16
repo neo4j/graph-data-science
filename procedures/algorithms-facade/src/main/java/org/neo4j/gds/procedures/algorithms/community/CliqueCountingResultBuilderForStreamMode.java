@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.cliqueCounting.CliqueCountingResult;
 
@@ -35,7 +35,7 @@ class CliqueCountingResultBuilderForStreamMode implements StreamResultBuilder<Cl
 
     @Override
     public Stream<CliqueCountingStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<CliqueCountingResult> result
     ) {
@@ -45,9 +45,9 @@ class CliqueCountingResultBuilderForStreamMode implements StreamResultBuilder<Cl
         var perNodeCount = cliqueCountingResult.perNodeCount();
 
         return LongStream
-            .range(IdMap.START_NODE_ID, graph.nodeCount())
+            .range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .mapToObj(nodeId -> CliqueCountingStreamResult.create(
-                    graph.toOriginalNodeId(nodeId),
+                    nodeTranslator.toOriginalNodeId(nodeId),
                     perNodeCount.get(nodeId)
                 )
             );

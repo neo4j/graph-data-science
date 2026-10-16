@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 
@@ -34,7 +34,7 @@ class TopologicalSortResultBuilderForStreamMode implements StreamResultBuilder<T
 
     @Override
     public Stream<TopologicalSortStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<TopologicalSortResult> result
     ) {
@@ -48,11 +48,11 @@ class TopologicalSortResultBuilderForStreamMode implements StreamResultBuilder<T
             : (nodeId) -> null;
         var topologicallySortedNodes = topologicalSortResult.sortedNodes();
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .mapToObj(index -> {
                 var mappedNodeId = topologicallySortedNodes.get(index);
                 return new TopologicalSortStreamResult(
-                    graph.toOriginalNodeId(mappedNodeId),
+                    nodeTranslator.toOriginalNodeId(mappedNodeId),
                     distanceFunction.apply(mappedNodeId)
                 );
             });

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -31,10 +31,11 @@ public interface StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
      * You implement this and use as much or as little of the gathered data as is appropriate.
      * Plus your own injected dependencies of course.
      *
-     * @param result output from algorithm, empty when graph was empty
+     * @param nodeTranslator
+     * @param result         output from algorithm, empty when graph was empty
      */
     Stream<RESULT_TO_CALLER> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<RESULT_FROM_ALGORITHM> result
     );

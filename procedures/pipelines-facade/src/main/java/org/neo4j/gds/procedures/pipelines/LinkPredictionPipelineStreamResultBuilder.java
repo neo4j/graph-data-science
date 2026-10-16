@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
@@ -45,7 +45,7 @@ class LinkPredictionPipelineStreamResultBuilder implements StreamResultBuilder<L
 
     @Override
     public Stream<StreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<LinkPredictionResult> result
     ) {

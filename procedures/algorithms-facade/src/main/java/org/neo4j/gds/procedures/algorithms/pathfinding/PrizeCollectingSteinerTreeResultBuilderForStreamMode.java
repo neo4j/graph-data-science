@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.pricesteiner.PrizeCollectingSteinerTreeResult;
 
@@ -33,7 +33,7 @@ class PrizeCollectingSteinerTreeResultBuilderForStreamMode implements StreamResu
 
     @Override
     public Stream<SpanningTreeStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<PrizeCollectingSteinerTreeResult> result
     ) {
@@ -44,11 +44,11 @@ class PrizeCollectingSteinerTreeResultBuilderForStreamMode implements StreamResu
         var parents = steinerTreeResult.parentArray();
         var costs = steinerTreeResult.relationshipToParentCost();
 
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
+        return LongStream.range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .filter(nodeId -> parents.get(nodeId) != PrizeCollectingSteinerTreeResult.PRUNED && parents.get(nodeId) != PrizeCollectingSteinerTreeResult.ROOT )
             .mapToObj(nodeId -> {
-                    var originalNodeId = graph.toOriginalNodeId(nodeId);
-                    var parentNodeId = graph.toOriginalNodeId(parents.get(nodeId));
+                    var originalNodeId = nodeTranslator.toOriginalNodeId(nodeId);
+                    var parentNodeId = nodeTranslator.toOriginalNodeId(parents.get(nodeId));
                     var cost = costs.get(nodeId);
                     return new SpanningTreeStreamResult(originalNodeId, parentNodeId, cost);
                 }

@@ -20,9 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
@@ -34,7 +34,7 @@ class Node2VecResultBuilderForStreamMode implements StreamResultBuilder<Node2Vec
 
     @Override
     public Stream<DefaultNodeEmbeddingsStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<Node2VecResult> result
     ) {
@@ -45,10 +45,10 @@ class Node2VecResultBuilderForStreamMode implements StreamResultBuilder<Node2Vec
         var nodePropertyValues = new FloatEmbeddingNodePropertyValues(node2VecResult.embeddings());
 
         return LongStream
-            .range(IdMap.START_NODE_ID, graph.nodeCount())
+            .range(IdMap.START_NODE_ID, nodeTranslator.nodeCount())
             .filter(nodePropertyValues::hasValue)
             .mapToObj(nodeId -> DefaultNodeEmbeddingsStreamResult.create(
-                graph.toOriginalNodeId(nodeId),
+                nodeTranslator.toOriginalNodeId(nodeId),
                 nodePropertyValues.floatArrayValue(nodeId)
             ));
     }

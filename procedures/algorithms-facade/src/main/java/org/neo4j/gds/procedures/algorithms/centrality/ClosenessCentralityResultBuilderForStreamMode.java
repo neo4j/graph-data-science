@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 
@@ -32,10 +32,10 @@ class ClosenessCentralityResultBuilderForStreamMode implements StreamResultBuild
 
     @Override
     public Stream<CentralityStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<ClosenessCentralityResult> result
     ) {
-        return transformer.transform(graph, result);
+        return transformer.transform(nodeTranslator, result);
     }
 }

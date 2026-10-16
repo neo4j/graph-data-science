@@ -20,9 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -53,7 +53,7 @@ public class PathFindingResultBuilderForStreamMode implements StreamResultBuilde
 
     @Override
     public Stream<PathFindingStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<PathFindingResult> result
     ) {
@@ -64,14 +64,14 @@ public class PathFindingResultBuilderForStreamMode implements StreamResultBuilde
             graphStore.capabilities().canWriteToLocalDatabase()
         );
 
-        var resultStream = pathFindingResult.mapPaths(pathResult -> mapPath(pathResult,graph,pathFactoryFacade));
+        var resultStream = pathFindingResult.mapPaths(pathResult -> mapPath(pathResult, nodeTranslator,pathFactoryFacade));
 
         closeableResourceRegistry.register(resultStream);
 
         return resultStream;
     }
 
-    PathFindingStreamResult mapPath(PathResult pathResult, Graph graph, PathFactoryFacade pathFactoryFacade){
+    PathFindingStreamResult mapPath(PathResult pathResult, NodeTranslator nodeTranslator, PathFactoryFacade pathFactoryFacade){
         var nodeIds = pathResult.nodeIds();
         var costs = pathResult.costs();
         var pathIndex = pathResult.index();
@@ -80,7 +80,7 @@ public class PathFindingResultBuilderForStreamMode implements StreamResultBuilde
 
         // convert internal ids to Neo ids
         for (int i = 0; i < nodeIds.length; i++) {
-            nodeIds[i] = graph.toOriginalNodeId(nodeIds[i]);
+            nodeIds[i] = nodeTranslator.toOriginalNodeId(nodeIds[i]);
         }
         var path = pathFactoryFacade.createPath(
             nodeIds,
@@ -91,8 +91,8 @@ public class PathFindingResultBuilderForStreamMode implements StreamResultBuilde
 
         return new PathFindingStreamResult(
             pathIndex,
-            graph.toOriginalNodeId(pathResult.sourceNode()),
-            graph.toOriginalNodeId(pathResult.targetNode()),
+            nodeTranslator.toOriginalNodeId(pathResult.sourceNode()),
+            nodeTranslator.toOriginalNodeId(pathResult.targetNode()),
             pathResult.totalCost(),
             // 😿
             Arrays.stream(nodeIds)

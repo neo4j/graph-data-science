@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.bridges.BridgeResult;
 
@@ -32,7 +32,7 @@ class BridgesResultBuilderForStreamModeWithComponentSizes implements StreamResul
 
     @Override
     public Stream<BridgesStreamResult> build(
-        Graph graph,
+        NodeTranslator nodeTranslator,
         GraphStore graphStore,
         Optional<BridgeResult> result
     ) {
@@ -44,8 +44,8 @@ class BridgesResultBuilderForStreamModeWithComponentSizes implements StreamResul
             .bridges()
             .stream()
             .map(bridge -> new BridgesStreamResult(
-                graph.toOriginalNodeId(bridge.from()),
-                graph.toOriginalNodeId(bridge.to()),
+                nodeTranslator.toOriginalNodeId(bridge.from()),
+                nodeTranslator.toOriginalNodeId(bridge.to()),
                 List.of(bridge.remainingSizes()[0], bridge.remainingSizes()[1])
             ));
     }
