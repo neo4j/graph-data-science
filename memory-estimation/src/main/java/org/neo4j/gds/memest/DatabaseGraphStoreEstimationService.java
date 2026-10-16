@@ -27,7 +27,7 @@ import org.neo4j.gds.projection.GraphStoreFactorySuppliers;
 
 import java.util.concurrent.ExecutorService;
 
-public class DatabaseGraphStoreEstimationService {
+public class DatabaseGraphStoreEstimationService implements GraphStoreEstimationService {
     private final GraphLoaderContext graphLoaderContext;
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
     private final DependencyResolver dependencyResolver;

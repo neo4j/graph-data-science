@@ -35,7 +35,7 @@ import java.util.Collections;
 import static java.util.function.Predicate.isEqual;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 
-public class FictitiousGraphStoreEstimationService {
+public class FictitiousGraphStoreEstimationService implements GraphStoreEstimationService{
     private final GraphStoreFactorySuppliers graphStoreFactorySuppliers;
 
     public FictitiousGraphStoreEstimationService(GraphStoreFactorySuppliers graphStoreFactorySuppliers) {

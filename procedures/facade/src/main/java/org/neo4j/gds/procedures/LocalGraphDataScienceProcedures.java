@@ -30,7 +30,9 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.ProjectedAlgorithmEstimationService;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.UnprojectedAlgorithmEstimationService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
@@ -150,10 +152,21 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             DefaultPool.INSTANCE
         );
 
-        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
-            new FictitiousGraphStoreEstimationService(graphStoreFactorySuppliers),
-            globallyScopedDependencies.graphStoreCatalogService(),
+        var databaseGraphStoreAlgorithmEstimationService = new UnprojectedAlgorithmEstimationService(
             databaseGraphStoreEstimationService,
+            requestScopedDependencies
+        );
+
+        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+            new UnprojectedAlgorithmEstimationService(
+                new FictitiousGraphStoreEstimationService(graphStoreFactorySuppliers),
+                requestScopedDependencies
+            ),
+            databaseGraphStoreAlgorithmEstimationService,
+            new ProjectedAlgorithmEstimationService(
+                globallyScopedDependencies.graphStoreCatalogService(),
+                requestScopedDependencies
+            ),
             requestScopedDependencies
         );
 

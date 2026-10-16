@@ -21,20 +21,11 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.GraphParameters;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.validation.GraphStoreValidation;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
-import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
-import org.neo4j.gds.memest.GraphMemoryEstimation;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -43,24 +34,22 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * But we do not like inheritance, so the hooks are injected
  */
 public class AlgorithmEstimationTemplate {
-    // global scoped dependencies
-    private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService;
-    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final UnprojectedAlgorithmEstimationService fictitiousAlgorithmEstimationService;
+    private final UnprojectedAlgorithmEstimationService databaseAlgorithmEstimationService;
+    private final ProjectedAlgorithmEstimationService projectedAlgorithmEstimationService;
 
     // request scoped parameters and services
-    private final DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService;
     private final RequestScopedDependencies requestScopedDependencies;
-    private final GraphDimensionsFactory graphDimensionsFactory = new GraphDimensionsFactory();
 
     public AlgorithmEstimationTemplate(
-        FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService,
-        GraphStoreCatalogService graphStoreCatalogService,
-        DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
+        UnprojectedAlgorithmEstimationService fictitiousAlgorithmEstimationService,
+        UnprojectedAlgorithmEstimationService DatabaseAlgorithmEstimationService,
+        ProjectedAlgorithmEstimationService projectedAlgorithmEstimationService,
         RequestScopedDependencies requestScopedDependencies
     ) {
-        this.fictitiousGraphStoreEstimationService = fictitiousGraphStoreEstimationService;
-        this.graphStoreCatalogService = graphStoreCatalogService;
-        this.databaseGraphStoreEstimationService = databaseGraphStoreEstimationService;
+        this.fictitiousAlgorithmEstimationService = fictitiousAlgorithmEstimationService;
+        this.databaseAlgorithmEstimationService = DatabaseAlgorithmEstimationService;
+        this.projectedAlgorithmEstimationService = projectedAlgorithmEstimationService;
         this.requestScopedDependencies = requestScopedDependencies;
     }
 
@@ -86,36 +75,26 @@ public class AlgorithmEstimationTemplate {
         Concurrency concurrency,
         DimensionTransformer dimensionTransformer
     ) {
-        var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
-
-        if (graphNameOrConfiguration instanceof Map graphConfig) {
+        if (graphNameOrConfiguration instanceof Map<?, ?> graphConfig) {
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(requestScopedDependencies.user().getUsername());
-            var projectionConfiguration = memoryEstimationGraphConfigParser.parse(graphConfig);
+            @SuppressWarnings("unchecked")
+            var projectionConfiguration = memoryEstimationGraphConfigParser.parse((Map<String, Object>) graphConfig);
 
-            var graphMemoryEstimation = estimate(projectionConfiguration);
-
-            estimationBuilder.add("graph", graphMemoryEstimation.estimateMemoryUsageAfterLoading());
-
-            var graphDimensions = graphMemoryEstimation.dimensions();
-
-            var transformedDimensions = dimensionTransformer.transform(graphDimensions);
-
-            return estimate(
-                estimationBuilder,
-                memoryEstimation,
-                transformedDimensions,
-                concurrency
-            );
+            return projectionConfiguration.isFictitiousLoading()
+                ? fictitiousAlgorithmEstimationService.estimate(projectionConfiguration, memoryEstimation, concurrency, dimensionTransformer)
+                : databaseAlgorithmEstimationService.estimate(projectionConfiguration, memoryEstimation, concurrency, dimensionTransformer);
         }
 
         if (graphNameOrConfiguration instanceof String rawGraphName) {
             GraphName graphName = GraphName.parse(rawGraphName);
 
-            var graphDimensions = dimensionsFromActualGraph(graphName, graphParameters);
-
-            var transformedDimensions = dimensionTransformer.transform(graphDimensions);
-
-            return estimate(estimationBuilder, memoryEstimation, transformedDimensions, concurrency);
+            return projectedAlgorithmEstimationService.estimate(
+                graphName,
+                graphParameters,
+                memoryEstimation,
+                concurrency,
+                dimensionTransformer
+            );
         }
 
         throw new IllegalArgumentException(formatWithLocale(
@@ -124,48 +103,5 @@ public class AlgorithmEstimationTemplate {
         ));
     }
 
-    private GraphMemoryEstimation estimate(GraphProjectConfig projectionConfiguration) {
-        return projectionConfiguration.isFictitiousLoading()
-            ? fictitiousGraphStoreEstimationService.estimate(
-            requestScopedDependencies.correlationId(),
-            projectionConfiguration
-        )
-            : databaseGraphStoreEstimationService.estimate(
-                requestScopedDependencies.correlationId(),
-                projectionConfiguration
-            );
-    }
 
-    private GraphDimensions dimensionsFromActualGraph(
-        GraphName graphName,
-        GraphParameters graphParameters
-    ) {
-        var graphResources = graphStoreCatalogService.fetchGraphResources(
-            requestScopedDependencies.databaseId(),
-            graphName,
-            requestScopedDependencies.user(),
-            graphParameters,
-            Optional.empty(),
-            GraphStoreValidation.DISABLED,
-            true,
-            Optional.empty()
-        );
-
-        return graphDimensionsFactory.graphDimensions(graphResources, graphParameters);
-    }
-
-    private MemoryEstimateResult estimate(
-        MemoryEstimations.Builder estimationBuilder,
-        MemoryEstimation memoryEstimation,
-        GraphDimensions graphDimensions,
-        Concurrency concurrency
-    ) {
-        var rootEstimation = estimationBuilder
-            .add("algorithm", memoryEstimation)
-            .build();
-
-        var memoryTree = rootEstimation.estimate(graphDimensions, concurrency);
-
-        return MemoryEstimateResultFactory.from(memoryTree, graphDimensions);
-    }
 }
