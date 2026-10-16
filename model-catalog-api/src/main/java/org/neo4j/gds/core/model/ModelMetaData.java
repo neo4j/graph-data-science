@@ -21,7 +21,6 @@ package org.neo4j.gds.core.model;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.model.ModelConfig;
@@ -32,7 +31,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 
-@GenerateBuilder
 public record ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo>(
     String creator,
     List<String> sharedWith,
