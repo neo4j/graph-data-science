@@ -265,7 +265,7 @@ class OpenModelCatalogTest {
 
         assertEquals(
             "The model `testModel` has data with different types than expected. " +
-                "Expected data type: `java.lang.String`, invoked with model data type: `java.lang.Double`.",
+                "Expected data type: `java.lang.Double`, invoked with model data type: `java.lang.String`.",
             ex.getMessage()
         );
     }
@@ -287,8 +287,8 @@ class OpenModelCatalogTest {
 
         assertEquals(
             "The model `testModel` has a training config with different types than expected. " +
-                "Expected train config type: `org.neo4j.gds.model.catalog.TestTrainConfigImpl`, " +
-                "invoked with model config type: `org.neo4j.gds.core.model.OpenModelCatalogTest$ModelCatalogTestTrainConfig`.",
+                "Expected train config type: `org.neo4j.gds.core.model.OpenModelCatalogTest$ModelCatalogTestTrainConfig`, " +
+                "invoked with model config type: `org.neo4j.gds.model.catalog.TestTrainConfigImpl`.",
             ex.getMessage()
         );
     }

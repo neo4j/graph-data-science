@@ -109,8 +109,8 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends CustomInfo>(
                 "The model `%s` has data with different types than expected. " +
                     "Expected data type: `%s`, invoked with model data type: `%s`.",
                 name(),
-                data().getClass().getName(),
-                dataClass.getName()
+                dataClass.getName(),
+                data().getClass().getName()
             ));
         }
         if (!configClass.isInstance(trainConfig())) {
@@ -118,8 +118,8 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends CustomInfo>(
                 "The model `%s` has a training config with different types than expected. " +
                     "Expected train config type: `%s`, invoked with model config type: `%s`.",
                 name(),
-                trainConfig().getClass().getName(),
-                configClass.getName()
+                configClass.getName(),
+                trainConfig().getClass().getName()
             ));
         }
         if (!infoClass.isInstance(customInfo())) {
@@ -127,8 +127,8 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends CustomInfo>(
                 "The model `%s` has a customInfo with different types than expected. " +
                     "Expected customInfo type: `%s`, invoked with model info type: `%s`.",
                 name(),
-                customInfo().getClass().getName(),
-                infoClass.getName()
+                infoClass.getName(),
+                customInfo().getClass().getName()
             ));
         }
         return (Model<D, C, I>) this;
