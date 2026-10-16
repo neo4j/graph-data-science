@@ -20,16 +20,12 @@
 package org.neo4j.gds.api.nodes;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.FilteredIdMaps;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.PrimitiveIterator;
-import java.util.Set;
-import java.util.function.LongPredicate;
 
 public final class ComposedIdMap implements IdMap {
 
@@ -101,28 +97,6 @@ public final class ComposedIdMap implements IdMap {
         if (this.labelInformation.isSingleLabel()) {
             this.labelInformation = labelInformation.toMultiLabel(nodeLabel);
         }
-    }
-
-    // NodeIterator / BatchNodeIterable
-
-    @Override
-    public void forEachNode(LongPredicate consumer) {
-        long nodeCount = nodeCount();
-        for (long i = 0; i < nodeCount; i++) {
-            if (!consumer.test(i)) {
-                return;
-            }
-        }
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator() {
-        return new BatchNodeIterable.IdIterator(nodeCount());
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
-        return this.labelInformation.nodeIterator(labels, nodeCount());
     }
 
     // IdMap root / filter

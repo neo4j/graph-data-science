@@ -32,13 +32,13 @@ import java.util.OptionalLong;
 
 public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     protected final NodePropertyValues properties;
-    protected FilteredIdMap graph;
+    FilteredIdMap filteredIdMap;
 
     protected abstract long translateId(long nodeId);
 
-    FilteredNodePropertyValues(NodePropertyValues properties, FilteredIdMap graph) {
+    FilteredNodePropertyValues(NodePropertyValues properties, FilteredIdMap filteredIdMap) {
         this.properties = properties;
-        this.graph = graph;
+        this.filteredIdMap = filteredIdMap;
     }
 
     @Override
@@ -85,7 +85,7 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     public OptionalLong getMaxLongPropertyValue() {
         if (valueType() == ValueType.LONG) {
             MutableLong currentMax = new MutableLong(Long.MIN_VALUE);
-            graph.forEachNode(id -> {
+            filteredIdMap.forEachNode(id -> {
                 currentMax.setValue(Math.max(currentMax.doubleValue(), longValue(id)));
                 return true;
             });
@@ -95,7 +95,7 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
 
         } else if (valueType() == ValueType.DOUBLE) {
             MutableDouble currentMax = new MutableDouble(Double.NEGATIVE_INFINITY);
-            graph.forEachNode(id -> {
+            filteredIdMap.forEachNode(id -> {
                 currentMax.setValue(Math.max(currentMax.doubleValue(), doubleValue(id)));
                 return true;
             });
@@ -112,7 +112,7 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     public OptionalDouble getMaxDoublePropertyValue() {
         if (valueType() == ValueType.LONG) {
             MutableLong currentMax = new MutableLong(Long.MIN_VALUE);
-            graph.forEachNode(id -> {
+            filteredIdMap.forEachNode(id -> {
                 currentMax.setValue(Math.max(currentMax.doubleValue(), longValue(id)));
                 return true;
             });
@@ -122,7 +122,7 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
 
         } else if (valueType() == ValueType.DOUBLE) {
             MutableDouble currentMax = new MutableDouble(Double.NEGATIVE_INFINITY);
-            graph.forEachNode(id -> {
+            filteredIdMap.forEachNode(id -> {
                 currentMax.setValue(Math.max(currentMax.doubleValue(), doubleValue(id)));
                 return true;
             });
@@ -137,7 +137,7 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
 
     @Override
     public long nodeCount() {
-        return graph.nodeCount();
+        return filteredIdMap.nodeCount();
     }
 
     // This class is used when the ID space of the wrapped properties is wider than the id space used to retrieved node properties.
@@ -149,7 +149,7 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
 
         @Override
         protected long translateId(long nodeId) {
-            return graph.toRootNodeId(nodeId);
+            return filteredIdMap.toRootNodeId(nodeId);
         }
     }
 
@@ -231,7 +231,7 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
 
         @Override
         protected long translateId(long nodeId) {
-            return graph.toFilteredNodeId(nodeId);
+            return filteredIdMap.toFilteredNodeId(nodeId);
         }
     }
 }

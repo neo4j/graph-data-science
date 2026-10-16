@@ -42,9 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -109,21 +107,6 @@ public final class UnionGraph implements CSRGraph {
     @Override
     public long relationshipCount() {
         return graphs.stream().mapToLong(Graph::relationshipCount).sum();
-    }
-
-    @Override
-    public void forEachNode(LongPredicate consumer) {
-        first.forEachNode(consumer);
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator() {
-        return first.nodeIterator();
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
-        return first.nodeIterator(labels);
     }
 
     @Override

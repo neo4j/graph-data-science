@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.nodes.FilterableNodeTranslator;
 import org.neo4j.gds.api.nodes.IdMap;
@@ -32,9 +31,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.function.LongPredicate;
 
 public final class FilteredIdMaps {
 
@@ -174,20 +171,6 @@ public final class FilteredIdMaps {
         @Override
         public void addNodeIdToLabel(long filteredNodeId, NodeLabel nodeLabel) {
             rootIdMap.addNodeIdToLabel(filteredTranslator.toOriginalNodeId(filteredNodeId), nodeLabel);
-        }
-
-        @Override
-        public void forEachNode(LongPredicate consumer) {
-            long count = nodeCount();
-            for (long i = 0L; i < count; i++) if (!consumer.test(i)) return;
-        }
-
-        @Override
-        public PrimitiveIterator.OfLong nodeIterator() {return new BatchNodeIterable.IdIterator(nodeCount());}
-
-        @Override
-        public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
-            return filteredLabelInformation.nodeIterator(labels, nodeCount());
         }
     }
 }

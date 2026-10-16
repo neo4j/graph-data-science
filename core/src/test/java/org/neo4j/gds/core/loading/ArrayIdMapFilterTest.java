@@ -76,7 +76,7 @@ class ArrayIdMapFilterTest {
         filtered.forEachNode(ids::add);
         assertThat(ids).containsExactly(0L, 1L, 2L, 3L, 4L);
         // label-restricted iteration must yield filtered ids, consistent with forEachNode
-        assertThat(collect(filtered.nodeIterator(Set.of(A)))).containsExactly(0L, 1L, 2L, 3L, 4L);
+        assertThat(collect(filtered.nodeIterator(Set.of(A), filtered.nodeCount()))).containsExactly(0L, 1L, 2L, 3L, 4L);
     }
 
     @Test
@@ -101,9 +101,9 @@ class ArrayIdMapFilterTest {
         assertThat(filteredView.availableNodeLabels()).containsExactlyInAnyOrder(A, B);
         assertThat(filteredView.nodeCount(A)).isEqualTo(3);
         assertThat(filteredView.nodeCount(B)).isEqualTo(2);
-        assertThat(collect(filteredView.nodeIterator(Set.of(A)))).containsExactly(0L, 2L, 3L);
-        assertThat(collect(filteredView.nodeIterator(Set.of(B)))).containsExactly(1L, 4L);
-        assertThat(collect(filteredView.nodeIterator(Set.of(A, B)))).containsExactly(0L, 1L, 2L, 3L, 4L);
+        assertThat(collect(filteredView.nodeIterator(Set.of(A), filteredView.nodeCount()))).containsExactly(0L, 2L, 3L);
+        assertThat(collect(filteredView.nodeIterator(Set.of(B), filteredView.nodeCount()))).containsExactly(1L, 4L);
+        assertThat(collect(filteredView.nodeIterator(Set.of(A, B), filteredView.nodeCount()))).containsExactly(0L, 1L, 2L, 3L, 4L);
     }
 
     private static List<Long> collect(PrimitiveIterator.OfLong iterator) {

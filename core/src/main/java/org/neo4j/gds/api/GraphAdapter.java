@@ -34,9 +34,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
 public abstract class GraphAdapter implements Graph {
@@ -125,21 +123,6 @@ public abstract class GraphAdapter implements Graph {
     @Override
     public long highestOriginalId() {
         return graph.highestOriginalId();
-    }
-
-    @Override
-    public void forEachNode(LongPredicate consumer) {
-        graph.forEachNode(consumer);
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator() {
-        return graph.nodeIterator();
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
-        return graph.nodeIterator(labels);
     }
 
     @Override

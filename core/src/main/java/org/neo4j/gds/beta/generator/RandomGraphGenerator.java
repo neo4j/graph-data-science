@@ -359,7 +359,7 @@ public final class RandomGraphGenerator {
             Map.Entry::getKey,
             entry -> {
                 var nodeLabels = new HashSet<>(propertyNameToLabels.get(entry.getKey()));
-                var nodes = idMap.nodeIterator(nodeLabels);
+                var nodes = idMap.nodeIterator(nodeLabels, idMap.nodeCount());
                 return generateProperties(nodes, entry.getValue());
             }
         ));
@@ -378,7 +378,7 @@ public final class RandomGraphGenerator {
             .collect(
                 NodeSchema::builder,
                 (builder, row) -> builder.addProperty(row.label, row.propertyKey, row.valueType),
-                (leftBuilder, rightBuilder) -> leftBuilder.addBuilder(rightBuilder)
+                NodeSchema.NodeSchemaBuilder::addBuilder
             )
             .build();
         return new NodePropertiesAndSchema(nodeSchema, generatedProperties);

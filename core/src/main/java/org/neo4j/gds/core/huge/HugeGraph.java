@@ -48,9 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -226,21 +224,6 @@ public class HugeGraph implements CSRGraph {
     @Override
     public long relationshipCount() {
         return relationshipCount;
-    }
-
-    @Override
-    public void forEachNode(LongPredicate consumer) {
-        idMap.forEachNode(consumer);
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator() {
-        return idMap.nodeIterator();
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
-        return idMap.nodeIterator(labels);
     }
 
     @Override

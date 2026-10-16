@@ -25,14 +25,12 @@ import org.neo4j.gds.api.NodeIdMapper;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
-import org.neo4j.gds.collections.primitive.PrimitiveLongCollections;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
 import java.util.Set;
-import java.util.function.LongPredicate;
 
 public class DirectIdMap implements IdMap {
     private final long nodeCount;
@@ -114,27 +112,11 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public void forEachNode(LongPredicate consumer) {
-        for (long i = 0; i < nodeCount; i++) {
-            var shouldContinue = consumer.test(i);
-            if (!shouldContinue) break;
-        }
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator() {
-        return PrimitiveLongCollections.range(0, nodeCount - 1);
-    }
-
-    @Override
-    public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
-        return nodeIterator();
-    }
-
     public void addNodeLabel(NodeLabel nodeLabel) {
         throw new UnsupportedOperationException("Adding Node labels is not supported");
     }
 
+    @Override
     public void addNodeIdToLabel(long nodeId, NodeLabel nodeLabel) {
         throw new UnsupportedOperationException("Assigning Node labels to nodes is not supported");
     }
