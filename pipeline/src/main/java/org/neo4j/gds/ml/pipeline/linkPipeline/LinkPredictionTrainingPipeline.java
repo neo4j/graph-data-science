@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.core.model.catalog.ModelMetadata;
@@ -129,9 +130,11 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
         return modelCatalog.getAllMetadata(username)
             .filter(modelMetadata -> modelMetadata.name().equals(modelName))
             .findFirst()
-            .or(
-                () -> modelCatalog.getAllMetadata()
-                    .filter(modelMetadata -> modelMetadata.name().equals(modelName))
+            .or(() ->
+                modelCatalog.getAllMetadata()
+                    .filter(
+                        modelMetadata -> modelMetadata.name().equals(modelName)
+                                || modelMetadata.name().equals(modelName + Model.PUBLIC_MODEL_SUFFIX))
                     .filter(ModelMetadata::published)
                     .findFirst()
             );

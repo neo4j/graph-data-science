@@ -274,27 +274,12 @@ class LinkPredictionTrainingPipelineTest {
         var model = new Model<>(metaData, 1L, Optional.empty());
         modelCatalog.set(model);
 
-        var executionContext = new ExecutionContext(
-            CloseableResourceRegistry.EMPTY,
-            DatabaseId.of(""),
-            Log.noOpLog(),
-            ExecutionContext.EMPTY_MEMORY_CONTEXT,
-            Metrics.DISABLED,
-            ProcedureReturnColumns.EMPTY,
-            PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            TerminationMonitor.EMPTY,
-            new User("", false),
-            null,
-            ExecutionContext.EMPTY_DEPENDENCY_RESOLVER,
-            modelCatalog
-        );
-
         var pipeline = new LinkPredictionTrainingPipeline();
         var step = new TestNodePropertyStep(Map.of("modelName", modelName));
         pipeline.addNodePropertyStep(step);
 
-        assertThat(pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.user().getUsername())).isPresent().get().isEqualTo("derivedWeight");
+        assertThat(pipeline.relationshipWeightProperty(modelCatalog, ""))
+            .isPresent().get().isEqualTo("derivedWeight");
     }
 
     @Test
