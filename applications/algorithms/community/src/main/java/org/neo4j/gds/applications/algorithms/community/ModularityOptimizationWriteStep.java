@@ -62,7 +62,8 @@ class ModularityOptimizationWriteStep implements WriteStep<ModularityOptimizatio
         );
 
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

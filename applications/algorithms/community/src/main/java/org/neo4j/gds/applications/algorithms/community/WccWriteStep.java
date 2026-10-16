@@ -64,7 +64,8 @@ class WccWriteStep implements WriteStep<DisjointSetStruct, Pair<NodePropertiesWr
         );
 
         var nodePropertiesWritten = writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.ExportedRelationship;
-import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
@@ -52,13 +52,13 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
     public static RelationshipStreamExporterBuilder builder(
         Log log,
         TransactionContext transactionContext,
-        IdMap idMap,
+        NodeTranslator nodeTranslator,
         Stream<ExportedRelationship> relationships,
         TerminationFlag terminationFlag
     ) {
         return new NativeRelationshipStreamExporterBuilder(log, transactionContext)
             .withRelationships(relationships)
-            .withIdMappingOperator(idMap::toOriginalNodeId)
+            .withIdMappingOperator(nodeTranslator::toOriginalNodeId)
             .withTerminationFlag(terminationFlag);
     }
 

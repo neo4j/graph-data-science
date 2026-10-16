@@ -50,7 +50,8 @@ class KMeansWriteStep implements WriteStep<KmeansResult, NodePropertiesWritten> 
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

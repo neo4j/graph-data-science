@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -50,9 +50,9 @@ public class NativeNodeLabelExporter extends StatementApi implements NodeLabelEx
         void accept(Write ops, long value) throws Exception;
     }
 
-    public static NodeLabelExporterBuilder builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
+    public static NodeLabelExporterBuilder builder(TransactionContext transactionContext, NodeTranslator nodeTranslator, TerminationFlag terminationFlag) {
         return new NativeNodeLabelExporterBuilder(transactionContext)
-            .withIdMap(idMap)
+            .withNodeTranslator(nodeTranslator)
             .withTerminationFlag(terminationFlag);
     }
 

@@ -236,11 +236,13 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
     @Test
     void rejectsAVectorWhenTheStoreFormatDoesNotSupportIt() {
+        var idMap = new DirectIdMap(3);
         var exporter = new NativeNodePropertiesExporterBuilder(
             TestSupport.fullAccessTransaction(db),
             () -> false
         )
-            .withIdMap(new DirectIdMap(3))
+            .withNodeTranslator(idMap.nodeTranslator())
+            .withNodeLabels(idMap.availableNodeLabels())
             .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
             .build();
 
@@ -256,11 +258,13 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
     @Test
     void rejectsAVectorWithTooManyDimensions() {
+        var idMap = new DirectIdMap(3);
         var exporter = new NativeNodePropertiesExporterBuilder(
             TestSupport.fullAccessTransaction(db),
             () -> true
         )
-            .withIdMap(new DirectIdMap(3))
+            .withNodeTranslator(idMap.nodeTranslator())
+            .withNodeLabels(idMap.availableNodeLabels())
             .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
             .build();
 
@@ -279,11 +283,13 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
     @Test
     void aPlainArrayIsNotSubjectToTheVectorGuard() {
+        var idMap = new DirectIdMap(3);
         var exporter = new NativeNodePropertiesExporterBuilder(
             TestSupport.fullAccessTransaction(db),
             () -> false
         )
-            .withIdMap(new DirectIdMap(3))
+            .withNodeTranslator(idMap.nodeTranslator())
+            .withNodeLabels(idMap.availableNodeLabels())
             .withTerminationFlag(TerminationFlag.RUNNING_TRUE)
             .build();
 

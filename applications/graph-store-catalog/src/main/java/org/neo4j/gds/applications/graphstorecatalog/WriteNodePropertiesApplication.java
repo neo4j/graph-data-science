@@ -129,7 +129,8 @@ public class WriteNodePropertiesApplication {
         progressTracker.beginSubTask();
         try {
             var exporter = nodePropertyExporterBuilder
-                .withIdMap(subGraph)
+                .withNodeTranslator(subGraph.nodeTranslator())
+                .withNodeLabels(subGraph.availableNodeLabels())
                 .withTerminationFlag(terminationFlag)
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                 .withProgressTracker(progressTracker)

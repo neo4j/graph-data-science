@@ -57,7 +57,8 @@ class K1ColoringWriteStep implements WriteStep<K1ColoringResult, Void> {
         );
 
         writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

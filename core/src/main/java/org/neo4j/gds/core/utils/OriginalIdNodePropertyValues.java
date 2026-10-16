@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 
 import java.util.OptionalLong;
@@ -29,8 +29,8 @@ public class OriginalIdNodePropertyValues implements LongNodePropertyValues {
     private final LongUnaryOperator toOriginalNodeId;
     private final long nodeCount;
 
-    public OriginalIdNodePropertyValues(IdMap idMap) {
-        this(idMap::toOriginalNodeId, idMap.nodeCount());
+    public OriginalIdNodePropertyValues(NodeTranslator nodeTranslator) {
+        this(nodeTranslator::toOriginalNodeId, nodeTranslator.nodeCount());
     }
 
     public OriginalIdNodePropertyValues(LongUnaryOperator toOriginalNodeId, long nodeCount) {

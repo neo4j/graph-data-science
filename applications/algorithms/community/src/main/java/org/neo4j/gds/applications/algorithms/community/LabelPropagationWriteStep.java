@@ -65,7 +65,8 @@ class LabelPropagationWriteStep implements WriteStep<LabelPropagationResult, Pai
         );
 
         var nodePropertiesWritten = writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

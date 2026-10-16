@@ -51,7 +51,8 @@ class NodeRegressionPredictPipelineWriteStep implements WriteStep<HugeDoubleArra
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

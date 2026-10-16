@@ -22,7 +22,7 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -57,7 +57,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     ) {
         return builder(
             transactionContext,
-            graph,
+            graph.nodeTranslator(),
             graph,
             terminationFlag
         );
@@ -65,13 +65,13 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
 
     public static RelationshipExporterBuilder builder(
         TransactionContext transactionContext,
-        IdMap idMap,
+        NodeTranslator nodeTranslator,
         Graph graph,
         TerminationFlag terminationFlag
     ) {
         return new NativeRelationshipExporterBuilder(transactionContext)
             .withGraph(graph)
-            .withIdMappingOperator(idMap::toOriginalNodeId)
+            .withIdMappingOperator(nodeTranslator::toOriginalNodeId)
             .withTerminationFlag(terminationFlag);
     }
 

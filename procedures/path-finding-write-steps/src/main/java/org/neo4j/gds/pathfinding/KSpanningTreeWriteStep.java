@@ -88,7 +88,8 @@ public class KSpanningTreeWriteStep implements WriteStep<SpanningTree, Void> {
         );
 
         var nodePropertyExporter = writeContext.nodePropertyExporterBuilder()
-            .withIdMap(graph)
+            .withNodeTranslator(graph.nodeTranslator())
+            .withNodeLabels(graph.availableNodeLabels())
             .withTerminationFlag(requestScopedDependencies.terminationFlag())
             .withProgressTracker(progressTracker)
             .withResultStore(resultStoreResolver.apply(resultStore))

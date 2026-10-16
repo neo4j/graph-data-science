@@ -52,7 +52,8 @@ class TriangleCountWriteStep implements WriteStep<TriangleCountResult, NodePrope
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.localTriangles());
 
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

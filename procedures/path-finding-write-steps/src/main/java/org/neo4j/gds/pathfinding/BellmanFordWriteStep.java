@@ -66,7 +66,7 @@ public final class BellmanFordWriteStep implements WriteStep<BellmanFordResult, 
         BellmanFordResult result,
         JobId jobId
     ) {
-        var specification = new PathFindingWriteRelationshipSpecification(graph, writeNodeIds, writeCosts);
+        var specification = new PathFindingWriteRelationshipSpecification(graph.nodeTranslator(), writeNodeIds, writeCosts);
         var keys = specification.createKeys();
         var types = specification.createTypes();
 
@@ -83,7 +83,7 @@ public final class BellmanFordWriteStep implements WriteStep<BellmanFordResult, 
                 keys,
                 types,
                 relationshipStream,
-                graph,
+                graph.nodeTranslator(),
                 "Write shortest Paths",
                 resultStoreResolver.apply(resultStore),
                 this.jobId

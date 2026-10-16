@@ -52,7 +52,8 @@ class SccAlphaWriteStep implements WriteStep<HugeLongArray, NodePropertiesWritte
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result);
 
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

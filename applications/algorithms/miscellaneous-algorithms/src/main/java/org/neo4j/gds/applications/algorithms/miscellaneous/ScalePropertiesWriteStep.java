@@ -52,7 +52,8 @@ class ScalePropertiesWriteStep implements WriteStep<ScalePropertiesResult, NodeP
         var nodePropertyValues = new ScaledPropertiesNodePropertyValues(graph.nodeCount(), result.scaledProperties());
 
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

@@ -52,7 +52,8 @@ class FastRPWriteStep implements WriteStep<FastRPResult, NodePropertiesWritten> 
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.embeddings());
 
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

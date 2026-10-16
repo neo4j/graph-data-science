@@ -52,7 +52,8 @@ class CliqueCountingWriteStep implements WriteStep<CliqueCountingResult, Void> {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.perNodeCount());
 
         writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

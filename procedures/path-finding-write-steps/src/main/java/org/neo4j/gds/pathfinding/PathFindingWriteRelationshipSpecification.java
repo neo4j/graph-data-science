@@ -20,7 +20,7 @@
 package org.neo4j.gds.pathfinding;
 
 import org.neo4j.gds.api.ExportedRelationship;
-import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.values.storable.Value;
@@ -35,12 +35,12 @@ final class PathFindingWriteRelationshipSpecification {
     private static final String COSTS_KEY = "costs";
 
 
-    private final IdMap idMap;
+    private final NodeTranslator nodeTranslator;
     private final boolean writeNodeIds;
     private final boolean writeCosts;
 
-    PathFindingWriteRelationshipSpecification(IdMap idMap, boolean writeNodeIds, boolean writeCosts) {
-        this.idMap = idMap;
+    PathFindingWriteRelationshipSpecification(NodeTranslator nodeTranslator, boolean writeNodeIds, boolean writeCosts) {
+        this.nodeTranslator = nodeTranslator;
         this.writeNodeIds = writeNodeIds;
         this.writeCosts = writeCosts;
     }
@@ -119,7 +119,7 @@ final class PathFindingWriteRelationshipSpecification {
     // Replaces the ids in the given array with the original ids
     private long[] toOriginalIds( long[] internalIds) {
         for (int i = 0; i < internalIds.length; i++) {
-            internalIds[i] = idMap.toOriginalNodeId(internalIds[i]);
+            internalIds[i] = nodeTranslator.toOriginalNodeId(internalIds[i]);
         }
         return internalIds;
     }

@@ -66,7 +66,7 @@ class WriteNodeLabelApplication {
             );
 
             var nodeLabelExporter = nodeLabelExporterBuilder
-                .withIdMap(filteredNodes.idMap())
+                .withNodeTranslator(filteredNodes.idMap())
                 .withTerminationFlag(terminationFlag)
                 .withResultStore(configuration.resolveResultStore(resultStore))
                 .withJobId(configuration.jobId())

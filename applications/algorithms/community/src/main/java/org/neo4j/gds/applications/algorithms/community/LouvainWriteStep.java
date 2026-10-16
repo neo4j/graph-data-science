@@ -54,7 +54,8 @@ class LouvainWriteStep implements WriteStep<LouvainResult, NodePropertiesWritten
         var nodePropertyValues = constructNodePropertyValues(graphStore, result);
 
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

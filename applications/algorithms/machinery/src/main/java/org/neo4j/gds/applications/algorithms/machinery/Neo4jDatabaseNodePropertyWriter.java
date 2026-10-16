@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.schema.NodePropertySchema;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -44,6 +45,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -60,7 +62,8 @@ final class Neo4jDatabaseNodePropertyWriter {
         RequestCorrelationId requestCorrelationId,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
-        Graph graph,
+        NodeTranslator nodeTranslator,
+        Set<NodeLabel> nodeLabels,
         GraphStore graphStore,
         Concurrency writeConcurrency,
         List<NodePropertyRecord> nodeProperties,
@@ -72,7 +75,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     ) {
         validatePropertiesCanBeWritten(
             graphStore.capabilities().writeMode(),
-            graph.schema().nodeSchema().properties(),
+            graphStore.schema().nodeSchema().filter(nodeLabels).properties(),
             nodeProperties,
             resultStore.isPresent()
         );
@@ -80,7 +83,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         var progressTracker = createProgressTracker(
             requestCorrelationId,
             taskRegistryFactory,
-            graph.nodeCount(),
+            nodeTranslator.nodeCount(),
             writeConcurrency,
             procedureName,
             log,
@@ -88,7 +91,8 @@ final class Neo4jDatabaseNodePropertyWriter {
         );
 
         var exporter = nodePropertyExporterBuilder
-            .withIdMap(graph)
+            .withNodeTranslator(nodeTranslator)
+            .withNodeLabels(nodeLabels)
             .withTerminationFlag(terminationFlag)
             .withProgressTracker(progressTracker)
             .withResultStore(resultStore)

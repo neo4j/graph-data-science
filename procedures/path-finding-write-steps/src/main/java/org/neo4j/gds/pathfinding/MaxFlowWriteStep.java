@@ -80,7 +80,7 @@ public class MaxFlowWriteStep implements WriteStep<FlowResult, RelationshipsWrit
                 List.of(writeProperty),
                 List.of(ValueType.DOUBLE),
                 relationshipStream,
-                graph,
+                graph.nodeTranslator(),
                 "Write maximum flow",
                 resultStoreResolver.apply(resultStore),
                 this.jobId

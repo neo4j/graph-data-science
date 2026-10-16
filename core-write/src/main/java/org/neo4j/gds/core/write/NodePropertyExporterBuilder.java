@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.JobId;
@@ -48,11 +48,23 @@ public abstract class NodePropertyExporterBuilder {
 
     public abstract NodePropertyExporter build();
 
-    public NodePropertyExporterBuilder withIdMap(IdMap idMap) {
-        Objects.requireNonNull(idMap);
-        this.nodeCount = idMap.nodeCount();
-        this.nodeLabels = idMap.availableNodeLabels();
-        this.toOriginalId = idMap::toOriginalNodeId;
+    public NodePropertyExporterBuilder withNodeTranslator(NodeTranslator nodeTranslator) {
+        Objects.requireNonNull(nodeTranslator);
+        this.nodeCount = nodeTranslator.nodeCount();
+        this.toOriginalId = nodeTranslator::toOriginalNodeId;
+        return this;
+    }
+
+    /**
+     * Set the node labels of the nodes whose properties are exported.
+     * Required in addition to {@link #withNodeTranslator(NodeTranslator)};
+     * the labels are recorded when exporting to a {@link ResultStore}.
+     *
+     * @param nodeLabels the available node labels of the exported nodes
+     * @return this
+     */
+    public NodePropertyExporterBuilder withNodeLabels(Set<NodeLabel> nodeLabels) {
+        this.nodeLabels = Objects.requireNonNull(nodeLabels);
         return this;
     }
 

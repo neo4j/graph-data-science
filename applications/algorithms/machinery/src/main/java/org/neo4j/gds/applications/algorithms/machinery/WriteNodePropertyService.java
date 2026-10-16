@@ -19,9 +19,10 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -33,6 +34,7 @@ import org.neo4j.gds.logging.Log;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class WriteNodePropertyService {
     private final Log log;
@@ -46,7 +48,8 @@ public class WriteNodePropertyService {
     }
 
     public NodePropertiesWritten perform(
-        Graph graph,
+        NodeTranslator nodeTranslator,
+        Set<NodeLabel> nodeLabels,
         GraphStore graphStore,
         ResultStore resultStore,
         WritePropertyConfig writePropertyConfiguration,
@@ -57,7 +60,8 @@ public class WriteNodePropertyService {
 
         var nodePropertyRecord = NodePropertyRecord.of(writePropertyConfiguration.writeProperty(), nodePropertyValues);
         return perform(
-            graph,
+            nodeTranslator,
+            nodeLabels,
             graphStore,
             resultStore,
             writePropertyConfiguration,
@@ -68,7 +72,8 @@ public class WriteNodePropertyService {
     }
 
     public NodePropertiesWritten perform(
-        Graph graph,
+        NodeTranslator nodeTranslator,
+        Set<NodeLabel> nodeLabels,
         GraphStore graphStore,
         ResultStore resultStore,
         WriteConfig writeConfiguration,
@@ -80,7 +85,8 @@ public class WriteNodePropertyService {
             requestScopedDependencies.correlationId(),
             writeContext.nodePropertyExporterBuilder(),
             requestScopedDependencies.taskRegistryFactory(),
-            graph,
+            nodeTranslator,
+            nodeLabels,
             graphStore,
             writeConfiguration.writeConcurrency(),
             nodeProperties,
@@ -93,7 +99,8 @@ public class WriteNodePropertyService {
     }
 
     public NodePropertiesWritten perform(
-        Graph graph,
+        NodeTranslator nodeTranslator,
+        Set<NodeLabel> nodeLabels,
         GraphStore graphStore,
         Optional<ResultStore> resolvedResultStore,
         Concurrency writeConcurrency,
@@ -106,7 +113,8 @@ public class WriteNodePropertyService {
         var nodePropertyRecord = NodePropertyRecord.of(writeProperty, nodePropertyValues);
 
         return perform(
-                graph,
+                nodeTranslator,
+                nodeLabels,
                 graphStore,
                 resolvedResultStore,
                 writeConcurrency,
@@ -117,7 +125,8 @@ public class WriteNodePropertyService {
     }
 
     public NodePropertiesWritten perform(
-        Graph graph,
+        NodeTranslator nodeTranslator,
+        Set<NodeLabel> nodeLabels,
         GraphStore graphStore,
         Optional<ResultStore> resolvedResultStore,
         Concurrency writeConcurrency,
@@ -129,7 +138,8 @@ public class WriteNodePropertyService {
             requestScopedDependencies.correlationId(),
             writeContext.nodePropertyExporterBuilder(),
             requestScopedDependencies.taskRegistryFactory(),
-            graph,
+            nodeTranslator,
+            nodeLabels,
             graphStore,
             writeConcurrency,
             nodeProperties,

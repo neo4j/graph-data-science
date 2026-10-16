@@ -57,7 +57,8 @@ class SpeakerListenerLPAWriteStep implements WriteStep<PregelResult, NodePropert
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

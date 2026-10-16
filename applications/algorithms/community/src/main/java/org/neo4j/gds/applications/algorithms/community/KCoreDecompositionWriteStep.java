@@ -49,7 +49,8 @@ class KCoreDecompositionWriteStep implements WriteStep<KCoreDecompositionResult,
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStore,
             configuration,

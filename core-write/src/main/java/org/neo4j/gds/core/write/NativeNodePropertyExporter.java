@@ -63,7 +63,8 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     @TestOnly
     public static NodePropertyExporterBuilder builder(TransactionContext transactionContext, IdMap idMap, TerminationFlag terminationFlag) {
         return new NativeNodePropertiesExporterBuilder(transactionContext, () -> true)
-            .withIdMap(idMap)
+            .withNodeTranslator(idMap.nodeTranslator())
+            .withNodeLabels(idMap.availableNodeLabels())
             .withTerminationFlag(terminationFlag);
     }
 

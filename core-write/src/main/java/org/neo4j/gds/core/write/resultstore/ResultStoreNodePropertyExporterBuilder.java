@@ -23,6 +23,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 
+import java.util.Objects;
+
 public class ResultStoreNodePropertyExporterBuilder extends NodePropertyExporterBuilder {
 
     @Override
@@ -30,7 +32,7 @@ public class ResultStoreNodePropertyExporterBuilder extends NodePropertyExporter
         return new ResultStoreNodePropertyExporter(
             jobId,
             resultStore.orElseThrow(),
-            nodeLabels.stream().map(NodeLabel::name).toList(),
+            Objects.requireNonNull(nodeLabels, "withNodeLabels(...) must be called").stream().map(NodeLabel::name).toList(),
             toOriginalId
         );
     }

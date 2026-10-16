@@ -75,7 +75,8 @@ public class ArticulationPointsWriteStep implements WriteStep<ArticulationPoints
         };
 
         return writeNodePropertyService.perform(
-            graph,
+            graph.nodeTranslator(),
+            graph.availableNodeLabels(),
             graphStore,
             resultStoreResolver.apply(resultStore),
             writeConcurrency,

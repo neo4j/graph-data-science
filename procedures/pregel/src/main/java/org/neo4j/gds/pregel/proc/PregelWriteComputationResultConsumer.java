@@ -87,8 +87,10 @@ public class PregelWriteComputationResultConsumer<
 
                         var resultStore = config.resolveResultStore(computationResult.resultStore()).orElse(ResultStore.EMPTY);
 
+                        var graph = computationResult.graph();
                         var nodePropsWritten = writeToDatabase.perform(
-                            computationResult.graph(),
+                            graph.nodeTranslator(),
+                            graph.availableNodeLabels(),
                             computationResult.graphStore(),
                             resultStore,
                             config,

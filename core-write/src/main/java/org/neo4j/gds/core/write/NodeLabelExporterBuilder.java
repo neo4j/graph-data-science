@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -45,10 +45,10 @@ public abstract class NodeLabelExporterBuilder {
 
     public abstract NodeLabelExporter build();
 
-    public NodeLabelExporterBuilder withIdMap(IdMap idMap) {
-        Objects.requireNonNull(idMap);
-        this.nodeCount = idMap.nodeCount();
-        this.toOriginalId = idMap::toOriginalNodeId;
+    public NodeLabelExporterBuilder withNodeTranslator(NodeTranslator nodeTranslator) {
+        Objects.requireNonNull(nodeTranslator);
+        this.nodeCount = nodeTranslator.nodeCount();
+        this.toOriginalId = nodeTranslator::toOriginalNodeId;
         return this;
     }
 

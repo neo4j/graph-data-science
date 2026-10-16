@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -47,7 +47,7 @@ public class WriteRelationshipService {
         String writeRelationshipType,
         String writeProperty,
         Graph writeGraph,
-        IdMap rootIdMap,
+        NodeTranslator nodeTranslator,
         String taskName,
         Optional<ResultStore> resultStore,
         JobId jobId
@@ -58,7 +58,7 @@ public class WriteRelationshipService {
             requestScopedDependencies,
             writeContext.relationshipExporterBuilder(),
             writeGraph,
-            rootIdMap,
+            nodeTranslator,
             log,
             taskName,
             resultStore,
@@ -71,7 +71,7 @@ public class WriteRelationshipService {
         List<String> properties,
         List<ValueType> valueTypes,
         Stream<ExportedRelationship> relationshipStream,
-        IdMap rootIdMap,
+        NodeTranslator nodeTranslator,
         String taskName,
         Optional<ResultStore> resultStore,
         JobId jobId
@@ -84,7 +84,7 @@ public class WriteRelationshipService {
             requestScopedDependencies,
             writeContext.relationshipStreamExporterBuilder(),
             relationshipStream,
-            rootIdMap,
+            nodeTranslator,
             log,
             taskName,
             resultStore,

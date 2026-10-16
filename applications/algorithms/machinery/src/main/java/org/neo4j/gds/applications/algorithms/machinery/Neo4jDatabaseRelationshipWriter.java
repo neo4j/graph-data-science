@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -47,7 +47,7 @@ final class Neo4jDatabaseRelationshipWriter {
         RequestScopedDependencies requestScopedDependencies,
         RelationshipExporterBuilder relationshipExporterBuilder,
         Graph graph,
-        IdMap rootIdMap,
+        NodeTranslator nodeTranslator,
         Log log,
         String taskName,
         Optional<ResultStore> resultStore,
@@ -65,7 +65,7 @@ final class Neo4jDatabaseRelationshipWriter {
         );
 
         var exporter = relationshipExporterBuilder
-            .withIdMappingOperator(rootIdMap::toOriginalNodeId)
+            .withIdMappingOperator(nodeTranslator::toOriginalNodeId)
             .withGraph(graph)
             .withTerminationFlag(requestScopedDependencies.terminationFlag())
             .withProgressTracker(progressTracker)
@@ -95,7 +95,7 @@ final class Neo4jDatabaseRelationshipWriter {
         RequestScopedDependencies requestScopedDependencies,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         Stream<ExportedRelationship> relationshipStream,
-        IdMap rootIdMap,
+        NodeTranslator nodeTranslator,
         Log log,
         String taskName,
         Optional<ResultStore> maybeResultStore,
@@ -123,7 +123,7 @@ final class Neo4jDatabaseRelationshipWriter {
         // configure the exporter
         var relationshipStreamExporter = relationshipStreamExporterBuilder
             .withResultStore(maybeResultStore)
-            .withIdMappingOperator(rootIdMap::toOriginalNodeId)
+            .withIdMappingOperator(nodeTranslator::toOriginalNodeId)
             .withProgressTracker(progressTracker)
             .withRelationships(maybeCollectedStream)
             .withTerminationFlag(requestScopedDependencies.terminationFlag())
