@@ -24,12 +24,12 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestGraph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.Intersections;
-import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.modularity.TestGraphs;
+import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
@@ -79,7 +79,8 @@ class Node2VecKarateClubTest {
                 samplingWalkParameters,
                 trainParameters,
                 new Concurrency(4),
-                Optional.of(42L)
+                Optional.of(42L),
+                false
             ),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

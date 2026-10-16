@@ -30,6 +30,7 @@ public record Node2VecParameters(
     SamplingWalkParameters samplingWalkParameters,
     TrainParameters trainParameters,
     Concurrency concurrency,
-    Optional<Long> randomSeed
+    Optional<Long> randomSeed,
+    boolean weighted
 )
     implements AlgorithmParameters {}

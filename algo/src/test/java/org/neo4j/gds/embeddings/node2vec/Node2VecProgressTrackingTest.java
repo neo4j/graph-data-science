@@ -27,8 +27,8 @@ import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
-import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -82,7 +82,8 @@ class Node2VecProgressTrackingTest {
             walkParameters,
             trainParameters,
             new Concurrency(concurrency),
-            Optional.of(1337L)
+            Optional.of(1337L),
+            false
         );
 
         var log = mock(Log.class);

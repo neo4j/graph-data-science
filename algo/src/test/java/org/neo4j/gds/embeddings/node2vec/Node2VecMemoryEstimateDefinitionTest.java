@@ -43,7 +43,45 @@ class Node2VecMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(1000, new Concurrency(1))
-            .hasSameMinAndMaxEqualTo(7_688_480L);
+            .hasSameMinAndMaxEqualTo(2_929_832L);
     }
+
+    @Test
+    void shouldIncludeCostForDegreeCentrality() {
+
+        var trainParams = mock(TrainParameters.class);
+        when(trainParams.embeddingDimension()).thenReturn(128);
+        var samplingWalkParameters = new SamplingWalkParameters(null,10, 80, 1.0, 1.0,1,1,1);
+
+        var params = mock(Node2VecParameters.class);
+        when(params.samplingWalkParameters()).thenReturn(samplingWalkParameters);
+        when(params.trainParameters()).thenReturn(trainParams);
+        when(params.weighted()).thenReturn(true);
+
+        var memoryEstimation = new Node2VecMemoryEstimateDefinition(params).memoryEstimation();
+
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange(1000, new Concurrency(1))
+            .hasSameMinAndMaxEqualTo(2_937_920L);
+    }
+
+    @Test
+    void shouldAdaptToChangingConcurrency() {
+
+        var trainParams = mock(TrainParameters.class);
+        when(trainParams.embeddingDimension()).thenReturn(128);
+        var samplingWalkParameters = new SamplingWalkParameters(null,10, 80, 1.0, 1.0,1,1,1);
+
+        var params = mock(Node2VecParameters.class);
+        when(params.samplingWalkParameters()).thenReturn(samplingWalkParameters);
+        when(params.trainParameters()).thenReturn(trainParams);
+
+        var memoryEstimation = new Node2VecMemoryEstimateDefinition(params).memoryEstimation();
+
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange(1000, new Concurrency(4))
+            .hasSameMinAndMaxEqualTo(2_933_768L);
+    }
+
 
 }

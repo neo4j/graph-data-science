@@ -20,8 +20,11 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.compression.common.VarLongEncoding;
+import org.neo4j.gds.degree.DegreeCentralityAlgorithmEstimateDefinition;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -41,16 +44,46 @@ public final class Node2VecMemoryEstimateDefinition implements MemoryEstimateDef
         int walksPerNode = parameters.samplingWalkParameters().walksPerNode();
         int walkLength = parameters.samplingWalkParameters().walkLength();
         int embeddingDimension = parameters.trainParameters().embeddingDimension();
-        return MemoryEstimations.builder(Node2Vec.class)
-            .perNode("random walks", (nodeCount) -> {
-                var numberOfRandomWalks = nodeCount * walksPerNode;
-                var randomWalkMemoryUsage = Estimate.sizeOfLongArray(walkLength);
-                return HugeObjectArray.memoryEstimation(numberOfRandomWalks, randomWalkMemoryUsage);
-            })
+        var builder =  MemoryEstimations.builder(Node2Vec.class)
+            .add("compressed random walks", bytesCompressedRandomWalks(walksPerNode,walkLength))
             .add("probability cache", randomWalksMemoryEstimation())
             .add("model", modelMemoryEstimation(embeddingDimension))
-            .build();
+            .perThread("walks", Estimate.sizeOfLongArray(walkLength));
+
+        if (parameters.weighted()) {
+            builder = builder.add("degree centrality",degreeCentralityMemoryEstimation());
+        }
+        return builder.build();
     }
+
+    private MemoryEstimation degreeCentralityMemoryEstimation() {
+            return new DegreeCentralityAlgorithmEstimateDefinition(true).memoryEstimation();
+    }
+
+    private MemoryEstimation bytesCompressedRandomWalks(int walksPerNode,int walkLength){
+        return
+            MemoryEstimations.builder()
+                .perNode(
+                    "random walks", (nodeCount) -> {
+                        //Let's take an upperbound and assume every entry zig-zags between 0,and nodecount
+                        // the deltas become  nodecount, - nodecount,
+                        //2*nodeCount, because  `zigzag` encoding makes -a ~~  2|a|-1 and a ~~ 2|a|
+                        var bytesPerEntry = VarLongEncoding.encodedVLongSize(2 * nodeCount);
+                        long entries = ((long) walkLength) * bytesPerEntry;
+                        var byteArraySize = Estimate.sizeOfByteArray(entries);
+                        var numberOfRandomWalks = nodeCount * walksPerNode;
+                        return HugeObjectArray.memoryEstimation(numberOfRandomWalks, byteArraySize);
+                    }
+                )
+                .perNode(
+                    "walk lengths", (nodeCount) -> {
+                        var numberOfRandomWalks = nodeCount * walksPerNode;
+                        return HugeIntArray.memoryEstimation(numberOfRandomWalks);
+                    }
+                ).perThread("iterator", Estimate.sizeOfLongArray(walkLength))
+                .build();
+    }
+
 
     private MemoryEstimation randomWalksMemoryEstimation() {
         return MemoryEstimations.builder(RandomWalkProbabilities.class)
