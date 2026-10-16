@@ -19,39 +19,35 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.annotation.ValueClass;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-@ValueClass
-public abstract class BuildInfoProperties {
-
-    public abstract String gdsVersion();
-
-    public abstract String buildDate();
-
-    public abstract String buildJdk();
-
-    public abstract String buildJavaVersion();
-
-    public abstract String buildHash();
-
-    public abstract String minimumRequiredJavaVersion();
+public record BuildInfoProperties(
+    String gdsVersion,
+    String buildDate,
+    String buildJdk,
+    String buildJavaVersion,
+    String buildHash,
+    String minimumRequiredJavaVersion
+) {
+    public BuildInfoProperties {
+        Objects.requireNonNull(gdsVersion, "gdsVersion");
+    }
 
     public static BuildInfoProperties from(Properties properties) {
-        return ImmutableBuildInfoProperties.builder()
-            .gdsVersion(properties.getProperty("Implementation-Version"))
-            .buildDate(properties.getProperty("Build-Date", "unknown"))
-            .buildJdk(properties.getProperty("Created-By", "unknown"))
-            .buildJavaVersion(properties.getProperty("Build-Java-Version", "unknown"))
-            .buildHash(properties.getProperty("Full-Change", "unknown"))
-            .minimumRequiredJavaVersion(properties.getProperty("X-Compile-Target-JDK", "unknown"))
-            .build();
+        return new BuildInfoProperties(
+            properties.getProperty("Implementation-Version"),
+            properties.getProperty("Build-Date", "unknown"),
+            properties.getProperty("Created-By", "unknown"),
+            properties.getProperty("Build-Java-Version", "unknown"),
+            properties.getProperty("Full-Change", "unknown"),
+            properties.getProperty("X-Compile-Target-JDK", "unknown")
+        );
     }
 
     public static BuildInfoProperties get() throws IOException {

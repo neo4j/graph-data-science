@@ -21,7 +21,6 @@ package org.neo4j.gds.graphbuilder.util;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.neo4j.gds.annotation.ValueClass;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -45,23 +44,16 @@ public final class CaptureStdOut {
             System.setErr(new PrintStream(stderr, true, StandardCharsets.UTF_8));
 
             var output = task.get();
-            return ImmutableOutput.<T>builder()
-                .stdout(stdout.toString(StandardCharsets.UTF_8).strip())
-                .stderr(stderr.toString(StandardCharsets.UTF_8).strip())
-                .output(output)
-                .build();
+            return new Output<T>(
+                stdout.toString(StandardCharsets.UTF_8).strip(),
+                stderr.toString(StandardCharsets.UTF_8).strip(),
+                output
+            );
         } finally {
             System.setErr(originalErr);
             System.setOut(originalOut);
         }
     }
 
-    @ValueClass
-    public interface Output<T> {
-        String stdout();
-
-        String stderr();
-
-        @Nullable T output();
-    }
+    public record Output<T>(String stdout, String stderr, @Nullable T output) {}
 }
