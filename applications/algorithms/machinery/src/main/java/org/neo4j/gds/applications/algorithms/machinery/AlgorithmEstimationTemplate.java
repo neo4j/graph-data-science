@@ -34,16 +34,16 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * But we do not like inheritance, so the hooks are injected
  */
 public class AlgorithmEstimationTemplate {
-    private final UnprojectedAlgorithmEstimationService fictitiousAlgorithmEstimationService;
-    private final UnprojectedAlgorithmEstimationService databaseAlgorithmEstimationService;
+    private final FictitiousAlgorithmEstimationService fictitiousAlgorithmEstimationService;
+    private final DatabaseAlgorithmEstimationService databaseAlgorithmEstimationService;
     private final ProjectedAlgorithmEstimationService projectedAlgorithmEstimationService;
 
     // request scoped parameters and services
     private final RequestScopedDependencies requestScopedDependencies;
 
     public AlgorithmEstimationTemplate(
-        UnprojectedAlgorithmEstimationService fictitiousAlgorithmEstimationService,
-        UnprojectedAlgorithmEstimationService DatabaseAlgorithmEstimationService,
+        FictitiousAlgorithmEstimationService fictitiousAlgorithmEstimationService,
+        DatabaseAlgorithmEstimationService DatabaseAlgorithmEstimationService,
         ProjectedAlgorithmEstimationService projectedAlgorithmEstimationService,
         RequestScopedDependencies requestScopedDependencies
     ) {

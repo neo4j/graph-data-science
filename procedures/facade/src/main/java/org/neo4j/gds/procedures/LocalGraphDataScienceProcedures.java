@@ -27,12 +27,13 @@ import org.neo4j.gds.applications.algorithms.execution.machinery.AlgorithmProces
 import org.neo4j.gds.applications.algorithms.execution.machinery.DefaultAlgorithmProcessingFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.DatabaseAlgorithmEstimationService;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.FictitiousAlgorithmEstimationService;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.ProjectedAlgorithmEstimationService;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.machinery.UnprojectedAlgorithmEstimationService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
@@ -152,16 +153,17 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             DefaultPool.INSTANCE
         );
 
-        var databaseGraphStoreAlgorithmEstimationService = new UnprojectedAlgorithmEstimationService(
+        var databaseGraphStoreAlgorithmEstimationService = new DatabaseAlgorithmEstimationService(
             databaseGraphStoreEstimationService,
             requestScopedDependencies
         );
 
+        var fictitiousAlgorithmEstimationService = new FictitiousAlgorithmEstimationService(
+            new FictitiousGraphStoreEstimationService(graphStoreFactorySuppliers),
+            requestScopedDependencies
+        );
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
-            new UnprojectedAlgorithmEstimationService(
-                new FictitiousGraphStoreEstimationService(graphStoreFactorySuppliers),
-                requestScopedDependencies
-            ),
+            fictitiousAlgorithmEstimationService,
             databaseGraphStoreAlgorithmEstimationService,
             new ProjectedAlgorithmEstimationService(
                 globallyScopedDependencies.graphStoreCatalogService(),
