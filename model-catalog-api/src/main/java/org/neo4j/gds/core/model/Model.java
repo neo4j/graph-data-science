@@ -47,8 +47,6 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends Model.CustomI
     @Nullable DATA data,
     Optional<Path> fileLocation
 ) {
-    public static final String PUBLIC_MODEL_SUFFIX = "_public";
-
     public static <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> trained(
         ModelMetaData<C, I> metaData,
         D data

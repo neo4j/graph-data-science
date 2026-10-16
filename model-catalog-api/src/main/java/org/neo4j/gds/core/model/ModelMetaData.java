@@ -47,6 +47,7 @@ public record ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo>
         Objects.requireNonNull(creationTime);
     }
 
+    public static final String PUBLIC_MODEL_SUFFIX = "_public";
     private static final String ALL_USERS = "*";
 
     public static <C extends ModelConfig, I extends CustomInfo> ModelMetaData<C, I> of(
@@ -74,7 +75,7 @@ public record ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo>
     }
 
     public ModelMetaData<CONFIG, INFO> publish() {
-        var name = name() + Model.PUBLIC_MODEL_SUFFIX;
+        var name = name() + PUBLIC_MODEL_SUFFIX;
         return new ModelMetaData<>(creator, List.of(ALL_USERS), name, algoType, graphSchema, trainConfig, creationTime, customInfo, gdsVersion);
     }
 
