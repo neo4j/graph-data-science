@@ -79,7 +79,7 @@ public class HitsWriteStep implements WriteStep<PregelResult, NodePropertiesWrit
         var hubRecord = NodePropertyRecord.of(hubProperty, hubValues);
 
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph),
             graph.availableNodeLabels(),
             graphStore,
             resultStoreResolver.apply(resultStore),

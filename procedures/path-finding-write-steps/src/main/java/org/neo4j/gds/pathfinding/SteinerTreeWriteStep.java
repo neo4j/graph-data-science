@@ -78,7 +78,7 @@ public class SteinerTreeWriteStep implements WriteStep<SteinerTreeResult, Relati
              writeRelationshipType,
              writeProperty,
              spanningGraph,
-             graph.nodeTranslator(),
+             graphStore.nodeTranslator(graph),
              "SteinerWrite",
              resultStoreResolver.apply(resultStore),
             this.jobId

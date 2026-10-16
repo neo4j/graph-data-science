@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyRecord;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.JobId;
@@ -101,6 +102,7 @@ public class WriteNodePropertiesApplication {
                     resultStore,
                     configuration,
                     subGraph,
+                    graphStore.nodeTranslator(subGraph),
                     nodePropertyExporterBuilder,
                     requestScopedDependencies.terminationFlag(),
                     progressTracker
@@ -122,6 +124,7 @@ public class WriteNodePropertiesApplication {
         ResultStore resultStore,
         GraphWriteNodePropertiesConfig config,
         Graph subGraph,
+        NodeTranslator nodeTranslator,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
@@ -129,7 +132,7 @@ public class WriteNodePropertiesApplication {
         progressTracker.beginSubTask();
         try {
             var exporter = nodePropertyExporterBuilder
-                .withNodeTranslator(subGraph.nodeTranslator())
+                .withNodeTranslator(nodeTranslator)
                 .withNodeLabels(subGraph.availableNodeLabels())
                 .withTerminationFlag(terminationFlag)
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())

@@ -52,7 +52,7 @@ class GraphSageWriteStep implements WriteStep<GraphSageResult, NodePropertiesWri
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.embeddings());
 
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph),
             graph.availableNodeLabels(),
             graphStore,
             resultStore,

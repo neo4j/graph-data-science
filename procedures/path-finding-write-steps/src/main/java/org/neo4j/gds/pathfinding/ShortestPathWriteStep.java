@@ -72,7 +72,7 @@ public class ShortestPathWriteStep implements WriteStep<PathFindingResult, Relat
         JobId jobId
     ) {
 
-        var specification = new PathFindingWriteRelationshipSpecification(graph.nodeTranslator(), writeNodeIds,writeCosts);
+        var specification = new PathFindingWriteRelationshipSpecification(graphStore.nodeTranslator(graph), writeNodeIds,writeCosts);
         var keys = specification.createKeys();
         var types=  specification.createTypes();
 
@@ -93,7 +93,7 @@ public class ShortestPathWriteStep implements WriteStep<PathFindingResult, Relat
                 keys,
                 types,
                 relationshipStream,
-                graph.nodeTranslator(),
+                graphStore.nodeTranslator(graph),
                 "Write shortest Paths",
                 resultStoreResolver.apply(resultStore),
                 this.jobId

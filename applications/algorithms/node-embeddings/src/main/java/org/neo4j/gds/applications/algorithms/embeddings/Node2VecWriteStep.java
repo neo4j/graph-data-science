@@ -52,7 +52,7 @@ class Node2VecWriteStep implements WriteStep<Node2VecResult, NodePropertiesWritt
         var nodePropertyValues = new FloatEmbeddingNodePropertyValues(result.embeddings());
 
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph),
             graph.availableNodeLabels(),
             graphStore,
             resultStore,

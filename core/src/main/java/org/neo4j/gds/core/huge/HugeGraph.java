@@ -34,6 +34,7 @@ import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
+import org.neo4j.gds.api.nodes.RootNodeMapping;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.Properties;
 import org.neo4j.gds.api.properties.relationships.PropertyCursor;
@@ -207,6 +208,11 @@ public class HugeGraph implements CSRGraph {
     @Override
     public IdMap rootIdMap() {
         return idMap.rootIdMap();
+    }
+
+    @Override
+    public RootNodeMapping rootNodeMapping() {
+        return idMap.rootNodeMapping();
     }
 
     @Override

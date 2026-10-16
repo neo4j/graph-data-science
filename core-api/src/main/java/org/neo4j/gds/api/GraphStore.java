@@ -23,6 +23,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.nodes.IdMap;
+import org.neo4j.gds.api.nodes.NodeTranslator;
+import org.neo4j.gds.api.nodes.RootNodeMapping;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipProperty;
@@ -61,6 +63,28 @@ public interface GraphStore {
     long nodeCount();
 
     IdMap nodes();
+
+    /**
+     * Translates between original node ids and root node ids, i.e. the mapped node ids of {@link #nodes()}.
+     */
+    default NodeTranslator nodeTranslator() {
+        return nodes().nodeTranslator();
+    }
+
+    /**
+     * Translates between original node ids and the mapped node ids of the given id map,
+     * which is either {@link #nodes()} or a (filtered) graph of this graph store.
+     */
+    default NodeTranslator nodeTranslator(IdMap idMap) {
+        assert idMap.rootIdMap() == nodes() : "The id map does not belong to this graph store";
+
+        var rootNodeMapping = idMap.rootNodeMapping();
+        if (rootNodeMapping == RootNodeMapping.IDENTITY) {
+            assert idMap.nodeCount() == nodes().nodeCount() : "A filtered id map must override rootNodeMapping()";
+            return nodeTranslator();
+        }
+        return RootNodeMapping.nodeTranslator(nodeTranslator(), rootNodeMapping, idMap.nodeCount());
+    }
 
     Set<NodeLabel> nodeLabels();
 

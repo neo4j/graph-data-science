@@ -62,7 +62,7 @@ public class CelfWriteStep implements WriteStep<CELFResult, NodePropertiesWritte
         var nodePropertyValues = new CELFNodeProperties(result.seedSetNodes(), graph.nodeCount());
 
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph),
             graph.availableNodeLabels(),
             graphStore,
             resultStoreResolver.apply(resultStore),

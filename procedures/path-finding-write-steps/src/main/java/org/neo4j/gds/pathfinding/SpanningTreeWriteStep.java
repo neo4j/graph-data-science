@@ -68,7 +68,7 @@ public class SpanningTreeWriteStep implements WriteStep<SpanningTree, Relationsh
             writeRelationshipType,
             writeProperty,
             spanningGraph,
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph),
             AlgorithmLabel.SpanningTree.asString(),
             resultStoreResolver.apply(resultStore),
             this.jobId

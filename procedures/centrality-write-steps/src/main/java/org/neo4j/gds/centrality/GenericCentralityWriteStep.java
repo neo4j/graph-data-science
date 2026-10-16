@@ -62,7 +62,7 @@ public class GenericCentralityWriteStep<R extends CentralityAlgorithmResult> imp
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph),
             graph.availableNodeLabels(),
             graphStore,
             resultStoreResolver.apply(resultStore),
