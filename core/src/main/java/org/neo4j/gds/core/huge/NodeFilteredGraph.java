@@ -98,11 +98,6 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public PrimitiveIterator.OfLong nodeIterator() {
-        return filteredIdMap.nodeIterator();
-    }
-
-    @Override
     public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
         return filteredIdMap.nodeIterator(labels);
     }

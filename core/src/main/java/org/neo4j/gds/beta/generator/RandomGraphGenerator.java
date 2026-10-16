@@ -378,7 +378,7 @@ public final class RandomGraphGenerator {
             .collect(
                 NodeSchema::builder,
                 (builder, row) -> builder.addProperty(row.label, row.propertyKey, row.valueType),
-                (leftBuilder, rightBuilder) -> leftBuilder.addBuilder(rightBuilder)
+                NodeSchema.NodeSchemaBuilder::addBuilder
             )
             .build();
         return new NodePropertiesAndSchema(nodeSchema, generatedProperties);

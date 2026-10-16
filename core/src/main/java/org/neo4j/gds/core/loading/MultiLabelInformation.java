@@ -42,14 +42,21 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class MultiLabelInformation implements LabelInformation {
 
     private final Map<NodeLabel, BitSet> labelInformation;
+    private final long nodeCount;
 
-    private MultiLabelInformation(Map<NodeLabel, BitSet> labelInformation) {
+    private MultiLabelInformation(Map<NodeLabel, BitSet> labelInformation, long nodeCount) {
         this.labelInformation = labelInformation;
+        this.nodeCount = nodeCount;
     }
 
     @Override
     public boolean isEmpty() {
         return labelInformation.isEmpty();
+    }
+
+    @Override
+    public long nodeCount() {
+        return this.nodeCount;
     }
 
     @Override
@@ -63,24 +70,29 @@ public final class MultiLabelInformation implements LabelInformation {
 
     @Override
     public MultiLabelInformation filter(Collection<NodeLabel> nodeLabels, long filteredNodeCount, NodeIdMapper toFilteredNodeId) {
-        return new MultiLabelInformation(nodeLabels
+        var labelInformation = nodeLabels
             .stream()
-            .collect(Collectors.toMap(nodeLabel -> nodeLabel, nodeLabel -> {
-                var rootBitSet = labelInformation.get(nodeLabel);
-                var filteredBitSet = new BitSet(filteredNodeCount);
-                var iterator = rootBitSet.iterator();
-                for (long rootId = iterator.nextSetBit(); rootId != BitSetIterator.NO_MORE; rootId = iterator.nextSetBit()) {
-                    filteredBitSet.set(toFilteredNodeId.map(rootId));
+            .collect(Collectors.toMap(
+                nodeLabel -> nodeLabel,
+                nodeLabel -> {
+                    var rootBitSet = this.labelInformation.get(nodeLabel);
+                    var filteredBitSet = new BitSet(filteredNodeCount);
+                    var iterator = rootBitSet.iterator();
+                    for (long rootId = iterator.nextSetBit(); rootId != BitSetIterator.NO_MORE; rootId = iterator.nextSetBit()) {
+                        filteredBitSet.set(toFilteredNodeId.map(rootId));
+                    }
+                    return filteredBitSet;
                 }
-                return filteredBitSet;
-            })));
+            ));
+
+        return new MultiLabelInformation(labelInformation, filteredNodeCount);
     }
 
     @Override
-    public BitSet unionBitSet(Collection<NodeLabel> nodeLabels, long nodeCount) {
+    public BitSet unionBitSet(Collection<NodeLabel> nodeLabels) {
         assert labelInformation.keySet().containsAll(nodeLabels);
 
-        BitSet unionBitSet = new BitSet(nodeCount);
+        BitSet unionBitSet = new BitSet(this.nodeCount);
         nodeLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
         return unionBitSet;
     }
@@ -171,11 +183,11 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
-    public PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels, long nodeCount) {
+    public PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels) {
         if (labels.contains(NodeLabel.ALL_NODES)) {
-            return new BatchNodeIterable.IdIterator(nodeCount);
+            return new BatchNodeIterable.IdIterator(this.nodeCount);
         }
-        return new BatchNodeIterable.BitSetIdIterator(unionBitSet(labels, nodeCount));
+        return new BatchNodeIterable.BitSetIdIterator(unionBitSet(labels));
     }
 
     public static final class Builder implements LabelInformation.Builder {
@@ -262,7 +274,7 @@ public final class MultiLabelInformation implements LabelInformation {
                 labelInformation.put(starLabel, bitSet);
             }
 
-            return new MultiLabelInformation(labelInformation);
+            return new MultiLabelInformation(labelInformation, nodeCount);
         }
     }
 }

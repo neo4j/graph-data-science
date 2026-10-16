@@ -271,7 +271,7 @@ class MultiLabelInformationTest {
         var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
         // Here we get NPE, because...well we don't check if the labels we try to filter by actually exist.
-        var filteredLabelInformation = labelInformation.filter(List.of(NodeLabel.of("C")), 1, NodeIdMapper.IDENTITY);
+        var filteredLabelInformation =labelInformation.filter(List.of(NodeLabel.of("C")), 1, NodeIdMapper.IDENTITY);
 
         // TODO: What is the expected behaviour?
     }
@@ -356,7 +356,7 @@ class MultiLabelInformationTest {
 
         var labelInformation = builder.build(3, NodeIdMapper.IDENTITY);
 
-        var unionBitSet = labelInformation.unionBitSet(List.of(NodeLabel.of("C"), NodeLabel.of("A")), 4);
+        var unionBitSet = labelInformation.unionBitSet(List.of(NodeLabel.of("C"), NodeLabel.of("A")));
 
         assertThat(unionBitSet.get(1)).isTrue();
         assertThat(unionBitSet.get(2)).isFalse();
@@ -416,7 +416,7 @@ class MultiLabelInformationTest {
         builder.addNodeIdToLabel(NodeLabel.of("A"), 4L);
         var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
 
-        var nodeIterator = labelInformation.nodeIterator(List.of(NodeLabel.of("A"), NodeLabel.of("C")), 4);
+        var nodeIterator = labelInformation.nodeIterator(List.of(NodeLabel.of("A"), NodeLabel.of("C")));
 
         assertThat(nodeIterator)
             .isNotNull()
@@ -430,10 +430,11 @@ class MultiLabelInformationTest {
 
     @Test
     void nodeIteratorShouldWorkForAllNodesLabel() {
+        var nodeCount = 2;
         var builder = MultiLabelInformation.Builder.of(1, List.of(NodeLabel.of("A"), NodeLabel.of("B")), List.of());
-        var labelInformation = builder.build(1, NodeIdMapper.IDENTITY);
+        var labelInformation = builder.build(nodeCount, NodeIdMapper.IDENTITY);
 
-        var nodeIterator = labelInformation.nodeIterator(List.of(NodeLabel.ALL_NODES), 2);
+        var nodeIterator = labelInformation.nodeIterator(List.of(NodeLabel.ALL_NODES));
 
         assertThat(nodeIterator)
             .isNotNull()
@@ -442,7 +443,7 @@ class MultiLabelInformationTest {
         var idCounter = new LongAdder();
         nodeIterator.forEachRemaining((LongConsumer) __ -> idCounter.increment());
 
-        assertThat(idCounter.longValue()).isEqualTo(2L);
+        assertThat(idCounter.longValue()).isEqualTo(nodeCount);
     }
 
 

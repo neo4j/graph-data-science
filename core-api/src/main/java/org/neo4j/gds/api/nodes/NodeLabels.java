@@ -22,6 +22,7 @@ package org.neo4j.gds.api.nodes;
 import org.neo4j.gds.NodeLabel;
 
 import java.util.List;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 
 public interface NodeLabels {
@@ -49,6 +50,10 @@ public interface NodeLabels {
 
     default void forEachNodeLabel(long mappedNodeId, NodeLabelConsumer consumer) {
         labelInformation().forEachNodeLabel(mappedNodeId, consumer);
+    }
+
+    default PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
+        return labelInformation().nodeIterator(labels);
     }
 
     /**

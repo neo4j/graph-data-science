@@ -29,6 +29,7 @@ import org.neo4j.gds.api.properties.relationships.RelationshipProperties;
 import org.neo4j.gds.api.schema.GraphSchema;
 
 import java.util.Optional;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 
 public interface Graph extends IdMap, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties {
@@ -113,5 +114,9 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
         var findN = new FindNth();
         graph.forEachRelationship(sourceNodeId, findN);
         return findN.target;
+    }
+
+    default PrimitiveIterator.OfLong nodeIterator() {
+        return new BatchNodeIterable.IdIterator(nodeCount());
     }
 }
