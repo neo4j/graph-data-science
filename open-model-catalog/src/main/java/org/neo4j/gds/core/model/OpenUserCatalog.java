@@ -130,42 +130,11 @@ class OpenUserCatalog implements UserCatalog {
         Class<C> configClass,
         Class<I> infoClass
     ) {
-        if (model != null) {
-            var modelName = model.name();
-            if (!dataClass.isInstance(model.data())) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The model `%s` has data with different types than expected. " +
-                    "Expected data type: `%s`, invoked with model data type: `%s`.",
-                    modelName,
-                    model.data().getClass().getName(),
-                    dataClass.getName()
-                ));
-            }
-            if (!configClass.isInstance(model.trainConfig())) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The model `%s` has a training config with different types than expected. " +
-                    "Expected train config type: `%s`, invoked with model config type: `%s`.",
-                    modelName,
-                    model.trainConfig().getClass().getName(),
-                    configClass.getName()
-                ));
-            }
-
-
-            if (!infoClass.isInstance(model.customInfo())) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The model `%s` has a customInfo with different types than expected. " +
-                    "Expected customInfo type: `%s`, invoked with model info type: `%s`.",
-                    modelName,
-                    model.customInfo().getClass().getName(),
-                    infoClass.getName()
-                ));
-            }
+        if (model == null) {
+            return null;
         }
 
-        // We just did the check
-        // noinspection unchecked
-        return (Model<D, C, I>) model;
+        return model.cast(dataClass, configClass, infoClass);
     }
 
     private void verifyModelNameIsUnique(String model) {
