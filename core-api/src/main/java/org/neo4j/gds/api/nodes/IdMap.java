@@ -87,4 +87,8 @@ public interface IdMap extends NodeTranslator, NodeLabels {
             }
         }
     }
+
+    default NodeTranslator nodeTranslator() {
+        return this;
+    }
 }

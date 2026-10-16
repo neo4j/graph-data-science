@@ -28,6 +28,7 @@ import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
+import org.neo4j.gds.api.nodes.NodeTranslator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.ModifiableRelationshipCursor;
 import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
@@ -90,6 +91,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
         var degreeCache = HugeIntArray.newArray(filteredIdMap.nodeCount());
         degreeCache.fill(NO_DEGREE);
         return degreeCache;
+    }
+
+    @Override
+    public NodeTranslator nodeTranslator() {
+        return filteredIdMap.nodeTranslator();
     }
 
     @Override
