@@ -25,7 +25,7 @@ import org.neo4j.gds.progress.registration.TaskStore;
 
 import java.time.Duration;
 
-class TaskStoreFactory {
+public class TaskStoreFactory {
     private final Duration retentionPeriod;
 
     private TaskStoreFactory(Duration retentionPeriod) {
@@ -35,7 +35,7 @@ class TaskStoreFactory {
     /**
      * @param progressTrackingEnabled if not enabled you get shunt behaviour
      */
-    static TaskStoreFactory create(boolean progressTrackingEnabled, Duration retentionPeriod) {
+    public static TaskStoreFactory create(boolean progressTrackingEnabled, Duration retentionPeriod) {
         if (!progressTrackingEnabled) return new TaskStoreFactory(null) {
             @Override
             public TaskStore create() {
