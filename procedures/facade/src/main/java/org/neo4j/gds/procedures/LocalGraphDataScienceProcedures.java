@@ -154,20 +154,18 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         );
 
         var databaseGraphStoreAlgorithmEstimationService = new DatabaseAlgorithmEstimationService(
-            databaseGraphStoreEstimationService,
-            requestScopedDependencies
+            databaseGraphStoreEstimationService
         );
 
         var fictitiousAlgorithmEstimationService = new FictitiousAlgorithmEstimationService(
-            new FictitiousGraphStoreEstimationService(graphStoreFactorySuppliers),
-            requestScopedDependencies
+            new FictitiousGraphStoreEstimationService(graphStoreFactorySuppliers)
         );
+
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
             fictitiousAlgorithmEstimationService,
             databaseGraphStoreAlgorithmEstimationService,
             new ProjectedAlgorithmEstimationService(
-                globallyScopedDependencies.graphStoreCatalogService(),
-                requestScopedDependencies
+                globallyScopedDependencies.graphStoreCatalogService()
             ),
             requestScopedDependencies
         );

@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -53,7 +54,7 @@ class UnprojectedAlgorithmEstimationServiceTest {
 
         when(graphStoreEstimationService.estimate(any(),any())).thenReturn(graphMemoryEstimation);
 
-        var service = new UnprojectedAlgorithmEstimationService(graphStoreEstimationService, requestScopedDependencies);
+        var service = new UnprojectedAlgorithmEstimationService(graphStoreEstimationService);
 
         GraphProjectConfig config = mock(GraphProjectConfig.class);
         Concurrency concurrency = new Concurrency(4);
@@ -61,7 +62,13 @@ class UnprojectedAlgorithmEstimationServiceTest {
 
         var algoEstimation =  MemoryEstimations.builder("Algo Estimation").perNode("a",(nodeCount) -> nodeCount).build();
 
-        MemoryEstimateResult result = service.estimate(config, algoEstimation, concurrency, transformer);
+        MemoryEstimateResult result = service.estimate(
+            PlainSimpleRequestCorrelationId.create(),
+            config,
+            algoEstimation,
+            concurrency,
+            transformer
+        );
 
         assertThat(result).isNotNull();
         assertThat(result.nodeCount()).isEqualTo(100);

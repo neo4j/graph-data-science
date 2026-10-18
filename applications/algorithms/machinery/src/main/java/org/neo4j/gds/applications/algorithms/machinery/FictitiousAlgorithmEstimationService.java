@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
@@ -29,18 +30,18 @@ public class FictitiousAlgorithmEstimationService {
     private final UnprojectedAlgorithmEstimationService algorithmEstimationService;
 
     public FictitiousAlgorithmEstimationService(
-        FictitiousGraphStoreEstimationService graphStoreEstimationService,
-        RequestScopedDependencies requestScopedDependencies
+        FictitiousGraphStoreEstimationService graphStoreEstimationService
     ) {
-        this.algorithmEstimationService = new UnprojectedAlgorithmEstimationService(graphStoreEstimationService, requestScopedDependencies);
+        this.algorithmEstimationService = new UnprojectedAlgorithmEstimationService(graphStoreEstimationService);
     }
 
     public MemoryEstimateResult estimate(
+        RequestCorrelationId requestCorrelationId,
         GraphProjectConfig graphProjectConfig,
         MemoryEstimation memoryEstimation,
         Concurrency concurrency,
         DimensionTransformer dimensionTransformer
     ) {
-        return this.algorithmEstimationService.estimate(graphProjectConfig, memoryEstimation, concurrency, dimensionTransformer);
+        return this.algorithmEstimationService.estimate(requestCorrelationId,graphProjectConfig, memoryEstimation, concurrency, dimensionTransformer);
     }
 }

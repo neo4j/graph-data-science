@@ -21,9 +21,11 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.GraphParameters;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -45,7 +47,7 @@ class ProjectedAlgorithmEstimationServiceTest {
 
        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
        var requestScopedDependencies = mock(RequestScopedDependencies.class);
-       var service = new ProjectedAlgorithmEstimationService(graphStoreCatalogService, requestScopedDependencies);
+       var service = new ProjectedAlgorithmEstimationService(graphStoreCatalogService);
 
         GraphName graphName = GraphName.parse("graph");
         GraphParameters graphParameters = mock(GraphParameters.class);
@@ -74,7 +76,15 @@ class ProjectedAlgorithmEstimationServiceTest {
         
         when(algorithmEstimation.estimate(any(), any())).thenReturn(algorithmTree);
 
-        MemoryEstimateResult result = service.estimate(graphName, graphParameters, algorithmEstimation, concurrency, transformer);
+        MemoryEstimateResult result = service.estimate(
+            graphName,
+            graphParameters,
+            algorithmEstimation,
+            concurrency,
+            transformer,
+            DatabaseId.EMPTY,
+            User.DEFAULT
+        );
 
         assertThat(result).isNotNull();
         assertThat(result.nodeCount()).isEqualTo(100);

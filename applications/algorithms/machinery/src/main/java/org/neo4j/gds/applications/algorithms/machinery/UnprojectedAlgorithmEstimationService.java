@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.RequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -27,17 +28,15 @@ import org.neo4j.gds.memest.GraphStoreEstimationService;
 
 public class UnprojectedAlgorithmEstimationService {
     private final GraphStoreEstimationService graphStoreEstimationService;
-    private final RequestScopedDependencies requestScopedDependencies;
 
     public UnprojectedAlgorithmEstimationService(
-        GraphStoreEstimationService graphStoreEstimationService,
-        RequestScopedDependencies requestScopedDependencies
+        GraphStoreEstimationService graphStoreEstimationService
     ) {
         this.graphStoreEstimationService = graphStoreEstimationService;
-        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     public MemoryEstimateResult estimate(
+        RequestCorrelationId requestCorrelationId,
         GraphProjectConfig graphProjectConfig,
         MemoryEstimation memoryEstimation,
         Concurrency concurrency,
@@ -46,7 +45,7 @@ public class UnprojectedAlgorithmEstimationService {
         var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
         var graphMemoryEstimation = graphStoreEstimationService.estimate(
-            requestScopedDependencies.correlationId(),
+            requestCorrelationId,
             graphProjectConfig
         );
 

@@ -80,9 +80,11 @@ public class AlgorithmEstimationTemplate {
             @SuppressWarnings("unchecked")
             var projectionConfiguration = memoryEstimationGraphConfigParser.parse((Map<String, Object>) graphConfig);
 
+            var correlationId = requestScopedDependencies.correlationId();
+
             return projectionConfiguration.isFictitiousLoading()
-                ? fictitiousAlgorithmEstimationService.estimate(projectionConfiguration, memoryEstimation, concurrency, dimensionTransformer)
-                : databaseAlgorithmEstimationService.estimate(projectionConfiguration, memoryEstimation, concurrency, dimensionTransformer);
+                ? fictitiousAlgorithmEstimationService.estimate(correlationId, projectionConfiguration, memoryEstimation, concurrency, dimensionTransformer)
+                : databaseAlgorithmEstimationService.estimate(correlationId, projectionConfiguration, memoryEstimation, concurrency, dimensionTransformer);
         }
 
         if (graphNameOrConfiguration instanceof String rawGraphName) {
@@ -93,7 +95,9 @@ public class AlgorithmEstimationTemplate {
                 graphParameters,
                 memoryEstimation,
                 concurrency,
-                dimensionTransformer
+                dimensionTransformer,
+                requestScopedDependencies.databaseId(),
+                requestScopedDependencies.user()
             );
         }
 

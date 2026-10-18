@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.GraphParameters;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -31,15 +33,12 @@ import java.util.Optional;
 
 public class ProjectedAlgorithmEstimationService {
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final RequestScopedDependencies requestScopedDependencies;
     private final GraphDimensionsFactory graphDimensionsFactory = new GraphDimensionsFactory();
 
     public ProjectedAlgorithmEstimationService(
-        GraphStoreCatalogService graphStoreCatalogService,
-        RequestScopedDependencies requestScopedDependencies
+        GraphStoreCatalogService graphStoreCatalogService
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     public MemoryEstimateResult estimate(
@@ -47,11 +46,13 @@ public class ProjectedAlgorithmEstimationService {
         GraphParameters graphParameters,
         MemoryEstimation memoryEstimation,
         Concurrency concurrency,
-        DimensionTransformer dimensionTransformer
+        DimensionTransformer dimensionTransformer,
+        DatabaseId databaseId,
+        User user
     ) {
         var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
-        var graphDimensions = dimensionsFromActualGraph(graphName, graphParameters);
+        var graphDimensions = dimensionsFromActualGraph(graphName, graphParameters,databaseId,user);
 
         var transformedDimensions = dimensionTransformer.transform(graphDimensions);
 
@@ -60,12 +61,14 @@ public class ProjectedAlgorithmEstimationService {
 
     private GraphDimensions dimensionsFromActualGraph(
         GraphName graphName,
-        GraphParameters graphParameters
+        GraphParameters graphParameters,
+        DatabaseId databaseId,
+        User user
     ) {
         var graphResources = graphStoreCatalogService.fetchGraphResources(
-            requestScopedDependencies.databaseId(),
+            databaseId,
             graphName,
-            requestScopedDependencies.user(),
+            user,
             graphParameters,
             Optional.empty(),
             GraphStoreValidation.DISABLED,
