@@ -32,17 +32,5 @@ public record MemoryEstimateResult(
     double heapPercentageMin,
     double heapPercentageMax
 ) {
-    public MemoryEstimateResult withDimensions(org.neo4j.gds.core.GraphDimensions dimensions) {
-        return new MemoryEstimateResult(
-            requiredMemory,
-            treeView,
-            mapView,
-            bytesMin,
-            bytesMax,
-            dimensions.nodeCount(),
-            dimensions.relCountUpperBound(),
-            heapPercentageMin,
-            heapPercentageMax
-        );
-    }
+
 }

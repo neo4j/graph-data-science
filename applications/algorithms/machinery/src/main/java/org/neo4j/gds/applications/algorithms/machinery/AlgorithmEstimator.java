@@ -24,7 +24,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 
-public class AlgorithmEstimator {
+public final class AlgorithmEstimator {
 
     private AlgorithmEstimator() {}
 
