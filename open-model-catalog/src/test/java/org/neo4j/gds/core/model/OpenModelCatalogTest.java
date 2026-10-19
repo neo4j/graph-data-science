@@ -94,14 +94,16 @@ class OpenModelCatalogTest {
 
     @Test
     void shouldStoreModelsPerType() {
-        var model = Model.of(
+        var model = TypedModel.trained(
+            "default",
             new ModelType("testAlgo"),
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of(USERNAME, "testModel"),
             new TestCustomInfo()
         );
-        var model2 = Model.of(
+        var model2 = TypedModel.trained(
+            "default",
             new ModelType("testAlgo2"),
             GRAPH_SCHEMA,
             1337L,
@@ -109,16 +111,18 @@ class OpenModelCatalogTest {
             new TestCustomInfo()
         );
 
-        modelCatalog.set(model);
-        modelCatalog.set(model2);
+        modelCatalog.set(model.model());
+        modelCatalog.set(model2.model());
 
         assertEquals(
             model,
-            modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, CustomInfo.class)
+            modelCatalog.getUntypedOrThrow(USERNAME, "testModel")
+                .as(String.class, TestTrainConfig.class, CustomInfo.class)
         );
         assertEquals(
             model2,
-            modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, CustomInfo.class)
+            modelCatalog.getUntypedOrThrow(USERNAME, "testModel2")
+                .as(Long.class, TestTrainConfig.class, CustomInfo.class)
         );
     }
 
@@ -172,14 +176,16 @@ class OpenModelCatalogTest {
 
     @Test
     void shouldStoreModels() {
-        var model = Model.of(
+        var model = TypedModel.trained(
+            "default",
             new ModelType("testAlgo"),
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of("user1", "testModel"),
             new TestCustomInfo()
         );
-        var model2 = Model.of(
+        var model2 = TypedModel.trained(
+            "default",
             new ModelType("testAlgo"),
             GRAPH_SCHEMA,
             "testTrainData",
@@ -187,16 +193,18 @@ class OpenModelCatalogTest {
             new TestCustomInfo()
         );
 
-        modelCatalog.set(model);
-        modelCatalog.set(model2);
+        modelCatalog.set(model.model());
+        modelCatalog.set(model2.model());
 
         assertEquals(
             model,
-            modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, CustomInfo.class)
+            modelCatalog.getUntypedOrThrow("user1", "testModel")
+                .as(String.class, TestTrainConfig.class, CustomInfo.class)
         );
         assertEquals(
             model2,
-            modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, CustomInfo.class)
+            modelCatalog.getUntypedOrThrow("user2", "testModel2")
+                .as(String.class, TestTrainConfig.class, CustomInfo.class)
         );
     }
 
@@ -247,7 +255,8 @@ class OpenModelCatalogTest {
 
         var ex = assertThrows(
             NoSuchElementException.class,
-            () -> modelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class, CustomInfo.class)
+            () -> modelCatalog.getUntypedOrThrow("fakeUser", "testModel")
+                .as(String.class, TestTrainConfig.class, CustomInfo.class)
         );
 
         assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
@@ -260,12 +269,13 @@ class OpenModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class, CustomInfo.class)
+            () -> modelCatalog.getUntypedOrThrow(USERNAME, "testModel")
+                .as(Double.class, TestTrainConfig.class, CustomInfo.class)
         );
 
         assertEquals(
-            "The model `testModel` has data with different types than expected. " +
-                "Expected data type: `java.lang.Double`, invoked with model data type: `java.lang.String`.",
+            "The model `testModel` has data with different type than expected. " +
+                "Expected data type: `java.lang.Double`, invoked with data type: `java.lang.String`.",
             ex.getMessage()
         );
     }
@@ -276,19 +286,14 @@ class OpenModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.get(
-                USERNAME,
-                "testModel",
-                String.class,
-                ModelCatalogTestTrainConfig.class,
-                CustomInfo.class
-            )
+            () -> modelCatalog.getUntypedOrThrow(USERNAME, "testModel")
+                .as(String.class, ModelCatalogTestTrainConfig.class, CustomInfo.class)
         );
 
         assertEquals(
-            "The model `testModel` has a training config with different types than expected. " +
-                "Expected train config type: `org.neo4j.gds.core.model.OpenModelCatalogTest$ModelCatalogTestTrainConfig`, " +
-                "invoked with model config type: `org.neo4j.gds.model.catalog.TestTrainConfigImpl`.",
+            "The model `testModel` has trainConfig with different type than expected. " +
+                "Expected trainConfig type: `org.neo4j.gds.core.model.OpenModelCatalogTest$ModelCatalogTestTrainConfig`, " +
+                "invoked with trainConfig type: `org.neo4j.gds.model.catalog.TestTrainConfigImpl`.",
             ex.getMessage()
         );
     }

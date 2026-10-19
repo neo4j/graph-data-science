@@ -42,14 +42,8 @@ final class NodeClassificationPredictConfigPreProcessor {
     void enhanceInputWithPipelineParameters(Map<String, Object> userInput) {
         if (!userInput.containsKey("modelName")) return;
 
-        //noinspection ConstantConditions
-        var model = modelCatalog.get(
-            user.getUsername(),
-            (String) userInput.get("modelName"),
-            BaseModelData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            CustomInfo.class
-        );
+        var model = modelCatalog.getUntypedOrThrow(user.getUsername(), (String) userInput.get("modelName"))
+            .as(BaseModelData.class, NodeClassificationPipelineTrainConfig.class, CustomInfo.class);
 
         userInput.putIfAbsent("targetNodeLabels", model.trainConfig().targetNodeLabels());
         userInput.putIfAbsent("relationshipTypes", model.trainConfig().relationshipTypes());

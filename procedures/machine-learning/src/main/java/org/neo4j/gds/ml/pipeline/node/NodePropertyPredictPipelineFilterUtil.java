@@ -37,13 +37,8 @@ public final class NodePropertyPredictPipelineFilterUtil {
         String username,
         NodePropertyPredictPipelineBaseConfig basePredictConfig
     ) {
-        var trainedModel = modelCatalog.get(
-            username,
-            modelName,
-            BaseModelData.class,
-            NodePropertyPipelineBaseTrainConfig.class,
-            CustomInfo.class
-        );
+        var trainedModel = modelCatalog.getUntypedOrThrow(username, modelName)
+            .as(BaseModelData.class, NodePropertyPipelineBaseTrainConfig.class, CustomInfo.class);
 
         var combinedTargetNodeLabels = basePredictConfig.targetNodeLabels().isEmpty()
             ? trainedModel.trainConfig().targetNodeLabels()

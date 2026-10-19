@@ -38,21 +38,6 @@ class OpenUserCatalog implements UserCatalog {
     private final Map<String, Model<?, ?, ?>> userModels = new ConcurrentHashMap<>();
 
     @Override
-    public <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
-        String modelName,
-        Class<D> dataClass,
-        Class<C> configClass,
-        Class<I> infoClass
-    ) {
-        return get(
-            getUntyped(modelName),
-            dataClass,
-            configClass,
-            infoClass
-        );
-    }
-
-    @Override
     public Model<?, ?, ?> getUntyped(String modelName) {
         return userModels.get(modelName);
     }
