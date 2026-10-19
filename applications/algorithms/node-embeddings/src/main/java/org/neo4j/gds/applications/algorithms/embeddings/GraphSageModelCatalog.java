@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.applications.algorithms.embeddings;
 
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.TypedModel;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
@@ -37,12 +37,12 @@ public class GraphSageModelCatalog {
      * <p>
      * NB: We use {@link org.neo4j.gds.model.ModelConfig#username()} because then operator can override.
      */
-    TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> get(String username,  String modelName) {
+    TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> get(String username,  String modelName) {
         return modelCatalog.getUntypedOrThrow(username, modelName)
-            .as(ModelData.class, GraphSageTrainConfig.class, GraphSageModelTrainer.GraphSageTrainMetrics.class);
+            .as(ModelData.class, GraphSageTrainConfig.class, CustomInfo.class);
     }
 
-    void store(TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model) {
+    void store(TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> model) {
         modelCatalog.set(model.model());
     }
 }

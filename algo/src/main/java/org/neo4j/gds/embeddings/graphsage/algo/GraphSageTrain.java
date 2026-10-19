@@ -20,12 +20,12 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.TypedModel;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 
 /**
  * Just a marker interface
  */
-public abstract class GraphSageTrain implements Algorithm<TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> {
+public abstract class GraphSageTrain implements Algorithm<TypedModel<ModelData, GraphSageTrainConfig, CustomInfo>> {
 }

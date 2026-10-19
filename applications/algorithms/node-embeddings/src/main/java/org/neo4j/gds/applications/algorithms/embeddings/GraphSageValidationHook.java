@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.TypedModel;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -32,11 +32,11 @@ import org.neo4j.gds.ml.core.EmbeddingUtils;
 
 class GraphSageValidationHook implements PostLoadValidationHook {
     private final GraphSageBaseConfig configuration;
-    private final TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model;
+    private final TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> model;
 
     GraphSageValidationHook(
         GraphSageBaseConfig configuration,
-        TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model
+        TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> model
     ) {
         this.configuration = configuration;
         this.model = model;

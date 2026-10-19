@@ -22,8 +22,8 @@ package org.neo4j.gds.procedures.algorithms.embeddings;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.TypedModel;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.model.ModelConfig;
@@ -32,12 +32,12 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class GraphSageResultBuilderForTrainMode implements ResultBuilder<GraphSageTrainConfig, TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, Stream<GraphSageTrainResult>, Void> {
+class GraphSageResultBuilderForTrainMode implements ResultBuilder<GraphSageTrainConfig, TypedModel<ModelData, GraphSageTrainConfig, CustomInfo>, Stream<GraphSageTrainResult>, Void> {
     @Override
     public Stream<GraphSageTrainResult> build(
         Graph graph,
         GraphSageTrainConfig configuration,
-        Optional<TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> result,
+        Optional<TypedModel<ModelData, GraphSageTrainConfig, CustomInfo>> result,
         AlgorithmProcessingTimings timings,
         Optional<Void> unused
     ) {
@@ -45,7 +45,7 @@ class GraphSageResultBuilderForTrainMode implements ResultBuilder<GraphSageTrain
     }
 
     private static GraphSageTrainResult createResult(
-        TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> trainedModel,
+        TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> trainedModel,
         long trainMillis
     ) {
         var modelInfo = new HashMap<String, Object>();

@@ -343,7 +343,7 @@ public class GraphSageModelTrainer {
         List<List<Double>> iterationLossPerEpoch,
         boolean didConverge
     ) implements CustomInfo {
-        public static GraphSageTrainMetrics empty() {
+        public static CustomInfo empty() {
             return new GraphSageTrainMetrics(List.of(), false);
         }
 

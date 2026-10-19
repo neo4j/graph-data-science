@@ -32,6 +32,7 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
@@ -501,6 +502,6 @@ class GraphSageAlgorithmFactoryTest {
 
     private record GraphSageTestParameters(
         GraphSageStreamConfig config,
-        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model
+        Model<ModelData, GraphSageTrainConfig, CustomInfo> model
     ){}
 }

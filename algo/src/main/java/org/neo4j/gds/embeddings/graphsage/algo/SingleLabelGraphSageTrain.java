@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
@@ -64,7 +65,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
     }
 
     @Override
-    public TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
+    public TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> compute() {
         progressTracker.beginSubTask(/*GraphSageTrain*/);
 
         var featureDimension = FeatureExtraction.featureCount(graph, parameters.featureProperties());

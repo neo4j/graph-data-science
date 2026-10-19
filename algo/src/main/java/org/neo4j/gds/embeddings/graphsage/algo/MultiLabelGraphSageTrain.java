@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
@@ -77,7 +78,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     }
 
     @Override
-    public TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
+    public TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> compute() {
         progressTracker.beginSubTask(/*GraphSageTrain*/);
         terminationFlag.assertRunning();
         var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(

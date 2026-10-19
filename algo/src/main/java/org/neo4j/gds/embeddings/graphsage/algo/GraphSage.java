@@ -23,12 +23,12 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -45,14 +45,14 @@ public class GraphSage implements Algorithm<GraphSageResult> {
     private final TerminationFlag terminationFlag;
 
     private final Graph graph;
-    private final TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model;
+    private final TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> model;
     private final ExecutorService executor;
     private final Concurrency concurrency;
     private final int batchSize;
 
     public GraphSage(
         Graph graph,
-        TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model,
+        TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> model,
         Concurrency concurrency,
         int batchSize,
         ExecutorService executor,

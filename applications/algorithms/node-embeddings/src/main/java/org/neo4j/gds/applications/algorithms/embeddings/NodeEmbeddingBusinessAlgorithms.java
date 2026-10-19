@@ -23,8 +23,8 @@ import org.neo4j.gds.NodeEmbeddingsAlgorithmTasks;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerManager;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.TypedModel;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
@@ -61,7 +61,7 @@ public class NodeEmbeddingBusinessAlgorithms {
         );
     }
 
-    public TypedModel<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
+    public TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> graphSageTrain(
         Graph graph,
         GraphSageTrainConfig configuration
     ) {
