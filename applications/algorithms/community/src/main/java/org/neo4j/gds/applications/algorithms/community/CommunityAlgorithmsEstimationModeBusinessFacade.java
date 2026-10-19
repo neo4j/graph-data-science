@@ -23,8 +23,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTempla
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMemoryEstimateDefinition;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
-import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.cliqueCounting.CliqueCountingMemoryEstimateDefinition;
+import org.neo4j.gds.cliquecounting.CliqueCountingBaseConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.hdbscan.HDBScanBaseConfig;
@@ -75,9 +75,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = approximateMaximumKCut(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -90,9 +91,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = cliqueCounting();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -108,9 +110,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = k1Coloring();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -122,9 +125,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = kCoreDecomposition();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -136,9 +140,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = kMeans(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -153,9 +158,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = labelPropagation();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -170,9 +176,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = localClusteringCoefficient(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -184,9 +191,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = leiden(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -198,9 +206,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = louvain(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -212,9 +221,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = modularity();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -229,9 +239,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = modularityOptimization();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -243,9 +254,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = scc();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -257,9 +269,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = triangleCount();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -275,9 +288,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = wcc(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -289,9 +303,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = speakerListenerLPA();
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 
@@ -303,9 +318,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = hdbscan(configuration);
 
         return algorithmEstimationTemplate.estimate(
-            configuration,
+            configuration.toGraphParameters(),
             graphNameOrConfiguration,
-            memoryEstimation
+            memoryEstimation,
+            configuration.concurrency()
         );
     }
 }
