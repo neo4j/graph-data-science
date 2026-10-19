@@ -102,7 +102,7 @@ public class WriteNodePropertiesApplication {
                     resultStore,
                     configuration,
                     subGraph,
-                    graphStore.nodeTranslator(subGraph),
+                    graphStore.nodeTranslator(subGraph.rootNodeMapping()),
                     nodePropertyExporterBuilder,
                     requestScopedDependencies.terminationFlag(),
                     progressTracker

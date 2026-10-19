@@ -51,7 +51,7 @@ class HashGnnWriteStep implements WriteStep<HashGNNResult, NodePropertiesWritten
         var nodePropertyValues = result.embeddings();
 
         return writeNodePropertyService.perform(
-            graphStore.nodeTranslator(graph),
+            graphStore.nodeTranslator(graph.rootNodeMapping()),
             graph.availableNodeLabels(),
             graphStore,
             resultStore,

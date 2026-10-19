@@ -55,7 +55,7 @@ class LeidenWriteStep implements WriteStep<LeidenResult, Pair<NodePropertiesWrit
         var nodePropertyValues = constructNodePropertyValues(graphStore, result);
 
         var nodePropertiesWritten = writeNodePropertyService.perform(
-            graphStore.nodeTranslator(graph),
+            graphStore.nodeTranslator(graph.rootNodeMapping()),
             graph.availableNodeLabels(),
             graphStore,
             resultStore,

@@ -55,14 +55,14 @@ class GraphStoreNodeTranslatorTest {
     void shouldUseRootNodeTranslatorForUnfilteredGraph() {
         var graph = graphStore.getGraph(RelationshipType.ALL_RELATIONSHIPS);
 
-        assertThat(graphStore.nodeTranslator(graph)).isSameAs(graphStore.nodeTranslator());
+        assertThat(graphStore.nodeTranslator(graph.rootNodeMapping())).isSameAs(graphStore.nodeTranslator());
     }
 
     @Test
     void shouldTranslateFilteredGraph() {
         var filteredGraph = filteredGraph();
 
-        assertTranslatesLike(graphStore.nodeTranslator(filteredGraph), filteredGraph);
+        assertTranslatesLike(graphStore.nodeTranslator(filteredGraph.rootNodeMapping()), filteredGraph);
     }
 
     @Test
@@ -75,7 +75,7 @@ class GraphStoreNodeTranslatorTest {
             }
         };
 
-        assertTranslatesLike(graphStore.nodeTranslator(wrappedGraph), filteredGraph);
+        assertTranslatesLike(graphStore.nodeTranslator(wrappedGraph.rootNodeMapping()), filteredGraph);
     }
 
     private Graph filteredGraph() {

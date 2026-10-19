@@ -92,7 +92,7 @@ class SimilarityWrite {
             writeRelationshipConfiguration.writeRelationshipType(),
             writePropertyConfiguration.writeProperty(),
             similarityGraph,
-            graphStore.nodeTranslator(similarityGraph),
+            graphStore.nodeTranslator(similarityGraph.rootNodeMapping()),
             label.asString(),
             resultStore,
             jobId
