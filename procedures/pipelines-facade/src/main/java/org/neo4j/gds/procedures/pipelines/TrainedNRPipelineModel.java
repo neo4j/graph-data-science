@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
@@ -32,16 +32,11 @@ public class TrainedNRPipelineModel {
         this.modelCatalog = modelCatalog;
     }
 
-    public Model<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> get(
+    public TypedModel<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> get(
         String modelName,
         String username
     ) {
-        return modelCatalog.get(
-            username,
-            modelName,
-            Regressor.RegressorData.class,
-            NodeRegressionPipelineTrainConfig.class,
-            NodeRegressionPipelineModelInfo.class
-        );
+        return modelCatalog.getUntypedOrThrow(username, modelName)
+            .as(Regressor.RegressorData.class, NodeRegressionPipelineTrainConfig.class, NodeRegressionPipelineModelInfo.class);
     }
 }

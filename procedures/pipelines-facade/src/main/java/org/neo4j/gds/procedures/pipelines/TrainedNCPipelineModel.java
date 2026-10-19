@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
@@ -32,16 +32,8 @@ public class TrainedNCPipelineModel {
         this.modelCatalog = modelCatalog;
     }
 
-    public Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> get(
-        String modelName,
-        String username
-    ) {
-        return modelCatalog.get(
-            username,
-            modelName,
-            Classifier.ClassifierData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            NodeClassificationPipelineModelInfo.class
-        );
+    public TypedModel<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> get(String modelName, String username) {
+        return modelCatalog.getUntypedOrThrow(username, modelName)
+            .as(Classifier.ClassifierData.class, NodeClassificationPipelineTrainConfig.class, NodeClassificationPipelineModelInfo.class);
     }
 }

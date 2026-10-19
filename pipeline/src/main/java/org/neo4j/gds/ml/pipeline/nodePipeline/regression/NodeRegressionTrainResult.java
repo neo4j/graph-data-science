@@ -20,14 +20,14 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.core.model.CatalogModelContainer;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
 public record NodeRegressionTrainResult(Regressor regressor, TrainingStatistics trainingStatistics) {
 
     public record NodeRegressionTrainPipelineResult(
-        Model<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> model,
+        TypedModel<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> model,
         TrainingStatistics trainingStatistics
     ) implements CatalogModelContainer<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> {}
 }

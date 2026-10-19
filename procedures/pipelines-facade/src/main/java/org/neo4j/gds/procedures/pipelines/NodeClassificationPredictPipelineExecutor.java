@@ -22,8 +22,8 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tasks.Tasks;
@@ -92,7 +92,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
     }
 
     public static MemoryEstimation estimate(
-        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
+        TypedModel<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
         NodeClassificationPredictPipelineBaseConfig configuration,
         ModelCatalog modelCatalog,
         AlgorithmsProcedureFacade algorithmsProcedureFacade

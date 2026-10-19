@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelMetaData;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.pipeline.ResultToModelConverter;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult.NodeRegressionTrainPipelineResult;
@@ -56,7 +56,7 @@ public class NodeRegressionToModelConverter implements ResultToModelConverter<No
                 NodePropertyPredictPipeline.from(pipeline)
             )
         );
-        var catalogModel = Model.trained(metadata, trainResult.regressor().data());
+        var catalogModel = TypedModel.trained(metadata, trainResult.regressor().data());
 
         return new NodeRegressionTrainPipelineResult(catalogModel, trainResult.trainingStatistics());
     }

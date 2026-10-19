@@ -910,7 +910,7 @@ public class PipelineApplications {
         var username = configuration.username();
         var model = trainedLPPipelineModel.get(modelName, username);
 
-        return linkPredictionPipelineEstimator.estimate(model, configuration);
+        return linkPredictionPipelineEstimator.estimate(model.customInfo().pipeline(), model.data(), configuration);
     }
 
     private MemoryEstimation linkPredictionTrainMemoryEstimation(LinkPredictionTrainConfig configuration) {

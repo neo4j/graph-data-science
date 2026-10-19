@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
@@ -32,16 +32,11 @@ public class TrainedLPPipelineModel {
         this.modelCatalog = modelCatalog;
     }
 
-    public Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> get(
+    public TypedModel<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> get(
         String modelName,
         String username
     ) {
-        return modelCatalog.get(
-            username,
-            modelName,
-            Classifier.ClassifierData.class,
-            LinkPredictionTrainConfig.class,
-            LinkPredictionModelInfo.class
-        );
+        return modelCatalog.getUntypedOrThrow(username, modelName)
+            .as(Classifier.ClassifierData.class, LinkPredictionTrainConfig.class, LinkPredictionModelInfo.class);
     }
 }

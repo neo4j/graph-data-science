@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.model.ModelConfig;
 
-public interface CatalogModelContainer<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends CustomInfo> {
-    Model<DATA, CONFIG, INFO> model();
+public interface CatalogModelContainer<DATA, CONFIG extends ModelConfig, INFO extends CustomInfo> {
+    TypedModel<DATA, CONFIG, INFO> model();
 }

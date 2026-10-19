@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelMetaData;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.pipeline.ResultToModelConverter;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -57,7 +57,7 @@ public class NodeClassificationToModelConverter implements ResultToModelConverte
                 result.classIdMap().originalIdsList()
             )
         );
-        var catalogModel = Model.trained(metadata, result.classifier().data());
+        var catalogModel = TypedModel.trained(metadata, result.classifier().data());
 
         return new NodeClassificationModelResult(catalogModel, result.trainingStatistics());
     }

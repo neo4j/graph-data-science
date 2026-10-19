@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
@@ -34,10 +34,15 @@ public record LinkPredictionTrainResult(
         Map<String, Object> modelSelectionStats
 ) implements MLTrainResult {
     public LinkPredictionTrainResult(
-        Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
+        TypedModel<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
         TrainingStatistics trainingStatistics,
         long trainMillis
     ) {
-        this(trainMillis, MLTrainResult.createModelInfo(model), model.trainConfig().toMap(), trainingStatistics.toMap());
+        this(
+            trainMillis,
+            MLTrainResult.createModelInfo(model.name(), model.algoType(), model.customInfo()),
+            model.trainConfig().toMap(),
+            trainingStatistics.toMap()
+        );
     }
 }

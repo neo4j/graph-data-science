@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.ml.models.Classifier;
@@ -48,7 +48,7 @@ public class NodeClassificationPredictPipelineEstimator {
     }
 
     public MemoryEstimation estimate(
-        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
+        TypedModel<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
         NodeClassificationPredictPipelineBaseConfig configuration
     ) {
         var pipeline = model.customInfo().pipeline();

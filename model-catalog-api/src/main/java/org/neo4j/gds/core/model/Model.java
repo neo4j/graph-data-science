@@ -72,6 +72,10 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends CustomInfo>(
         return new Model<>(metaData, null, Optional.empty());
     }
 
+    public <D, C extends ModelConfig, I extends CustomInfo> TypedModel<D, C, I> as(Class<D> dataClass, Class<C> configClass, Class<I> infoClass) {
+        return TypedModel.of(this, dataClass, configClass, infoClass);
+    }
+
     public <D> Model<D, CONFIG, INFO> withData(@Nullable D data) {
         return new Model<>(metaData, data, fileLocation);
     }
