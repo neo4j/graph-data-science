@@ -19,7 +19,7 @@ The `gds.model.store_location` parameter must be configured for this feature.
 
 *Models that can be stored*
 
-* xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE model]
+* xref:machine-learning/node-embeddings/graphsage.adoc[GraphSAGE model]
 * xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification model]
 * xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction model]
 

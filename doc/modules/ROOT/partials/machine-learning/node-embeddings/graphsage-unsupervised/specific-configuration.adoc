@@ -1,0 +1,7 @@
+| batchSize         | Integer        | n/a                  | yes      | The number of nodes per batch.
+| featureProperties | List of String | n/a                  | no       | The names of the node properties that should be used as input features. All property names must exist in the projected graph and be of type Float or List of Float.
+| jobId             | String         | Generated internally | yes      | An ID that can be provided to more easily track the algorithm’s progress.
+| modelName         | String         | n/a                  | no       | The name of a GraphSAGE unsupervised model in the model catalog.
+| nodeLabels        | List of String | ["*"]                | yes      | Filter the named graph using the given node labels. Nodes with any of the given labels will be included.
+| randomSeed        | String         | n/a                  | yes      | A number used to seed all randomness of the computation
+| relationshipTypes | List of String | ["*"]                | yes      | Filter the named graph using the given relationship types.

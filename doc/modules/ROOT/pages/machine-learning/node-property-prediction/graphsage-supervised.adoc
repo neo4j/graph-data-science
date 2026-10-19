@@ -1,0 +1,196 @@
+[[graphsage-supervised]]
+[.preview]
+= GraphSAGE supervised (AGA-only)
+:description: This section describes the GraphSAGE supervised algorithm available in Aura Graph Analytics.
+:entity: node
+:algorithm: GraphSAGE
+
+include::partial$/product-limitations/only-in-serverless.adoc[]
+
+:directed:
+:undirected:
+:heterogeneous-nodes:
+:node-properties:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+[[algorithms-graphsage-supervised-intro]]
+== Introduction
+
+GraphSAGE is a graph neural network (GNN) architecture outlined in the paper https://arxiv.org/pdf/1706.02216.pdf[_Inductive Representation Learning on Large Graphs_] by Hamilton et al. (2017).
+
+This section covers the syntax used to execute the {algorithm} algorithm supervised to predict labels of nodes in a graph.
+
+NOTE: For node embeddings, see xref:machine-learning/node-embeddings/graphsage/graphsage-unsupervised.adoc[GraphSAGE unsupervised].
+
+.GraphSAGE supervised syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-train]
+======
+.Run GraphSAGE supervised in train mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.graphSage.supervised.train(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  trainMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name               | Type           | Default                                | Optional | Description
+| activationFunction | String         | "relu"                                 | yes      | The activation function to use. Valid values are "relu" and "sigmoid"
+| aggregator         | String         | "mean"                                 | yes      | The neighborhood embedding aggregator to use. Valid values are "mean" and "max"
+| batchSize          | Integer        | n/a                                    | yes      | The number of target nodes to train on in each batch. If not provided, the algorithm will automatically infer the maximally allowed batch size within the constraints of available memory
+| classWeights       | Boolean        | false                                  | yes      | Whether to use class weights to balance the training data. If set to true, class weights will be calculated based on the distribution of the target labels in the training set.
+| dropout            | Float          | 0.1                                    | yes      | The dropout probability for each layer. Must be a value >= 0.0 and < 1.0
+| embeddingDimension | Integer        | 256                                    | yes      | The node embedding dimension of the model layers' outputs
+| epochs             | Integer        | n/a                                    | no       | The number of epochs to train the model
+| epochsPerVal       | Integer        | 0                                      | yes      | The number of epochs between evaluating the model on the validation set. If set to 0, the model will not be evaluated on the validation set
+| featureProperties  | List of String | n/a                                    | no       | The names of the node properties that should be used as input features. All property names must exist in the projected graph and be of type Float or List of Float.
+| jobId              | String         | Generated internally                   | yes      | An ID that can be provided to more easily track the algorithm’s progress.
+| layerNormalization | Boolean        | true                                   | yes      | Whether to apply layer normalization between the model layers
+| learningRate       | Float          | 0.001                                  | yes      | The learning rate for the optimizer
+| modelName          | String         | n/a                                    | no       | The name of the model to train (must be unique)
+| nodeLabels         | List of String | ["*"]                                  | yes      | Filter the named graph using the given node labels.
+| numNeighbors       | List           | [20, 10]                               | yes      | The number of neighbors to sample for each layer. Note that this also determines the number of layers
+| randomSeed         | String         | n/a                                    | yes      | A number used to seed all randomness of the computation
+| relationshipTypes  | List of String | ["*"]                                  | yes      | Filter the named graph using the given relationship types.
+| splitRatios        | Map            | {"TRAIN" 0.6, "TEST" 0.2, "VALID" 0.2} | yes      | The ratios as a map to split the target nodes of the input graph into training, test, and validation sets. The keys must be "TRAIN", "TEST" and "VALID". The sum of the values must be 1.0
+| targetLabel        | String         | n/a                                    | no       | The node label (i.e. type) to train to predict on
+| targetProperty     | String         | n/a                                    | no       | The node property to train to predict, represented by a column in the input node table of the specified 'target_label'.
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name                | Type    | Description
+| preProcessingMillis | Integer | Milliseconds for preprocessing the graph.
+| trainMillis         | Integer | Milliseconds to train the model.
+| configuration       | Map     | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-stream]
+======
+.Run GraphSAGE supervised in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.graphSage.supervised.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  predictedClass: Integer,
+  predictedProbabilities: List
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/machine-learning/node-property-prediction/graphsage-supervised/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name                   | Type          | Description
+| nodeId                 | Integer       | Node ID.
+| predictedClass         | Integer       | Predicted class for this node.
+| predictedProbabilities | List of Float | Probabilities for all classes, for this node.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run GraphSAGE supervised in mutate mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.graphSage.supervised.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name                         | Type   | Default | Optional | Description
+include::partial$/machine-learning/node-property-prediction/graphsage-supervised/specific-configuration.adoc[]
+| mutateProperty               | String | n/a     | no       | The node property in the GDS graph to which the embedding is written.
+| predictedProbabilityProperty | String | n/a     | yes      | The node property in which the class probability list is stored. If omitted, the probability list is discarded.
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name                  | Type    | Description
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| mutateMillis          | Integer | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten | Integer | Number of properties added to the projected graph.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run GraphSAGE supervised in write mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.graphSage.supervised.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  computeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name                         | Type   | Default       | Optional | Description
+include::partial$/machine-learning/node-property-prediction/graphsage-supervised/specific-configuration.adoc[]
+| predictedProbabilityProperty | String | n/a           | yes      | The node property in which the class probability list is stored. If omitted, the probability list is discarded.
+| writeConcurrency             | String | 'concurrency' | yes      | The number of concurrent threads used for writing the node properties.
+| writeProperty                | String | n/a           | no       | The node property in the Neo4j database to which the prediction is written
+|===
+
+.Results
+[opts="header",cols="2,1,6"]
+|===
+| Name                  | Type    | Description
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| nodePropertiesWritten | Integer | Number of properties added to the projected graph.
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the graph.
+| writeMillis           | Integer | Milliseconds for writing result data back.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+======
+====

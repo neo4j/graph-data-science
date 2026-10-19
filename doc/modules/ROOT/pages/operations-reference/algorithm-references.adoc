@@ -459,7 +459,7 @@
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.8+<.^|xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
+.8+<.^|xref:machine-learning/node-embeddings/graphsage/graphsage-plugin.adoc[GraphSAGE]
 | `gds.beta.graphSage.stream` label:procedure[Procedure]
 | `gds.beta.graphSage.stream.estimate` label:procedure[Procedure]
 | `gds.beta.graphSage.mutate` label:procedure[Procedure]
