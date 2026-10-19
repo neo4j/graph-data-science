@@ -67,8 +67,8 @@ public record ModelMetadata(
             GraphSchemaRenderer.toMapOld(model.graphSchema()),
             model.trainConfig().toMap(),
             model.customInfo().toMap(),
-            model.loaded(),
-            model.stored(),
+            model.isLoaded(),
+            model.isStored(),
             !model.sharedWith().isEmpty()
         );
     }

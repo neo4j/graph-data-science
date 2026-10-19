@@ -122,7 +122,7 @@ class NodeRegressionToModelConverterTest {
         assertThat(model.creator()).isEqualTo(config.username());
         assertThat(model.graphSchema()).isEqualTo(graphStore.schema());
         assertThat(model.name()).isEqualTo(config.modelName());
-        assertThat(model.stored()).isFalse();
+        assertThat(model.isStored()).isFalse();
         assertThat(model.isPublished()).isFalse();
 
         assertThat(model.customInfo().bestCandidate().trainerConfig().toMap()).isEqualTo(modelCandidate.toMap());

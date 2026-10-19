@@ -80,8 +80,8 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends CustomInfo>(
         return new Model<>(metaData, data, fileLocation);
     }
 
-    public boolean loaded() { return data != null; }
-    public boolean stored() { return fileLocation.isPresent(); }
+    public boolean isLoaded() { return data != null; }
+    public boolean isStored() { return fileLocation.isPresent(); }
 
     public Model<DATA, CONFIG, INFO> publish() {
         return new Model<>(metaData.publish(), data, fileLocation);

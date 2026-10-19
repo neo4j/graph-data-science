@@ -105,7 +105,7 @@ class NodeClassificationToModelConverterTest {
         assertThat(model.trainConfig()).isEqualTo(config);
         assertThat(model.graphSchema()).isEqualTo(originalSchema);
         assertThat(model.name()).isEqualTo(MODEL_NAME);
-        assertThat(model.stored()).isFalse();
+        assertThat(model.isStored()).isFalse();
         assertThat(model.isPublished()).isFalse();
         assertThat(model.customInfo().bestParameters()).isEqualTo(modelCandidate);
         assertThat(model.customInfo().metrics().keySet()).containsExactly(metric.toString());
