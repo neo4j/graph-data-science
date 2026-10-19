@@ -72,18 +72,14 @@ public interface GraphStore {
     }
 
     /**
-     * Translates between original node ids and the mapped node ids of the given id map,
-     * which is either {@link #nodes()} or a (filtered) graph of this graph store.
+     * Translates between original node ids and the mapped node ids described by the given
+     * root node mapping, e.g. of {@link #nodes()} or a (filtered) graph of this graph store.
      */
-    default NodeTranslator nodeTranslator(IdMap idMap) {
-        assert idMap.rootIdMap() == nodes() : "The id map does not belong to this graph store";
-
-        var rootNodeMapping = idMap.rootNodeMapping();
-        if (rootNodeMapping == RootNodeMapping.IDENTITY) {
-            assert idMap.nodeCount() == nodes().nodeCount() : "A filtered id map must override rootNodeMapping()";
+    default NodeTranslator nodeTranslator(RootNodeMapping rootNodeMapping) {
+        if (rootNodeMapping.isIdentity()) {
             return nodeTranslator();
         }
-        return RootNodeMapping.nodeTranslator(nodeTranslator(), rootNodeMapping, idMap.nodeCount());
+        return RootNodeMapping.nodeTranslator(nodeTranslator(), rootNodeMapping);
     }
 
     Set<NodeLabel> nodeLabels();

@@ -25,24 +25,49 @@ package org.neo4j.gds.api.nodes;
  * on top of the root id space; for an unfiltered id map, both id spaces are the same.
  * <p>
  * Translating between root node ids and original node ids is not part of this
- * mapping, see {@link org.neo4j.gds.api.GraphStore#nodeTranslator(IdMap)}.
+ * mapping, see {@link org.neo4j.gds.api.GraphStore#nodeTranslator(RootNodeMapping)}.
  */
 public interface RootNodeMapping {
 
     /**
      * Mapping for id maps whose mapped node ids are root node ids.
      */
-    RootNodeMapping IDENTITY = new RootNodeMapping() {
-        @Override
-        public long toRootNodeId(long mappedNodeId) {
-            return mappedNodeId;
-        }
+    static RootNodeMapping identity(long nodeCount) {
+        return new RootNodeMapping() {
+            @Override
+            public boolean isIdentity() {
+                return true;
+            }
 
-        @Override
-        public long fromRootNodeId(long rootNodeId) {
-            return rootNodeId;
-        }
-    };
+            @Override
+            public long nodeCount() {
+                return nodeCount;
+            }
+
+            @Override
+            public long toRootNodeId(long mappedNodeId) {
+                return mappedNodeId;
+            }
+
+            @Override
+            public long fromRootNodeId(long rootNodeId) {
+                return rootNodeId;
+            }
+        };
+    }
+
+    /**
+     * Declares whether this mapping is an identity mapping, i.e.,
+     * the root id space and the internal id space are the same.
+     */
+    default boolean isIdentity() {
+        return false;
+    }
+
+    /**
+     * The number of (potentially filtered) nodes represented by this mapping.
+     */
+    long nodeCount();
 
     /**
      * Maps a mapped node id to its root node id.
@@ -63,9 +88,8 @@ public interface RootNodeMapping {
      */
     static NodeTranslator nodeTranslator(
         NodeTranslator rootNodeTranslator,
-        RootNodeMapping rootNodeMapping,
-        long nodeCount
+        RootNodeMapping rootNodeMapping
     ) {
-        return new RootMappedNodeTranslator(rootNodeTranslator, rootNodeMapping, nodeCount);
+        return new RootMappedNodeTranslator(rootNodeTranslator, rootNodeMapping);
     }
 }

@@ -90,6 +90,11 @@ public final class FilteredIdMaps {
             this.filteredLabelInformation = filteredLabelInformation;
             this.rootNodeMapping = new RootNodeMapping() {
                 @Override
+                public long nodeCount() {
+                    return filteredTranslator.nodeCount();
+                }
+
+                @Override
                 public long toRootNodeId(long filteredNodeId) {
                     return filteredTranslator.toOriginalNodeId(filteredNodeId);
                 }

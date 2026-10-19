@@ -29,10 +29,10 @@ final class RootMappedNodeTranslator implements NodeTranslator {
     private final RootNodeMapping rootNodeMapping;
     private final long nodeCount;
 
-    RootMappedNodeTranslator(NodeTranslator rootNodeTranslator, RootNodeMapping rootNodeMapping, long nodeCount) {
+    RootMappedNodeTranslator(NodeTranslator rootNodeTranslator, RootNodeMapping rootNodeMapping) {
         this.rootNodeTranslator = rootNodeTranslator;
         this.rootNodeMapping = rootNodeMapping;
-        this.nodeCount = nodeCount;
+        this.nodeCount = rootNodeMapping.nodeCount();
     }
 
     @Override

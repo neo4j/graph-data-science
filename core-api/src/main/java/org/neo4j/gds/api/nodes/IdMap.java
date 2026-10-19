@@ -67,7 +67,7 @@ public interface IdMap extends NodeTranslator, NodeLabels {
      * Id maps whose mapped node ids differ from their root node ids must override this.
      */
     default RootNodeMapping rootNodeMapping() {
-        return RootNodeMapping.IDENTITY;
+        return RootNodeMapping.identity(nodeCount());
     }
 
     /**
