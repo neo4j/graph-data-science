@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
+import org.neo4j.gds.api.nodes.RootNodeMapping;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
@@ -103,6 +104,11 @@ public abstract class GraphAdapter implements Graph {
     @Override
     public IdMap rootIdMap() {
         return graph.rootIdMap();
+    }
+
+    @Override
+    public RootNodeMapping rootNodeMapping() {
+        return graph.rootNodeMapping();
     }
 
     @Override

@@ -33,7 +33,6 @@ import org.neo4j.gds.core.JobId;
 import org.neo4j.gds.similarity.SimilarityGraph;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.TopKSimilarityGraph;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
@@ -89,16 +88,11 @@ class SimilarityWrite {
         JobId jobId
     ) {
 
-        var rootIdMap = similarityGraph instanceof TopKSimilarityGraph
-            ? similarityGraph
-            : graphStore.nodes();
-
-
         var relationshipsWritten = writeRelationshipService.writeFromGraph(
             writeRelationshipConfiguration.writeRelationshipType(),
             writePropertyConfiguration.writeProperty(),
             similarityGraph,
-            rootIdMap,
+            graphStore.nodeTranslator(similarityGraph.rootNodeMapping()),
             label.asString(),
             resultStore,
             jobId

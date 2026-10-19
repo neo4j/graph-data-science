@@ -60,7 +60,7 @@ class SccWriteStep implements WriteStep<HugeLongArray, NodePropertiesWritten> {
         );
 
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph.rootNodeMapping()),
             graph.availableNodeLabels(),
             graphStore,
             resultStore,

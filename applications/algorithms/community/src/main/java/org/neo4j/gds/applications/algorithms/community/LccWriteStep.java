@@ -50,7 +50,7 @@ class LccWriteStep implements WriteStep<LocalClusteringCoefficientResult, NodePr
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph.rootNodeMapping()),
             graph.availableNodeLabels(),
             graphStore,
             resultStore,

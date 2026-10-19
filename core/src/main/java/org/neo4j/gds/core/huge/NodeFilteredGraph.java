@@ -29,6 +29,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.api.nodes.NodeTranslator;
+import org.neo4j.gds.api.nodes.RootNodeMapping;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.ModifiableRelationshipCursor;
 import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
@@ -96,6 +97,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     @Override
     public NodeTranslator nodeTranslator() {
         return filteredIdMap.nodeTranslator();
+    }
+
+    @Override
+    public RootNodeMapping rootNodeMapping() {
+        return filteredIdMap.rootNodeMapping();
     }
 
     @Override

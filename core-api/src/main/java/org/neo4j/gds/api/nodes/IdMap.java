@@ -62,6 +62,15 @@ public interface IdMap extends NodeTranslator, NodeLabels {
     IdMap rootIdMap();
 
     /**
+     * Returns the mapping between the mapped node ids of this id map and the
+     * mapped node ids of its {@link #rootIdMap()}.
+     * Id maps whose mapped node ids differ from their root node ids must override this.
+     */
+    default RootNodeMapping rootNodeMapping() {
+        return RootNodeMapping.identity(nodeCount());
+    }
+
+    /**
      * Returns an id map that maps between this id map's id space (the root
      * id space) and a compact id space containing only the nodes that have
      * at least one of the given node labels.

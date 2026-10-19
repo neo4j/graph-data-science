@@ -78,7 +78,7 @@ public class PrizeCollectingSteinerTreeWriteStep implements WriteStep<PrizeColle
             writeRelationshipType,
             writeProperty,
             spanningGraph,
-            spanningGraph.nodeTranslator(),
+            graphStore.nodeTranslator(graph.rootNodeMapping()),
             "PrizeCollectingSteinerWrite",
             resultStoreResolver.apply(resultStore),
             this.jobId

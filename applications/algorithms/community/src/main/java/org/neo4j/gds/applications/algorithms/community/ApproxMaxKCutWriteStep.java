@@ -54,7 +54,7 @@ class ApproxMaxKCutWriteStep implements WriteStep<ApproxMaxKCutResult, NodePrope
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(false, longNodePropertyValues);
 
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph.rootNodeMapping()),
             graph.availableNodeLabels(),
             graphStore,
             resultStore,

@@ -50,7 +50,7 @@ class HDBScanWriteStep implements WriteStep<Labels, NodePropertiesWritten> {
         JobId jobId
     ) {
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph.rootNodeMapping()),
             graph.availableNodeLabels(),
             graphStore,
             resultStore,

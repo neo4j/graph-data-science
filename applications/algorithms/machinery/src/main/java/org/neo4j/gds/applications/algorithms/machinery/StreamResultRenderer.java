@@ -37,7 +37,7 @@ public class StreamResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> imple
         Optional<Void> unused2
     ) {
         return resultBuilder.build(
-            graphResources.graph().nodeTranslator(),
+            graphResources.graphStore().nodeTranslator(graphResources.graph().rootNodeMapping()),
             graphResources.graphStore(),
             result
         );

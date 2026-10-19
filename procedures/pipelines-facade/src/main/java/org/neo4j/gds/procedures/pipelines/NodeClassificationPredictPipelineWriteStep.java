@@ -57,7 +57,7 @@ class NodeClassificationPredictPipelineWriteStep implements WriteStep<NodeClassi
         );
 
         return writeNodePropertyService.perform(
-            graph.nodeTranslator(),
+            graphStore.nodeTranslator(graph.rootNodeMapping()),
             graph.availableNodeLabels(),
             graphStore,
             resultStore,

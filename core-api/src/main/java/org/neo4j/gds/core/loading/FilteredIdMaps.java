@@ -26,6 +26,7 @@ import org.neo4j.gds.api.nodes.IdMap;
 import org.neo4j.gds.api.nodes.LabelInformation;
 import org.neo4j.gds.api.nodes.NodeLabelConsumer;
 import org.neo4j.gds.api.nodes.NodeTranslator;
+import org.neo4j.gds.api.nodes.RootNodeMapping;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collection;
@@ -81,11 +82,28 @@ public final class FilteredIdMaps {
         private final IdMap rootIdMap;
         private final NodeTranslator filteredTranslator; // root mapped id <-> filtered id
         private final LabelInformation filteredLabelInformation;
+        private final RootNodeMapping rootNodeMapping;
 
         FilteredView(IdMap rootIdMap, NodeTranslator filteredTranslator, LabelInformation filteredLabelInformation) {
             this.rootIdMap = rootIdMap;
             this.filteredTranslator = filteredTranslator;
             this.filteredLabelInformation = filteredLabelInformation;
+            this.rootNodeMapping = new RootNodeMapping() {
+                @Override
+                public long nodeCount() {
+                    return filteredTranslator.nodeCount();
+                }
+
+                @Override
+                public long toRootNodeId(long filteredNodeId) {
+                    return filteredTranslator.toOriginalNodeId(filteredNodeId);
+                }
+
+                @Override
+                public long fromRootNodeId(long rootNodeId) {
+                    return filteredTranslator.toMappedNodeId(rootNodeId);
+                }
+            };
         }
 
         @Override
@@ -137,6 +155,9 @@ public final class FilteredIdMaps {
 
         @Override
         public IdMap rootIdMap() {return rootIdMap;}
+
+        @Override
+        public RootNodeMapping rootNodeMapping() {return rootNodeMapping;}
 
         @Override
         public long toRootNodeId(long filteredNodeId) {return filteredTranslator.toOriginalNodeId(filteredNodeId);}
