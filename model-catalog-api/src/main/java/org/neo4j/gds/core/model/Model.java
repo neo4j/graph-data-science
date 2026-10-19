@@ -29,8 +29,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 /**
  * A Model can be created in three ways.
  * 1. It can be the product of training. In this case it has Metadata and Data but no FileLocation.
@@ -102,41 +100,6 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends CustomInfo>(
     public ZonedDateTime creationTime()  { return metaData.creationTime(); }
     public boolean isPublished()         { return metaData.isPublished(); }
     public ModelHash hash()              { return metaData.hash(); }
-
-    public <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> cast(
-        Class<D> dataClass,
-        Class<C> configClass,
-        Class<I> infoClass
-    ) {
-        if (!dataClass.isInstance(data())) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The model `%s` has data with different types than expected. " +
-                    "Expected data type: `%s`, invoked with model data type: `%s`.",
-                name(),
-                dataClass.getName(),
-                data().getClass().getName()
-            ));
-        }
-        if (!configClass.isInstance(trainConfig())) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The model `%s` has a training config with different types than expected. " +
-                    "Expected train config type: `%s`, invoked with model config type: `%s`.",
-                name(),
-                configClass.getName(),
-                trainConfig().getClass().getName()
-            ));
-        }
-        if (!infoClass.isInstance(customInfo())) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The model `%s` has a customInfo with different types than expected. " +
-                    "Expected customInfo type: `%s`, invoked with model info type: `%s`.",
-                name(),
-                infoClass.getName(),
-                customInfo().getClass().getName()
-            ));
-        }
-        return (Model<D, C, I>) this;
-    }
 
     @TestOnly
     public static <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> of(

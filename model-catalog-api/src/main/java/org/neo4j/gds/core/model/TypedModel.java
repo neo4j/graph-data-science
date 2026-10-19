@@ -22,9 +22,7 @@ package org.neo4j.gds.core.model;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.model.ModelConfig;
 
-import java.nio.file.Path;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -72,27 +70,6 @@ public record TypedModel<D, C extends ModelConfig, I extends CustomInfo>(
         ModelMetaData<C, I> metadata, D data
     ) {
         return new TypedModel<>(Model.trained(metadata, data), data, metadata.trainConfig(), metadata.customInfo());
-    }
-
-    public static <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> stored(
-        ModelMetaData<C, I> metaData,
-        D data,
-        Path fileLocation
-    ) {
-        return new Model<>(metaData, data, Optional.of(fileLocation));
-    }
-
-    public static <C extends ModelConfig, I extends CustomInfo> Model<Object, C, I> stored(
-        ModelMetaData<C, I> metaData,
-        Path fileLocation
-    ) {
-        return new Model<>(metaData, null, Optional.of(fileLocation));
-    }
-
-    public static <C extends ModelConfig, I extends CustomInfo> Model<Object, C, I> metadataOnly(
-        ModelMetaData<C, I> metaData
-    ) {
-        return new Model<>(metaData, null, Optional.empty());
     }
 
     public ModelMetaData metaData()     { return model.metaData(); }

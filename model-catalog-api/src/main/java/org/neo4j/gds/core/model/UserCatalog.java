@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.model;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -32,15 +31,11 @@ public interface UserCatalog {
 
     Collection<Model<?, ?, ?>> list();
 
-    Model<?, ?, ?> list(String modelName);
-
     Stream<Model<?, ?, ?>> streamModels();
 
     Set<String> availableModelNames();
 
     boolean exists(String modelName);
-
-    Optional<ModelType> type(String modelName);
 
     Model<?, ?, ?> drop(String modelName, boolean failOnMissing);
 

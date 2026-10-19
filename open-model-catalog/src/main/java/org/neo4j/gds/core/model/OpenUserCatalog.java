@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.neo4j.gds.model.ModelConfig;
-
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -54,11 +51,6 @@ class OpenUserCatalog implements UserCatalog {
     }
 
     @Override
-    public Model<?, ?, ?> list(String modelName) {
-        return getUntyped(modelName);
-    }
-
-    @Override
     public Stream<Model<?, ?, ?>> streamModels() {
         return userModels.values().stream();
     }
@@ -71,11 +63,6 @@ class OpenUserCatalog implements UserCatalog {
     @Override
     public boolean exists(String modelName) {
         return userModels.containsKey(modelName);
-    }
-
-    @Override
-    public Optional<ModelType> type(String modelName) {
-        return Optional.ofNullable(userModels.get(modelName)).map(Model::algoType);
     }
 
     @Override
@@ -107,19 +94,6 @@ class OpenUserCatalog implements UserCatalog {
     @Override
     public long size() {
         return userModels.size();
-    }
-
-    private <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
-        Model<?, ?, ?> model,
-        Class<D> dataClass,
-        Class<C> configClass,
-        Class<I> infoClass
-    ) {
-        if (model == null) {
-            return null;
-        }
-
-        return model.cast(dataClass, configClass, infoClass);
     }
 
     private void verifyModelNameIsUnique(String model) {
