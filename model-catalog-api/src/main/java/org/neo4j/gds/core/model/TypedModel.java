@@ -42,19 +42,19 @@ public record TypedModel<D, C extends ModelConfig, I extends CustomInfo>(
                 message, model.name(), "data", dataClass.getName(), model.data().getClass().getName()
             ));
         }
-        var data = (D) model.data();
+        var data = dataClass.cast(model.data());
         if (!configClass.isInstance(model.trainConfig())) {
             throw new IllegalArgumentException(formatWithLocale(
                 message, model.name(), "trainConfig", configClass.getName(), model.trainConfig().getClass().getName()
             ));
         }
-        var config = (C) model.trainConfig();
+        var config = configClass.cast(model.trainConfig());
         if (!infoClass.isInstance(model.customInfo())) {
             throw new IllegalArgumentException(formatWithLocale(
                 message, model.name(), "customInfo", infoClass.getName(), model.customInfo().getClass().getName()
             ));
         }
-        var info = (I) model.customInfo();
+        var info = infoClass.cast(model.customInfo());
 
         return new TypedModel<D, C, I>(model, data, config, info);
     }
