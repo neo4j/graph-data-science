@@ -81,7 +81,7 @@ public record TypedModel<D, C extends ModelConfig, I extends CustomInfo>(
     public String gdsVersion()           { return model.gdsVersion(); }
     public ZonedDateTime creationTime()  { return model.creationTime(); }
     public boolean isPublished()         { return model.isPublished(); }
-    public ModelHash hash()              { return model.hash(); }
+    public ModelKey key()                { return model.key(); }
 
     public boolean isStored()             { return model.isStored(); }
 }

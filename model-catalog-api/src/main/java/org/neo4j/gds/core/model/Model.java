@@ -99,7 +99,7 @@ public record Model<DATA, CONFIG extends ModelConfig, INFO extends CustomInfo>(
     public List<String> sharedWith()     { return metaData.sharedWith(); }
     public ZonedDateTime creationTime()  { return metaData.creationTime(); }
     public boolean isPublished()         { return metaData.isPublished(); }
-    public ModelHash hash()              { return metaData.hash(); }
+    public ModelKey key()                { return metaData.key(); }
 
     @TestOnly
     public static <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> of(

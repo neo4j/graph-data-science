@@ -82,8 +82,8 @@ public record ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo>
         return sharedWith.contains(ALL_USERS);
     }
 
-    public ModelHash hash() {
-        return new ModelHash(creator, name, creationTime);
+    public ModelKey key() {
+        return new ModelKey(creator, name, creationTime);
     }
 
     private static ZonedDateTime now() {
