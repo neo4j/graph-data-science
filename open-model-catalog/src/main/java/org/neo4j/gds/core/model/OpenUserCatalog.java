@@ -19,14 +19,10 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.neo4j.gds.core.model.Model.CustomInfo;
-import org.neo4j.gds.model.ModelConfig;
-
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -37,21 +33,6 @@ class OpenUserCatalog implements UserCatalog {
     private static final long ALLOWED_MODELS_COUNT = 3;
 
     private final Map<String, Model<?, ?, ?>> userModels = new ConcurrentHashMap<>();
-
-    @Override
-    public <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
-        String modelName,
-        Class<D> dataClass,
-        Class<C> configClass,
-        Class<I> infoClass
-    ) {
-        return get(
-            getUntyped(modelName),
-            dataClass,
-            configClass,
-            infoClass
-        );
-    }
 
     @Override
     public Model<?, ?, ?> getUntyped(String modelName) {
@@ -70,11 +51,6 @@ class OpenUserCatalog implements UserCatalog {
     }
 
     @Override
-    public Model<?, ?, ?> list(String modelName) {
-        return getUntyped(modelName);
-    }
-
-    @Override
     public Stream<Model<?, ?, ?>> streamModels() {
         return userModels.values().stream();
     }
@@ -87,11 +63,6 @@ class OpenUserCatalog implements UserCatalog {
     @Override
     public boolean exists(String modelName) {
         return userModels.containsKey(modelName);
-    }
-
-    @Override
-    public Optional<String> type(String modelName) {
-        return Optional.ofNullable(userModels.get(modelName)).map(Model::algoType);
     }
 
     @Override
@@ -115,7 +86,7 @@ class OpenUserCatalog implements UserCatalog {
     }
 
     @Override
-    public void verifyModelCanBeStored(String modelName, String modelType) {
+    public void verifyModelCanBeStored(String modelName, ModelType modelType) {
         verifyModelNameIsUnique(modelName);
         verifyModelsLimit(modelType);
     }
@@ -123,50 +94,6 @@ class OpenUserCatalog implements UserCatalog {
     @Override
     public long size() {
         return userModels.size();
-    }
-
-    private <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
-        Model<?, ?, ?> model,
-        Class<D> dataClass,
-        Class<C> configClass,
-        Class<I> infoClass
-    ) {
-        if (model != null) {
-            var modelName = model.name();
-            if (!dataClass.isInstance(model.data())) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The model `%s` has data with different types than expected. " +
-                    "Expected data type: `%s`, invoked with model data type: `%s`.",
-                    modelName,
-                    model.data().getClass().getName(),
-                    dataClass.getName()
-                ));
-            }
-            if (!configClass.isInstance(model.trainConfig())) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The model `%s` has a training config with different types than expected. " +
-                    "Expected train config type: `%s`, invoked with model config type: `%s`.",
-                    modelName,
-                    model.trainConfig().getClass().getName(),
-                    configClass.getName()
-                ));
-            }
-
-
-            if (!infoClass.isInstance(model.customInfo())) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The model `%s` has a customInfo with different types than expected. " +
-                    "Expected customInfo type: `%s`, invoked with model info type: `%s`.",
-                    modelName,
-                    model.customInfo().getClass().getName(),
-                    infoClass.getName()
-                ));
-            }
-        }
-
-        // We just did the check
-        // noinspection unchecked
-        return (Model<D, C, I>) model;
     }
 
     private void verifyModelNameIsUnique(String model) {
@@ -178,7 +105,7 @@ class OpenUserCatalog implements UserCatalog {
         }
     }
 
-    private void verifyModelsLimit(String modelType) {
+    private void verifyModelsLimit(ModelType modelType) {
         if (!canStoreModel(modelType)) {
             throw new IllegalStateException(
                 formatWithLocale(
@@ -191,11 +118,11 @@ class OpenUserCatalog implements UserCatalog {
         }
     }
 
-    private boolean canStoreModel(String modelType) {
+    private boolean canStoreModel(ModelType modelType) {
         return modelsPerType(modelType) < ALLOWED_MODELS_COUNT;
     }
 
-    private long modelsPerType(String modelType) {
+    private long modelsPerType(ModelType modelType) {
         return userModels.values()
             .stream()
             .filter(model -> model.algoType().equals(modelType))

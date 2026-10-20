@@ -21,12 +21,12 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPParameters;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageParameters;
@@ -99,7 +99,7 @@ public class NodeEmbeddingAlgorithms {
     }
 
 
-    public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
+    public TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> graphSageTrain(
         Graph graph,
         GraphSageTrainParameters parameters,
         GraphSageTrainConfig config,

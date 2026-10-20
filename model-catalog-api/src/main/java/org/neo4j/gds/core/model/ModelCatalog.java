@@ -20,9 +20,7 @@
 package org.neo4j.gds.core.model;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.model.catalog.ModelMetadata;
-import org.neo4j.gds.model.ModelConfig;
 
 import java.nio.file.Path;
 import java.util.stream.Stream;
@@ -34,14 +32,6 @@ public interface ModelCatalog {
     void unregisterListener(ModelCatalogListener listener);
 
     void set(Model<?, ?, ?> model);
-
-    <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
-        String username,
-        String modelName,
-        Class<D> dataClass,
-        Class<C> configClass,
-        Class<I> infoClass
-    );
 
     Model<?, ?, ?> getUntypedOrThrow(String username, String modelName);
 
@@ -69,7 +59,7 @@ public interface ModelCatalog {
 
     void removeAllLoadedModels();
 
-    void verifyModelCanBeStored(String username, String modelName, String modelType);
+    void verifyModelCanBeStored(String username, String modelName, ModelType modelType);
 
     ModelCatalog EMPTY = new ModelCatalog() {
         @Override
@@ -85,17 +75,6 @@ public interface ModelCatalog {
         @Override
         public void set(Model<?, ?, ?> model) {
 
-        }
-
-        @Override
-        public <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
-            String username,
-            String modelName,
-            Class<D> dataClass,
-            Class<C> configClass,
-            Class<I> infoClass
-        ) {
-            return null;
         }
 
         @Override
@@ -152,7 +131,7 @@ public interface ModelCatalog {
         }
 
         @Override
-        public void verifyModelCanBeStored(String username, String modelName, String modelType) {
+        public void verifyModelCanBeStored(String username, String modelName, ModelType modelType) {
 
         }
     };

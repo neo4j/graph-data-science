@@ -161,7 +161,7 @@ class GraphSageTest {
             trainConfig
         );
         var model = trainAlgo.compute();
-        modelCatalog.set(model);
+        modelCatalog.set(model.model());
 
         var streamConfig = GraphSageStreamConfigImpl
             .builder()
@@ -259,7 +259,7 @@ class GraphSageTest {
 
         var resultModel = graphSageTrain.compute();
 
-        modelCatalog.set(resultModel);
+        modelCatalog.set(resultModel.model());
 
         var progressTrackerWithLog = TestProgressTrackerHelper.create(
             NodeEmbeddingsAlgorithmTasks.graphSage(graph, trainConfig.concurrency()),

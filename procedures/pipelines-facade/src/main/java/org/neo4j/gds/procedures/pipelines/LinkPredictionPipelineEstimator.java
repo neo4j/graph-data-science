@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 class LinkPredictionPipelineEstimator {
@@ -37,14 +35,15 @@ class LinkPredictionPipelineEstimator {
     }
 
     MemoryEstimation estimate(
-        Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
+        LinkPredictionPredictPipeline pipeline,
+        Classifier.ClassifierData classifierData,
         LinkPredictionPredictPipelineBaseConfig configuration
     ) {
         return LinkPredictionPredictPipelineExecutor.estimate(
             modelCatalog,
-            model.customInfo().pipeline(),
+            pipeline,
             configuration,
-            model.data(),
+            classifierData,
             algorithmsProcedureFacade
         );
     }

@@ -20,7 +20,8 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -64,7 +65,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
     }
 
     @Override
-    public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
+    public TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> compute() {
         progressTracker.beginSubTask(/*GraphSageTrain*/);
 
         var featureDimension = FeatureExtraction.featureCount(graph, parameters.featureProperties());
@@ -84,13 +85,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
         progressTracker.endSubTask(/*GraphSageTrain*/);
 
-        return Model.of(
-            gdsVersion,
-            GraphSage.MODEL_TYPE,
-            graph.schema(),
-            ModelData.of(trainResult.layers(), new SingleLabelFeatureFunction()),
-            config,
-            trainResult.metrics()
-        );
+        var data = ModelData.of(trainResult.layers(), new SingleLabelFeatureFunction());
+        return TypedModel.trained(gdsVersion, GraphSage.MODEL_TYPE, graph.schema(), data, config, trainResult.metrics());
     }
 }

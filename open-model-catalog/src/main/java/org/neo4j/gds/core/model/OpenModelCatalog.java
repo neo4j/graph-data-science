@@ -21,9 +21,7 @@ package org.neo4j.gds.core.model;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.model.catalog.ModelMetadata;
-import org.neo4j.gds.model.ModelConfig;
 
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -70,27 +68,6 @@ public final class OpenModelCatalog implements ModelCatalog {
         );
 
         listeners.forEach(listener -> listener.onInsert(model));
-    }
-
-    @Override
-    public <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
-        String username,
-        String modelName,
-        Class<D> dataClass,
-        Class<C> configClass,
-        Class<I> infoClass
-    ) {
-        var userCatalog = getUserCatalog(username);
-        var model = userCatalog.get(modelName, dataClass, configClass, infoClass);
-        if (model == null) {
-            throw new NoSuchElementException(prettySuggestions(
-                formatWithLocale("Model with name `%s` does not exist.", modelName),
-                modelName,
-                userCatalog.availableModelNames()
-            ));
-        }
-
-        return model;
     }
 
     @Override
@@ -167,7 +144,7 @@ public final class OpenModelCatalog implements ModelCatalog {
     }
 
     @Override
-    public void verifyModelCanBeStored(String username, String modelName, String modelType) {
+    public void verifyModelCanBeStored(String username, String modelName, ModelType modelType) {
         getUserCatalog(username).verifyModelCanBeStored(modelName, modelType);
     }
 

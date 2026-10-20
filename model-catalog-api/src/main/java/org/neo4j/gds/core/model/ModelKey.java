@@ -19,33 +19,6 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.model.ModelConfig;
-
 import java.time.ZonedDateTime;
 
-@ValueClass
-public
-interface ModelHash {
-    String user();
-
-    String name();
-
-    ZonedDateTime timestamp();
-
-    static ModelHash of(ModelMetaData<? extends ModelConfig, ?> modelMetaData) {
-        return ImmutableModelHash.of(
-            modelMetaData.creator(),
-            modelMetaData.name(),
-            modelMetaData.creationTime()
-        );
-    }
-
-    static ModelHash of(Model<?, ?, ?> model) {
-        return ImmutableModelHash.of(
-            model.creator(),
-            model.name(),
-            model.creationTime()
-        );
-    }
-}
+public record ModelKey(String user, String name, ZonedDateTime timestamp) {}

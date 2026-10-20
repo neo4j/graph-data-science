@@ -34,7 +34,8 @@ public record NodeClassificationPipelineTrainResult(
         long trainMillis
     ) {
         var modelSelectionStats = pipelineResult.trainingStatistics().toMap();
-        var modelInfo = MLTrainResult.createModelInfo(pipelineResult.model());
+        var model = pipelineResult.model();
+        var modelInfo = MLTrainResult.createModelInfo(model.name(), model.algoType(), model.customInfo());
         var trainConfig = pipelineResult.model().trainConfig().toMap();
         return new NodeClassificationPipelineTrainResult(trainMillis, modelInfo, trainConfig, modelSelectionStats);
     }

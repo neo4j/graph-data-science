@@ -23,8 +23,8 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.core.model.CustomInfo;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
@@ -57,7 +57,7 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
     public <RESULT> RESULT graphSage(
         GraphName graphName,
         GraphSageTrainConfig configuration,
-        ResultBuilder<GraphSageTrainConfig, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, RESULT, Void> resultBuilder
+        ResultBuilder<GraphSageTrainConfig, TypedModel<ModelData, GraphSageTrainConfig, CustomInfo>, RESULT, Void> resultBuilder
     ) {
         var validationHook = new GraphSageTrainValidationHook(configuration);
 
@@ -75,7 +75,7 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
             (graph, __) -> algorithms.graphSageTrain(graph, configuration),
             writeToDiskStep,
             resultBuilder,
-            Optional.empty(),
+            Optional.<String>empty(),
             Optional.of(List.of(validationHook))
         );
     }

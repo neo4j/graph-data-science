@@ -31,9 +31,10 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.PlainSimpleRequestCorrelationId;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.model.ImmutableModel;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelMetaData;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.progress.registration.EmptyTaskRegistryFactory;
@@ -55,7 +56,6 @@ import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.model.catalog.TestTrainConfigImpl;
-import org.neo4j.gds.model.catalog.TestWeightedTrainConfig;
 import org.neo4j.gds.model.catalog.TestWeightedTrainConfigImpl;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
@@ -63,6 +63,7 @@ import org.neo4j.gds.termination.TerminationMonitor;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -216,7 +217,7 @@ class LinkPredictionTrainingPipelineTest {
 
         String modelName = "myModel";
         modelCatalog.set(Model.of(
-            "myAlgo",
+            new ModelType("myAlgo"),
             GraphSchema.empty(),
             1L,
             TestWeightedTrainConfigImpl.builder()
@@ -257,45 +258,28 @@ class LinkPredictionTrainingPipelineTest {
     void deriveRelationshipWeightPropertyFromPublishedModel() {
         var modelCatalog = new OpenModelCatalog();
 
-        String modelName = "myModel";
-        var model = Model.of(
-            "myAlgo",
+        var modelName = "myModel";
+        var modelUser = "otherUser";
+        var config = TestWeightedTrainConfigImpl.builder()
+            .modelUser(modelUser)
+            .modelName(modelName)
+            .relationshipWeightProperty("derivedWeight").build();
+        var metaData = ModelMetaData.of(
+            "default",
+            new ModelType("myAlgo"),
             GraphSchema.empty(),
-            1L,
-            TestWeightedTrainConfigImpl.builder()
-                .modelUser("otherUser")
-                .modelName(modelName)
-                .relationshipWeightProperty("derivedWeight").build(),
+            config,
             new TestCustomInfo()
-        );
-        modelCatalog.set(
-            ImmutableModel.<Long, TestWeightedTrainConfig, TestCustomInfo>builder()
-                .from(model)
-                .sharedWith(List.of(Model.ALL_USERS))
-                .build()
-        );
-
-        var executionContext = new ExecutionContext(
-            CloseableResourceRegistry.EMPTY,
-            DatabaseId.of(""),
-            Log.noOpLog(),
-            ExecutionContext.EMPTY_MEMORY_CONTEXT,
-            Metrics.DISABLED,
-            ProcedureReturnColumns.EMPTY,
-            PlainSimpleRequestCorrelationId.create(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            TerminationMonitor.EMPTY,
-            new User("", false),
-            null,
-            ExecutionContext.EMPTY_DEPENDENCY_RESOLVER,
-            modelCatalog
-        );
+        ).publish();
+        var model = new Model<>(metaData, 1L, Optional.empty());
+        modelCatalog.set(model);
 
         var pipeline = new LinkPredictionTrainingPipeline();
         var step = new TestNodePropertyStep(Map.of("modelName", modelName));
         pipeline.addNodePropertyStep(step);
 
-        assertThat(pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.user().getUsername())).isPresent().get().isEqualTo("derivedWeight");
+        assertThat(pipeline.relationshipWeightProperty(modelCatalog, ""))
+            .isPresent().get().isEqualTo("derivedWeight");
     }
 
     @Test
@@ -304,7 +288,7 @@ class LinkPredictionTrainingPipelineTest {
 
         String modelName = "myModel";
         modelCatalog.set(Model.of(
-            "myAlgo",
+            new ModelType("myAlgo"),
             GraphSchema.empty(),
             1L,
             TestWeightedTrainConfigImpl.builder()
@@ -343,7 +327,7 @@ class LinkPredictionTrainingPipelineTest {
 
         String modelName = "myModel";
         modelCatalog.set(Model.of(
-            "myAlgo",
+            new ModelType("myAlgo"),
             GraphSchema.empty(),
             1L,
             TestTrainConfigImpl.builder()

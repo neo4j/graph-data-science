@@ -19,22 +19,17 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 
 public final class GraphSageModelResolver {
     private GraphSageModelResolver() {}
 
-    public static Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> resolveModel(
+    public static TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> resolveModel(
         ModelCatalog modelCatalog, String username, String modelName) {
-        return modelCatalog.get(
-            username,
-            modelName,
-            ModelData.class,
-            GraphSageTrainConfig.class,
-            GraphSageModelTrainer.GraphSageTrainMetrics.class
-        );
+        return modelCatalog.getUntypedOrThrow(username, modelName)
+            .as(ModelData.class, GraphSageTrainConfig.class, CustomInfo.class);
     }
 }

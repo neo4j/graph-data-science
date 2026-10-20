@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
@@ -43,13 +43,8 @@ public class NodeRegressionPredictConfigPreProcessor {
             .ifPresent(modelName -> {
                 assert modelCatalog != null : "ModelCatalog should have been set in the ExecutionContext by this point!!!";
 
-                var trainedModel = modelCatalog.get(
-                    user.getUsername(),
-                    (String) modelName,
-                    BaseModelData.class,
-                    NodePropertyPipelineBaseTrainConfig.class,
-                    Model.CustomInfo.class
-                );
+                var trainedModel = modelCatalog.getUntypedOrThrow(user.getUsername(), (String) modelName)
+                    .as(BaseModelData.class, NodePropertyPipelineBaseTrainConfig.class, CustomInfo.class);
 
                 var combinedTargetNodeLabels = Optional.ofNullable(userInput.get("targetNodeLabels"))
                     .map(targetNodeLabels -> (List<String>) targetNodeLabels)

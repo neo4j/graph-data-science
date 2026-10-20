@@ -46,8 +46,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.core.utils.logging.GdsLoggers;
 import org.neo4j.gds.core.utils.logging.LoggerForProgressTrackingAdapter;
 import org.neo4j.gds.domain.services.GloballyScopedDependenciesBuilder;
@@ -501,7 +501,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             List.of(new DecisionTreePredictor<>(root))
         );
 
-        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model = Model.of(
+        TypedModel<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model = TypedModel.trained(
+            "test",
             NodeClassificationTrainingPipeline.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,

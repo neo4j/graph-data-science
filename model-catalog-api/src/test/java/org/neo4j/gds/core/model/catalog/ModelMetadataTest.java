@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.model.catalog;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.model.ModelType;
 
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -36,7 +37,7 @@ class ModelMetadataTest {
         assertThat(createdAt.getZone()).isEqualTo(ZoneOffset.UTC);
 
         var metadata = new ModelMetadata(
-            "m", "user", "graphSage",
+            "m", "user", ModelType.GraphSage,
             createdAt,
             Map.of(), Map.of(), Map.of(),
             false, true, false
@@ -51,7 +52,7 @@ class ModelMetadataTest {
         var berlin = ZonedDateTime.parse("2025-01-02T12:39:46.745137+01:00[Europe/Berlin]");
 
         var metadata = new ModelMetadata(
-            "m", "user", "graphSage",
+            "m", "user", ModelType.GraphSage,
             berlin,
             Map.of(), Map.of(), Map.of(),
             false, true, false

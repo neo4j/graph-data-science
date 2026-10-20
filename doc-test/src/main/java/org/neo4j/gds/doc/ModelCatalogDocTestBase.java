@@ -26,6 +26,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.core.model.TestCustomInfo;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
@@ -43,14 +44,14 @@ public abstract class ModelCatalogDocTestBase extends SingleFileDocTestBase {
         this.modelCatalog = GraphDatabaseApiProxy.resolveDependency(defaultDb, ModelCatalog.class);
 
         var exampleModel1 = Model.of(
-            "example-model-type",
+            new ModelType("example-model-type"),
             GraphSchema.empty(),
             new Object(),
             TestTrainConfig.of("", "my-model1"),
             new TestCustomInfo(Map.of("exampleModelInfo", "exampleValue"))
         );
         var exampleModel2 = Model.of(
-            "example-model-type",
+            new ModelType("example-model-type"),
             GraphSchema.empty(),
             new Object(),
             TestTrainConfig.of("", "my-model2"),

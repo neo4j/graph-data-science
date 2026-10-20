@@ -29,6 +29,7 @@ import org.neo4j.gds.PropertyMapping.Key;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.model.catalog.ModelDropProc;
@@ -133,7 +134,7 @@ class GraphSageIntegrationTest extends BaseProcTest {
     }
 
     private void modelDoesntExist() {
-        checkModelExistence("n/a", false);
+        checkModelExistence(new ModelType("n/a"), false);
     }
 
     private void train() {
@@ -156,14 +157,14 @@ class GraphSageIntegrationTest extends BaseProcTest {
         checkModelExistence(GraphSage.MODEL_TYPE, true);
     }
 
-    private void checkModelExistence(String modelType, boolean exists) {
+    private void checkModelExistence(ModelType modelType, boolean exists) {
         assertCypherResult(
             "CALL gds.model.exists($modelName)",
             Map.of("modelName", modelName),
             List.of(
                 Map.of(
                     "modelName", modelName,
-                    "modelType", modelType,
+                    "modelType", modelType.value(),
                     "exists", exists
                 )
             )
@@ -196,7 +197,7 @@ class GraphSageIntegrationTest extends BaseProcTest {
             singletonList(
                 Map.of(
                     "modelName", modelName,
-                    "modelType", GraphSage.MODEL_TYPE,
+                    "modelType", GraphSage.MODEL_TYPE.value(),
                     "modelInfo", allOf(
                         hasEntry(equalTo("metrics"), isA(Map.class))
                     ),

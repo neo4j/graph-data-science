@@ -19,40 +19,75 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.configuration.Config;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.time.Clock;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 
-import static org.neo4j.gds.core.model.Model.ALL_USERS;
+public record ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo>(
+    String creator,
+    List<String> sharedWith,
+    String name,
+    ModelType algoType,
+    GraphSchema graphSchema,
+    CONFIG trainConfig,
+    ZonedDateTime creationTime,
+    INFO customInfo,
+    String gdsVersion
+) {
+    public ModelMetaData {
+        sharedWith = List.copyOf(sharedWith);
+        Objects.requireNonNull(creationTime);
+    }
 
-@ValueClass
-public interface ModelMetaData<CONFIG extends ModelConfig, INFO extends CustomInfo> {
+    public static final String PUBLIC_MODEL_SUFFIX = "_public";
+    private static final String ALL_USERS = "*";
 
-    String creator();
+    public static <C extends ModelConfig, I extends CustomInfo> ModelMetaData<C, I> of(
+        String gdsVersion,
+        ModelType algoType,
+        GraphSchema graphSchema,
+        C trainConfig,
+        I customInfo
+    ) {
+        return new ModelMetaData<>(
+            trainConfig.username(),
+            List.of(),
+            trainConfig.modelName(),
+            algoType,
+            graphSchema,
+            trainConfig,
+            now(),
+            customInfo,
+            gdsVersion
+        );
+    }
 
-    List<String> sharedWith();
+    public ModelMetaData<CONFIG, INFO> withCreationTime(ZonedDateTime creationTime) {
+        return new ModelMetaData<>(creator, sharedWith, name, algoType, graphSchema, trainConfig, creationTime, customInfo, gdsVersion);
+    }
 
-    String name();
+    public ModelMetaData<CONFIG, INFO> publish() {
+        var name = name() + PUBLIC_MODEL_SUFFIX;
+        return new ModelMetaData<>(creator, List.of(ALL_USERS), name, algoType, graphSchema, trainConfig, creationTime, customInfo, gdsVersion);
+    }
 
-    String algoType();
+    public boolean isPublished() {
+        return sharedWith.contains(ALL_USERS);
+    }
 
-    GraphSchema graphSchema();
+    public ModelKey key() {
+        return new ModelKey(creator, name, creationTime);
+    }
 
-    CONFIG trainConfig();
-
-    ZonedDateTime creationTime();
-
-    INFO customInfo();
-
-    String gdsVersion();
-
-    @Value.Derived
-    default boolean isPublished() {
-        return sharedWith().contains(ALL_USERS);
+    private static ZonedDateTime now() {
+        var zoneId = Config.EMPTY.get(GraphDatabaseSettings.db_temporal_timezone);
+        return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
     }
 }

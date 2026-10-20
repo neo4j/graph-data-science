@@ -24,7 +24,7 @@ import org.neo4j.gds.ml.api.TrainingMethod;
 import java.util.Map;
 import java.util.Optional;
 
-public class TestCustomInfo implements Model.CustomInfo {
+public class TestCustomInfo implements CustomInfo {
 
     private final Map<String, Object> customFields;
 

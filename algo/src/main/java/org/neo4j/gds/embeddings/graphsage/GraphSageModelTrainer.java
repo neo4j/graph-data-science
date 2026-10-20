@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.model.Model.CustomInfo;
+import org.neo4j.gds.core.model.CustomInfo;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.progress.tasks.Task;
 import org.neo4j.gds.progress.tasks.Tasks;
@@ -343,7 +343,7 @@ public class GraphSageModelTrainer {
         List<List<Double>> iterationLossPerEpoch,
         boolean didConverge
     ) implements CustomInfo {
-        public static GraphSageTrainMetrics empty() {
+        public static CustomInfo empty() {
             return new GraphSageTrainMetrics(List.of(), false);
         }
 

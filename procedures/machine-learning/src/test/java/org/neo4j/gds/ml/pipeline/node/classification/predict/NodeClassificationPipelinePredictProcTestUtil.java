@@ -22,8 +22,8 @@ package org.neo4j.gds.ml.pipeline.node.classification.predict;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -68,7 +68,7 @@ final class NodeClassificationPipelinePredictProcTestUtil {
         addPipelineModelWithFeatures(modelCatalog, graphName, username, dimensionOfNodeFeatures, List.of("a", "b"));
     }
 
-    static Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
+    static TypedModel<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
         String graphName,
         String username,
         int dimensionOfNodeFeatures,
@@ -96,26 +96,29 @@ final class NodeClassificationPipelinePredictProcTestUtil {
             }
         }
 
-        var modelData = createClassifierData(weights.data(), bias.data());
-        return Model.of(
+        LogisticRegressionData modelData = createClassifierData(weights.data(), bias.data());
+        NodeClassificationPipelineTrainConfig config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .modelUser(username)
+            .modelName("model")
+            .graphName(graphName)
+            .pipeline("DUMMY")
+            .metrics(ClassificationMetricSpecification.Parser.parseList(List.of("F1_MACRO")))
+            .targetProperty("foo")
+            .build();
+        NodeClassificationPipelineModelInfo info = NodeClassificationPipelineModelInfo.of(
+            Map.of(),
+            Map.of(),
+            new ModelCandidateStats(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
+            pipeline,
+            List.of(0L, 1L)
+        );
+        return TypedModel.trained(
+            "default",
             NodeClassificationTrainingPipeline.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
-            NodeClassificationPipelineTrainConfigImpl.builder()
-                .modelUser(username)
-                .modelName("model")
-                .graphName(graphName)
-                .pipeline("DUMMY")
-                .metrics(ClassificationMetricSpecification.Parser.parseList(List.of("F1_MACRO")))
-                .targetProperty("foo")
-                .build(),
-            NodeClassificationPipelineModelInfo.of(
-                Map.of(),
-                Map.of(),
-                new ModelCandidateStats(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
-                pipeline,
-                List.of(0L, 1L)
-            )
+            config,
+            info
         );
     }
 
@@ -126,7 +129,7 @@ final class NodeClassificationPipelinePredictProcTestUtil {
         int dimensionOfNodeFeatures,
         List<String> nodeFeatures
     ) {
-        modelCatalog.set(createModel(graphName, username, dimensionOfNodeFeatures, nodeFeatures));
+        modelCatalog.set(createModel(graphName, username, dimensionOfNodeFeatures, nodeFeatures).model());
     }
 
     static LogisticRegressionData createClassifierData(double[] weights, double[] bias) {

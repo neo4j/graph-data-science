@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
@@ -43,7 +43,7 @@ public final class LinkPredictionPipelineCompanion {
 
     private LinkPredictionPipelineCompanion() {}
 
-    public static Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getTrainedLPPipelineModel(
+    public static TypedModel<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> getTrainedLPPipelineModel(
         ModelCatalog modelCatalog,
         String pipelineName,
         String username

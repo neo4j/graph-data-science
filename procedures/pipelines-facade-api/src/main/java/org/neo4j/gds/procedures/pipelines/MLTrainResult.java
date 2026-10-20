@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
+import org.neo4j.gds.core.model.ModelType;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Map;
@@ -31,13 +32,13 @@ public interface MLTrainResult {
     Map<String, Object> modelInfo();
     Map<String, Object> configuration();
 
-    static Map<String, Object> createModelInfo(Model<?, ?, ?> trainedModel) {
+    static Map<String, Object> createModelInfo(String modelName, ModelType modelType, CustomInfo customInfo) {
         return Stream.concat(
                 Map.of(
-                        ModelConfig.MODEL_NAME_KEY, trainedModel.name(),
-                        ModelConfig.MODEL_TYPE_KEY, trainedModel.algoType()
+                        ModelConfig.MODEL_NAME_KEY, modelName,
+                        ModelConfig.MODEL_TYPE_KEY, modelType.value()
                 ).entrySet().stream(),
-                trainedModel.customInfo().toMap().entrySet().stream()
+                customInfo.toMap().entrySet().stream()
         ).collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue

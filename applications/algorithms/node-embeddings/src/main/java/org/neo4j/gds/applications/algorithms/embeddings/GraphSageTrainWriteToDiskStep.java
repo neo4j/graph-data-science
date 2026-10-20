@@ -24,9 +24,9 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.JobId;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.core.model.CustomInfo;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
@@ -35,7 +35,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
  * The {@link org.neo4j.gds.core.model.ModelCatalog} takes care of the former.
  * The {@link ModelRepository} takes care of the latter.
  */
-class GraphSageTrainWriteToDiskStep implements WriteStep<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, Void> {
+class GraphSageTrainWriteToDiskStep implements WriteStep<TypedModel<ModelData, GraphSageTrainConfig, CustomInfo>, Void> {
     private final GraphSageModelCatalog graphSageModelCatalog;
     private final ModelRepository modelRepository;
     private final GraphSageTrainConfig configuration;
@@ -55,12 +55,12 @@ class GraphSageTrainWriteToDiskStep implements WriteStep<Model<ModelData, GraphS
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> result,
+        TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> result,
         JobId jobId
     ) {
         graphSageModelCatalog.store(result);
 
-        if (configuration.storeModelToDisk()) modelRepository.store(result);
+        if (configuration.storeModelToDisk()) modelRepository.store(result.model());
 
         return null;
     }

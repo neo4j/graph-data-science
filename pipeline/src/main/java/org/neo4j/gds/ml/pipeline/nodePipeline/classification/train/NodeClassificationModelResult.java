@@ -20,11 +20,11 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.core.model.CatalogModelContainer;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
 public record NodeClassificationModelResult(
-    Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
+    TypedModel<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
     TrainingStatistics trainingStatistics
 ) implements CatalogModelContainer<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> {}

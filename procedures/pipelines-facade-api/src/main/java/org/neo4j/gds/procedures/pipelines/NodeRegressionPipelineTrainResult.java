@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
@@ -35,13 +35,13 @@ public record NodeRegressionPipelineTrainResult(
 ) implements MLTrainResult {
 
     public NodeRegressionPipelineTrainResult(
-        Model<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> model,
+        TypedModel<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> model,
         TrainingStatistics trainingStatistics,
         long trainMillis
     ) {
         this(
             trainMillis,
-            MLTrainResult.createModelInfo(model),
+            MLTrainResult.createModelInfo(model.name(), model.algoType(), model.customInfo()),
             model.trainConfig().toMap(),
             trainingStatistics.toMap()
         );

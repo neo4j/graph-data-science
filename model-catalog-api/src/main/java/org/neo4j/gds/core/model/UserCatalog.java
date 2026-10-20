@@ -19,21 +19,11 @@
  */
 package org.neo4j.gds.core.model;
 
-import org.neo4j.gds.core.model.Model.CustomInfo;
-import org.neo4j.gds.model.ModelConfig;
-
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 public interface UserCatalog {
-    <D, C extends ModelConfig, I extends CustomInfo> Model<D, C, I> get(
-        String modelName,
-        Class<D> dataClass,
-        Class<C> configClass,
-        Class<I> infoClass
-    );
 
     Model<?, ?, ?> getUntyped(String modelName);
 
@@ -41,21 +31,17 @@ public interface UserCatalog {
 
     Collection<Model<?, ?, ?>> list();
 
-    Model<?, ?, ?> list(String modelName);
-
     Stream<Model<?, ?, ?>> streamModels();
 
     Set<String> availableModelNames();
 
     boolean exists(String modelName);
 
-    Optional<String> type(String modelName);
-
     Model<?, ?, ?> drop(String modelName, boolean failOnMissing);
 
     void removeAllLoadedModels();
 
-    void verifyModelCanBeStored(String modelName, String modelType);
+    void verifyModelCanBeStored(String modelName, ModelType modelType);
 
     long size();
 }

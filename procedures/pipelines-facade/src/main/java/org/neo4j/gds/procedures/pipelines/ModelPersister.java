@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.logging.Log;
 
 /**
@@ -38,13 +38,13 @@ class ModelPersister {
         this.modelRepository = modelRepository;
     }
 
-    void persistModel(Model<?, ?, ?> model, boolean persistToDisk) {
-        modelCatalog.set(model);
+    void persistModel(TypedModel<?, ?, ?> model, boolean persistToDisk) {
+        modelCatalog.set(model.model());
 
         if (!persistToDisk) return; // all done
 
         try {
-            modelRepository.store(model);
+            modelRepository.store(model.model());
         } catch (Exception e) { // this is terrifying engineering, inherited from ...
             log.error("Failed to store model to disk after training.", e);
             throw e;

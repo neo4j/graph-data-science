@@ -160,7 +160,7 @@ class GraphSageTrainProcTest extends BaseProcTest {
                 .isNotNull()
                 .asInstanceOf(MAP)
                 .containsEntry(MODEL_NAME_KEY, modelName)
-                .containsEntry(MODEL_TYPE_KEY, GraphSage.MODEL_TYPE);
+                .containsEntry(MODEL_TYPE_KEY, GraphSage.MODEL_TYPE.value());
 
             assertThat(resultRow.get("trainMillis")).asInstanceOf(LONG).isGreaterThan(0);
         });
@@ -233,7 +233,7 @@ class GraphSageTrainProcTest extends BaseProcTest {
                 .isNotNull()
                 .asInstanceOf(MAP)
                 .containsEntry(MODEL_NAME_KEY, modelName)
-                .containsEntry(MODEL_TYPE_KEY, GraphSage.MODEL_TYPE);
+                .containsEntry(MODEL_TYPE_KEY, GraphSage.MODEL_TYPE.value());
 
             assertThat(resultRow.get("trainMillis")).asInstanceOf(LONG).isGreaterThan(0);
         });

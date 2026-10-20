@@ -21,7 +21,8 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.CustomInfo;
+import org.neo4j.gds.core.model.TypedModel;
 import org.neo4j.gds.progress.tracking.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
@@ -77,7 +78,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     }
 
     @Override
-    public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
+    public TypedModel<ModelData, GraphSageTrainConfig, CustomInfo> compute() {
         progressTracker.beginSubTask(/*GraphSageTrain*/);
         terminationFlag.assertRunning();
         var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(
@@ -104,14 +105,8 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
 
         progressTracker.endSubTask(/*GraphSageTrain*/);
 
-        return Model.of(
-            gdsVersion,
-            GraphSage.MODEL_TYPE,
-            graph.schema(),
-            ModelData.of(trainResult.layers(), multiLabelFeatureFunction),
-            config,
-            trainResult.metrics()
-        );
+        var data = ModelData.of(trainResult.layers(), multiLabelFeatureFunction);
+        return TypedModel.trained(gdsVersion, GraphSage.MODEL_TYPE, graph.schema(), data, config, trainResult.metrics());
     }
 
     private static Map<NodeLabel, Weights<Matrix>> makeWeightsByLabel(
