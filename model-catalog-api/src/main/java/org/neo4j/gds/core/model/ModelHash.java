@@ -21,9 +21,4 @@ package org.neo4j.gds.core.model;
 
 import java.time.ZonedDateTime;
 
-public record ModelHash(String user, String name, ZonedDateTime timestamp) {
-
-    public ModelHash withTimestamp(ZonedDateTime timestamp) {
-        return new ModelHash(user, name, timestamp);
-    }
-}
+public record ModelHash(String user, String name, ZonedDateTime timestamp) {}
