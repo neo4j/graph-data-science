@@ -22,6 +22,7 @@ package org.neo4j.gds.triangle;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.GdlSupport;
@@ -105,6 +106,50 @@ class IntersectingTriangleCountTest {
         for (int i = 0; i < result.localTriangles().size(); ++i) {
             assertEquals(6, result.localTriangles().get(i));
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"A, B, C", "A, C, B", "B, A, C", "B, C, A", "C, A, B", "C, B, A"})
+    void shouldCountLabelFilteredTriangleInEveryNodeOrder(String firstLabel, String secondLabel, String thirdLabel) {
+        var graph = fromGdl(formatWithLocale(
+            "CREATE (a:%s), (b:%s), (c:%s), (a)-[:T]->(b), (b)-[:T]->(c), (c)-[:T]->(a)",
+            firstLabel, secondLabel, thirdLabel
+        ));
+
+        var result = compute(graph, new Concurrency(4), Long.MAX_VALUE, List.of("A", "B", "C"));
+
+        assertThat(result.globalTriangles()).isEqualTo(1);
+        for (long node = 0; node < graph.nodeCount(); node++) {
+            assertThat(result.localTriangles().get(node)).isEqualTo(1);
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("partialLabelFilters")
+    void shouldCountAllTrianglesMatchingOneOrTwoLabels(List<String> labels) {
+        var graph = fromGdl(
+            "CREATE (a:A), (b:B), (c:C), (d:D), " +
+                "(a)-[:T]->(b), (a)-[:T]->(c), (a)-[:T]->(d), " +
+                "(b)-[:T]->(c), (b)-[:T]->(d), (c)-[:T]->(d)"
+        );
+
+        var result = compute(graph, new Concurrency(4), Long.MAX_VALUE, labels);
+
+        long expectedGlobal = labels.size() == 1 ? 3 : 2;
+        assertThat(result.globalTriangles()).isEqualTo(expectedGlobal);
+        var nodeLabels = List.of("A", "B", "C", "D");
+        for (int node = 0; node < nodeLabels.size(); node++) {
+            assertThat(result.localTriangles().get(node))
+                .isEqualTo(labels.contains(nodeLabels.get(node)) ? expectedGlobal : expectedGlobal - 1);
+        }
+    }
+
+    static Stream<List<String>> partialLabelFilters() {
+        return Stream.of(
+            List.of("A"), List.of("B"), List.of("C"), List.of("D"),
+            List.of("A", "B"), List.of("A", "C"), List.of("A", "D"),
+            List.of("B", "C"), List.of("B", "D"), List.of("C", "D")
+        );
     }
 
     @Test
