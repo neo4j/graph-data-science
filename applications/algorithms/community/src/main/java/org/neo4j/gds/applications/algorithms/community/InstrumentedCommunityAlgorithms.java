@@ -64,6 +64,8 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCentralityBaseConfig;
+import org.neo4j.gds.triangle.TriangleCentralityResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
@@ -439,6 +441,26 @@ public final class InstrumentedCommunityAlgorithms {
             (graph, __, ___) -> algorithms.triangles(graph, configuration),
             estimationFacade::triangles,
             AlgorithmLabel.Triangles,
+            sideEffect,
+            resultRenderer
+        );
+    }
+
+    public <RESULT, METADATA> CompletableFuture<RESULT> triangleCentrality(
+        GraphName graphName,
+        TriangleCentralityBaseConfig configuration,
+        Optional<SideEffect<TriangleCentralityResult, METADATA>> sideEffect,
+        ResultRenderer<TriangleCentralityResult, RESULT, METADATA> resultRenderer
+    ) {
+        var graphLoadETLBuilder = GraphLoadETLBuilder.from(configuration);
+
+        return launchConvenience.launchAlgorithm(
+            graphName,
+            configuration,
+            graphLoadETLBuilder,
+            (graph, __, ___) -> algorithms.triangleCentrality(graph, configuration),
+            () -> estimationFacade.triangleCentrality(configuration),
+            AlgorithmLabel.TriangleCentrality,
             sideEffect,
             resultRenderer
         );

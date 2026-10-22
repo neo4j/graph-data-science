@@ -74,6 +74,7 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.LocalLouvainMutateStu
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalModularityOptimizationMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalSccMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalSpeakerListenerLPAMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.LocalTriangleCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalTriangleCountMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalWccMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -86,6 +87,9 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
+import org.neo4j.gds.triangle.TriangleCentralityStatsConfig;
+import org.neo4j.gds.triangle.TriangleCentralityStreamConfig;
+import org.neo4j.gds.triangle.TriangleCentralityWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
@@ -212,6 +216,13 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             procedureReturnColumns
         );
 
+        var triangleCentralityMutateStub = new LocalTriangleCentralityMutateStub(
+            genericStub,
+            communityApplications.mutate(),
+            communityApplications.estimate(),
+            procedureReturnColumns
+        );
+
         var triangleCountMutateStub = new LocalTriangleCountMutateStub(
             genericStub,
             communityApplications.mutate(),
@@ -251,6 +262,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             modularityOptimizationMutateStub,
             sccMutateStub,
             speakerListenerLPAMutateStub,
+            triangleCentralityMutateStub,
             triangleCountMutateStub,
             wccMutateStub
         );
@@ -1233,6 +1245,92 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
 
         var configuration = configurationParser.parseConfiguration(algorithmConfiguration, SccWriteConfig::of);
         return Stream.of(estimationModeBusinessFacade.scc(configuration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<TriangleCentralityStreamResult> triangleCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new TriangleCentralityResultBuilderForStreamMode();
+        var parsedConfig = configurationParser.parseConfiguration(configuration, TriangleCentralityStreamConfig::of);
+        return streamModeBusinessFacade.triangleCentrality(GraphName.parse(graphName), parsedConfig, resultBuilder);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> triangleCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            TriangleCentralityStreamConfig::of
+        );
+        return Stream.of(estimationModeBusinessFacade.triangleCentrality(configuration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<TriangleCentralityStatsResult> triangleCentralityStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var parsedConfig = configurationParser.parseConfiguration(configuration, TriangleCentralityStatsConfig::of);
+        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new TriangleCentralityResultBuilderForStatsMode(
+            parsedConfig, shouldComputeCentralityDistribution
+        );
+        return statsModeBusinessFacade.triangleCentrality(GraphName.parse(graphName), parsedConfig, resultBuilder);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> triangleCentralityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            TriangleCentralityStatsConfig::of
+        );
+        return Stream.of(estimationModeBusinessFacade.triangleCentrality(configuration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<TriangleCentralityMutateResult> triangleCentralityMutate(
+        String graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        return stubs.triangleCentrality().execute(graphName, rawConfiguration);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> triangleCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        return stubs.triangleCentrality().estimate(graphNameOrConfiguration, rawConfiguration);
+    }
+
+    @Override
+    public Stream<TriangleCentralityWriteResult> triangleCentralityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new TriangleCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, TriangleCentralityWriteConfig::of);
+        return writeModeBusinessFacade.triangleCentrality(GraphName.parse(graphName), parsedConfig, resultBuilder);
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> triangleCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            TriangleCentralityWriteConfig::of
+        );
+        return Stream.of(estimationModeBusinessFacade.triangleCentrality(configuration, graphNameOrConfiguration));
     }
 
     @Override

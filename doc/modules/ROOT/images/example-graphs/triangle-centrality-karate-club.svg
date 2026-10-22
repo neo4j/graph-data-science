@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="700" viewBox="0 0 1240 700" role="img" aria-labelledby="title description">
+  <title id="title">Triangle Centrality in Zachary's Karate Club</title>
+  <desc id="description">The full undirected Karate Club network, with 34 members and 78 friendships. Highlighted members 14, 1, 32, and 34 appear in the comparison table. Member 14 has Triangle Centrality 0.756 and five neighbors: 1, 2, 3, 4, and 34. Members 1, 2, 3, 4, and 14 form a complete five-node clique. Cyan lines show member 14's friendships. Members 1 and 34 are the instructor and club president.</desc>
+  <rect width="1240" height="700" fill="white"/>
+  <g font-family="Arial, sans-serif" fill="#014063">
+    <text x="45" y="35" font-size="25" font-weight="bold">Zachary's Karate Club</text>
+    <text x="45" y="62" font-size="17" fill="#555">34 members · 78 friendships · 45 triangles</text>
+  </g>
+  <g id="friendships" fill="none" stroke-linecap="round">
+    <line data-source="1" data-target="2" x1="760" y1="325" x2="690" y2="490" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="3" x1="760" y1="325" x2="530" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="2" data-target="3" x1="690" y1="490" x2="530" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="4" x1="760" y1="325" x2="650" y2="180" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="2" data-target="4" x1="690" y1="490" x2="650" y2="180" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="3" data-target="4" x1="530" y1="410" x2="650" y2="180" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="5" x1="760" y1="325" x2="815" y2="515" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="6" x1="760" y1="325" x2="855" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="7" x1="760" y1="325" x2="865" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="5" data-target="7" x1="815" y1="515" x2="865" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="6" data-target="7" x1="855" y1="270" x2="865" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="8" x1="760" y1="325" x2="610" y2="560" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="2" data-target="8" x1="690" y1="490" x2="610" y2="560" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="3" data-target="8" x1="530" y1="410" x2="610" y2="560" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="4" data-target="8" x1="650" y1="180" x2="610" y2="560" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="9" x1="760" y1="325" x2="485" y2="335" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="3" data-target="9" x1="530" y1="410" x2="485" y2="335" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="3" data-target="10" x1="530" y1="410" x2="455" y2="175" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="11" x1="760" y1="325" x2="810" y2="175" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="5" data-target="11" x1="815" y1="515" x2="810" y2="175" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="6" data-target="11" x1="855" y1="270" x2="810" y2="175" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="12" x1="760" y1="325" x2="850" y2="335" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="13" x1="760" y1="325" x2="750" y2="120" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="4" data-target="13" x1="650" y1="180" x2="750" y2="120" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="6" data-target="17" x1="855" y1="270" x2="925" y2="340" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="7" data-target="17" x1="865" y1="410" x2="925" y2="340" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="18" x1="760" y1="325" x2="755" y2="460" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="2" data-target="18" x1="690" y1="490" x2="755" y2="460" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="20" x1="760" y1="325" x2="515" y2="100" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="2" data-target="20" x1="690" y1="490" x2="515" y2="100" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="22" x1="760" y1="325" x2="755" y2="560" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="2" data-target="22" x1="690" y1="490" x2="755" y2="560" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="24" data-target="26" x1="180" y1="465" x2="345" y2="575" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="25" data-target="26" x1="250" y1="535" x2="345" y2="575" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="3" data-target="28" x1="530" y1="410" x2="285" y2="470" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="24" data-target="28" x1="180" y1="465" x2="285" y2="470" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="25" data-target="28" x1="250" y1="535" x2="285" y2="470" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="3" data-target="29" x1="530" y1="410" x2="460" y2="490" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="24" data-target="30" x1="180" y1="465" x2="120" y2="200" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="27" data-target="30" x1="180" y1="105" x2="120" y2="200" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="2" data-target="31" x1="690" y1="490" x2="405" y2="285" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="9" data-target="31" x1="485" y1="335" x2="405" y2="285" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="32" x1="760" y1="325" x2="450" y2="585" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="25" data-target="32" x1="250" y1="535" x2="450" y2="585" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="26" data-target="32" x1="345" y1="575" x2="450" y2="585" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="29" data-target="32" x1="460" y1="490" x2="450" y2="585" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="3" data-target="33" x1="530" y1="410" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="9" data-target="33" x1="485" y1="335" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="15" data-target="33" x1="265" y1="110" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="16" data-target="33" x1="175" y1="175" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="19" data-target="33" x1="95" y1="365" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="21" data-target="33" x1="100" y1="270" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="23" data-target="33" x1="365" y1="100" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="24" data-target="33" x1="180" y1="465" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="30" data-target="33" x1="120" y1="200" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="31" data-target="33" x1="405" y1="285" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="32" data-target="33" x1="450" y1="585" x2="345" y2="410" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="9" data-target="34" x1="485" y1="335" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="10" data-target="34" x1="455" y1="175" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="15" data-target="34" x1="265" y1="110" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="16" data-target="34" x1="175" y1="175" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="19" data-target="34" x1="95" y1="365" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="20" data-target="34" x1="515" y1="100" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="21" data-target="34" x1="100" y1="270" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="23" data-target="34" x1="365" y1="100" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="24" data-target="34" x1="180" y1="465" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="27" data-target="34" x1="180" y1="105" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="28" data-target="34" x1="285" y1="470" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="29" data-target="34" x1="460" y1="490" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="30" data-target="34" x1="120" y1="200" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="31" data-target="34" x1="405" y1="285" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="32" data-target="34" x1="450" y1="585" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="33" data-target="34" x1="345" y1="410" x2="295" y2="270" stroke="#78858c" stroke-width="1.4" opacity="0.6"/>
+    <line data-source="1" data-target="14" x1="760" y1="325" x2="540" y2="255" stroke="#007f9e" stroke-width="3" opacity="0.95"/>
+    <line data-source="2" data-target="14" x1="690" y1="490" x2="540" y2="255" stroke="#007f9e" stroke-width="3" opacity="0.95"/>
+    <line data-source="3" data-target="14" x1="530" y1="410" x2="540" y2="255" stroke="#007f9e" stroke-width="3" opacity="0.95"/>
+    <line data-source="4" data-target="14" x1="650" y1="180" x2="540" y2="255" stroke="#007f9e" stroke-width="3" opacity="0.95"/>
+    <line data-source="14" data-target="34" x1="540" y1="255" x2="295" y2="270" stroke="#007f9e" stroke-width="3" opacity="0.95"/>
+  </g>
+  <g id="members" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">
+    <g data-member="2"><circle cx="690" cy="490" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="690" y="497" fill="#014063">2</text></g>
+    <g data-member="3"><circle cx="530" cy="410" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="530" y="417" fill="#014063">3</text></g>
+    <g data-member="4"><circle cx="650" cy="180" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="650" y="187" fill="#014063">4</text></g>
+    <g data-member="5"><circle cx="815" cy="515" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="815" y="522" fill="#014063">5</text></g>
+    <g data-member="6"><circle cx="855" cy="270" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="855" y="277" fill="#014063">6</text></g>
+    <g data-member="7"><circle cx="865" cy="410" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="865" y="417" fill="#014063">7</text></g>
+    <g data-member="8"><circle cx="610" cy="560" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="610" y="567" fill="#014063">8</text></g>
+    <g data-member="9"><circle cx="485" cy="335" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="485" y="342" fill="#014063">9</text></g>
+    <g data-member="10"><circle cx="455" cy="175" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="455" y="182" fill="#014063">10</text></g>
+    <g data-member="11"><circle cx="810" cy="175" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="810" y="182" fill="#014063">11</text></g>
+    <g data-member="12"><circle cx="850" cy="335" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="850" y="342" fill="#014063">12</text></g>
+    <g data-member="13"><circle cx="750" cy="120" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="750" y="127" fill="#014063">13</text></g>
+    <g data-member="15"><circle cx="265" cy="110" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="265" y="117" fill="#014063">15</text></g>
+    <g data-member="16"><circle cx="175" cy="175" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="175" y="182" fill="#014063">16</text></g>
+    <g data-member="17"><circle cx="925" cy="340" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="925" y="347" fill="#014063">17</text></g>
+    <g data-member="18"><circle cx="755" cy="460" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="755" y="467" fill="#014063">18</text></g>
+    <g data-member="19"><circle cx="95" cy="365" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="95" y="372" fill="#014063">19</text></g>
+    <g data-member="20"><circle cx="515" cy="100" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="515" y="107" fill="#014063">20</text></g>
+    <g data-member="21"><circle cx="100" cy="270" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="100" y="277" fill="#014063">21</text></g>
+    <g data-member="22"><circle cx="755" cy="560" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="755" y="567" fill="#014063">22</text></g>
+    <g data-member="23"><circle cx="365" cy="100" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="365" y="107" fill="#014063">23</text></g>
+    <g data-member="24"><circle cx="180" cy="465" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="180" y="472" fill="#014063">24</text></g>
+    <g data-member="25"><circle cx="250" cy="535" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="250" y="542" fill="#014063">25</text></g>
+    <g data-member="26"><circle cx="345" cy="575" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="345" y="582" fill="#014063">26</text></g>
+    <g data-member="27"><circle cx="180" cy="105" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="180" y="112" fill="#014063">27</text></g>
+    <g data-member="28"><circle cx="285" cy="470" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="285" y="477" fill="#014063">28</text></g>
+    <g data-member="29"><circle cx="460" cy="490" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="460" y="497" fill="#014063">29</text></g>
+    <g data-member="30"><circle cx="120" cy="200" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="120" y="207" fill="#014063">30</text></g>
+    <g data-member="31"><circle cx="405" cy="285" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="405" y="292" fill="#014063">31</text></g>
+    <g data-member="33"><circle cx="345" cy="410" r="18" fill="white" stroke="#014063" stroke-width="1.5"/><text x="345" y="417" fill="#014063">33</text></g>
+    <g data-member="1"><circle cx="760" cy="325" r="28" fill="#014063" stroke="#014063" stroke-width="3"/><text x="760" y="332" fill="white" font-weight="bold">1</text></g>
+    <g data-member="14"><circle cx="540" cy="255" r="28" fill="#007f9e" stroke="#007f9e" stroke-width="3"/><text x="540" y="262" fill="white" font-weight="bold">14</text></g>
+    <g data-member="32"><circle cx="450" cy="585" r="28" fill="#014063" stroke="#014063" stroke-width="3"/><text x="450" y="592" fill="white" font-weight="bold">32</text></g>
+    <g data-member="34"><circle cx="295" cy="270" r="28" fill="#014063" stroke="#014063" stroke-width="3"/><text x="295" y="277" fill="white" font-weight="bold">34</text></g>
+  </g>
+  <g font-family="Arial, sans-serif">
+    <rect x="975" y="90" width="245" height="455" rx="10" fill="#f3f7f9" stroke="#c6d4dc"/>
+    <text x="993" y="122" font-size="19" font-weight="bold" fill="#014063">Members in the table</text>
+    <circle cx="1008" cy="165" r="17" fill="#007f9e"/>
+    <text x="1008" y="171" font-size="17" text-anchor="middle" fill="white">14</text>
+    <text x="1034" y="158" font-size="17" font-weight="bold" fill="#014063">Member 14</text>
+    <text x="1034" y="183" font-size="17" fill="#333">TC: 0.756</text>
+    <text x="993" y="214" font-size="15" fill="#555">Triangle Centrality: rank 1</text>
+    <circle cx="1008" cy="257" r="17" fill="#014063"/>
+    <text x="1008" y="263" font-size="17" text-anchor="middle" fill="white">1</text>
+    <text x="1034" y="250" font-size="17" font-weight="bold" fill="#014063">Mr. Hi · instructor</text>
+    <text x="1034" y="275" font-size="17" fill="#333">TC: 0.674</text>
+    <text x="993" y="306" font-size="15" fill="#555">Betweenness, Closeness: rank 1</text>
+    <circle cx="1008" cy="349" r="17" fill="#014063"/>
+    <text x="1008" y="355" font-size="17" text-anchor="middle" fill="white">32</text>
+    <text x="1034" y="342" font-size="17" font-weight="bold" fill="#014063">Member 32</text>
+    <text x="1034" y="367" font-size="17" fill="#333">TC: 0.652</text>
+    <text x="993" y="398" font-size="15" fill="#555">Triangle Centrality: rank 3</text>
+    <circle cx="1008" cy="441" r="17" fill="#014063"/>
+    <text x="1008" y="447" font-size="17" text-anchor="middle" fill="white">34</text>
+    <text x="1034" y="434" font-size="17" font-weight="bold" fill="#014063">John A. · president</text>
+    <text x="1034" y="459" font-size="17" fill="#333">TC: 0.563</text>
+    <text x="993" y="490" font-size="15" fill="#555">Degree, PageRank: rank 1</text>
+    <line x1="993" y1="574" x2="1025" y2="574" stroke="#007f9e" stroke-width="3"/>
+    <text x="1035" y="580" font-size="16" fill="#333">Member 14's friendships</text>
+    <text x="45" y="665" font-size="17" fill="#555">Member numbers follow the original study. All friendships are undirected.</text>
+  </g>
+</svg>

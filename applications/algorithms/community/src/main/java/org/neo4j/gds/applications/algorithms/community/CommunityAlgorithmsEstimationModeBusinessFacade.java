@@ -52,6 +52,8 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.IntersectingTriangleCountMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
+import org.neo4j.gds.triangle.TriangleCentralityBaseConfig;
+import org.neo4j.gds.triangle.TriangleCentralityMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -156,6 +158,24 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         Object graphNameOrConfiguration
     ) {
         var memoryEstimation = labelPropagation();
+
+        return algorithmEstimationTemplate.estimate(
+            configuration.toGraphParameters(),
+            graphNameOrConfiguration,
+            memoryEstimation,
+            configuration.concurrency()
+        );
+    }
+
+    public MemoryEstimation triangleCentrality(TriangleCentralityBaseConfig configuration) {
+        return new TriangleCentralityMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult triangleCentrality(
+        TriangleCentralityBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = triangleCentrality(configuration);
 
         return algorithmEstimationTemplate.estimate(
             configuration.toGraphParameters(),

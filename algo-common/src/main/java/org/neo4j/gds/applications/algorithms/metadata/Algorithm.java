@@ -86,6 +86,7 @@ public enum Algorithm {
     SteinerTree,
     TopologicalSort,
     ToUndirected,
+    TriangleCentrality,
     TriangleCount,
     Triangles,
     WCC,

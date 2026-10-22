@@ -36,6 +36,15 @@ class NodePropertyStepFactoryTest {
     private static final String REMOTE_PROC_NAME = "gds.remote.mutate";
 
     @Test
+    void shouldValidateTriangleCentralityConfiguration() {
+        assertThatThrownBy(() -> NodePropertyStepFactory.createNodePropertyStep(
+            "triangleCentrality", Map.of("mutateProperty", "centrality", "maxDegree", 1)
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("The 'maxDegree' parameter must be set to a value greater than 1.");
+    }
+
+    @Test
     void shouldRejectFastPathAsNodePropertyStepWithSaneError() {
         // FastPath exists as a standalone procedure but is intentionally not supported in pipelines.
         // Someone trying to add it as a node-property step must get a clear, actionable error rather

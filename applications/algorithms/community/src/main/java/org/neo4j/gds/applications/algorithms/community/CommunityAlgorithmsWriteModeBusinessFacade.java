@@ -59,6 +59,8 @@ import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
+import org.neo4j.gds.triangle.TriangleCentralityResult;
+import org.neo4j.gds.triangle.TriangleCentralityWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -301,6 +303,21 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new SpeakerListenerLPAWriteStep(writeNodePropertyService, configuration, SLLPA);
 
         return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.speakerListenerLPA(
+            graphName,
+            configuration,
+            Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),
+            new WriteResultRenderer<>(configuration, resultBuilder)
+        ));
+    }
+
+    public <RESULT> RESULT triangleCentrality(
+        GraphName graphName,
+        TriangleCentralityWriteConfig configuration,
+        ResultBuilder<TriangleCentralityWriteConfig, TriangleCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new TriangleCentralityWriteStep(writeNodePropertyService, configuration);
+
+        return synchroniser.synchronise(() -> instrumentedCommunityAlgorithms.triangleCentrality(
             graphName,
             configuration,
             Optional.of(new WriteSideEffect<>(configuration.jobId(), writeStep)),

@@ -70,6 +70,7 @@ import org.neo4j.gds.ml.pipeline.stubs.SpeakerListenerLPAStub;
 import org.neo4j.gds.ml.pipeline.stubs.SplitRelationshipsStub;
 import org.neo4j.gds.ml.pipeline.stubs.SteinerTreeStub;
 import org.neo4j.gds.ml.pipeline.stubs.ToUndirectedStub;
+import org.neo4j.gds.ml.pipeline.stubs.TriangleCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.TriangleCountStub;
 import org.neo4j.gds.ml.pipeline.stubs.WccStub;
 
@@ -143,6 +144,7 @@ class StubbyHolder {
             case SteinerTree -> new SteinerTreeStub();
             case TopologicalSort -> null;
             case ToUndirected -> new ToUndirectedStub();
+            case TriangleCentrality -> new TriangleCentralityStub();
             case TriangleCount -> new TriangleCountStub();
             case Triangles -> null;
             case WCC -> new WccStub();

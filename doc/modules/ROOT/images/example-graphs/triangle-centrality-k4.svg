@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" role="img" aria-labelledby="title description">
+  <title id="title">Complete graph K4 for Triangle Centrality filtering examples</title>
+  <desc id="description">Nodes A, B, C, and D have their respective node labels. All six pairs are connected by K4_LINK relationships, projected as undirected. The graph contains triangles ABC, ABD, ACD, and BCD.</desc>
+  <g stroke="#555" stroke-width="2" fill="none">
+    <path d="M65 50 H235 V220 H65 Z"/>
+    <path d="M65 50 L235 220 M235 50 L65 220"/>
+  </g>
+  <g fill="#014063">
+    <circle cx="65" cy="50" r="34"/>
+    <circle cx="235" cy="50" r="34"/>
+    <circle cx="65" cy="220" r="34"/>
+    <circle cx="235" cy="220" r="34"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="22" fill="white" text-anchor="middle" dominant-baseline="middle">
+    <text x="65" y="50">A</text>
+    <text x="235" y="50">B</text>
+    <text x="65" y="220">C</text>
+    <text x="235" y="220">D</text>
+  </g>
+  <text x="150" y="285" font-family="Arial, sans-serif" font-size="14" fill="#333" text-anchor="middle">All relationships: K4_LINK</text>
+</svg>

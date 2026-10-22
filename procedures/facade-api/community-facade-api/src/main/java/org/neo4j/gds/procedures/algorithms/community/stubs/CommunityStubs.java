@@ -33,6 +33,7 @@ public record CommunityStubs(
     ModularityOptimizationMutateStub modularityOptimization,
     SccMutateStub scc,
     SpeakerListenerLPAMutateStub sllpa,
+    TriangleCentralityMutateStub triangleCentrality,
     TriangleCountMutateStub triangleCount,
     WccMutateStub wcc
 ) {
