@@ -61,7 +61,10 @@ public final class CentralityStatistics {
         var histogram = histogramSupplier.get();
         if (concurrency.value() == 1) {
             for (long id = 0; id < nodeCount; id++) {
-                histogram.recordValue(centralityFunction.applyAsDouble(id));
+                double score = centralityFunction.applyAsDouble(id);
+                if (!Double.isNaN(score)) {
+                    histogram.recordValue(score);
+                }
             }
         } else {
             var tasks = PartitionUtils.rangePartition(
@@ -137,6 +140,7 @@ public final class CentralityStatistics {
             return HistogramUtils.failure();
         }
         return histogram
+            .filter(h -> h.getTotalCount() > 0)
             .map(HistogramUtils::centralitySummary)
             .orElseGet(Collections::emptyMap);
     }

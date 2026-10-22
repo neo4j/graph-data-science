@@ -29,10 +29,52 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mock;
 
 class CentralityStatisticsTest {
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldSummarizeZeroScores(int concurrency) {
+        var result = CentralityStatistics.centralityStatistics(
+            5, id -> 0.0, DefaultPool.INSTANCE, new Concurrency(concurrency), true
+        );
+
+        var summary = CentralityStatistics.centralitySummary(result.histogram(), result.success());
+        assertThat(summary).hasSize(9);
+        assertThat(summary.values()).allMatch(value -> ((Number) value).doubleValue() == 0.0);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldExcludeNaNScores(int concurrency) {
+        // NaN marks excluded nodes, so only the three valid scores should contribute to the distribution.
+        var scores = new double[]{Double.NaN, 0.5, 0.75, 1.0, Double.NaN};
+        var result = CentralityStatistics.centralityStatistics(
+            scores.length, id -> scores[(int) id], DefaultPool.INSTANCE, new Concurrency(concurrency), true
+        );
+
+        assertThat(result.success()).isTrue();
+        assertThat(result.histogram().orElseThrow().getTotalCount()).isEqualTo(3);
+        var summary = CentralityStatistics.centralitySummary(result.histogram(), result.success());
+        assertThat((double) summary.get("min")).isCloseTo(0.5, within(1e-5));
+        assertThat((double) summary.get("mean")).isCloseTo(0.75, within(1e-5));
+        assertThat((double) summary.get("max")).isCloseTo(1.0, within(1e-5));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldReturnEmptyDistributionWhenAllScoresAreNaN(int concurrency) {
+        // Excluding every node leaves no scores to summarize, rather than a distribution of zero scores.
+        var result = CentralityStatistics.centralityStatistics(
+            5, id -> Double.NaN, DefaultPool.INSTANCE, new Concurrency(concurrency), true
+        );
+
+        assertThat(result.success()).isTrue();
+        assertThat(CentralityStatistics.centralitySummary(result.histogram(), result.success())).isEmpty();
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {1,4})

@@ -44,7 +44,10 @@ class CentralityRecordTask implements Runnable {
     @Override
     public void run() {
         partition.consume(id -> {
-            histogram.recordValue(centralityFunction.applyAsDouble(id));
+            double score = centralityFunction.applyAsDouble(id);
+            if (!Double.isNaN(score)) {
+                histogram.recordValue(score);
+            }
         });
     }
 
