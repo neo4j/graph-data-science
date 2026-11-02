@@ -46,3 +46,7 @@ tasks.register('unpackDocs', Copy) {
 }
 
 processTestResources.dependsOn tasks.named('unpackDocs')
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}

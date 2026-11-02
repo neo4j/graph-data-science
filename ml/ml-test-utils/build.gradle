@@ -10,3 +10,7 @@ dependencies {
     implementation project(':ml-algo')
     implementation project(':test-utils')
 }
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}
