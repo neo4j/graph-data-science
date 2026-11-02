@@ -73,3 +73,7 @@ dependencies {
     testCompileOnly openGds.immutables.builder
 
 }
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}

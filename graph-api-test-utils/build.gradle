@@ -18,3 +18,7 @@ dependencies {
         openGds.junit.jupiter.engine,
     )
 }
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}

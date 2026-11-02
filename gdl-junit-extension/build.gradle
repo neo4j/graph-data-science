@@ -26,3 +26,7 @@ dependencies {
     testImplementation openGds.bundles.test.basic
     testRuntimeOnly openGds.bundles.test.platforms
 }
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}

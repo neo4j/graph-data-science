@@ -14,3 +14,7 @@ dependencies {
     implementation project(':gdl-graph')
     implementation project(':gdl-junit-extension')
 }
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}

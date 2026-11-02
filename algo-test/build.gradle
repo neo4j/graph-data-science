@@ -28,3 +28,7 @@ dependencies {
     implementation project(':progress-tracking')
     implementation project(':termination')
 }
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}

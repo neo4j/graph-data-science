@@ -19,3 +19,7 @@ dependencies {
     )
     implementation project(':string-formatting')
 }
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}

@@ -19,3 +19,7 @@ dependencies {
     testImplementation project(':progress-tracking')
     testImplementation project(':string-formatting')
 }
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}

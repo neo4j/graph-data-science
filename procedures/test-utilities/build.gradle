@@ -50,3 +50,7 @@ dependencies {
     testCompileOnly openGds.jetbrains.annotations
 
 }
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}
