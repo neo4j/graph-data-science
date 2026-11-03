@@ -18,4 +18,6 @@ dependencies {
     implementation openGds.google.auto.common
     implementation openGds.javapoet
     implementation openGds.commons.lang3
+
+    compileOnly         openGds.jetbrains.annotations
 }
