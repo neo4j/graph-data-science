@@ -398,6 +398,34 @@ class GraphSageModelTrainerTest {
         assertThat(trainMetrics.ranIterationsPerEpoch()).containsExactly(2);
     }
 
+    @ParameterizedTest
+    @CsvSource({"1, 2", "2, 3", "3, 4"})
+    void testConvergenceWithPatience(int patience, int expectedIterations) {
+        var config = configBuilder
+            .modelName("patientModel")
+            .tolerance(100.0)
+            .patience(patience)
+            .maxIterations(10)
+            .epochs(10)
+            .build();
+        var parameters = TrainConfigTransformer.toParameters(config);
+        var featureDimension = FeatureExtraction.featureCount(unweightedGraph, parameters.featureProperties());
+        var trainer = new GraphSageModelTrainer(
+            Log.noOpLog(),
+            parameters,
+            featureDimension,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var trainMetrics = trainer.train(unweightedGraph, features).metrics();
+
+        assertThat(trainMetrics.didConverge()).isTrue();
+        assertThat(trainMetrics.ranEpochs()).isEqualTo(1);
+        assertThat(trainMetrics.ranIterationsPerEpoch()).containsExactly(expectedIterations);
+    }
+
     @Test
     void batchesPerIteration() {
         configBuilder.modelName("convergingModel:)")

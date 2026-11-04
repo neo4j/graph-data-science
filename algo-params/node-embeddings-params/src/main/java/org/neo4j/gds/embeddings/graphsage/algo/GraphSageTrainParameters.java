@@ -36,6 +36,7 @@ public record GraphSageTrainParameters(
     int epochs,
     double learningRate,
     double tolerance,
+    int patience,
     int negativeSampleWeight,
     double penaltyL2,
     int embeddingDimension,

@@ -57,6 +57,7 @@ public final class TrainConfigTransformer {
             config.epochs(),
             config.learningRate(),
             config.tolerance(),
+            config.patience(),
             config.negativeSampleWeight(),
             config.penaltyL2(),
             config.embeddingDimension(),
