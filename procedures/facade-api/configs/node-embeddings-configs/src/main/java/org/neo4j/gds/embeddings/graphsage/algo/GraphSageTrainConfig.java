@@ -92,6 +92,11 @@ public interface GraphSageTrainConfig extends
         return 1e-4;
     }
 
+    @Configuration.IntegerRange(min = 1)
+    default int patience() {
+        return 1;
+    }
+
     default double learningRate() {
         return 0.1;
     }

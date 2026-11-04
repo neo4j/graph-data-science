@@ -259,6 +259,7 @@ public class GraphSageModelTrainer {
         var iterationLosses = new ArrayList<Double>();
         double prevLoss = prevEpochLoss;
         var converged = false;
+        int unproductiveStreak = 0;
 
         int maxIterations = parameters.maxIterations();
         for (; iteration <= maxIterations; iteration++) {
@@ -278,6 +279,12 @@ public class GraphSageModelTrainer {
             log.info(formatWithLocale("Average loss per node: %.10f", avgLossPerNode));
 
             if (Math.abs(prevLoss - avgLossPerNode) < parameters.tolerance()) {
+                unproductiveStreak++;
+            } else {
+                unproductiveStreak = 0;
+            }
+
+            if (unproductiveStreak >= parameters.patience()) {
                 converged = true;
                 progressTracker.endSubTask(/*Iteration*/);
                 break;

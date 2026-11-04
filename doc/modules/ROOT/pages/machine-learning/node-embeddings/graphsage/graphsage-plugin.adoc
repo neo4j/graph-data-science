@@ -176,6 +176,16 @@ A lower tolerance results in more sensitive training with a higher probability t
 A high tolerance means a less sensitive training and hence resulting in earlier convergence.
 
 
+=== Patience
+
+This parameter defines how many consecutive iterations of an epoch may be unproductive before the epoch is considered converged.
+An iteration is unproductive if the loss differs from the loss of the previous iteration by less than the <<_tolerance>>.
+The streak is reset whenever an iteration changes the loss by at least the `tolerance`.
+
+With the default `patience` of 1, an epoch converges the first time the loss change falls below the `tolerance`.
+A higher patience makes training more robust against stopping early because of a single flat iteration, at the cost of longer training.
+
+
 === Projected feature dimension
 
 This parameter is only relevant if you want to distinguish between multiple node labels.
