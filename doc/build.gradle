@@ -7,3 +7,7 @@ tasks.register("assembleDocs", Tar) {
 }
 
 assemble.dependsOn(assembleDocs)
+
+tasks.cyclonedxDirectBom {
+    enabled = false
+}
