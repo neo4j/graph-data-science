@@ -27,6 +27,12 @@ import org.neo4j.gds.progress.tasks.LeafTask;
 import org.neo4j.gds.progress.tasks.Tasks;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -189,6 +195,113 @@ class PerDatabaseTaskStoreTest {
 
         // wait for the cleanup to run
         Thread.sleep(Duration.ofMillis(200).toMillis());
+        assertThat(taskStore.query()).isEmpty();
+        assertThat(taskStore.registeredJobCount()).isZero();
+    }
+
+    @Test
+    void shouldDropEntryOnRemove() {
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
+        var alice = new User("alice", false);
+        var jobId = new JobId("42");
+        taskStore.store(alice, jobId, Tasks.leaf("a", new Concurrency(1)));
+        taskStore.store(alice, jobId, Tasks.leaf("b", new Concurrency(1)));
+        taskStore.store(alice, new JobId("43"), Tasks.leaf("c", new Concurrency(1)));
+        assertThat(taskStore.registeredJobCount()).isEqualTo(2);
+
+        taskStore.remove(alice, jobId);
+
+        assertThat(taskStore.registeredJobCount()).isEqualTo(1);
+        assertThat(taskStore.lookup(alice, jobId)).isEmpty();
+        assertThat(taskStore.query()).hasSize(1);
+    }
+
+    @Test
+    void shouldDropEntryWhenCompletedTasksAreCleanedUp() {
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
+
+        for (int i = 0; i < 100; i++) {
+            var jobId = new JobId();
+            taskStore.store(User.DEFAULT, jobId, Tasks.leaf("leaf", new Concurrency(1)));
+            taskStore.markCompleted(User.DEFAULT, jobId);
+        }
+
+        assertThat(taskStore.registeredJobCount()).isZero();
+    }
+
+    @Test
+    void shouldNotCreateEntriesForUnknownKeys() {
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
+        var unknownUser = new User("unknown", false);
+        var unknownJob = new JobId("unknown");
+
+        assertThat(taskStore.lookup(unknownUser, unknownJob)).isEmpty();
+        taskStore.remove(unknownUser, unknownJob);
+        taskStore.markCompleted(unknownUser, unknownJob);
+
+        assertThat(taskStore.registeredJobCount()).isZero();
+        assertThat(taskStore.query()).isEmpty();
+    }
+
+    @Test
+    void shouldStayConsistentUnderConcurrentStoreAndRemove() throws Exception {
+        var taskStore = PerDatabaseTaskStore.create(Duration.ZERO);
+        var keyCount = 8;
+        var jobIds = IntStream.range(0, keyCount).mapToObj(i -> new JobId("job-" + i)).toList();
+        var iterations = 2_000;
+        var start = new CountDownLatch(1);
+        var executor = Executors.newFixedThreadPool(6);
+
+        try {
+            var futures = new ArrayList<Future<?>>();
+            for (int t = 0; t < 3; t++) {
+                futures.add(executor.submit(() -> {
+                    start.await();
+                    for (int i = 0; i < iterations; i++) {
+                        taskStore.store(User.DEFAULT, jobIds.get(i % keyCount), Tasks.leaf("leaf", new Concurrency(1)));
+                    }
+                    return null;
+                }));
+            }
+            for (int t = 0; t < 2; t++) {
+                futures.add(executor.submit(() -> {
+                    start.await();
+                    for (int i = 0; i < iterations; i++) {
+                        taskStore.remove(User.DEFAULT, jobIds.get(i % keyCount));
+                    }
+                    return null;
+                }));
+            }
+            futures.add(executor.submit(() -> {
+                start.await();
+                for (int i = 0; i < iterations; i++) {
+                    taskStore.lookup(User.DEFAULT, new JobId("unknown-" + i));
+                    taskStore.remove(User.DEFAULT, new JobId("unknown-" + i));
+                }
+                return null;
+            }));
+
+            start.countDown();
+            for (var future : futures) {
+                future.get(30, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+
+        // only known keys may be present, and no entry may be an empty container
+        var nonEmptyJobs = jobIds.stream().filter(jobId -> !taskStore.lookup(User.DEFAULT, jobId).isEmpty()).count();
+        assertThat(taskStore.registeredJobCount()).isEqualTo(nonEmptyJobs);
+
+        // a store after the removals have finished is always visible
+        for (var jobId : jobIds) {
+            var task = Tasks.leaf("final", new Concurrency(1));
+            taskStore.store(User.DEFAULT, jobId, task);
+            assertThat(taskStore.lookup(User.DEFAULT, jobId)).contains(new StoredTask(User.DEFAULT, jobId, task));
+        }
+
+        jobIds.forEach(jobId -> taskStore.remove(User.DEFAULT, jobId));
+        assertThat(taskStore.registeredJobCount()).isZero();
         assertThat(taskStore.query()).isEmpty();
     }
 }
