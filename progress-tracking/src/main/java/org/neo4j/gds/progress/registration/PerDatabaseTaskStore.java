@@ -54,9 +54,13 @@ public final class PerDatabaseTaskStore implements TaskStore {
 
     @Override
     public void store(User user, JobId jobId, Task task) {
-        var taskContainer = getTaskContainer(user, jobId);
-
-        taskContainer.add(task);
+        // compute() is atomic per key, so a concurrent remove() cannot detach the container
+        // between looking it up and adding the task to it
+        registeredTasks.compute(Pair.of(user, jobId), (__, taskContainer) -> {
+            var container = taskContainer == null ? new TaskContainer() : taskContainer;
+            container.add(task);
+            return container;
+        });
 
         var storedTask = new StoredTask(user, jobId, task);
 
@@ -65,9 +69,7 @@ public final class PerDatabaseTaskStore implements TaskStore {
 
     @Override
     public void remove(User user, JobId jobId) {
-        var taskContainer = getTaskContainer(user, jobId);
-
-        taskContainer.removeAll();
+        registeredTasks.remove(Pair.of(user, jobId));
     }
 
     @Override
@@ -137,13 +139,19 @@ public final class PerDatabaseTaskStore implements TaskStore {
     }
 
     /**
-     * This ensures you never have to deal with a null task container
+     * This ensures you never have to deal with a null task container.
+     * Unknown keys get an empty container that is not added to the registry.
      */
     private TaskContainer getTaskContainer(User user, JobId jobId) {
-        return registeredTasks.computeIfAbsent(
-            Pair.of(user, jobId),
-            __ -> new TaskContainer()
-        );
+        var taskContainer = registeredTasks.get(Pair.of(user, jobId));
+        return taskContainer == null ? new TaskContainer() : taskContainer;
+    }
+
+    /**
+     * Number of (user, job) entries currently held; visible for testing.
+     */
+    int registeredJobCount() {
+        return registeredTasks.size();
     }
 
     private Stream<StoredTask> queryWithFilter(Predicate<Pair<User, JobId>> filter) {
